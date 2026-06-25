@@ -1,8 +1,12 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getEmergencyBySlug } from '@/lib/emergencies';
+import { getToken } from '@/lib/auth';
+import { OrgSelector } from '@/components/org-selector';
+import { LocationPicker } from '@/components/location-picker';
 import { submitPeticion } from './actions';
 import { PeticionForm } from './peticion-form';
+import { ItemsField } from './items-field';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -24,8 +28,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PeticionPage({ params }: Props) {
   const { slug } = await params;
-  const emergency = await getEmergencyBySlug(slug);
 
+  const token = await getToken();
+  if (!token) {
+    redirect(`/login?next=/e/${slug}/peticion`);
+  }
+
+  const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
     notFound();
   }
@@ -45,7 +54,13 @@ export default async function PeticionPage({ params }: Props) {
           </p>
         </header>
 
-        <PeticionForm action={boundAction} slug={slug} />
+        <PeticionForm
+          action={boundAction}
+          slug={slug}
+          locationPicker={<LocationPicker />}
+          orgSelector={<OrgSelector />}
+          itemsField={<ItemsField />}
+        />
       </div>
     </main>
   );

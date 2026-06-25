@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getEmergencyBySlug } from '@/lib/emergencies';
+import { getToken } from '@/lib/auth';
+import { OrgSelector } from '@/components/org-selector';
+import { LocationPicker } from '@/components/location-picker';
 import { registerResource } from './actions';
 import { RegistrarForm } from './registrar-form';
 
@@ -24,14 +27,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function RegistrarPage({ params }: Props) {
   const { slug } = await params;
-  const emergency = await getEmergencyBySlug(slug);
 
+  const token = await getToken();
+  if (!token) {
+    redirect(`/login?next=/e/${slug}/registrar`);
+  }
+
+  const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
     notFound();
   }
 
-  // Bind the resolved emergencyId into the server action so the form
-  // does not need to know about it directly.
   const boundAction = registerResource.bind(null, emergency.id);
 
   return (
@@ -46,7 +52,12 @@ export default async function RegistrarPage({ params }: Props) {
           </p>
         </header>
 
-        <RegistrarForm action={boundAction} slug={slug} />
+        <RegistrarForm
+          action={boundAction}
+          slug={slug}
+          locationPicker={<LocationPicker />}
+          orgSelector={<OrgSelector />}
+        />
       </div>
     </main>
   );

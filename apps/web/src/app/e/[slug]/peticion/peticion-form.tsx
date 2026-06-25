@@ -2,19 +2,10 @@
 
 import { useActionState } from 'react';
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import type { PeticionState } from './actions';
 
 const INITIAL_STATE: PeticionState = { status: 'idle' };
-
-const CATEGORIES = [
-  { value: 'hygiene', label: 'Higiene' },
-  { value: 'water', label: 'Agua' },
-  { value: 'food', label: 'Alimentos' },
-  { value: 'medical', label: 'Sanitario' },
-  { value: 'shelter', label: 'Refugio' },
-  { value: 'tools', label: 'Herramientas' },
-  { value: 'other', label: 'Otro' },
-] as const;
 
 const PRIORITIES = [
   { value: 'low', label: 'Baja' },
@@ -28,9 +19,18 @@ type BoundAction = (prev: PeticionState, formData: FormData) => Promise<Peticion
 interface PeticionFormProps {
   action: BoundAction;
   slug: string;
+  locationPicker: ReactNode;
+  orgSelector: ReactNode;
+  itemsField: ReactNode;
 }
 
-export function PeticionForm({ action, slug }: PeticionFormProps) {
+export function PeticionForm({
+  action,
+  slug,
+  locationPicker,
+  orgSelector,
+  itemsField,
+}: PeticionFormProps) {
   const [state, formAction, pending] = useActionState<PeticionState, FormData>(
     action,
     INITIAL_STATE,
@@ -99,30 +99,22 @@ export function PeticionForm({ action, slug }: PeticionFormProps) {
         />
       </div>
 
-      {/* Categoría */}
+      {/* Descripción */}
       <div className="flex flex-col gap-2">
         <label
-          htmlFor="category"
+          htmlFor="description"
           className="text-sm font-semibold text-gray-900 uppercase tracking-wide"
         >
-          Categoría <span aria-hidden="true">*</span>
+          Descripción{' '}
+          <span className="text-gray-400 font-normal normal-case">(opcional)</span>
         </label>
-        <select
-          id="category"
-          name="category"
-          required
-          defaultValue=""
-          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
-        >
-          <option value="" disabled>
-            Selecciona una categoría…
-          </option>
-          {CATEGORIES.map(({ value, label }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+        <textarea
+          id="description"
+          name="description"
+          rows={3}
+          placeholder="Detalla la necesidad para que la coordinación pueda valorarla…"
+          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 resize-none"
+        />
       </div>
 
       {/* Prioridad */}
@@ -151,41 +143,19 @@ export function PeticionForm({ action, slug }: PeticionFormProps) {
         </select>
       </div>
 
-      {/* Cantidad (opcional) */}
+      {/* Ubicación */}
       <div className="flex flex-col gap-2">
-        <label
-          htmlFor="quantity"
-          className="text-sm font-semibold text-gray-900 uppercase tracking-wide"
-        >
-          Cantidad <span className="text-gray-400 font-normal normal-case">(opcional)</span>
-        </label>
-        <input
-          id="quantity"
-          name="quantity"
-          type="number"
-          min={1}
-          step={1}
-          placeholder="Ej. 50"
-          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
-        />
+        <p className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+          Ubicación <span aria-hidden="true">*</span>
+        </p>
+        {locationPicker}
       </div>
 
-      {/* Unidad (opcional) */}
-      <div className="flex flex-col gap-2">
-        <label
-          htmlFor="unit"
-          className="text-sm font-semibold text-gray-900 uppercase tracking-wide"
-        >
-          Unidad <span className="text-gray-400 font-normal normal-case">(opcional)</span>
-        </label>
-        <input
-          id="unit"
-          name="unit"
-          type="text"
-          placeholder="Ej. cajas, litros, unidades"
-          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
-        />
-      </div>
+      {/* Organización */}
+      {orgSelector}
+
+      {/* Artículos */}
+      {itemsField}
 
       {/* Submit */}
       <button

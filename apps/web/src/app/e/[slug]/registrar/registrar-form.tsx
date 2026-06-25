@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react';
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import type { ActionState } from './actions';
 
 const INITIAL_STATE: ActionState = { status: 'idle' };
@@ -9,14 +10,16 @@ const INITIAL_STATE: ActionState = { status: 'idle' };
 const RESOURCE_TYPES = [
   { value: 'collection_point', label: 'Punto de recogida' },
   { value: 'delivery_point', label: 'Punto de entrega' },
+  { value: 'collection_and_delivery', label: 'Recogida y entrega' },
   { value: 'warehouse', label: 'Almacén' },
   { value: 'transport', label: 'Transporte' },
   { value: 'supplier', label: 'Proveedor' },
   { value: 'venue', label: 'Local / Espacio' },
 ] as const;
 
-const SIDES = [
-  { value: 'origin', label: 'Origen (España)' },
+const STAGES = [
+  { value: 'origin', label: 'Origen' },
+  { value: 'intermediate', label: 'Intermedio' },
   { value: 'destination', label: 'Destino' },
 ] as const;
 
@@ -25,9 +28,11 @@ type BoundAction = (prev: ActionState, formData: FormData) => Promise<ActionStat
 interface RegistrarFormProps {
   action: BoundAction;
   slug: string;
+  locationPicker: ReactNode;
+  orgSelector: ReactNode;
 }
 
-export function RegistrarForm({ action, slug }: RegistrarFormProps) {
+export function RegistrarForm({ action, slug, locationPicker, orgSelector }: RegistrarFormProps) {
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     action,
     INITIAL_STATE,
@@ -83,7 +88,7 @@ export function RegistrarForm({ action, slug }: RegistrarFormProps) {
           htmlFor="type"
           className="text-sm font-semibold text-gray-900 uppercase tracking-wide"
         >
-          Tipo de recurso
+          Tipo de recurso <span aria-hidden="true">*</span>
         </label>
         <select
           id="type"
@@ -103,25 +108,25 @@ export function RegistrarForm({ action, slug }: RegistrarFormProps) {
         </select>
       </div>
 
-      {/* Lado */}
+      {/* Etapa */}
       <div className="flex flex-col gap-2">
         <label
-          htmlFor="side"
+          htmlFor="stage"
           className="text-sm font-semibold text-gray-900 uppercase tracking-wide"
         >
-          Lado
+          Etapa <span aria-hidden="true">*</span>
         </label>
         <select
-          id="side"
-          name="side"
+          id="stage"
+          name="stage"
           required
           defaultValue=""
           className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
         >
           <option value="" disabled>
-            Selecciona un lado…
+            Selecciona una etapa…
           </option>
-          {SIDES.map(({ value, label }) => (
+          {STAGES.map(({ value, label }) => (
             <option key={value} value={value}>
               {label}
             </option>
@@ -135,7 +140,7 @@ export function RegistrarForm({ action, slug }: RegistrarFormProps) {
           htmlFor="name"
           className="text-sm font-semibold text-gray-900 uppercase tracking-wide"
         >
-          Nombre
+          Nombre <span aria-hidden="true">*</span>
         </label>
         <input
           id="name"
@@ -147,6 +152,35 @@ export function RegistrarForm({ action, slug }: RegistrarFormProps) {
           className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
         />
       </div>
+
+      {/* Descripción */}
+      <div className="flex flex-col gap-2">
+        <label
+          htmlFor="description"
+          className="text-sm font-semibold text-gray-900 uppercase tracking-wide"
+        >
+          Descripción{' '}
+          <span className="text-gray-400 font-normal normal-case">(opcional)</span>
+        </label>
+        <textarea
+          id="description"
+          name="description"
+          rows={3}
+          placeholder="Información adicional sobre el recurso…"
+          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 resize-none"
+        />
+      </div>
+
+      {/* Ubicación */}
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+          Ubicación <span aria-hidden="true">*</span>
+        </p>
+        {locationPicker}
+      </div>
+
+      {/* Organización */}
+      {orgSelector}
 
       {/* Submit */}
       <button

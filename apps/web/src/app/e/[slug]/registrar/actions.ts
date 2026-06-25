@@ -1,5 +1,6 @@
 'use server';
 
+import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { getToken, authHeaders } from '@/lib/auth';
@@ -37,12 +38,19 @@ export async function registerResource(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const token = await getToken();
+  if (!token) {
+    redirect('/login');
+  }
+
   const rawType = formData.get('type');
   const rawStage = formData.get('stage');
   const rawName = formData.get('name');
+  const rawDescription = formData.get('description');
   const rawAddress = formData.get('address');
   const rawLatitude = formData.get('latitude');
   const rawLongitude = formData.get('longitude');
+  const rawOrgId = formData.get('organizationId');
 
   const name = typeof rawName === 'string' ? rawName.trim() : '';
 
@@ -56,35 +64,49 @@ export async function registerResource(
     return { status: 'error', message: 'El nombre debe tener al menos 2 caracteres.' };
   }
 
+  const latStr = typeof rawLatitude === 'string' ? rawLatitude.trim() : '';
+  const lonStr = typeof rawLongitude === 'string' ? rawLongitude.trim() : '';
+
+  if (latStr === '' || lonStr === '') {
+    return { status: 'error', message: 'Selecciona una ubicación.' };
+  }
+
   const address =
     typeof rawAddress === 'string' && rawAddress.trim() !== ''
       ? rawAddress.trim()
       : 'Sin dirección';
-  const latitude =
-    typeof rawLatitude === 'string' && rawLatitude !== ''
-      ? Number(rawLatitude)
-      : 0;
-  const longitude =
-    typeof rawLongitude === 'string' && rawLongitude !== ''
-      ? Number(rawLongitude)
-      : 0;
+  const latitude = Number(latStr);
+  const longitude = Number(lonStr);
 
-  const token = await getToken();
-  const headers = token ? authHeaders(token) : {};
+  const description =
+    typeof rawDescription === 'string' && rawDescription.trim() !== ''
+      ? rawDescription.trim()
+      : undefined;
 
-  const { data, error } = await api.POST(
+  const ownerOrganizationId =
+    typeof rawOrgId === 'string' && rawOrgId.trim() !== ''
+      ? rawOrgId.trim()
+      : undefined;
+
+  const { data, error, response } = await api.POST(
     '/emergencies/{emergencyId}/resources',
     {
       params: { path: { emergencyId } },
-      headers,
+      headers: authHeaders(token),
       body: {
         type: rawType,
         stage: rawStage,
         name,
+        ...(description !== undefined ? { description } : {}),
         location: { address, latitude, longitude },
+        ...(ownerOrganizationId !== undefined ? { ownerOrganizationId } : {}),
       },
     },
   );
+
+  if (response.status === 401) {
+    redirect('/login');
+  }
 
   if (error !== undefined || data === undefined) {
     const msg =
