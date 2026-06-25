@@ -1,0 +1,9 @@
+# Documentos de desarrollo / especificación — fuera de git de momento
+/docs/
+especificacion_plataforma_ayuda_solidaria.md
+01-especificacion-producto-y-arquitectura.md
+
+# Secretos / entorno — nunca al repo
+.env
+.env.*
+!.env.example
