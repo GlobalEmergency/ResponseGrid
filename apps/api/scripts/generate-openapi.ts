@@ -25,6 +25,7 @@ async function generate(): Promise<void> {
     .setDescription('API for humanitarian emergency resource coordination')
     .setVersion('0.1')
     .addTag('resources')
+    .addTag('emergencies')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

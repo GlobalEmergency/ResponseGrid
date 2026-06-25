@@ -1,0 +1,52 @@
+import { IsOptional, IsString, Matches, MinLength } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+
+export class CreateEmergencyDto {
+  @ApiProperty({ example: 'Emergencia sísmica — Venezuela', minLength: 2 })
+  @IsString()
+  @MinLength(2)
+  name!: string;
+
+  @ApiProperty({
+    example: 'venezuela',
+    required: false,
+    description: 'URL-safe slug (lowercase letters, digits, hyphens). Auto-generated from name if omitted.',
+    pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+    message: 'slug must contain only lowercase letters, digits, and hyphens (e.g. my-emergency)',
+  })
+  slug?: string;
+
+  @ApiProperty({ example: 'VE', minLength: 2, description: 'ISO 3166-1 alpha-2 country code' })
+  @IsString()
+  @MinLength(2)
+  country!: string;
+}
+
+export class CreateEmergencyResponseDto {
+  @ApiProperty({ example: '11111111-1111-4111-8111-111111111111' })
+  id!: string;
+
+  @ApiProperty({ example: 'venezuela' })
+  slug!: string;
+}
+
+export class EmergencyViewDto {
+  @ApiProperty({ example: '11111111-1111-4111-8111-111111111111' })
+  id!: string;
+
+  @ApiProperty({ example: 'Emergencia sísmica — Venezuela' })
+  name!: string;
+
+  @ApiProperty({ example: 'venezuela' })
+  slug!: string;
+
+  @ApiProperty({ example: 'VE' })
+  country!: string;
+
+  @ApiProperty({ example: 'active' })
+  status!: string;
+}
