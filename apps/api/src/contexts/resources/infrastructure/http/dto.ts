@@ -1,4 +1,4 @@
-import { IsEnum, IsString, MinLength } from 'class-validator';
+import { IsEnum, IsNotIn, IsString, MinLength } from 'class-validator';
 import { ResourceType, ResourceSide, VerificationLevel } from '../../domain/resource-enums';
 
 export class RegisterResourceDto {
@@ -8,5 +8,7 @@ export class RegisterResourceDto {
 }
 
 export class VerifyResourceDto {
-  @IsEnum(VerificationLevel) level!: VerificationLevel;
+  @IsEnum(VerificationLevel)
+  @IsNotIn([VerificationLevel.Unverified])
+  level!: VerificationLevel;
 }
