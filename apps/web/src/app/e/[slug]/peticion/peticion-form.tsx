@@ -2,32 +2,36 @@
 
 import { useActionState } from 'react';
 import Link from 'next/link';
-import type { ActionState } from './actions';
+import type { PeticionState } from './actions';
 
-const INITIAL_STATE: ActionState = { status: 'idle' };
+const INITIAL_STATE: PeticionState = { status: 'idle' };
 
-const RESOURCE_TYPES = [
-  { value: 'collection_point', label: 'Punto de recogida' },
-  { value: 'delivery_point', label: 'Punto de entrega' },
-  { value: 'warehouse', label: 'Almacén' },
-  { value: 'transport', label: 'Transporte' },
-  { value: 'supplier', label: 'Proveedor' },
-  { value: 'venue', label: 'Local / Espacio' },
+const CATEGORIES = [
+  { value: 'hygiene', label: 'Higiene' },
+  { value: 'water', label: 'Agua' },
+  { value: 'food', label: 'Alimentos' },
+  { value: 'medical', label: 'Sanitario' },
+  { value: 'shelter', label: 'Refugio' },
+  { value: 'tools', label: 'Herramientas' },
+  { value: 'other', label: 'Otro' },
 ] as const;
 
-const SIDES = [
-  { value: 'origin', label: 'Origen (España)' },
-  { value: 'destination', label: 'Destino' },
+const PRIORITIES = [
+  { value: 'low', label: 'Baja' },
+  { value: 'medium', label: 'Media' },
+  { value: 'high', label: 'Alta' },
+  { value: 'urgent', label: 'Urgente' },
 ] as const;
 
-type Action = (prev: ActionState, formData: FormData) => Promise<ActionState>;
+type BoundAction = (prev: PeticionState, formData: FormData) => Promise<PeticionState>;
 
-interface RegistrarFormProps {
-  action: Action;
+interface PeticionFormProps {
+  action: BoundAction;
+  slug: string;
 }
 
-export function RegistrarForm({ action }: RegistrarFormProps) {
-  const [state, formAction, pending] = useActionState<ActionState, FormData>(
+export function PeticionForm({ action, slug }: PeticionFormProps) {
+  const [state, formAction, pending] = useActionState<PeticionState, FormData>(
     action,
     INITIAL_STATE,
   );
@@ -40,25 +44,24 @@ export function RegistrarForm({ action }: RegistrarFormProps) {
         className="flex flex-col gap-6 rounded-lg border-2 border-gray-900 bg-white p-6"
       >
         <p className="text-lg font-semibold text-gray-900 leading-snug">
-          Gracias, quedas registrado. No recibas material ni publiques nada hasta
-          que te validemos.
+          Gracias, tu petición se ha registrado y será revisada por el equipo de
+          coordinación.
         </p>
         <div className="flex flex-col gap-3">
           <Link
-            href="/registrar"
+            href={`/e/${slug}/peticion`}
             className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors"
             onClick={() => {
-              // Reload forces useActionState back to INITIAL_STATE
-              window.location.href = '/registrar';
+              window.location.href = `/e/${slug}/peticion`;
             }}
           >
-            Registrar otro recurso
+            Enviar otra petición
           </Link>
           <Link
-            href="/"
+            href={`/e/${slug}`}
             className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-gray-900 bg-white border-2 border-gray-900 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors"
           >
-            Volver al inicio
+            Volver a la emergencia
           </Link>
         </div>
       </section>
@@ -77,73 +80,109 @@ export function RegistrarForm({ action }: RegistrarFormProps) {
         </p>
       )}
 
-      {/* Tipo de recurso */}
+      {/* Título */}
       <div className="flex flex-col gap-2">
         <label
-          htmlFor="type"
+          htmlFor="title"
           className="text-sm font-semibold text-gray-900 uppercase tracking-wide"
         >
-          Tipo de recurso
-        </label>
-        <select
-          id="type"
-          name="type"
-          required
-          defaultValue=""
-          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
-        >
-          <option value="" disabled>
-            Selecciona un tipo…
-          </option>
-          {RESOURCE_TYPES.map(({ value, label }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Lado */}
-      <div className="flex flex-col gap-2">
-        <label
-          htmlFor="side"
-          className="text-sm font-semibold text-gray-900 uppercase tracking-wide"
-        >
-          Lado
-        </label>
-        <select
-          id="side"
-          name="side"
-          required
-          defaultValue=""
-          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
-        >
-          <option value="" disabled>
-            Selecciona un lado…
-          </option>
-          {SIDES.map(({ value, label }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Nombre */}
-      <div className="flex flex-col gap-2">
-        <label
-          htmlFor="name"
-          className="text-sm font-semibold text-gray-900 uppercase tracking-wide"
-        >
-          Nombre
+          Título <span aria-hidden="true">*</span>
         </label>
         <input
-          id="name"
-          name="name"
+          id="title"
+          name="title"
           type="text"
           required
           minLength={2}
-          placeholder="Ej. Cruz Roja Madrid"
+          placeholder="Ej. Mantas térmicas para familias"
+          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+        />
+      </div>
+
+      {/* Categoría */}
+      <div className="flex flex-col gap-2">
+        <label
+          htmlFor="category"
+          className="text-sm font-semibold text-gray-900 uppercase tracking-wide"
+        >
+          Categoría <span aria-hidden="true">*</span>
+        </label>
+        <select
+          id="category"
+          name="category"
+          required
+          defaultValue=""
+          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+        >
+          <option value="" disabled>
+            Selecciona una categoría…
+          </option>
+          {CATEGORIES.map(({ value, label }) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Prioridad */}
+      <div className="flex flex-col gap-2">
+        <label
+          htmlFor="priority"
+          className="text-sm font-semibold text-gray-900 uppercase tracking-wide"
+        >
+          Prioridad <span aria-hidden="true">*</span>
+        </label>
+        <select
+          id="priority"
+          name="priority"
+          required
+          defaultValue=""
+          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+        >
+          <option value="" disabled>
+            Selecciona una prioridad…
+          </option>
+          {PRIORITIES.map(({ value, label }) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Cantidad (opcional) */}
+      <div className="flex flex-col gap-2">
+        <label
+          htmlFor="quantity"
+          className="text-sm font-semibold text-gray-900 uppercase tracking-wide"
+        >
+          Cantidad <span className="text-gray-400 font-normal normal-case">(opcional)</span>
+        </label>
+        <input
+          id="quantity"
+          name="quantity"
+          type="number"
+          min={1}
+          step={1}
+          placeholder="Ej. 50"
+          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+        />
+      </div>
+
+      {/* Unidad (opcional) */}
+      <div className="flex flex-col gap-2">
+        <label
+          htmlFor="unit"
+          className="text-sm font-semibold text-gray-900 uppercase tracking-wide"
+        >
+          Unidad <span className="text-gray-400 font-normal normal-case">(opcional)</span>
+        </label>
+        <input
+          id="unit"
+          name="unit"
+          type="text"
+          placeholder="Ej. cajas, litros, unidades"
           className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
         />
       </div>
@@ -154,7 +193,7 @@ export function RegistrarForm({ action }: RegistrarFormProps) {
         disabled={pending}
         className="flex items-center justify-center w-full py-4 px-6 text-lg font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {pending ? 'Enviando…' : 'Registrar recurso'}
+        {pending ? 'Enviando…' : 'Enviar petición'}
       </button>
     </form>
   );

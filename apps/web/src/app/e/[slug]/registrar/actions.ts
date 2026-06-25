@@ -1,7 +1,6 @@
 'use server';
 
 import { api } from '@/lib/api';
-import { DEMO_EMERGENCY_ID } from '@/lib/config';
 import type { components } from '@reliefhub/api-client';
 
 type ResourceType = components['schemas']['RegisterResourceDto']['type'];
@@ -32,6 +31,7 @@ function isSide(value: unknown): value is Side {
 }
 
 export async function registerResource(
+  emergencyId: string,
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
@@ -54,7 +54,7 @@ export async function registerResource(
   const { data, error } = await api.POST(
     '/emergencies/{emergencyId}/resources',
     {
-      params: { path: { emergencyId: DEMO_EMERGENCY_ID } },
+      params: { path: { emergencyId } },
       body: { type: rawType, side: rawSide, name },
     },
   );
