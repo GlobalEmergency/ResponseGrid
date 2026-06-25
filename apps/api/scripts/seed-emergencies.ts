@@ -29,9 +29,17 @@ async function seed(): Promise<void> {
         status: 'active',
         createdAt: sql`NOW()`,
       })
-      .onConflictDoNothing();
+      .onConflictDoUpdate({
+        target: emergenciesTable.id,
+        set: {
+          name: 'Emergencia sísmica — Venezuela',
+          slug: 'venezuela',
+          country: 'VE',
+          status: 'active',
+        },
+      });
 
-    console.log('Seed completed: emergency "venezuela" inserted (or already existed).');
+    console.log('Seed completed: emergency "venezuela" upserted.');
   } finally {
     await pool.end();
   }
