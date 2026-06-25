@@ -4,7 +4,8 @@
   "scripts": {
     "dev:infra": "docker compose up -d",
     "api:dev": "pnpm --filter api start:dev",
-    "api:test": "pnpm --filter api test"
+    "api:test": "pnpm --filter api test",
+    "gen:api": "pnpm --filter api gen:openapi && pnpm --filter @reliefhub/api-client generate"
   },
   "pnpm": {
     "overrides": {

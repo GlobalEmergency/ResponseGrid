@@ -1,0 +1,25 @@
+{
+  "name": "@reliefhub/api-client",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "generate": "openapi-typescript ../../apps/api/openapi.json -o src/schema.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.13.5"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.8.0",
+    "typescript": "^5.7.3"
+  }
+}

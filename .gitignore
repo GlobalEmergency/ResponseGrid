@@ -11,6 +11,7 @@ especificacion_plataforma_ayuda_solidaria.md
 # Dependencias / build
 node_modules/
 dist/
+packages/*/dist/
 
 # Generated artifacts
 apps/api/openapi.json
