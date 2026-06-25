@@ -5,14 +5,16 @@ type ResourceViewDto = components['schemas']['ResourceViewDto'];
 const TYPE_LABELS: Record<ResourceViewDto['type'], string> = {
   collection_point: 'Punto de recogida',
   delivery_point: 'Punto de entrega',
+  collection_and_delivery: 'Recogida y entrega',
   warehouse: 'Almacén',
   transport: 'Transporte',
   supplier: 'Proveedor',
   venue: 'Local / Espacio',
 };
 
-const SIDE_LABELS: Record<ResourceViewDto['side'], string> = {
+const STAGE_LABELS: Record<ResourceViewDto['stage'], string> = {
   origin: 'Origen',
+  intermediate: 'Intermedio',
   destination: 'Destino',
 };
 
@@ -32,7 +34,7 @@ export function PublicResourceCard({ resource }: PublicResourceCardProps) {
       <div className="flex flex-wrap gap-2 text-sm text-gray-700">
         <span className="font-medium">{TYPE_LABELS[resource.type]}</span>
         <span aria-hidden="true" className="text-gray-300">·</span>
-        <span>{SIDE_LABELS[resource.side]}</span>
+        <span>{STAGE_LABELS[resource.stage]}</span>
       </div>
     </article>
   );

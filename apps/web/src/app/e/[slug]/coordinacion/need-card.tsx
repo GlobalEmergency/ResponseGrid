@@ -6,8 +6,9 @@ import type { components } from '@reliefhub/api-client';
 import type { ActionResult } from './actions';
 
 type NeedView = components['schemas']['NeedViewDto'];
+type ItemCategory = components['schemas']['NeedItemResponseDto']['category'];
 
-const CATEGORY_LABELS: Record<NeedView['category'], string> = {
+const CATEGORY_LABELS: Record<ItemCategory, string> = {
   hygiene: 'Higiene',
   water: 'Agua',
   food: 'Alimentos',
@@ -54,17 +55,19 @@ export function NeedCard({ need, slug }: NeedCardProps) {
           {need.title}
         </h2>
         <div className="flex flex-wrap gap-3 text-sm text-gray-600">
-          <span className="font-medium">
-            {CATEGORY_LABELS[need.category]}
-          </span>
+          {need.items[0] !== undefined && (
+            <span className="font-medium">
+              {CATEGORY_LABELS[need.items[0].category]}
+            </span>
+          )}
           <span aria-hidden="true" className="text-gray-300">·</span>
           <span>Prioridad: {PRIORITY_LABELS[need.priority]}</span>
-          {need.requestedQuantity != null && (
+          {need.items.length > 0 && (
             <>
               <span aria-hidden="true" className="text-gray-300">·</span>
               <span>
-                {String(need.requestedQuantity)}
-                {need.unit != null ? ` ${String(need.unit)}` : ''}
+                {String(need.items[0]?.quantity ?? '')}
+                {need.items[0]?.unit != null ? ` ${String(need.items[0].unit)}` : ''}
               </span>
             </>
           )}

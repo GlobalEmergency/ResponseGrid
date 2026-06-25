@@ -248,17 +248,19 @@ export default async function EmergencyPage({ params }: Props) {
                     {need.title}
                   </h3>
                   <div className="flex flex-wrap gap-2 text-sm text-gray-600">
-                    <span className="font-medium">
-                      {CATEGORY_LABELS[need.category] ?? need.category}
-                    </span>
+                    {need.items[0] !== undefined && (
+                      <span className="font-medium">
+                        {CATEGORY_LABELS[need.items[0].category] ?? need.items[0].category}
+                      </span>
+                    )}
                     <span aria-hidden="true" className="text-gray-300">·</span>
                     <span>Prioridad: {PRIORITY_LABELS[need.priority] ?? need.priority}</span>
-                    {need.requestedQuantity != null && (
+                    {need.items.length > 0 && (
                       <>
                         <span aria-hidden="true" className="text-gray-300">·</span>
                         <span>
-                          {String(need.requestedQuantity)}
-                          {need.unit != null ? ` ${String(need.unit)}` : ''}
+                          {String(need.items[0]?.quantity ?? '')}
+                          {need.items[0]?.unit != null ? ` ${String(need.items[0].unit)}` : ''}
                         </span>
                       </>
                     )}

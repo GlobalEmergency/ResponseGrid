@@ -2,17 +2,17 @@
 
 import Link from 'next/link';
 import { useActionState } from 'react';
-import { loginAction, type LoginResult } from './actions';
+import { signupAction, type SignupResult } from './actions';
 
-const INITIAL_STATE: LoginResult = { status: 'idle' };
+const INITIAL_STATE: SignupResult = { status: 'idle' };
 
-interface LoginFormProps {
+interface SignupFormProps {
   next: string;
 }
 
-export function LoginForm({ next }: LoginFormProps) {
-  const boundAction = loginAction.bind(null, next);
-  const [state, formAction, pending] = useActionState<LoginResult, FormData>(
+export function SignupForm({ next }: SignupFormProps) {
+  const boundAction = signupAction.bind(null, next);
+  const [state, formAction, pending] = useActionState<SignupResult, FormData>(
     boundAction,
     INITIAL_STATE,
   );
@@ -30,12 +30,25 @@ export function LoginForm({ next }: LoginFormProps) {
         </p>
       )}
 
+      {/* Name */}
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="name" className="text-sm font-semibold text-gray-900">
+          Nombre completo
+        </label>
+        <input
+          id="name"
+          name="name"
+          type="text"
+          autoComplete="name"
+          required
+          placeholder="Jane Doe"
+          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+        />
+      </div>
+
       {/* Email */}
       <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="email"
-          className="text-sm font-semibold text-gray-900"
-        >
+        <label htmlFor="email" className="text-sm font-semibold text-gray-900">
           Correo electrónico
         </label>
         <input
@@ -44,7 +57,7 @@ export function LoginForm({ next }: LoginFormProps) {
           type="email"
           autoComplete="email"
           required
-          placeholder="coord@reliefhub.org"
+          placeholder="tu@email.com"
           className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
         />
       </div>
@@ -55,14 +68,16 @@ export function LoginForm({ next }: LoginFormProps) {
           htmlFor="password"
           className="text-sm font-semibold text-gray-900"
         >
-          Contraseña
+          Contraseña{' '}
+          <span className="font-normal text-gray-500">(mín. 8 caracteres)</span>
         </label>
         <input
           id="password"
           name="password"
           type="password"
-          autoComplete="current-password"
+          autoComplete="new-password"
           required
+          minLength={8}
           placeholder="••••••••"
           className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
         />
@@ -74,17 +89,17 @@ export function LoginForm({ next }: LoginFormProps) {
         disabled={pending}
         className="flex w-full items-center justify-center rounded-lg bg-gray-900 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {pending ? 'Entrando…' : 'Entrar'}
+        {pending ? 'Creando cuenta…' : 'Crear cuenta'}
       </button>
 
-      {/* Link to signup */}
+      {/* Link to login */}
       <p className="text-center text-sm text-gray-600">
-        ¿No tienes cuenta?{' '}
+        ¿Ya tienes cuenta?{' '}
         <Link
-          href="/signup"
+          href="/login"
           className="font-semibold text-gray-900 underline underline-offset-2 hover:text-gray-700"
         >
-          Crear cuenta
+          Inicia sesión
         </Link>
       </p>
     </form>

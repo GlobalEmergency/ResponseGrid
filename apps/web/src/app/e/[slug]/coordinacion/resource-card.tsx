@@ -14,14 +14,16 @@ type VerificationLevel = Exclude<
 const TYPE_LABELS: Record<ResourceView['type'], string> = {
   collection_point: 'Punto de recogida',
   delivery_point: 'Punto de entrega',
+  collection_and_delivery: 'Recogida y entrega',
   warehouse: 'Almacén',
   transport: 'Transporte',
   supplier: 'Proveedor',
   venue: 'Local / Espacio',
 };
 
-const SIDE_LABELS: Record<ResourceView['side'], string> = {
+const STAGE_LABELS: Record<ResourceView['stage'], string> = {
   origin: 'Origen',
+  intermediate: 'Intermedio',
   destination: 'Destino',
 };
 
@@ -71,7 +73,7 @@ export function ResourceCard({ resource, slug }: ResourceCardProps) {
         <div className="flex flex-wrap gap-3 text-sm text-gray-600">
           <span className="font-medium">{TYPE_LABELS[resource.type]}</span>
           <span aria-hidden="true" className="text-gray-300">·</span>
-          <span>{SIDE_LABELS[resource.side]}</span>
+          <span>{STAGE_LABELS[resource.stage]}</span>
         </div>
       </div>
 

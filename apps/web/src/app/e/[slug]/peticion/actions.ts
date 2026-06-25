@@ -3,7 +3,7 @@
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 
-type NeedCategory = components['schemas']['CreateNeedDto']['category'];
+type NeedCategory = components['schemas']['NeedItemDto']['category'];
 type NeedPriority = components['schemas']['CreateNeedDto']['priority'];
 
 export type PeticionState =
@@ -41,6 +41,9 @@ export async function submitPeticion(
   const rawPriority = formData.get('priority');
   const rawQuantity = formData.get('quantity');
   const rawUnit = formData.get('unit');
+  const rawAddress = formData.get('address');
+  const rawLatitude = formData.get('latitude');
+  const rawLongitude = formData.get('longitude');
 
   const title = typeof rawTitle === 'string' ? rawTitle.trim() : '';
 
@@ -54,15 +57,28 @@ export async function submitPeticion(
     return { status: 'error', message: 'Prioridad no válida.' };
   }
 
-  const requestedQuantity =
+  const quantity =
     typeof rawQuantity === 'string' && rawQuantity.trim() !== ''
       ? Number(rawQuantity)
-      : undefined;
+      : 1;
 
   const unit =
     typeof rawUnit === 'string' && rawUnit.trim() !== ''
       ? rawUnit.trim()
       : undefined;
+
+  const address =
+    typeof rawAddress === 'string' && rawAddress.trim() !== ''
+      ? rawAddress.trim()
+      : 'Sin dirección';
+  const latitude =
+    typeof rawLatitude === 'string' && rawLatitude !== ''
+      ? Number(rawLatitude)
+      : 0;
+  const longitude =
+    typeof rawLongitude === 'string' && rawLongitude !== ''
+      ? Number(rawLongitude)
+      : 0;
 
   const { data, error } = await api.POST(
     '/emergencies/{emergencyId}/needs',
@@ -70,10 +86,16 @@ export async function submitPeticion(
       params: { path: { emergencyId } },
       body: {
         title,
-        category: rawCategory,
         priority: rawPriority,
-        ...(requestedQuantity !== undefined ? { requestedQuantity } : {}),
-        ...(unit !== undefined ? { unit } : {}),
+        location: { address, latitude, longitude },
+        items: [
+          {
+            name: title,
+            quantity,
+            category: rawCategory,
+            ...(unit !== undefined ? { unit } : {}),
+          },
+        ],
       },
     },
   );
