@@ -89,6 +89,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/emergencies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List active emergencies */
+        get: operations["EmergenciesController_list"];
+        put?: never;
+        /** Create an emergency */
+        post: operations["EmergenciesController_createEmergency"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/by-slug/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get emergency by slug */
+        get: operations["EmergenciesController_getBySlugRoute"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -150,6 +185,38 @@ export interface components {
              * @enum {string}
              */
             publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed";
+        };
+        CreateEmergencyDto: {
+            /** @example Emergencia sísmica — Venezuela */
+            name: string;
+            /**
+             * @description URL-safe slug (lowercase letters, digits, hyphens). Auto-generated from name if omitted.
+             * @example venezuela
+             */
+            slug?: string;
+            /**
+             * @description ISO 3166-1 alpha-2 country code
+             * @example VE
+             */
+            country: string;
+        };
+        CreateEmergencyResponseDto: {
+            /** @example 11111111-1111-4111-8111-111111111111 */
+            id: string;
+            /** @example venezuela */
+            slug: string;
+        };
+        EmergencyViewDto: {
+            /** @example 11111111-1111-4111-8111-111111111111 */
+            id: string;
+            /** @example Emergencia sísmica — Venezuela */
+            name: string;
+            /** @example venezuela */
+            slug: string;
+            /** @example VE */
+            country: string;
+            /** @example active */
+            status: string;
         };
     };
     responses: never;
@@ -325,6 +392,93 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ResourceViewDto"][];
                 };
+            };
+        };
+    };
+    EmergenciesController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of active emergencies */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmergencyViewDto"][];
+                };
+            };
+        };
+    };
+    EmergenciesController_createEmergency: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateEmergencyDto"];
+            };
+        };
+        responses: {
+            /** @description Emergency created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateEmergencyResponseDto"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Slug already exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EmergenciesController_getBySlugRoute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Emergency found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmergencyViewDto"];
+                };
+            };
+            /** @description Emergency not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
