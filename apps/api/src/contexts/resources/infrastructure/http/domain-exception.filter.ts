@@ -3,36 +3,20 @@ import { Response } from 'express';
 import { ResourceNotFoundError } from '../../application/resource-not-found.error';
 import { ResourceNotVerifiedError, InvalidVerificationLevelError } from '../../domain/resource-errors';
 
-@Catch()
+type DomainError = ResourceNotFoundError | ResourceNotVerifiedError | InvalidVerificationLevelError;
+
+// Only catches domain errors; everything else (e.g. ValidationPipe's BadRequestException)
+// falls through to Nest's default handler, which already returns clean JSON.
+@Catch(ResourceNotFoundError, ResourceNotVerifiedError, InvalidVerificationLevelError)
 export class DomainExceptionFilter implements ExceptionFilter {
-  catch(exception: unknown, host: ArgumentsHost): void {
-    const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
-
-    if (exception instanceof ResourceNotFoundError) {
-      response.status(HttpStatus.NOT_FOUND).json({
-        statusCode: HttpStatus.NOT_FOUND,
-        message: exception.message,
-      });
-      return;
-    }
-
-    if (exception instanceof ResourceNotVerifiedError) {
-      response.status(HttpStatus.CONFLICT).json({
-        statusCode: HttpStatus.CONFLICT,
-        message: exception.message,
-      });
-      return;
-    }
-
-    if (exception instanceof InvalidVerificationLevelError) {
-      response.status(HttpStatus.BAD_REQUEST).json({
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: exception.message,
-      });
-      return;
-    }
-
-    throw exception;
+  catch(exception: DomainError, host: ArgumentsHost): void {
+    const response = host.switchToHttp().getResponse<Response>();
+    const statusCode =
+      exception instanceof ResourceNotFoundError
+        ? HttpStatus.NOT_FOUND
+        : exception instanceof ResourceNotVerifiedError
+          ? HttpStatus.CONFLICT
+          : HttpStatus.BAD_REQUEST;
+    response.status(statusCode).json({ statusCode, message: exception.message });
   }
 }
