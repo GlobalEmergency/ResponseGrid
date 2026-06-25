@@ -12,5 +12,8 @@ especificacion_plataforma_ayuda_solidaria.md
 node_modules/
 dist/
 
+# Generated artifacts
+apps/api/openapi.json
+
 # Scratch de orquestación (ledger SDD)
 .superpowers/
