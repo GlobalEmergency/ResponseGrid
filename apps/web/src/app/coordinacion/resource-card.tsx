@@ -30,7 +30,7 @@ const LEVEL_OPTIONS: { value: VerificationLevel; label: string }[] = [
   { value: 'official', label: 'Oficial' },
 ];
 
-const INITIAL_STATE: ActionResult = { status: 'success' };
+const INITIAL_STATE: ActionResult = { status: 'idle' };
 
 interface ResourceCardProps {
   resource: ResourceView;
