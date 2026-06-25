@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Authenticate and obtain a JWT access token */
+        post: operations["AuthController_loginRoute"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/emergencies/{emergencyId}/resources": {
         parameters: {
             query?: never;
@@ -13,7 +30,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Register a resource for an emergency */
+        /** Register a resource for an emergency (public — citizen self-registration) */
         post: operations["ResourcesController_create"];
         delete?: never;
         options?: never;
@@ -30,7 +47,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Verify a resource */
+        /** Verify a resource (coordinator only) */
         post: operations["ResourcesController_verifyResource"];
         delete?: never;
         options?: never;
@@ -47,7 +64,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Publish a resource */
+        /** Publish a resource (coordinator only) */
         post: operations["ResourcesController_publishResource"];
         delete?: never;
         options?: never;
@@ -62,7 +79,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get the coordination queue for an emergency */
+        /** Get the coordination queue for an emergency (coordinator only) */
         get: operations["CoordinationController_list"];
         put?: never;
         post?: never;
@@ -99,7 +116,7 @@ export interface paths {
         /** List active emergencies */
         get: operations["EmergenciesController_list"];
         put?: never;
-        /** Create an emergency */
+        /** Create an emergency (admin only) */
         post: operations["EmergenciesController_createEmergency"];
         delete?: never;
         options?: never;
@@ -128,6 +145,16 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        LoginDto: {
+            /** @example admin@reliefhub.org */
+            email: string;
+            /** @example admin1234 */
+            password: string;
+        };
+        LoginResponseDto: {
+            /** @description JWT access token */
+            accessToken: string;
+        };
         RegisterResourceDto: {
             /**
              * @example collection_point
@@ -227,6 +254,44 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    AuthController_loginRoute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginDto"];
+            };
+        };
+        responses: {
+            /** @description Login successful */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponseDto"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid credentials */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ResourcesController_create: {
         parameters: {
             query?: never;
@@ -291,6 +356,20 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Resource not found */
             404: {
                 headers: {
@@ -321,6 +400,20 @@ export interface operations {
             };
             /** @description Invalid UUID */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -362,6 +455,20 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ResourceViewDto"][];
                 };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required for this emergency */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Emergency not found */
             404: {
@@ -439,6 +546,20 @@ export interface operations {
             };
             /** @description Invalid request body */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Admin access required */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

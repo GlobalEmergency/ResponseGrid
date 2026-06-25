@@ -8,6 +8,7 @@ import { GetEmergencyBySlug } from '../application/get-emergency-by-slug';
 import { EMERGENCY_REPOSITORY, EmergencyRepository } from '../domain/ports/emergency.repository';
 import { DrizzleEmergencyRepository } from './drizzle/drizzle-emergency.repository';
 import { createDb } from '../../../shared/db';
+import { IdentityModule } from '../../identity/infrastructure/identity.module';
 
 export const DB_POOL = Symbol('EMERGENCIES_DB_POOL');
 
@@ -50,6 +51,7 @@ const getBySlugProvider = {
 };
 
 @Module({
+  imports: [IdentityModule],
   controllers: [EmergenciesController],
   providers: [
     dbPoolProvider,

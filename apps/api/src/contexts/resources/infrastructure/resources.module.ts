@@ -16,6 +16,7 @@ import { EVENT_BUS, EventBus } from '../domain/ports/event-bus';
 import { DrizzleResourceRepository } from './drizzle/drizzle-resource.repository';
 import { BullMqEventBus } from './bullmq-event-bus';
 import { createDb } from '../../../shared/db';
+import { IdentityModule } from '../../identity/infrastructure/identity.module';
 
 export const DB_POOL = Symbol('DB_POOL');
 export const EVENT_QUEUE = Symbol('EVENT_QUEUE');
@@ -89,6 +90,7 @@ const publicResourcesProvider = {
 };
 
 @Module({
+  imports: [IdentityModule],
   controllers: [ResourcesController, CoordinationController, PublicController],
   providers: [
     dbPoolProvider,

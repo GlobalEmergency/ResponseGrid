@@ -15,6 +15,13 @@
       "when": 1782415793869,
       "tag": "0001_bitter_terror",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782417787883,
+      "tag": "0002_quick_nighthawk",
+      "breakpoints": true
     }
   ]
 }
