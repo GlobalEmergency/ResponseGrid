@@ -5,8 +5,10 @@ import { Pool } from 'pg';
 import { Db } from '../../../shared/db';
 import { ResourcesController } from './http/resources.controller';
 import { CoordinationController } from './http/coordination.controller';
+import { PublicController } from './http/public.controller';
 import { RegisterResource } from '../application/register-resource';
 import { GetCoordinationQueue } from '../application/get-coordination-queue';
+import { GetPublicResources } from '../application/get-public-resources';
 import { VerifyResource } from '../application/verify-resource';
 import { PublishResource } from '../application/publish-resource';
 import { RESOURCE_REPOSITORY, ResourceRepository } from '../domain/ports/resource.repository';
@@ -80,9 +82,14 @@ const publishProvider = {
   inject: [RESOURCE_REPOSITORY, EVENT_BUS],
   useFactory: (repo: ResourceRepository, bus: EventBus) => new PublishResource(repo, bus),
 };
+const publicResourcesProvider = {
+  provide: GetPublicResources,
+  inject: [RESOURCE_REPOSITORY],
+  useFactory: (repo: ResourceRepository) => new GetPublicResources(repo),
+};
 
 @Module({
-  controllers: [ResourcesController, CoordinationController],
+  controllers: [ResourcesController, CoordinationController, PublicController],
   providers: [
     dbPoolProvider,
     eventQueueProvider,
@@ -92,6 +99,7 @@ const publishProvider = {
     queueProvider,
     verifyProvider,
     publishProvider,
+    publicResourcesProvider,
   ],
 })
 export class ResourcesModule implements OnModuleDestroy {

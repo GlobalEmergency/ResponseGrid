@@ -4,7 +4,7 @@ import { DrizzleResourceRepository } from './drizzle-resource.repository';
 import { Resource } from '../../domain/resource';
 import { ResourceId } from '../../domain/resource-id';
 import { EmergencyId } from '../../domain/emergency-id';
-import { ResourceType, ResourceSide, VerificationLevel } from '../../domain/resource-enums';
+import { ResourceType, ResourceSide, VerificationLevel, PublicStatus } from '../../domain/resource-enums';
 import type { Pool } from 'pg';
 
 const URL = process.env.DATABASE_URL ?? 'postgres://reliefhub:reliefhub@localhost:5433/reliefhub';
@@ -44,5 +44,21 @@ describe('DrizzleResourceRepository (integration)', () => {
     await repo.save(verified);
     const result = await repo.findPendingByEmergency(EmergencyId.fromString(EM));
     expect(result.map((x) => x.name)).toEqual(['P']);
+  });
+
+  it('findActiveByEmergency returns only published resources and excludes them from pending', async () => {
+    const active = Resource.register({ id: ResourceId.create(), emergencyId: EmergencyId.fromString(EM), type: ResourceType.CollectionPoint, side: ResourceSide.Origin, name: 'Active' });
+    active.verify(VerificationLevel.Verified, 'c1');
+    active.publish();
+    const pending = Resource.register({ id: ResourceId.create(), emergencyId: EmergencyId.fromString(EM), type: ResourceType.CollectionPoint, side: ResourceSide.Origin, name: 'Pending' });
+    await repo.save(active);
+    await repo.save(pending);
+
+    const activeResult = await repo.findActiveByEmergency(EmergencyId.fromString(EM));
+    expect(activeResult.map((x) => x.name)).toEqual(['Active']);
+    expect(activeResult[0].publicStatus).toBe(PublicStatus.Active);
+
+    const pendingResult = await repo.findPendingByEmergency(EmergencyId.fromString(EM));
+    expect(pendingResult.map((x) => x.name)).toEqual(['Pending']);
   });
 });

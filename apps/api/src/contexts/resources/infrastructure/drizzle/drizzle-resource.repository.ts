@@ -53,4 +53,17 @@ export class DrizzleResourceRepository implements ResourceRepository {
       );
     return rows.map((r) => Resource.fromSnapshot(rowToSnapshot(r)));
   }
+
+  async findActiveByEmergency(emergencyId: EmergencyId): Promise<Resource[]> {
+    const rows = await this.db
+      .select()
+      .from(resourcesTable)
+      .where(
+        and(
+          eq(resourcesTable.emergencyId, emergencyId.value),
+          eq(resourcesTable.publicStatus, PublicStatus.Active),
+        ),
+      );
+    return rows.map((r) => Resource.fromSnapshot(rowToSnapshot(r)));
+  }
 }

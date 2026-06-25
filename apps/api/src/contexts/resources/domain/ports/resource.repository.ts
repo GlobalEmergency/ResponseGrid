@@ -8,4 +8,5 @@ export interface ResourceRepository {
   save(resource: Resource): Promise<void>;
   findById(id: ResourceId): Promise<Resource | null>;
   findPendingByEmergency(emergencyId: EmergencyId): Promise<Resource[]>;
+  findActiveByEmergency(emergencyId: EmergencyId): Promise<Resource[]>;
 }

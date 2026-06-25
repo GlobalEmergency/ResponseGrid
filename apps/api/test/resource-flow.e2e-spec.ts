@@ -40,6 +40,9 @@ describe('Resource flow (e2e)', () => {
 
     const afterPublish = await request(server).get(`/emergencies/${EM}/coordination/queue`).expect(200);
     expect(afterPublish.body).toEqual([]); // no longer pending
+
+    const publicResources = await request(server).get(`/emergencies/${EM}/public/resources`).expect(200);
+    expect(publicResources.body).toEqual([expect.objectContaining({ id, publicStatus: 'active' })]);
   });
 
   it('verify on non-existent resource returns 404', async () => {
