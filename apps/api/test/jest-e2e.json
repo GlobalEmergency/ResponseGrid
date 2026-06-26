@@ -6,5 +6,6 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
-  "setupFiles": ["./jest-setup-e2e.ts"]
+  "globalSetup": "./global-setup.js",
+  "setupFiles": ["./jest-setup-e2e.ts", "./jest-setup-test-db.ts"]
 }

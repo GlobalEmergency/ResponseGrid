@@ -87,6 +87,10 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "globalSetup": "<rootDir>/../test/global-setup.js",
+    "setupFiles": [
+      "<rootDir>/../test/jest-setup-test-db.ts"
+    ]
   }
 }
