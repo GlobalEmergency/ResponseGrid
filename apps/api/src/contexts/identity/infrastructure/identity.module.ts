@@ -24,7 +24,6 @@ import { JwtTokenService } from './jwt-token.service';
 import { JwtAuthGuard } from './http/jwt-auth.guard';
 import { RequireAdminGuard } from './http/require-admin.guard';
 import { RequireCoordinatorGuard } from './http/require-coordinator.guard';
-import { RequireAnyCoordinatorGuard } from './http/require-any-coordinator.guard';
 import { RequireResourceCoordinatorGuard } from './http/require-resource-coordinator.guard';
 import { RequireNeedCoordinatorGuard } from './http/require-need-coordinator.guard';
 import { DrizzleResourceEmergencyLookup } from './drizzle/drizzle-resource-emergency-lookup';
@@ -157,7 +156,6 @@ const authenticateWithProviderProvider = {
     JwtAuthGuard,
     RequireAdminGuard,
     RequireCoordinatorGuard,
-    RequireAnyCoordinatorGuard,
     RequireResourceCoordinatorGuard,
     RequireNeedCoordinatorGuard,
     GoogleStrategy,
@@ -172,7 +170,6 @@ const authenticateWithProviderProvider = {
     JwtAuthGuard,
     RequireAdminGuard,
     RequireCoordinatorGuard,
-    RequireAnyCoordinatorGuard,
     RequireResourceCoordinatorGuard,
     RequireNeedCoordinatorGuard,
     JwtModule,
