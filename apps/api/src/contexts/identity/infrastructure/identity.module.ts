@@ -1,22 +1,32 @@
 import { Inject, Module, OnModuleDestroy } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 import { Pool } from 'pg';
 import { Db, createDb } from '../../../shared/db';
 import { AuthController } from './http/auth.controller';
+import { OAuthController } from './http/oauth.controller';
 import { Login } from '../application/login';
 import { RegisterUser } from '../application/register-user';
+import { AuthenticateWithProvider } from '../application/authenticate-with-provider';
 import { USER_REPOSITORY, UserRepository } from '../domain/ports/user.repository';
 import { MEMBERSHIP_REPOSITORY, MembershipRepository } from '../domain/ports/membership.repository';
+import {
+  USER_IDENTITY_REPOSITORY,
+  UserIdentityRepository,
+} from '../domain/ports/user-identity.repository';
 import { PASSWORD_HASHER } from '../domain/ports/password-hasher';
 import { TOKEN_SERVICE } from '../domain/ports/token.service';
 import { DrizzleUserRepository } from './drizzle/drizzle-user.repository';
 import { DrizzleMembershipRepository } from './drizzle/drizzle-membership.repository';
+import { DrizzleUserIdentityRepository } from './drizzle/drizzle-user-identity.repository';
 import { BcryptPasswordHasher } from './bcrypt-password-hasher';
 import { JwtTokenService } from './jwt-token.service';
 import { JwtAuthGuard } from './http/jwt-auth.guard';
 import { RequireAdminGuard } from './http/require-admin.guard';
 import { RequireCoordinatorGuard } from './http/require-coordinator.guard';
 import { RequireAnyCoordinatorGuard } from './http/require-any-coordinator.guard';
+import { GoogleStrategy } from './http/google.strategy';
+import { FacebookStrategy } from './http/facebook.strategy';
 
 export const IDENTITY_DB_POOL = Symbol('IDENTITY_DB_POOL');
 
@@ -44,6 +54,13 @@ const membershipRepositoryProvider = {
   provide: MEMBERSHIP_REPOSITORY,
   inject: [IDENTITY_DB_POOL],
   useFactory: (dbPool: DbPool): MembershipRepository => new DrizzleMembershipRepository(dbPool.db),
+};
+
+const userIdentityRepositoryProvider = {
+  provide: USER_IDENTITY_REPOSITORY,
+  inject: [IDENTITY_DB_POOL],
+  useFactory: (dbPool: DbPool): UserIdentityRepository =>
+    new DrizzleUserIdentityRepository(dbPool.db),
 };
 
 const passwordHasherProvider = {
@@ -77,8 +94,19 @@ const registerUserProvider = {
   ) => new RegisterUser(userRepo, hasher, tokenService),
 };
 
+const authenticateWithProviderProvider = {
+  provide: AuthenticateWithProvider,
+  inject: [USER_REPOSITORY, USER_IDENTITY_REPOSITORY, TOKEN_SERVICE],
+  useFactory: (
+    userRepo: UserRepository,
+    identityRepo: UserIdentityRepository,
+    tokenService: JwtTokenService,
+  ) => new AuthenticateWithProvider(userRepo, identityRepo, tokenService),
+};
+
 @Module({
   imports: [
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       useFactory: () => {
         const secret = process.env.JWT_SECRET;
@@ -87,19 +115,23 @@ const registerUserProvider = {
       },
     }),
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, OAuthController],
   providers: [
     dbPoolProvider,
     userRepositoryProvider,
     membershipRepositoryProvider,
+    userIdentityRepositoryProvider,
     passwordHasherProvider,
     tokenServiceProvider,
     loginProvider,
     registerUserProvider,
+    authenticateWithProviderProvider,
     JwtAuthGuard,
     RequireAdminGuard,
     RequireCoordinatorGuard,
     RequireAnyCoordinatorGuard,
+    GoogleStrategy,
+    FacebookStrategy,
   ],
   exports: [
     USER_REPOSITORY,
