@@ -21,7 +21,10 @@ export async function setToken(token: string): Promise<void> {
     httpOnly: true,
     sameSite: 'lax',
     path: '/',
-    secure: process.env.NODE_ENV === 'production',
+    // Secure only when explicitly enabled (set COOKIE_SECURE=true behind HTTPS).
+    // Tying it to NODE_ENV breaks sessions when a production build is served over
+    // plain HTTP (local runs, reverse proxies that don't forward HTTPS).
+    secure: process.env.COOKIE_SECURE === 'true',
     // 8-hour session — coordinators don't need persistent logins
     maxAge: 60 * 60 * 8,
   });
