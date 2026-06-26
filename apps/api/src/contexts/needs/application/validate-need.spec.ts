@@ -4,9 +4,14 @@ import { InMemoryNeedRepository } from '../infrastructure/in-memory-need.reposit
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { NeedCategory, Priority, NeedStatus } from '../domain/need-enums';
 import { NeedNotFoundError } from './need-not-found.error';
+import { NeedEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const USER_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+
+const activeReader: NeedEmergencyStatusReader = {
+  getStatus: () => Promise.resolve('active'),
+};
 
 describe('ValidateNeed', () => {
   let repo: InMemoryNeedRepository;
@@ -18,7 +23,7 @@ describe('ValidateNeed', () => {
     repo = new InMemoryNeedRepository();
     bus = new FakeEventBus();
     validateNeed = new ValidateNeed(repo, bus);
-    createNeed = new CreateNeed(repo, bus);
+    createNeed = new CreateNeed(repo, bus, activeReader);
   });
 
   it('transitions need to Validated status', async () => {

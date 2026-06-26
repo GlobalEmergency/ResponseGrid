@@ -7,6 +7,8 @@ import {
   ResourceStage,
   VerificationLevel,
 } from '../domain/resource-enums';
+import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
+import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 
@@ -16,11 +18,21 @@ const baseLocation = {
   longitude: -0.3763,
 };
 
+/** Fake that returns a fixed status — simulates the emergencies table read. */
+class FakeEmergencyStatusReader implements ResourceEmergencyStatusReader {
+  constructor(private readonly status: string | null) {}
+  getStatus(_emergencyId: string): Promise<string | null> {
+    return Promise.resolve(this.status);
+  }
+}
+
+const activeReader = new FakeEmergencyStatusReader('active');
+
 describe('RegisterResource', () => {
   it('persists an unverified resource and publishes ResourceRegistered', async () => {
     const repo = new InMemoryResourceRepository();
     const bus = new FakeEventBus();
-    const useCase = new RegisterResource(repo, bus);
+    const useCase = new RegisterResource(repo, bus, activeReader);
 
     const { id } = await useCase.execute({
       emergencyId: EM,
@@ -45,7 +57,7 @@ describe('RegisterResource', () => {
   it('persists stage, location, and owner on the aggregate', async () => {
     const repo = new InMemoryResourceRepository();
     const bus = new FakeEventBus();
-    const useCase = new RegisterResource(repo, bus);
+    const useCase = new RegisterResource(repo, bus, activeReader);
 
     const { id } = await useCase.execute({
       emergencyId: EM,
@@ -67,5 +79,59 @@ describe('RegisterResource', () => {
     expect(resource?.ownerUserId).toBe('user-test-2');
     expect(resource?.ownerOrganizationId).toBe('org-test-1');
     expect(resource?.description).toBe('Recogida y entrega');
+  });
+
+  it('throws EmergencyNotAcceptingIntakeError when emergency is paused', async () => {
+    const repo = new InMemoryResourceRepository();
+    const bus = new FakeEventBus();
+    const pausedReader = new FakeEmergencyStatusReader('paused');
+    const useCase = new RegisterResource(repo, bus, pausedReader);
+
+    await expect(
+      useCase.execute({
+        emergencyId: EM,
+        type: ResourceType.Warehouse,
+        stage: ResourceStage.Origin,
+        name: 'Should Fail',
+        location: baseLocation,
+        ownerUserId: 'user-test-3',
+      }),
+    ).rejects.toThrow(EmergencyNotAcceptingIntakeError);
+  });
+
+  it('throws EmergencyNotAcceptingIntakeError when emergency is closed', async () => {
+    const repo = new InMemoryResourceRepository();
+    const bus = new FakeEventBus();
+    const closedReader = new FakeEmergencyStatusReader('closed');
+    const useCase = new RegisterResource(repo, bus, closedReader);
+
+    await expect(
+      useCase.execute({
+        emergencyId: EM,
+        type: ResourceType.Warehouse,
+        stage: ResourceStage.Origin,
+        name: 'Should Also Fail',
+        location: baseLocation,
+        ownerUserId: 'user-test-4',
+      }),
+    ).rejects.toThrow(EmergencyNotAcceptingIntakeError);
+  });
+
+  it('throws EmergencyNotAcceptingIntakeError when emergency does not exist', async () => {
+    const repo = new InMemoryResourceRepository();
+    const bus = new FakeEventBus();
+    const nullReader = new FakeEmergencyStatusReader(null);
+    const useCase = new RegisterResource(repo, bus, nullReader);
+
+    await expect(
+      useCase.execute({
+        emergencyId: EM,
+        type: ResourceType.Warehouse,
+        stage: ResourceStage.Origin,
+        name: 'Non-existent emergency',
+        location: baseLocation,
+        ownerUserId: 'user-test-5',
+      }),
+    ).rejects.toThrow(EmergencyNotAcceptingIntakeError);
   });
 });

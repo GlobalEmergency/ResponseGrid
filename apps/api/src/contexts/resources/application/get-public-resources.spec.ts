@@ -9,6 +9,7 @@ import {
   ResourceStage,
   PublicStatus,
 } from '../domain/resource-enums';
+import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const baseLocation = {
@@ -17,11 +18,15 @@ const baseLocation = {
   longitude: -5.9863,
 };
 
+const activeReader: ResourceEmergencyStatusReader = {
+  getStatus: () => Promise.resolve('active'),
+};
+
 describe('GetPublicResources', () => {
   it('returns only published (active) resources of the emergency as views', async () => {
     const repo = new InMemoryResourceRepository();
     const bus = new FakeEventBus();
-    const register = new RegisterResource(repo, bus);
+    const register = new RegisterResource(repo, bus, activeReader);
     const verify = new VerifyResource(repo, bus);
     const publish = new PublishResource(repo, bus);
 
@@ -56,7 +61,7 @@ describe('GetPublicResources', () => {
   it('does not return unverified or unpublished resources', async () => {
     const repo = new InMemoryResourceRepository();
     const bus = new FakeEventBus();
-    const register = new RegisterResource(repo, bus);
+    const register = new RegisterResource(repo, bus, activeReader);
 
     await register.execute({
       emergencyId: EM,

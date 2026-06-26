@@ -10,11 +10,13 @@ import {
   ResourceNotVerifiedError,
   InvalidVerificationLevelError,
 } from '../../domain/resource-errors';
+import { EmergencyNotAcceptingIntakeError } from '../../../emergencies/domain/emergency-not-accepting-intake.error';
 
 type DomainError =
   | ResourceNotFoundError
   | ResourceNotVerifiedError
-  | InvalidVerificationLevelError;
+  | InvalidVerificationLevelError
+  | EmergencyNotAcceptingIntakeError;
 
 // Only catches domain errors; everything else (e.g. ValidationPipe's BadRequestException)
 // falls through to Nest's default handler, which already returns clean JSON.
@@ -22,6 +24,7 @@ type DomainError =
   ResourceNotFoundError,
   ResourceNotVerifiedError,
   InvalidVerificationLevelError,
+  EmergencyNotAcceptingIntakeError,
 )
 export class DomainExceptionFilter implements ExceptionFilter {
   catch(exception: DomainError, host: ArgumentsHost): void {
@@ -29,9 +32,11 @@ export class DomainExceptionFilter implements ExceptionFilter {
     const statusCode =
       exception instanceof ResourceNotFoundError
         ? HttpStatus.NOT_FOUND
-        : exception instanceof ResourceNotVerifiedError
+        : exception instanceof EmergencyNotAcceptingIntakeError
           ? HttpStatus.CONFLICT
-          : HttpStatus.BAD_REQUEST;
+          : exception instanceof ResourceNotVerifiedError
+            ? HttpStatus.CONFLICT
+            : HttpStatus.BAD_REQUEST;
     response
       .status(statusCode)
       .json({ statusCode, message: exception.message });

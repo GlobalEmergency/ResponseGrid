@@ -10,6 +10,7 @@ import {
   usersTable,
   membershipsTable,
 } from '../src/contexts/identity/infrastructure/drizzle/schema';
+import { emergenciesTable } from '../src/contexts/emergencies/infrastructure/drizzle/schema';
 import * as bcrypt from 'bcryptjs';
 
 const EM = '11111111-1111-4111-8111-111111111111';
@@ -52,6 +53,19 @@ describe('Resource flow (e2e)', () => {
       await db.delete(resourcesTable);
       await db.delete(membershipsTable);
       await db.delete(usersTable);
+
+      // Ensure the emergency exists so the intake kill-switch allows creation
+      await db
+        .insert(emergenciesTable)
+        .values({
+          id: EM,
+          name: 'Resource Flow Emergency',
+          slug: 'resource-flow-emergency',
+          country: 'ES',
+          status: 'active',
+          createdAt: new Date(),
+        })
+        .onConflictDoNothing();
 
       const coordHash = await bcrypt.hash('coord1234', 10);
       await db.insert(usersTable).values({

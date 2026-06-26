@@ -4,9 +4,14 @@ import { ValidateNeed } from './validate-need';
 import { InMemoryNeedRepository } from '../infrastructure/in-memory-need.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { NeedCategory, Priority, NeedStatus } from '../domain/need-enums';
+import { NeedEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const USER_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+
+const activeReader: NeedEmergencyStatusReader = {
+  getStatus: () => Promise.resolve('active'),
+};
 
 const baseCmd = {
   emergencyId: EM,
@@ -30,7 +35,7 @@ describe('GetPublicNeeds', () => {
     repo = new InMemoryNeedRepository();
     bus = new FakeEventBus();
     getPublicNeeds = new GetPublicNeeds(repo);
-    createNeed = new CreateNeed(repo, bus);
+    createNeed = new CreateNeed(repo, bus, activeReader);
     validateNeed = new ValidateNeed(repo, bus);
   });
 

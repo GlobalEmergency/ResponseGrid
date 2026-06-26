@@ -11,6 +11,7 @@ import {
   PublicStatus,
 } from '../domain/resource-enums';
 import { ResourceNotVerifiedError } from '../domain/resource-errors';
+import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const baseLocation = {
@@ -19,11 +20,15 @@ const baseLocation = {
   longitude: -3.7057,
 };
 
+const activeReader: ResourceEmergencyStatusReader = {
+  getStatus: () => Promise.resolve('active'),
+};
+
 describe('PublishResource', () => {
   it('publishes a verified resource and emits ResourcePublished', async () => {
     const repo = new InMemoryResourceRepository();
     const bus = new FakeEventBus();
-    const { id } = await new RegisterResource(repo, bus).execute({
+    const { id } = await new RegisterResource(repo, bus, activeReader).execute({
       emergencyId: EM,
       type: ResourceType.CollectionPoint,
       stage: ResourceStage.Origin,
@@ -50,7 +55,7 @@ describe('PublishResource', () => {
   it('refuses to publish an unverified resource', async () => {
     const repo = new InMemoryResourceRepository();
     const bus = new FakeEventBus();
-    const { id } = await new RegisterResource(repo, bus).execute({
+    const { id } = await new RegisterResource(repo, bus, activeReader).execute({
       emergencyId: EM,
       type: ResourceType.CollectionPoint,
       stage: ResourceStage.Origin,

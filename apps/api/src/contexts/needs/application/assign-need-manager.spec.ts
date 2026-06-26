@@ -4,10 +4,15 @@ import { InMemoryNeedRepository } from '../infrastructure/in-memory-need.reposit
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { NeedCategory, Priority } from '../domain/need-enums';
 import { NeedNotFoundError } from './need-not-found.error';
+import { NeedEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const USER_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const ORG_ID = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+
+const activeReader: NeedEmergencyStatusReader = {
+  getStatus: () => Promise.resolve('active'),
+};
 
 describe('AssignNeedManager', () => {
   let repo: InMemoryNeedRepository;
@@ -19,7 +24,7 @@ describe('AssignNeedManager', () => {
     repo = new InMemoryNeedRepository();
     bus = new FakeEventBus();
     assignManager = new AssignNeedManager(repo);
-    createNeed = new CreateNeed(repo, bus);
+    createNeed = new CreateNeed(repo, bus, activeReader);
   });
 
   it('sets managingOrganizationId on an existing need', async () => {

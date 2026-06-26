@@ -22,6 +22,7 @@ import {
   usersTable,
   membershipsTable,
 } from '../src/contexts/identity/infrastructure/drizzle/schema';
+import { emergenciesTable } from '../src/contexts/emergencies/infrastructure/drizzle/schema';
 import * as bcrypt from 'bcryptjs';
 
 // Emergency A: the coordinator belongs to this one
@@ -73,6 +74,29 @@ describe('Coordinator scope authz (e2e)', () => {
       await db.delete(needItemsTable);
       await db.delete(needsTable);
       await db.delete(resourcesTable);
+
+      // Ensure both emergencies exist (kill-switch reads status)
+      await db
+        .insert(emergenciesTable)
+        .values([
+          {
+            id: EM_A,
+            name: 'Scope Emergency A',
+            slug: 'scope-emergency-a',
+            country: 'ES',
+            status: 'active',
+            createdAt: new Date(),
+          },
+          {
+            id: EM_B,
+            name: 'Scope Emergency B',
+            slug: 'scope-emergency-b',
+            country: 'ES',
+            status: 'active',
+            createdAt: new Date(),
+          },
+        ])
+        .onConflictDoNothing();
 
       // Insert coordinator user and membership on EM_A only
       await db

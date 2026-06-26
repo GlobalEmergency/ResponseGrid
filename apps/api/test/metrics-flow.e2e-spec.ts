@@ -15,6 +15,7 @@ import {
   usersTable,
   membershipsTable,
 } from '../src/contexts/identity/infrastructure/drizzle/schema';
+import { emergenciesTable } from '../src/contexts/emergencies/infrastructure/drizzle/schema';
 import * as bcrypt from 'bcryptjs';
 
 // Unique emergency and user UUIDs to avoid conflicts with other e2e specs
@@ -76,6 +77,19 @@ describe('Metrics endpoint (e2e)', () => {
       await db.delete(needItemsTable);
       await db.delete(needsTable);
       await db.delete(resourcesTable);
+
+      // Ensure the emergency exists so the intake kill-switch allows creation
+      await db
+        .insert(emergenciesTable)
+        .values({
+          id: EM,
+          name: 'Metrics Flow Emergency',
+          slug: 'metrics-flow-emergency',
+          country: 'VE',
+          status: 'active',
+          createdAt: new Date(),
+        })
+        .onConflictDoNothing();
 
       await db
         .insert(usersTable)

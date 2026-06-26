@@ -5,7 +5,9 @@ import {
   HttpCode,
   NotFoundException,
   Param,
+  ParseUUIDPipe,
   Post,
+  Put,
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
@@ -17,21 +19,28 @@ import {
   ApiConflictResponse,
   ApiOkResponse,
   ApiNotFoundResponse,
+  ApiNoContentResponse,
   ApiBearerAuth,
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
+  ApiParam,
 } from '@nestjs/swagger';
 import { CreateEmergency } from '../../application/create-emergency';
 import { ListActiveEmergencies } from '../../application/list-active-emergencies';
 import { GetEmergencyBySlug } from '../../application/get-emergency-by-slug';
+import { PauseEmergency } from '../../application/pause-emergency';
+import { ResumeEmergency } from '../../application/resume-emergency';
+import { PublishAnnouncement } from '../../application/publish-announcement';
 import {
   CreateEmergencyDto,
   CreateEmergencyResponseDto,
   EmergencyViewDto,
+  PublishAnnouncementDto,
 } from './dto';
 import { EmergencyExceptionFilter } from './emergency-exception.filter';
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
 import { RequireAdminGuard } from '../../../identity/infrastructure/http/require-admin.guard';
+import { RequireCoordinatorGuard } from '../../../identity/infrastructure/http/require-coordinator.guard';
 
 @ApiTags('emergencies')
 @Controller('emergencies')
@@ -41,6 +50,9 @@ export class EmergenciesController {
     private readonly create: CreateEmergency,
     private readonly listActive: ListActiveEmergencies,
     private readonly getBySlug: GetEmergencyBySlug,
+    private readonly pause: PauseEmergency,
+    private readonly resume: ResumeEmergency,
+    private readonly publishAnnouncement: PublishAnnouncement,
   ) {}
 
   @Post()
@@ -85,5 +97,79 @@ export class EmergenciesController {
     if (!result)
       throw new NotFoundException(`Emergency with slug "${slug}" not found`);
     return result;
+  }
+
+  @Post(':emergencyId/pause')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard, RequireCoordinatorGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Pause an active emergency (coordinator only)' })
+  @ApiParam({
+    name: 'emergencyId',
+    description: 'Emergency UUID',
+    format: 'uuid',
+  })
+  @ApiNoContentResponse({ description: 'Emergency paused' })
+  @ApiNotFoundResponse({ description: 'Emergency not found' })
+  @ApiConflictResponse({
+    description: 'Invalid transition (emergency is not active)',
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Coordinator role required' })
+  async pauseEmergency(
+    @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
+  ): Promise<void> {
+    await this.pause.execute({ emergencyId });
+  }
+
+  @Post(':emergencyId/resume')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard, RequireCoordinatorGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Resume a paused emergency (coordinator only)' })
+  @ApiParam({
+    name: 'emergencyId',
+    description: 'Emergency UUID',
+    format: 'uuid',
+  })
+  @ApiNoContentResponse({ description: 'Emergency resumed' })
+  @ApiNotFoundResponse({ description: 'Emergency not found' })
+  @ApiConflictResponse({
+    description: 'Invalid transition (emergency is not paused)',
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Coordinator role required' })
+  async resumeEmergency(
+    @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
+  ): Promise<void> {
+    await this.resume.execute({ emergencyId });
+  }
+
+  @Put(':emergencyId/announcement')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard, RequireCoordinatorGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Publish official announcement for an emergency (coordinator only)',
+  })
+  @ApiParam({
+    name: 'emergencyId',
+    description: 'Emergency UUID',
+    format: 'uuid',
+  })
+  @ApiNoContentResponse({ description: 'Announcement published' })
+  @ApiNotFoundResponse({ description: 'Emergency not found' })
+  @ApiBadRequestResponse({ description: 'Invalid body' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Coordinator role required' })
+  async publishEmergencyAnnouncement(
+    @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
+    @Body() dto: PublishAnnouncementDto,
+  ): Promise<void> {
+    await this.publishAnnouncement.execute({
+      emergencyId,
+      message: dto.message,
+    });
   }
 }

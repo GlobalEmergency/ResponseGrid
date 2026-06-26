@@ -15,8 +15,13 @@ import {
   RESOURCE_REPOSITORY,
   ResourceRepository,
 } from '../domain/ports/resource.repository';
+import {
+  RESOURCE_EMERGENCY_STATUS_READER,
+  ResourceEmergencyStatusReader,
+} from '../domain/ports/emergency-status-reader';
 import { EVENT_BUS, EventBus } from '../domain/ports/event-bus';
 import { DrizzleResourceRepository } from './drizzle/drizzle-resource.repository';
+import { DrizzleEmergencyStatusReader } from '../../../shared/drizzle-emergency-status-reader';
 import { BullMqEventBus } from './bullmq-event-bus';
 import { IdentityModule } from '../../identity/infrastructure/identity.module';
 
@@ -44,6 +49,13 @@ const resourceRepositoryProvider = {
   useFactory: (db: Db): ResourceRepository => new DrizzleResourceRepository(db),
 };
 
+const emergencyStatusReaderProvider = {
+  provide: RESOURCE_EMERGENCY_STATUS_READER,
+  inject: [DB],
+  useFactory: (db: Db): ResourceEmergencyStatusReader =>
+    new DrizzleEmergencyStatusReader(db),
+};
+
 const busProvider = {
   provide: EVENT_BUS,
   inject: [EVENT_QUEUE],
@@ -53,9 +65,12 @@ const busProvider = {
 
 const registerProvider = {
   provide: RegisterResource,
-  inject: [RESOURCE_REPOSITORY, EVENT_BUS],
-  useFactory: (repo: ResourceRepository, bus: EventBus) =>
-    new RegisterResource(repo, bus),
+  inject: [RESOURCE_REPOSITORY, EVENT_BUS, RESOURCE_EMERGENCY_STATUS_READER],
+  useFactory: (
+    repo: ResourceRepository,
+    bus: EventBus,
+    statusReader: ResourceEmergencyStatusReader,
+  ) => new RegisterResource(repo, bus, statusReader),
 };
 const queueProvider = {
   provide: GetCoordinationQueue,
@@ -86,6 +101,7 @@ const publicResourcesProvider = {
   providers: [
     eventQueueProvider,
     resourceRepositoryProvider,
+    emergencyStatusReaderProvider,
     busProvider,
     registerProvider,
     queueProvider,

@@ -5,6 +5,9 @@ import { EmergenciesController } from './http/emergencies.controller';
 import { CreateEmergency } from '../application/create-emergency';
 import { ListActiveEmergencies } from '../application/list-active-emergencies';
 import { GetEmergencyBySlug } from '../application/get-emergency-by-slug';
+import { PauseEmergency } from '../application/pause-emergency';
+import { ResumeEmergency } from '../application/resume-emergency';
+import { PublishAnnouncement } from '../application/publish-announcement';
 import {
   EMERGENCY_REPOSITORY,
   EmergencyRepository,
@@ -37,6 +40,24 @@ const getBySlugProvider = {
   useFactory: (repo: EmergencyRepository) => new GetEmergencyBySlug(repo),
 };
 
+const pauseEmergencyProvider = {
+  provide: PauseEmergency,
+  inject: [EMERGENCY_REPOSITORY],
+  useFactory: (repo: EmergencyRepository) => new PauseEmergency(repo),
+};
+
+const resumeEmergencyProvider = {
+  provide: ResumeEmergency,
+  inject: [EMERGENCY_REPOSITORY],
+  useFactory: (repo: EmergencyRepository) => new ResumeEmergency(repo),
+};
+
+const publishAnnouncementProvider = {
+  provide: PublishAnnouncement,
+  inject: [EMERGENCY_REPOSITORY],
+  useFactory: (repo: EmergencyRepository) => new PublishAnnouncement(repo),
+};
+
 @Module({
   imports: [DatabaseModule, IdentityModule],
   controllers: [EmergenciesController],
@@ -45,6 +66,9 @@ const getBySlugProvider = {
     createEmergencyProvider,
     listActiveProvider,
     getBySlugProvider,
+    pauseEmergencyProvider,
+    resumeEmergencyProvider,
+    publishAnnouncementProvider,
   ],
 })
 export class EmergenciesModule {}

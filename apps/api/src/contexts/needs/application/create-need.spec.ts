@@ -2,6 +2,8 @@ import { CreateNeed, CreateNeedCommand } from './create-need';
 import { InMemoryNeedRepository } from '../infrastructure/in-memory-need.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { NeedCategory, Priority, NeedStatus } from '../domain/need-enums';
+import { NeedEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
+import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const USER_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -20,6 +22,16 @@ const defaultItems = [
     category: NeedCategory.Water,
   },
 ];
+
+/** Fake status reader returns a fixed status. */
+class FakeNeedEmergencyStatusReader implements NeedEmergencyStatusReader {
+  constructor(private readonly status: string | null) {}
+  getStatus(_emergencyId: string): Promise<string | null> {
+    return Promise.resolve(this.status);
+  }
+}
+
+const activeReader = new FakeNeedEmergencyStatusReader('active');
 
 function makeCmd(overrides?: Partial<CreateNeedCommand>): CreateNeedCommand {
   return {
@@ -43,7 +55,7 @@ describe('CreateNeed', () => {
   beforeEach(() => {
     repo = new InMemoryNeedRepository();
     bus = new FakeEventBus();
-    useCase = new CreateNeed(repo, bus);
+    useCase = new CreateNeed(repo, bus, activeReader);
   });
 
   it('creates a need with Pending status and returns its id', async () => {
@@ -127,5 +139,34 @@ describe('CreateNeed', () => {
     );
     const saved = await repo.findById({ value: result.id } as never);
     expect(saved!.description).toBe('Critical need near hospital');
+  });
+
+  describe('kill-switch (emergency not accepting intake)', () => {
+    it('throws EmergencyNotAcceptingIntakeError when emergency is paused', async () => {
+      const pausedReader = new FakeNeedEmergencyStatusReader('paused');
+      const uc = new CreateNeed(repo, bus, pausedReader);
+
+      await expect(uc.execute(makeCmd())).rejects.toThrow(
+        EmergencyNotAcceptingIntakeError,
+      );
+    });
+
+    it('throws EmergencyNotAcceptingIntakeError when emergency is closed', async () => {
+      const closedReader = new FakeNeedEmergencyStatusReader('closed');
+      const uc = new CreateNeed(repo, bus, closedReader);
+
+      await expect(uc.execute(makeCmd())).rejects.toThrow(
+        EmergencyNotAcceptingIntakeError,
+      );
+    });
+
+    it('throws EmergencyNotAcceptingIntakeError when emergency does not exist', async () => {
+      const nullReader = new FakeNeedEmergencyStatusReader(null);
+      const uc = new CreateNeed(repo, bus, nullReader);
+
+      await expect(uc.execute(makeCmd())).rejects.toThrow(
+        EmergencyNotAcceptingIntakeError,
+      );
+    });
   });
 });

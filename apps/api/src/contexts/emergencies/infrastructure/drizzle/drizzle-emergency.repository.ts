@@ -16,7 +16,9 @@ function rowToSnapshot(row: Row): EmergencySnapshot {
     slug: row.slug,
     country: row.country,
     status: row.status as EmergencyStatus,
+    announcement: row.announcement ?? null,
     createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   };
 }
 
@@ -27,10 +29,25 @@ export class DrizzleEmergencyRepository implements EmergencyRepository {
     const s = e.toSnapshot();
     await this.db
       .insert(emergenciesTable)
-      .values(s)
+      .values({
+        id: s.id,
+        name: s.name,
+        slug: s.slug,
+        country: s.country,
+        status: s.status,
+        announcement: s.announcement,
+        createdAt: s.createdAt,
+        updatedAt: s.updatedAt,
+      })
       .onConflictDoUpdate({
         target: emergenciesTable.id,
-        set: { name: s.name, status: s.status, country: s.country },
+        set: {
+          name: s.name,
+          status: s.status,
+          country: s.country,
+          announcement: s.announcement,
+          updatedAt: s.updatedAt,
+        },
       });
   }
 

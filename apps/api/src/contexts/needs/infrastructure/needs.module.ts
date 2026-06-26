@@ -13,8 +13,13 @@ import {
   NEED_REPOSITORY,
   NeedRepository,
 } from '../domain/ports/need.repository';
+import {
+  NEED_EMERGENCY_STATUS_READER,
+  NeedEmergencyStatusReader,
+} from '../domain/ports/emergency-status-reader';
 import { EVENT_BUS, EventBus } from '../domain/ports/event-bus';
 import { DrizzleNeedRepository } from './drizzle/drizzle-need.repository';
+import { DrizzleEmergencyStatusReader } from '../../../shared/drizzle-emergency-status-reader';
 import { BullMqEventBus } from './bullmq-event-bus';
 import { IdentityModule } from '../../identity/infrastructure/identity.module';
 
@@ -42,6 +47,13 @@ const needRepositoryProvider = {
   useFactory: (db: Db): NeedRepository => new DrizzleNeedRepository(db),
 };
 
+const emergencyStatusReaderProvider = {
+  provide: NEED_EMERGENCY_STATUS_READER,
+  inject: [DB],
+  useFactory: (db: Db): NeedEmergencyStatusReader =>
+    new DrizzleEmergencyStatusReader(db),
+};
+
 const eventBusProvider = {
   provide: EVENT_BUS,
   inject: [EVENT_QUEUE],
@@ -51,9 +63,12 @@ const eventBusProvider = {
 
 const createNeedProvider = {
   provide: CreateNeed,
-  inject: [NEED_REPOSITORY, EVENT_BUS],
-  useFactory: (repo: NeedRepository, bus: EventBus) =>
-    new CreateNeed(repo, bus),
+  inject: [NEED_REPOSITORY, EVENT_BUS, NEED_EMERGENCY_STATUS_READER],
+  useFactory: (
+    repo: NeedRepository,
+    bus: EventBus,
+    statusReader: NeedEmergencyStatusReader,
+  ) => new CreateNeed(repo, bus, statusReader),
 };
 
 const validateNeedProvider = {
@@ -87,6 +102,7 @@ const assignNeedManagerProvider = {
   providers: [
     eventQueueProvider,
     needRepositoryProvider,
+    emergencyStatusReaderProvider,
     eventBusProvider,
     createNeedProvider,
     validateNeedProvider,

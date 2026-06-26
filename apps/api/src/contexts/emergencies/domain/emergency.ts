@@ -1,6 +1,7 @@
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Slug } from './slug';
 import { EmergencyStatus } from './emergency-status';
+import { InvalidEmergencyTransitionError } from './invalid-emergency-transition.error';
 
 export interface CreateEmergencyProps {
   id: EmergencyId;
@@ -15,7 +16,9 @@ export interface EmergencySnapshot {
   slug: string;
   country: string;
   status: EmergencyStatus;
+  announcement: string | null;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export class Emergency {
@@ -25,17 +28,22 @@ export class Emergency {
     public readonly slug: Slug,
     public readonly country: string,
     private _status: EmergencyStatus,
+    private _announcement: string | null,
     public readonly createdAt: Date,
+    private _updatedAt: Date,
   ) {}
 
   static create(props: CreateEmergencyProps): Emergency {
+    const now = new Date();
     return new Emergency(
       props.id,
       props.name,
       props.slug,
       props.country,
       EmergencyStatus.Active,
-      new Date(),
+      null,
+      now,
+      now,
     );
   }
 
@@ -46,7 +54,9 @@ export class Emergency {
       Slug.fromString(snap.slug),
       snap.country,
       snap.status,
+      snap.announcement,
       snap.createdAt,
+      snap.updatedAt,
     );
   }
 
@@ -54,8 +64,38 @@ export class Emergency {
     return this._status;
   }
 
+  get announcement(): string | null {
+    return this._announcement;
+  }
+
+  get updatedAt(): Date {
+    return this._updatedAt;
+  }
+
   close(): void {
     this._status = EmergencyStatus.Closed;
+    this._updatedAt = new Date();
+  }
+
+  pause(): void {
+    if (this._status !== EmergencyStatus.Active) {
+      throw new InvalidEmergencyTransitionError(this._status, 'paused');
+    }
+    this._status = EmergencyStatus.Paused;
+    this._updatedAt = new Date();
+  }
+
+  resume(): void {
+    if (this._status !== EmergencyStatus.Paused) {
+      throw new InvalidEmergencyTransitionError(this._status, 'active');
+    }
+    this._status = EmergencyStatus.Active;
+    this._updatedAt = new Date();
+  }
+
+  publishAnnouncement(text: string): void {
+    this._announcement = text;
+    this._updatedAt = new Date();
   }
 
   toSnapshot(): EmergencySnapshot {
@@ -65,7 +105,9 @@ export class Emergency {
       slug: this.slug.value,
       country: this.country,
       status: this._status,
+      announcement: this._announcement,
       createdAt: this.createdAt,
+      updatedAt: this._updatedAt,
     };
   }
 }

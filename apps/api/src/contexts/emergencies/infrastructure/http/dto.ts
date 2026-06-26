@@ -1,4 +1,10 @@
-import { IsOptional, IsString, Matches, MinLength } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  Matches,
+  MinLength,
+  IsNotEmpty,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateEmergencyDto {
@@ -53,6 +59,24 @@ export class EmergencyViewDto {
   @ApiProperty({ example: 'VE' })
   country!: string;
 
-  @ApiProperty({ example: 'active' })
+  @ApiProperty({ example: 'active', enum: ['active', 'paused', 'closed'] })
   status!: string;
+
+  @ApiProperty({
+    example: 'El puente de acceso norte está cortado.',
+    nullable: true,
+  })
+  announcement!: string | null;
+
+  @ApiProperty({ example: '2026-06-25T10:00:00.000Z' })
+  updatedAt!: string;
+}
+
+export class PublishAnnouncementDto {
+  @ApiProperty({
+    example: 'Se suspenden las operaciones de rescate hasta nuevo aviso.',
+  })
+  @IsString()
+  @IsNotEmpty()
+  message!: string;
 }

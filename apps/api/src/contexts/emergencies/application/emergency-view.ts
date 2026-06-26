@@ -6,6 +6,8 @@ export interface EmergencyView {
   slug: string;
   country: string;
   status: string;
+  announcement: string | null;
+  updatedAt: string;
 }
 
 export function toEmergencyView(e: Emergency): EmergencyView {
@@ -15,5 +17,7 @@ export function toEmergencyView(e: Emergency): EmergencyView {
     slug: e.slug.value,
     country: e.country,
     status: e.status,
+    announcement: e.announcement,
+    updatedAt: e.updatedAt.toISOString(),
   };
 }

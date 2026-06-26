@@ -14,6 +14,7 @@ import {
   usersTable,
   membershipsTable,
 } from '../src/contexts/identity/infrastructure/drizzle/schema';
+import { emergenciesTable } from '../src/contexts/emergencies/infrastructure/drizzle/schema';
 import * as bcrypt from 'bcryptjs';
 
 const EM = '33333333-3333-4333-8333-333333333333';
@@ -85,6 +86,18 @@ describe('Need flow (e2e)', () => {
     try {
       await db.delete(needItemsTable);
       await db.delete(needsTable);
+      // Ensure the emergency exists so the intake kill-switch allows creation
+      await db
+        .insert(emergenciesTable)
+        .values({
+          id: EM,
+          name: 'Need Flow Emergency',
+          slug: 'need-flow-emergency',
+          country: 'VE',
+          status: 'active',
+          createdAt: new Date(),
+        })
+        .onConflictDoNothing();
       // Insert coordinator user and membership (guard against existing rows)
       await db
         .insert(usersTable)

@@ -9,6 +9,7 @@ import {
   ResourceStage,
   VerificationLevel,
 } from '../domain/resource-enums';
+import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const baseLocation = {
@@ -17,11 +18,15 @@ const baseLocation = {
   longitude: 2.1734,
 };
 
+const activeReader: ResourceEmergencyStatusReader = {
+  getStatus: () => Promise.resolve('active'),
+};
+
 describe('VerifyResource', () => {
   it('sets the level and publishes ResourceVerified', async () => {
     const repo = new InMemoryResourceRepository();
     const bus = new FakeEventBus();
-    const { id } = await new RegisterResource(repo, bus).execute({
+    const { id } = await new RegisterResource(repo, bus, activeReader).execute({
       emergencyId: EM,
       type: ResourceType.Warehouse,
       stage: ResourceStage.Origin,
