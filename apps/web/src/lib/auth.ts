@@ -3,6 +3,12 @@ import { cookies } from 'next/headers';
 const COOKIE_NAME = 'rh_token';
 
 /**
+ * Session lifetime in seconds. Defaults to 8 hours; override with SESSION_MAX_AGE_SECONDS
+ * env var (e.g. SESSION_MAX_AGE_SECONDS=3600 for 1-hour sessions in staging).
+ */
+const SESSION_MAX_AGE_SECONDS = Number(process.env.SESSION_MAX_AGE_SECONDS) || 60 * 60 * 8;
+
+/**
  * Reads the auth token from the httpOnly cookie.
  * Must only be called from Server Components or Server Actions.
  */
@@ -25,8 +31,7 @@ export async function setToken(token: string): Promise<void> {
     // Tying it to NODE_ENV breaks sessions when a production build is served over
     // plain HTTP (local runs, reverse proxies that don't forward HTTPS).
     secure: process.env.COOKIE_SECURE === 'true',
-    // 8-hour session — coordinators don't need persistent logins
-    maxAge: 60 * 60 * 8,
+    maxAge: SESSION_MAX_AGE_SECONDS,
   });
 }
 
