@@ -17,5 +17,9 @@ packages/*/dist/
 # Generated artifacts
 apps/api/openapi.json
 
+# Stray dev server logs
+*.log
+*.err
+
 # Scratch de orquestación (ledger SDD)
 .superpowers/

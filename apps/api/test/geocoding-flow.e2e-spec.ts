@@ -1,14 +1,14 @@
 import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from '../src/app.module';
+import { GeocodingModule } from '../src/contexts/geocoding/infrastructure/geocoding.module';
 import { GEOCODING_PROVIDER } from '../src/contexts/geocoding/domain/ports/geocoding.provider';
 
 describe('Geocoding flow (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+    const moduleRef = await Test.createTestingModule({ imports: [GeocodingModule] })
       .overrideProvider(GEOCODING_PROVIDER)
       .useValue({
         search: (q: string) =>
