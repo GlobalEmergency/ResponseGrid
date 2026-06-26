@@ -75,6 +75,30 @@ describe('Organization flow (e2e)', () => {
     });
   });
 
+  describe('GET /auth/me', () => {
+    it('returns user profile when authenticated', async () => {
+      const reg = await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({ email: 'meuser@reliefhub.org', password: 'password123', name: 'Me User' })
+        .expect(201);
+      const token = reg.body.accessToken as string;
+
+      const res = await request(app.getHttpServer())
+        .get('/auth/me')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(res.body).toHaveProperty('id');
+      expect(res.body.email).toBe('meuser@reliefhub.org');
+      expect(res.body.name).toBe('Me User');
+      expect(res.body).toHaveProperty('isAdmin');
+    });
+
+    it('returns 401 without token', async () => {
+      await request(app.getHttpServer()).get('/auth/me').expect(401);
+    });
+  });
+
   describe('Organizations flow: register → create org → list mine', () => {
     let accessToken: string;
 
@@ -139,6 +163,147 @@ describe('Organization flow (e2e)', () => {
         .set('Authorization', `Bearer ${accessToken}`)
         .send({ name: 'Bad Org', type: 'invalid_type' })
         .expect(400);
+    });
+  });
+
+  describe('Organization members flow', () => {
+    let ownerToken: string;
+    let memberToken: string;
+    let orgId: string;
+    let memberId: string;
+
+    beforeAll(async () => {
+      // Register owner
+      const ownerRes = await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({ email: 'owner@reliefhub.org', password: 'password123', name: 'Owner User' })
+        .expect(201);
+      ownerToken = ownerRes.body.accessToken as string;
+
+      // Register member
+      const memberRes = await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({ email: 'newmember@reliefhub.org', password: 'password123', name: 'New Member' })
+        .expect(201);
+      memberToken = memberRes.body.accessToken as string;
+
+      // Get member's userId via /auth/me
+      const meRes = await request(app.getHttpServer())
+        .get('/auth/me')
+        .set('Authorization', `Bearer ${memberToken}`)
+        .expect(200);
+      memberId = meRes.body.id as string;
+
+      // Owner creates an org → becomes Owner
+      const orgRes = await request(app.getHttpServer())
+        .post('/organizations')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ name: 'Members Test Org', type: 'ngo' })
+        .expect(201);
+      orgId = orgRes.body.id as string;
+    });
+
+    it('GET /organizations/{id}/members requires auth', async () => {
+      await request(app.getHttpServer()).get(`/organizations/${orgId}/members`).expect(401);
+    });
+
+    it('GET /organizations/{id}/members returns owner for newly created org', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/organizations/${orgId}/members`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(200);
+
+      const members = res.body as Array<{ userId: string; email: string; role: string }>;
+      expect(members).toHaveLength(1);
+      expect(members[0].email).toBe('owner@reliefhub.org');
+      expect(members[0].role).toBe('owner');
+    });
+
+    it('POST /organizations/{id}/members adds a member (owner only)', async () => {
+      await request(app.getHttpServer())
+        .post(`/organizations/${orgId}/members`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ email: 'newmember@reliefhub.org' })
+        .expect(201);
+
+      const res = await request(app.getHttpServer())
+        .get(`/organizations/${orgId}/members`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(200);
+
+      const members = res.body as Array<{ userId: string; email: string; role: string }>;
+      expect(members).toHaveLength(2);
+      const newMember = members.find((m) => m.email === 'newmember@reliefhub.org');
+      expect(newMember?.role).toBe('member');
+    });
+
+    it('POST /organizations/{id}/members returns 403 when non-owner tries to add', async () => {
+      await request(app.getHttpServer())
+        .post(`/organizations/${orgId}/members`)
+        .set('Authorization', `Bearer ${memberToken}`)
+        .send({ email: 'another@reliefhub.org' })
+        .expect(403);
+    });
+
+    it('POST /organizations/{id}/members returns 404 when email does not exist', async () => {
+      await request(app.getHttpServer())
+        .post(`/organizations/${orgId}/members`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ email: 'nobody@reliefhub.org' })
+        .expect(404);
+    });
+
+    it('POST /organizations/{id}/members returns 409 when already a member', async () => {
+      await request(app.getHttpServer())
+        .post(`/organizations/${orgId}/members`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ email: 'newmember@reliefhub.org' })
+        .expect(409);
+    });
+
+    it('member can list members (GET /organizations/{id}/members)', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/organizations/${orgId}/members`)
+        .set('Authorization', `Bearer ${memberToken}`)
+        .expect(200);
+
+      expect(Array.isArray(res.body)).toBe(true);
+    });
+
+    it('DELETE /organizations/{id}/members/{userId} removes the member (owner only)', async () => {
+      await request(app.getHttpServer())
+        .delete(`/organizations/${orgId}/members/${memberId}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(204);
+
+      const res = await request(app.getHttpServer())
+        .get(`/organizations/${orgId}/members`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(200);
+
+      const members = res.body as Array<{ userId: string }>;
+      expect(members.find((m) => m.userId === memberId)).toBeUndefined();
+    });
+
+    it('DELETE /organizations/{id}/members/{userId} returns 403 when non-owner tries', async () => {
+      // Re-add member first
+      await request(app.getHttpServer())
+        .post(`/organizations/${orgId}/members`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ email: 'newmember@reliefhub.org' })
+        .expect(201);
+
+      // Now member tries to remove owner (should fail)
+      const ownerMeRes = await request(app.getHttpServer())
+        .get('/auth/me')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(200);
+      const ownerId = ownerMeRes.body.id as string;
+
+      await request(app.getHttpServer())
+        .delete(`/organizations/${orgId}/members/${ownerId}`)
+        .set('Authorization', `Bearer ${memberToken}`)
+        .expect(403);
     });
   });
 });

@@ -50,6 +50,13 @@
       "when": 1782600000000,
       "tag": "0006_social_login",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1782700000000,
+      "tag": "0007_org_member_role",
+      "breakpoints": true
     }
   ]
 }

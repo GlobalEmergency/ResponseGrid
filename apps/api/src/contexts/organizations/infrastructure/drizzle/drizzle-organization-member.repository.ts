@@ -1,7 +1,11 @@
 import { eq, and } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
 import { organizationsTable, organizationMembersTable } from './schema';
-import { OrganizationMemberRepository } from '../../domain/ports/organization-member.repository';
+import {
+  OrganizationMemberRepository,
+  OrganizationMemberEntry,
+} from '../../domain/ports/organization-member.repository';
+import { OrganizationRole } from '../../domain/organization-enums';
 import { Organization, OrganizationSnapshot } from '../../domain/organization';
 
 type OrgRow = typeof organizationsTable.$inferSelect;
@@ -21,10 +25,10 @@ function rowToSnapshot(row: OrgRow): OrganizationSnapshot {
 export class DrizzleOrganizationMemberRepository implements OrganizationMemberRepository {
   constructor(private readonly db: Db) {}
 
-  async add(organizationId: string, userId: string): Promise<void> {
+  async add(organizationId: string, userId: string, role: OrganizationRole): Promise<void> {
     await this.db
       .insert(organizationMembersTable)
-      .values({ organizationId, userId })
+      .values({ organizationId, userId, role })
       .onConflictDoNothing();
   }
 
@@ -32,7 +36,10 @@ export class DrizzleOrganizationMemberRepository implements OrganizationMemberRe
     const rows = await this.db
       .select({ org: organizationsTable })
       .from(organizationMembersTable)
-      .innerJoin(organizationsTable, eq(organizationMembersTable.organizationId, organizationsTable.id))
+      .innerJoin(
+        organizationsTable,
+        eq(organizationMembersTable.organizationId, organizationsTable.id),
+      )
       .where(eq(organizationMembersTable.userId, userId));
     return rows.map((r) => Organization.fromSnapshot(rowToSnapshot(r.org)));
   }
@@ -48,5 +55,38 @@ export class DrizzleOrganizationMemberRepository implements OrganizationMemberRe
         ),
       );
     return rows.length > 0;
+  }
+
+  async listMembers(organizationId: string): Promise<OrganizationMemberEntry[]> {
+    const rows = await this.db
+      .select({ userId: organizationMembersTable.userId, role: organizationMembersTable.role })
+      .from(organizationMembersTable)
+      .where(eq(organizationMembersTable.organizationId, organizationId));
+    return rows.map((r) => ({ userId: r.userId, role: r.role as OrganizationRole }));
+  }
+
+  async getRole(organizationId: string, userId: string): Promise<OrganizationRole | null> {
+    const rows = await this.db
+      .select({ role: organizationMembersTable.role })
+      .from(organizationMembersTable)
+      .where(
+        and(
+          eq(organizationMembersTable.organizationId, organizationId),
+          eq(organizationMembersTable.userId, userId),
+        ),
+      );
+    if (!rows[0]) return null;
+    return rows[0].role as OrganizationRole;
+  }
+
+  async remove(organizationId: string, userId: string): Promise<void> {
+    await this.db
+      .delete(organizationMembersTable)
+      .where(
+        and(
+          eq(organizationMembersTable.organizationId, organizationId),
+          eq(organizationMembersTable.userId, userId),
+        ),
+      );
   }
 }

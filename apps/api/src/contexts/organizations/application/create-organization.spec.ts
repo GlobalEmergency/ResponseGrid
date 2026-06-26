@@ -1,7 +1,7 @@
 import { CreateOrganization } from './create-organization';
 import { InMemoryOrganizationRepository } from '../infrastructure/in-memory-organization.repository';
 import { InMemoryOrganizationMemberRepository } from '../infrastructure/in-memory-organization-member.repository';
-import { OrganizationType } from '../domain/organization-enums';
+import { OrganizationType, OrganizationRole } from '../domain/organization-enums';
 import { OrganizationId } from '../domain/organization-id';
 
 describe('CreateOrganization', () => {
@@ -26,7 +26,7 @@ describe('CreateOrganization', () => {
     expect(saved?.type).toBe(OrganizationType.Ngo);
   });
 
-  it('associates the creator as member', async () => {
+  it('associates the creator as Owner member', async () => {
     const orgRepo = new InMemoryOrganizationRepository();
     const memberRepo = new InMemoryOrganizationMemberRepository(orgRepo);
     const useCase = new CreateOrganization(orgRepo, memberRepo);
@@ -42,6 +42,9 @@ describe('CreateOrganization', () => {
 
     const isMember = await memberRepo.isMember(id, creatorUserId);
     expect(isMember).toBe(true);
+
+    const role = await memberRepo.getRole(id, creatorUserId);
+    expect(role).toBe(OrganizationRole.Owner);
   });
 
   it('stores optional taxId and contactEmail', async () => {

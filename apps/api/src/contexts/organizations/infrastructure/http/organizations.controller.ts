@@ -1,41 +1,58 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Request,
+  UseFilters,
   UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
+  ApiConflictResponse,
 } from '@nestjs/swagger';
 import { Request as ExpressRequest } from 'express';
 import { JwtAuthGuard, AuthenticatedUser } from '../../../identity/infrastructure/http/jwt-auth.guard';
 import { CreateOrganization } from '../../application/create-organization';
 import { ListMyOrganizations } from '../../application/list-my-organizations';
 import { ListOrganizations } from '../../application/list-organizations';
+import { AddOrganizationMember } from '../../application/add-organization-member';
+import { RemoveOrganizationMember } from '../../application/remove-organization-member';
+import { ListOrganizationMembers } from '../../application/list-organization-members';
 import {
   CreateOrganizationDto,
   CreateOrganizationResponseDto,
   OrganizationViewDto,
+  AddMemberDto,
+  OrganizationMemberDto,
 } from './dto';
+import { OrganizationExceptionFilter } from './organization-exception.filter';
 
 type AuthedRequest = ExpressRequest & { user: AuthenticatedUser };
 
 @ApiTags('organizations')
 @Controller('organizations')
+@UseFilters(OrganizationExceptionFilter)
 export class OrganizationsController {
   constructor(
     private readonly createOrganization: CreateOrganization,
     private readonly listMyOrganizations: ListMyOrganizations,
     private readonly listOrganizations: ListOrganizations,
+    private readonly addOrganizationMember: AddOrganizationMember,
+    private readonly removeOrganizationMember: RemoveOrganizationMember,
+    private readonly listOrganizationMembers: ListOrganizationMembers,
   ) {}
 
   @Post()
@@ -73,5 +90,65 @@ export class OrganizationsController {
   @ApiOkResponse({ description: 'All organizations', type: [OrganizationViewDto] })
   async list(): Promise<OrganizationViewDto[]> {
     return this.listOrganizations.execute();
+  }
+
+  @Get(':id/members')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List members of an organization (must be a member)' })
+  @ApiOkResponse({ description: 'Organization members', type: [OrganizationMemberDto] })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Not a member of this organization' })
+  async listMembers(
+    @Param('id') id: string,
+    @Request() req: AuthedRequest,
+  ): Promise<OrganizationMemberDto[]> {
+    return this.listOrganizationMembers.execute({
+      organizationId: id,
+      requesterUserId: req.user.id,
+    });
+  }
+
+  @Post(':id/members')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Add a member to an organization (owner only)' })
+  @ApiCreatedResponse({ description: 'Member added' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Only the owner can add members' })
+  @ApiNotFoundResponse({ description: 'User not found by email' })
+  @ApiConflictResponse({ description: 'User is already a member' })
+  async addMember(
+    @Param('id') id: string,
+    @Body() dto: AddMemberDto,
+    @Request() req: AuthedRequest,
+  ): Promise<void> {
+    await this.addOrganizationMember.execute({
+      organizationId: id,
+      requesterUserId: req.user.id,
+      email: dto.email,
+    });
+  }
+
+  @Delete(':id/members/:userId')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Remove a member from an organization (owner only)' })
+  @ApiNoContentResponse({ description: 'Member removed' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Only the owner can remove members' })
+  @ApiNotFoundResponse({ description: 'Member not found' })
+  async removeMember(
+    @Param('id') id: string,
+    @Param('userId') userId: string,
+    @Request() req: AuthedRequest,
+  ): Promise<void> {
+    await this.removeOrganizationMember.execute({
+      organizationId: id,
+      requesterUserId: req.user.id,
+      targetUserId: userId,
+    });
   }
 }

@@ -12,6 +12,7 @@ import type { MembershipSnapshot } from '../../domain/membership';
 export interface AuthenticatedUser {
   id: string;
   email: string;
+  name: string;
   isAdmin: boolean;
   memberships: MembershipSnapshot[];
 }
@@ -45,6 +46,7 @@ export class JwtAuthGuard implements CanActivate {
     request.user = {
       id: user.id.value,
       email: user.email.value,
+      name: user.name,
       isAdmin: user.isAdmin,
       memberships: memberships.map((m) => m.toSnapshot()),
     };

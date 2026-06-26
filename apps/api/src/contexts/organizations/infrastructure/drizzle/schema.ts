@@ -15,6 +15,8 @@ export const organizationMembersTable = pgTable(
   {
     organizationId: uuid('organization_id').notNull(),
     userId: uuid('user_id').notNull(),
+    /** OrganizationRole: 'owner' | 'member' */
+    role: text('role').notNull().default('member'),
   },
   (t) => [unique('org_members_org_user_unique').on(t.organizationId, t.userId)],
 );

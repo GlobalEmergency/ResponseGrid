@@ -11,3 +11,8 @@ export enum VerificationLevel {
   Verified = 'verified',
   Official = 'official',
 }
+
+export enum OrganizationRole {
+  Owner = 'owner',
+  Member = 'member',
+}

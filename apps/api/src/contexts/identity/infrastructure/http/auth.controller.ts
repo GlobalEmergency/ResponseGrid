@@ -1,4 +1,14 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseFilters } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Request,
+  UseFilters,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -7,11 +17,16 @@ import {
   ApiBadRequestResponse,
   ApiUnauthorizedResponse,
   ApiConflictResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
+import { Request as ExpressRequest } from 'express';
 import { Login } from '../../application/login';
 import { RegisterUser } from '../../application/register-user';
-import { LoginDto, LoginResponseDto, RegisterDto, RegisterResponseDto } from './dto';
+import { LoginDto, LoginResponseDto, RegisterDto, RegisterResponseDto, MeResponseDto } from './dto';
 import { IdentityExceptionFilter } from './identity-exception.filter';
+import { JwtAuthGuard, AuthenticatedUser } from './jwt-auth.guard';
+
+type AuthedRequest = ExpressRequest & { user: AuthenticatedUser };
 
 @ApiTags('auth')
 @Controller('auth')
@@ -40,5 +55,20 @@ export class AuthController {
   @ApiConflictResponse({ description: 'Email already registered' })
   async registerRoute(@Body() dto: RegisterDto): Promise<RegisterResponseDto> {
     return this.registerUser.execute({ email: dto.email, password: dto.password, name: dto.name });
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get the authenticated user profile' })
+  @ApiOkResponse({ description: 'Authenticated user info', type: MeResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  me(@Request() req: AuthedRequest): MeResponseDto {
+    return {
+      id: req.user.id,
+      email: req.user.email,
+      name: req.user.name,
+      isAdmin: req.user.isAdmin,
+    };
   }
 }

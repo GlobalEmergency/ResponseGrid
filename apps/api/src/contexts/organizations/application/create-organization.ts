@@ -2,7 +2,7 @@ import { OrganizationRepository } from '../domain/ports/organization.repository'
 import { OrganizationMemberRepository } from '../domain/ports/organization-member.repository';
 import { Organization } from '../domain/organization';
 import { OrganizationId } from '../domain/organization-id';
-import { OrganizationType } from '../domain/organization-enums';
+import { OrganizationType, OrganizationRole } from '../domain/organization-enums';
 
 export interface CreateOrganizationCommand {
   name: string;
@@ -29,7 +29,7 @@ export class CreateOrganization {
     });
 
     await this.orgRepo.save(org);
-    await this.memberRepo.add(id.value, cmd.creatorUserId);
+    await this.memberRepo.add(id.value, cmd.creatorUserId, OrganizationRole.Owner);
 
     return { id: id.value };
   }

@@ -1,6 +1,6 @@
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { OrganizationType } from '../../domain/organization-enums';
+import { OrganizationType, OrganizationRole } from '../../domain/organization-enums';
 
 export class CreateOrganizationDto {
   @ApiProperty({ example: 'Red Cross Spain' })
@@ -39,4 +39,24 @@ export class OrganizationViewDto {
 
   @ApiProperty()
   verificationLevel!: string;
+}
+
+export class AddMemberDto {
+  @ApiProperty({ example: 'member@example.com' })
+  @IsEmail()
+  email!: string;
+}
+
+export class OrganizationMemberDto {
+  @ApiProperty({ description: 'User UUID' })
+  userId!: string;
+
+  @ApiProperty({ example: 'member@example.com' })
+  email!: string;
+
+  @ApiProperty({ example: 'Jane Doe' })
+  name!: string;
+
+  @ApiProperty({ enum: OrganizationRole, example: OrganizationRole.Member })
+  role!: OrganizationRole;
 }

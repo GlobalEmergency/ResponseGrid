@@ -36,3 +36,17 @@ export class RegisterResponseDto {
   @ApiProperty({ description: 'JWT access token (auto-login after registration)' })
   accessToken!: string;
 }
+
+export class MeResponseDto {
+  @ApiProperty({ description: 'User UUID' })
+  id!: string;
+
+  @ApiProperty({ example: 'user@example.com' })
+  email!: string;
+
+  @ApiProperty({ example: 'Jane Doe' })
+  name!: string;
+
+  @ApiProperty()
+  isAdmin!: boolean;
+}

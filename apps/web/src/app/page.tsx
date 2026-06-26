@@ -77,6 +77,24 @@ export default async function HomePage() {
           )}
         </section>
 
+        {/* ── PIE / ENLACES ─────────────────────────────────────────── */}
+        <footer className="border-t-2 border-gray-100 pt-6">
+          <nav aria-label="Navegación secundaria" className="flex flex-wrap gap-4">
+            <Link
+              href="/organizaciones"
+              className="text-sm font-medium text-gray-600 hover:text-gray-900 underline underline-offset-2 transition-colors"
+            >
+              Mis organizaciones
+            </Link>
+            <Link
+              href="/login"
+              className="text-sm font-medium text-gray-600 hover:text-gray-900 underline underline-offset-2 transition-colors"
+            >
+              Acceso coordinación
+            </Link>
+          </nav>
+        </footer>
+
       </div>
     </main>
   );
