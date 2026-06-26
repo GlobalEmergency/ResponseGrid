@@ -2,6 +2,7 @@
 
 import { useTransition } from 'react';
 import { removeMemberAction } from '../actions';
+import { Button } from '@/components/atoms/button';
 
 interface RemoveMemberButtonProps {
   orgId: string;
@@ -22,14 +23,15 @@ export function RemoveMemberButton({ orgId, userId }: RemoveMemberButtonProps) {
   }
 
   return (
-    <button
+    <Button
       type="button"
+      variant="danger-outline"
+      size="sm"
       onClick={handleRemove}
       disabled={pending}
       aria-label="Quitar miembro"
-      className="rounded-md border-2 border-red-600 px-3 py-1.5 text-xs font-semibold text-red-700 transition-colors hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
     >
       {pending ? 'Quitando…' : 'Quitar'}
-    </button>
+    </Button>
   );
 }

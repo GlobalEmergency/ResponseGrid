@@ -5,6 +5,7 @@ import { api } from '@/lib/api';
 import { getToken, authHeaders } from '@/lib/auth';
 import { AddMemberForm } from './add-member-form';
 import { RemoveMemberButton } from './remove-member-button';
+import { Badge } from '@/components/atoms/badge';
 
 export const dynamic = 'force-dynamic';
 
@@ -97,15 +98,9 @@ export default async function OrganizationDetailPage({ params }: Props) {
                   <span className="text-xs text-gray-500 truncate">{member.email}</span>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  <span
-                    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
-                      member.role === 'owner'
-                        ? 'border-gray-900 bg-gray-900 text-white'
-                        : 'border-gray-300 bg-gray-50 text-gray-600'
-                    }`}
-                  >
+                  <Badge variant={member.role === 'owner' ? 'role-owner' : 'role-member'}>
                     {member.role === 'owner' ? 'Propietario' : 'Miembro'}
-                  </span>
+                  </Badge>
                   {isOwner && member.userId !== currentUserId && (
                     <RemoveMemberButton orgId={id} userId={member.userId} />
                   )}

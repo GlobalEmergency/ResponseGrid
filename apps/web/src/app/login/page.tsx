@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { LoginForm } from './login-form';
+import { LoginForm } from '@/components/organisms/login-form';
 
 export const metadata: Metadata = {
   title: 'Acceso coordinación — ReliefHub',

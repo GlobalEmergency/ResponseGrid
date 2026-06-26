@@ -2,6 +2,10 @@
 
 import { useActionState } from 'react';
 import { createOrganizationAction, type OrgActionResult } from './actions';
+import { Input } from '@/components/atoms/input';
+import { Select } from '@/components/atoms/select';
+import { Button } from '@/components/atoms/button';
+import { ErrorMessage } from '@/components/atoms/error-message';
 
 const INITIAL_STATE: OrgActionResult = { status: 'idle' };
 
@@ -21,15 +25,8 @@ export function CreateOrgForm() {
 
   return (
     <form action={formAction} className="flex flex-col gap-5 rounded-lg border-2 border-gray-200 p-6">
-      {/* Error */}
       {state.status === 'error' && (
-        <p
-          role="alert"
-          aria-live="assertive"
-          className="rounded-md border border-red-600 bg-red-50 px-4 py-3 text-sm font-medium text-red-800"
-        >
-          {state.message}
-        </p>
+        <ErrorMessage message={state.message ?? 'Error al crear la organización'} />
       )}
 
       {/* Name */}
@@ -37,13 +34,12 @@ export function CreateOrgForm() {
         <label htmlFor="org-name" className="text-sm font-semibold text-gray-900">
           Nombre <span aria-hidden="true">*</span>
         </label>
-        <input
+        <Input
           id="org-name"
           name="name"
           type="text"
           required
           placeholder="Cruz Roja España"
-          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
         />
       </div>
 
@@ -52,18 +48,12 @@ export function CreateOrgForm() {
         <label htmlFor="org-type" className="text-sm font-semibold text-gray-900">
           Tipo <span aria-hidden="true">*</span>
         </label>
-        <select
-          id="org-type"
-          name="type"
-          required
-          defaultValue=""
-          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
-        >
+        <Select id="org-type" name="type" required defaultValue="">
           <option value="" disabled>Selecciona un tipo…</option>
           {ORG_TYPES.map((t) => (
             <option key={t.value} value={t.value}>{t.label}</option>
           ))}
-        </select>
+        </Select>
       </div>
 
       {/* Tax ID */}
@@ -72,12 +62,11 @@ export function CreateOrgForm() {
           NIF / CIF
           <span className="ml-1 text-xs font-normal text-gray-500">(opcional)</span>
         </label>
-        <input
+        <Input
           id="org-taxid"
           name="taxId"
           type="text"
           placeholder="ES-12345678"
-          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
         />
       </div>
 
@@ -87,23 +76,17 @@ export function CreateOrgForm() {
           Email de contacto
           <span className="ml-1 text-xs font-normal text-gray-500">(opcional)</span>
         </label>
-        <input
+        <Input
           id="org-email"
           name="contactEmail"
           type="email"
           placeholder="contacto@org.es"
-          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
         />
       </div>
 
-      {/* Submit */}
-      <button
-        type="submit"
-        disabled={pending}
-        className="flex w-full items-center justify-center rounded-lg bg-gray-900 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-      >
+      <Button type="submit" disabled={pending} fullWidth>
         {pending ? 'Creando…' : 'Crear organización'}
-      </button>
+      </Button>
     </form>
   );
 }

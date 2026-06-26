@@ -3,9 +3,12 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { PublicResourceCard } from '@/app/public-resource-card';
+import { PublicResourceCard } from '@/components/organisms/public-resource-card';
 import { EmergencyMapWrapper } from '@/components/emergency-map-wrapper';
 import { NeedsFilter } from '@/components/needs-filter';
+import { Badge } from '@/components/atoms/badge';
+import { EmptyState } from '@/components/molecules/empty-state';
+import { MetricCard } from '@/components/molecules/metric-card';
 import type { MapPoint } from '@/components/emergency-map';
 
 export const dynamic = 'force-dynamic';
@@ -156,12 +159,9 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
             <h1 className="text-3xl font-bold tracking-tight text-gray-900">
               {emergency.name}
             </h1>
-            <span
-              aria-label="Estado: emergencia activa"
-              className="inline-flex items-center rounded-full border-2 border-red-700 bg-red-50 px-3 py-1 text-sm font-bold text-red-800"
-            >
+            <Badge variant="active" aria-label="Estado: emergencia activa">
               Emergencia activa
-            </span>
+            </Badge>
           </div>
           <p className="text-sm font-medium text-gray-500 tracking-wide uppercase">
             Fuente oficial · ReliefHub
@@ -178,38 +178,10 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
               Resumen
             </h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <div className="flex flex-col items-center rounded-lg border-2 border-gray-200 bg-gray-50 px-4 py-5">
-                <span className="text-3xl font-extrabold text-gray-900 tabular-nums">
-                  {metrics.needs.open}
-                </span>
-                <span className="mt-1 text-xs font-medium text-gray-500 text-center leading-tight">
-                  Peticiones abiertas
-                </span>
-              </div>
-              <div className="flex flex-col items-center rounded-lg border-2 border-gray-200 bg-gray-50 px-4 py-5">
-                <span className="text-3xl font-extrabold text-gray-900 tabular-nums">
-                  {metrics.needs.closed}
-                </span>
-                <span className="mt-1 text-xs font-medium text-gray-500 text-center leading-tight">
-                  Peticiones cerradas
-                </span>
-              </div>
-              <div className="flex flex-col items-center rounded-lg border-2 border-gray-200 bg-gray-50 px-4 py-5">
-                <span className="text-3xl font-extrabold text-gray-900 tabular-nums">
-                  {metrics.resources.active}
-                </span>
-                <span className="mt-1 text-xs font-medium text-gray-500 text-center leading-tight">
-                  Puntos logísticos activos
-                </span>
-              </div>
-              <div className="flex flex-col items-center rounded-lg border-2 border-gray-200 bg-gray-50 px-4 py-5">
-                <span className="text-3xl font-extrabold text-gray-900 tabular-nums">
-                  {metrics.resources.pending}
-                </span>
-                <span className="mt-1 text-xs font-medium text-gray-500 text-center leading-tight">
-                  Pendientes de validar
-                </span>
-              </div>
+              <MetricCard value={metrics.needs.open} label="Peticiones abiertas" />
+              <MetricCard value={metrics.needs.closed} label="Peticiones cerradas" />
+              <MetricCard value={metrics.resources.active} label="Puntos logísticos activos" />
+              <MetricCard value={metrics.resources.pending} label="Pendientes de validar" />
             </div>
           </section>
         )}
@@ -308,14 +280,10 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
           </h2>
 
           {activeResources.length === 0 ? (
-            <div className="rounded-lg border-2 border-dashed border-gray-300 px-6 py-10 text-center">
-              <p className="text-base font-semibold text-gray-700">
-                Aún no hay puntos activos.
-              </p>
-              <p className="mt-2 text-sm text-gray-500">
-                Por ahora, la forma más eficaz de ayudar es la donación económica.
-              </p>
-            </div>
+            <EmptyState
+              title="Aún no hay puntos activos."
+              description="Por ahora, la forma más eficaz de ayudar es la donación económica."
+            />
           ) : (
             <ul
               className="flex flex-col gap-3"
@@ -343,11 +311,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
           <NeedsFilter />
 
           {validatedNeeds.length === 0 ? (
-            <div className="rounded-lg border-2 border-dashed border-gray-300 px-6 py-10 text-center">
-              <p className="text-base font-semibold text-gray-700">
-                Aún no hay necesidades publicadas.
-              </p>
-            </div>
+            <EmptyState title="Aún no hay necesidades publicadas." />
           ) : (
             <ul className="flex flex-col gap-3" role="list" aria-label="Necesidades validadas">
               {validatedNeeds.map((need) => (

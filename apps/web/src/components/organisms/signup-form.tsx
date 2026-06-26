@@ -2,8 +2,12 @@
 
 import Link from 'next/link';
 import { useActionState } from 'react';
-import { signupAction, type SignupResult } from './actions';
+import { signupAction, type SignupResult } from '@/app/signup/actions';
 import { SocialLoginButtons } from '@/components/social-login-buttons';
+import { Input } from '@/components/atoms/input';
+import { Label } from '@/components/atoms/label';
+import { Button } from '@/components/atoms/button';
+import { ErrorMessage } from '@/components/atoms/error-message';
 
 const INITIAL_STATE: SignupResult = { status: 'idle' };
 
@@ -21,59 +25,43 @@ export function SignupForm({ next }: SignupFormProps) {
   return (
     <div className="flex flex-col gap-5">
       <form action={formAction} className="flex flex-col gap-5">
-        {/* Error message */}
         {state.status === 'error' && (
-          <p
-            role="alert"
-            aria-live="assertive"
-            className="rounded-md border border-red-600 bg-red-50 px-4 py-3 text-sm font-medium text-red-800"
-          >
-            {state.message}
-          </p>
+          <ErrorMessage message={state.message ?? 'Error al crear la cuenta'} />
         )}
 
         {/* Name */}
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="name" className="text-sm font-semibold text-gray-900">
-            Nombre completo
-          </label>
-          <input
+          <Label htmlFor="name">Nombre completo</Label>
+          <Input
             id="name"
             name="name"
             type="text"
             autoComplete="name"
             required
             placeholder="Jane Doe"
-            className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
           />
         </div>
 
         {/* Email */}
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="email" className="text-sm font-semibold text-gray-900">
-            Correo electrónico
-          </label>
-          <input
+          <Label htmlFor="email">Correo electrónico</Label>
+          <Input
             id="email"
             name="email"
             type="email"
             autoComplete="email"
             required
             placeholder="tu@email.com"
-            className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
           />
         </div>
 
         {/* Password */}
         <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="password"
-            className="text-sm font-semibold text-gray-900"
-          >
+          <Label htmlFor="password">
             Contraseña{' '}
             <span className="font-normal text-gray-500">(mín. 8 caracteres)</span>
-          </label>
-          <input
+          </Label>
+          <Input
             id="password"
             name="password"
             type="password"
@@ -81,24 +69,16 @@ export function SignupForm({ next }: SignupFormProps) {
             required
             minLength={8}
             placeholder="••••••••"
-            className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
           />
         </div>
 
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={pending}
-          className="flex w-full items-center justify-center rounded-lg bg-gray-900 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-        >
+        <Button type="submit" disabled={pending} fullWidth>
           {pending ? 'Creando cuenta…' : 'Crear cuenta'}
-        </button>
+        </Button>
       </form>
 
-      {/* Social login */}
       <SocialLoginButtons />
 
-      {/* Link to login */}
       <p className="text-center text-sm text-gray-600">
         ¿Ya tienes cuenta?{' '}
         <Link

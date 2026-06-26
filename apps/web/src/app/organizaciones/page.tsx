@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import { getToken, authHeaders } from '@/lib/auth';
 import { CreateOrgForm } from './create-org-form';
+import { EmptyState } from '@/components/molecules/empty-state';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,14 +54,10 @@ export default async function OrganizacionesPage() {
           </h2>
 
           {myOrgs.length === 0 ? (
-            <div className="rounded-lg border-2 border-dashed border-gray-300 px-6 py-8 text-center">
-              <p className="text-base font-semibold text-gray-700">
-                Aún no perteneces a ninguna organización.
-              </p>
-              <p className="mt-2 text-sm text-gray-500">
-                Crea una a continuación o pide que te añadan a una existente.
-              </p>
-            </div>
+            <EmptyState
+              title="Aún no perteneces a ninguna organización."
+              description="Crea una a continuación o pide que te añadan a una existente."
+            />
           ) : (
             <ul className="flex flex-col gap-3" role="list">
               {myOrgs.map((org) => (

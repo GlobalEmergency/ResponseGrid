@@ -1,9 +1,11 @@
 'use client';
 
 import { useActionState } from 'react';
-import { validateNeed } from './actions';
+import { validateNeed } from '@/app/e/[slug]/coordinacion/actions';
 import type { components } from '@reliefhub/api-client';
-import type { ActionResult } from './actions';
+import type { ActionResult } from '@/app/e/[slug]/coordinacion/actions';
+import { Button } from '@/components/atoms/button';
+import { ErrorMessage } from '@/components/atoms/error-message';
 
 type NeedView = components['schemas']['NeedViewDto'];
 type ItemCategory = components['schemas']['NeedItemResponseDto']['category'];
@@ -27,12 +29,15 @@ const PRIORITY_LABELS: Record<NeedView['priority'], string> = {
 
 const INITIAL_STATE: ActionResult = { status: 'idle' };
 
-interface NeedCardProps {
+interface CoordinationNeedCardProps {
   need: NeedView;
   slug: string;
 }
 
-export function NeedCard({ need, slug }: NeedCardProps) {
+export function CoordinationNeedCard({
+  need,
+  slug,
+}: CoordinationNeedCardProps) {
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(
     async (_prev, _formData) => {
       return validateNeed(need.id, slug);
@@ -67,7 +72,9 @@ export function NeedCard({ need, slug }: NeedCardProps) {
               <span aria-hidden="true" className="text-gray-300">·</span>
               <span>
                 {String(need.items[0]?.quantity ?? '')}
-                {need.items[0]?.unit != null ? ` ${String(need.items[0].unit)}` : ''}
+                {need.items[0]?.unit != null
+                  ? ` ${String(need.items[0].unit)}`
+                  : ''}
               </span>
             </>
           )}
@@ -76,24 +83,14 @@ export function NeedCard({ need, slug }: NeedCardProps) {
 
       {/* Error message */}
       {state.status === 'error' && (
-        <p
-          role="alert"
-          aria-live="assertive"
-          className="rounded-md border border-red-600 bg-red-50 px-4 py-3 text-sm font-medium text-red-800"
-        >
-          {state.message}
-        </p>
+        <ErrorMessage message={state.message ?? 'Error desconocido'} />
       )}
 
       {/* Validate form */}
       <form action={formAction}>
-        <button
-          type="submit"
-          disabled={pending}
-          className="flex w-full items-center justify-center rounded-lg bg-gray-900 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-        >
+        <Button type="submit" disabled={pending} fullWidth>
           {pending ? 'Procesando…' : 'Validar'}
-        </button>
+        </Button>
       </form>
     </article>
   );

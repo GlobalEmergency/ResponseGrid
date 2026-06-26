@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { api } from '@/lib/api';
+import { Badge } from '@/components/atoms/badge';
+import { EmptyState } from '@/components/molecules/empty-state';
 
 // Emergency list must reflect live backend state on every request.
 export const dynamic = 'force-dynamic';
@@ -40,14 +42,10 @@ export default async function HomePage() {
           </h2>
 
           {activeEmergencies.length === 0 ? (
-            <div className="rounded-lg border-2 border-dashed border-gray-300 px-6 py-10 text-center">
-              <p className="text-base font-semibold text-gray-700">
-                No hay emergencias activas en este momento.
-              </p>
-              <p className="mt-2 text-sm text-gray-500">
-                Cuando se active una emergencia aparecerá aquí.
-              </p>
-            </div>
+            <EmptyState
+              title="No hay emergencias activas en este momento."
+              description="Cuando se active una emergencia aparecerá aquí."
+            />
           ) : (
             <ul className="flex flex-col gap-3" role="list" aria-label="Lista de emergencias activas">
               {activeEmergencies.map((emergency) => (
@@ -60,12 +58,9 @@ export default async function HomePage() {
                       <span className="text-lg font-bold text-gray-900 leading-tight">
                         {emergency.name}
                       </span>
-                      <span
-                        aria-label="Estado: activa"
-                        className="inline-flex items-center rounded-full border-2 border-red-700 bg-red-50 px-3 py-0.5 text-xs font-bold text-red-800"
-                      >
+                      <Badge variant="active" aria-label="Estado: activa">
                         Activa
-                      </span>
+                      </Badge>
                     </div>
                     <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">
                       {emergency.country}

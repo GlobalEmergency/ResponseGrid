@@ -3,9 +3,10 @@ import { notFound, redirect } from 'next/navigation';
 import { getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { ResourceCard } from './resource-card';
-import { NeedCard } from './need-card';
+import { CoordinationResourceCard } from '@/components/organisms/coordination-resource-card';
+import { CoordinationNeedCard } from '@/components/organisms/coordination-need-card';
 import { NeedsFilter } from '@/components/needs-filter';
+import { EmptyState } from '@/components/molecules/empty-state';
 import { logout } from './actions';
 
 // Always fetch live data — never serve a stale cached page.
@@ -126,19 +127,15 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
           </h2>
 
           {resourceQueue.length === 0 ? (
-            <div className="rounded-lg border-2 border-dashed border-gray-300 px-6 py-10 text-center">
-              <p className="text-base font-semibold text-gray-700">
-                No hay recursos pendientes de revisión.
-              </p>
-              <p className="mt-2 text-sm text-gray-500">
-                Cuando alguien registre un recurso aparecerá aquí.
-              </p>
-            </div>
+            <EmptyState
+              title="No hay recursos pendientes de revisión."
+              description="Cuando alguien registre un recurso aparecerá aquí."
+            />
           ) : (
             <ul className="flex flex-col gap-4" aria-label="Cola de recursos">
               {resourceQueue.map((resource) => (
                 <li key={resource.id}>
-                  <ResourceCard resource={resource} slug={slug} />
+                  <CoordinationResourceCard resource={resource} slug={slug} />
                 </li>
               ))}
             </ul>
@@ -157,19 +154,15 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
           <NeedsFilter />
 
           {needsQueue.length === 0 ? (
-            <div className="rounded-lg border-2 border-dashed border-gray-300 px-6 py-10 text-center">
-              <p className="text-base font-semibold text-gray-700">
-                No hay peticiones pendientes de validación.
-              </p>
-              <p className="mt-2 text-sm text-gray-500">
-                Las peticiones ciudadanas aparecerán aquí cuando lleguen.
-              </p>
-            </div>
+            <EmptyState
+              title="No hay peticiones pendientes de validación."
+              description="Las peticiones ciudadanas aparecerán aquí cuando lleguen."
+            />
           ) : (
             <ul className="flex flex-col gap-4" aria-label="Cola de peticiones">
               {needsQueue.map((need) => (
                 <li key={need.id}>
-                  <NeedCard need={need} slug={slug} />
+                  <CoordinationNeedCard need={need} slug={slug} />
                 </li>
               ))}
             </ul>

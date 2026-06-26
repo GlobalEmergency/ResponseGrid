@@ -1,9 +1,13 @@
 'use client';
 
 import { useActionState } from 'react';
-import { verifyAndPublish } from './actions';
+import { verifyAndPublish } from '@/app/e/[slug]/coordinacion/actions';
 import type { components } from '@reliefhub/api-client';
-import type { ActionResult } from './actions';
+import type { ActionResult } from '@/app/e/[slug]/coordinacion/actions';
+import { Badge } from '@/components/atoms/badge';
+import { Select } from '@/components/atoms/select';
+import { Button } from '@/components/atoms/button';
+import { ErrorMessage } from '@/components/atoms/error-message';
 
 type ResourceView = components['schemas']['ResourceViewDto'];
 type VerificationLevel = Exclude<
@@ -34,12 +38,15 @@ const LEVEL_OPTIONS: { value: VerificationLevel; label: string }[] = [
 
 const INITIAL_STATE: ActionResult = { status: 'idle' };
 
-interface ResourceCardProps {
+interface CoordinationResourceCardProps {
   resource: ResourceView;
   slug: string;
 }
 
-export function ResourceCard({ resource, slug }: ResourceCardProps) {
+export function CoordinationResourceCard({
+  resource,
+  slug,
+}: CoordinationResourceCardProps) {
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(
     async (_prev, formData) => {
       const level = formData.get('level') as VerificationLevel;
@@ -63,12 +70,9 @@ export function ResourceCard({ resource, slug }: ResourceCardProps) {
           <h2 className="text-xl font-bold text-gray-900 leading-tight break-words">
             {resource.name}
           </h2>
-          <span
-            aria-label="Sin verificar"
-            className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-full border border-blue-300 bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-800"
-          >
+          <Badge variant="unverified" aria-label="Sin verificar">
             Sin verificar
-          </span>
+          </Badge>
         </div>
         <div className="flex flex-wrap gap-3 text-sm text-gray-600">
           <span className="font-medium">{TYPE_LABELS[resource.type]}</span>
@@ -79,13 +83,7 @@ export function ResourceCard({ resource, slug }: ResourceCardProps) {
 
       {/* Error message */}
       {state.status === 'error' && (
-        <p
-          role="alert"
-          aria-live="assertive"
-          className="rounded-md border border-red-600 bg-red-50 px-4 py-3 text-sm font-medium text-red-800"
-        >
-          {state.message}
-        </p>
+        <ErrorMessage message={state.message ?? 'Error desconocido'} />
       )}
 
       {/* Action form */}
@@ -97,27 +95,22 @@ export function ResourceCard({ resource, slug }: ResourceCardProps) {
           >
             Nivel de verificación
           </label>
-          <select
+          <Select
             id={`level-${resource.id}`}
             name="level"
             defaultValue="verified"
-            className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
           >
             {LEVEL_OPTIONS.map(({ value, label }) => (
               <option key={value} value={value}>
                 {label}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="flex w-full items-center justify-center rounded-lg bg-gray-900 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-        >
+        <Button type="submit" disabled={pending} fullWidth>
           {pending ? 'Procesando…' : 'Verificar y publicar'}
-        </button>
+        </Button>
       </form>
     </article>
   );
