@@ -264,6 +264,12 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
               >
                 Donar material
               </Link>
+              <Link
+                href={`/e/${slug}/voluntario`}
+                className="flex items-center justify-center w-full py-4 px-6 text-lg font-semibold text-gray-900 bg-white rounded-lg border-2 border-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors"
+              >
+                Apuntarme como voluntario
+              </Link>
             </div>
           ) : (
             <p className="rounded-lg border-2 border-gray-200 bg-gray-50 px-5 py-4 text-sm text-gray-500">
@@ -390,12 +396,20 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
         {/* ── 8. PIE ───────────────────────────────────────────────────── */}
         <footer className="border-t border-gray-200 pt-6 flex items-center justify-between gap-4 flex-wrap">
           {token !== null && (
-            <Link
-              href={`/e/${slug}/mis-puntos`}
-              className="text-sm text-gray-400 underline underline-offset-2 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded"
-            >
-              Mis puntos
-            </Link>
+            <div className="flex items-center gap-4 flex-wrap">
+              <Link
+                href={`/e/${slug}/mis-puntos`}
+                className="text-sm text-gray-400 underline underline-offset-2 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded"
+              >
+                Mis puntos
+              </Link>
+              <Link
+                href={`/e/${slug}/mi-voluntariado`}
+                className="text-sm text-gray-400 underline underline-offset-2 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded"
+              >
+                Mi voluntariado
+              </Link>
+            </div>
           )}
           <Link
             href={`/e/${slug}/coordinacion`}
