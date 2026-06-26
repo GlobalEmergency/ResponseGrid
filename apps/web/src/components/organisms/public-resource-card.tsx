@@ -1,5 +1,6 @@
 import type { components } from '@reliefhub/api-client';
 import { VerificationBadge } from '@/components/atoms/verification-badge';
+import { StatusLight } from '@/components/atoms/status-light';
 
 type ResourceViewDto = components['schemas']['ResourceViewDto'];
 
@@ -38,6 +39,8 @@ export function PublicResourceCard({ resource }: PublicResourceCardProps) {
         <span>{STAGE_LABELS[resource.stage]}</span>
         <span aria-hidden="true" className="text-gray-300">·</span>
         <VerificationBadge level={resource.verificationLevel} />
+        <span aria-hidden="true" className="text-gray-300">·</span>
+        <StatusLight status={resource.publicStatus} />
       </div>
     </article>
   );

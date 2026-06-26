@@ -10,7 +10,9 @@ import { useEffect } from 'react';
 const BASE =
   'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img';
 
-function makeIcon(color: 'blue' | 'red'): L.Icon {
+type MarkerColor = 'blue' | 'red' | 'green' | 'gold' | 'orange';
+
+function makeIcon(color: MarkerColor): L.Icon {
   return L.icon({
     iconUrl: `${BASE}/marker-icon-2x-${color}.png`,
     // pointhi repo only ships 2x; we use it for both 1x and 2x
@@ -24,16 +26,40 @@ function makeIcon(color: 'blue' | 'red'): L.Icon {
   });
 }
 
-const RESOURCE_ICON = makeIcon('blue');
-const NEED_ICON = makeIcon('red');
+const ICONS: Record<MarkerColor, L.Icon> = {
+  green: makeIcon('green'),
+  gold: makeIcon('gold'),
+  orange: makeIcon('orange'),
+  blue: makeIcon('blue'),
+  red: makeIcon('red'),
+};
 
 // ── Types ─────────────────────────────────────────────────────────────────────
+export type ResourcePublicStatus = 'active' | 'saturated' | 'paused' | 'closed' | 'hidden';
+
 export interface MapPoint {
   id: string;
   lat: number;
   lng: number;
   label: string;
   kind: 'resource' | 'need';
+  /** Only meaningful for kind === 'resource'. Controls marker colour. */
+  status?: ResourcePublicStatus;
+}
+
+function resourceIcon(status: ResourcePublicStatus | undefined): L.Icon {
+  switch (status) {
+    case 'active':
+      return ICONS.green;
+    case 'saturated':
+      return ICONS.gold;
+    case 'paused':
+      return ICONS.orange;
+    case 'closed':
+    case 'hidden':
+    default:
+      return ICONS.blue;
+  }
 }
 
 interface EmergencyMapProps {
@@ -87,7 +113,7 @@ export default function EmergencyMap({ points }: EmergencyMapProps) {
           <Marker
             key={point.id}
             position={[point.lat, point.lng]}
-            icon={point.kind === 'resource' ? RESOURCE_ICON : NEED_ICON}
+            icon={point.kind === 'resource' ? resourceIcon(point.status) : ICONS.red}
           >
             <Popup>
               <strong>{point.label}</strong>

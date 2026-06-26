@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
+import { getToken } from '@/lib/auth';
 import { PublicResourceCard } from '@/components/organisms/public-resource-card';
 import { EmergencyMapWrapper } from '@/components/emergency-map-wrapper';
 import { NeedsFilter } from '@/components/needs-filter';
@@ -73,6 +74,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
   }
 
   const emergencyId = emergency.id;
+  const token = await getToken();
 
   const rawCategory = typeof resolvedSearchParams.category === 'string' ? resolvedSearchParams.category : undefined;
   const rawPriority = typeof resolvedSearchParams.priority === 'string' ? resolvedSearchParams.priority : undefined;
@@ -126,6 +128,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
           lng: r.location.longitude,
           label: r.name,
           kind: 'resource',
+          status: r.publicStatus,
         }),
       ),
     ...validatedNeeds
@@ -363,10 +366,18 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
           >
             Mapa de la emergencia
           </h2>
-          <div className="flex gap-4 text-xs text-gray-500">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
             <span className="flex items-center gap-1.5">
-              <span className="inline-block w-3 h-3 rounded-full bg-blue-500" aria-hidden="true" />
-              Recurso
+              <span className="inline-block w-3 h-3 rounded-full bg-green-500" aria-hidden="true" />
+              Operativo
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block w-3 h-3 rounded-full bg-yellow-400" aria-hidden="true" />
+              Saturado
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block w-3 h-3 rounded-full bg-orange-500" aria-hidden="true" />
+              En pausa
             </span>
             <span className="flex items-center gap-1.5">
               <span className="inline-block w-3 h-3 rounded-full bg-red-500" aria-hidden="true" />
@@ -377,10 +388,18 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
         </section>
 
         {/* ── 8. PIE ───────────────────────────────────────────────────── */}
-        <footer className="border-t border-gray-200 pt-6 flex justify-end">
+        <footer className="border-t border-gray-200 pt-6 flex items-center justify-between gap-4 flex-wrap">
+          {token !== null && (
+            <Link
+              href={`/e/${slug}/mis-puntos`}
+              className="text-sm text-gray-400 underline underline-offset-2 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded"
+            >
+              Mis puntos
+            </Link>
+          )}
           <Link
             href={`/e/${slug}/coordinacion`}
-            className="text-sm text-gray-400 underline underline-offset-2 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded"
+            className="text-sm text-gray-400 underline underline-offset-2 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded ml-auto"
           >
             Acceso de coordinación
           </Link>
