@@ -1,7 +1,7 @@
 import { GetEmergencyBySlug } from './get-emergency-by-slug';
 import { InMemoryEmergencyRepository } from '../infrastructure/in-memory-emergency.repository';
 import { Emergency } from '../domain/emergency';
-import { EmergencyId } from '../domain/emergency-id';
+import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Slug } from '../domain/slug';
 
 describe('GetEmergencyBySlug', () => {

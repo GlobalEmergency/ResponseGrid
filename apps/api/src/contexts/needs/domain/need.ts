@@ -1,12 +1,12 @@
 import { NeedId } from './need-id';
-import { EmergencyId } from './emergency-id';
+import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Priority, NeedStatus } from './need-enums';
 import { NeedNotPendingError } from './need-errors';
 import { DomainEvent } from './events/domain-event';
 import { NeedCreated } from './events/need-created.event';
 import { NeedValidated } from './events/need-validated.event';
 import { NeedRejected } from './events/need-rejected.event';
-import { Location, LocationProps } from './location';
+import { Location, LocationProps } from '../../../shared/domain/location';
 import { NeedItem, NeedItemSnapshot } from './need-item';
 
 export class NeedItemsRequiredError extends Error {

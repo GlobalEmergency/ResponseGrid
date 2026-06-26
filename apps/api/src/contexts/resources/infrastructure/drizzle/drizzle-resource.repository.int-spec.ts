@@ -3,9 +3,9 @@ import { resourcesTable } from './schema';
 import { DrizzleResourceRepository } from './drizzle-resource.repository';
 import { Resource } from '../../domain/resource';
 import { ResourceId } from '../../domain/resource-id';
-import { EmergencyId } from '../../domain/emergency-id';
+import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import { ResourceType, ResourceStage, VerificationLevel, PublicStatus } from '../../domain/resource-enums';
-import { Location } from '../../domain/location';
+import { Location } from '../../../../shared/domain/location';
 import type { Pool } from 'pg';
 
 const OWNER_ID = 'ffffffff-ffff-4fff-8fff-ffffffffffff';

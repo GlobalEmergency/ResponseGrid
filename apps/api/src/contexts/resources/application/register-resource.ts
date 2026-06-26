@@ -2,9 +2,9 @@ import { ResourceRepository } from '../domain/ports/resource.repository';
 import { EventBus } from '../domain/ports/event-bus';
 import { Resource } from '../domain/resource';
 import { ResourceId } from '../domain/resource-id';
-import { EmergencyId } from '../domain/emergency-id';
+import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { ResourceType, ResourceStage } from '../domain/resource-enums';
-import { Location, LocationProps } from '../domain/location';
+import { Location, LocationProps } from '../../../shared/domain/location';
 
 export interface RegisterResourceCommand {
   emergencyId: string;

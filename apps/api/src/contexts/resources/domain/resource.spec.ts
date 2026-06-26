@@ -1,8 +1,8 @@
 import { Resource } from './resource';
 import { ResourceId } from './resource-id';
-import { EmergencyId } from './emergency-id';
+import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { ResourceType, ResourceStage, VerificationLevel, PublicStatus } from './resource-enums';
-import { Location } from './location';
+import { Location } from '../../../shared/domain/location';
 import { ResourceNotVerifiedError, InvalidVerificationLevelError } from './resource-errors';
 
 const makeLocation = () =>

@@ -1,9 +1,9 @@
 import { Need, NeedItemsRequiredError } from './need';
 import { NeedId } from './need-id';
-import { EmergencyId } from './emergency-id';
+import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Priority, NeedCategory, NeedStatus } from './need-enums';
 import { NeedNotPendingError } from './need-errors';
-import { Location } from './location';
+import { Location } from '../../../shared/domain/location';
 import { NeedItem } from './need-item';
 
 const EM = '11111111-1111-4111-8111-111111111111';

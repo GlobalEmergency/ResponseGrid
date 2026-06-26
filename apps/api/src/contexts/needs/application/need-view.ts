@@ -1,5 +1,5 @@
 import { Need } from '../domain/need';
-import { LocationProps } from '../domain/location';
+import { LocationProps } from '../../../shared/domain/location';
 import { NeedItemSnapshot } from '../domain/need-item';
 
 export interface NeedView {

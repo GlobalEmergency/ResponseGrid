@@ -1,7 +1,7 @@
 import { ResourceId } from './resource-id';
-import { EmergencyId } from './emergency-id';
+import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { ResourceType, ResourceStage, VerificationLevel, PublicStatus } from './resource-enums';
-import { Location, LocationProps } from './location';
+import { Location, LocationProps } from '../../../shared/domain/location';
 import { InvalidVerificationLevelError, ResourceNotVerifiedError } from './resource-errors';
 import { DomainEvent } from './events/domain-event';
 import { ResourceRegistered } from './events/resource-registered';

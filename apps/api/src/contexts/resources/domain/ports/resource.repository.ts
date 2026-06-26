@@ -1,6 +1,6 @@
 import { Resource } from '../resource';
 import { ResourceId } from '../resource-id';
-import { EmergencyId } from '../emergency-id';
+import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import { PublicStatus } from '../resource-enums';
 
 export const RESOURCE_REPOSITORY = Symbol('ResourceRepository');

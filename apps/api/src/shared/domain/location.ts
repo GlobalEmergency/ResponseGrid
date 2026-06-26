@@ -1,3 +1,13 @@
+/**
+ * Shared Kernel — Location value object.
+ *
+ * This file is a DELIBERATE shared kernel: Location (address + lat/lon with
+ * range validation) is used identically in the needs and resources bounded
+ * contexts. Centralising it here removes the duplication while keeping the
+ * module pure domain (no framework, no I/O). Bounded contexts consume this
+ * kernel but do NOT share aggregates or business rules through it.
+ */
+
 export interface LocationProps {
   address: string;
   latitude: number;

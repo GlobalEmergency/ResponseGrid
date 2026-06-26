@@ -3,9 +3,9 @@ import { needsTable, needItemsTable } from './schema';
 import { DrizzleNeedRepository } from './drizzle-need.repository';
 import { Need } from '../../domain/need';
 import { NeedId } from '../../domain/need-id';
-import { EmergencyId } from '../../domain/emergency-id';
+import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import { NeedCategory, Priority, NeedStatus } from '../../domain/need-enums';
-import { Location } from '../../domain/location';
+import { Location } from '../../../../shared/domain/location';
 import { NeedItem } from '../../domain/need-item';
 import type { Pool } from 'pg';
 

@@ -1,7 +1,7 @@
 import { NeedRepository, NeedFilters } from '../domain/ports/need.repository';
 import { Need, NeedSnapshot } from '../domain/need';
 import { NeedId } from '../domain/need-id';
-import { EmergencyId } from '../domain/emergency-id';
+import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { NeedStatus } from '../domain/need-enums';
 
 export class InMemoryNeedRepository implements NeedRepository {

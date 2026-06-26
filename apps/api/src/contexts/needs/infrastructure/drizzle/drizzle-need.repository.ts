@@ -5,7 +5,7 @@ import { needsTable, needItemsTable } from './schema';
 import { NeedRepository, NeedFilters } from '../../domain/ports/need.repository';
 import { Need, NeedSnapshot } from '../../domain/need';
 import { NeedId } from '../../domain/need-id';
-import { EmergencyId } from '../../domain/emergency-id';
+import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import { Priority, NeedCategory, NeedStatus } from '../../domain/need-enums';
 import { NeedItemSnapshot } from '../../domain/need-item';
 

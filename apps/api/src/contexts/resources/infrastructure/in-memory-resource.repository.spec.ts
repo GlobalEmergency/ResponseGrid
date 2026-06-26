@@ -1,10 +1,10 @@
 import { InMemoryResourceRepository } from './in-memory-resource.repository';
 import { Resource } from '../domain/resource';
 import { ResourceId } from '../domain/resource-id';
-import { EmergencyId } from '../domain/emergency-id';
+import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { ResourceType, ResourceStage, VerificationLevel } from '../domain/resource-enums';
 import { PublicStatus } from '../domain/resource-enums';
-import { Location } from '../domain/location';
+import { Location } from '../../../shared/domain/location';
 
 const EM_A = '11111111-1111-4111-8111-111111111111';
 const EM_B = '22222222-2222-4222-8222-222222222222';

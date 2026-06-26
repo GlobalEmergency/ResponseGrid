@@ -3,7 +3,7 @@ import { Db } from '../../../../shared/db';
 import { emergenciesTable } from './schema';
 import { EmergencyRepository } from '../../domain/ports/emergency.repository';
 import { Emergency, EmergencySnapshot } from '../../domain/emergency';
-import { EmergencyId } from '../../domain/emergency-id';
+import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import { Slug } from '../../domain/slug';
 import { EmergencyStatus } from '../../domain/emergency-status';
 

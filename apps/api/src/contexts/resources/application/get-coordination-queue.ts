@@ -1,5 +1,5 @@
 import { ResourceRepository } from '../domain/ports/resource.repository';
-import { EmergencyId } from '../domain/emergency-id';
+import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { ResourceView, toResourceView } from './resource-view';
 
 export class GetCoordinationQueue {

@@ -1,7 +1,7 @@
 import { RegisterResource } from './register-resource';
 import { InMemoryResourceRepository } from '../infrastructure/in-memory-resource.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
-import { EmergencyId } from '../domain/emergency-id';
+import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { ResourceType, ResourceStage, VerificationLevel } from '../domain/resource-enums';
 
 const EM = '11111111-1111-4111-8111-111111111111';

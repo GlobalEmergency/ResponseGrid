@@ -1,4 +1,4 @@
-import { EmergencyId } from './emergency-id';
+import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Slug } from './slug';
 import { EmergencyStatus } from './emergency-status';
 

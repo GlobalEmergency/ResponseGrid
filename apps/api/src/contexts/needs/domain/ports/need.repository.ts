@@ -1,6 +1,6 @@
 import { Need } from '../need';
 import { NeedId } from '../need-id';
-import { EmergencyId } from '../emergency-id';
+import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import { NeedCategory, NeedStatus, Priority } from '../need-enums';
 
 export const NEED_REPOSITORY = Symbol('NeedRepository');

@@ -1,7 +1,7 @@
 import { ResourceRepository } from '../domain/ports/resource.repository';
 import { Resource } from '../domain/resource';
 import { ResourceId } from '../domain/resource-id';
-import { EmergencyId } from '../domain/emergency-id';
+import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { VerificationLevel, PublicStatus } from '../domain/resource-enums';
 
 export class InMemoryResourceRepository implements ResourceRepository {

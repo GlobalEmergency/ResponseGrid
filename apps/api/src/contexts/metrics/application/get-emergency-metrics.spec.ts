@@ -6,15 +6,13 @@ import { CreateNeed } from '../../needs/application/create-need';
 import { ValidateNeed } from '../../needs/application/validate-need';
 import { Need } from '../../needs/domain/need';
 import { NeedId } from '../../needs/domain/need-id';
-import { EmergencyId } from '../../needs/domain/emergency-id';
+import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { NeedCategory, Priority } from '../../needs/domain/need-enums';
-import { Location } from '../../needs/domain/location';
+import { Location } from '../../../shared/domain/location';
 import { NeedItem } from '../../needs/domain/need-item';
 import { Resource } from '../../resources/domain/resource';
 import { ResourceId } from '../../resources/domain/resource-id';
-import { EmergencyId as ResourceEmergencyId } from '../../resources/domain/emergency-id';
 import { ResourceType, ResourceStage, VerificationLevel } from '../../resources/domain/resource-enums';
-import { Location as ResourceLocation } from '../../resources/domain/location';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const USER_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -43,13 +41,13 @@ function seedNeed(repo: InMemoryNeedRepository, title: string): Need {
 }
 
 function makeResourceLocation() {
-  return ResourceLocation.create({ address: 'Sevilla', latitude: 37.38, longitude: -5.98 });
+  return Location.create({ address: 'Sevilla', latitude: 37.38, longitude: -5.98 });
 }
 
 function seedResource(repo: InMemoryResourceRepository, name: string): Resource {
   return Resource.register({
     id: ResourceId.create(),
-    emergencyId: ResourceEmergencyId.fromString(EM),
+    emergencyId: EmergencyId.fromString(EM),
     type: ResourceType.CollectionPoint,
     stage: ResourceStage.Origin,
     name,

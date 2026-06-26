@@ -1,5 +1,5 @@
 import { NeedRepository, NeedFilters } from '../domain/ports/need.repository';
-import { EmergencyId } from '../domain/emergency-id';
+import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { NeedCategory, Priority } from '../domain/need-enums';
 import { NeedView, toNeedView } from './need-view';
 

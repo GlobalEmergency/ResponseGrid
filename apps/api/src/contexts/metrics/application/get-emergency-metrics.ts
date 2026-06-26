@@ -1,7 +1,6 @@
 import { NeedRepository } from '../../needs/domain/ports/need.repository';
 import { ResourceRepository } from '../../resources/domain/ports/resource.repository';
-import { EmergencyId as NeedEmergencyId } from '../../needs/domain/emergency-id';
-import { EmergencyId as ResourceEmergencyId } from '../../resources/domain/emergency-id';
+import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { NeedStatus } from '../../needs/domain/need-enums';
 import { PublicStatus } from '../../resources/domain/resource-enums';
 
@@ -38,12 +37,11 @@ export class GetEmergencyMetrics {
   ) {}
 
   async execute(query: GetEmergencyMetricsQuery): Promise<EmergencyMetrics> {
-    const needEmergencyId = NeedEmergencyId.fromString(query.emergencyId);
-    const resourceEmergencyId = ResourceEmergencyId.fromString(query.emergencyId);
+    const emergencyId = EmergencyId.fromString(query.emergencyId);
 
     const [needCounts, resourceCounts] = await Promise.all([
-      this.needRepo.countByEmergencyGroupedByStatus(needEmergencyId),
-      this.resourceRepo.countByEmergencyGroupedByPublicStatus(resourceEmergencyId),
+      this.needRepo.countByEmergencyGroupedByStatus(emergencyId),
+      this.resourceRepo.countByEmergencyGroupedByPublicStatus(emergencyId),
     ]);
 
     const needTotal =

@@ -2,9 +2,9 @@ import { NeedRepository } from '../domain/ports/need.repository';
 import { EventBus } from '../domain/ports/event-bus';
 import { Need } from '../domain/need';
 import { NeedId } from '../domain/need-id';
-import { EmergencyId } from '../domain/emergency-id';
+import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Priority, NeedCategory } from '../domain/need-enums';
-import { Location } from '../domain/location';
+import { Location } from '../../../shared/domain/location';
 import { NeedItem } from '../domain/need-item';
 
 export interface CreateNeedItemCommand {

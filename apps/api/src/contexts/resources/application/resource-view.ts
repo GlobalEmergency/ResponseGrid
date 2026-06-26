@@ -1,5 +1,5 @@
 import { Resource } from '../domain/resource';
-import { LocationProps } from '../domain/location';
+import { LocationProps } from '../../../shared/domain/location';
 
 export interface ResourceView {
   id: string;

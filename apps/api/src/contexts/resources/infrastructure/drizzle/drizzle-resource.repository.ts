@@ -4,7 +4,7 @@ import { resourcesTable } from './schema';
 import { ResourceRepository } from '../../domain/ports/resource.repository';
 import { Resource, ResourceSnapshot } from '../../domain/resource';
 import { ResourceId } from '../../domain/resource-id';
-import { EmergencyId } from '../../domain/emergency-id';
+import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import { ResourceType, ResourceStage, VerificationLevel, PublicStatus } from '../../domain/resource-enums';
 
 type Row = typeof resourcesTable.$inferSelect;
