@@ -27,7 +27,10 @@ import {
 } from '../src/contexts/identity/infrastructure/drizzle/schema';
 import { emergenciesTable } from '../src/contexts/emergencies/infrastructure/drizzle/schema';
 import { volunteersTable } from '../src/contexts/volunteers/infrastructure/drizzle/schema';
-import { tasksTable, taskAssignmentsTable } from '../src/contexts/volunteers/infrastructure/drizzle/task-schema';
+import {
+  tasksTable,
+  taskAssignmentsTable,
+} from '../src/contexts/volunteers/infrastructure/drizzle/task-schema';
 import * as bcrypt from 'bcryptjs';
 
 // ── Unique UUID namespace for this spec (f0000002-*) ─────────────────────────
@@ -310,7 +313,10 @@ describe('Volunteer tasks (e2e)', () => {
       const res = await request(server)
         .post(`/emergencies/${EM_T}/tasks`)
         .set('Authorization', `Bearer ${coordToken}`)
-        .send({ title: 'Lifecycle Task', description: 'Used for lifecycle e2e' })
+        .send({
+          title: 'Lifecycle Task',
+          description: 'Used for lifecycle e2e',
+        })
         .expect(201);
       taskId = (res.body as { id: string }).id;
     });
@@ -328,10 +334,15 @@ describe('Volunteer tasks (e2e)', () => {
         .get(`/emergencies/${EM_T}/tasks`)
         .set('Authorization', `Bearer ${coordToken}`)
         .expect(200);
-      const tasks = res.body as Array<{ id: string; assignments: Array<{ volunteerId: string }> }>;
+      const tasks = res.body as Array<{
+        id: string;
+        assignments: Array<{ volunteerId: string }>;
+      }>;
       const task = tasks.find((t) => t.id === taskId);
       expect(task).toBeDefined();
-      expect(task!.assignments.some((a) => a.volunteerId === VOLUNTEER_A_ROW)).toBe(true);
+      expect(
+        task!.assignments.some((a) => a.volunteerId === VOLUNTEER_A_ROW),
+      ).toBe(true);
     });
 
     it('volunteer A checks in themselves → 204; task → in_progress', async () => {
@@ -486,9 +497,7 @@ describe('Volunteer tasks (e2e)', () => {
     });
 
     it('returns 401 without token', async () => {
-      await request(server)
-        .get(`/emergencies/${EM_T}/tasks/mine`)
-        .expect(401);
+      await request(server).get(`/emergencies/${EM_T}/tasks/mine`).expect(401);
     });
   });
 });
