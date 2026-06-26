@@ -450,6 +450,142 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/emergencies/{emergencyId}/offers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit a donation offer for an emergency (authenticated donor) */
+        post: operations["OffersController_submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/offers/queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get open offers queue for an emergency (coordinator only) */
+        get: operations["OffersController_listQueue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/offers/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List my offers for an emergency (authenticated donor) */
+        get: operations["OffersController_listMine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/needs/{needId}/offers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List matched offers for a need (coordinator only) */
+        get: operations["OffersController_listForNeed"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/needs/{needId}/offer-suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Suggest open offers for a need (coordinator only), sorted by proximity */
+        get: operations["OffersController_suggestForNeed"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/offers/{offerId}/match": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Match an offer to a need (coordinator of the offer's emergency only) */
+        post: operations["OffersController_match"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/offers/{offerId}/fulfill": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark an offer as fulfilled (coordinator of the offer's emergency only) */
+        post: operations["OffersController_fulfill"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/offers/{offerId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel an offer (owner or coordinator) */
+        post: operations["OffersController_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -865,6 +1001,117 @@ export interface components {
         EmergencyMetricsDto: {
             needs: components["schemas"]["NeedsMetricsDto"];
             resources: components["schemas"]["ResourcesMetricsDto"];
+        };
+        OfferLocationDto: {
+            /** @example 123 Main Street, Caracas, Venezuela */
+            address: string;
+            /**
+             * @description Latitude (-90 to 90)
+             * @example 10.4806
+             */
+            latitude: number;
+            /**
+             * @description Longitude (-180 to 180)
+             * @example -66.9036
+             */
+            longitude: number;
+        };
+        SubmitOfferDto: {
+            /**
+             * @example food
+             * @enum {string}
+             */
+            category: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other";
+            /**
+             * @description Description of the item being offered
+             * @example Rice bags 25kg
+             */
+            description: string;
+            /**
+             * @description Quantity offered (positive integer)
+             * @example 50
+             */
+            quantity: number;
+            /**
+             * @description Unit of measurement
+             * @example bags
+             */
+            unit?: string;
+            location: components["schemas"]["OfferLocationDto"];
+            /**
+             * Format: uuid
+             * @description Target need this offer is directed at (optional)
+             */
+            targetNeedId?: string;
+            /**
+             * Format: uuid
+             * @description Organization on whose behalf the offer is made (optional)
+             */
+            donorOrganizationId?: string;
+            /**
+             * @description Additional notes (optional)
+             * @example Available for pickup Mon-Fri
+             */
+            notes?: string;
+        };
+        SubmitOfferResponseDto: {
+            /**
+             * Format: uuid
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            id: string;
+        };
+        OfferLocationResponseDto: {
+            /** @example 123 Main Street, Caracas */
+            address: string;
+            /** @example 10.4806 */
+            latitude: number;
+            /** @example -66.9036 */
+            longitude: number;
+        };
+        OfferViewDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            emergencyId: string;
+            /** Format: uuid */
+            donorUserId: string;
+            /** Format: uuid */
+            donorOrganizationId?: Record<string, never> | null;
+            /**
+             * @example food
+             * @enum {string}
+             */
+            category: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other";
+            /** @example Rice bags 25kg */
+            description: string;
+            /** @example 50 */
+            quantity: number;
+            /** @example bags */
+            unit?: Record<string, never> | null;
+            location: components["schemas"]["OfferLocationResponseDto"];
+            /** Format: uuid */
+            targetNeedId?: Record<string, never> | null;
+            /** Format: uuid */
+            matchedNeedId?: Record<string, never> | null;
+            /**
+             * @example open
+             * @enum {string}
+             */
+            status: "open" | "matched" | "fulfilled" | "cancelled";
+            /** @example Available Mon-Fri */
+            notes?: Record<string, never> | null;
+            /** @example 2024-01-01T00:00:00.000Z */
+            createdAt: string;
+            /** @example 2024-01-01T00:00:00.000Z */
+            updatedAt: string;
+        };
+        MatchOfferDto: {
+            /**
+             * Format: uuid
+             * @description The need to match this offer against
+             */
+            needId: string;
         };
     };
     responses: never;
@@ -2023,6 +2270,360 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["EmergencyMetricsDto"];
                 };
+            };
+        };
+    };
+    OffersController_submit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitOfferDto"];
+            };
+        };
+        responses: {
+            /** @description Offer created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmitOfferResponseDto"];
+                };
+            };
+            /** @description Invalid request body or UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Emergency is not accepting intake (paused/closed) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OffersController_listQueue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of open offers */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferViewDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OffersController_listMine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description My offers */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferViewDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OffersController_listForNeed: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Need UUID */
+                needId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Offers matched to the need */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferViewDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Need not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OffersController_suggestForNeed: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Need UUID */
+                needId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Suggested offers sorted by proximity */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferViewDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Need not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OffersController_match: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Offer UUID */
+                offerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MatchOfferDto"];
+            };
+        };
+        responses: {
+            /** @description Offer matched to need */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Offer or need not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Offer is not in Open status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OffersController_fulfill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Offer UUID */
+                offerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Offer fulfilled */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Offer not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Offer is not in Matched status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OffersController_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Offer UUID */
+                offerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Offer cancelled */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Only the offer owner or a coordinator can cancel */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Offer not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Offer cannot be cancelled in its current status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

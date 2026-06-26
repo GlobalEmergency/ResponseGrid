@@ -34,6 +34,7 @@ import { RequireResourceCoordinatorGuard } from './http/require-resource-coordin
 import { RequireNeedCoordinatorGuard } from './http/require-need-coordinator.guard';
 import { DrizzleResourceEmergencyLookup } from './drizzle/drizzle-resource-emergency-lookup';
 import { DrizzleNeedEmergencyLookup } from './drizzle/drizzle-need-emergency-lookup';
+import { DrizzleOfferEmergencyLookup } from './drizzle/drizzle-offer-emergency-lookup';
 import {
   RESOURCE_EMERGENCY_LOOKUP,
   ResourceEmergencyLookup,
@@ -42,6 +43,11 @@ import {
   NEED_EMERGENCY_LOOKUP,
   NeedEmergencyLookup,
 } from '../domain/ports/need-emergency-lookup';
+import {
+  OFFER_EMERGENCY_LOOKUP,
+  OfferEmergencyLookup,
+} from '../domain/ports/offer-emergency-lookup';
+import { RequireOfferCoordinatorGuard } from './http/require-offer-coordinator.guard';
 import { GoogleStrategy } from './http/google.strategy';
 import { FacebookStrategy } from './http/facebook.strategy';
 
@@ -88,6 +94,13 @@ const needEmergencyLookupProvider = {
   inject: [DB],
   useFactory: (db: Db): NeedEmergencyLookup =>
     new DrizzleNeedEmergencyLookup(db),
+};
+
+const offerEmergencyLookupProvider = {
+  provide: OFFER_EMERGENCY_LOOKUP,
+  inject: [DB],
+  useFactory: (db: Db): OfferEmergencyLookup =>
+    new DrizzleOfferEmergencyLookup(db),
 };
 
 const loginProvider = {
@@ -144,11 +157,13 @@ const authenticateWithProviderProvider = {
     authenticateWithProviderProvider,
     resourceEmergencyLookupProvider,
     needEmergencyLookupProvider,
+    offerEmergencyLookupProvider,
     JwtAuthGuard,
     RequireAdminGuard,
     RequireCoordinatorGuard,
     RequireResourceCoordinatorGuard,
     RequireNeedCoordinatorGuard,
+    RequireOfferCoordinatorGuard,
     GoogleStrategy,
     FacebookStrategy,
   ],
@@ -158,11 +173,13 @@ const authenticateWithProviderProvider = {
     TOKEN_SERVICE,
     RESOURCE_EMERGENCY_LOOKUP,
     NEED_EMERGENCY_LOOKUP,
+    OFFER_EMERGENCY_LOOKUP,
     JwtAuthGuard,
     RequireAdminGuard,
     RequireCoordinatorGuard,
     RequireResourceCoordinatorGuard,
     RequireNeedCoordinatorGuard,
+    RequireOfferCoordinatorGuard,
     JwtModule,
   ],
 })

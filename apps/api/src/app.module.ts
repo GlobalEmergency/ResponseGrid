@@ -8,6 +8,7 @@ import { OrganizationsModule } from './contexts/organizations/infrastructure/org
 import { AccreditationModule } from './contexts/accreditation/infrastructure/accreditation.module';
 import { GeocodingModule } from './contexts/geocoding/infrastructure/geocoding.module';
 import { MetricsModule } from './contexts/metrics/infrastructure/metrics.module';
+import { OffersModule } from './contexts/offers/infrastructure/offers.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MetricsModule } from './contexts/metrics/infrastructure/metrics.module'
     AccreditationModule,
     GeocodingModule,
     MetricsModule,
+    OffersModule,
   ],
 })
 export class AppModule {}
