@@ -31,7 +31,7 @@ export async function generateMetadata(
 
   return {
     title: `${emergency.name} · ReliefHub`,
-    description: `Información oficial y puntos activos de ayuda para ${emergency.name}. La forma más eficaz de ayudar es la donación económica a entidades verificadas.`,
+    description: `Información oficial y puntos activos de ayuda para ${emergency.name}. Coordina la ayuda material: ofrece recursos, consulta las necesidades validadas y evita saturar la logística.`,
   };
 }
 
@@ -186,36 +186,6 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
           </section>
         )}
 
-        {/* ── 3. DONACIÓN ECONÓMICA (bloque destacado) ─────────────────── */}
-        <section
-          aria-labelledby="donate-heading"
-          className="rounded-lg border-2 border-gray-900 bg-gray-900 p-6 flex flex-col gap-4"
-        >
-          <h2
-            id="donate-heading"
-            className="text-xl font-bold text-white leading-snug"
-          >
-            La forma más eficaz de ayudar ahora
-          </h2>
-          <p className="text-base text-gray-200">
-            La forma más eficaz de ayudar ahora es la{' '}
-            <strong>donación económica a entidades verificadas</strong>. Permite
-            que los profesionales compren exactamente lo que se necesita, donde
-            y cuando se necesita.
-          </p>
-          <a
-            href="#"
-            aria-disabled="true"
-            tabIndex={-1}
-            className="flex items-center justify-center w-full py-4 px-6 text-lg font-semibold text-gray-900 bg-white rounded-lg border-2 border-white opacity-60 cursor-not-allowed focus:outline-none"
-          >
-            Donar a entidades verificadas
-          </a>
-          <p className="text-xs text-gray-400 text-center">
-            Próximamente: enlace a campañas verificadas
-          </p>
-        </section>
-
         {/* ── 3. QUÉ NO LLEVAR ─────────────────────────────────────────── */}
         <section aria-labelledby="dont-bring-heading" className="flex flex-col gap-4">
           <h2
@@ -282,7 +252,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
           {activeResources.length === 0 ? (
             <EmptyState
               title="Aún no hay puntos activos."
-              description="Por ahora, la forma más eficaz de ayudar es la donación económica."
+              description="En cuanto se verifiquen puntos logísticos aparecerán aquí. Mientras tanto, puedes ofrecer un recurso o consultar las necesidades validadas."
             />
           ) : (
             <ul
