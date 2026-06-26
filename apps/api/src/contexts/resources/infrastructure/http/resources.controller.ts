@@ -97,11 +97,11 @@ export class ResourcesController {
   @ApiForbiddenResponse({ description: 'Coordinator role required' })
   async verifyResource(
     @Param('resourceId', ParseUUIDPipe) resourceId: string,
-    @Body() dto: VerifyResourceDto,
+    @Body() _dto: VerifyResourceDto,
     @Req() req: Request & { user?: AuthenticatedUser },
   ): Promise<void> {
     const coordinatorId = req.user?.id ?? 'unknown';
-    await this.verify.execute({ resourceId, level: dto.level, coordinatorId });
+    await this.verify.execute({ resourceId, coordinatorId });
   }
 
   @Post('resources/:resourceId/publish')

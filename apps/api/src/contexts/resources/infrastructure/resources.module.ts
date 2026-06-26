@@ -22,8 +22,13 @@ import {
 import { EVENT_BUS, EventBus } from '../domain/ports/event-bus';
 import { DrizzleResourceRepository } from './drizzle/drizzle-resource.repository';
 import { DrizzleEmergencyStatusReader } from '../../../shared/drizzle-emergency-status-reader';
+import { DrizzleOrganizationAccreditationReader } from '../../../shared/drizzle-organization-accreditation-reader';
 import { BullMqEventBus } from './bullmq-event-bus';
 import { IdentityModule } from '../../identity/infrastructure/identity.module';
+import {
+  ORGANIZATION_ACCREDITATION_READER,
+  OrganizationAccreditationReader,
+} from '../domain/ports/organization-accreditation-reader';
 
 export const EVENT_QUEUE = Symbol('ResourcesEventQueue');
 
@@ -77,11 +82,21 @@ const queueProvider = {
   inject: [RESOURCE_REPOSITORY],
   useFactory: (repo: ResourceRepository) => new GetCoordinationQueue(repo),
 };
+const organizationAccreditationReaderProvider = {
+  provide: ORGANIZATION_ACCREDITATION_READER,
+  inject: [DB],
+  useFactory: (db: Db): OrganizationAccreditationReader =>
+    new DrizzleOrganizationAccreditationReader(db),
+};
+
 const verifyProvider = {
   provide: VerifyResource,
-  inject: [RESOURCE_REPOSITORY, EVENT_BUS],
-  useFactory: (repo: ResourceRepository, bus: EventBus) =>
-    new VerifyResource(repo, bus),
+  inject: [RESOURCE_REPOSITORY, EVENT_BUS, ORGANIZATION_ACCREDITATION_READER],
+  useFactory: (
+    repo: ResourceRepository,
+    bus: EventBus,
+    accreditationReader: OrganizationAccreditationReader,
+  ) => new VerifyResource(repo, bus, accreditationReader),
 };
 const publishProvider = {
   provide: PublishResource,
@@ -102,6 +117,7 @@ const publicResourcesProvider = {
     eventQueueProvider,
     resourceRepositoryProvider,
     emergencyStatusReaderProvider,
+    organizationAccreditationReaderProvider,
     busProvider,
     registerProvider,
     queueProvider,

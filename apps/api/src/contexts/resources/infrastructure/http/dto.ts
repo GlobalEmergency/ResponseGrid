@@ -1,6 +1,5 @@
 import {
   IsEnum,
-  IsNotIn,
   IsString,
   MinLength,
   IsOptional,
@@ -11,11 +10,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  ResourceType,
-  ResourceStage,
-  VerificationLevel,
-} from '../../domain/resource-enums';
+import { ResourceType, ResourceStage } from '../../domain/resource-enums';
 
 export class LocationDto {
   @ApiProperty({ example: 'Calle Mayor 1, Valencia' })
@@ -80,13 +75,9 @@ export class RegisterResourceDto {
   ownerOrganizationId?: string;
 }
 
-export class VerifyResourceDto {
-  @ApiProperty({
-    enum: VerificationLevel,
-    example: VerificationLevel.Verified,
-    description: 'Must not be "unverified"',
-  })
-  @IsEnum(VerificationLevel)
-  @IsNotIn([VerificationLevel.Unverified])
-  level!: VerificationLevel;
-}
+/**
+ * The coordinator only initiates verification; the actual resulting level
+ * (Verified vs Official) is derived server-side from the organization's
+ * accreditation status. This DTO is intentionally empty.
+ */
+export class VerifyResourceDto {}

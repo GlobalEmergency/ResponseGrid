@@ -163,7 +163,7 @@ describe('Coordinator scope authz (e2e)', () => {
       await request(server)
         .post(`/resources/${resourceId}/verify`)
         .set('Authorization', `Bearer ${coordToken}`)
-        .send({ level: 'verified' })
+        .send({})
         .expect(204);
     });
 
@@ -193,7 +193,7 @@ describe('Coordinator scope authz (e2e)', () => {
       await request(server)
         .post(`/resources/${resourceId}/verify`)
         .set('Authorization', `Bearer ${coordToken}`)
-        .send({ level: 'verified' })
+        .send({})
         .expect(403);
     });
 
@@ -201,7 +201,7 @@ describe('Coordinator scope authz (e2e)', () => {
       await request(server)
         .post('/resources/00000000-0000-4000-8000-000000000099/verify')
         .set('Authorization', `Bearer ${coordToken}`)
-        .send({ level: 'verified' })
+        .send({})
         .expect(404);
     });
   });
@@ -223,7 +223,7 @@ describe('Coordinator scope authz (e2e)', () => {
       await request(server)
         .post(`/resources/${resourceId}/verify`)
         .set('Authorization', `Bearer ${coordToken}`)
-        .send({ level: 'verified' })
+        .send({})
         .expect(204);
 
       await request(server)

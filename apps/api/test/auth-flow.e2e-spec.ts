@@ -207,7 +207,7 @@ describe('Auth flow (e2e)', () => {
     it('returns 401 without token', async () => {
       await request(server)
         .post(`/resources/${resourceId}/verify`)
-        .send({ level: 'verified' })
+        .send({})
         .expect(401);
     });
 
@@ -215,7 +215,7 @@ describe('Auth flow (e2e)', () => {
       await request(server)
         .post(`/resources/${resourceId}/verify`)
         .set('Authorization', `Bearer ${coordToken}`)
-        .send({ level: 'verified' })
+        .send({})
         .expect(204);
     });
   });

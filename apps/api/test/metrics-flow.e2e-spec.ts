@@ -209,7 +209,7 @@ describe('Metrics endpoint (e2e)', () => {
     await request(server)
       .post(`/resources/${(r1.body as { id: string }).id}/verify`)
       .set('Authorization', `Bearer ${coordToken}`)
-      .send({ level: 'verified' })
+      .send({})
       .expect(204);
 
     await request(server)

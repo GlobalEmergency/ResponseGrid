@@ -142,7 +142,7 @@ describe('Resource flow (e2e)', () => {
     await request(server)
       .post(`/resources/${id}/verify`)
       .set('Authorization', `Bearer ${coordToken}`)
-      .send({ level: 'verified' })
+      .send({})
       .expect(204);
     await request(server)
       .post(`/resources/${id}/publish`)
@@ -189,7 +189,7 @@ describe('Resource flow (e2e)', () => {
     await request(server)
       .post(`/resources/${nonExistentId}/verify`)
       .set('Authorization', `Bearer ${coordToken}`)
-      .send({ level: 'verified' })
+      .send({})
       .expect(404);
   });
 

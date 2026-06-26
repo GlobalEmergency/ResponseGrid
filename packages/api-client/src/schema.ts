@@ -81,7 +81,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Verify a resource (coordinator only) */
+        /** Verify a resource (coordinator of the resource's emergency only) */
         post: operations["ResourcesController_verifyResource"];
         delete?: never;
         options?: never;
@@ -98,7 +98,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Publish a resource (coordinator only) */
+        /** Publish a resource (coordinator of the resource's emergency only) */
         post: operations["ResourcesController_publishResource"];
         delete?: never;
         options?: never;
@@ -175,6 +175,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/emergencies/{emergencyId}/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pause an active emergency (coordinator only) */
+        post: operations["EmergenciesController_pauseEmergency"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resume a paused emergency (coordinator only) */
+        post: operations["EmergenciesController_resumeEmergency"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/announcement": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Publish official announcement for an emergency (coordinator only) */
+        put: operations["EmergenciesController_publishEmergencyAnnouncement"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/emergencies/{emergencyId}/needs": {
         parameters: {
             query?: never;
@@ -235,7 +286,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Validate a need (coordinator only) */
+        /** Validate a need (coordinator of the need's emergency only) */
         post: operations["NeedsController_validate"];
         delete?: never;
         options?: never;
@@ -252,7 +303,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Assign a managing organization to a need (coordinator only) */
+        /** Assign a managing organization to a need (coordinator of the need's emergency only) */
         post: operations["NeedsController_assignManager"];
         delete?: never;
         options?: never;
@@ -330,6 +381,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/accreditations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List accreditations (admin only) */
+        get: operations["AccreditationsController_listAccreditations"];
+        put?: never;
+        /** Grant accreditation to an organization (admin only) */
+        post: operations["AccreditationsController_grantAccreditation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accreditations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Revoke an accreditation (admin only) */
+        delete: operations["AccreditationsController_revokeAccreditation"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/geocode": {
         parameters: {
             query?: never;
@@ -357,57 +443,6 @@ export interface paths {
         /** Get aggregated metrics for an emergency (public) */
         get: operations["MetricsController_metrics"];
         put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/emergencies/{id}/pause": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: { id: string };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Pause intake for an emergency (coordinator only) */
-        post: operations["EmergenciesController_pause"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/emergencies/{id}/resume": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: { id: string };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Resume intake for a paused emergency (coordinator only) */
-        post: operations["EmergenciesController_resume"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/emergencies/{id}/announcement": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: { id: string };
-            cookie?: never;
-        };
-        get?: never;
-        /** Update the official announcement for an emergency (coordinator only) */
-        put: operations["EmergenciesController_updateAnnouncement"];
         post?: never;
         delete?: never;
         options?: never;
@@ -496,14 +531,7 @@ export interface components {
              */
             id: string;
         };
-        VerifyResourceDto: {
-            /**
-             * @description Must not be "unverified"
-             * @example verified
-             * @enum {string}
-             */
-            level: "unverified" | "verified" | "official";
-        };
+        VerifyResourceDto: Record<string, never>;
         LocationViewDto: {
             /** @example Calle Mayor 1, Valencia */
             address: string;
@@ -575,15 +603,18 @@ export interface components {
             slug: string;
             /** @example VE */
             country: string;
-            /** @description Lifecycle status of the emergency */
-            status: 'active' | 'paused' | 'closed';
-            /** @description Official coordinator announcement, or null if none */
-            announcement: string | null;
-            /** @description ISO 8601 timestamp of the last update */
+            /**
+             * @example active
+             * @enum {string}
+             */
+            status: "active" | "paused" | "closed";
+            /** @example El puente de acceso norte está cortado. */
+            announcement: Record<string, never> | null;
+            /** @example 2026-06-25T10:00:00.000Z */
             updatedAt: string;
         };
-        UpdateAnnouncementDto: {
-            /** @description Official announcement message */
+        PublishAnnouncementDto: {
+            /** @example Se suspenden las operaciones de rescate hasta nuevo aviso. */
             message: string;
         };
         NeedLocationDto: {
@@ -752,6 +783,36 @@ export interface components {
         AddMemberDto: {
             /** @example member@example.com */
             email: string;
+        };
+        GrantAccreditationDto: {
+            /**
+             * Format: uuid
+             * @description Organization to accredit
+             */
+            organizationId: string;
+            /** @description Scope: "global" or { emergencyId: "<uuid>" } */
+            scope: "global" | {
+                /** Format: uuid */
+                emergencyId: string;
+            };
+            /** @description Free-text evidence / justification */
+            evidence?: string;
+        };
+        AccreditationResponseDto: {
+            /** Format: uuid */
+            id: string;
+        };
+        AccreditationViewDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            organizationId: string;
+            scope: Record<string, never>;
+            /** Format: uuid */
+            grantedByUserId: string;
+            /** @description ISO 8601 timestamp */
+            grantedAt: string;
+            evidence?: Record<string, never> | null;
         };
         GeocodeResultDto: {
             /** @example Madrid, Community of Madrid, Spain */
@@ -1235,6 +1296,157 @@ export interface operations {
             };
         };
     };
+    EmergenciesController_pauseEmergency: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Emergency paused */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Emergency not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid transition (emergency is not active) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EmergenciesController_resumeEmergency: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Emergency resumed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Emergency not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid transition (emergency is not paused) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EmergenciesController_publishEmergencyAnnouncement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublishAnnouncementDto"];
+            };
+        };
+        responses: {
+            /** @description Announcement published */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Emergency not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     NeedsController_create: {
         parameters: {
             query?: never;
@@ -1649,6 +1861,125 @@ export interface operations {
             };
         };
     };
+    AccreditationsController_listAccreditations: {
+        parameters: {
+            query?: {
+                /** @description Filter by organization UUID */
+                organizationId?: string;
+                /** @description Filter by emergency UUID */
+                emergencyId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of accreditations */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccreditationViewDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Admin access required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AccreditationsController_grantAccreditation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GrantAccreditationDto"];
+            };
+        };
+        responses: {
+            /** @description Accreditation granted */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccreditationResponseDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Admin access required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AccreditationsController_revokeAccreditation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Accreditation UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Accreditation revoked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Admin access required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Accreditation not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     GeocodingController_search: {
         parameters: {
             query: {
@@ -1692,113 +2023,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["EmergencyMetricsDto"];
                 };
-            };
-        };
-    };
-    EmergenciesController_pause: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: { id: string };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Emergency paused */
-            204: {
-                headers: { [name: string]: unknown };
-                content?: never;
-            };
-            /** @description Missing or invalid token */
-            401: {
-                headers: { [name: string]: unknown };
-                content?: never;
-            };
-            /** @description Coordinator role required */
-            403: {
-                headers: { [name: string]: unknown };
-                content?: never;
-            };
-            /** @description Emergency not found */
-            404: {
-                headers: { [name: string]: unknown };
-                content?: never;
-            };
-            /** @description Emergency already paused */
-            409: {
-                headers: { [name: string]: unknown };
-                content?: never;
-            };
-        };
-    };
-    EmergenciesController_resume: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: { id: string };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Emergency resumed */
-            204: {
-                headers: { [name: string]: unknown };
-                content?: never;
-            };
-            /** @description Missing or invalid token */
-            401: {
-                headers: { [name: string]: unknown };
-                content?: never;
-            };
-            /** @description Coordinator role required */
-            403: {
-                headers: { [name: string]: unknown };
-                content?: never;
-            };
-            /** @description Emergency not found */
-            404: {
-                headers: { [name: string]: unknown };
-                content?: never;
-            };
-            /** @description Emergency is not paused */
-            409: {
-                headers: { [name: string]: unknown };
-                content?: never;
-            };
-        };
-    };
-    EmergenciesController_updateAnnouncement: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: { id: string };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateAnnouncementDto"];
-            };
-        };
-        responses: {
-            /** @description Announcement updated */
-            204: {
-                headers: { [name: string]: unknown };
-                content?: never;
-            };
-            /** @description Missing or invalid token */
-            401: {
-                headers: { [name: string]: unknown };
-                content?: never;
-            };
-            /** @description Coordinator role required */
-            403: {
-                headers: { [name: string]: unknown };
-                content?: never;
-            };
-            /** @description Emergency not found */
-            404: {
-                headers: { [name: string]: unknown };
-                content?: never;
             };
         };
     };
