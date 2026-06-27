@@ -425,7 +425,10 @@ describe('DrizzleResourceRepository (integration)', () => {
   });
 
   it('findByExternal returns null when no match', async () => {
-    const result = await repo.findByExternal('nonexistent-source', 'nonexistent-id');
+    const result = await repo.findByExternal(
+      'nonexistent-source',
+      'nonexistent-id',
+    );
     expect(result).toBeNull();
   });
 
@@ -477,17 +480,22 @@ describe('DrizzleResourceRepository (integration)', () => {
         await repo.save(makeVisible(`Visible ${i}`));
       }
       // one hidden (default)
-      await repo.save(Resource.register({
-        id: ResourceId.create(),
-        emergencyId: EmergencyId.fromString(EM),
-        type: ResourceType.CollectionPoint,
-        stage: ResourceStage.Origin,
-        name: 'Hidden One',
-        location: baseLocation,
-        ownerUserId: OWNER_ID,
-      }));
+      await repo.save(
+        Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'Hidden One',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+        }),
+      );
 
-      const { items, total } = await repo.findVisiblePaged(EmergencyId.fromString(EM), { page: 1, limit: 2 });
+      const { items, total } = await repo.findVisiblePaged(
+        EmergencyId.fromString(EM),
+        { page: 1, limit: 2 },
+      );
       expect(items).toHaveLength(2);
       expect(total).toBe(5);
     });
@@ -527,8 +535,11 @@ describe('DrizzleResourceRepository (integration)', () => {
       await repo.save(withWater);
       await repo.save(withFood);
 
-      const { items, total } = await repo.findVisiblePaged(EmergencyId.fromString(EM), { page: 1, limit: 10, category: 'water' });
-      expect(items.every(r => r.accepts.includes('water'))).toBe(true);
+      const { items, total } = await repo.findVisiblePaged(
+        EmergencyId.fromString(EM),
+        { page: 1, limit: 10, category: 'water' },
+      );
+      expect(items.every((r) => r.accepts.includes('water'))).toBe(true);
       expect(total).toBe(1);
       expect(items[0].name).toBe('Water Resource');
     });
@@ -568,7 +579,10 @@ describe('DrizzleResourceRepository (integration)', () => {
       await repo.save(ve);
       await repo.save(co);
 
-      const { items, total } = await repo.findVisiblePaged(EmergencyId.fromString(EM), { page: 1, limit: 10, country: 'VE' });
+      const { items, total } = await repo.findVisiblePaged(
+        EmergencyId.fromString(EM),
+        { page: 1, limit: 10, country: 'VE' },
+      );
       expect(total).toBe(1);
       expect(items[0].name).toBe('VE Resource');
     });
@@ -576,7 +590,12 @@ describe('DrizzleResourceRepository (integration)', () => {
 
   describe('facets', () => {
     it('counts byCategory (unnesting accepts), byCountry, and total visible only', async () => {
-      const makeResource = (name: string, accepts: string[], country: string | null, visible: boolean) => {
+      const makeResource = (
+        name: string,
+        accepts: string[],
+        country: string | null,
+        visible: boolean,
+      ) => {
         const base = Resource.register({
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(EM),
@@ -604,14 +623,16 @@ describe('DrizzleResourceRepository (integration)', () => {
       await repo.save(makeResource('R2', ['water'], 'CO', true));
       await repo.save(makeResource('R3 hidden', ['water'], 'VE', false));
 
-      const { byCategory, byCountry, total } = await repo.facets(EmergencyId.fromString(EM));
+      const { byCategory, byCountry, total } = await repo.facets(
+        EmergencyId.fromString(EM),
+      );
 
       expect(total).toBe(2);
       expect(byCategory['water']).toBe(2); // R1 and R2
-      expect(byCategory['food']).toBe(1);  // R1 only
+      expect(byCategory['food']).toBe(1); // R1 only
       expect(byCategory['water']).not.toBe(3); // R3 excluded
-      expect(byCountry['VE']).toBe(1);  // R1
-      expect(byCountry['CO']).toBe(1);  // R2
+      expect(byCountry['VE']).toBe(1); // R1
+      expect(byCountry['CO']).toBe(1); // R2
     });
   });
 

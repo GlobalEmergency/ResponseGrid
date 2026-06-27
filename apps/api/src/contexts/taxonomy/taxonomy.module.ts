@@ -10,8 +10,7 @@ import { DrizzleCategoryRepository } from './infrastructure/drizzle/drizzle-cate
 const categoryRepositoryProvider = {
   provide: CATEGORY_REPOSITORY,
   inject: [DB],
-  useFactory: (db: Db): CategoryRepository =>
-    new DrizzleCategoryRepository(db),
+  useFactory: (db: Db): CategoryRepository => new DrizzleCategoryRepository(db),
 };
 
 @Module({

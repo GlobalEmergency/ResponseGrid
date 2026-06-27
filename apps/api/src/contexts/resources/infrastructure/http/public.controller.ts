@@ -20,7 +20,8 @@ export class PublicController {
 
   @Get('emergencies/:emergencyId/public/resources')
   @ApiOperation({
-    summary: 'List published resources for an emergency (paginated + filterable)',
+    summary:
+      'List published resources for an emergency (paginated + filterable)',
   })
   @ApiParam({
     name: 'emergencyId',
@@ -46,7 +47,8 @@ export class PublicController {
 
   @Get('emergencies/:emergencyId/public/resources/facets')
   @ApiOperation({
-    summary: 'Get facets (counts by category and country) for visible resources',
+    summary:
+      'Get facets (counts by category and country) for visible resources',
   })
   @ApiParam({
     name: 'emergencyId',

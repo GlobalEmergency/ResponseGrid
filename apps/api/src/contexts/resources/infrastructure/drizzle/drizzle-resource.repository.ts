@@ -175,7 +175,10 @@ export class DrizzleResourceRepository implements ResourceRepository {
     return rows.map((r) => Resource.fromSnapshot(rowToSnapshot(r)));
   }
 
-  async findByExternal(sourceName: string, externalId: string): Promise<Resource | null> {
+  async findByExternal(
+    sourceName: string,
+    externalId: string,
+  ): Promise<Resource | null> {
     const rows = await this.db
       .select()
       .from(resourcesTable)
@@ -193,7 +196,11 @@ export class DrizzleResourceRepository implements ResourceRepository {
     emergencyId: EmergencyId,
     q: { page: number; limit: number; category?: string; country?: string },
   ): Promise<{ items: Resource[]; total: number }> {
-    const VISIBLE = [PublicStatus.Active, PublicStatus.Saturated, PublicStatus.Paused];
+    const VISIBLE = [
+      PublicStatus.Active,
+      PublicStatus.Saturated,
+      PublicStatus.Paused,
+    ];
     const offset = (q.page - 1) * q.limit;
 
     const conditions = [
@@ -202,7 +209,9 @@ export class DrizzleResourceRepository implements ResourceRepository {
     ];
 
     if (q.category) {
-      conditions.push(sql`${resourcesTable.accepts} @> ARRAY[${q.category}]::text[]`);
+      conditions.push(
+        sql`${resourcesTable.accepts} @> ARRAY[${q.category}]::text[]`,
+      );
     }
     if (q.country) {
       conditions.push(eq(resourcesTable.country, q.country));
@@ -217,10 +226,7 @@ export class DrizzleResourceRepository implements ResourceRepository {
         .where(whereClause)
         .limit(q.limit)
         .offset(offset),
-      this.db
-        .select({ cnt: count() })
-        .from(resourcesTable)
-        .where(whereClause),
+      this.db.select({ cnt: count() }).from(resourcesTable).where(whereClause),
     ]);
 
     return {
@@ -229,16 +235,25 @@ export class DrizzleResourceRepository implements ResourceRepository {
     };
   }
 
-  async facets(
-    emergencyId: EmergencyId,
-  ): Promise<{ byCategory: Record<string, number>; byCountry: Record<string, number>; total: number }> {
-    const VISIBLE = [PublicStatus.Active, PublicStatus.Saturated, PublicStatus.Paused];
+  async facets(emergencyId: EmergencyId): Promise<{
+    byCategory: Record<string, number>;
+    byCountry: Record<string, number>;
+    total: number;
+  }> {
+    const VISIBLE = [
+      PublicStatus.Active,
+      PublicStatus.Saturated,
+      PublicStatus.Paused,
+    ];
     const visibleWhere = and(
       eq(resourcesTable.emergencyId, emergencyId.value),
       inArray(resourcesTable.publicStatus, VISIBLE),
     );
 
-    const visibleArr = sql.join(VISIBLE.map((v) => sql`${v}`), sql`, `);
+    const visibleArr = sql.join(
+      VISIBLE.map((v) => sql`${v}`),
+      sql`, `,
+    );
     const [totalRows, categoryRows, countryRows] = await Promise.all([
       this.db.select({ cnt: count() }).from(resourcesTable).where(visibleWhere),
       this.db.execute<{ cat: string; cnt: string }>(sql`

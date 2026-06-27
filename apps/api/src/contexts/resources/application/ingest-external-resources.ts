@@ -24,10 +24,7 @@ import { ResourceRepository } from '../domain/ports/resource.repository';
 import { Resource } from '../domain/resource';
 import { ResourceId } from '../domain/resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import {
-  VerificationLevel,
-  PublicStatus,
-} from '../domain/resource-enums';
+import { VerificationLevel, PublicStatus } from '../domain/resource-enums';
 import { CategoryResolver } from '../../taxonomy/domain/category-resolver';
 import { ResourceMapper } from './acopiove-mapper';
 
@@ -67,9 +64,14 @@ export class IngestExternalResources {
         continue;
       }
 
-      const accepts = this.categoryResolver.resolveMany(mapped.acceptsRawLabels);
+      const accepts = this.categoryResolver.resolveMany(
+        mapped.acceptsRawLabels,
+      );
 
-      const existing = await this.repo.findByExternal(sourceName, mapped.externalId);
+      const existing = await this.repo.findByExternal(
+        sourceName,
+        mapped.externalId,
+      );
 
       if (existing !== null) {
         // UPDATE: rebuild the aggregate preserving local-owned fields

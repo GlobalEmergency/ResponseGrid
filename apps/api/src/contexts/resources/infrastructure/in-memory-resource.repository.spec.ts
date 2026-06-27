@@ -80,7 +80,11 @@ describe('InMemoryResourceRepository', () => {
   });
 
   describe('findVisiblePaged', () => {
-    const makeVisible = (emergencyId: string, name: string, opts: { accepts?: string[]; country?: string } = {}) => {
+    const makeVisible = (
+      emergencyId: string,
+      name: string,
+      opts: { accepts?: string[]; country?: string } = {},
+    ) => {
       const r = Resource.register({
         id: ResourceId.create(),
         emergencyId: EmergencyId.fromString(emergencyId),
@@ -105,17 +109,25 @@ describe('InMemoryResourceRepository', () => {
       // hidden resource should not appear
       await repo.save(make(EM_A, 'Hidden'));
 
-      const { items, total } = await repo.findVisiblePaged(EmergencyId.fromString(EM_A), { page: 1, limit: 2 });
+      const { items, total } = await repo.findVisiblePaged(
+        EmergencyId.fromString(EM_A),
+        { page: 1, limit: 2 },
+      );
       expect(items).toHaveLength(2);
       expect(total).toBe(5);
     });
 
     it('filters by category', async () => {
       const repo = new InMemoryResourceRepository();
-      await repo.save(makeVisible(EM_A, 'Water', { accepts: ['water', 'food'] }));
+      await repo.save(
+        makeVisible(EM_A, 'Water', { accepts: ['water', 'food'] }),
+      );
       await repo.save(makeVisible(EM_A, 'Food Only', { accepts: ['food'] }));
 
-      const { items, total } = await repo.findVisiblePaged(EmergencyId.fromString(EM_A), { page: 1, limit: 10, category: 'water' });
+      const { items, total } = await repo.findVisiblePaged(
+        EmergencyId.fromString(EM_A),
+        { page: 1, limit: 10, category: 'water' },
+      );
       expect(total).toBe(1);
       expect(items[0].name).toBe('Water');
     });
@@ -125,7 +137,10 @@ describe('InMemoryResourceRepository', () => {
       await repo.save(makeVisible(EM_A, 'VE Resource', { country: 'VE' }));
       await repo.save(makeVisible(EM_A, 'CO Resource', { country: 'CO' }));
 
-      const { items, total } = await repo.findVisiblePaged(EmergencyId.fromString(EM_A), { page: 1, limit: 10, country: 'VE' });
+      const { items, total } = await repo.findVisiblePaged(
+        EmergencyId.fromString(EM_A),
+        { page: 1, limit: 10, country: 'VE' },
+      );
       expect(total).toBe(1);
       expect(items[0].name).toBe('VE Resource');
     });
@@ -134,7 +149,11 @@ describe('InMemoryResourceRepository', () => {
   describe('facets', () => {
     it('counts byCategory, byCountry and total (visible only)', async () => {
       const repo = new InMemoryResourceRepository();
-      const makeVis = (name: string, accepts: string[], country: string | null) => {
+      const makeVis = (
+        name: string,
+        accepts: string[],
+        country: string | null,
+      ) => {
         const r = Resource.register({
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(EM_A),
@@ -156,7 +175,9 @@ describe('InMemoryResourceRepository', () => {
       // hidden should not count
       await repo.save(make(EM_A, 'Hidden'));
 
-      const { byCategory, byCountry, total } = await repo.facets(EmergencyId.fromString(EM_A));
+      const { byCategory, byCountry, total } = await repo.facets(
+        EmergencyId.fromString(EM_A),
+      );
       expect(total).toBe(2);
       expect(byCategory['water']).toBe(2);
       expect(byCategory['food']).toBe(1);

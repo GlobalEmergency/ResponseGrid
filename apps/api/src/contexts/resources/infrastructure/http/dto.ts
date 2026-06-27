@@ -76,17 +76,26 @@ export class RegisterResourceDto {
   @IsString()
   ownerOrganizationId?: string;
 
-  @ApiPropertyOptional({ example: '+58 212 555 0000', description: 'Contact info for this resource point' })
+  @ApiPropertyOptional({
+    example: '+58 212 555 0000',
+    description: 'Contact info for this resource point',
+  })
   @IsOptional()
   @IsString()
   contact?: string;
 
-  @ApiPropertyOptional({ example: 'Lun-Vie 08-18', description: 'Operating schedule' })
+  @ApiPropertyOptional({
+    example: 'Lun-Vie 08-18',
+    description: 'Operating schedule',
+  })
   @IsOptional()
   @IsString()
   schedule?: string;
 
-  @ApiPropertyOptional({ example: 'Juan Pérez', description: 'Responsible manager name' })
+  @ApiPropertyOptional({
+    example: 'Juan Pérez',
+    description: 'Responsible manager name',
+  })
   @IsOptional()
   @IsString()
   manager?: string;
@@ -101,7 +110,10 @@ export class RegisterResourceDto {
   @IsString({ each: true })
   accepts?: string[];
 
-  @ApiPropertyOptional({ example: 'VE', description: 'ISO 3166-1 alpha-2 country code' })
+  @ApiPropertyOptional({
+    example: 'VE',
+    description: 'ISO 3166-1 alpha-2 country code',
+  })
   @IsOptional()
   @IsString()
   country?: string;
@@ -131,14 +143,22 @@ export class UpdateResourcePublicStatusDto {
 }
 
 export class PublicResourcesQueryDto {
-  @ApiPropertyOptional({ description: 'Page number (1-based)', example: 1, default: 1 })
+  @ApiPropertyOptional({
+    description: 'Page number (1-based)',
+    example: 1,
+    default: 1,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   page?: number;
 
-  @ApiPropertyOptional({ description: 'Items per page (max 100)', example: 50, default: 50 })
+  @ApiPropertyOptional({
+    description: 'Items per page (max 100)',
+    example: 50,
+    default: 50,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -146,12 +166,18 @@ export class PublicResourcesQueryDto {
   @Max(100)
   limit?: number;
 
-  @ApiPropertyOptional({ description: 'Filter by category slug', example: 'water' })
+  @ApiPropertyOptional({
+    description: 'Filter by category slug',
+    example: 'water',
+  })
   @IsOptional()
   @IsString()
   category?: string;
 
-  @ApiPropertyOptional({ description: 'Filter by ISO 3166-1 alpha-2 country code', example: 'VE' })
+  @ApiPropertyOptional({
+    description: 'Filter by ISO 3166-1 alpha-2 country code',
+    example: 'VE',
+  })
   @IsOptional()
   @IsString()
   country?: string;

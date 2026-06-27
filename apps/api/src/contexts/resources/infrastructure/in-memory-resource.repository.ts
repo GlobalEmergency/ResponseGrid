@@ -88,7 +88,10 @@ export class InMemoryResourceRepository implements ResourceRepository {
     return Promise.resolve(result);
   }
 
-  findByExternal(sourceName: string, externalId: string): Promise<Resource | null> {
+  findByExternal(
+    sourceName: string,
+    externalId: string,
+  ): Promise<Resource | null> {
     const snap = [...this.store.values()].find(
       (s) =>
         s.provenance?.sourceName === sourceName &&
@@ -117,13 +120,17 @@ export class InMemoryResourceRepository implements ResourceRepository {
     }
     const total = all.length;
     const offset = (q.page - 1) * q.limit;
-    const items = all.slice(offset, offset + q.limit).map((s) => Resource.fromSnapshot(s));
+    const items = all
+      .slice(offset, offset + q.limit)
+      .map((s) => Resource.fromSnapshot(s));
     return Promise.resolve({ items, total });
   }
 
-  facets(
-    emergencyId: EmergencyId,
-  ): Promise<{ byCategory: Record<string, number>; byCountry: Record<string, number>; total: number }> {
+  facets(emergencyId: EmergencyId): Promise<{
+    byCategory: Record<string, number>;
+    byCountry: Record<string, number>;
+    total: number;
+  }> {
     const visible = new Set<PublicStatus>([
       PublicStatus.Active,
       PublicStatus.Saturated,

@@ -100,7 +100,11 @@ describe('GetPublicResources', () => {
         location: baseLocation,
         ownerUserId: `user-${i}`,
       });
-      await verify.execute({ resourceId: id, level: 'verified' as const, coordinatorId: 'c1' });
+      await verify.execute({
+        resourceId: id,
+        level: 'verified' as const,
+        coordinatorId: 'c1',
+      });
       await publish.execute({ resourceId: id });
     }
 
@@ -148,10 +152,16 @@ describe('GetPublicResources', () => {
       country: 'VE',
       city: 'Caracas',
     });
-    await verify.execute({ resourceId: id, level: 'verified' as const, coordinatorId: 'c1' });
+    await verify.execute({
+      resourceId: id,
+      level: 'verified' as const,
+      coordinatorId: 'c1',
+    });
     await publish.execute({ resourceId: id });
 
-    const result = await new GetPublicResources(repo).execute({ emergencyId: EM });
+    const result = await new GetPublicResources(repo).execute({
+      emergencyId: EM,
+    });
 
     expect(result.items[0]).toMatchObject({
       accepts: ['water', 'food'],

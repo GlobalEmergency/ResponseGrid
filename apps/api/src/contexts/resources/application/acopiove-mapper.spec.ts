@@ -40,13 +40,17 @@ describe('acopioveMapper', () => {
   });
 
   it('sets acceptsRawLabels from recibe[] without resolving', () => {
-    const result = acopioveMapper(makeRecord({ recibe: ['agua', 'ropa', 'medicamentos'] }));
+    const result = acopioveMapper(
+      makeRecord({ recibe: ['agua', 'ropa', 'medicamentos'] }),
+    );
     expect(result).not.toBeNull();
     expect(result!.acceptsRawLabels).toEqual(['agua', 'ropa', 'medicamentos']);
   });
 
   it('maps ciudad → city, pais → country', () => {
-    const result = acopioveMapper(makeRecord({ ciudad: 'Sevilla', pais: 'España' }));
+    const result = acopioveMapper(
+      makeRecord({ ciudad: 'Sevilla', pais: 'España' }),
+    );
     expect(result).not.toBeNull();
     expect(result!.city).toBe('Sevilla');
     expect(result!.country).toBe('España');
@@ -54,7 +58,11 @@ describe('acopioveMapper', () => {
 
   it('maps contacto → contact, horario → schedule, responsable → manager', () => {
     const result = acopioveMapper(
-      makeRecord({ contacto: '600111222', horario: '9-18h', responsable: 'Juan' }),
+      makeRecord({
+        contacto: '600111222',
+        horario: '9-18h',
+        responsable: 'Juan',
+      }),
     );
     expect(result).not.toBeNull();
     expect(result!.contact).toBe('600111222');
@@ -102,7 +110,9 @@ describe('acopioveMapper', () => {
   });
 
   it('accepts string coordinates (API may return "34.0456000" as string)', () => {
-    const result = acopioveMapper(makeRecord({ latitude: '39.4699', longitude: '-0.3763' }));
+    const result = acopioveMapper(
+      makeRecord({ latitude: '39.4699', longitude: '-0.3763' }),
+    );
     expect(result).not.toBeNull();
     expect(result!.latitude).toBeCloseTo(39.4699);
     expect(result!.longitude).toBeCloseTo(-0.3763);
