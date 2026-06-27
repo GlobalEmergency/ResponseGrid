@@ -116,6 +116,38 @@ describe('Files upload (e2e)', () => {
       .expect(422);
   });
 
+  it('POST /files with image/svg+xml is rejected with 422 (XSS prevention)', async () => {
+    const svgBuf = Buffer.from(
+      '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>',
+    );
+    await request(server)
+      .post('/files')
+      .set('Authorization', `Bearer ${userToken}`)
+      .attach('file', svgBuf, {
+        filename: 'evil.svg',
+        contentType: 'image/svg+xml',
+      })
+      .expect(422);
+  });
+
+  it('GET /files/:key response includes X-Content-Type-Options: nosniff', async () => {
+    const pngBuf = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      'base64',
+    );
+    const uploadRes = await request(server)
+      .post('/files')
+      .set('Authorization', `Bearer ${userToken}`)
+      .attach('file', pngBuf, {
+        filename: 'nosniff-test.png',
+        contentType: 'image/png',
+      })
+      .expect(201);
+    const { key } = uploadRes.body as { key: string; url: string };
+    const getRes = await request(server).get(`/files/${key}`).expect(200);
+    expect(getRes.headers['x-content-type-options']).toBe('nosniff');
+  });
+
   it('GET /files/:key with unknown key returns 404', async () => {
     await request(server).get('/files/nonexistent-key.png').expect(404);
   });

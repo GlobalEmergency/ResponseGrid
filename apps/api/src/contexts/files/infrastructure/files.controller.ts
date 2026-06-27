@@ -55,10 +55,20 @@ export class FilesController {
         file: Express.Multer.File,
         cb: (error: Error | null, acceptFile: boolean) => void,
       ) => {
+        // SVG is excluded: it can embed <script> tags and execute JS same-origin.
+        if (file.mimetype === 'image/svg+xml') {
+          cb(
+            new UnprocessableEntityException(
+              `Unsupported content-type "image/svg+xml"; SVG uploads are not permitted`,
+            ),
+            false,
+          );
+          return;
+        }
         if (!file.mimetype.startsWith('image/')) {
           cb(
             new UnprocessableEntityException(
-              `Unsupported content-type "${file.mimetype}"; only image/* is accepted`,
+              `Unsupported content-type "${file.mimetype}"; only image/* (JPEG, PNG, WebP, …) is accepted`,
             ),
             false,
           );
@@ -116,7 +126,9 @@ export class FilesController {
       throw new NotFoundException(`File "${key}" not found`);
     }
 
-    // Derive content-type from extension
+    // Derive content-type from extension.
+    // SVG is intentionally absent: uploads are rejected at POST time, so a
+    // stored SVG key should never occur; fall back to octet-stream if it does.
     const ext = key.split('.').pop()?.toLowerCase() ?? '';
     const contentTypeMap: Record<string, string> = {
       jpg: 'image/jpeg',
@@ -124,13 +136,14 @@ export class FilesController {
       png: 'image/png',
       gif: 'image/gif',
       webp: 'image/webp',
-      svg: 'image/svg+xml',
       bmp: 'image/bmp',
       tiff: 'image/tiff',
       bin: 'application/octet-stream',
     };
     const contentType = contentTypeMap[ext] ?? 'application/octet-stream';
     res.setHeader('Content-Type', contentType);
+    // Prevent MIME-sniffing attacks (defence-in-depth alongside the SVG block).
+    res.setHeader('X-Content-Type-Options', 'nosniff');
     stream.pipe(res);
   }
 }
