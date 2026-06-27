@@ -7,6 +7,7 @@ import {
   Min,
   Max,
   ValidateNested,
+  IsArray,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -73,6 +74,41 @@ export class RegisterResourceDto {
   @IsOptional()
   @IsString()
   ownerOrganizationId?: string;
+
+  @ApiPropertyOptional({ example: '+58 212 555 0000', description: 'Contact info for this resource point' })
+  @IsOptional()
+  @IsString()
+  contact?: string;
+
+  @ApiPropertyOptional({ example: 'Lun-Vie 08-18', description: 'Operating schedule' })
+  @IsOptional()
+  @IsString()
+  schedule?: string;
+
+  @ApiPropertyOptional({ example: 'Juan Pérez', description: 'Responsible manager name' })
+  @IsOptional()
+  @IsString()
+  manager?: string;
+
+  @ApiPropertyOptional({
+    type: [String],
+    example: ['water', 'food'],
+    description: 'Category slugs this resource accepts',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  accepts?: string[];
+
+  @ApiPropertyOptional({ example: 'VE', description: 'ISO 3166-1 alpha-2 country code' })
+  @IsOptional()
+  @IsString()
+  country?: string;
+
+  @ApiPropertyOptional({ example: 'Caracas', description: 'City name' })
+  @IsOptional()
+  @IsString()
+  city?: string;
 }
 
 /**

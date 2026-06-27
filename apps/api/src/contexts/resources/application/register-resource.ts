@@ -1,7 +1,7 @@
 import { ResourceRepository } from '../domain/ports/resource.repository';
 import { EventBus } from '../domain/ports/event-bus';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
-import { Resource } from '../domain/resource';
+import { Resource, Provenance } from '../domain/resource';
 import { ResourceId } from '../domain/resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { ResourceType, ResourceStage } from '../domain/resource-enums';
@@ -19,6 +19,14 @@ export interface RegisterResourceCommand {
   location: LocationProps;
   ownerUserId: string;
   ownerOrganizationId?: string | null;
+  // enriched optional fields
+  contact?: string | null;
+  schedule?: string | null;
+  manager?: string | null;
+  accepts?: string[];
+  country?: string | null;
+  city?: string | null;
+  provenance?: Provenance | null;
 }
 
 export class RegisterResource {
@@ -47,6 +55,13 @@ export class RegisterResource {
       location: Location.create(cmd.location),
       ownerUserId: cmd.ownerUserId,
       ownerOrganizationId: cmd.ownerOrganizationId ?? null,
+      contact: cmd.contact ?? null,
+      schedule: cmd.schedule ?? null,
+      manager: cmd.manager ?? null,
+      accepts: cmd.accepts ?? [],
+      country: cmd.country ?? null,
+      city: cmd.city ?? null,
+      provenance: cmd.provenance ?? null,
     });
     await this.repo.save(resource);
     await this.bus.publish(resource.pullDomainEvents());

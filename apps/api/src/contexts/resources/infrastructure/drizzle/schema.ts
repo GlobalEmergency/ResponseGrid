@@ -4,6 +4,7 @@ import {
   text,
   timestamp,
   doublePrecision,
+  jsonb,
 } from 'drizzle-orm/pg-core';
 
 export const resourcesTable = pgTable('resources', {
@@ -21,4 +22,15 @@ export const resourcesTable = pgTable('resources', {
   verificationLevel: text('verification_level').notNull(),
   publicStatus: text('public_status').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+  // enriched fields (0018_resources_enrich)
+  contact: text('contact'),
+  schedule: text('schedule'),
+  manager: text('manager'),
+  accepts: text('accepts').array(),
+  sourceName: text('source_name'),
+  externalId: text('external_id'),
+  externalUpdatedAt: timestamp('external_updated_at', { withTimezone: true }),
+  country: text('country'),
+  city: text('city'),
+  raw: jsonb('raw'),
 });

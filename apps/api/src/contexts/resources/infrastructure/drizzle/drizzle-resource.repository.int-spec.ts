@@ -305,4 +305,68 @@ describe('DrizzleResourceRepository (integration)', () => {
     );
     expect(counts[PublicStatus.Hidden]).toBe(1);
   });
+
+  it('round-trips enriched fields through Postgres (Task 2)', async () => {
+    const externalUpdatedAt = new Date('2026-06-27T00:00:00.000Z');
+    const r = Resource.register({
+      id: ResourceId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      type: ResourceType.CollectionPoint,
+      stage: ResourceStage.Origin,
+      name: 'Acopio Venezuela',
+      location: baseLocation,
+      ownerUserId: OWNER_ID,
+      accepts: ['water', 'food'],
+      contact: '+58 212 555 0000',
+      schedule: 'Lun-Vie 08-18',
+      manager: 'Juan Pérez',
+      country: 'VE',
+      city: 'Caracas',
+      provenance: {
+        sourceName: 'acopiove.org',
+        externalId: 'abc',
+        externalUpdatedAt,
+        raw: { x: 1 },
+      },
+    });
+
+    await repo.save(r);
+    const found = await repo.findById(r.id);
+
+    expect(found).not.toBeNull();
+    expect(found!.accepts).toEqual(['water', 'food']);
+    expect(found!.contact).toBe('+58 212 555 0000');
+    expect(found!.schedule).toBe('Lun-Vie 08-18');
+    expect(found!.manager).toBe('Juan Pérez');
+    expect(found!.country).toBe('VE');
+    expect(found!.city).toBe('Caracas');
+    expect(found!.provenance?.sourceName).toBe('acopiove.org');
+    expect(found!.provenance?.externalId).toBe('abc');
+    expect(found!.provenance?.externalUpdatedAt).toEqual(externalUpdatedAt);
+    expect(found!.provenance?.raw).toEqual({ x: 1 });
+  });
+
+  it('round-trips resource with no enriched fields (defaults)', async () => {
+    const r = Resource.register({
+      id: ResourceId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      type: ResourceType.Warehouse,
+      stage: ResourceStage.Origin,
+      name: 'Plain Resource',
+      location: baseLocation,
+      ownerUserId: OWNER_ID,
+    });
+
+    await repo.save(r);
+    const found = await repo.findById(r.id);
+
+    expect(found).not.toBeNull();
+    expect(found!.accepts).toEqual([]);
+    expect(found!.contact).toBeNull();
+    expect(found!.schedule).toBeNull();
+    expect(found!.manager).toBeNull();
+    expect(found!.country).toBeNull();
+    expect(found!.city).toBeNull();
+    expect(found!.provenance).toBeNull();
+  });
 });

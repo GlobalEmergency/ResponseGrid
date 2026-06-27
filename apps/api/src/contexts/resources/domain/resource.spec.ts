@@ -198,4 +198,94 @@ describe('Resource', () => {
     expect(restored.ownerOrganizationId).toBe('org-roundtrip');
     expect(restored.description).toBe('Camión de reparto');
   });
+
+  describe('enriched fields (Task 2)', () => {
+    it('exposes accepts, contact, provenance and geo fields when provided', () => {
+      const externalUpdatedAt = new Date('2026-06-27T00:00:00Z');
+      const r = Resource.register({
+        id: ResourceId.create(),
+        emergencyId: EmergencyId.fromString(
+          '11111111-1111-4111-8111-111111111111',
+        ),
+        type: ResourceType.CollectionPoint,
+        stage: ResourceStage.Origin,
+        name: 'Acopio Venezuela',
+        location: makeLocation(),
+        ownerUserId: 'user-enrich',
+        accepts: ['water', 'food'],
+        contact: '+58 212 555 0000',
+        schedule: 'Lun-Vie 08-18',
+        manager: 'Juan Pérez',
+        country: 'VE',
+        city: 'Caracas',
+        provenance: {
+          sourceName: 'acopiove.org',
+          externalId: 'abc123',
+          externalUpdatedAt,
+          raw: { a: 1 },
+        },
+      });
+
+      expect(r.accepts).toEqual(['water', 'food']);
+      expect(r.contact).toBe('+58 212 555 0000');
+      expect(r.schedule).toBe('Lun-Vie 08-18');
+      expect(r.manager).toBe('Juan Pérez');
+      expect(r.country).toBe('VE');
+      expect(r.city).toBe('Caracas');
+      expect(r.provenance).toEqual({
+        sourceName: 'acopiove.org',
+        externalId: 'abc123',
+        externalUpdatedAt,
+        raw: { a: 1 },
+      });
+    });
+
+    it('defaults accepts to [] and all other enriched fields to null when not provided', () => {
+      const r = make();
+      expect(r.accepts).toEqual([]);
+      expect(r.contact).toBeNull();
+      expect(r.schedule).toBeNull();
+      expect(r.manager).toBeNull();
+      expect(r.country).toBeNull();
+      expect(r.city).toBeNull();
+      expect(r.provenance).toBeNull();
+    });
+
+    it('toSnapshot / fromSnapshot round-trip preserves enriched fields', () => {
+      const externalUpdatedAt = new Date('2026-06-27T00:00:00Z');
+      const r = Resource.register({
+        id: ResourceId.create(),
+        emergencyId: EmergencyId.fromString(
+          '11111111-1111-4111-8111-111111111111',
+        ),
+        type: ResourceType.CollectionPoint,
+        stage: ResourceStage.Origin,
+        name: 'Snapshot Enrich',
+        location: makeLocation(),
+        ownerUserId: 'user-snap-enrich',
+        accepts: ['tools'],
+        contact: 'snap@contact.com',
+        country: 'ES',
+        city: 'Madrid',
+        provenance: {
+          sourceName: 'snap-source',
+          externalId: 'snap-ext-1',
+          externalUpdatedAt,
+          raw: { x: 42 },
+        },
+      });
+
+      const snap = r.toSnapshot();
+      const restored = Resource.fromSnapshot(snap);
+
+      expect(restored.accepts).toEqual(['tools']);
+      expect(restored.contact).toBe('snap@contact.com');
+      expect(restored.country).toBe('ES');
+      expect(restored.city).toBe('Madrid');
+      expect(restored.provenance?.sourceName).toBe('snap-source');
+      expect(restored.provenance?.externalId).toBe('snap-ext-1');
+      expect(restored.provenance?.externalUpdatedAt).toEqual(externalUpdatedAt);
+      expect(restored.provenance?.raw).toEqual({ x: 42 });
+    });
+  });
 });

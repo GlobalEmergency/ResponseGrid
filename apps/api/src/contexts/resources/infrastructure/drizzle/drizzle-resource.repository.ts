@@ -2,7 +2,7 @@ import { and, count, eq, inArray } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
 import { resourcesTable } from './schema';
 import { ResourceRepository } from '../../domain/ports/resource.repository';
-import { Resource, ResourceSnapshot } from '../../domain/resource';
+import { Resource, ResourceSnapshot, Provenance } from '../../domain/resource';
 import { ResourceId } from '../../domain/resource-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import {
@@ -13,6 +13,16 @@ import {
 } from '../../domain/resource-enums';
 
 type Row = typeof resourcesTable.$inferSelect;
+
+function rowToProvenance(row: Row): Provenance | null {
+  if (!row.sourceName) return null;
+  return {
+    sourceName: row.sourceName,
+    externalId: row.externalId ?? '',
+    externalUpdatedAt: row.externalUpdatedAt ?? null,
+    raw: row.raw ?? null,
+  };
+}
 
 function rowToSnapshot(row: Row): ResourceSnapshot {
   return {
@@ -32,6 +42,13 @@ function rowToSnapshot(row: Row): ResourceSnapshot {
     verificationLevel: row.verificationLevel as VerificationLevel,
     publicStatus: row.publicStatus as PublicStatus,
     createdAt: row.createdAt,
+    contact: row.contact ?? null,
+    schedule: row.schedule ?? null,
+    manager: row.manager ?? null,
+    accepts: row.accepts ?? [],
+    country: row.country ?? null,
+    city: row.city ?? null,
+    provenance: rowToProvenance(row),
   };
 }
 
@@ -57,6 +74,16 @@ export class DrizzleResourceRepository implements ResourceRepository {
         verificationLevel: s.verificationLevel,
         publicStatus: s.publicStatus,
         createdAt: s.createdAt,
+        contact: s.contact,
+        schedule: s.schedule,
+        manager: s.manager,
+        accepts: s.accepts,
+        country: s.country,
+        city: s.city,
+        sourceName: s.provenance?.sourceName ?? null,
+        externalId: s.provenance?.externalId ?? null,
+        externalUpdatedAt: s.provenance?.externalUpdatedAt ?? null,
+        raw: s.provenance?.raw ?? null,
       })
       .onConflictDoUpdate({
         target: resourcesTable.id,
@@ -64,6 +91,16 @@ export class DrizzleResourceRepository implements ResourceRepository {
           verificationLevel: s.verificationLevel,
           publicStatus: s.publicStatus,
           name: s.name,
+          contact: s.contact,
+          schedule: s.schedule,
+          manager: s.manager,
+          accepts: s.accepts,
+          country: s.country,
+          city: s.city,
+          sourceName: s.provenance?.sourceName ?? null,
+          externalId: s.provenance?.externalId ?? null,
+          externalUpdatedAt: s.provenance?.externalUpdatedAt ?? null,
+          raw: s.provenance?.raw ?? null,
         },
       });
   }
