@@ -219,7 +219,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
             bloquear la llegada de ayuda profesional.
           </p>
           <ul className="flex flex-col gap-2" role="list">
-            {DONT_BRING.map((item) => (
+            {(emergency.dontBringList.length > 0 ? emergency.dontBringList : DONT_BRING).map((item) => (
               <li
                 key={item}
                 className="flex items-start gap-3 text-sm text-gray-800"

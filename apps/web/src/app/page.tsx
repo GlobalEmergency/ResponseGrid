@@ -93,6 +93,12 @@ export default async function HomePage() {
             >
               Admin
             </Link>
+            <Link
+              href="/admin/templates"
+              className="text-sm font-medium text-gray-400 hover:text-gray-700 underline underline-offset-2 transition-colors"
+            >
+              Plantillas
+            </Link>
           </nav>
         </footer>
 
