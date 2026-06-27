@@ -122,6 +122,12 @@ export default async function HomePage() {
             >
               Plantillas
             </Link>
+            <Link
+              href="/admin/auditoria"
+              className="text-sm font-medium text-gray-400 hover:text-gray-700 underline underline-offset-2 transition-colors"
+            >
+              Auditoría
+            </Link>
           </nav>
         </footer>
 
