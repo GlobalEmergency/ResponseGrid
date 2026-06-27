@@ -40,7 +40,7 @@ export function LoginForm({ next, t }: LoginFormProps) {
             type="email"
             autoComplete="email"
             required
-            placeholder="coord@reliefhub.org"
+            placeholder="email@example.com"
           />
         </div>
 

@@ -153,8 +153,8 @@ export const es = {
 
   // ── Login page ────────────────────────────────────────────────────────────
   login: {
-    title: 'Acceso de coordinación',
-    subtitle: 'Introduce tus credenciales para entrar al panel.',
+    title: 'Iniciar sesión',
+    subtitle: 'Accede a tu cuenta para continuar.',
     demo_label: 'Credenciales demo',
     demo_email_label: 'Email:',
     demo_email: 'coord@reliefhub.org',
@@ -167,8 +167,8 @@ export const es = {
     no_account: '¿No tienes cuenta?',
     create_account: 'Crear cuenta',
     error_fallback: 'Error al iniciar sesión',
-    meta_title: 'Acceso coordinación — ReliefHub',
-    meta_description: 'Panel de coordinación de emergencias.',
+    meta_title: 'Iniciar sesión — ReliefHub',
+    meta_description: 'Inicia sesión en ReliefHub.',
   },
 
   // ── Signup page ───────────────────────────────────────────────────────────

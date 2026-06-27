@@ -33,18 +33,21 @@ export default async function LoginPage({ searchParams }: Props) {
           </p>
         </header>
 
-        {/* Demo credentials note */}
-        <div className="rounded-lg border-2 border-gray-200 bg-gray-50 px-4 py-3 flex flex-col gap-1">
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-            {t.login.demo_label}
-          </p>
-          <p className="text-sm text-gray-700">
-            <span className="font-medium">{t.login.demo_email_label}</span> {t.login.demo_email}
-          </p>
-          <p className="text-sm text-gray-700">
-            <span className="font-medium">{t.login.demo_password_label}</span> {t.login.demo_password}
-          </p>
-        </div>
+        {/* Demo credentials note — opt-in via DEMO_MODE=true; hidden by default
+            so real production deployments never expose demo credentials. */}
+        {process.env.DEMO_MODE === 'true' && (
+          <div className="rounded-lg border-2 border-gray-200 bg-gray-50 px-4 py-3 flex flex-col gap-1">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+              {t.login.demo_label}
+            </p>
+            <p className="text-sm text-gray-700">
+              <span className="font-medium">{t.login.demo_email_label}</span> {t.login.demo_email}
+            </p>
+            <p className="text-sm text-gray-700">
+              <span className="font-medium">{t.login.demo_password_label}</span> {t.login.demo_password}
+            </p>
+          </div>
+        )}
 
         {/* Login form */}
         <LoginForm next={next} t={t.login} />

@@ -139,8 +139,8 @@ export const en = {
   },
 
   login: {
-    title: 'Coordination access',
-    subtitle: 'Enter your credentials to access the panel.',
+    title: 'Sign in',
+    subtitle: 'Sign in to your account to continue.',
     demo_label: 'Demo credentials',
     demo_email_label: 'Email:',
     demo_email: 'coord@reliefhub.org',
@@ -153,8 +153,8 @@ export const en = {
     no_account: "Don't have an account?",
     create_account: 'Create account',
     error_fallback: 'Login error',
-    meta_title: 'Coordination access — ReliefHub',
-    meta_description: 'Emergency coordination panel.',
+    meta_title: 'Sign in — ReliefHub',
+    meta_description: 'Sign in to ReliefHub.',
   },
 
   signup: {
