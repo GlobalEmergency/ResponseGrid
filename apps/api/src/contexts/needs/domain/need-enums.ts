@@ -8,6 +8,11 @@ export enum NeedCategory {
   Shelter = 'shelter',
   Tools = 'tools',
   Other = 'other',
+  // Health vertical (F04)
+  Medicines = 'medicines',
+  MedicalEquipment = 'medical_equipment',
+  MedicalSupplies = 'medical_supplies',
+  MedicalPersonnel = 'medical_personnel',
 }
 
 export enum NeedStatus {
