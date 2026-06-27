@@ -9,6 +9,7 @@ import {
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import {
   ApiTags,
   ApiOperation,
@@ -17,6 +18,7 @@ import {
   ApiBadRequestResponse,
   ApiUnauthorizedResponse,
   ApiConflictResponse,
+  ApiTooManyRequestsResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { Request as ExpressRequest } from 'express';
@@ -45,16 +47,23 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ auth: { ttl: 60_000, limit: 10 } })
   @ApiOperation({ summary: 'Authenticate and obtain a JWT access token' })
   @ApiOkResponse({ description: 'Login successful', type: LoginResponseDto })
   @ApiBadRequestResponse({ description: 'Invalid request body' })
   @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
+  @ApiTooManyRequestsResponse({
+    description: 'Rate limit exceeded — try again later',
+  })
   async loginRoute(@Body() dto: LoginDto): Promise<LoginResponseDto> {
     return this.login.execute({ email: dto.email, password: dto.password });
   }
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ auth: { ttl: 60_000, limit: 10 } })
   @ApiOperation({
     summary: 'Register a new user account (auto-login returns JWT)',
   })
@@ -64,6 +73,9 @@ export class AuthController {
   })
   @ApiBadRequestResponse({ description: 'Invalid request body' })
   @ApiConflictResponse({ description: 'Email already registered' })
+  @ApiTooManyRequestsResponse({
+    description: 'Rate limit exceeded — try again later',
+  })
   async registerRoute(@Body() dto: RegisterDto): Promise<RegisterResponseDto> {
     return this.registerUser.execute({
       email: dto.email,
