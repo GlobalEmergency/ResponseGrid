@@ -58,7 +58,7 @@ export default async function MisPuntosPage({ params }: Props) {
   const myResources = await fetchMyResources(emergency.id, slug);
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-start bg-white px-4 py-10">
+    <main className="flex-1 flex flex-col items-center justify-start bg-white px-4 py-10">
       <div className="w-full max-w-xl flex flex-col gap-8">
 
         {/* ── CABECERA ──────────────────────────────────────────────── */}

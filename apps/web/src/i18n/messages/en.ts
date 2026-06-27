@@ -18,6 +18,30 @@ export const en = {
     language: 'Language',
     es: 'ES',
     en: 'EN',
+
+    // Global Emergency global footer (shared by every page)
+    footer: {
+      project_of: 'A project by',
+      org: 'Global Emergency',
+      tagline:
+        'Open-source platform for coordinating emergency aid. Official, verified information, in real time.',
+      nav_heading: 'Navigation',
+      nav_home: 'Home',
+      nav_emergencies: 'Active emergencies',
+      nav_orgs: 'Organisations',
+      nav_coordination: 'Coordination access',
+      resources_heading: 'Resources',
+      resources_about: 'About us',
+      resources_how: 'How it works',
+      resources_transparency: 'Transparency',
+      resources_verify: 'Verify a campaign',
+      legal_heading: 'Legal',
+      privacy: 'Privacy',
+      terms: 'Terms & conditions',
+      copyright: '© {year} Global Emergency · Open source (MIT)',
+      built_by: 'Built by volunteers',
+      aria_label: 'Footer',
+    },
   },
 
   home: {
@@ -63,14 +87,8 @@ export const en = {
     trust_verified: 'Validated by local coordination',
     trust_official: 'Accredited organisation',
 
-    // SEO footer
-    footer_org: 'GlobalEmergency',
-    footer_tagline:
-      'Emergency aid coordination platform. Multi-emergency, multilingual (ES/EN), privacy by design and data hosted in the EU.',
-    footer_about: 'About us',
-    footer_transparency: 'Transparency',
-    footer_privacy: 'Privacy (GDPR)',
-    footer_verify_campaign: 'Verify campaign',
+    // Account access (home secondary bar)
+    account_heading: 'Your account',
 
     meta_title: 'ResponseGrid — Active emergencies',
     meta_description:
@@ -208,7 +226,7 @@ export const en = {
     official_label: 'Official announcement',
     last_updated: 'Last updated:',
     aria_label: 'Official announcement',
-    source: 'GlobalEmergency',
+    source: 'Global Emergency',
   },
 
   login: {
@@ -526,5 +544,123 @@ export const en = {
     success_message: 'Report submitted successfully. The coordinator will review it shortly.',
     success_send_another: 'Submit another report',
     error_fallback: 'Error submitting report',
+  },
+
+  // ── Page: About us (/sobre) ───────────────────────────────────────────────
+  about: {
+    meta_title: 'About us — ResponseGrid, a project by Global Emergency',
+    meta_description:
+      'ResponseGrid is Global Emergency’s open-source platform for coordinating emergency aid: verified points, real needs, volunteers and a real-time map.',
+    overline: 'About us',
+    h1: 'We coordinate aid so it reaches where it’s truly needed',
+    lead:
+      'ResponseGrid is a free, non-profit platform by Global Emergency. It connects citizens, organisations and coordinators during a disaster so every effort is useful, verified and doesn’t overload logistics.',
+    stat_open: 'Open source',
+    stat_open_value: 'MIT',
+    stat_realtime: 'Real-time information',
+    stat_realtime_value: '24/7',
+    stat_data: 'Data hosted in the EU',
+    stat_data_value: 'GDPR',
+    mission_heading: 'Our mission',
+    mission_body:
+      'For aid to arrive sooner and better. We cut the noise, avoid pointless trips and give coordination a true picture of needs, resources and volunteers on a single map.',
+    how_heading: 'How we do it',
+    how_body:
+      'We publish only points and campaigns verified by local coordination, validate real needs and match supply offers with those who request them. All information is official and in real time.',
+    open_heading: 'Open source, built by volunteers',
+    open_body:
+      'The code is open (MIT licence) and built and maintained by volunteers. Anyone can audit it, improve it or deploy it for their own region.',
+    ge_heading: 'Part of Global Emergency',
+    ge_body:
+      'ResponseGrid is one of Global Emergency’s projects, an initiative that democratises access to professional technology for Civil Protection and emergency services.',
+    ge_link: 'Discover Global Emergency',
+    cta_heading: 'Want to help now?',
+    cta_body: 'Check the active emergencies and find out how you can contribute.',
+    cta_button: 'View active emergencies',
+  },
+
+  // ── Page: How it works (/como-funciona) ───────────────────────────────────
+  how_page: {
+    meta_title: 'How it works — ResponseGrid',
+    meta_description:
+      'How ResponseGrid works: you register what you offer, local coordination verifies it, and it becomes useful aid. Official, real-time information without overloading logistics.',
+    overline: 'How it works',
+    h1: 'From your offer to useful aid, in three steps',
+    lead:
+      'ResponseGrid brings order to the chaos of an emergency: it captures signals, validates them and turns them into decisions. Nothing is published until local coordination verifies it.',
+    step1_title: 'You register what you offer',
+    step1_body:
+      'You offer a resource (warehouse, transport, space), sign up as a volunteer or post a need. We capture your signal instantly; nothing is published unvalidated.',
+    step2_title: 'Coordination verifies',
+    step2_body:
+      'Local coordinators validate every point, campaign and need. Accredited organisations earn the official badge. Trust is the product.',
+    step3_title: 'It becomes useful aid',
+    step3_body:
+      'Validated needs are matched with supply offers and volunteers, all on a real-time map. No pointless trips or overloaded supply chains.',
+    trust_heading: 'Three levels of trust',
+    trust_intro: 'Every resource and campaign always shows its verification level:',
+    trust_unverified: 'In queue — do not bring supplies yet.',
+    trust_verified: 'Validated by local coordination.',
+    trust_official: 'Accredited organisation (official).',
+    cta_heading: 'Start contributing',
+    cta_body: 'See the active emergencies and choose how to help.',
+    cta_button: 'View active emergencies',
+  },
+
+  // ── Page: Transparency (/transparencia) ───────────────────────────────────
+  transparency: {
+    meta_title: 'Transparency — ResponseGrid',
+    meta_description:
+      'Transparency at ResponseGrid: verification before publishing, data protected in the EU (GDPR), open source under the MIT licence and open governance by volunteers.',
+    overline: 'Transparency',
+    h1: 'Transparency and trust, by design',
+    lead:
+      'We work in emergencies, where wrong information costs time and lives. That’s why we openly explain how we verify, how we handle data and how the project is governed.',
+    verify_heading: 'We verify before publishing',
+    verify_body:
+      'No point, campaign or need goes public without local coordination validating it. Organisations get accredited to earn the official badge, and every action is audited.',
+    data_heading: 'Your data, protected',
+    data_body:
+      'Privacy by design: we ask for the minimum data, sensitive locations are published with approximate coordinates, and personal data (such as family-reunification documents) is never exposed. Data hosted in the EU, GDPR-compliant.',
+    license_heading: 'Open source (MIT)',
+    license_body:
+      'All the code is public and under the MIT licence. Anyone can audit it, contribute or deploy it. No black boxes: what you see is what it does.',
+    governance_heading: 'Open governance',
+    governance_body:
+      'ResponseGrid is a Global Emergency project, maintained by volunteers. Decisions and the roadmap are discussed in the open in the public repository.',
+    legal_heading: 'Legal documents',
+    legal_body: 'See the common policies shared across all Global Emergency projects:',
+    cta_heading: 'Review the code',
+    cta_body: 'The whole project is public and auditable on GitHub.',
+    cta_button: 'View on GitHub',
+  },
+
+  // ── Page: Verify a campaign (/verificar) ──────────────────────────────────
+  verify_page: {
+    meta_title: 'How to verify a campaign — ResponseGrid',
+    meta_description:
+      'Before donating or bringing supplies, learn how to verify an emergency campaign: trust levels, the official badge and red flags to avoid fraud.',
+    overline: 'Verify a campaign',
+    h1: 'Is this campaign trustworthy? Learn how to verify it',
+    lead:
+      'In an emergency, calls for help multiply — and not all are reliable. ResponseGrid marks every campaign and point with its trust level so you know who to trust.',
+    levels_heading: 'The trust levels',
+    level_unverified_title: 'In queue',
+    level_unverified_body: 'Just created, not yet validated. Don’t bring supplies yet: wait until it’s verified.',
+    level_verified_title: 'Verified',
+    level_verified_body: 'Validated by the emergency’s local coordination. Reliable, up-to-date information.',
+    level_official_title: 'Official',
+    level_official_body: 'Published by an accredited organisation. The highest level of trust.',
+    steps_heading: 'How to check it in 4 steps',
+    step1: 'Look at the trust badge on the campaign or point card.',
+    step2: 'Check the emergency is active and has an official announcement.',
+    step3: 'Before travelling, confirm the address by phone (sensitive locations are approximate).',
+    step4: 'Donate money to verified organisations; avoid unsolicited supplies.',
+    warning_heading: 'Red flags',
+    warning_body:
+      'Be wary of unverified campaigns asking for money through private channels, bank details over messaging apps, or shipments to addresses with no assigned receiving point. When in doubt, don’t act and alert coordination.',
+    cta_heading: 'Check verified campaigns',
+    cta_body: 'Enter an active emergency and filter by verified points and campaigns.',
+    cta_button: 'View active emergencies',
   },
 } as Messages;

@@ -4,7 +4,7 @@ import { api } from '@/lib/api';
 import { getToken, authHeaders } from '@/lib/auth';
 import { SiteHeaderBand } from '@/components/organisms/site-header-band';
 import { EmergencyDirectoryCard } from '@/components/organisms/emergency-directory-card';
-import { SiteFooter } from '@/components/organisms/site-footer';
+import { AccountNav } from '@/components/molecules/account-nav';
 import { HowItWorksStep } from '@/components/molecules/how-it-works-step';
 import { TrustLevelsCard } from '@/components/molecules/trust-levels-card';
 import { EmptyState } from '@/components/molecules/empty-state';
@@ -50,7 +50,7 @@ export default async function HomePage() {
   const sectionHeading = 'font-display text-lg font-bold text-navy';
 
   return (
-    <main className="min-h-screen bg-surface">
+    <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-md bg-surface lg:max-w-5xl">
         <SiteHeaderBand />
 
@@ -146,7 +146,7 @@ export default async function HomePage() {
             tVerification={t.verification_badge}
           />
 
-          <SiteFooter
+          <AccountNav
             t={th}
             authed={token !== null}
             isAdmin={isAdmin}

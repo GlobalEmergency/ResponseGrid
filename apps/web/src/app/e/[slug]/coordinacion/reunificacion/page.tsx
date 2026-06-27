@@ -153,7 +153,7 @@ export default async function CoordinacionReunificacionPage({
   ];
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-start bg-white px-4 py-10">
+    <main className="flex-1 flex flex-col items-center justify-start bg-white px-4 py-10">
       <div className="w-full max-w-xl flex flex-col gap-8">
         {/* Header */}
         <header className="flex flex-col gap-3">

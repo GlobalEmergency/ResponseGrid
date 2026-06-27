@@ -136,7 +136,7 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
   const baseUrl = `/e/${slug}/coordinacion/reportes`;
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-start px-4 py-10 bg-white">
+    <main className="flex-1 flex flex-col items-center justify-start px-4 py-10 bg-white">
       <div className="w-full max-w-xl flex flex-col gap-8">
 
         {/* ── CABECERA ────────────────────────────────────────────────── */}

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Archivo, Public_Sans } from 'next/font/google';
 import './globals.css';
 import { SwRegister } from '@/components/providers/sw-register';
+import { GlobalFooter } from '@/components/organisms/global-footer';
 import { getT } from '@/i18n/server';
 import { LocaleProvider } from '@/i18n/locale-context';
 
@@ -21,8 +22,10 @@ const publicSans = Public_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://responsegrid.app'),
   title: 'ResponseGrid',
-  description: 'Coordinación de recursos en emergencias',
+  description: 'Coordinación de ayuda en emergencias — un proyecto de Global Emergency',
+  applicationName: 'ResponseGrid',
 };
 
 export default async function RootLayout({
@@ -30,13 +33,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { locale } = await getT();
+  const { locale, t } = await getT();
 
   return (
     <html lang={locale} className={`h-full ${archivo.variable} ${publicSans.variable}`}>
       <body className="min-h-full flex flex-col bg-white text-ink antialiased font-sans">
         <LocaleProvider locale={locale}>
           {children}
+          <GlobalFooter tf={t.common.footer} />
         </LocaleProvider>
         <SwRegister />
       </body>

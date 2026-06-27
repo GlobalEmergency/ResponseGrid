@@ -70,7 +70,7 @@ export default async function ReportarPage({ params, searchParams }: Props) {
   const boundAction = submitReport.bind(null, emergency.id);
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-start px-4 py-10 bg-white">
+    <main className="flex-1 flex flex-col items-center justify-start px-4 py-10 bg-white">
       <div className="w-full max-w-md flex flex-col gap-8">
         <header className="flex flex-col gap-1">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
