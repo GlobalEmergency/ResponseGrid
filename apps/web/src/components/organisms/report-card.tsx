@@ -5,7 +5,7 @@ import { reviewReport } from '@/app/e/[slug]/reportar/actions';
 import type { ReviewReportResult } from '@/app/e/[slug]/reportar/actions';
 import { Button } from '@/components/atoms/button';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/$/, '');
 
 type ReportPriority = 'low' | 'medium' | 'high' | 'urgent';
 type ReportStatus = 'open' | 'reviewed';
