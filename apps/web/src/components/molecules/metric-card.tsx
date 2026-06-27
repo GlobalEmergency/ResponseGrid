@@ -1,21 +1,31 @@
+type Tone = 'navy' | 'success' | 'accent';
+
 interface MetricCardProps {
   value: number | string;
   label: string;
+  /** Colour of the figure. Defaults to navy. */
+  tone?: Tone;
 }
 
+const TONE_CLASS: Record<Tone, string> = {
+  navy: 'text-navy',
+  success: 'text-success',
+  accent: 'text-accent',
+};
+
 /**
- * MetricCard — a single metric tile (big number + descriptive label).
- * Used in the 2×2 / 4-column metrics grid on the emergency public page.
+ * MetricCard — a single metric tile (big figure + label) for the emergency
+ * summary grid. Branded "Banda oficial" look: warm card, Archivo figure.
  */
-export function MetricCard({ value, label }: MetricCardProps) {
+export function MetricCard({ value, label, tone = 'navy' }: MetricCardProps) {
   return (
-    <div className="flex flex-col items-center rounded-lg border-2 border-gray-200 bg-gray-50 px-4 py-5">
-      <span className="text-3xl font-extrabold text-gray-900 tabular-nums">
+    <div className="rounded-card border border-line bg-white px-3.5 py-3">
+      <span
+        className={`block font-display text-[26px] font-extrabold leading-none tabular-nums ${TONE_CLASS[tone]}`}
+      >
         {value}
       </span>
-      <span className="mt-1 text-xs font-medium text-gray-500 text-center leading-tight">
-        {label}
-      </span>
+      <span className="mt-1.5 block text-xs leading-tight text-muted">{label}</span>
     </div>
   );
 }

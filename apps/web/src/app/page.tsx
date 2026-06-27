@@ -2,9 +2,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { getToken, authHeaders } from '@/lib/auth';
-import { Badge } from '@/components/atoms/badge';
+import { SiteHeaderBand } from '@/components/organisms/site-header-band';
+import { EmergencyDirectoryCard } from '@/components/organisms/emergency-directory-card';
+import { SiteFooter } from '@/components/organisms/site-footer';
+import { HowItWorksStep } from '@/components/molecules/how-it-works-step';
+import { TrustLevelsCard } from '@/components/molecules/trust-levels-card';
 import { EmptyState } from '@/components/molecules/empty-state';
-import { LanguageSwitcher } from '@/components/molecules/language-switcher';
 import { getT } from '@/i18n/server';
 
 // Emergency list must reflect live backend state on every request.
@@ -39,117 +42,117 @@ export default async function HomePage() {
     }
   }
 
-  const activeEmergencies = emergencies ?? [];
+  const all = emergencies ?? [];
+  const activeEmergencies = all.filter((e) => e.status === 'active');
+  const closedEmergencies = all.filter((e) => e.status !== 'active');
+
+  const th = t.home;
+  const sectionHeading = 'font-display text-lg font-bold text-navy';
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-start bg-white px-4 py-10">
-      <div className="w-full max-w-xl flex flex-col gap-10">
+    <main className="flex min-h-screen justify-center bg-surface">
+      <div className="w-full max-w-md bg-surface">
+        <SiteHeaderBand />
 
-        {/* ── CABECERA ─────────────────────────────────────────────────── */}
-        <header className="flex flex-col gap-2">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex flex-col gap-2">
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                {t.home.title}
-              </h1>
-              <p className="text-base text-gray-600">
-                {t.home.subtitle}
-              </p>
-            </div>
-            <LanguageSwitcher />
-          </div>
-        </header>
-
-        {/* ── EMERGENCIAS ACTIVAS ───────────────────────────────────────── */}
-        <section aria-labelledby="emergencies-heading" className="flex flex-col gap-4">
-          <h2
-            id="emergencies-heading"
-            className="text-xl font-bold text-gray-900"
-          >
-            {t.home.active_emergencies}
-          </h2>
-
-          {activeEmergencies.length === 0 ? (
-            <EmptyState
-              title={t.home.no_emergencies_title}
-              description={t.home.no_emergencies_description}
-            />
-          ) : (
-            <ul className="flex flex-col gap-3" role="list" aria-label={t.home.aria_emergency_list}>
-              {activeEmergencies.map((emergency) => (
-                <li key={emergency.id}>
-                  <Link
-                    href={`/e/${emergency.slug}`}
-                    className="flex flex-col gap-2 rounded-lg border-2 border-gray-900 bg-white p-5 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors"
-                  >
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="text-lg font-bold text-gray-900 leading-tight">
-                        {emergency.name}
-                      </span>
-                      <Badge variant="active" aria-label="Estado: activa">
-                        {t.home.emergency_status_active}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">
-                      {emergency.country}
-                    </p>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        {/* ── PIE / ENLACES ─────────────────────────────────────────── */}
-        <footer className="border-t-2 border-gray-100 pt-6">
-          <nav aria-label="Navegación secundaria" className="flex flex-wrap gap-4">
-            <Link
-              href="/organizaciones"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900 underline underline-offset-2 transition-colors"
-            >
-              {t.home.my_orgs}
-            </Link>
-            {token != null && (
-              <Link
-                href="/notificaciones"
-                className="text-sm font-medium text-gray-600 hover:text-gray-900 underline underline-offset-2 transition-colors"
+        <div className="flex flex-col gap-8 px-5 pb-12 pt-6">
+          {/* ── Hero (SEO H1) ───────────────────────────────────────────── */}
+          <section>
+            <h1 className="font-display text-[27px] font-extrabold leading-[1.1] tracking-tight text-navy">
+              {th.hero_h1}
+            </h1>
+            <p className="mt-3.5 text-[15px] leading-[1.55] text-ink-soft">{th.hero_subtitle}</p>
+            <div className="mt-[18px] flex gap-2.5">
+              <a
+                href="#emergencias"
+                className="flex-1 rounded-xl bg-navy px-4 py-3.5 text-center text-[15px] font-bold text-white transition-colors hover:bg-navy-700 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
               >
-                {notificationUnreadCount > 0
-                  ? t.home.notifications_with_count.replace('{count}', String(notificationUnreadCount))
-                  : t.home.notifications}
-              </Link>
-            )}
-            <Link
-              href="/login"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900 underline underline-offset-2 transition-colors"
-            >
-              {t.home.coordination_access}
-            </Link>
-            {isAdmin && (
-              <>
-                <Link
-                  href="/admin/acreditaciones"
-                  className="text-sm font-medium text-gray-400 hover:text-gray-700 underline underline-offset-2 transition-colors"
-                >
-                  {t.home.admin}
-                </Link>
-                <Link
-                  href="/admin/templates"
-                  className="text-sm font-medium text-gray-400 hover:text-gray-700 underline underline-offset-2 transition-colors"
-                >
-                  {t.home.templates}
-                </Link>
-                <Link
-                  href="/admin/auditoria"
-                  className="text-sm font-medium text-gray-400 hover:text-gray-700 underline underline-offset-2 transition-colors"
-                >
-                  {t.home.audit}
-                </Link>
-              </>
-            )}
-          </nav>
-        </footer>
+                {th.hero_cta_emergencies}
+              </a>
+              <a
+                href="#emergencias"
+                className="rounded-xl border-[1.5px] border-[#d8d2c8] bg-white px-5 py-3.5 text-center text-[15px] font-bold text-navy transition-colors hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
+              >
+                {th.hero_cta_donate}
+              </a>
+            </div>
+          </section>
 
+          {/* ── Emergencias activas ─────────────────────────────────────── */}
+          <section id="emergencias" aria-labelledby="emergencias-heading" className="scroll-mt-4">
+            <div className="mb-3.5 flex items-baseline justify-between gap-2">
+              <h2 id="emergencias-heading" className={sectionHeading}>{th.active_emergencies}</h2>
+              {activeEmergencies.length > 0 && (
+                <span className="text-xs text-muted-soft">
+                  {th.active_count.replace('{count}', String(activeEmergencies.length))}
+                </span>
+              )}
+            </div>
+
+            {activeEmergencies.length === 0 ? (
+              <EmptyState title={th.no_emergencies_title} description={th.no_emergencies_description} />
+            ) : (
+              <ul className="flex flex-col gap-3" role="list" aria-label={th.aria_emergency_list}>
+                {activeEmergencies.map((emergency) => (
+                  <li key={emergency.id}>
+                    <EmergencyDirectoryCard
+                      emergency={emergency}
+                      activeLabel={th.emergency_status_active}
+                      enterLabel={th.enter_operation}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {closedEmergencies.length > 0 && (
+              <div className="mt-3 flex flex-col gap-2.5">
+                {closedEmergencies.map((emergency) => (
+                  <Link
+                    key={emergency.id}
+                    href={`/e/${emergency.slug}`}
+                    className="flex items-center gap-2.5 rounded-card border border-line bg-surface-alt px-4 py-3.5 transition-colors hover:border-navy/20 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
+                  >
+                    <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-muted-soft" aria-hidden="true" />
+                    <span className="flex-1">
+                      <span className="block text-sm font-bold text-muted">{emergency.name}</span>
+                      <span className="block text-[11.5px] text-muted-soft">{th.closed_label}</span>
+                    </span>
+                    <span className="text-muted-soft" aria-hidden="true">→</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* ── Cómo funciona ───────────────────────────────────────────── */}
+          <section aria-labelledby="how-heading">
+            <h2 id="how-heading" className={`${sectionHeading} mb-3.5`}>{th.how_it_works_heading}</h2>
+            <div className="flex flex-col gap-4">
+              <HowItWorksStep index={1} title={th.step1_title} body={th.step1_body} />
+              <HowItWorksStep index={2} title={th.step2_title} body={th.step2_body} />
+              <HowItWorksStep index={3} title={th.step3_title} body={th.step3_body} tone="accent" />
+            </div>
+          </section>
+
+          {/* ── La confianza es el producto ─────────────────────────────── */}
+          <TrustLevelsCard
+            heading={th.trust_heading}
+            intro={th.trust_intro}
+            rows={[
+              { level: 'unverified', text: th.trust_unverified },
+              { level: 'verified', text: th.trust_verified },
+              { level: 'official', text: th.trust_official },
+            ]}
+            tVerification={t.verification_badge}
+          />
+
+          <SiteFooter
+            t={th}
+            authed={token !== null}
+            isAdmin={isAdmin}
+            notificationUnreadCount={notificationUnreadCount}
+          />
+        </div>
       </div>
     </main>
   );

@@ -10,7 +10,11 @@ type BadgeVariant =
   | 'offer-open'
   | 'offer-matched'
   | 'offer-fulfilled'
-  | 'offer-cancelled';
+  | 'offer-cancelled'
+  | 'priority-urgent'
+  | 'priority-high'
+  | 'priority-medium'
+  | 'priority-low';
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   variant: BadgeVariant;
@@ -37,6 +41,15 @@ const VARIANT_CLASSES: Record<BadgeVariant, string> = {
     'inline-flex items-center rounded-full border border-green-400 bg-green-50 px-2.5 py-0.5 text-xs font-semibold text-green-800',
   'offer-cancelled':
     'inline-flex items-center rounded-full border border-gray-300 bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-500',
+  // Need-priority pills (Banda oficial brand)
+  'priority-urgent':
+    'inline-flex items-center rounded-full bg-danger-soft px-2 py-0.5 text-[10.5px] font-extrabold uppercase tracking-[0.05em] text-danger',
+  'priority-high':
+    'inline-flex items-center rounded-full bg-warning-soft px-2 py-0.5 text-[10.5px] font-extrabold uppercase tracking-[0.05em] text-warning',
+  'priority-medium':
+    'inline-flex items-center rounded-full bg-official-soft px-2 py-0.5 text-[10.5px] font-extrabold uppercase tracking-[0.05em] text-navy',
+  'priority-low':
+    'inline-flex items-center rounded-full bg-line-soft px-2 py-0.5 text-[10.5px] font-extrabold uppercase tracking-[0.05em] text-muted',
 };
 
 export function Badge({ variant, className = '', children, ...props }: BadgeProps) {
