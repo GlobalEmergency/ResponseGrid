@@ -630,3 +630,145 @@ Si la profundidad relacional explota (cadenas transportista→subcontrata→adua
 | Integraciones de sistemas (API) | ✅ `ServiceAccount`/API key ya diseñado (§8) |
 
 **Conclusión:** lo actual está cubierto y el roadmap logístico es mayoritariamente configuración. El único concepto que estos actores exigen —scope **transversal** a emergencias— ya está resuelto modelando la jerarquía como **DAG extensible**, no como árbol. No se identifica ningún requisito de los citados que obligue a rehacer el núcleo.
+
+---
+
+## 17. Prueba de privacidad: control a nivel de fila y de campo (RLS · ABAC · GDPR)
+
+> Los permisos (§4) responden "¿puede este principal hacer la acción X sobre el **tipo** Y?". Pero la privacidad de **este** dominio —ubicaciones sensibles (F09), personas desaparecidas (F01), necesidades nominales por beneficiario (F02/#24), datos sanitarios (F04), manifiestos con datos del consignatario— **no se juega a nivel de acción, sino de FILA y de CAMPO**. Esta sección somete ese eje al mismo estrés que §16.
+
+### 17.1 Cuatro capas, no una
+
+Confundirlas es el error que convierte la privacidad en un parche. Son ortogonales y **todas** necesarias:
+
+| Capa | Pregunta | Mecanismo | Ejemplo |
+|---|---|---|---|
+| **1. Acción** (RBAC) | ¿puede leer informes de desaparecidos? | permiso `reunification:read_private` (§4) | sin él → 403 |
+| **2. Fila** (RLS + scope) | ¿**qué** informes? | predicado RLS derivado del scope (§17.2) | solo los de emergencias donde tiene grant |
+| **3. Campo** (ABAC + proyección) | ¿**qué campos** de esa fila? | clase de sensibilidad + proyección por audiencia (§17.4) | ve estado, **no** `documentId` ni teléfono salvo asignación |
+| **4. Propósito/ciclo** (GDPR) | ¿para qué, cuánto tiempo, auditado? | base legal, retención, purga, auditoría de acceso (§17.7) | acceso registrado; purga al cerrar la emergencia |
+
+El modelo de §1–§16 cubre la capa 1 y (vía scope) la 2. Las capas **3 y 4** son el endurecimiento de privacidad que formaliza esta sección.
+
+### 17.2 Regla de oro: las políticas RLS se DERIVAN del modelo de grants (una sola verdad)
+
+El riesgo número uno de RLS es crear una **segunda** lógica de autorización en SQL que diverge de la del dominio. Para evitarlo, el predicado RLS **no decide nada nuevo**: solo refleja el límite de scope que ya calcula `AccessControl`.
+
+```sql
+-- RLS "tonta y gruesa": solo el límite de aislamiento; la inteligencia vive en el dominio.
+CREATE POLICY emergency_isolation ON needs
+  USING (emergency_id::text = ANY (
+    string_to_array(current_setting('app.scope_emergencies', true), ',')
+  ));
+```
+
+```ts
+// El contexto del principal (de §9, el JWT con grants) se inyecta en la sesión Postgres por transacción.
+async withPrincipal(ctx: AuthorizationContext, work: () => Promise<T>): Promise<T> {
+  await db.execute(sql`SET LOCAL app.principal_id = ${ctx.principalId}`);
+  await db.execute(sql`SET LOCAL app.scope_emergencies = ${readableEmergencyIds(ctx).join(',')}`);
+  return work();
+}
+```
+
+### 17.3 Dos muros, sin violar "la lógica vive en el dominio"
+
+Tensión real con la arquitectura (§7.1 del spec: *"la lógica vive en el dominio, no en la BD"*) vs. RLS (que empuja autorización a la BD). Resolución honesta — **defensa en profundidad con un dueño claro**:
+
+- **Muro 1 (autoritativo, testeable): el dominio.** `can()` + proyecciones (§17.4) son la fuente de verdad; el grueso del TDD (§7.3 del spec) los cubre.
+- **Muro 2 (red de seguridad): RLS.** Garantiza que **ninguna** query pueda filtrar filas de otra emergencia **aunque un caso de uso olvide un filtro**. No decide políticas; impone el límite de aislamiento.
+
+Así se conserva "la lógica en el dominio" (el muro 1 manda) **y** se obtiene la garantía anti-fuga de RLS (el muro 2 no depende de que el programador acierte). Coherente con la "puerta de escape de escalado" del spec (§7.5): una emergencia ultra-sensible se promueve a esquema/BD propia sin tocar la identidad.
+
+### 17.4 Sensibilidad de campo = proyecciones por audiencia (encaja en CQRS-lite, y ya lo hacéis)
+
+La capa 3 es la que falta formalizar. **Ya existe ad-hoc en el código:** la migración `0015_location_sensitivity.sql` documenta *"el agregado siempre guarda coordenadas exactas; la aproximación se aplica al serializar en la respuesta pública"*. Eso es exactamente enmascarado en la **proyección de lectura**, no en el cliente. Se generaliza:
+
+```ts
+// La sensibilidad se aplica al LEER (proyección CQRS-lite), NUNCA en el DTO del cliente:
+// si la fila sale de la BD con el dato exacto, ya hubo fuga.
+function projectNeed(need: Need, viewer: AuthorizationContext): NeedView {
+  const precise =
+    need.locationSensitivity === 'public' ||
+    access.can(viewer, 'need:read_precise_location', need); // p. ej. asignado (ABAC)
+  return {
+    id: need.id, category: need.category, status: need.status, quantity: need.quantity,
+    location: precise ? need.exactCoords : fuzzToCentroid(need.exactCoords),
+  };
+}
+```
+
+Regla: **cada campo tiene una _clase de sensibilidad_** (`public` · `operational` · `personal` · `special`), y existe **una proyección por audiencia** (`PublicView`, `CoordinatorView`, `AssignedView`) elegida por `can()` + clase. No hay "una entidad que se serializa distinto a mano" en seis sitios.
+
+### 17.5 Recorrido por los datos sensibles del dominio
+
+| Dato sensible | Fila — ¿quién la ve? | Campo — ¿qué se enmascara? | Mecanismo | Hoy en código |
+|---|---|---|---|---|
+| Ubicación de punto/necesidad (F09) | público (aprox.) / asignado (exacta) | coords → centroide | clase `personal` + ABAC `assigned` | ✅ parcial (`location_sensitivity` en needs) |
+| Persona desaparecida (F01) | solo `reunification:read_private` en esa emergencia | `documentId`, `reporter.phone/email` ocultos salvo autorizado | acción + fila + clase `special` | ⚠️ existe el dato; falta proyección por clase |
+| Necesidad nominal por beneficiario (F02/#24) | coordinación; **nunca** público | identidad del beneficiario | proyección `public` sin PII | ⚠️ feature pendiente (#24) |
+| `skillSpecialty` sanitario (F04) | coordinación | texto libre (p. ej. patología) | clase `special`, fuera de logs | ⚠️ a clasificar |
+| PII de voluntario | coordinador / su manager de grupo | contacto | clase `personal` + scope `group` | ⚠️ a clasificar |
+| Antifraude de campaña (CIF, cuenta) | verificador/coordinador | datos bancarios/responsable | clase `personal`, no público | ⚠️ a clasificar |
+| Manifiesto / consignatario (Fase 4) | logística por scope `hub` (§16) | identidad/dirección del beneficiario | **clase `special`** aunque vea la fila (§17.6) | 🔜 roadmap |
+| Acceso a categoría especial | — | — | **auditoría de acceso** (§17.7) | ✅ `audit_log` (access-log) |
+
+### 17.6 Interacción con §16: el scope te da la FILA, la sensibilidad gobierna el CAMPO
+
+El caso que demuestra que las dos pruebas (escalabilidad y privacidad) **componen** sin colisión. Retomando a Ana, jefa del hub de Valencia (§16.3):
+
+```
+Shipment S1 (emergency:venezuela) transita hub:valencia
+  campos logísticos:  weight, route, eta, status          → clase 'operational'
+  manifiesto:         consignee.name, consignee.address    → clase 'special' (PII del beneficiario)
+
+can(Ana, 'shipment:read', S1)      → PERMIT  (vía padre hub, DAG §16) → ve la FILA
+project(S1, Ana):
+  - campos 'operational' → visibles  (los necesita para coordinar la carga)
+  - campos 'special'     → requieren 'manifest:read_pii' con propósito 'delivery'
+                           Ana NO lo tiene → consignatario ENMASCARADO
+```
+
+Ana coordina el envío **sin ver la identidad del beneficiario**. El **scope abrió la fila; la sensibilidad cerró el campo.** Un modelo que solo tuviera scope (RLS) le habría enseñado la PII; uno que solo tuviera permisos de acción no habría sabido enseñarle la carga. Hacen falta las dos capas, y el modelo las tiene.
+
+### 17.7 Propósito, consentimiento, auditoría, retención y borrado (GDPR)
+
+La capa 4, donde el spec marca *bloqueante legal* (§11):
+
+- **Limitación de propósito:** el dato se usa solo para el fin consentido (el teléfono del voluntario para coordinar tareas, no para difusión). Se modela como condición ABAC `purpose` o conjunto de propósitos permitidos en la credencial (§8). MVP: registrar consentimiento + auditar acceso; propósito formal como fase posterior.
+- **Auditoría de acceso a categoría especial:** el `audit_log` **implementado** es un _access-log_ (actor, método, path, entidad, status) **sin payload** — buena decisión de privacidad. Requisito: que las **lecturas** (`GET`) de desaparecidos/nominales/sanitarios se auditen, no solo las mutaciones. (Nota: el spec proponía `before/after`; la implementación eligió access-log: **mantenerla así** evita que el propio audit sea una fuga de PII.)
+- **Retención y purga:** purga por emergencia al cerrar (§7.4 spec) como job de ciclo de vida; **derecho de supresión** → cascada/seudonimización del sujeto **y** de la cadena de grants donde figure (§5).
+- **El audit no debe guardar categoría especial** en claro: referenciar por id, nunca volcar el campo.
+
+### 17.8 Interacción con el plano máquina (§8): export público y API keys
+
+- La **API pública read-only** (#19) sirve **solo la proyección `public`** (ubicaciones difusas, cero PII). 
+- El subconjunto **exportable** como scope OAuth2 (§8.2) **excluye toda clase `personal`/`special`**. Una API key **nunca** obtiene una proyección más permisiva que su principal.
+- Los **webhooks** (#23) transportan payload de proyección pública o solo ids — jamás PII.
+
+### 17.9 Anti-patrones a evitar (la parte "brutal")
+
+1. **RLS divergente:** reimplementar políticas en SQL que contradicen al dominio → dos verdades que derivan. RLS solo el límite de scope (§17.2).
+2. **Enmascarar en el DTO/cliente:** si la fila salió de la BD con el dato exacto, **ya hubo fuga**. Enmascarar en la proyección de lectura (§17.4).
+3. **PII en el JWT:** grants sí (§9), datos del sujeto no.
+4. **PII en el audit:** nada de `before/after` con categoría especial; access-log sin payload (§17.7).
+5. **Coordenadas exactas en logs/eventos de dominio:** los domain events que cruzan Redis/colas no deben llevar PII ni ubicación exacta de entidades sensibles.
+6. **Exportar campos sensibles por la API pública/scopes** (§17.8).
+
+### 17.10 Veredicto + decisiones abiertas
+
+| Capa | ¿Cubierta por el modelo? |
+|---|---|
+| Acción (RBAC) | ✅ catálogo de permisos (§4) |
+| Fila (RLS + scope) | ✅ predicado derivado del grant; doble muro (§17.2–17.3) |
+| Campo (sensibilidad + proyección) | ✅ patrón formalizado; ya existe ad-hoc en `0015` (§17.4) |
+| Propósito/ciclo (GDPR) | ⚠️ mecanismo definido; **base legal y retención son decisión legal** (§17.7) |
+
+**Conclusión:** el eje de privacidad **no** se resuelve con permisos solos, y el modelo no lo pretende: aporta las cuatro capas y, lo importante, las **deriva de una sola fuente** (el grant/scope) para que RLS y enmascarado no se conviertan en un segundo sistema de autorización. El único trabajo no-cubierto-por-arquitectura es **clasificar los campos por sensibilidad** (mecánico) y **cerrar la base legal/retención** (decisión legal del spec §11).
+
+**Decisiones abiertas (privacidad):**
+1. **Base legal por categoría de dato** (spec §11, bloqueante legal): consentimiento vs. interés legítimo vs. interés vital (catástrofe) por cada clase.
+2. **Ventanas de retención y purga** por tipo de dato y al cerrar emergencia.
+3. **Cifrado en reposo / esquema propio** para categoría especial (desaparecidos, sanitario): ¿se activa la puerta de escape del spec §7.5 desde el inicio para estos verticales?
+4. **Propósito formal (ABAC `purpose`):** ¿MVP o fase 2? Recomendación: MVP = consentimiento + auditoría de acceso; propósito formal después.
+5. **`need:read_precise_location` / clases de sensibilidad:** ¿4 clases (`public/operational/personal/special`) o empezar con 2 (público/sensible) como hoy en `0015`? Recomendación: 2 ahora, 4 cuando entren manifiestos y sanitario.
