@@ -14,7 +14,7 @@
  *  - Geographic grouping: Venezuela first, diaspora/others after.
  */
 
-import { useState, useTransition, useEffect, useMemo } from 'react';
+import { useState, useTransition, useEffect, useMemo, useRef } from 'react';
 import { createResponseGridClient } from '@reliefhub/api-client';
 import type { components } from '@reliefhub/api-client';
 import { PublicResourceCard } from '@/components/organisms/public-resource-card';
@@ -108,9 +108,12 @@ export function ResourceList({
   const [loadMoreError, setLoadMoreError] = useState(false);
 
   // ── Re-fetch page 1 whenever category or country changes ──────────────────
+  const firstRun = useRef(true);
+
   useEffect(() => {
-    // Skip the first render (we already have initialItems for default filters)
-    if (activeCategory === '' && activeCountry === '' && page === 1) {
+    // Skip only the very first mount (we already have initialItems from SSR)
+    if (firstRun.current) {
+      firstRun.current = false;
       return;
     }
 
@@ -188,7 +191,7 @@ export function ResourceList({
       (r) =>
         r.name.toLowerCase().includes(q) ||
         (r.city != null && r.city.toLowerCase().includes(q)) ||
-        (r.location.address.toLowerCase().includes(q)),
+        (r.location.address?.toLowerCase().includes(q) ?? false),
     );
   }, [items, searchQuery]);
 
@@ -198,7 +201,8 @@ export function ResourceList({
     [filteredItems],
   );
 
-  const hasMore = items.length < total;
+  const isSearching = searchQuery.trim() !== '';
+  const hasMore = !isSearching && items.length < total;
 
   if (items.length === 0 && !isPending) {
     return (
@@ -238,9 +242,11 @@ export function ResourceList({
 
       {/* ── Summary line ────────────────────────────────────────────────── */}
       <p className="text-xs text-gray-500">
-        {tList.showing
-          .replace('{shown}', String(filteredItems.length))
-          .replace('{total}', String(total))}
+        {isSearching
+          ? tList.search_results.replace('{n}', String(filteredItems.length))
+          : tList.showing
+              .replace('{shown}', String(filteredItems.length))
+              .replace('{total}', String(total))}
       </p>
 
       {filteredItems.length === 0 ? (

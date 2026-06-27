@@ -207,6 +207,7 @@ export const en = {
   resource_list: {
     aria_label: 'Verified active points',
     showing: 'Showing {shown} of {total}',
+    search_results: '{n} results',
     load_more: 'Load more',
     loading: 'Loading…',
     load_more_error: 'Could not load more. Retry',

@@ -225,6 +225,7 @@ export const es = {
   resource_list: {
     aria_label: 'Puntos activos verificados',
     showing: 'Mostrando {shown} de {total}',
+    search_results: '{n} resultados',
     load_more: 'Cargar más',
     loading: 'Cargando…',
     load_more_error: 'No se pudo cargar más. Reintentar',
