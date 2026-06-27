@@ -22,15 +22,20 @@ export default async function HomePage() {
   const { t } = await getT();
   const { data: emergencies } = await api.GET('/emergencies');
 
-  // Fetch notification unread count when authenticated.
+  // Fetch notification unread count and admin status when authenticated.
   const token = await getToken();
   let notificationUnreadCount = 0;
+  let isAdmin = false;
   if (token != null) {
-    const { data: notifData } = await api.GET('/notifications/mine', {
-      headers: authHeaders(token),
-    });
-    if (notifData != null) {
-      notificationUnreadCount = notifData.unreadCount;
+    const [notifResult, meResult] = await Promise.all([
+      api.GET('/notifications/mine', { headers: authHeaders(token) }),
+      api.GET('/auth/me', { headers: authHeaders(token) }),
+    ]);
+    if (notifResult.data != null) {
+      notificationUnreadCount = notifResult.data.unreadCount;
+    }
+    if (meResult.data != null) {
+      isAdmin = meResult.data.isAdmin === true;
     }
   }
 
@@ -120,24 +125,28 @@ export default async function HomePage() {
             >
               {t.home.coordination_access}
             </Link>
-            <Link
-              href="/admin/acreditaciones"
-              className="text-sm font-medium text-gray-400 hover:text-gray-700 underline underline-offset-2 transition-colors"
-            >
-              {t.home.admin}
-            </Link>
-            <Link
-              href="/admin/templates"
-              className="text-sm font-medium text-gray-400 hover:text-gray-700 underline underline-offset-2 transition-colors"
-            >
-              {t.home.templates}
-            </Link>
-            <Link
-              href="/admin/auditoria"
-              className="text-sm font-medium text-gray-400 hover:text-gray-700 underline underline-offset-2 transition-colors"
-            >
-              {t.home.audit}
-            </Link>
+            {isAdmin && (
+              <>
+                <Link
+                  href="/admin/acreditaciones"
+                  className="text-sm font-medium text-gray-400 hover:text-gray-700 underline underline-offset-2 transition-colors"
+                >
+                  {t.home.admin}
+                </Link>
+                <Link
+                  href="/admin/templates"
+                  className="text-sm font-medium text-gray-400 hover:text-gray-700 underline underline-offset-2 transition-colors"
+                >
+                  {t.home.templates}
+                </Link>
+                <Link
+                  href="/admin/auditoria"
+                  className="text-sm font-medium text-gray-400 hover:text-gray-700 underline underline-offset-2 transition-colors"
+                >
+                  {t.home.audit}
+                </Link>
+              </>
+            )}
           </nav>
         </footer>
 
