@@ -8,14 +8,16 @@ import { Input } from '@/components/atoms/input';
 import { Label } from '@/components/atoms/label';
 import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';
+import type { Messages } from '@/i18n/messages/es';
 
 const INITIAL_STATE: LoginResult = { status: 'idle' };
 
 interface LoginFormProps {
   next: string;
+  t: Messages['login'];
 }
 
-export function LoginForm({ next }: LoginFormProps) {
+export function LoginForm({ next, t }: LoginFormProps) {
   const boundAction = loginAction.bind(null, next);
   const [state, formAction, pending] = useActionState<LoginResult, FormData>(
     boundAction,
@@ -26,12 +28,12 @@ export function LoginForm({ next }: LoginFormProps) {
     <div className="flex flex-col gap-5">
       <form action={formAction} className="flex flex-col gap-5">
         {state.status === 'error' && (
-          <ErrorMessage message={state.message ?? 'Error al iniciar sesión'} />
+          <ErrorMessage message={state.message ?? t.error_fallback} />
         )}
 
         {/* Email */}
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="email">Correo electrónico</Label>
+          <Label htmlFor="email">{t.email_label}</Label>
           <Input
             id="email"
             name="email"
@@ -44,7 +46,7 @@ export function LoginForm({ next }: LoginFormProps) {
 
         {/* Password */}
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="password">Contraseña</Label>
+          <Label htmlFor="password">{t.password_label}</Label>
           <Input
             id="password"
             name="password"
@@ -56,19 +58,19 @@ export function LoginForm({ next }: LoginFormProps) {
         </div>
 
         <Button type="submit" disabled={pending} fullWidth>
-          {pending ? 'Entrando…' : 'Entrar'}
+          {pending ? t.submitting : t.submit}
         </Button>
       </form>
 
       <SocialLoginButtons />
 
       <p className="text-center text-sm text-gray-600">
-        ¿No tienes cuenta?{' '}
+        {t.no_account}{' '}
         <Link
           href="/signup"
           className="font-semibold text-gray-900 underline underline-offset-2 hover:text-gray-700"
         >
-          Crear cuenta
+          {t.create_account}
         </Link>
       </p>
     </div>

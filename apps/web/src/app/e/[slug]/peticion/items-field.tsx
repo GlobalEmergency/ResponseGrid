@@ -1,18 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import type { Messages } from '@/i18n/messages/es';
 
-const CATEGORIES = [
-  { value: 'hygiene', label: 'Higiene' },
-  { value: 'water', label: 'Agua' },
-  { value: 'food', label: 'Alimentos' },
-  { value: 'medical', label: 'Sanitario' },
-  { value: 'shelter', label: 'Refugio' },
-  { value: 'tools', label: 'Herramientas' },
-  { value: 'other', label: 'Otro' },
-] as const;
-
-type Category = (typeof CATEGORIES)[number]['value'];
+const CATEGORY_VALUES = ['hygiene', 'water', 'food', 'medical', 'shelter', 'tools', 'other'] as const;
+type Category = (typeof CATEGORY_VALUES)[number];
 
 interface Item {
   id: number;
@@ -28,8 +20,22 @@ function makeItem(): Item {
   return { id: nextId++, name: '', quantity: 1, unit: '', category: 'other' };
 }
 
-export function ItemsField() {
+interface ItemsFieldProps {
+  t: Messages['peticion'];
+}
+
+export function ItemsField({ t }: ItemsFieldProps) {
   const [items, setItems] = useState<Item[]>([makeItem()]);
+
+  const categories = [
+    { value: 'hygiene' as Category, label: t.category_hygiene },
+    { value: 'water' as Category, label: t.category_water },
+    { value: 'food' as Category, label: t.category_food },
+    { value: 'medical' as Category, label: t.category_medical },
+    { value: 'shelter' as Category, label: t.category_shelter },
+    { value: 'tools' as Category, label: t.category_tools },
+    { value: 'other' as Category, label: t.category_other },
+  ];
 
   // Serialize to hidden input on every change
   const serialized = JSON.stringify(
@@ -63,14 +69,14 @@ export function ItemsField() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
-          Artículos <span aria-hidden="true">*</span>
+          {t.items_heading} <span aria-hidden="true">*</span>
         </p>
         <button
           type="button"
           onClick={addItem}
           className="text-sm font-semibold text-gray-900 underline underline-offset-2 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded"
         >
-          + Añadir artículo
+          {t.items_add}
         </button>
       </div>
 
@@ -81,16 +87,16 @@ export function ItemsField() {
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Artículo {index + 1}
+              {t.item_number.replace('{n}', String(index + 1))}
             </span>
             {items.length > 1 && (
               <button
                 type="button"
                 onClick={() => removeItem(item.id)}
-                aria-label={`Eliminar artículo ${index + 1}`}
+                aria-label={t.item_remove.replace('{n}', String(index + 1))}
                 className="text-sm text-red-600 hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-1 rounded"
               >
-                Quitar
+                {t.item_remove_label}
               </button>
             )}
           </div>
@@ -101,7 +107,7 @@ export function ItemsField() {
               htmlFor={`item-name-${item.id}`}
               className="text-sm font-medium text-gray-700"
             >
-              Nombre <span aria-hidden="true">*</span>
+              {t.item_name_label} <span aria-hidden="true">*</span>
             </label>
             <input
               id={`item-name-${item.id}`}
@@ -109,7 +115,7 @@ export function ItemsField() {
               required
               value={item.name}
               onChange={(e) => updateItem(item.id, { name: e.target.value })}
-              placeholder="Ej. Mantas térmicas"
+              placeholder={t.item_name_placeholder}
               className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
             />
           </div>
@@ -121,7 +127,7 @@ export function ItemsField() {
                 htmlFor={`item-qty-${item.id}`}
                 className="text-sm font-medium text-gray-700"
               >
-                Cantidad <span aria-hidden="true">*</span>
+                {t.item_quantity_label} <span aria-hidden="true">*</span>
               </label>
               <input
                 id={`item-qty-${item.id}`}
@@ -143,15 +149,15 @@ export function ItemsField() {
                 htmlFor={`item-unit-${item.id}`}
                 className="text-sm font-medium text-gray-700"
               >
-                Unidad{' '}
-                <span className="text-gray-400 font-normal">(opt.)</span>
+                {t.item_unit_label}{' '}
+                <span className="text-gray-400 font-normal">{t.item_unit_opt}</span>
               </label>
               <input
                 id={`item-unit-${item.id}`}
                 type="text"
                 value={item.unit}
                 onChange={(e) => updateItem(item.id, { unit: e.target.value })}
-                placeholder="cajas, litros…"
+                placeholder={t.item_unit_placeholder}
                 className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
               />
             </div>
@@ -163,7 +169,7 @@ export function ItemsField() {
               htmlFor={`item-cat-${item.id}`}
               className="text-sm font-medium text-gray-700"
             >
-              Categoría <span aria-hidden="true">*</span>
+              {t.item_category_label} <span aria-hidden="true">*</span>
             </label>
             <select
               id={`item-cat-${item.id}`}
@@ -174,7 +180,7 @@ export function ItemsField() {
               }
               className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
             >
-              {CATEGORIES.map(({ value, label }) => (
+              {categories.map(({ value, label }) => (
                 <option key={value} value={value}>
                   {label}
                 </option>

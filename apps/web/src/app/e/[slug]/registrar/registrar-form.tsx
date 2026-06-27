@@ -12,24 +12,9 @@ import { ErrorMessage } from '@/components/atoms/error-message';
 import { FormField } from '@/components/molecules/form-field';
 import { DraftRestoredBanner } from '@/components/atoms/draft-restored-banner';
 import { useFormDraft } from '@/lib/use-form-draft';
+import type { Messages } from '@/i18n/messages/es';
 
 const INITIAL_STATE: ActionState = { status: 'idle' };
-
-const RESOURCE_TYPES = [
-  { value: 'collection_point', label: 'Punto de recogida' },
-  { value: 'delivery_point', label: 'Punto de entrega' },
-  { value: 'collection_and_delivery', label: 'Recogida y entrega' },
-  { value: 'warehouse', label: 'Almacén' },
-  { value: 'transport', label: 'Transporte' },
-  { value: 'supplier', label: 'Proveedor' },
-  { value: 'venue', label: 'Local / Espacio' },
-] as const;
-
-const STAGES = [
-  { value: 'origin', label: 'Origen' },
-  { value: 'intermediate', label: 'Intermedio' },
-  { value: 'destination', label: 'Destino' },
-] as const;
 
 type BoundAction = (prev: ActionState, formData: FormData) => Promise<ActionState>;
 
@@ -38,9 +23,18 @@ interface RegistrarFormProps {
   slug: string;
   locationPicker: ReactNode;
   orgSelector: ReactNode;
+  t: Messages['registrar'];
+  backToEmergencyLabel: string;
 }
 
-export function RegistrarForm({ action, slug, locationPicker, orgSelector }: RegistrarFormProps) {
+export function RegistrarForm({
+  action,
+  slug,
+  locationPicker,
+  orgSelector,
+  t,
+  backToEmergencyLabel,
+}: RegistrarFormProps) {
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     action,
     INITIAL_STATE,
@@ -68,6 +62,22 @@ export function RegistrarForm({ action, slug, locationPicker, orgSelector }: Reg
     if (state.status === 'success') clearDraft();
   }, [state.status, clearDraft]);
 
+  const resourceTypes = [
+    { value: 'collection_point', label: t.type_collection_point },
+    { value: 'delivery_point', label: t.type_delivery_point },
+    { value: 'collection_and_delivery', label: t.type_collection_and_delivery },
+    { value: 'warehouse', label: t.type_warehouse },
+    { value: 'transport', label: t.type_transport },
+    { value: 'supplier', label: t.type_supplier },
+    { value: 'venue', label: t.type_venue },
+  ] as const;
+
+  const stages = [
+    { value: 'origin', label: t.stage_origin },
+    { value: 'intermediate', label: t.stage_intermediate },
+    { value: 'destination', label: t.stage_destination },
+  ] as const;
+
   if (state.status === 'success') {
     return (
       <section
@@ -76,8 +86,7 @@ export function RegistrarForm({ action, slug, locationPicker, orgSelector }: Reg
         className="flex flex-col gap-6 rounded-lg border-2 border-gray-900 bg-white p-6"
       >
         <p className="text-lg font-semibold text-gray-900 leading-snug">
-          Gracias, quedas registrado. No recibas material ni publiques nada hasta
-          que te validemos.
+          {t.success_message}
         </p>
         <div className="flex flex-col gap-3">
           <Link
@@ -87,13 +96,13 @@ export function RegistrarForm({ action, slug, locationPicker, orgSelector }: Reg
               window.location.href = `/e/${slug}/registrar`;
             }}
           >
-            Registrar otro recurso
+            {t.success_register_another}
           </Link>
           <Link
             href={`/e/${slug}`}
             className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-gray-900 bg-white border-2 border-gray-900 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors"
           >
-            Volver a la emergencia
+            {backToEmergencyLabel}
           </Link>
         </div>
       </section>
@@ -105,13 +114,13 @@ export function RegistrarForm({ action, slug, locationPicker, orgSelector }: Reg
       {wasRestored && <DraftRestoredBanner />}
 
       {state.status === 'error' && (
-        <ErrorMessage message={state.message ?? 'Error al registrar el recurso'} />
+        <ErrorMessage message={state.message ?? t.error_fallback} />
       )}
 
       {/* Tipo de recurso */}
       <FormField
         htmlFor="type"
-        label={<>Tipo de recurso <span aria-hidden="true">*</span></>}
+        label={<>{t.type_label} <span aria-hidden="true">*</span></>}
       >
         <Select
           id="type"
@@ -121,9 +130,9 @@ export function RegistrarForm({ action, slug, locationPicker, orgSelector }: Reg
           onChange={(e) => setType(e.target.value)}
         >
           <option value="" disabled>
-            Selecciona un tipo…
+            {t.select_type_placeholder}
           </option>
-          {RESOURCE_TYPES.map(({ value, label }) => (
+          {resourceTypes.map(({ value, label }) => (
             <option key={value} value={value}>
               {label}
             </option>
@@ -134,7 +143,7 @@ export function RegistrarForm({ action, slug, locationPicker, orgSelector }: Reg
       {/* Etapa */}
       <FormField
         htmlFor="stage"
-        label={<>Etapa <span aria-hidden="true">*</span></>}
+        label={<>{t.stage_label} <span aria-hidden="true">*</span></>}
       >
         <Select
           id="stage"
@@ -144,9 +153,9 @@ export function RegistrarForm({ action, slug, locationPicker, orgSelector }: Reg
           onChange={(e) => setStage(e.target.value)}
         >
           <option value="" disabled>
-            Selecciona una etapa…
+            {t.select_stage_placeholder}
           </option>
-          {STAGES.map(({ value, label }) => (
+          {stages.map(({ value, label }) => (
             <option key={value} value={value}>
               {label}
             </option>
@@ -157,7 +166,7 @@ export function RegistrarForm({ action, slug, locationPicker, orgSelector }: Reg
       {/* Nombre */}
       <FormField
         htmlFor="name"
-        label={<>Nombre <span aria-hidden="true">*</span></>}
+        label={<>{t.name_label} <span aria-hidden="true">*</span></>}
       >
         <Input
           id="name"
@@ -165,7 +174,7 @@ export function RegistrarForm({ action, slug, locationPicker, orgSelector }: Reg
           type="text"
           required
           minLength={2}
-          placeholder="Ej. Cruz Roja Madrid"
+          placeholder={t.name_placeholder}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
@@ -176,7 +185,7 @@ export function RegistrarForm({ action, slug, locationPicker, orgSelector }: Reg
         htmlFor="description"
         label={
           <>
-            Descripción{' '}
+            {t.description_label}{' '}
             <span className="text-gray-400 font-normal normal-case">(opcional)</span>
           </>
         }
@@ -185,7 +194,7 @@ export function RegistrarForm({ action, slug, locationPicker, orgSelector }: Reg
           id="description"
           name="description"
           rows={3}
-          placeholder="Información adicional sobre el recurso…"
+          placeholder={t.description_placeholder}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
@@ -194,7 +203,7 @@ export function RegistrarForm({ action, slug, locationPicker, orgSelector }: Reg
       {/* Ubicación */}
       <FormField
         htmlFor="location-search"
-        label={<>Ubicación <span aria-hidden="true">*</span></>}
+        label={<>{t.location_label} <span aria-hidden="true">*</span></>}
         labelAs="p"
       >
         {locationPicker}
@@ -205,7 +214,7 @@ export function RegistrarForm({ action, slug, locationPicker, orgSelector }: Reg
 
       {/* Submit */}
       <Button type="submit" disabled={pending} fullWidth>
-        {pending ? 'Enviando…' : 'Registrar recurso'}
+        {pending ? t.submitting : t.submit}
       </Button>
     </form>
   );

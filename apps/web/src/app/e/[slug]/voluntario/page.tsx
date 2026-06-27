@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { registerVolunteer } from './actions';
 import { VoluntarioForm } from './voluntario-form';
+import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,19 +19,21 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const emergency = await getEmergencyBySlug(slug);
+  const { t } = await getT();
 
   if (!emergency) {
     return { title: 'Emergencia no encontrada · ReliefHub' };
   }
 
   return {
-    title: `Apuntarme como voluntario — ${emergency.name} · ReliefHub`,
-    description: `Regístrate como voluntario para colaborar en ${emergency.name}.`,
+    title: t.voluntario.meta_title.replace('{emergencyName}', emergency.name),
+    description: t.voluntario.meta_description.replace('{emergencyName}', emergency.name),
   };
 }
 
 export default async function VoluntarioPage({ params }: Props) {
   const { slug } = await params;
+  const { t } = await getT();
 
   const token = await getToken();
   if (!token) {
@@ -68,10 +71,10 @@ export default async function VoluntarioPage({ params }: Props) {
             ← {emergency.name}
           </a>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Apuntarme como voluntario
+            {t.voluntario.page_title}
           </h1>
           <p className="text-base text-gray-600">
-            {emergency.name} · Rellena tus datos para unirte al equipo de voluntariado.
+            {t.voluntario.page_subtitle.replace('{emergencyName}', emergency.name)}
           </p>
         </header>
 
@@ -79,6 +82,8 @@ export default async function VoluntarioPage({ params }: Props) {
           action={boundAction}
           slug={slug}
           existingProfile={existingProfile}
+          t={t.voluntario}
+          backToEmergencyLabel={t.common.back_to_emergency}
         />
       </div>
     </main>

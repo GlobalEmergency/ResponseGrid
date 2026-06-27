@@ -12,15 +12,9 @@ import { ErrorMessage } from '@/components/atoms/error-message';
 import { FormField } from '@/components/molecules/form-field';
 import { DraftRestoredBanner } from '@/components/atoms/draft-restored-banner';
 import { useFormDraft } from '@/lib/use-form-draft';
+import type { Messages } from '@/i18n/messages/es';
 
 const INITIAL_STATE: PeticionState = { status: 'idle' };
-
-const PRIORITIES = [
-  { value: 'low', label: 'Baja' },
-  { value: 'medium', label: 'Media' },
-  { value: 'high', label: 'Alta' },
-  { value: 'urgent', label: 'Urgente' },
-] as const;
 
 type BoundAction = (prev: PeticionState, formData: FormData) => Promise<PeticionState>;
 
@@ -30,6 +24,8 @@ interface PeticionFormProps {
   locationPicker: ReactNode;
   orgSelector: ReactNode;
   itemsField: ReactNode;
+  t: Messages['peticion'];
+  backToEmergencyLabel: string;
 }
 
 export function PeticionForm({
@@ -38,6 +34,8 @@ export function PeticionForm({
   locationPicker,
   orgSelector,
   itemsField,
+  t,
+  backToEmergencyLabel,
 }: PeticionFormProps) {
   const [state, formAction, pending] = useActionState<PeticionState, FormData>(
     action,
@@ -65,6 +63,13 @@ export function PeticionForm({
     if (state.status === 'success') clearDraft();
   }, [state.status, clearDraft]);
 
+  const priorities = [
+    { value: 'low', label: t.priority_low },
+    { value: 'medium', label: t.priority_medium },
+    { value: 'high', label: t.priority_high },
+    { value: 'urgent', label: t.priority_urgent },
+  ] as const;
+
   if (state.status === 'success') {
     return (
       <section
@@ -73,8 +78,7 @@ export function PeticionForm({
         className="flex flex-col gap-6 rounded-lg border-2 border-gray-900 bg-white p-6"
       >
         <p className="text-lg font-semibold text-gray-900 leading-snug">
-          Gracias, tu petición se ha registrado y será revisada por el equipo de
-          coordinación.
+          {t.success_message}
         </p>
         <div className="flex flex-col gap-3">
           <Link
@@ -84,13 +88,13 @@ export function PeticionForm({
               window.location.href = `/e/${slug}/peticion`;
             }}
           >
-            Enviar otra petición
+            {t.success_send_another}
           </Link>
           <Link
             href={`/e/${slug}`}
             className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-gray-900 bg-white border-2 border-gray-900 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors"
           >
-            Volver a la emergencia
+            {backToEmergencyLabel}
           </Link>
         </div>
       </section>
@@ -102,13 +106,13 @@ export function PeticionForm({
       {wasRestored && <DraftRestoredBanner />}
 
       {state.status === 'error' && (
-        <ErrorMessage message={state.message ?? 'Error al enviar la petición'} />
+        <ErrorMessage message={state.message ?? t.error_fallback} />
       )}
 
       {/* Título */}
       <FormField
         htmlFor="title"
-        label={<>Título <span aria-hidden="true">*</span></>}
+        label={<>{t.title_label} <span aria-hidden="true">*</span></>}
       >
         <Input
           id="title"
@@ -116,7 +120,7 @@ export function PeticionForm({
           type="text"
           required
           minLength={2}
-          placeholder="Ej. Mantas térmicas para familias"
+          placeholder={t.title_placeholder}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
@@ -127,7 +131,7 @@ export function PeticionForm({
         htmlFor="description"
         label={
           <>
-            Descripción{' '}
+            {t.description_label}{' '}
             <span className="text-gray-400 font-normal normal-case">(opcional)</span>
           </>
         }
@@ -136,7 +140,7 @@ export function PeticionForm({
           id="description"
           name="description"
           rows={3}
-          placeholder="Detalla la necesidad para que la coordinación pueda valorarla…"
+          placeholder={t.description_placeholder}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
@@ -145,7 +149,7 @@ export function PeticionForm({
       {/* Prioridad */}
       <FormField
         htmlFor="priority"
-        label={<>Prioridad <span aria-hidden="true">*</span></>}
+        label={<>{t.priority_label} <span aria-hidden="true">*</span></>}
       >
         <Select
           id="priority"
@@ -155,9 +159,9 @@ export function PeticionForm({
           onChange={(e) => setPriority(e.target.value)}
         >
           <option value="" disabled>
-            Selecciona una prioridad…
+            {t.select_priority_placeholder}
           </option>
-          {PRIORITIES.map(({ value, label }) => (
+          {priorities.map(({ value, label }) => (
             <option key={value} value={value}>
               {label}
             </option>
@@ -168,7 +172,7 @@ export function PeticionForm({
       {/* Ubicación */}
       <FormField
         htmlFor="location-search"
-        label={<>Ubicación <span aria-hidden="true">*</span></>}
+        label={<>{t.location_label} <span aria-hidden="true">*</span></>}
         labelAs="p"
       >
         {locationPicker}
@@ -182,7 +186,7 @@ export function PeticionForm({
 
       {/* Submit */}
       <Button type="submit" disabled={pending} fullWidth>
-        {pending ? 'Enviando…' : 'Enviar petición'}
+        {pending ? t.submitting : t.submit}
       </Button>
     </form>
   );

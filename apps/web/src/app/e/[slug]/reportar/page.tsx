@@ -4,6 +4,7 @@ import { getEmergencyBySlug } from '@/lib/emergencies';
 import { getToken, authHeaders } from '@/lib/auth';
 import { submitReport } from './actions';
 import { ReportForm } from './report-form';
+import { getT } from '@/i18n/server';
 
 const API_BASE = process.env.API_URL ?? 'http://localhost:3000';
 
@@ -15,10 +16,11 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const emergency = await getEmergencyBySlug(slug);
+  const { t } = await getT();
   if (!emergency) return { title: 'Emergencia no encontrada · ReliefHub' };
   return {
-    title: `Enviar parte — ${emergency.name} · ReliefHub`,
-    description: `Envía un parte de campo para ${emergency.name}.`,
+    title: t.reportar.meta_title.replace('{emergencyName}', emergency.name),
+    description: t.reportar.meta_description.replace('{emergencyName}', emergency.name),
   };
 }
 
@@ -27,6 +29,7 @@ export const dynamic = 'force-dynamic';
 export default async function ReportarPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
+  const { t } = await getT();
 
   const token = await getToken();
   if (token === null) {
@@ -75,7 +78,7 @@ export default async function ReportarPage({ params, searchParams }: Props) {
       <div className="w-full max-w-md flex flex-col gap-8">
         <header className="flex flex-col gap-1">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Enviar parte de campo
+            {t.reportar.page_title}
           </h1>
           <p className="text-base text-gray-600">
             {emergency.name}
@@ -87,6 +90,8 @@ export default async function ReportarPage({ params, searchParams }: Props) {
           slug={slug}
           myResources={myResources}
           prefilledResourceId={prefilledResourceId}
+          t={t.reportar}
+          backToEmergencyLabel={t.common.back_to_emergency}
         />
       </div>
     </main>

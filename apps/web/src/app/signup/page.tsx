@@ -1,10 +1,14 @@
 import type { Metadata } from 'next';
 import { SignupForm } from '@/components/organisms/signup-form';
+import { getT } from '@/i18n/server';
 
-export const metadata: Metadata = {
-  title: 'Crear cuenta — ReliefHub',
-  description: 'Regístrate en ReliefHub para coordinar emergencias.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  return {
+    title: t.signup.meta_title,
+    description: t.signup.meta_description,
+  };
+}
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -13,6 +17,7 @@ type Props = {
 export default async function SignupPage({ searchParams }: Props) {
   const resolved = await searchParams;
   const next = typeof resolved.next === 'string' ? resolved.next : '/';
+  const { t } = await getT();
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-4 py-10 bg-white">
@@ -20,15 +25,15 @@ export default async function SignupPage({ searchParams }: Props) {
         {/* Header */}
         <header className="flex flex-col gap-1">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Crear cuenta
+            {t.signup.title}
           </h1>
           <p className="text-base text-gray-600">
-            Únete a ReliefHub para coordinar recursos en emergencias.
+            {t.signup.subtitle}
           </p>
         </header>
 
         {/* Signup form */}
-        <SignupForm next={next} />
+        <SignupForm next={next} t={t.signup} />
       </div>
     </main>
   );

@@ -11,22 +11,9 @@ import { FormField } from '@/components/molecules/form-field';
 import { PhotoUploader } from '@/components/molecules/photo-uploader';
 import { DraftRestoredBanner } from '@/components/atoms/draft-restored-banner';
 import { useFormDraft } from '@/lib/use-form-draft';
+import type { Messages } from '@/i18n/messages/es';
 
 const INITIAL_STATE: SubmitReportState = { status: 'idle' };
-
-const REPORT_TYPES = [
-  { value: 'incident', label: 'Incidencia' },
-  { value: 'stock', label: 'Stock' },
-  { value: 'status', label: 'Estado' },
-  { value: 'other', label: 'Otro' },
-] as const;
-
-const REPORT_PRIORITIES = [
-  { value: 'low', label: 'Baja' },
-  { value: 'medium', label: 'Media' },
-  { value: 'high', label: 'Alta' },
-  { value: 'urgent', label: 'Urgente' },
-] as const;
 
 type BoundAction = (prev: SubmitReportState, formData: FormData) => Promise<SubmitReportState>;
 
@@ -35,6 +22,8 @@ interface ReportFormProps {
   slug: string;
   myResources: Array<{ id: string; name: string }>;
   prefilledResourceId?: string;
+  t: Messages['reportar'];
+  backToEmergencyLabel: string;
 }
 
 export function ReportForm({
@@ -42,6 +31,8 @@ export function ReportForm({
   slug,
   myResources,
   prefilledResourceId,
+  t,
+  backToEmergencyLabel,
 }: ReportFormProps) {
   const [state, formAction, pending] = useActionState<SubmitReportState, FormData>(
     action,
@@ -76,6 +67,20 @@ export function ReportForm({
     photoUrlsRef.current = urls;
   }, []);
 
+  const reportTypes = [
+    { value: 'incident', label: t.type_incident },
+    { value: 'stock', label: t.type_stock },
+    { value: 'status', label: t.type_status },
+    { value: 'other', label: t.type_other },
+  ] as const;
+
+  const reportPriorities = [
+    { value: 'low', label: t.priority_low },
+    { value: 'medium', label: t.priority_medium },
+    { value: 'high', label: t.priority_high },
+    { value: 'urgent', label: t.priority_urgent },
+  ] as const;
+
   if (state.status === 'success') {
     return (
       <section
@@ -84,7 +89,7 @@ export function ReportForm({
         className="flex flex-col gap-6 rounded-lg border-2 border-gray-900 bg-white p-6"
       >
         <p className="text-lg font-semibold text-gray-900 leading-snug">
-          Parte enviado correctamente. El coordinador lo revisará en breve.
+          {t.success_message}
         </p>
         <div className="flex flex-col gap-3">
           <Link
@@ -94,13 +99,13 @@ export function ReportForm({
               window.location.href = `/e/${slug}/reportar`;
             }}
           >
-            Enviar otro parte
+            {t.success_send_another}
           </Link>
           <Link
             href={`/e/${slug}`}
             className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-gray-900 bg-white border-2 border-gray-900 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors"
           >
-            Volver a la emergencia
+            {backToEmergencyLabel}
           </Link>
         </div>
       </section>
@@ -119,13 +124,13 @@ export function ReportForm({
       {wasRestored && <DraftRestoredBanner />}
 
       {state.status === 'error' && (
-        <ErrorMessage message={state.message ?? 'Error al enviar el parte'} />
+        <ErrorMessage message={state.message ?? t.error_fallback} />
       )}
 
       {/* Tipo */}
       <FormField
         htmlFor="type"
-        label={<>Tipo <span aria-hidden="true">*</span></>}
+        label={<>{t.type_label} <span aria-hidden="true">*</span></>}
       >
         <Select
           id="type"
@@ -134,8 +139,8 @@ export function ReportForm({
           value={type}
           onChange={(e) => setType(e.target.value)}
         >
-          <option value="" disabled>Selecciona un tipo…</option>
-          {REPORT_TYPES.map(({ value, label }) => (
+          <option value="" disabled>{t.select_type_placeholder}</option>
+          {reportTypes.map(({ value, label }) => (
             <option key={value} value={value}>{label}</option>
           ))}
         </Select>
@@ -144,7 +149,7 @@ export function ReportForm({
       {/* Prioridad */}
       <FormField
         htmlFor="priority"
-        label={<>Prioridad <span aria-hidden="true">*</span></>}
+        label={<>{t.priority_label} <span aria-hidden="true">*</span></>}
       >
         <Select
           id="priority"
@@ -153,8 +158,8 @@ export function ReportForm({
           value={priority}
           onChange={(e) => setPriority(e.target.value)}
         >
-          <option value="" disabled>Selecciona una prioridad…</option>
-          {REPORT_PRIORITIES.map(({ value, label }) => (
+          <option value="" disabled>{t.select_priority_placeholder}</option>
+          {reportPriorities.map(({ value, label }) => (
             <option key={value} value={value}>{label}</option>
           ))}
         </Select>
@@ -163,14 +168,14 @@ export function ReportForm({
       {/* Nota */}
       <FormField
         htmlFor="note"
-        label={<>Nota <span aria-hidden="true">*</span></>}
+        label={<>{t.note_label} <span aria-hidden="true">*</span></>}
       >
         <Textarea
           id="note"
           name="note"
           rows={4}
           required
-          placeholder="Describe la incidencia, estado o stock…"
+          placeholder={t.note_placeholder}
           value={note}
           onChange={(e) => setNote(e.target.value)}
         />
@@ -180,7 +185,7 @@ export function ReportForm({
       {myResources.length > 0 && (
         <FormField
           htmlFor="resourceId"
-          label="Punto relacionado (opcional)"
+          label={t.related_point_label}
         >
           <Select
             id="resourceId"
@@ -188,7 +193,7 @@ export function ReportForm({
             value={resourceId}
             onChange={(e) => setResourceId(e.target.value)}
           >
-            <option value="">General (sin punto específico)</option>
+            <option value="">{t.general_no_point}</option>
             {myResources.map(({ id, name }) => (
               <option key={id} value={id}>{name}</option>
             ))}
@@ -206,7 +211,7 @@ export function ReportForm({
 
       {/* Submit */}
       <Button type="submit" disabled={pending} fullWidth>
-        {pending ? 'Enviando…' : 'Enviar parte'}
+        {pending ? t.submitting : t.submit}
       </Button>
     </form>
   );

@@ -11,34 +11,12 @@ import { ErrorMessage } from '@/components/atoms/error-message';
 import { FormField } from '@/components/molecules/form-field';
 import { DraftRestoredBanner } from '@/components/atoms/draft-restored-banner';
 import { useFormDraft } from '@/lib/use-form-draft';
+import type { Messages } from '@/i18n/messages/es';
 
 type VolunteerViewDto = components['schemas']['VolunteerViewDto'];
 type Skill = components['schemas']['RegisterVolunteerDto']['skills'][number];
 
 const INITIAL_STATE: VolunteerActionState = { status: 'idle' };
-
-const SKILL_OPTIONS: { value: Skill; label: string }[] = [
-  { value: 'driving', label: 'Conducción' },
-  { value: 'medical', label: 'Sanitario / Primeros auxilios' },
-  { value: 'logistics', label: 'Logística' },
-  { value: 'cooking', label: 'Cocina' },
-  { value: 'languages', label: 'Idiomas' },
-  { value: 'admin', label: 'Administración' },
-  { value: 'general', label: 'General / Apoyo' },
-];
-
-const AVAILABILITY_OPTIONS = [
-  { value: 'immediate', label: 'Inmediata' },
-  { value: 'this_week', label: 'Esta semana' },
-  { value: 'flexible', label: 'Flexible' },
-] as const;
-
-const VEHICLE_OPTIONS = [
-  { value: 'none', label: 'Ninguno' },
-  { value: 'car', label: 'Coche' },
-  { value: 'van', label: 'Furgoneta' },
-  { value: 'truck', label: 'Camión' },
-] as const;
 
 type BoundAction = (prev: VolunteerActionState, formData: FormData) => Promise<VolunteerActionState>;
 
@@ -46,9 +24,11 @@ interface VoluntarioFormProps {
   action: BoundAction;
   slug: string;
   existingProfile: VolunteerViewDto | null;
+  t: Messages['voluntario'];
+  backToEmergencyLabel: string;
 }
 
-export function VoluntarioForm({ action, slug, existingProfile }: VoluntarioFormProps) {
+export function VoluntarioForm({ action, slug, existingProfile, t, backToEmergencyLabel }: VoluntarioFormProps) {
   const [state, formAction, pending] = useActionState<VolunteerActionState, FormData>(
     action,
     INITIAL_STATE,
@@ -98,6 +78,29 @@ export function VoluntarioForm({ action, slug, existingProfile }: VoluntarioForm
     });
   }
 
+  const skillOptions: { value: Skill; label: string }[] = [
+    { value: 'driving', label: t.skill_driving },
+    { value: 'medical', label: t.skill_medical },
+    { value: 'logistics', label: t.skill_logistics },
+    { value: 'cooking', label: t.skill_cooking },
+    { value: 'languages', label: t.skill_languages },
+    { value: 'admin', label: t.skill_admin },
+    { value: 'general', label: t.skill_general },
+  ];
+
+  const availabilityOptions = [
+    { value: 'immediate', label: t.availability_immediate },
+    { value: 'this_week', label: t.availability_this_week },
+    { value: 'flexible', label: t.availability_flexible },
+  ] as const;
+
+  const vehicleOptions = [
+    { value: 'none', label: t.vehicle_none },
+    { value: 'car', label: t.vehicle_car },
+    { value: 'van', label: t.vehicle_van },
+    { value: 'truck', label: t.vehicle_truck },
+  ] as const;
+
   if (state.status === 'success') {
     return (
       <section
@@ -106,22 +109,20 @@ export function VoluntarioForm({ action, slug, existingProfile }: VoluntarioForm
         className="flex flex-col gap-6 rounded-lg border-2 border-gray-900 bg-white p-6"
       >
         <p className="text-lg font-semibold text-gray-900 leading-snug">
-          {existingProfile !== null
-            ? '¡Datos actualizados! Tu perfil de voluntario ha sido guardado.'
-            : '¡Gracias! Quedas registrado como voluntario. El equipo de coordinación se pondrá en contacto contigo.'}
+          {existingProfile !== null ? t.success_update : t.success_new}
         </p>
         <div className="flex flex-col gap-3">
           <Link
             href={`/e/${slug}/mi-voluntariado`}
             className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors"
           >
-            Ver mi voluntariado
+            {t.view_volunteering}
           </Link>
           <Link
             href={`/e/${slug}`}
             className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-gray-900 bg-white border-2 border-gray-900 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors"
           >
-            Volver a la emergencia
+            {backToEmergencyLabel}
           </Link>
         </div>
       </section>
@@ -137,8 +138,7 @@ export function VoluntarioForm({ action, slug, existingProfile }: VoluntarioForm
           className="rounded-lg border-2 border-amber-400 bg-amber-50 px-4 py-3 text-sm text-amber-900"
           role="note"
         >
-          <span className="font-semibold">Ya estás apuntado como voluntario.</span>{' '}
-          Puedes actualizar tus datos a continuación.
+          <span className="font-semibold">{t.already_registered}</span>
         </div>
       )}
 
@@ -149,7 +149,7 @@ export function VoluntarioForm({ action, slug, existingProfile }: VoluntarioForm
       {/* Nombre */}
       <FormField
         htmlFor="name"
-        label={<>Nombre completo <span aria-hidden="true">*</span></>}
+        label={<>{t.name_label} <span aria-hidden="true">*</span></>}
       >
         <Input
           id="name"
@@ -157,7 +157,7 @@ export function VoluntarioForm({ action, slug, existingProfile }: VoluntarioForm
           type="text"
           required
           minLength={2}
-          placeholder="Ej. Ana García"
+          placeholder={t.name_placeholder}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
@@ -166,7 +166,7 @@ export function VoluntarioForm({ action, slug, existingProfile }: VoluntarioForm
       {/* Contacto */}
       <FormField
         htmlFor="contact"
-        label={<>Contacto (email o teléfono) <span aria-hidden="true">*</span></>}
+        label={<>{t.contact_label} <span aria-hidden="true">*</span></>}
       >
         <Input
           id="contact"
@@ -174,7 +174,7 @@ export function VoluntarioForm({ action, slug, existingProfile }: VoluntarioForm
           type="text"
           required
           minLength={2}
-          placeholder="Ej. ana@ejemplo.com o 612 345 678"
+          placeholder={t.contact_placeholder}
           value={contact}
           onChange={(e) => setContact(e.target.value)}
         />
@@ -183,7 +183,7 @@ export function VoluntarioForm({ action, slug, existingProfile }: VoluntarioForm
       {/* Municipio */}
       <FormField
         htmlFor="municipality"
-        label={<>Municipio <span aria-hidden="true">*</span></>}
+        label={<>{t.municipality_label} <span aria-hidden="true">*</span></>}
       >
         <Input
           id="municipality"
@@ -191,7 +191,7 @@ export function VoluntarioForm({ action, slug, existingProfile }: VoluntarioForm
           type="text"
           required
           minLength={2}
-          placeholder="Ej. Valencia"
+          placeholder={t.municipality_placeholder}
           value={municipality}
           onChange={(e) => setMunicipality(e.target.value)}
         />
@@ -200,10 +200,10 @@ export function VoluntarioForm({ action, slug, existingProfile }: VoluntarioForm
       {/* Habilidades */}
       <fieldset className="flex flex-col gap-3">
         <legend className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
-          Habilidades
+          {t.skills_legend}
         </legend>
         <div className="flex flex-wrap gap-2">
-          {SKILL_OPTIONS.map(({ value, label }) => {
+          {skillOptions.map(({ value, label }) => {
             const active = selectedSkills.has(value);
             return (
               <label
@@ -233,7 +233,7 @@ export function VoluntarioForm({ action, slug, existingProfile }: VoluntarioForm
       {/* Disponibilidad */}
       <FormField
         htmlFor="availability"
-        label={<>Disponibilidad <span aria-hidden="true">*</span></>}
+        label={<>{t.availability_label} <span aria-hidden="true">*</span></>}
       >
         <Select
           id="availability"
@@ -243,9 +243,9 @@ export function VoluntarioForm({ action, slug, existingProfile }: VoluntarioForm
           onChange={(e) => setAvailability(e.target.value)}
         >
           <option value="" disabled>
-            Selecciona tu disponibilidad…
+            {t.select_availability_placeholder}
           </option>
-          {AVAILABILITY_OPTIONS.map(({ value, label }) => (
+          {availabilityOptions.map(({ value, label }) => (
             <option key={value} value={value}>
               {label}
             </option>
@@ -256,7 +256,7 @@ export function VoluntarioForm({ action, slug, existingProfile }: VoluntarioForm
       {/* Vehículo */}
       <FormField
         htmlFor="vehicle"
-        label={<>Vehículo disponible <span aria-hidden="true">*</span></>}
+        label={<>{t.vehicle_label} <span aria-hidden="true">*</span></>}
       >
         <Select
           id="vehicle"
@@ -266,9 +266,9 @@ export function VoluntarioForm({ action, slug, existingProfile }: VoluntarioForm
           onChange={(e) => setVehicle(e.target.value)}
         >
           <option value="" disabled>
-            Selecciona tipo de vehículo…
+            {t.select_vehicle_placeholder}
           </option>
-          {VEHICLE_OPTIONS.map(({ value, label }) => (
+          {vehicleOptions.map(({ value, label }) => (
             <option key={value} value={value}>
               {label}
             </option>
@@ -291,20 +291,18 @@ export function VoluntarioForm({ action, slug, existingProfile }: VoluntarioForm
             htmlFor="consentAccepted"
             className="text-sm text-gray-700 leading-snug cursor-pointer"
           >
-            Acepto el tratamiento de mis datos personales para la coordinación de
-            esta emergencia, conforme a la normativa vigente de protección de datos
-            (GDPR). Los datos serán usados exclusivamente para la gestión del
-            voluntariado. <span aria-hidden="true" className="text-red-600 font-bold">*</span>
+            {t.consent_text}{' '}
+            <span aria-hidden="true" className="text-red-600 font-bold">*</span>
           </label>
         </div>
       </div>
 
       <Button type="submit" disabled={pending} fullWidth>
         {pending
-          ? 'Guardando…'
+          ? t.submitting
           : existingProfile !== null
-            ? 'Actualizar datos'
-            : 'Apuntarme como voluntario'}
+            ? t.submit_update
+            : t.submit_new}
       </Button>
     </form>
   );

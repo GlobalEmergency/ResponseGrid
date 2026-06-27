@@ -1,10 +1,14 @@
 import type { Metadata } from 'next';
 import { LoginForm } from '@/components/organisms/login-form';
+import { getT } from '@/i18n/server';
 
-export const metadata: Metadata = {
-  title: 'Acceso coordinación — ReliefHub',
-  description: 'Panel de coordinación de emergencias.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  return {
+    title: t.login.meta_title,
+    description: t.login.meta_description,
+  };
+}
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -14,6 +18,7 @@ export default async function LoginPage({ searchParams }: Props) {
   const resolved = await searchParams;
   const next =
     typeof resolved.next === 'string' ? resolved.next : '/';
+  const { t } = await getT();
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-4 py-10 bg-white">
@@ -21,28 +26,28 @@ export default async function LoginPage({ searchParams }: Props) {
         {/* Header */}
         <header className="flex flex-col gap-1">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Acceso de coordinación
+            {t.login.title}
           </h1>
           <p className="text-base text-gray-600">
-            Introduce tus credenciales para entrar al panel.
+            {t.login.subtitle}
           </p>
         </header>
 
         {/* Demo credentials note */}
         <div className="rounded-lg border-2 border-gray-200 bg-gray-50 px-4 py-3 flex flex-col gap-1">
           <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-            Credenciales demo
+            {t.login.demo_label}
           </p>
           <p className="text-sm text-gray-700">
-            <span className="font-medium">Email:</span> coord@reliefhub.org
+            <span className="font-medium">{t.login.demo_email_label}</span> {t.login.demo_email}
           </p>
           <p className="text-sm text-gray-700">
-            <span className="font-medium">Contraseña:</span> coord1234
+            <span className="font-medium">{t.login.demo_password_label}</span> {t.login.demo_password}
           </p>
         </div>
 
         {/* Login form */}
-        <LoginForm next={next} />
+        <LoginForm next={next} t={t.login} />
       </div>
     </main>
   );

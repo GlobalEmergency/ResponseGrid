@@ -8,14 +8,16 @@ import { Input } from '@/components/atoms/input';
 import { Label } from '@/components/atoms/label';
 import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';
+import type { Messages } from '@/i18n/messages/es';
 
 const INITIAL_STATE: SignupResult = { status: 'idle' };
 
 interface SignupFormProps {
   next: string;
+  t: Messages['signup'];
 }
 
-export function SignupForm({ next }: SignupFormProps) {
+export function SignupForm({ next, t }: SignupFormProps) {
   const boundAction = signupAction.bind(null, next);
   const [state, formAction, pending] = useActionState<SignupResult, FormData>(
     boundAction,
@@ -26,12 +28,12 @@ export function SignupForm({ next }: SignupFormProps) {
     <div className="flex flex-col gap-5">
       <form action={formAction} className="flex flex-col gap-5">
         {state.status === 'error' && (
-          <ErrorMessage message={state.message ?? 'Error al crear la cuenta'} />
+          <ErrorMessage message={state.message ?? t.error_fallback} />
         )}
 
         {/* Name */}
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="name">Nombre completo</Label>
+          <Label htmlFor="name">{t.name_label}</Label>
           <Input
             id="name"
             name="name"
@@ -44,7 +46,7 @@ export function SignupForm({ next }: SignupFormProps) {
 
         {/* Email */}
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="email">Correo electrónico</Label>
+          <Label htmlFor="email">{t.email_label}</Label>
           <Input
             id="email"
             name="email"
@@ -58,8 +60,8 @@ export function SignupForm({ next }: SignupFormProps) {
         {/* Password */}
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="password">
-            Contraseña{' '}
-            <span className="font-normal text-gray-500">(mín. 8 caracteres)</span>
+            {t.password_label}{' '}
+            <span className="font-normal text-gray-500">{t.password_hint}</span>
           </Label>
           <Input
             id="password"
@@ -73,19 +75,19 @@ export function SignupForm({ next }: SignupFormProps) {
         </div>
 
         <Button type="submit" disabled={pending} fullWidth>
-          {pending ? 'Creando cuenta…' : 'Crear cuenta'}
+          {pending ? t.submitting : t.submit}
         </Button>
       </form>
 
       <SocialLoginButtons />
 
       <p className="text-center text-sm text-gray-600">
-        ¿Ya tienes cuenta?{' '}
+        {t.already_account}{' '}
         <Link
           href="/login"
           className="font-semibold text-gray-900 underline underline-offset-2 hover:text-gray-700"
         >
-          Inicia sesión
+          {t.login_link}
         </Link>
       </p>
     </div>

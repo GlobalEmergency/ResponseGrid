@@ -4,17 +4,22 @@ import { api } from '@/lib/api';
 import { getToken, authHeaders } from '@/lib/auth';
 import { Badge } from '@/components/atoms/badge';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { LanguageSwitcher } from '@/components/atoms/language-switcher';
+import { getT } from '@/i18n/server';
 
 // Emergency list must reflect live backend state on every request.
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'ReliefHub — Emergencias activas',
-  description:
-    'Plataforma de coordinación de ayuda en emergencias. Consulta las emergencias activas y cómo puedes colaborar.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  return {
+    title: t.home.meta_title,
+    description: t.home.meta_description,
+  };
+}
 
 export default async function HomePage() {
+  const { t } = await getT();
   const { data: emergencies } = await api.GET('/emergencies');
 
   // Fetch notification unread count when authenticated.
@@ -37,12 +42,17 @@ export default async function HomePage() {
 
         {/* ── CABECERA ─────────────────────────────────────────────────── */}
         <header className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            ReliefHub
-          </h1>
-          <p className="text-base text-gray-600">
-            Coordinación de recursos en emergencias.
-          </p>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-2">
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+                {t.home.title}
+              </h1>
+              <p className="text-base text-gray-600">
+                {t.home.subtitle}
+              </p>
+            </div>
+            <LanguageSwitcher />
+          </div>
         </header>
 
         {/* ── EMERGENCIAS ACTIVAS ───────────────────────────────────────── */}
@@ -51,16 +61,16 @@ export default async function HomePage() {
             id="emergencies-heading"
             className="text-xl font-bold text-gray-900"
           >
-            Emergencias activas
+            {t.home.active_emergencies}
           </h2>
 
           {activeEmergencies.length === 0 ? (
             <EmptyState
-              title="No hay emergencias activas en este momento."
-              description="Cuando se active una emergencia aparecerá aquí."
+              title={t.home.no_emergencies_title}
+              description={t.home.no_emergencies_description}
             />
           ) : (
-            <ul className="flex flex-col gap-3" role="list" aria-label="Lista de emergencias activas">
+            <ul className="flex flex-col gap-3" role="list" aria-label={t.home.aria_emergency_list}>
               {activeEmergencies.map((emergency) => (
                 <li key={emergency.id}>
                   <Link
@@ -72,7 +82,7 @@ export default async function HomePage() {
                         {emergency.name}
                       </span>
                       <Badge variant="active" aria-label="Estado: activa">
-                        Activa
+                        {t.home.emergency_status_active}
                       </Badge>
                     </div>
                     <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">
@@ -92,7 +102,7 @@ export default async function HomePage() {
               href="/organizaciones"
               className="text-sm font-medium text-gray-600 hover:text-gray-900 underline underline-offset-2 transition-colors"
             >
-              Mis organizaciones
+              {t.home.my_orgs}
             </Link>
             {token != null && (
               <Link
@@ -100,33 +110,33 @@ export default async function HomePage() {
                 className="text-sm font-medium text-gray-600 hover:text-gray-900 underline underline-offset-2 transition-colors"
               >
                 {notificationUnreadCount > 0
-                  ? `Notificaciones (${notificationUnreadCount})`
-                  : 'Notificaciones'}
+                  ? t.home.notifications_with_count.replace('{count}', String(notificationUnreadCount))
+                  : t.home.notifications}
               </Link>
             )}
             <Link
               href="/login"
               className="text-sm font-medium text-gray-600 hover:text-gray-900 underline underline-offset-2 transition-colors"
             >
-              Acceso coordinación
+              {t.home.coordination_access}
             </Link>
             <Link
               href="/admin/acreditaciones"
               className="text-sm font-medium text-gray-400 hover:text-gray-700 underline underline-offset-2 transition-colors"
             >
-              Admin
+              {t.home.admin}
             </Link>
             <Link
               href="/admin/templates"
               className="text-sm font-medium text-gray-400 hover:text-gray-700 underline underline-offset-2 transition-colors"
             >
-              Plantillas
+              {t.home.templates}
             </Link>
             <Link
               href="/admin/auditoria"
               className="text-sm font-medium text-gray-400 hover:text-gray-700 underline underline-offset-2 transition-colors"
             >
-              Auditoría
+              {t.home.audit}
             </Link>
           </nav>
         </footer>

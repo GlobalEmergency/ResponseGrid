@@ -6,6 +6,7 @@ import { OrgSelector } from '@/components/org-selector';
 import { LocationPicker } from '@/components/location-picker';
 import { registerResource } from './actions';
 import { RegistrarForm } from './registrar-form';
+import { getT } from '@/i18n/server';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -14,19 +15,21 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const emergency = await getEmergencyBySlug(slug);
+  const { t } = await getT();
 
   if (!emergency) {
     return { title: 'Emergencia no encontrada · ReliefHub' };
   }
 
   return {
-    title: `Ofrecer un recurso — ${emergency.name} · ReliefHub`,
-    description: `Regístrate como recurso disponible para ${emergency.name}.`,
+    title: t.registrar.meta_title.replace('{emergencyName}', emergency.name),
+    description: t.registrar.meta_description.replace('{emergencyName}', emergency.name),
   };
 }
 
 export default async function RegistrarPage({ params }: Props) {
   const { slug } = await params;
+  const { t } = await getT();
 
   const token = await getToken();
   if (!token) {
@@ -45,10 +48,10 @@ export default async function RegistrarPage({ params }: Props) {
       <div className="w-full max-w-md flex flex-col gap-8">
         <header className="flex flex-col gap-1">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Ofrecer un recurso
+            {t.registrar.page_title}
           </h1>
           <p className="text-base text-gray-600">
-            {emergency.name} · Rellena el formulario. Te validaremos antes de activarte.
+            {t.registrar.page_subtitle.replace('{emergencyName}', emergency.name)}
           </p>
         </header>
 
@@ -57,6 +60,8 @@ export default async function RegistrarPage({ params }: Props) {
           slug={slug}
           locationPicker={<LocationPicker />}
           orgSelector={<OrgSelector />}
+          t={t.registrar}
+          backToEmergencyLabel={t.common.back_to_emergency}
         />
       </div>
     </main>

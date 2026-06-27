@@ -12,18 +12,9 @@ import { ErrorMessage } from '@/components/atoms/error-message';
 import { FormField } from '@/components/molecules/form-field';
 import { DraftRestoredBanner } from '@/components/atoms/draft-restored-banner';
 import { useFormDraft } from '@/lib/use-form-draft';
+import type { Messages } from '@/i18n/messages/es';
 
 const INITIAL_STATE: OfferState = { status: 'idle' };
-
-const CATEGORIES = [
-  { value: 'food', label: 'Alimentos' },
-  { value: 'water', label: 'Agua' },
-  { value: 'hygiene', label: 'Higiene' },
-  { value: 'medical', label: 'Sanitario' },
-  { value: 'shelter', label: 'Refugio' },
-  { value: 'tools', label: 'Herramientas' },
-  { value: 'other', label: 'Otro' },
-] as const;
 
 type BoundAction = (prev: OfferState, formData: FormData) => Promise<OfferState>;
 
@@ -36,6 +27,8 @@ interface DonarFormProps {
   targetNeedId?: string;
   locationPicker: ReactNode;
   orgSelector: ReactNode;
+  t: Messages['donar'];
+  backToEmergencyLabel: string;
 }
 
 export function DonarForm({
@@ -45,6 +38,8 @@ export function DonarForm({
   targetNeedId,
   locationPicker,
   orgSelector,
+  t,
+  backToEmergencyLabel,
 }: DonarFormProps) {
   const [state, formAction, pending] = useActionState<OfferState, FormData>(
     action,
@@ -77,6 +72,16 @@ export function DonarForm({
     if (state.status === 'success') clearDraft();
   }, [state.status, clearDraft]);
 
+  const categories = [
+    { value: 'food', label: t.category_food },
+    { value: 'water', label: t.category_water },
+    { value: 'hygiene', label: t.category_hygiene },
+    { value: 'medical', label: t.category_medical },
+    { value: 'shelter', label: t.category_shelter },
+    { value: 'tools', label: t.category_tools },
+    { value: 'other', label: t.category_other },
+  ] as const;
+
   if (state.status === 'success') {
     return (
       <section
@@ -85,8 +90,7 @@ export function DonarForm({
         className="flex flex-col gap-6 rounded-lg border-2 border-gray-900 bg-white p-6"
       >
         <p className="text-lg font-semibold text-gray-900 leading-snug">
-          ¡Gracias! Tu oferta ha sido recibida. El equipo de coordinación la
-          revisará y te contactará si es necesario.
+          {t.success_message}
         </p>
         <div className="flex flex-col gap-3">
           <Link
@@ -96,13 +100,13 @@ export function DonarForm({
               window.location.href = `/e/${slug}/donar`;
             }}
           >
-            Hacer otra oferta
+            {t.success_donate_again}
           </Link>
           <Link
             href={`/e/${slug}`}
             className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-gray-900 bg-white border-2 border-gray-900 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors"
           >
-            Volver a la emergencia
+            {backToEmergencyLabel}
           </Link>
         </div>
       </section>
@@ -114,7 +118,7 @@ export function DonarForm({
       {wasRestored && <DraftRestoredBanner />}
 
       {state.status === 'error' && (
-        <ErrorMessage message={state.message ?? 'Error al enviar la oferta'} />
+        <ErrorMessage message={state.message ?? t.error_fallback} />
       )}
 
       {/* Directed offer indicator */}
@@ -124,7 +128,7 @@ export function DonarForm({
             className="rounded-lg border-2 border-amber-400 bg-amber-50 px-4 py-3 text-sm text-amber-900"
             role="note"
           >
-            <span className="font-semibold">Ofreces para:</span>{' '}
+            <span className="font-semibold">{t.directed_offer_label}</span>{' '}
             {targetNeedTitle}
           </div>
           <input type="hidden" name="targetNeedId" value={targetNeedId} />
@@ -134,7 +138,7 @@ export function DonarForm({
       {/* Categoría */}
       <FormField
         htmlFor="category"
-        label={<>Categoría del material <span aria-hidden="true">*</span></>}
+        label={<>{t.category_label} <span aria-hidden="true">*</span></>}
       >
         <Select
           id="category"
@@ -144,9 +148,9 @@ export function DonarForm({
           onChange={(e) => setCategory(e.target.value)}
         >
           <option value="" disabled>
-            Selecciona una categoría…
+            {t.select_category_placeholder}
           </option>
-          {CATEGORIES.map(({ value, label }) => (
+          {categories.map(({ value, label }) => (
             <option key={value} value={value}>
               {label}
             </option>
@@ -157,7 +161,7 @@ export function DonarForm({
       {/* Descripción */}
       <FormField
         htmlFor="description"
-        label={<>Descripción del material <span aria-hidden="true">*</span></>}
+        label={<>{t.description_label} <span aria-hidden="true">*</span></>}
       >
         <Input
           id="description"
@@ -165,7 +169,7 @@ export function DonarForm({
           type="text"
           required
           minLength={2}
-          placeholder="Ej. Sacos de arroz de 25 kg"
+          placeholder={t.description_placeholder}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
@@ -176,7 +180,7 @@ export function DonarForm({
         <div className="flex-1">
           <FormField
             htmlFor="quantity"
-            label={<>Cantidad <span aria-hidden="true">*</span></>}
+            label={<>{t.quantity_label} <span aria-hidden="true">*</span></>}
           >
             <Input
               id="quantity"
@@ -185,7 +189,7 @@ export function DonarForm({
               required
               min={1}
               step={1}
-              placeholder="50"
+              placeholder={t.quantity_placeholder}
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
             />
@@ -196,7 +200,7 @@ export function DonarForm({
             htmlFor="unit"
             label={
               <>
-                Unidad{' '}
+                {t.unit_label}{' '}
                 <span className="text-gray-400 font-normal normal-case">(opcional)</span>
               </>
             }
@@ -205,7 +209,7 @@ export function DonarForm({
               id="unit"
               name="unit"
               type="text"
-              placeholder="Ej. sacos, litros, cajas"
+              placeholder={t.unit_placeholder}
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
             />
@@ -216,7 +220,7 @@ export function DonarForm({
       {/* Ubicación */}
       <FormField
         htmlFor="location-search"
-        label={<>Ubicación del material <span aria-hidden="true">*</span></>}
+        label={<>{t.location_label} <span aria-hidden="true">*</span></>}
         labelAs="p"
       >
         {locationPicker}
@@ -230,7 +234,7 @@ export function DonarForm({
         htmlFor="notes"
         label={
           <>
-            Notas adicionales{' '}
+            {t.notes_label}{' '}
             <span className="text-gray-400 font-normal normal-case">(opcional)</span>
           </>
         }
@@ -239,7 +243,7 @@ export function DonarForm({
           id="notes"
           name="notes"
           rows={3}
-          placeholder="Ej. Disponible de lunes a viernes por la mañana"
+          placeholder={t.notes_placeholder}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
         />
@@ -247,7 +251,7 @@ export function DonarForm({
 
       {/* Submit */}
       <Button type="submit" disabled={pending} fullWidth>
-        {pending ? 'Enviando…' : 'Donar material'}
+        {pending ? t.submitting : t.submit}
       </Button>
     </form>
   );

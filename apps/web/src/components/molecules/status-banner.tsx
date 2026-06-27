@@ -1,13 +1,18 @@
 /**
  * StatusBanner — prominent banner shown when an emergency is paused or closed.
  * Renders nothing when status is 'active'.
+ * `t` is optional — falls back to Spanish when omitted.
  */
+
+import type { Messages } from '@/i18n/messages/es';
+import { es } from '@/i18n/messages/es';
 
 interface StatusBannerProps {
   status: 'active' | 'paused' | 'closed';
+  t?: Messages['status_banner'];
 }
 
-export function StatusBanner({ status }: StatusBannerProps) {
+export function StatusBanner({ status, t = es.status_banner }: StatusBannerProps) {
   if (status === 'active') return null;
 
   const isPaused = status === 'paused';
@@ -24,14 +29,10 @@ export function StatusBanner({ status }: StatusBannerProps) {
       ].join(' ')}
     >
       <p className="text-base font-bold leading-snug">
-        {isPaused
-          ? '⏸ Recogidas en pausa — solo información'
-          : '🔒 Emergencia cerrada'}
+        {isPaused ? t.paused_title : t.closed_title}
       </p>
       <p className="text-sm">
-        {isPaused
-          ? 'En este momento no se admiten nuevas altas de recursos ni peticiones. Consulta la información disponible y vuelve más tarde.'
-          : 'Esta emergencia ha concluido. Ya no se aceptan recursos ni peticiones.'}
+        {isPaused ? t.paused_body : t.closed_body}
       </p>
     </div>
   );
