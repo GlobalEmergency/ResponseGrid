@@ -1,12 +1,15 @@
 import {
   IsArray,
+  IsBoolean,
   IsEnum,
   IsIn,
+  IsInt,
   IsLatitude,
   IsLongitude,
   IsNotEmpty,
   IsOptional,
   IsString,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -15,6 +18,7 @@ import {
   ReportType,
   ReportPriority,
   ReportStatus,
+  DamageLevel,
 } from '../../domain/report-enums';
 
 export class LocationDto {
@@ -30,6 +34,37 @@ export class LocationDto {
   @ApiProperty({ example: -0.3763 })
   @IsLongitude()
   longitude!: number;
+}
+
+export class StructuralDetailDto {
+  @ApiProperty({ enum: DamageLevel })
+  @IsEnum(DamageLevel)
+  damageLevel!: DamageLevel;
+
+  @ApiPropertyOptional({
+    type: Number,
+    description: 'Estimated number of trapped persons (null if unknown)',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  trappedPersonsEstimate?: number | null;
+
+  @ApiPropertyOptional({
+    type: Boolean,
+    description: 'Whether the site is accessible for rescue teams',
+  })
+  @IsOptional()
+  @IsBoolean()
+  accessibleForRescue?: boolean | null;
+
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Building type (e.g. residential, school, hospital)',
+  })
+  @IsOptional()
+  @IsString()
+  buildingType?: string | null;
 }
 
 export class SubmitReportDto {
@@ -65,6 +100,16 @@ export class SubmitReportDto {
   @ValidateNested()
   @Type(() => LocationDto)
   location?: LocationDto;
+
+  @ApiPropertyOptional({
+    type: StructuralDetailDto,
+    description:
+      'Required for structural_damage and trapped_persons types; ignored otherwise',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => StructuralDetailDto)
+  structuralDetail?: StructuralDetailDto;
 }
 
 export class GetReportsQueueQueryDto {
@@ -82,4 +127,19 @@ export class GetReportsQueueQueryDto {
   @IsOptional()
   @IsString()
   resourceId?: string;
+
+  @ApiPropertyOptional({ enum: ReportType, description: 'Filter by type' })
+  @IsOptional()
+  @IsIn(Object.values(ReportType))
+  type?: ReportType;
+}
+
+export class PublishReportDto {
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Optional public note added by coordinator when publishing',
+  })
+  @IsOptional()
+  @IsString()
+  publishNote?: string;
 }

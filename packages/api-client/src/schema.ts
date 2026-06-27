@@ -1015,6 +1015,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/reports/{reportId}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish a structural damage report */
+        post: operations["ReportsController_publish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/reports/damage-layer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get published structural damage reports as a GeoJSON FeatureCollection (public) */
+        get: operations["ReportsController_damageLayer"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/emergencies/{emergencyId}/reports/mine": {
         parameters: {
             query?: never;
@@ -1916,9 +1950,19 @@ export interface components {
             /** Format: uuid */
             volunteerId: string;
         };
+        StructuralDetailDto: {
+            /** @enum {string} */
+            damageLevel: "collapsed" | "severe" | "moderate";
+            /** @description Estimated number of trapped persons (null if unknown) */
+            trappedPersonsEstimate?: number;
+            /** @description Whether the site is accessible for rescue teams */
+            accessibleForRescue?: boolean;
+            /** @description Building type (e.g. residential, school, hospital) */
+            buildingType?: string;
+        };
         SubmitReportDto: {
             /** @enum {string} */
-            type: "incident" | "stock" | "status" | "other";
+            type: "incident" | "stock" | "status" | "other" | "structural_damage" | "trapped_persons";
             /** @example Road blocked near bridge */
             note: string;
             /** @enum {string} */
@@ -1928,6 +1972,12 @@ export interface components {
             /** @description Resource ID this report refers to */
             resourceId?: string;
             location?: components["schemas"]["LocationDto"];
+            /** @description Required for structural_damage and trapped_persons types; ignored otherwise */
+            structuralDetail?: components["schemas"]["StructuralDetailDto"];
+        };
+        PublishReportDto: {
+            /** @description Optional public note added by coordinator when publishing */
+            publishNote?: string;
         };
         AuditEntryDto: {
             id: string;
@@ -4670,10 +4720,12 @@ export interface operations {
     ReportsController_getQueue: {
         parameters: {
             query?: {
-                status?: "open" | "reviewed";
+                status?: "open" | "reviewed" | "published" | "closed";
                 priority?: "low" | "medium" | "high" | "urgent";
                 /** @description Filter by resource ID */
                 resourceId?: string;
+                /** @description Filter by type */
+                type?: "incident" | "stock" | "status" | "other" | "structural_damage" | "trapped_persons";
             };
             header?: never;
             path: {
@@ -4729,6 +4781,57 @@ export interface operations {
         responses: {
             /** @description Report marked as reviewed */
             204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReportsController_publish: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublishReportDto"];
+            };
+        };
+        responses: {
+            /** @description Report published */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Report is not in reviewed status */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReportsController_damageLayer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description GeoJSON FeatureCollection of published damage reports */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

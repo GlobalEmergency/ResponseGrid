@@ -26,7 +26,14 @@ import { SubmitReport } from '../../application/submit-report';
 import { GetReportsQueue } from '../../application/get-reports-queue';
 import { MarkReportReviewed } from '../../application/mark-report-reviewed';
 import { GetMyReports } from '../../application/get-my-reports';
-import { SubmitReportDto, GetReportsQueueQueryDto } from './dto';
+import { PublishStructuralReport } from '../../application/publish-structural-report';
+import { GetPublishedDamageLayer } from '../../application/get-published-damage-layer';
+import type { DamageFeatureCollection } from '../../application/get-published-damage-layer';
+import {
+  SubmitReportDto,
+  GetReportsQueueQueryDto,
+  PublishReportDto,
+} from './dto';
 import { ReportSnapshot } from '../../domain/report';
 
 @ApiTags('reports')
@@ -37,6 +44,8 @@ export class ReportsController {
     private readonly getReportsQueue: GetReportsQueue,
     private readonly markReportReviewed: MarkReportReviewed,
     private readonly getMyReports: GetMyReports,
+    private readonly publishStructuralReport: PublishStructuralReport,
+    private readonly getPublishedDamageLayer: GetPublishedDamageLayer,
   ) {}
 
   /** Submit a field report for an emergency. */
@@ -61,6 +70,16 @@ export class ReportsController {
       photoUrls: dto.photoUrls ?? [],
       resourceId: dto.resourceId ?? null,
       location: dto.location ?? null,
+      structuralDetail: dto.structuralDetail
+        ? {
+            damageLevel: dto.structuralDetail.damageLevel,
+            trappedPersonsEstimate:
+              dto.structuralDetail.trappedPersonsEstimate ?? null,
+            accessibleForRescue:
+              dto.structuralDetail.accessibleForRescue ?? null,
+            buildingType: dto.structuralDetail.buildingType ?? null,
+          }
+        : null,
     });
   }
 
@@ -80,6 +99,7 @@ export class ReportsController {
     if (query.status !== undefined) filters.status = query.status;
     if (query.priority !== undefined) filters.priority = query.priority;
     if (query.resourceId !== undefined) filters.resourceId = query.resourceId;
+    if (query.type !== undefined) filters.type = query.type;
     return this.getReportsQueue.execute({ emergencyId, filters });
   }
 
@@ -95,6 +115,50 @@ export class ReportsController {
     @Param('reportId', ParseUUIDPipe) reportId: string,
   ): Promise<void> {
     await this.markReportReviewed.execute({ reportId });
+  }
+
+  /** Publish a structural damage report (coordinator only). */
+  @Post('reports/:reportId/publish')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard, RequireReportCoordinatorGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Publish a structural damage report' })
+  @ApiParam({ name: 'reportId', type: String })
+  @ApiResponse({ status: 204, description: 'Report published' })
+  @ApiResponse({
+    status: 422,
+    description: 'Report is not in reviewed status',
+  })
+  async publish(
+    @Param('reportId', ParseUUIDPipe) reportId: string,
+    @Body() dto: PublishReportDto,
+  ): Promise<void> {
+    await this.publishStructuralReport.execute({
+      reportId,
+      ...(dto.publishNote !== undefined
+        ? { publishNote: dto.publishNote }
+        : {}),
+    });
+  }
+
+  /**
+   * Get the public GeoJSON damage layer for an emergency.
+   * No authentication required — public endpoint.
+   */
+  @Get('emergencies/:emergencyId/reports/damage-layer')
+  @ApiOperation({
+    summary:
+      'Get published structural damage reports as a GeoJSON FeatureCollection (public)',
+  })
+  @ApiParam({ name: 'emergencyId', type: String })
+  @ApiResponse({
+    status: 200,
+    description: 'GeoJSON FeatureCollection of published damage reports',
+  })
+  async damageLayer(
+    @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
+  ): Promise<DamageFeatureCollection> {
+    return this.getPublishedDamageLayer.execute({ emergencyId });
   }
 
   /** Get my own reports for an emergency. */
