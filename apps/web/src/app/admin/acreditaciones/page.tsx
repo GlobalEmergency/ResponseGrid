@@ -100,7 +100,10 @@ export default async function AcreditacionesPage() {
                         </span>
                       )}
                       <span className="text-xs text-gray-400">
-                        Concedida: {new Date(acc.grantedAt).toLocaleDateString('es-ES')}
+                        Concedida:{' '}
+                        <time dateTime={acc.grantedAt} suppressHydrationWarning>
+                          {new Date(acc.grantedAt).toLocaleDateString('es-ES')}
+                        </time>
                       </span>
                     </div>
                     <div className="flex-shrink-0">

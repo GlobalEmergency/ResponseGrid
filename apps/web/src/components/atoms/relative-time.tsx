@@ -38,6 +38,7 @@ export function RelativeTime({ isoString, className }: RelativeTimeProps) {
     <time
       dateTime={isoString}
       className={className}
+      suppressHydrationWarning
     >
       {formatted}
     </time>

@@ -26,7 +26,9 @@ export function TemplateCard({
         <p className="text-xs text-gray-600 break-words">{description}</p>
         <p className="text-xs text-gray-400">
           {dontBringCount} ítems «qué no llevar» · Creada{' '}
-          {new Date(createdAt).toLocaleDateString('es-ES')}
+          <time dateTime={createdAt} suppressHydrationWarning>
+            {new Date(createdAt).toLocaleDateString('es-ES')}
+          </time>
         </p>
       </div>
       {actions != null && (
