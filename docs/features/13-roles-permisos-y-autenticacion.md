@@ -121,7 +121,10 @@ export type ScopeRefProps =
   | { type: 'organization'; id: string }
   | { type: 'emergency';    id: string }
   | { type: 'group';        id: string }
-  | { type: 'entity'; entityType: string; id: string }; // permiso sobre UNA instancia
+  | { type: 'entity'; entityType: string; id: string } // permiso sobre UNA instancia
+  // Conjunto ABIERTO y extensible. Actores logísticos transversales (§16) añaden tipos
+  // sin tocar el algoritmo: p. ej. { type: 'hub'; id } · { type: 'corridor'; id } · { type: 'customs_zone'; id }
+  ;
 
 export class ScopeRef {
   static platform(): ScopeRef { /* … */ }
@@ -161,6 +164,8 @@ can(principal, action, resource):
 ```
 
 Un grant en un scope **superior** cubre todo lo inferior. Esto **unifica `isAdmin`, `memberships` y `org members` en una sola regla**: `platform_admin` puede en cualquier emergencia; `org_admin` en todas las de su org; `group_manager` solo en su grupo. El "veto central" del spec (§2 arquitectura) sale gratis: un grant `platform` siempre gana al delegado.
+
+> **Árbol → DAG (multi-padre).** Para los actores y recursos que viven en el **plano global y cruzan emergencias** (una naviera, un hub logístico, un envío que transita un puerto que sirve a dos emergencias a la vez), la "cadena" del paso 1 deja de ser un árbol estricto y pasa a ser un **DAG**: un recurso puede tener **varios padres** (su `emergency_id` _y_ el hub/organización por el que pasa). El algoritmo no cambia conceptualmente —`junta los grants sobre el **cierre transitivo de ancestros**` en vez de sobre una única cadena lineal—. Esto es lo que permite que "el jefe del hub de Valencia vea toda la carga de su hub, **sea de la emergencia que sea**", algo que un árbol `entity ⊂ una emergencia` no puede expresar. Desarrollo y ejemplo trabajado en **§16**.
 
 ### 3.4 El puerto de autorización (PDP único)
 
@@ -547,3 +552,81 @@ El grueso del riesgo está en el paso 3 (tocar muchos controllers): se mitiga co
 7. **¿Qué permisos se exportan como scopes OAuth2 públicos (#21)?** Recomendación Fase 1: solo `*:read` del subconjunto ya público. Definir el subconjunto _exportable_ del catálogo (§8.2) antes de #16.
 8. **API key: ¿solo `ServiceAccount`, o también _personal access tokens_ que cuelgan de un `User` (#17)?** Recomendación: empezar por `ServiceAccount` (server-to-server, Fase 1); los PAT de usuario, después.
 9. **Coordinación con #16/#17:** este documento debería referenciarse desde el diseño de `/api/public/v1` para que API keys (#17) y scopes (#21) reutilicen el catálogo, no inventen uno paralelo.
+10. **¿Cuándo promover un "hub logístico" de _recurso_ (entity) a _scope_ de primera clase?** Recomendación: mientras un hub sirva a una sola emergencia, basta `entity`/`group`; cuando un mismo nodo (puerto, terminal aérea, almacén central) opere **varias emergencias a la vez**, promoverlo a `scope: 'hub'` (§16). Decisión activable sin migración del modelo.
+
+---
+
+## 16. Prueba de escalabilidad: actores logísticos transversales (navieras, aerolíneas, hubs, aduanas)
+
+> Esta sección somete el modelo a estrés contra requisitos futuros explícitos del spec —"furgoneta→camión→**naviera/aduanas**", "**transportista**", "crear **manifiesto**/expedición", `lots`/`shipments` (Fase 4)— y contra actores aún no escritos: **gestor de hub logístico, operador de naviera/aerolínea, agente de aduanas**.
+
+### 16.1 Qué estresan estos actores (y qué no)
+
+Hay que separar dos cosas que se confunden:
+
+- **NO estresan el núcleo.** `principal · permiso · rol · grant` es invariante. Estos actores son más de lo mismo.
+- **SÍ estresan el _scope_.** A diferencia de un coordinador (vive _dentro_ de una emergencia), una naviera/aerolínea/hub vive en el **plano global** y **cruza emergencias**: el spec ya asume `shipments` con `emergency_id` único (línea 190), y eso es un **árbol estricto** que no expresa "este nodo sirve a varias emergencias". Por eso §3.3 generaliza a **DAG**.
+
+### 16.2 Lo que escala por DATO (cero cambio de arquitectura)
+
+| Requisito futuro | Mecanismo del modelo | ¿Toca arquitectura? |
+|---|---|---|
+| Naviera / aerolínea / operador logístico / aduana como entidad | nuevo `OrganizationType` (`transport_operator`, `airline`, `customs_authority`) | **No** — enum/data |
+| "Gestor de hub", "operador de naviera", "transportista", "agente de aduanas" | nuevos roles del catálogo (§4) | **No** — data (fase 2: incluso roles custom por org) |
+| `shipment:create/track`, `manifest:sign`, `customs:clear`, `expedition:close` | nuevos permisos (§4.1) | **No** — data |
+| Terminal portuaria, carga aérea, zona aduanera, lote, expedición | nuevos `resource.type` / agregados Fase 4 | **No** — data |
+| "No crear expedición sin destino confirmado/receptor/capacidad" (regla del spec §20.3) | condición **ABAC** (§7): `{ kind: 'expedition_ready' }` | **No** — data |
+| Carga refrigerada / corredor internacional / despacho aduanero pendiente | condiciones ABAC (`category_lock`, `customs_state`) | **No** — data |
+| Acreditación de una naviera válida en todas las emergencias | `Accreditation` scope global (§11) → deriva grants | **No** — ya existe |
+| Sistema de la naviera/aerolínea que empuja manifiestos/ETA por API | `ServiceAccount` + API key (§8) | **No** — ya diseñado |
+
+**Veredicto de 16.2:** prácticamente todo el roadmap logístico es **configuración**, no reingeniería. Eso es la prueba de que el modelo escala.
+
+### 16.3 El único endurecimiento de arquitectura: scope = DAG extensible
+
+Dos ajustes, ya incorporados (§3.2 y §3.3):
+
+1. **Tipos de scope = conjunto abierto.** Añadir `hub`, `corridor`, `customs_zone` es ampliar una unión discriminada; el `can()` no se entera.
+2. **Resolución sobre el cierre transitivo de ancestros (DAG), no una cadena lineal.** Un recurso puede tener **varios padres**.
+
+**Ejemplo trabajado — el jefe de hub que ve carga de dos emergencias:**
+
+```
+Org "MedShip" (type: transport_operator), acreditada GLOBAL en Fase 0.
+Hub "Puerto de Valencia"  ── scope { type:'hub', id:'valencia' }
+Ana = jefa de operaciones del hub
+      grant(Ana, role:'hub_manager', scope:{type:'hub', id:'valencia'})
+
+Shipment S1 → emergency_id = 'venezuela'   ┐  ambos transitan el
+Shipment S2 → emergency_id = 'dana'        ┘  hub 'valencia'
+
+Padres de S1 (DAG):  S1 → hub:valencia
+                     S1 → emergency:venezuela → platform
+```
+
+`can(Ana, 'shipment:read', S1)`:
+- cierre de ancestros de S1 = { hub:valencia, emergency:venezuela, platform }
+- Ana tiene grant en `hub:valencia` → su rol `hub_manager` incluye `shipment:read` → **permit**.
+
+Ana ve S1 **sin** ser nada en la emergencia "venezuela": su autoridad entra por el **padre hub**, no por el padre emergencia. Un árbol estricto (`shipment ⊂ una emergencia`) **no podría** expresarlo; el DAG sí. Y un coordinador de "venezuela" sigue viendo S1 por el **otro** padre. Las dos autoridades coexisten sin colisión.
+
+### 16.4 Handoffs inter-organización (la naviera opera carga de una ONG)
+
+Cuando un actor de la org A actúa sobre un recurso propiedad de la org B (la naviera mueve un lote de una ONG), la autorización es **relacional**: "transportista_de(envío)". Se resuelve con:
+
+- **grant `entity`-scoped** sobre ese envío concreto (la ONG/coordinador concede `shipment:track` al transportista para ese shipment), **acotado por atenuación** (§5); o
+- una **tupla de relación** ReBAC (`carrier_of`, `consignee_of`) — exactamente la forma que §10 recomienda preparar en datos.
+
+Si la profundidad relacional explota (cadenas transportista→subcontrata→aduana→receptor), se **cambia el adapter del puerto `AccessControl` a OpenFGA/SpiceDB sin tocar el dominio** (§10). El modelo ya está diseñado para esa salida.
+
+### 16.5 Veredicto
+
+| Eje | ¿Escala a navieras/aerolíneas/hubs/aduanas? |
+|---|---|
+| Núcleo principal/permiso/rol/grant | ✅ Sin cambios (todo es data) |
+| Roles y permisos logísticos | ✅ Catálogo (data); custom por org en fase 2 |
+| Scope transversal multi-emergencia | ✅ Con DAG + tipos de scope abiertos (§3.2/§3.3, §16.3) |
+| Handoffs inter-organización | ✅ entity-scope/atenuación ahora; ReBAC externo si la profundidad lo exige (§10) |
+| Integraciones de sistemas (API) | ✅ `ServiceAccount`/API key ya diseñado (§8) |
+
+**Conclusión:** lo actual está cubierto y el roadmap logístico es mayoritariamente configuración. El único concepto que estos actores exigen —scope **transversal** a emergencias— ya está resuelto modelando la jerarquía como **DAG extensible**, no como árbol. No se identifica ningún requisito de los citados que obligue a rehacer el núcleo.
