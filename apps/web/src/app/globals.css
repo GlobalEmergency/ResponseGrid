@@ -1,5 +1,51 @@
 @import "tailwindcss";
 
+/*
+ * ResponseGrid design system — "Banda oficial" direction.
+ * Tokens are consumed as Tailwind v4 utilities (e.g. bg-navy, text-accent,
+ * border-line, rounded-card, font-display). Fonts are wired to the next/font
+ * CSS variables declared on <html> in layout.tsx.
+ */
+@theme {
+  /* Typography */
+  --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+
+  /* Brand */
+  --color-navy: #112b4a;
+  --color-navy-700: #13315c;
+  --color-accent: #e8740e;
+  --color-accent-600: #c85f08;
+
+  /* Warm neutral surfaces & ink */
+  --color-surface: #fbfaf8;
+  --color-surface-alt: #f4f1ec;
+  --color-ink: #1a2230;
+  --color-ink-soft: #2c3645;
+  --color-muted: #6a7382;
+  --color-muted-soft: #8a93a2;
+  --color-line: #e7e2da;
+  --color-line-soft: #eae5dd;
+
+  /* Semantic status */
+  --color-success: #1e8049;
+  --color-success-soft: #e9f7ee;
+  --color-success-dot: #3fbf6a;
+  --color-warning: #9a6210;
+  --color-warning-soft: #fcf3e0;
+  --color-warning-dot: #f2b400;
+  --color-danger: #c23a1e;
+  --color-danger-soft: #fbe3dc;
+  --color-danger-tint: #fceee6;
+  --color-official-soft: #e7eef7;
+  --color-family-soft: #fbf2dd;
+  --color-family-line: #e4c97a;
+  --color-family-ink: #7a5a12;
+
+  /* Radius */
+  --radius-card: 16px;
+}
+
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }

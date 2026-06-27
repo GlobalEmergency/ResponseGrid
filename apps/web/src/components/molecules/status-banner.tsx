@@ -22,10 +22,10 @@ export function StatusBanner({ status, t = es.status_banner }: StatusBannerProps
       role="alert"
       aria-live="polite"
       className={[
-        'flex flex-col gap-1 rounded-lg border-2 px-5 py-4',
+        'flex flex-col gap-1 rounded-card border px-4 py-4',
         isPaused
-          ? 'border-amber-500 bg-amber-50 text-amber-900'
-          : 'border-gray-400 bg-gray-100 text-gray-700',
+          ? 'border-warning-dot bg-warning-soft text-warning'
+          : 'border-line bg-surface-alt text-muted',
       ].join(' ')}
     >
       <p className="text-base font-bold leading-snug">

@@ -1,6 +1,6 @@
 /**
- * AnnouncementCard — displays the official coordinator announcement alongside
- * the last-updated timestamp.  Renders nothing when announcement is null.
+ * AnnouncementCard — official coordinator communiqué (Banda oficial look).
+ * Renders just the last-updated line when there is no announcement.
  * `t` is optional — falls back to Spanish when omitted.
  */
 
@@ -21,7 +21,7 @@ export function AnnouncementCard({
 }: AnnouncementCardProps) {
   if (announcement === null) {
     return (
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-muted-soft">
         {t.last_updated}{' '}
         <RelativeTime isoString={updatedAt} />
       </p>
@@ -31,15 +31,18 @@ export function AnnouncementCard({
   return (
     <aside
       aria-label={t.aria_label}
-      className="flex flex-col gap-2 rounded-lg border-2 border-gray-900 bg-gray-50 px-5 py-4"
+      className="flex flex-col gap-2 rounded-card border border-line bg-white px-4 py-4"
     >
-      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-        {t.official_label}
-      </p>
-      <p className="text-sm text-gray-900 leading-relaxed whitespace-pre-wrap">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-navy">
+          {t.official_label}
+        </span>
+        <span className="text-[11px] text-muted-soft">{t.source}</span>
+      </div>
+      <p className="text-[14.5px] leading-relaxed text-ink-soft whitespace-pre-wrap">
         {announcement}
       </p>
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-muted-soft">
         {t.last_updated}{' '}
         <RelativeTime isoString={updatedAt} />
       </p>

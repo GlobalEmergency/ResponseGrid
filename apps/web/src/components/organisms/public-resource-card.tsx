@@ -12,6 +12,10 @@ interface PublicResourceCardProps {
   tStatusLight: Messages['status_light'];
 }
 
+/**
+ * PublicResourceCard — a verified logistics point (Banda oficial look):
+ * trust + operational pills on top, name, then type · stage.
+ */
 export function PublicResourceCard({ resource, t, tVerification, tStatusLight }: PublicResourceCardProps) {
   const typeLabels: Record<ResourceViewDto['type'], string> = {
     collection_point: t.type_collection_point,
@@ -31,21 +35,19 @@ export function PublicResourceCard({ resource, t, tVerification, tStatusLight }:
 
   return (
     <article
-      aria-label={`Punto activo: ${resource.name}`}
-      className="flex flex-col gap-2 rounded-lg border-2 border-gray-900 bg-white p-4"
+      aria-label={`${resource.name}`}
+      className="flex flex-col gap-1.5 rounded-card border border-line bg-white p-4"
     >
-      <h3 className="text-lg font-bold text-gray-900 leading-tight">
-        {resource.name}
-      </h3>
-      <div className="flex flex-wrap items-center gap-2 text-sm text-gray-700">
-        <span className="font-medium">{typeLabels[resource.type]}</span>
-        <span aria-hidden="true" className="text-gray-300">·</span>
-        <span>{stageLabels[resource.stage]}</span>
-        <span aria-hidden="true" className="text-gray-300">·</span>
+      <div className="flex flex-wrap items-center gap-2">
         <VerificationBadge level={resource.verificationLevel} t={tVerification} />
-        <span aria-hidden="true" className="text-gray-300">·</span>
         <StatusLight status={resource.publicStatus} t={tStatusLight} />
       </div>
+      <h3 className="text-[15px] font-bold leading-tight text-ink">
+        {resource.name}
+      </h3>
+      <p className="text-[12.5px] text-muted">
+        {typeLabels[resource.type]} · {stageLabels[resource.stage]}
+      </p>
     </article>
   );
 }

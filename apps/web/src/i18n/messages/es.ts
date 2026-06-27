@@ -35,6 +35,43 @@ export const es = {
     templates: 'Plantillas',
     audit: 'Auditoría',
     aria_emergency_list: 'Lista de emergencias activas',
+    aria_secondary_nav: 'Navegación secundaria',
+    enter_operation: 'Entrar al operativo',
+    active_count: '{count} en curso',
+    closed_label: 'Cerrada · informe disponible',
+
+    // Hero
+    hero_h1: 'Coordina la ayuda en emergencias, sin saturar la logística',
+    hero_subtitle:
+      'ResponseGrid conecta a ciudadanía, organizaciones y coordinación durante una catástrofe: publica puntos verificados, valida necesidades reales y casa ofertas de material con quien las pide. Información oficial, en tiempo real.',
+    hero_cta_emergencies: 'Ver emergencias activas',
+    hero_cta_donate: 'Donar',
+
+    // Cómo funciona
+    how_it_works_heading: 'Cómo funciona',
+    step1_title: 'Registras lo que ofreces',
+    step1_body: 'Captamos tu ofrecimiento al instante. Nada se publica hasta validarse.',
+    step2_title: 'Coordinación verifica',
+    step2_body: 'Coordinadores locales validan cada punto, campaña y necesidad.',
+    step3_title: 'Se convierte en ayuda útil',
+    step3_body: 'Tus señales se vuelven decisiones, sin desplazamientos inútiles.',
+
+    // La confianza es el producto
+    trust_heading: 'La confianza es el producto',
+    trust_intro: 'Cada recurso y campaña muestra su nivel de verificación.',
+    trust_unverified: 'En cola · no llevar material',
+    trust_verified: 'Validado por coordinación local',
+    trust_official: 'Organización acreditada',
+
+    // Pie SEO
+    footer_org: 'GlobalEmergency',
+    footer_tagline:
+      'Plataforma de coordinación de ayuda en emergencias. Multi-emergencia, multilingüe (ES/EN), con privacidad por diseño y datos alojados en la UE.',
+    footer_about: 'Sobre nosotros',
+    footer_transparency: 'Transparencia',
+    footer_privacy: 'Privacidad (RGPD)',
+    footer_verify_campaign: 'Verificar campaña',
+
     meta_title: 'ResponseGrid — Emergencias activas',
     meta_description:
       'Plataforma de coordinación de ayuda en emergencias. Consulta las emergencias activas y cómo puedes colaborar.',
@@ -46,6 +83,41 @@ export const es = {
     official_source: 'Fuente oficial · ResponseGrid',
     status_active: 'Emergencia activa',
     status_active_aria: 'Estado: emergencia activa',
+
+    // Banda oficial — cabecera
+    header_overline: 'Operativo de emergencia',
+    header_status_active: 'Operativo activo',
+    header_status_paused: 'En pausa',
+    header_status_closed: 'Cerrada',
+
+    // Tarjetas de métricas
+    metric_tile_open: 'Necesidades abiertas',
+    metric_tile_points: 'Puntos activos',
+    metric_tile_covered: 'Cubiertas',
+    metric_tile_queue: 'En cola',
+
+    // Lo más eficaz ahora
+    effective_overline: 'Lo más eficaz ahora',
+    effective_title: 'Dona dinero a entidades verificadas',
+    effective_cta: 'Ver campañas verificadas',
+
+    // Subtítulos de "¿Cómo quieres ayudar?"
+    help_offer_subtitle: 'Almacén · transporte · espacio',
+    help_volunteer_subtitle: 'Disponibilidad y habilidades',
+    help_petition_subtitle: 'Solicitar material validado',
+    help_report_title: 'Reportar daños o personas atrapadas',
+
+    // Buscar familiar
+    family_title: 'Buscar a un familiar',
+    family_subtitle: 'Datos privados · solo personal autorizado',
+
+    // Qué NO hacer ahora
+    dont_do_heading: 'Qué NO hacer ahora',
+    dont_do_intro: 'Evita saturar la logística y los riesgos en zona.',
+
+    // Puntos / pie
+    points_count: '{count} verificados',
+    footer_verify: '🛡 ¿Es de fiar esta campaña? Verifícala',
 
     // Metrics
     metrics_heading: 'Resumen',
@@ -149,6 +221,7 @@ export const es = {
     official_label: 'Comunicado oficial',
     last_updated: 'Última actualización:',
     aria_label: 'Comunicado oficial',
+    source: 'GlobalEmergency',
   },
 
   // ── Login page ────────────────────────────────────────────────────────────
