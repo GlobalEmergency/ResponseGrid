@@ -17,6 +17,7 @@ function rowToSnapshot(row: Row): EmergencySnapshot {
     country: row.country,
     status: row.status as EmergencyStatus,
     announcement: row.announcement ?? null,
+    dontBringList: row.dontBringList,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -36,6 +37,7 @@ export class DrizzleEmergencyRepository implements EmergencyRepository {
         country: s.country,
         status: s.status,
         announcement: s.announcement,
+        dontBringList: s.dontBringList,
         createdAt: s.createdAt,
         updatedAt: s.updatedAt,
       })
@@ -46,6 +48,7 @@ export class DrizzleEmergencyRepository implements EmergencyRepository {
           status: s.status,
           country: s.country,
           announcement: s.announcement,
+          dontBringList: s.dontBringList,
           updatedAt: s.updatedAt,
         },
       });

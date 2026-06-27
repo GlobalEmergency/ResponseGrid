@@ -46,7 +46,10 @@ export class SubmitReportDto {
   @IsEnum(ReportPriority)
   priority!: ReportPriority;
 
-  @ApiPropertyOptional({ type: [String], description: 'URLs from POST /files (e.g. /files/key.png)' })
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'URLs from POST /files (e.g. /files/key.png)',
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })

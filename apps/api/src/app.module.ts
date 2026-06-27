@@ -12,12 +12,14 @@ import { OffersModule } from './contexts/offers/infrastructure/offers.module';
 import { VolunteersModule } from './contexts/volunteers/infrastructure/volunteers.module';
 import { FilesModule } from './contexts/files/infrastructure/files.module';
 import { ReportsModule } from './contexts/reports/infrastructure/reports.module';
+import { TemplatesModule } from './contexts/templates/infrastructure/templates.module';
 
 @Module({
   imports: [
     DatabaseModule,
     IdentityModule,
     ResourcesModule,
+    TemplatesModule,
     EmergenciesModule,
     NeedsModule,
     OrganizationsModule,

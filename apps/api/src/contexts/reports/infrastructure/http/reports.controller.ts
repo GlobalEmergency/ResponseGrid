@@ -75,7 +75,8 @@ export class ReportsController {
     @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
     @Query() query: GetReportsQueueQueryDto,
   ): Promise<ReportSnapshot[]> {
-    const filters: import('../../domain/ports/report.repository').ReportQueueFilters = {};
+    const filters: import('../../domain/ports/report.repository').ReportQueueFilters =
+      {};
     if (query.status !== undefined) filters.status = query.status;
     if (query.priority !== undefined) filters.priority = query.priority;
     if (query.resourceId !== undefined) filters.resourceId = query.resourceId;

@@ -174,6 +174,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all emergency templates (admin only) */
+        get: operations["TemplatesController_list"];
+        put?: never;
+        /** Create an emergency template (admin only) */
+        post: operations["TemplatesController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/templates/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete an emergency template (admin only) */
+        delete: operations["TemplatesController_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/emergencies": {
         parameters: {
             query?: never;
@@ -203,6 +238,23 @@ export interface paths {
         get: operations["EmergenciesController_getBySlugRoute"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/from-template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create an emergency from a template (admin only) */
+        post: operations["EmergenciesController_createFromTemplateRoute"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1027,6 +1079,46 @@ export interface components {
             /** Format: uuid */
             ownerOrganizationId?: Record<string, never> | null;
         };
+        CreateTemplateDto: {
+            /** @example Terremoto básico */
+            name: string;
+            /** @example Template para emergencias sísmicas de nivel moderado */
+            description: string;
+            /**
+             * @description Items that volunteers should NOT bring
+             * @example [
+             *       "mascotas",
+             *       "joyas",
+             *       "vehículos grandes"
+             *     ]
+             */
+            dontBringList: string[];
+            /** @example No se aceptan mascotas en el centro de acopio. */
+            defaultAnnouncement?: string | null;
+        };
+        CreateTemplateResponseDto: {
+            /** @example aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa */
+            id: string;
+        };
+        TemplateViewDto: {
+            /** @example aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa */
+            id: string;
+            /** @example Terremoto básico */
+            name: string;
+            /** @example Template para emergencias sísmicas */
+            description: string;
+            /**
+             * @example [
+             *       "mascotas",
+             *       "joyas"
+             *     ]
+             */
+            dontBringList: string[];
+            /** @example No se aceptan mascotas. */
+            defaultAnnouncement: Record<string, never> | null;
+            /** @example 2026-06-27T10:00:00.000Z */
+            createdAt: string;
+        };
         CreateEmergencyDto: {
             /** @example Emergencia sísmica — Venezuela */
             name: string;
@@ -1063,8 +1155,30 @@ export interface components {
             status: "active" | "paused" | "closed";
             /** @example El puente de acceso norte está cortado. */
             announcement: Record<string, never> | null;
+            /**
+             * @description Items volunteers should NOT bring to the emergency
+             * @example [
+             *       "mascotas",
+             *       "joyas",
+             *       "vehículos grandes"
+             *     ]
+             */
+            dontBringList: string[];
             /** @example 2026-06-25T10:00:00.000Z */
             updatedAt: string;
+        };
+        CreateEmergencyFromTemplateDto: {
+            /** @example aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa */
+            templateId: string;
+            /** @example Terremoto Valencia 2026 */
+            name: string;
+            /**
+             * @description URL-safe slug (lowercase letters, digits, hyphens)
+             * @example terremoto-valencia-2026
+             */
+            slug: string;
+            /** @example ES */
+            country: string;
         };
         PublishAnnouncementDto: {
             /** @example Se suspenden las operaciones de rescate hasta nuevo aviso. */
@@ -1994,6 +2108,127 @@ export interface operations {
             };
         };
     };
+    TemplatesController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of templates */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemplateViewDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Admin access required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TemplatesController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTemplateDto"];
+            };
+        };
+        responses: {
+            /** @description Template created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateTemplateResponseDto"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Admin access required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TemplatesController_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Template UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Template deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Admin access required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Template not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     EmergenciesController_list: {
         parameters: {
             query?: never;
@@ -2088,6 +2323,65 @@ export interface operations {
             };
             /** @description Emergency not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EmergenciesController_createFromTemplateRoute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateEmergencyFromTemplateDto"];
+            };
+        };
+        responses: {
+            /** @description Emergency created from template */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateEmergencyResponseDto"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Admin access required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Template not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Slug already exists */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

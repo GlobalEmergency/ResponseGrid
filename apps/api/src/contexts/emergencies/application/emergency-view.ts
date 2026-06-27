@@ -7,6 +7,7 @@ export interface EmergencyView {
   country: string;
   status: string;
   announcement: string | null;
+  dontBringList: string[];
   updatedAt: string;
 }
 
@@ -18,6 +19,7 @@ export function toEmergencyView(e: Emergency): EmergencyView {
     country: e.country,
     status: e.status,
     announcement: e.announcement,
+    dontBringList: e.dontBringList,
     updatedAt: e.updatedAt.toISOString(),
   };
 }

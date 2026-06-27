@@ -93,4 +93,20 @@ describe('DrizzleEmergencyRepository (integration)', () => {
     expect(result[0].slug.value).toBe('active-emergency');
     expect(result[0].status).toBe(EmergencyStatus.Active);
   });
+
+  it('round-trips dontBringList through Postgres', async () => {
+    const emergency = Emergency.create({
+      id: EmergencyId.fromString(SEED_ID),
+      name: 'Emergency with dont-bring list',
+      slug: Slug.fromString('dont-bring-test'),
+      country: 'VE',
+      dontBringList: ['mascotas', 'joyas'],
+    });
+
+    await repo.save(emergency);
+    const found = await repo.findById(emergency.id);
+
+    expect(found).not.toBeNull();
+    expect(found?.dontBringList).toEqual(['mascotas', 'joyas']);
+  });
 });

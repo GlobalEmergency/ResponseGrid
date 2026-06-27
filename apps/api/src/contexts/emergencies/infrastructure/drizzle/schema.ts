@@ -7,6 +7,7 @@ export const emergenciesTable = pgTable('emergencies', {
   country: text('country').notNull(),
   status: text('status').notNull(),
   announcement: text('announcement'),
+  dontBringList: text('dont_bring_list').array().notNull().default([]),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .notNull()

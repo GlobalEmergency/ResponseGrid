@@ -8,23 +8,27 @@ import { Response } from 'express';
 import { SlugAlreadyExistsError } from '../../application/slug-already-exists.error';
 import { EmergencyNotFoundError } from '../../application/emergency-not-found.error';
 import { InvalidEmergencyTransitionError } from '../../domain/invalid-emergency-transition.error';
+import { TemplateNotFoundError } from '../../../templates/application/template-not-found.error';
 
 type DomainError =
   | SlugAlreadyExistsError
   | EmergencyNotFoundError
-  | InvalidEmergencyTransitionError;
+  | InvalidEmergencyTransitionError
+  | TemplateNotFoundError;
 
 // Only catches domain errors; everything else falls through to Nest's default handler.
 @Catch(
   SlugAlreadyExistsError,
   EmergencyNotFoundError,
   InvalidEmergencyTransitionError,
+  TemplateNotFoundError,
 )
 export class EmergencyExceptionFilter implements ExceptionFilter {
   catch(exception: DomainError, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<Response>();
     const statusCode =
-      exception instanceof EmergencyNotFoundError
+      exception instanceof EmergencyNotFoundError ||
+      exception instanceof TemplateNotFoundError
         ? HttpStatus.NOT_FOUND
         : exception instanceof InvalidEmergencyTransitionError
           ? HttpStatus.CONFLICT

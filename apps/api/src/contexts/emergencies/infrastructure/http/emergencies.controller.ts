@@ -31,8 +31,10 @@ import { GetEmergencyBySlug } from '../../application/get-emergency-by-slug';
 import { PauseEmergency } from '../../application/pause-emergency';
 import { ResumeEmergency } from '../../application/resume-emergency';
 import { PublishAnnouncement } from '../../application/publish-announcement';
+import { CreateEmergencyFromTemplate } from '../../application/create-emergency-from-template';
 import {
   CreateEmergencyDto,
+  CreateEmergencyFromTemplateDto,
   CreateEmergencyResponseDto,
   EmergencyViewDto,
   PublishAnnouncementDto,
@@ -53,6 +55,7 @@ export class EmergenciesController {
     private readonly pause: PauseEmergency,
     private readonly resume: ResumeEmergency,
     private readonly publishAnnouncement: PublishAnnouncement,
+    private readonly createFromTemplate: CreateEmergencyFromTemplate,
   ) {}
 
   @Post()
@@ -97,6 +100,33 @@ export class EmergenciesController {
     if (!result)
       throw new NotFoundException(`Emergency with slug "${slug}" not found`);
     return result;
+  }
+
+  @Post('from-template')
+  @HttpCode(201)
+  @UseGuards(JwtAuthGuard, RequireAdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Create an emergency from a template (admin only)',
+  })
+  @ApiCreatedResponse({
+    description: 'Emergency created from template',
+    type: CreateEmergencyResponseDto,
+  })
+  @ApiBadRequestResponse({ description: 'Invalid request body' })
+  @ApiConflictResponse({ description: 'Slug already exists' })
+  @ApiNotFoundResponse({ description: 'Template not found' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Admin access required' })
+  async createFromTemplateRoute(
+    @Body() dto: CreateEmergencyFromTemplateDto,
+  ): Promise<CreateEmergencyResponseDto> {
+    return this.createFromTemplate.execute({
+      templateId: dto.templateId,
+      name: dto.name,
+      slug: dto.slug,
+      country: dto.country,
+    });
   }
 
   @Post(':emergencyId/pause')

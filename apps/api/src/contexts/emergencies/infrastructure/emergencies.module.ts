@@ -8,12 +8,18 @@ import { GetEmergencyBySlug } from '../application/get-emergency-by-slug';
 import { PauseEmergency } from '../application/pause-emergency';
 import { ResumeEmergency } from '../application/resume-emergency';
 import { PublishAnnouncement } from '../application/publish-announcement';
+import { CreateEmergencyFromTemplate } from '../application/create-emergency-from-template';
 import {
   EMERGENCY_REPOSITORY,
   EmergencyRepository,
 } from '../domain/ports/emergency.repository';
 import { DrizzleEmergencyRepository } from './drizzle/drizzle-emergency.repository';
 import { IdentityModule } from '../../identity/infrastructure/identity.module';
+import {
+  TEMPLATE_REPOSITORY,
+  TemplateRepository,
+} from '../../templates/domain/ports/template.repository';
+import { TemplatesModule } from '../../templates/infrastructure/templates.module';
 
 const emergencyRepositoryProvider = {
   provide: EMERGENCY_REPOSITORY,
@@ -58,8 +64,17 @@ const publishAnnouncementProvider = {
   useFactory: (repo: EmergencyRepository) => new PublishAnnouncement(repo),
 };
 
+const createFromTemplateProvider = {
+  provide: CreateEmergencyFromTemplate,
+  inject: [EMERGENCY_REPOSITORY, TEMPLATE_REPOSITORY],
+  useFactory: (
+    emergencyRepo: EmergencyRepository,
+    templateRepo: TemplateRepository,
+  ) => new CreateEmergencyFromTemplate(emergencyRepo, templateRepo),
+};
+
 @Module({
-  imports: [DatabaseModule, IdentityModule],
+  imports: [DatabaseModule, IdentityModule, TemplatesModule],
   controllers: [EmergenciesController],
   providers: [
     emergencyRepositoryProvider,
@@ -69,6 +84,7 @@ const publishAnnouncementProvider = {
     pauseEmergencyProvider,
     resumeEmergencyProvider,
     publishAnnouncementProvider,
+    createFromTemplateProvider,
   ],
 })
 export class EmergenciesModule {}

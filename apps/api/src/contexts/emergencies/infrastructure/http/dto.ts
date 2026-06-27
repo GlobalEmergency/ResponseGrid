@@ -1,9 +1,10 @@
 import {
+  IsNotEmpty,
   IsOptional,
   IsString,
+  IsUUID,
   Matches,
   MinLength,
-  IsNotEmpty,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -68,6 +69,13 @@ export class EmergencyViewDto {
   })
   announcement!: string | null;
 
+  @ApiProperty({
+    example: ['mascotas', 'joyas', 'vehículos grandes'],
+    type: [String],
+    description: 'Items volunteers should NOT bring to the emergency',
+  })
+  dontBringList!: string[];
+
   @ApiProperty({ example: '2026-06-25T10:00:00.000Z' })
   updatedAt!: string;
 }
@@ -79,4 +87,32 @@ export class PublishAnnouncementDto {
   @IsString()
   @IsNotEmpty()
   message!: string;
+}
+
+export class CreateEmergencyFromTemplateDto {
+  @ApiProperty({ example: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' })
+  @IsUUID()
+  templateId!: string;
+
+  @ApiProperty({ example: 'Terremoto Valencia 2026', minLength: 2 })
+  @IsString()
+  @MinLength(2)
+  name!: string;
+
+  @ApiProperty({
+    example: 'terremoto-valencia-2026',
+    description: 'URL-safe slug (lowercase letters, digits, hyphens)',
+    pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+  })
+  @IsString()
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+    message:
+      'slug must contain only lowercase letters, digits, and hyphens (e.g. my-emergency)',
+  })
+  slug!: string;
+
+  @ApiProperty({ example: 'ES', minLength: 2 })
+  @IsString()
+  @MinLength(2)
+  country!: string;
 }
