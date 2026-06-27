@@ -1,0 +1,58 @@
+name: Deploy to EC2
+
+# Auto-deploy on every push to main (or run manually). Keyless: assumes an AWS
+# IAM role via GitHub OIDC and triggers the deploy on the instance through SSM
+# (no SSH, no AWS keys stored in GitHub).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: responsegrid-deploy
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::386707340306:role/responsegrid-gha-deploy
+          aws-region: us-east-1
+
+      - name: Deploy on EC2 via SSM
+        run: |
+          set -euo pipefail
+          CMD='cd /opt/responsegrid && git fetch origin && git reset --hard origin/main && docker compose -f deploy/docker-compose.prod.yml up -d --build && docker compose -f deploy/docker-compose.prod.yml ps'
+          PARAMS=$(jq -n --arg c "$CMD" '{commands: [$c]}')
+          CID=$(aws ssm send-command \
+            --instance-ids i-0f5979080ad5da6e5 \
+            --document-name AWS-RunShellScript \
+            --comment "GHA ${GITHUB_SHA::7}" \
+            --timeout-seconds 2400 \
+            --parameters "$PARAMS" \
+            --query Command.CommandId --output text)
+          echo "SSM CommandId: $CID"
+          for i in $(seq 1 220); do
+            sleep 9
+            ST=$(aws ssm get-command-invocation --command-id "$CID" --instance-id i-0f5979080ad5da6e5 --query Status --output text 2>/dev/null || echo Pending)
+            echo "status: $ST"
+            if [ "$ST" = "Success" ]; then
+              aws ssm get-command-invocation --command-id "$CID" --instance-id i-0f5979080ad5da6e5 --query StandardOutputContent --output text | tail -25
+              exit 0
+            fi
+            case "$ST" in
+              Failed|Cancelled|TimedOut)
+                echo "::error::deploy $ST"
+                aws ssm get-command-invocation --command-id "$CID" --instance-id i-0f5979080ad5da6e5 --query StandardErrorContent --output text | tail -40
+                exit 1 ;;
+            esac
+          done
+          echo "::error::timed out waiting for SSM deploy"; exit 1
