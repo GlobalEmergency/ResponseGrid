@@ -258,7 +258,24 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
                 {te.action_volunteer}
               </Link>
             </div>
-          ) : (
+          ) : null}
+
+          {/* "Buscar familiar" — visible whether active or paused */}
+          <div
+            className={`${emergency.status === 'active' ? 'border-t border-gray-200 pt-4' : ''}`}
+          >
+            <Link
+              href={`/e/${slug}/buscar-familiar`}
+              className="flex items-center justify-center w-full py-4 px-6 text-lg font-semibold text-gray-900 bg-amber-50 rounded-lg border-2 border-amber-600 hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 transition-colors"
+            >
+              {te.action_find_family}
+            </Link>
+            <p className="mt-2 text-xs text-center text-gray-500">
+              Los datos son privados y solo accesibles para personal autorizado.
+            </p>
+          </div>
+
+          {emergency.status !== 'active' && (
             <p className="rounded-lg border-2 border-gray-200 bg-gray-50 px-5 py-4 text-sm text-gray-500">
               {te.actions_paused}
             </p>
@@ -404,6 +421,12 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
                 className="text-sm text-gray-400 underline underline-offset-2 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded"
               >
                 {te.footer_my_volunteer}
+              </Link>
+              <Link
+                href={`/e/${slug}/mi-busqueda`}
+                className="text-sm text-gray-400 underline underline-offset-2 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded"
+              >
+                {te.footer_my_search}
               </Link>
               <Link
                 href={`/e/${slug}/reportar`}
