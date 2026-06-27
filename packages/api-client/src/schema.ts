@@ -1049,6 +1049,109 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/emergencies/{emergencyId}/reunification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List missing person reports for an emergency (coordinator only) */
+        get: operations["ReunificationController_listReports"];
+        put?: never;
+        /** Create a missing person report for an emergency (public, anonymous-with-contact) */
+        post: operations["ReunificationController_createReport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/reunification/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search missing person reports by documentId (coordinator only) */
+        get: operations["ReunificationController_searchByDocumentId"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/reunification/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get my missing person reports for an emergency (authenticated user) */
+        get: operations["ReunificationController_getMyReports"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reunification/{reportId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get full detail of a missing person report (coordinator only) */
+        get: operations["ReunificationController_getReport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reunification/{reportId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update the status of a missing person report (coordinator only) */
+        patch: operations["ReunificationController_updateStatus"];
+        trace?: never;
+    };
+    "/reunification/{reportId}/sightings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register a sighting for a missing person report (authenticated users) */
+        post: operations["ReunificationController_registerSighting"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1842,6 +1945,116 @@ export interface components {
         AuditListResponseDto: {
             entries: components["schemas"]["AuditEntryDto"][];
             total: number;
+        };
+        CoordsDto: {
+            address: string;
+            latitude: number;
+            longitude: number;
+        };
+        PersonDto: {
+            firstName: string;
+            lastName: string;
+            documentId?: string;
+            approximateAge?: number;
+            lastKnownLocation: string;
+            lastKnownCoords?: components["schemas"]["CoordsDto"];
+            description?: string;
+        };
+        ReporterDto: {
+            name: string;
+            phone: string;
+            email?: string;
+        };
+        CreateMissingPersonReportDto: {
+            person: components["schemas"]["PersonDto"];
+            reporter: components["schemas"]["ReporterDto"];
+            /** @description Must be true to create a report */
+            consentGiven: boolean;
+        };
+        CreateMissingPersonReportResponseDto: {
+            id: string;
+            status: string;
+        };
+        CoordsResponseDto: {
+            address: string;
+            latitude: number;
+            longitude: number;
+        };
+        PersonResponseDto: {
+            firstName: string;
+            lastName: string;
+            approximateAge: Record<string, never>;
+            lastKnownLocation: string;
+            lastKnownCoords?: components["schemas"]["CoordsResponseDto"];
+            description?: Record<string, never>;
+        };
+        MissingPersonReportListItemDto: {
+            id: string;
+            status: string;
+            person: components["schemas"]["PersonResponseDto"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        PersonDetailResponseDto: {
+            firstName: string;
+            lastName: string;
+            approximateAge: Record<string, never>;
+            lastKnownLocation: string;
+            lastKnownCoords?: components["schemas"]["CoordsResponseDto"];
+            description?: Record<string, never>;
+            documentId?: Record<string, never>;
+        };
+        SightingResponseDto: {
+            id: string;
+            reportedByUserId?: Record<string, never>;
+            reportedByName?: Record<string, never>;
+            location: string;
+            coords?: components["schemas"]["CoordsResponseDto"];
+            note: string;
+            /** Format: date-time */
+            reportedAt: string;
+        };
+        MissingPersonReportDetailDto: {
+            id: string;
+            emergencyId: string;
+            status: string;
+            person: components["schemas"]["PersonDetailResponseDto"];
+            reporterName: string;
+            reporterPhone: string;
+            reporterEmail?: Record<string, never>;
+            sightings: components["schemas"]["SightingResponseDto"][];
+            matchNote?: Record<string, never>;
+            reviewedByUserId?: Record<string, never>;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        MyReportResponseDto: {
+            id: string;
+            emergencyId: string;
+            status: string;
+            person: components["schemas"]["PersonResponseDto"];
+            sightings: components["schemas"]["SightingResponseDto"][];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        UpdateReportStatusDto: {
+            /** @enum {string} */
+            status: "open" | "under_review" | "matched" | "closed";
+            matchNote?: string;
+        };
+        RegisterSightingDto: {
+            location: string;
+            coords?: components["schemas"]["CoordsDto"];
+            note: string;
+        };
+        RegisterSightingResponseDto: {
+            sightingId: string;
         };
     };
     responses: never;
@@ -4580,6 +4793,285 @@ export interface operations {
             };
             /** @description Admin access required */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReunificationController_listReports: {
+        parameters: {
+            query?: {
+                status?: "open" | "under_review" | "matched" | "closed";
+            };
+            header?: never;
+            path: {
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MissingPersonReportListItemDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReunificationController_createReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateMissingPersonReportDto"];
+            };
+        };
+        responses: {
+            /** @description Report created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateMissingPersonReportResponseDto"];
+                };
+            };
+            /** @description Invalid UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Emergency not active (paused/closed) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No consent or invalid data */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReunificationController_searchByDocumentId: {
+        parameters: {
+            query: {
+                documentId: string;
+            };
+            header?: never;
+            path: {
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MissingPersonReportDetailDto"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReunificationController_getMyReports: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyReportResponseDto"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReunificationController_getReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MissingPersonReportDetailDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReunificationController_updateStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateReportStatusDto"];
+            };
+        };
+        responses: {
+            /** @description Status updated */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid status transition */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReunificationController_registerSighting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterSightingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegisterSightingResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Report is matched or closed */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -28,6 +28,7 @@ import { DrizzleUserIdentityRepository } from './drizzle/drizzle-user-identity.r
 import { BcryptPasswordHasher } from './bcrypt-password-hasher';
 import { JwtTokenService } from './jwt-token.service';
 import { JwtAuthGuard } from './http/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from './http/optional-jwt-auth.guard';
 import { RequireAdminGuard } from './http/require-admin.guard';
 import { RequireCoordinatorGuard } from './http/require-coordinator.guard';
 import { RequireResourceCoordinatorGuard } from './http/require-resource-coordinator.guard';
@@ -201,6 +202,7 @@ const authenticateWithProviderProvider = {
     taskEmergencyLookupProvider,
     reportEmergencyLookupProvider,
     JwtAuthGuard,
+    OptionalJwtAuthGuard,
     RequireAdminGuard,
     RequireCoordinatorGuard,
     RequireResourceCoordinatorGuard,
@@ -223,6 +225,7 @@ const authenticateWithProviderProvider = {
     TASK_EMERGENCY_LOOKUP,
     REPORT_EMERGENCY_LOOKUP,
     JwtAuthGuard,
+    OptionalJwtAuthGuard,
     RequireAdminGuard,
     RequireCoordinatorGuard,
     RequireResourceCoordinatorGuard,

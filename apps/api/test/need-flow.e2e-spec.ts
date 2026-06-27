@@ -433,11 +433,25 @@ describe('Need flow (e2e)', () => {
       .set('Authorization', `Bearer ${coordToken}`)
       .send({
         title: 'Medicines for patients',
-        location: { address: 'Hospital, Caracas', latitude: 10.48, longitude: -66.9 },
+        location: {
+          address: 'Hospital, Caracas',
+          latitude: 10.48,
+          longitude: -66.9,
+        },
         priority: 'urgent',
         items: [
-          { name: 'Paracetamol', quantity: 500, unit: 'tablets', category: 'medicines' },
-          { name: 'Ventilator', quantity: 2, unit: null, category: 'medical_equipment' },
+          {
+            name: 'Paracetamol',
+            quantity: 500,
+            unit: 'tablets',
+            category: 'medicines',
+          },
+          {
+            name: 'Ventilator',
+            quantity: 2,
+            unit: null,
+            category: 'medical_equipment',
+          },
         ],
       })
       .expect(201);
@@ -473,11 +487,25 @@ describe('Need flow (e2e)', () => {
       .set('Authorization', `Bearer ${coordToken}`)
       .send({
         title: 'Health vertical supplies',
-        location: { address: 'Clinic, Caracas', latitude: 10.48, longitude: -66.9 },
+        location: {
+          address: 'Clinic, Caracas',
+          latitude: 10.48,
+          longitude: -66.9,
+        },
         priority: 'high',
         items: [
-          { name: 'Gloves', quantity: 1000, unit: 'units', category: 'medical_supplies' },
-          { name: 'Nurses', quantity: 5, unit: null, category: 'medical_personnel' },
+          {
+            name: 'Gloves',
+            quantity: 1000,
+            unit: 'units',
+            category: 'medical_supplies',
+          },
+          {
+            name: 'Nurses',
+            quantity: 5,
+            unit: null,
+            category: 'medical_personnel',
+          },
         ],
       })
       .expect(201);
@@ -495,7 +523,9 @@ describe('Need flow (e2e)', () => {
         title: 'Expiry test need',
         location: { address: 'Caracas', latitude: 10.48, longitude: -66.9 },
         priority: 'high',
-        items: [{ name: 'Water', quantity: 100, unit: 'liters', category: 'water' }],
+        items: [
+          { name: 'Water', quantity: 100, unit: 'liters', category: 'water' },
+        ],
       })
       .expect(201);
 
@@ -539,7 +569,9 @@ describe('Need flow (e2e)', () => {
         title: 'Soon to expire',
         location: { address: 'Caracas', latitude: 10.48, longitude: -66.9 },
         priority: 'medium',
-        items: [{ name: 'Bread', quantity: 50, unit: 'loaves', category: 'food' }],
+        items: [
+          { name: 'Bread', quantity: 50, unit: 'loaves', category: 'food' },
+        ],
       })
       .expect(201);
 
@@ -588,7 +620,9 @@ describe('Need flow (e2e)', () => {
         title: 'Renewable need',
         location: { address: 'Caracas', latitude: 10.48, longitude: -66.9 },
         priority: 'low',
-        items: [{ name: 'Blankets', quantity: 20, unit: null, category: 'shelter' }],
+        items: [
+          { name: 'Blankets', quantity: 20, unit: null, category: 'shelter' },
+        ],
       })
       .expect(201);
 
@@ -626,7 +660,9 @@ describe('Need flow (e2e)', () => {
     };
     expect(renewed.expiresAt).not.toBeNull();
     const newExpiry = new Date(renewed.expiresAt!);
-    expect(newExpiry.getTime()).toBeGreaterThan(Date.now() + 47 * 60 * 60 * 1000);
+    expect(newExpiry.getTime()).toBeGreaterThan(
+      Date.now() + 47 * 60 * 60 * 1000,
+    );
 
     // Should now appear in public list
     const publicNeeds = await request(server)
@@ -636,8 +672,6 @@ describe('Need flow (e2e)', () => {
   });
 
   it('/emergencies/:id/needs/expired requires coordinator auth', async () => {
-    await request(server)
-      .get(`/emergencies/${EM}/needs/expired`)
-      .expect(401);
+    await request(server).get(`/emergencies/${EM}/needs/expired`).expect(401);
   });
 });
