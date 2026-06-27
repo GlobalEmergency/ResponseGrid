@@ -7,7 +7,7 @@
  * Uses a pair of <button> elements (not a <select>) for clarity and accessibility.
  * Classified as a molecule: it composes multiple button atoms with cookie/locale logic.
  *
- * Visibility: shown on home and emergency landing pages.
+ * `tone="dark"` renders for placement on the navy header band.
  */
 
 import { useLocale } from '@/i18n/locale-context';
@@ -20,7 +20,11 @@ function switchLocale(next: Locale) {
   window.location.reload();
 }
 
-export function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+  tone?: 'light' | 'dark';
+}
+
+export function LanguageSwitcher({ tone = 'light' }: LanguageSwitcherProps) {
   const locale = useLocale();
 
   const locales: Locale[] = ['es', 'en'];
@@ -33,6 +37,14 @@ export function LanguageSwitcher() {
     >
       {locales.map((loc) => {
         const isActive = locale === loc;
+        const activeClass =
+          tone === 'dark'
+            ? 'border-white bg-white text-navy cursor-default'
+            : 'border-gray-900 bg-gray-900 text-white cursor-default';
+        const idleClass =
+          tone === 'dark'
+            ? 'border-white/30 bg-transparent text-white/80 hover:border-white hover:text-white'
+            : 'border-gray-300 bg-white text-gray-600 hover:border-gray-600 hover:text-gray-900';
         return (
           <button
             key={loc}
@@ -41,10 +53,9 @@ export function LanguageSwitcher() {
             onClick={() => { if (!isActive) switchLocale(loc); }}
             aria-pressed={isActive}
             className={[
-              'text-xs font-semibold px-2 py-1 rounded border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1',
-              isActive
-                ? 'border-gray-900 bg-gray-900 text-white cursor-default'
-                : 'border-gray-300 bg-white text-gray-600 hover:border-gray-600 hover:text-gray-900',
+              'text-xs font-semibold px-2 py-1 rounded border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1',
+              tone === 'dark' ? 'focus:ring-white' : 'focus:ring-gray-900',
+              isActive ? activeClass : idleClass,
             ].join(' ')}
           >
             {loc.toUpperCase()}
