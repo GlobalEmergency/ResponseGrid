@@ -14,6 +14,8 @@
 | D2 | **Roles custom por organización** | **Catálogo fijo primero** | Roles predefinidos en código (§4); roles custom por org = **fase 2** (§4.4). La atenuación funciona igual con catálogo fijo. |
 | D3 | **Enforcement / token** | **Mantener el JWT actual** (grants embebidos, 12 h) | El `can()` se resuelve **en memoria** contra los grants del token, igual que hoy con `memberships`. Se documenta el riesgo de revocación diferida y su mitigación ligera (§9), y el camino futuro a PDP server-side. Nota: D3 aplica al **plano interno**; el **plano API pública** (#2) tiene credenciales propias (API key/OAuth2) desde el inicio, resolviendo por el mismo `can()` (§8). |
 
+> **D1/D2/D3 son el incremento MVP de una visión mayor.** El North Star (infraestructura crítica federada, multi-jurisdicción, con IA en el loop) y la prueba de que estas decisiones no lo hipotecan están en **§18**. La regla: respetar las **5 invariantes de diseño** (§18.1) hace que "pensar en grande" no cueste nada hoy.
+
 ### 0.1 Alineación con el backlog (issues abiertas)
 
 Este diseño es el cimiento que varias issues abiertas necesitan pero que hoy no tiene base coherente:
@@ -772,3 +774,80 @@ La capa 4, donde el spec marca *bloqueante legal* (§11):
 3. **Cifrado en reposo / esquema propio** para categoría especial (desaparecidos, sanitario): ¿se activa la puerta de escape del spec §7.5 desde el inicio para estos verticales?
 4. **Propósito formal (ABAC `purpose`):** ¿MVP o fase 2? Recomendación: MVP = consentimiento + auditoría de acceso; propósito formal después.
 5. **`need:read_precise_location` / clases de sensibilidad:** ¿4 clases (`public/operational/personal/special`) o empezar con 2 (público/sensible) como hoy en `0015`? Recomendación: 2 ahora, 4 cuando entren manifiestos y sanitario.
+
+---
+
+## 18. Visión a gran escala (North Star) — qué diseñar AHORA vs construir después
+
+> Pensar en grande no es meter features en el MVP: es elegir las **invariantes** que hacen que el futuro grande sea una **extensión**, no una **reescritura**. ResponseGrid aspira a ser **infraestructura crítica** de respuesta a catástrofes: multi-país, multi-jurisdicción, multi-organización, con ecosistema de API, integraciones gubernamentales y logística internacional. Esta sección fija el destino y prueba que el núcleo (§1–§17) lo aguanta.
+
+### 18.1 Las 5 invariantes de diseño (si se respetan, nada de lo de abajo exige rehacer el núcleo)
+
+1. **Principal polimórfico:** `User | ServiceAccount | OAuthClient | AIAgent | …`. Todo lo que actúa es un principal.
+2. **Todo es `grant(principal, rol, scope)`:** una tabla, una regla de resolución.
+3. **Scope = DAG de tipos abiertos** (§3, §16): `platform/org/emergency/group/hub/entity/…`, multi-padre.
+4. **La política vive tras un puerto** (`AccessControl`): el motor es reemplazable (propio → Zanzibar) sin tocar el dominio.
+5. **Una sola moneda: permiso = scope OAuth2 = tupla de relación** (§8.2): lista para federar.
+
+El resto de §18 es la demostración de que cada ambición encaja en estas cinco.
+
+### 18.2 Re-examen de las decisiones con lente ambiciosa
+
+| Decisión MVP | Extensión "en grande" | Coste de diseñarlo ahora |
+|---|---|---|
+| **D1** delegación con atenuación | **Federación de organizaciones anidadas** (§18.3-b): Cruz Roja Int'l → nacional → delegación provincial; la atenuación fluye por el árbol de orgs igual que por el de scopes | Bajo: añadir `parentOrganizationId`; la regla de atenuación ya es recursiva |
+| **D2** catálogo fijo de roles | **Roles como _assets de plantilla_** (§18.3-a): una plantilla "Sismo/Sanitario" trae su _role pack_, como trae el catálogo de material. Roles custom por org = caso particular | Bajo: el rol ya es dato; se mueve al contexto `templates` |
+| **D3** mantener JWT | **PDP como objetivo cercano, no lejano**: para infraestructura crítica, la revocación inmediata y la **auditabilidad de cada decisión** no son opcionales. Ya tienes Redis+eventos+outbox | Medio: pero el puerto `AccessControl` hace que el cambio sea un no-evento |
+
+> Recomendación de gran escala: **mantener D1/D2/D3 como incremento MVP**, pero comprometerse explícitamente con estas tres extensiones como destino. Ninguna contradice el MVP; todas son "diseñar-para-ello ahora, construir después".
+
+### 18.3 Las dimensiones que faltaban (todas caben en las 5 invariantes)
+
+**(a) Roles y permisos como assets de plantilla.** El contexto `templates` ya pre-carga catálogo de material, mensajes y categorías por tipo de emergencia (Fase 0). Añadir **role packs** a la plantilla: "Sismo/Sanitario" trae `reunification_officer`, `medical_coordinator`…; "Inundación" trae otros. Activar una emergencia instancia su modelo de permisos en segundos. Unifica D2 con un sistema que ya existe.
+
+**(b) Organizaciones anidadas / federadas.** Hoy `organizations` es una lista plana. En grande, las orgs forman un **DAG** (`parentOrganizationId`): una matriz acredita y delega en sus filiales, recursivamente, con atenuación (§5). Esto es lo que permite onboarding de federaciones reales (Cruz Roja, Cáritas, redes de ayuntamientos) sin gestión central. Mismo patrón que el scope-DAG (§16) aplicado al plano de identidad.
+
+**(c) Agentes de IA como principals de primera clase.** Un agente de triage, de matching oferta↔necesidad o de borrador de decisiones de coordinación **es un `ServiceAccount` especializado** (`AIAgent`). Diseño que honra estructuralmente el "IA nunca como decisión final" del spec (§10):
+- permisos **acotados a `*:suggest` y `*:read`**, jamás `*:decide`/`*:verify`;
+- condición ABAC `requires_human_confirmation` en toda sugerencia que mute estado;
+- **atenuación** (§5): un agente que actúa para un coordinador **nunca** excede a ese coordinador;
+- auditado y revocable al instante como cualquier principal.
+
+El que el modelo de principals ya sea polimórfico convierte "meter IA en el loop" en **configuración, no arquitectura**. Es el mayor dividendo de la invariante 1.
+
+**(d) Break-glass / acceso de emergencia como protocolo diseñado.** En catástrofe, "las primeras horas" a veces exigen que un respondedor verificado actúe **antes** de la delegación formal. En vez de prohibirlo (y que la gente comparta credenciales) o permitirlo sin control, se modela un **grant break-glass**: autoservible por principals pre-verificados, **time-boxed** (p. ej. 2–4 h), con **motivo obligatorio**, **auto-revocado**, **máxima auditoría** y notificación inmediata a admins de plataforma. Es el caso de uso que la mayoría de sistemas de permisos no tiene y que este dominio necesita de verdad.
+
+**(e) Confianza portable (verifiable credentials).** La acreditación (§11) puede emitirse como **credencial verificable** (W3C VC / DID) firmada: una acreditación "Oficial" de Cruz Roja es criptográficamente verificable **fuera** de ResponseGrid (UN OCHA, sistemas gubernamentales). Convierte a la plataforma en **emisor/verificador de confianza** de una federación de respuesta a desastres. North Star lejano, pero la acreditación actual es la semilla exacta.
+
+**(f) Multi-instancia y soberanía de datos.** La "puerta de escape" del spec (§7.5) ya promueve emergencias ultra-sensibles a esquema/BD propia. En grande: **instancias por región** (UE, LATAM…) por residencia de datos y jurisdicción, con **identidad y confianza federadas** (un coordinador acreditado en la instancia UE es reconocido en la LATAM vía VC, §18.3-e). La privacidad (§17) gana una dimensión **`jurisdiction`** (base legal y retención por país).
+
+**(g) Estado final Zanzibar (decisión firme, no hedge).** Con navieras, aduanas, handoffs inter-org, orgs anidadas y jerarquías de grupos, **la profundidad relacional crecerá**. La apuesta ambiciosa: **modelar todo como tuplas de relación desde el día 1** (aunque el resolver sea propio al principio). Migrar a OpenFGA/SpiceDB pasa a ser **cambiar el resolver, no remodelar los datos**. Invariantes 4 y 5.
+
+**(h) Inteligencia de autorización (observabilidad + anti-fraude del propio acceso).** Toda decisión de `can()` **explicable** ("¿por qué se permitió/denegó?") y todo cambio de grant analizable. Sobre el `audit_log` (access-log, §17.7) + las herramientas de analítica ya conectadas (PostHog/Datadog): **detección de anomalías** (un org-admin que concede 500 roles en una hora = señal anti-fraude). El control anti-fraude deja de ser solo de campañas y pasa también a la capa de acceso.
+
+### 18.4 Mapa "diseñar ahora vs construir después"
+
+| Ambición | ¿Diseñar ahora? | ¿Construir cuándo? | Coste si NO se diseña ahora |
+|---|---|---|---|
+| Principal polimórfico (IA, API, OAuth) | ✅ Sí (invariante 1) | API keys Fase 1; IA/OAuth después | **Alto** — reescritura del núcleo de identidad |
+| Scope DAG + tipos abiertos | ✅ Sí (invariante 3) | hubs cuando entre logística | **Alto** — re-modelar autorización |
+| Tuplas de relación + puerto `AccessControl` | ✅ Sí (invariantes 4-5) | swap a Zanzibar si la profundidad lo exige | **Alto** — migración de datos masiva |
+| Roles como assets de plantilla | 🟡 Reservar el sitio | con roles custom (fase 2) | Bajo |
+| Orgs anidadas (`parentOrganizationId`) | 🟡 Columna ahora, lógica después | con federaciones reales | Medio |
+| Break-glass | 🟡 Tipo de grant previsto | cuando haya operación real en campo | Bajo |
+| SSO empresarial (SAML/OIDC) + SCIM | 🟢 Solo el puerto `IdentityProvider` | con adopción institucional | Bajo (el puerto ya está en el spec §7.4) |
+| Verifiable credentials / multi-instancia | 🟢 No bloquear el modelo | North Star | Bajo si se respetan las 5 invariantes |
+| PDP + revocación inmediata + decisión auditable | ✅ Puerto ahora, motor pronto | tras MVP | Medio |
+
+### 18.5 El test del rework (la prueba de "pensar en grande sin pagarlo ahora")
+
+**Pregunta:** ¿cuál de estas ambiciones obliga a rehacer el núcleo si se respetan las 5 invariantes (§18.1)? **Respuesta: ninguna.**
+
+- IA en el loop → nuevo subtipo de principal + permisos `*:suggest`. **Config.**
+- Federación de orgs → una columna `parentOrganizationId` + atenuación ya recursiva. **Aditivo.**
+- SSO de un gobierno con 5.000 personas → un adapter del puerto `IdentityProvider` + mapeo de claims a grants (JIT/SCIM). **Adapter.**
+- Zanzibar → swap del resolver tras el puerto. **Adapter.**
+- Multi-instancia/jurisdicción → dimensión en privacidad + confianza federada. **Extensión.**
+- Break-glass → un tipo de grant time-boxed. **Aditivo.**
+
+**Conclusión:** el modelo no solo cubre lo actual, lo logístico y la privacidad — está **diseñado para ser infraestructura crítica federada con IA en el loop**, y lo hace sin que el MVP cargue con esa complejidad. Las 5 invariantes son el contrato; mientras se respeten, "pensar en grande" sale gratis hasta el día en que toque construir cada pieza.
