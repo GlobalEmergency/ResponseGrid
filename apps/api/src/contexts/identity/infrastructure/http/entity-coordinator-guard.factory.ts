@@ -9,9 +9,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import type { MembershipRepository } from '../../domain/ports/membership.repository';
-import { MEMBERSHIP_REPOSITORY } from '../../domain/ports/membership.repository';
-import { UserId } from '../../domain/user-id';
 import { Role } from '../../domain/role';
 import { AuthenticatedUser } from './jwt-auth.guard';
 
@@ -22,6 +19,9 @@ interface EmergencyLookup {
 /**
  * Factory that produces a NestJS guard class requiring the authenticated user to be
  * a Coordinator (or Admin) of the emergency that owns the given entity.
+ *
+ * The membership check is performed in memory against the memberships already loaded
+ * by JwtAuthGuard (request.user.memberships), avoiding a second database query.
  *
  * @param lookupToken   DI token for the *EmergencyLookup port of the entity's context.
  * @param paramName     Route-param key holding the entity UUID (e.g. `'needId'`).
@@ -37,8 +37,6 @@ export function makeEntityCoordinatorGuard(
     constructor(
       @Inject(lookupToken)
       private readonly lookup: EmergencyLookup,
-      @Inject(MEMBERSHIP_REPOSITORY)
-      private readonly membershipRepo: MembershipRepository,
     ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -62,10 +60,8 @@ export function makeEntityCoordinatorGuard(
         throw new NotFoundException(`${entityLabel} ${entityId} not found`);
       }
 
-      const hasRole = await this.membershipRepo.hasRole(
-        UserId.fromString(request.user.id),
-        emergencyId,
-        Role.Coordinator,
+      const hasRole = request.user.memberships.some(
+        (m) => m.emergencyId === emergencyId && m.role === Role.Coordinator,
       );
 
       if (!hasRole) {
