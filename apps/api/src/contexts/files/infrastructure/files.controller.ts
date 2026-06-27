@@ -120,8 +120,8 @@ export class FilesController {
   @ApiOperation({ summary: 'Download a stored file by key' })
   @ApiParam({ name: 'key', description: 'Storage key returned by POST /files' })
   @ApiOkResponse({ description: 'File content streamed' })
-  serve(@Param('key') key: string, @Res() res: Response): void {
-    const stream = this.fileStorage.getStream(key);
+  async serve(@Param('key') key: string, @Res() res: Response): Promise<void> {
+    const stream = await this.fileStorage.getStream(key);
     if (!stream) {
       throw new NotFoundException(`File "${key}" not found`);
     }

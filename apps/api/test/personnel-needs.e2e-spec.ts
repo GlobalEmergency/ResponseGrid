@@ -28,7 +28,10 @@ import {
   tasksTable,
   taskAssignmentsTable,
 } from '../src/contexts/volunteers/infrastructure/drizzle/task-schema';
-import { needsTable, needItemsTable } from '../src/contexts/needs/infrastructure/drizzle/schema';
+import {
+  needsTable,
+  needItemsTable,
+} from '../src/contexts/needs/infrastructure/drizzle/schema';
 import * as bcrypt from 'bcryptjs';
 
 // ── Unique UUID namespace for F05 e2e spec (f0500002-*) ──────────────────────
@@ -259,7 +262,13 @@ describe('Personnel needs — F05 (e2e)', () => {
             longitude: -0.38,
           },
           priority: 'high',
-          items: [{ name: 'Personal médico', quantity: 2, category: 'medical_personnel' }],
+          items: [
+            {
+              name: 'Personal médico',
+              quantity: 2,
+              category: 'medical_personnel',
+            },
+          ],
           requiredSkill: 'medical',
           skillSpecialty: 'Urgencias pediátricas',
           requestedCount: 2,
@@ -277,7 +286,9 @@ describe('Personnel needs — F05 (e2e)', () => {
           title: 'Invalid need',
           location: { address: 'Somewhere', latitude: 39.47, longitude: -0.38 },
           priority: 'high',
-          items: [{ name: 'Staff', quantity: 1, category: 'medical_personnel' }],
+          items: [
+            { name: 'Staff', quantity: 1, category: 'medical_personnel' },
+          ],
           requestedCount: 0,
         })
         .expect(400);
@@ -294,9 +305,15 @@ describe('Personnel needs — F05 (e2e)', () => {
         .set('Authorization', `Bearer ${coordToken}`)
         .send({
           title: 'Public need test',
-          location: { address: 'Centro de Valencia', latitude: 39.47, longitude: -0.38 },
+          location: {
+            address: 'Centro de Valencia',
+            latitude: 39.47,
+            longitude: -0.38,
+          },
           priority: 'medium',
-          items: [{ name: 'Staff', quantity: 1, category: 'medical_personnel' }],
+          items: [
+            { name: 'Staff', quantity: 1, category: 'medical_personnel' },
+          ],
           requiredSkill: 'medical',
           skillSpecialty: 'SuperSecret specialty',
           requestedCount: 1,
@@ -340,7 +357,9 @@ describe('Personnel needs — F05 (e2e)', () => {
           title: 'Need for suggestions',
           location: { address: 'Somewhere', latitude: 39.47, longitude: -0.38 },
           priority: 'high',
-          items: [{ name: 'Staff', quantity: 2, category: 'medical_personnel' }],
+          items: [
+            { name: 'Staff', quantity: 2, category: 'medical_personnel' },
+          ],
           requiredSkill: 'medical',
           requestedCount: 2,
         })
@@ -354,7 +373,10 @@ describe('Personnel needs — F05 (e2e)', () => {
         .set('Authorization', `Bearer ${coordToken}`)
         .expect(200);
 
-      const suggestions = res.body as Array<{ volunteerId: string; skills: string[] }>;
+      const suggestions = res.body as Array<{
+        volunteerId: string;
+        skills: string[];
+      }>;
       expect(suggestions.length).toBeGreaterThanOrEqual(2);
       for (const s of suggestions) {
         expect(s.skills).toContain('medical');
@@ -414,7 +436,9 @@ describe('Personnel needs — F05 (e2e)', () => {
           title: 'Need for task creation',
           location: { address: 'Hospital', latitude: 39.47, longitude: -0.38 },
           priority: 'high',
-          items: [{ name: 'Staff', quantity: 1, category: 'medical_personnel' }],
+          items: [
+            { name: 'Staff', quantity: 1, category: 'medical_personnel' },
+          ],
           requiredSkill: 'medical',
           requestedCount: 1,
         })
@@ -436,7 +460,9 @@ describe('Personnel needs — F05 (e2e)', () => {
       };
       expect(body.id).toBeDefined();
       expect(body.linkedNeedId).toBe(needId);
-      expect(body.assignments.map((a) => a.volunteerId)).toContain(VOL_MED_A_ROW);
+      expect(body.assignments.map((a) => a.volunteerId)).toContain(
+        VOL_MED_A_ROW,
+      );
     });
 
     it('creates a Task with multiple volunteerIds assigned', async () => {

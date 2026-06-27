@@ -55,7 +55,9 @@ describe('DrizzleVolunteerMatcher (integration)', () => {
     ({ db, pool } = createDb(URL));
     matcher = new DrizzleVolunteerMatcher(db);
   });
-  afterAll(async () => { await pool.end(); });
+  afterAll(async () => {
+    await pool.end();
+  });
 
   beforeEach(async () => {
     await db.delete(volunteersTable);
@@ -63,7 +65,10 @@ describe('DrizzleVolunteerMatcher (integration)', () => {
     await db.insert(volunteersTable).values([
       makeVolRow({ skills: [VolunteerSkill.Medical] }),
       makeVolRow({ skills: [VolunteerSkill.Medical, VolunteerSkill.General] }),
-      makeVolRow({ skills: [VolunteerSkill.Logistics], status: VolunteerStatus.Assigned }), // inactive
+      makeVolRow({
+        skills: [VolunteerSkill.Logistics],
+        status: VolunteerStatus.Assigned,
+      }), // inactive
       makeVolRow({ skills: [VolunteerSkill.General] }), // no medical
       // volunteer in a DIFFERENT emergency
       makeVolRow({ emergencyId: EM_OTHER, skills: [VolunteerSkill.Medical] }),
@@ -71,7 +76,10 @@ describe('DrizzleVolunteerMatcher (integration)', () => {
   });
 
   it('returns only available volunteers with the matching skill in that emergency', async () => {
-    const results = await matcher.findAvailableBySkill(EM_M, VolunteerSkill.Medical);
+    const results = await matcher.findAvailableBySkill(
+      EM_M,
+      VolunteerSkill.Medical,
+    );
     expect(results).toHaveLength(2);
     for (const r of results) {
       expect(r.skills).toContain(VolunteerSkill.Medical);
@@ -79,8 +87,13 @@ describe('DrizzleVolunteerMatcher (integration)', () => {
   });
 
   it('does not return volunteers from a different emergency', async () => {
-    const results = await matcher.findAvailableBySkill(EM_M, VolunteerSkill.Medical);
-    const emergencyIds = await db.select({ em: volunteersTable.emergencyId }).from(volunteersTable);
+    const results = await matcher.findAvailableBySkill(
+      EM_M,
+      VolunteerSkill.Medical,
+    );
+    const emergencyIds = await db
+      .select({ em: volunteersTable.emergencyId })
+      .from(volunteersTable);
     // All returned volunteers should belong to EM_M — verify via name lookup in DB
     // (matcher returns volunteerId; we check they exist in EM_M rows)
     const emMVolIds = (
@@ -94,17 +107,27 @@ describe('DrizzleVolunteerMatcher (integration)', () => {
   });
 
   it('does not return Assigned volunteers', async () => {
-    const results = await matcher.findAvailableBySkill(EM_M, VolunteerSkill.Logistics);
+    const results = await matcher.findAvailableBySkill(
+      EM_M,
+      VolunteerSkill.Logistics,
+    );
     expect(results).toHaveLength(0); // the logistics volunteer is Assigned
   });
 
   it('respects the limit', async () => {
-    const results = await matcher.findAvailableBySkill(EM_M, VolunteerSkill.Medical, 1);
+    const results = await matcher.findAvailableBySkill(
+      EM_M,
+      VolunteerSkill.Medical,
+      1,
+    );
     expect(results).toHaveLength(1);
   });
 
   it('returns hasVehicle=true when vehicle !== none', async () => {
-    const results = await matcher.findAvailableBySkill(EM_M, VolunteerSkill.Medical);
+    const results = await matcher.findAvailableBySkill(
+      EM_M,
+      VolunteerSkill.Medical,
+    );
     for (const r of results) {
       expect(r.hasVehicle).toBe(true); // all seeded with Vehicle.Car
     }

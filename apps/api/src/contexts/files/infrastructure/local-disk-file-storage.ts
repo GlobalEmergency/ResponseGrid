@@ -43,13 +43,17 @@ export class LocalDiskFileStorage implements FileStorage {
     return { key, url: `/files/${key}` };
   }
 
-  getStream(key: string): NodeJS.ReadableStream | null {
+  async getStream(key: string): Promise<NodeJS.ReadableStream | null> {
     // Sanitise key: no path separators allowed
     if (key.includes('/') || key.includes('\\') || key.includes('..')) {
       return null;
     }
     const filePath = path.join(this.uploadsDir, key);
-    if (!fs.existsSync(filePath)) return null;
+    try {
+      await fs.promises.access(filePath);
+    } catch {
+      return null;
+    }
     return fs.createReadStream(filePath);
   }
 }

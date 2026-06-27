@@ -9,7 +9,9 @@ import { NeedCategory, Priority, PersonnelSkill } from './need-enums';
 import { Location } from '../../../shared/domain/location';
 
 const needId = NeedId.fromString('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
-const emergencyId = EmergencyId.fromString('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
+const emergencyId = EmergencyId.fromString(
+  'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+);
 const location = Location.create({
   address: '123 Main St',
   latitude: 10.48,
@@ -22,7 +24,9 @@ const item = NeedItem.create({
   category: NeedCategory.MedicalPersonnel,
 });
 
-function makeNeed(overrides: Partial<Parameters<typeof Need.create>[0]> = {}): Need {
+function makeNeed(
+  overrides: Partial<Parameters<typeof Need.create>[0]> = {},
+): Need {
   return Need.create({
     id: needId,
     emergencyId,
@@ -57,11 +61,15 @@ describe('Need — F05 personnel fields', () => {
   });
 
   it('throws when requestedCount is 0', () => {
-    expect(() => makeNeed({ requestedCount: 0 })).toThrow('requestedCount must be >= 1');
+    expect(() => makeNeed({ requestedCount: 0 })).toThrow(
+      'requestedCount must be >= 1',
+    );
   });
 
   it('throws when requestedCount is negative', () => {
-    expect(() => makeNeed({ requestedCount: -1 })).toThrow('requestedCount must be >= 1');
+    expect(() => makeNeed({ requestedCount: -1 })).toThrow(
+      'requestedCount must be >= 1',
+    );
   });
 
   it('accepts requestedCount of 1', () => {

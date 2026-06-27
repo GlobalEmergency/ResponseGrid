@@ -24,5 +24,5 @@ export interface SaveResult {
 export interface FileStorage {
   save(input: SaveInput): Promise<SaveResult>;
   /** Returns a readable stream for the given key, or null when not found. */
-  getStream(key: string): NodeJS.ReadableStream | null;
+  getStream(key: string): Promise<NodeJS.ReadableStream | null>;
 }
