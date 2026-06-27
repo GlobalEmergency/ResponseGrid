@@ -75,25 +75,12 @@ export class DrizzleTaskRepository implements TaskRepository {
   async save(task: Task): Promise<void> {
     const s = task.toSnapshot();
 
-    await this.db
-      .insert(tasksTable)
-      .values({
-        id: s.id,
-        emergencyId: s.emergencyId,
-        title: s.title,
-        description: s.description,
-        locationAddress: s.locationAddress,
-        locationLatitude: s.locationLatitude,
-        locationLongitude: s.locationLongitude,
-        requiredSkill: s.requiredSkill,
-        status: s.status,
-        createdByUserId: s.createdByUserId,
-        createdAt: s.createdAt,
-        updatedAt: s.updatedAt,
-      })
-      .onConflictDoUpdate({
-        target: tasksTable.id,
-        set: {
+    await this.db.transaction(async (tx) => {
+      await tx
+        .insert(tasksTable)
+        .values({
+          id: s.id,
+          emergencyId: s.emergencyId,
           title: s.title,
           description: s.description,
           locationAddress: s.locationAddress,
@@ -101,28 +88,43 @@ export class DrizzleTaskRepository implements TaskRepository {
           locationLongitude: s.locationLongitude,
           requiredSkill: s.requiredSkill,
           status: s.status,
+          createdByUserId: s.createdByUserId,
+          createdAt: s.createdAt,
           updatedAt: s.updatedAt,
-        },
-      });
+        })
+        .onConflictDoUpdate({
+          target: tasksTable.id,
+          set: {
+            title: s.title,
+            description: s.description,
+            locationAddress: s.locationAddress,
+            locationLatitude: s.locationLatitude,
+            locationLongitude: s.locationLongitude,
+            requiredSkill: s.requiredSkill,
+            status: s.status,
+            updatedAt: s.updatedAt,
+          },
+        });
 
-    // Replace all assignments for this task (delete + re-insert for simplicity)
-    await this.db
-      .delete(taskAssignmentsTable)
-      .where(eq(taskAssignmentsTable.taskId, s.id));
+      // Replace all assignments for this task (delete + re-insert for simplicity)
+      await tx
+        .delete(taskAssignmentsTable)
+        .where(eq(taskAssignmentsTable.taskId, s.id));
 
-    if (s.assignments.length > 0) {
-      await this.db.insert(taskAssignmentsTable).values(
-        s.assignments.map((a) => ({
-          id: randomUUID(),
-          taskId: s.id,
-          volunteerId: a.volunteerId,
-          assignedAt: a.assignedAt,
-          checkedInAt: a.checkedInAt ?? null,
-          checkedOutAt: a.checkedOutAt ?? null,
-          status: a.status,
-        })),
-      );
-    }
+      if (s.assignments.length > 0) {
+        await tx.insert(taskAssignmentsTable).values(
+          s.assignments.map((a) => ({
+            id: randomUUID(),
+            taskId: s.id,
+            volunteerId: a.volunteerId,
+            assignedAt: a.assignedAt,
+            checkedInAt: a.checkedInAt ?? null,
+            checkedOutAt: a.checkedOutAt ?? null,
+            status: a.status,
+          })),
+        );
+      }
+    });
   }
 
   async findById(id: TaskId): Promise<Task | null> {

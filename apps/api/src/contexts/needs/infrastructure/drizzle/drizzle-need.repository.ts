@@ -49,46 +49,48 @@ export class DrizzleNeedRepository implements NeedRepository {
   async save(need: Need): Promise<void> {
     const s = need.toSnapshot();
 
-    await this.db
-      .insert(needsTable)
-      .values({
-        id: s.id,
-        emergencyId: s.emergencyId,
-        title: s.title,
-        description: s.description,
-        address: s.location.address,
-        latitude: s.location.latitude,
-        longitude: s.location.longitude,
-        priority: s.priority,
-        requesterUserId: s.requesterUserId,
-        requesterOrganizationId: s.requesterOrganizationId,
-        managingOrganizationId: s.managingOrganizationId,
-        status: s.status,
-        createdAt: s.createdAt,
-      })
-      .onConflictDoUpdate({
-        target: needsTable.id,
-        set: {
-          status: s.status,
+    await this.db.transaction(async (tx) => {
+      await tx
+        .insert(needsTable)
+        .values({
+          id: s.id,
+          emergencyId: s.emergencyId,
+          title: s.title,
+          description: s.description,
+          address: s.location.address,
+          latitude: s.location.latitude,
+          longitude: s.location.longitude,
+          priority: s.priority,
+          requesterUserId: s.requesterUserId,
+          requesterOrganizationId: s.requesterOrganizationId,
           managingOrganizationId: s.managingOrganizationId,
-        },
-      });
+          status: s.status,
+          createdAt: s.createdAt,
+        })
+        .onConflictDoUpdate({
+          target: needsTable.id,
+          set: {
+            status: s.status,
+            managingOrganizationId: s.managingOrganizationId,
+          },
+        });
 
-    // Sync items: delete existing then re-insert (clean replace)
-    await this.db.delete(needItemsTable).where(eq(needItemsTable.needId, s.id));
+      // Sync items: delete existing then re-insert (clean replace)
+      await tx.delete(needItemsTable).where(eq(needItemsTable.needId, s.id));
 
-    if (s.items.length > 0) {
-      await this.db.insert(needItemsTable).values(
-        s.items.map((item) => ({
-          id: randomUUID(),
-          needId: s.id,
-          name: item.name,
-          quantity: item.quantity,
-          unit: item.unit,
-          category: item.category,
-        })),
-      );
-    }
+      if (s.items.length > 0) {
+        await tx.insert(needItemsTable).values(
+          s.items.map((item) => ({
+            id: randomUUID(),
+            needId: s.id,
+            name: item.name,
+            quantity: item.quantity,
+            unit: item.unit,
+            category: item.category,
+          })),
+        );
+      }
+    });
   }
 
   async findById(id: NeedId): Promise<Need | null> {
