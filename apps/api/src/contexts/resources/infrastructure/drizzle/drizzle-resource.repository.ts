@@ -72,7 +72,8 @@ export class DrizzleResourceRepository implements ResourceRepository {
     const rows = await this.db
       .select()
       .from(resourcesTable)
-      .where(eq(resourcesTable.id, id.value));
+      .where(eq(resourcesTable.id, id.value))
+      .limit(1);
     return rows[0] ? Resource.fromSnapshot(rowToSnapshot(rows[0])) : null;
   }
 

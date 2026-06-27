@@ -51,7 +51,8 @@ export class DrizzleOrganizationRepository implements OrganizationRepository {
     const rows = await this.db
       .select()
       .from(organizationsTable)
-      .where(eq(organizationsTable.id, id.value));
+      .where(eq(organizationsTable.id, id.value))
+      .limit(1);
     return rows[0] ? Organization.fromSnapshot(rowToSnapshot(rows[0])) : null;
   }
 

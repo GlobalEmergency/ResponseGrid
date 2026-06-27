@@ -76,7 +76,8 @@ export class DrizzleOfferRepository implements OfferRepository {
     const rows = await this.db
       .select()
       .from(offersTable)
-      .where(eq(offersTable.id, id.value));
+      .where(eq(offersTable.id, id.value))
+      .limit(1);
     if (!rows[0]) return null;
     return DonationOffer.fromSnapshot(rowToSnapshot(rows[0]));
   }

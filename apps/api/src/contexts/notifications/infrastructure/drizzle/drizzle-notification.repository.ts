@@ -48,7 +48,8 @@ export class DrizzleNotificationRepository implements NotificationRepository {
     const rows = await this.db
       .select()
       .from(notificationsTable)
-      .where(eq(notificationsTable.id, id.value));
+      .where(eq(notificationsTable.id, id.value))
+      .limit(1);
     return rows[0] ? Notification.fromSnapshot(rowToSnapshot(rows[0])) : null;
   }
 

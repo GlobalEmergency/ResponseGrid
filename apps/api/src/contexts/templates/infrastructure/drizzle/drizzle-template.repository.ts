@@ -48,7 +48,8 @@ export class DrizzleTemplateRepository implements TemplateRepository {
     const rows = await this.db
       .select()
       .from(templatesTable)
-      .where(eq(templatesTable.id, id.value));
+      .where(eq(templatesTable.id, id.value))
+      .limit(1);
     return rows[0] ? Template.fromSnapshot(rowToSnapshot(rows[0])) : null;
   }
 

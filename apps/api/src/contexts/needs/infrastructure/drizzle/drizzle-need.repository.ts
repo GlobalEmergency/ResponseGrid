@@ -97,7 +97,8 @@ export class DrizzleNeedRepository implements NeedRepository {
     const rows = await this.db
       .select()
       .from(needsTable)
-      .where(eq(needsTable.id, id.value));
+      .where(eq(needsTable.id, id.value))
+      .limit(1);
     if (!rows[0]) return null;
     const items = await this.db
       .select()

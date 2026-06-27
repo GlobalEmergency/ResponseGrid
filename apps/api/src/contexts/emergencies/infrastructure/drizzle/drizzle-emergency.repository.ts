@@ -58,7 +58,8 @@ export class DrizzleEmergencyRepository implements EmergencyRepository {
     const rows = await this.db
       .select()
       .from(emergenciesTable)
-      .where(eq(emergenciesTable.id, id.value));
+      .where(eq(emergenciesTable.id, id.value))
+      .limit(1);
     return rows[0] ? Emergency.fromSnapshot(rowToSnapshot(rows[0])) : null;
   }
 
