@@ -10,7 +10,7 @@ WORKDIR /repo
 
 # Copy the whole workspace (a root .dockerignore keeps it lean) and install.
 COPY . .
-RUN pnpm install --frozen-lockfile \
+RUN pnpm install --frozen-lockfile --filter=api... \
  && pnpm --filter=api build \
  && pnpm --filter=api deploy --prod --legacy /prod
 
