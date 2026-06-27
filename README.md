@@ -99,7 +99,11 @@ Desarrollo guiado por **TDD**; Clean Code, SOLID y DDD en el backend, Atomic Des
 
 ---
 
+## 🚀 Despliegue
+
+- [`docs/deploy/aws-free-tier.md`](docs/deploy/aws-free-tier.md) — guía paso a paso: **web en Vercel + API/Postgres/Redis en una EC2 t3.micro (capa gratuita) + S3**. Artefactos en [`deploy/`](deploy) (Dockerfile, `docker-compose.prod.yml`, migraciones, Caddy).
+
 ## 📚 Documentación
 
 - [`docs/features/`](docs/features) — fichas de feature (origen, propuesta DDD+API+Atomic, alcance, privacidad).
-- `01-especificacion-producto-y-arquitectura.md` y `especificacion_plataforma_ayuda_solidaria.md` — especificación de producto y arquitectura.
+- [`01-especificacion-producto-y-arquitectura.md`](01-especificacion-producto-y-arquitectura.md) y [`especificacion_plataforma_ayuda_solidaria.md`](especificacion_plataforma_ayuda_solidaria.md) — especificación de producto y arquitectura.

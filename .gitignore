@@ -1,7 +1,8 @@
-# Documentos de desarrollo / especificación — fuera de git de momento
-/docs/
-especificacion_plataforma_ayuda_solidaria.md
-01-especificacion-producto-y-arquitectura.md
+# Docs internos del proceso (planes/WIP de superpowers) — fuera de git.
+# Sí publicamos los entregables: fichas de feature, guía de despliegue y specs.
+/docs/*
+!/docs/features/
+!/docs/deploy/
 
 # Secretos / entorno — nunca al repo
 .env
