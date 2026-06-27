@@ -9,6 +9,7 @@ import {
 } from './resource-enums';
 import { Location } from '../../../shared/domain/location';
 import {
+  ResourceAlreadyPublishedError,
   ResourceNotVerifiedError,
   InvalidVerificationLevelError,
   InvalidPublicStatusTransitionError,
@@ -99,6 +100,24 @@ describe('Resource', () => {
     expect(r.pullDomainEvents().map((e) => e.eventName)).toEqual([
       'resource.published',
     ]);
+  });
+
+  it('throws ResourceAlreadyPublishedError when publishing a second time (bug fix)', () => {
+    const r = make();
+    r.verify(VerificationLevel.Verified, 'coord-1');
+    r.publish();
+    expect(() => r.publish()).toThrow(ResourceAlreadyPublishedError);
+  });
+
+  it('does not emit ResourcePublished on second publish attempt (bug fix)', () => {
+    const r = make();
+    r.verify(VerificationLevel.Verified, 'coord-1');
+    r.publish();
+    r.pullDomainEvents(); // drain
+    expect(() => r.publish()).toThrow(ResourceAlreadyPublishedError);
+    expect(r.pullDomainEvents()).toHaveLength(0);
+    // publicStatus must remain Active, not reset
+    expect(r.publicStatus).toBe(PublicStatus.Active);
   });
 
   describe('changePublicStatus', () => {

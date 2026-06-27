@@ -24,3 +24,9 @@ export class ResourceNotPublishedError extends Error {
     this.name = 'ResourceNotPublishedError';
   }
 }
+export class ResourceAlreadyPublishedError extends Error {
+  constructor() {
+    super('Resource is already published; use changePublicStatus to update it');
+    this.name = 'ResourceAlreadyPublishedError';
+  }
+}

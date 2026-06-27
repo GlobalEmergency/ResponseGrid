@@ -8,6 +8,7 @@ import { Response } from 'express';
 import { ResourceNotFoundError } from '../../application/resource-not-found.error';
 import { UnauthorizedStatusChangeError } from '../../application/unauthorized-status-change.error';
 import {
+  ResourceAlreadyPublishedError,
   ResourceNotVerifiedError,
   InvalidVerificationLevelError,
   InvalidPublicStatusTransitionError,
@@ -18,6 +19,7 @@ import { EmergencyNotAcceptingIntakeError } from '../../../emergencies/domain/em
 type DomainError =
   | ResourceNotFoundError
   | ResourceNotVerifiedError
+  | ResourceAlreadyPublishedError
   | InvalidVerificationLevelError
   | EmergencyNotAcceptingIntakeError
   | UnauthorizedStatusChangeError
@@ -29,6 +31,7 @@ type DomainError =
 @Catch(
   ResourceNotFoundError,
   ResourceNotVerifiedError,
+  ResourceAlreadyPublishedError,
   InvalidVerificationLevelError,
   EmergencyNotAcceptingIntakeError,
   UnauthorizedStatusChangeError,
@@ -45,9 +48,11 @@ export class DomainExceptionFilter implements ExceptionFilter {
           ? HttpStatus.FORBIDDEN
           : exception instanceof EmergencyNotAcceptingIntakeError
             ? HttpStatus.CONFLICT
-            : exception instanceof ResourceNotVerifiedError
+            : exception instanceof ResourceAlreadyPublishedError
               ? HttpStatus.CONFLICT
-              : HttpStatus.BAD_REQUEST;
+              : exception instanceof ResourceNotVerifiedError
+                ? HttpStatus.CONFLICT
+                : HttpStatus.BAD_REQUEST;
     response
       .status(statusCode)
       .json({ statusCode, message: exception.message });

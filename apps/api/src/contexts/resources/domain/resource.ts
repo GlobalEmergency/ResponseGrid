@@ -10,6 +10,7 @@ import { Location, LocationProps } from '../../../shared/domain/location';
 import {
   InvalidVerificationLevelError,
   InvalidPublicStatusTransitionError,
+  ResourceAlreadyPublishedError,
   ResourceNotPublishedError,
   ResourceNotVerifiedError,
 } from './resource-errors';
@@ -131,6 +132,9 @@ export class Resource {
   publish(): void {
     if (this._verificationLevel === VerificationLevel.Unverified) {
       throw new ResourceNotVerifiedError();
+    }
+    if (this._publicStatus !== PublicStatus.Hidden) {
+      throw new ResourceAlreadyPublishedError();
     }
     this._publicStatus = PublicStatus.Active;
     this.events.push(
