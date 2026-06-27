@@ -6,6 +6,7 @@ import { UserIdentity } from '../domain/user-identity';
 import { User } from '../domain/user';
 import { UserId } from '../domain/user-id';
 import { Email } from '../domain/email';
+import { AccountLinkRequiresAuthError } from '../domain/account-link-requires-auth.error';
 
 export interface AuthenticateWithProviderCommand {
   provider: AuthProvider;
@@ -53,10 +54,19 @@ export class AuthenticateWithProvider {
       return { accessToken: this.tokenService.sign(this.payload(user)) };
     }
 
-    // Path 2 — email matches an existing account → link and authenticate
+    // Path 2 — email matches an existing account
+    // SECURITY: if the existing account has a password hash, auto-linking would
+    // allow an attacker who controls a social account with the victim's email to
+    // silently take over the victim's password account. We block this case and
+    // require the user to authenticate with their password first, then link
+    // the social identity explicitly from account settings.
     const email = Email.fromString(cmd.email);
     const userByEmail = await this.userRepo.findByEmail(email);
     if (userByEmail !== null) {
+      if (userByEmail.passwordHash !== null) {
+        throw new AccountLinkRequiresAuthError(cmd.provider);
+      }
+      // Social-only account with matching email — safe to link
       await this.identityRepo.link(userByEmail.id, identity);
       return { accessToken: this.tokenService.sign(this.payload(userByEmail)) };
     }
