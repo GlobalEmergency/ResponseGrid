@@ -7,7 +7,7 @@ import { LanguageSwitcher } from '@/components/molecules/language-switcher';
 
 export function SiteHeaderBand() {
   return (
-    <header className="rounded-b-[28px] bg-navy px-5 pb-5 pt-6">
+    <header className="rounded-b-[28px] bg-navy px-5 pb-5 pt-6 lg:px-8">
       <div className="flex items-center justify-between gap-3 text-white">
         <Link
           href="/"

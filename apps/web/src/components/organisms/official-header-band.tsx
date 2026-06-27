@@ -33,7 +33,7 @@ export function OfficialHeaderBand({ name, status, updatedAt, te }: OfficialHead
         : te.header_status_closed;
 
   return (
-    <header className="rounded-b-[28px] bg-navy px-5 pb-7 pt-6 text-white">
+    <header className="rounded-b-[28px] bg-navy px-5 pb-7 pt-6 text-white lg:px-8">
       <div className="mb-5 flex items-center justify-between gap-3">
         <Link
           href="/"
@@ -45,22 +45,26 @@ export function OfficialHeaderBand({ name, status, updatedAt, te }: OfficialHead
         <LanguageSwitcher tone="dark" />
       </div>
 
-      <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-accent">
-        {te.header_overline}
-      </p>
-      <h1 className="font-display text-[30px] font-extrabold leading-[1.02] tracking-tight">
-        {name}
-      </h1>
+      <div className="lg:flex lg:items-end lg:justify-between lg:gap-6">
+        <div>
+          <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-accent">
+            {te.header_overline}
+          </p>
+          <h1 className="font-display text-[30px] font-extrabold leading-[1.02] tracking-tight lg:text-4xl">
+            {name}
+          </h1>
+        </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2.5">
-        <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wide">
-          <span className={`h-2 w-2 rounded-full ${DOT_CLASS[status]}`} aria-hidden="true" />
-          {statusLabel}
-        </span>
-        <span className="flex items-center gap-1.5 text-xs text-[#b7c6da]">
-          <span aria-hidden="true">🕑</span>
-          <RelativeTime isoString={updatedAt} />
-        </span>
+        <div className="mt-4 flex flex-wrap items-center gap-2.5 lg:mt-0 lg:flex-shrink-0">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wide">
+            <span className={`h-2 w-2 rounded-full ${DOT_CLASS[status]}`} aria-hidden="true" />
+            {statusLabel}
+          </span>
+          <span className="flex items-center gap-1.5 text-xs text-[#b7c6da]">
+            <span aria-hidden="true">🕑</span>
+            <RelativeTime isoString={updatedAt} />
+          </span>
+        </div>
       </div>
     </header>
   );

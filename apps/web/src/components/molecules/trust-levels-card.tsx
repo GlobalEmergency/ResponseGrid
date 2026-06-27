@@ -22,9 +22,9 @@ export function TrustLevelsCard({ heading, intro, rows, tVerification }: TrustLe
     <div className="rounded-card border border-line bg-white p-[18px]">
       <h3 className="font-display text-base font-bold text-navy">{heading}</h3>
       <p className="mt-1 text-[13px] leading-[1.45] text-muted">{intro}</p>
-      <ul className="mt-3.5 flex flex-col gap-2.5">
+      <ul className="mt-3.5 grid gap-2.5 sm:grid-cols-3 sm:gap-4">
         {rows.map((row) => (
-          <li key={row.level} className="flex items-center gap-2.5">
+          <li key={row.level} className="flex items-center gap-2.5 sm:flex-col sm:items-start sm:gap-1.5">
             <VerificationBadge level={row.level} t={tVerification} />
             <span className="text-[12.5px] text-muted">{row.text}</span>
           </li>

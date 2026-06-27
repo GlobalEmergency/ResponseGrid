@@ -130,8 +130,8 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
   const sectionTitle = 'font-display text-base font-bold text-navy';
 
   return (
-    <main className="flex min-h-screen justify-center bg-surface">
-      <div className="w-full max-w-md bg-surface">
+    <main className="min-h-screen bg-surface">
+      <div className="mx-auto w-full max-w-md bg-surface lg:max-w-6xl">
         <OfficialHeaderBand
           name={emergency.name}
           status={emergency.status}
@@ -139,31 +139,39 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
           te={te}
         />
 
-        <div className="flex flex-col gap-5 px-4 pb-12 pt-5">
+        <div className="flex flex-col gap-5 px-4 pb-12 pt-5 lg:gap-6 lg:px-8">
           <StatusBanner status={emergency.status} t={t.status_banner} />
 
-          {/* Comunicado oficial */}
-          <AnnouncementCard
-            announcement={typeof emergency.announcement === 'string' ? emergency.announcement : null}
-            updatedAt={emergency.updatedAt}
-            t={t.announcement}
-          />
-
-          {/* Lo más eficaz ahora — donación */}
-          {isActive && (
-            <EffectiveActionCard
-              href={`/e/${slug}/donar`}
-              overline={te.effective_overline}
-              title={te.effective_title}
-              cta={te.effective_cta}
+          {/* Comunicado oficial + "Lo más eficaz ahora" (lado a lado en escritorio) */}
+          {isActive ? (
+            <div className="grid gap-5 lg:grid-cols-3">
+              <div className="lg:col-span-2">
+                <AnnouncementCard
+                  announcement={typeof emergency.announcement === 'string' ? emergency.announcement : null}
+                  updatedAt={emergency.updatedAt}
+                  t={t.announcement}
+                />
+              </div>
+              <EffectiveActionCard
+                href={`/e/${slug}/donar`}
+                overline={te.effective_overline}
+                title={te.effective_title}
+                cta={te.effective_cta}
+              />
+            </div>
+          ) : (
+            <AnnouncementCard
+              announcement={typeof emergency.announcement === 'string' ? emergency.announcement : null}
+              updatedAt={emergency.updatedAt}
+              t={t.announcement}
             />
           )}
 
-          {/* Métricas */}
+          {/* Métricas (fila de KPIs) */}
           {metrics !== undefined && (
             <section aria-labelledby="metrics-heading">
               <h2 id="metrics-heading" className="sr-only">{te.metrics_heading}</h2>
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
                 <MetricCard value={metrics.needs.open} label={te.metric_tile_open} tone="navy" />
                 <MetricCard value={metrics.resources.active} label={te.metric_tile_points} tone="navy" />
                 <MetricCard value={metrics.needs.closed} label={te.metric_tile_covered} tone="success" />
@@ -172,6 +180,8 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
             </section>
           )}
 
+          {/* Paneles — columna única en móvil, dashboard multi-columna en escritorio */}
+          <div className="columns-1 gap-5 lg:columns-2 [&>*]:mb-5 [&>*]:break-inside-avoid">
           {/* ¿Cómo quieres ayudar? */}
           <section aria-labelledby="actions-heading" className="flex flex-col gap-3">
             <h2 id="actions-heading" className={sectionTitle}>{te.actions_heading}</h2>
@@ -283,8 +293,9 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
               </ul>
             )}
           </section>
+          </div>
 
-          {/* Mapa de la emergencia */}
+          {/* Mapa de la emergencia (ancho completo) */}
           <section aria-labelledby="map-heading" className="flex flex-col gap-3">
             <h2 id="map-heading" className={sectionTitle}>{te.map_heading}</h2>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">

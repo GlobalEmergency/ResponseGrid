@@ -50,18 +50,18 @@ export default async function HomePage() {
   const sectionHeading = 'font-display text-lg font-bold text-navy';
 
   return (
-    <main className="flex min-h-screen justify-center bg-surface">
-      <div className="w-full max-w-md bg-surface">
+    <main className="min-h-screen bg-surface">
+      <div className="mx-auto w-full max-w-md bg-surface lg:max-w-5xl">
         <SiteHeaderBand />
 
-        <div className="flex flex-col gap-8 px-5 pb-12 pt-6">
+        <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">
           {/* ── Hero (SEO H1) ───────────────────────────────────────────── */}
           <section>
-            <h1 className="font-display text-[27px] font-extrabold leading-[1.1] tracking-tight text-navy">
+            <h1 className="font-display text-[27px] font-extrabold leading-[1.1] tracking-tight text-navy lg:text-[40px] lg:leading-[1.05]">
               {th.hero_h1}
             </h1>
-            <p className="mt-3.5 text-[15px] leading-[1.55] text-ink-soft">{th.hero_subtitle}</p>
-            <div className="mt-[18px] flex gap-2.5">
+            <p className="mt-3.5 max-w-2xl text-[15px] leading-[1.55] text-ink-soft lg:text-base">{th.hero_subtitle}</p>
+            <div className="mt-[18px] flex gap-2.5 sm:max-w-md">
               <a
                 href="#emergencias"
                 className="flex-1 rounded-xl bg-navy px-4 py-3.5 text-center text-[15px] font-bold text-white transition-colors hover:bg-navy-700 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
@@ -91,7 +91,7 @@ export default async function HomePage() {
             {activeEmergencies.length === 0 ? (
               <EmptyState title={th.no_emergencies_title} description={th.no_emergencies_description} />
             ) : (
-              <ul className="flex flex-col gap-3" role="list" aria-label={th.aria_emergency_list}>
+              <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" role="list" aria-label={th.aria_emergency_list}>
                 {activeEmergencies.map((emergency) => (
                   <li key={emergency.id}>
                     <EmergencyDirectoryCard
@@ -105,7 +105,7 @@ export default async function HomePage() {
             )}
 
             {closedEmergencies.length > 0 && (
-              <div className="mt-3 flex flex-col gap-2.5">
+              <div className="mt-3 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
                 {closedEmergencies.map((emergency) => (
                   <Link
                     key={emergency.id}
@@ -127,7 +127,7 @@ export default async function HomePage() {
           {/* ── Cómo funciona ───────────────────────────────────────────── */}
           <section aria-labelledby="how-heading">
             <h2 id="how-heading" className={`${sectionHeading} mb-3.5`}>{th.how_it_works_heading}</h2>
-            <div className="flex flex-col gap-4">
+            <div className="grid gap-4 sm:grid-cols-3 sm:gap-6">
               <HowItWorksStep index={1} title={th.step1_title} body={th.step1_body} />
               <HowItWorksStep index={2} title={th.step2_title} body={th.step2_body} />
               <HowItWorksStep index={3} title={th.step3_title} body={th.step3_body} tone="accent" />
