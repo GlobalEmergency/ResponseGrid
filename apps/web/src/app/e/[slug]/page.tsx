@@ -257,6 +257,12 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
               >
                 {te.action_volunteer}
               </Link>
+              <Link
+                href={`/e/${slug}/reportar`}
+                className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-red-800 bg-red-50 rounded-lg border-2 border-red-600 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 transition-colors"
+              >
+                {te.action_report_damage}
+              </Link>
             </div>
           ) : null}
 
@@ -403,7 +409,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
               {te.map_legend_need}
             </span>
           </div>
-          <EmergencyMapWrapper points={mapPoints} />
+          <EmergencyMapWrapper points={mapPoints} emergencyId={emergencyId} />
         </section>
 
         {/* ── 8. PIE ───────────────────────────────────────────────────── */}

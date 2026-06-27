@@ -73,6 +73,7 @@ export const es = {
     action_submit_petition: 'Poner una petición',
     action_donate: 'Donar material',
     action_volunteer: 'Apuntarme como voluntario',
+    action_report_damage: '🏚 Reportar daños estructurales',
     action_find_family: 'Buscar familiar',
     actions_paused:
       'El alta de recursos y peticiones está en pausa. Consulta la información disponible y vuelve más tarde.',
@@ -97,6 +98,11 @@ export const es = {
     map_legend_saturated: 'Saturado',
     map_legend_paused: 'En pausa',
     map_legend_need: 'Petición',
+    map_legend_damage_collapsed: 'Colapsada',
+    map_legend_damage_severe: 'Daño grave',
+    map_legend_damage_moderate: 'Daño moderado',
+    map_damage_toggle_show: 'Mostrar daños',
+    map_damage_toggle_hide: 'Ocultar daños',
 
     // Footer links
     footer_my_points: 'Mis puntos',
@@ -548,6 +554,8 @@ export const es = {
     type_stock: 'Stock',
     type_status: 'Estado',
     type_other: 'Otro',
+    type_structural_damage: '🏚 Daños estructurales',
+    type_trapped_persons: '🆘 Personas atrapadas',
 
     priority_low: 'Baja',
     priority_medium: 'Media',

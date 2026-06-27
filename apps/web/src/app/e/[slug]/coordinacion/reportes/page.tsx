@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { ReportCard } from '@/components/organisms/report-card';
+import { DamageReportsQueue } from '@/components/organisms/damage-reports-queue';
 import type { FieldReport } from '@/components/organisms/report-card';
 
 export const dynamic = 'force-dynamic';
@@ -25,15 +26,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-const VALID_STATUSES = ['open', 'reviewed'] as const;
+const VALID_STATUSES = ['open', 'reviewed', 'published', 'closed'] as const;
 const VALID_PRIORITIES = ['low', 'medium', 'high', 'urgent'] as const;
+const VALID_TYPES = [
+  'incident',
+  'stock',
+  'status',
+  'other',
+  'structural_damage',
+  'trapped_persons',
+] as const;
 
 type ReportStatus = typeof VALID_STATUSES[number];
 type ReportPriority = typeof VALID_PRIORITIES[number];
+type ReportType = typeof VALID_TYPES[number];
 
 const STATUS_LABELS: Record<ReportStatus, string> = {
   open: 'Abiertos',
   reviewed: 'Revisados',
+  published: 'Publicados',
+  closed: 'Cerrados',
 };
 
 const PRIORITY_LABELS: Record<ReportPriority, string> = {
@@ -66,12 +78,16 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
   const rawStatus = typeof resolvedSearchParams.status === 'string' ? resolvedSearchParams.status : undefined;
   const rawPriority = typeof resolvedSearchParams.priority === 'string' ? resolvedSearchParams.priority : undefined;
   const rawResourceId = typeof resolvedSearchParams.resourceId === 'string' ? resolvedSearchParams.resourceId : undefined;
+  const rawType = typeof resolvedSearchParams.type === 'string' ? resolvedSearchParams.type : undefined;
 
   const statusFilter = (VALID_STATUSES as readonly string[]).includes(rawStatus ?? '')
     ? (rawStatus as ReportStatus)
     : undefined;
   const priorityFilter = (VALID_PRIORITIES as readonly string[]).includes(rawPriority ?? '')
     ? (rawPriority as ReportPriority)
+    : undefined;
+  const typeFilter = (VALID_TYPES as readonly string[]).includes(rawType ?? '')
+    ? (rawType as ReportType)
     : undefined;
 
   const resourceIdFilter = rawResourceId !== undefined && rawResourceId.trim().length > 0
@@ -87,6 +103,7 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
         status: statusFilter,
         priority: priorityFilter,
         resourceId: resourceIdFilter,
+        type: typeFilter,
       },
     },
     headers,
@@ -211,6 +228,18 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
             </Link>
           )}
         </section>
+
+        <hr className="border-gray-200" />
+
+        {/* ── COLA SAR — Daños y atrapados ────────────────────────────── */}
+        {typeFilter === undefined && (
+          <DamageReportsQueue reports={reports} slug={slug} />
+        )}
+
+        {typeFilter !== undefined &&
+          (typeFilter === 'structural_damage' || typeFilter === 'trapped_persons') && (
+            <DamageReportsQueue reports={reports} slug={slug} />
+          )}
 
         <hr className="border-gray-200" />
 
