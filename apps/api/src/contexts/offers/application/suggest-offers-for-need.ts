@@ -31,36 +31,7 @@ function euclideanDistance(
   return Math.sqrt(dlat * dlat + dlon * dlon);
 }
 
-export interface SuggestOffersForNeedParams {
-  needId: string;
-  emergencyId: string;
-}
-
-export class SuggestOffersForNeed {
-  constructor(
-    private readonly offerRepo: OfferRepository,
-    private readonly needLookup: NeedLookup,
-  ) {}
-
-  async execute(params: SuggestOffersForNeedParams): Promise<OfferView[]> {
-    const category = await this.needLookup.findCategory(params.needId);
-    if (category === null) {
-      throw new NeedForSuggestNotFoundError(params.needId);
-    }
-
-    const openOffers = await this.offerRepo.findOpenByEmergencyAndCategory(
-      EmergencyId.fromString(params.emergencyId),
-      category,
-    );
-
-    // Return as-is (sorted by createdAt from the repository is fine;
-    // proximity sort requires need location which we don't have here without
-    // an extra needs read — keep it simple per spec: euclidean on lat/lng)
-    return openOffers.map(toOfferView);
-  }
-}
-
-/** Extended version that accepts need location for proximity sorting */
+/** Accepts need location for proximity sorting */
 export class SuggestOffersForNeedWithLocation {
   constructor(
     private readonly offerRepo: OfferRepository,

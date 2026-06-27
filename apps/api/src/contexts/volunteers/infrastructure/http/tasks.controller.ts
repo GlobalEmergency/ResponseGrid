@@ -37,7 +37,7 @@ import { CheckInVolunteer } from '../../application/check-in-volunteer';
 import { CheckOutVolunteer } from '../../application/check-out-volunteer';
 import { CompleteTask } from '../../application/complete-task';
 import { CancelTask } from '../../application/cancel-task';
-import { GetMyTasks, MyTaskView } from '../../application/get-my-tasks';
+import { GetMyTasks } from '../../application/get-my-tasks';
 import {
   VOLUNTEER_REPOSITORY,
   type VolunteerRepository,
@@ -370,13 +370,6 @@ export class TasksController {
         checkedInAt: a.checkedInAt ?? null,
         checkedOutAt: a.checkedOutAt ?? null,
       })),
-    };
-  }
-
-  private mapMyTaskView(v: MyTaskView): MyTaskViewDto {
-    return {
-      ...this.mapTaskView(v),
-      myAssignmentStatus: v.myAssignmentStatus,
     };
   }
 
