@@ -9,6 +9,7 @@ import { PublicController } from './http/public.controller';
 import { RegisterResource } from '../application/register-resource';
 import { GetCoordinationQueue } from '../application/get-coordination-queue';
 import { GetPublicResources } from '../application/get-public-resources';
+import { GetResourceFacets } from '../application/get-resource-facets';
 import { GetMyResources } from '../application/get-my-resources';
 import { VerifyResource } from '../application/verify-resource';
 import { PublishResource } from '../application/publish-resource';
@@ -128,6 +129,12 @@ const publicResourcesProvider = {
   useFactory: (repo: ResourceRepository) => new GetPublicResources(repo),
 };
 
+const getResourceFacetsProvider = {
+  provide: GetResourceFacets,
+  inject: [RESOURCE_REPOSITORY],
+  useFactory: (repo: ResourceRepository) => new GetResourceFacets(repo),
+};
+
 const membershipReaderProvider = {
   provide: RESOURCE_MEMBERSHIP_READER,
   inject: [DB],
@@ -165,6 +172,7 @@ const getMyResourcesProvider = {
     verifyProvider,
     publishProvider,
     publicResourcesProvider,
+    getResourceFacetsProvider,
     updateStatusProvider,
     getMyResourcesProvider,
   ],

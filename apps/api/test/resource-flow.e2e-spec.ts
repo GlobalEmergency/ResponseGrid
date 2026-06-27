@@ -158,16 +158,20 @@ describe('Resource flow (e2e)', () => {
     const publicResources = await request(server)
       .get(`/emergencies/${EM}/public/resources`)
       .expect(200);
-    expect(publicResources.body).toEqual([
-      expect.objectContaining({
-        id,
-        stage: 'intermediate',
-        publicStatus: 'active',
-        location: expect.objectContaining({
-          address: baseLocation.address,
-        }) as unknown,
-      }),
-    ]);
+    expect(publicResources.body.items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id,
+          stage: 'intermediate',
+          publicStatus: 'active',
+          location: expect.objectContaining({
+            address: baseLocation.address,
+          }) as unknown,
+        }),
+      ]),
+    );
+    expect(publicResources.body.total).toBeGreaterThanOrEqual(1);
+    expect(publicResources.body.page).toBe(1);
   });
 
   it('registers with collection_and_delivery type → 201', async () => {

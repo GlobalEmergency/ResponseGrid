@@ -451,6 +451,170 @@ describe('DrizzleResourceRepository (integration)', () => {
     expect(result).toBeNull();
   });
 
+  // ─── Task 4: findVisiblePaged + facets ─────────────────────────────────────
+
+  describe('findVisiblePaged', () => {
+    it('returns paged items with correct total', async () => {
+      const makeVisible = (name: string) => {
+        const base = Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name,
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+        });
+        return Resource.fromSnapshot({
+          ...base.toSnapshot(),
+          verificationLevel: VerificationLevel.Verified,
+          publicStatus: PublicStatus.Active,
+          createdAt: new Date(),
+        });
+      };
+
+      for (let i = 1; i <= 5; i++) {
+        await repo.save(makeVisible(`Visible ${i}`));
+      }
+      // one hidden (default)
+      await repo.save(Resource.register({
+        id: ResourceId.create(),
+        emergencyId: EmergencyId.fromString(EM),
+        type: ResourceType.CollectionPoint,
+        stage: ResourceStage.Origin,
+        name: 'Hidden One',
+        location: baseLocation,
+        ownerUserId: OWNER_ID,
+      }));
+
+      const { items, total } = await repo.findVisiblePaged(EmergencyId.fromString(EM), { page: 1, limit: 2 });
+      expect(items).toHaveLength(2);
+      expect(total).toBe(5);
+    });
+
+    it('filters by category (accepts @> ARRAY[category])', async () => {
+      const withWater = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'Water Resource',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+          accepts: ['water', 'food'],
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+      const withFood = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'Food Only',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+          accepts: ['food'],
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+
+      await repo.save(withWater);
+      await repo.save(withFood);
+
+      const { items, total } = await repo.findVisiblePaged(EmergencyId.fromString(EM), { page: 1, limit: 10, category: 'water' });
+      expect(items.every(r => r.accepts.includes('water'))).toBe(true);
+      expect(total).toBe(1);
+      expect(items[0].name).toBe('Water Resource');
+    });
+
+    it('filters by country', async () => {
+      const ve = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'VE Resource',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+          country: 'VE',
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+      const co = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'CO Resource',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+          country: 'CO',
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+
+      await repo.save(ve);
+      await repo.save(co);
+
+      const { items, total } = await repo.findVisiblePaged(EmergencyId.fromString(EM), { page: 1, limit: 10, country: 'VE' });
+      expect(total).toBe(1);
+      expect(items[0].name).toBe('VE Resource');
+    });
+  });
+
+  describe('facets', () => {
+    it('counts byCategory (unnesting accepts), byCountry, and total visible only', async () => {
+      const makeResource = (name: string, accepts: string[], country: string | null, visible: boolean) => {
+        const base = Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name,
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+          accepts,
+          country: country ?? undefined,
+        });
+        if (visible) {
+          return Resource.fromSnapshot({
+            ...base.toSnapshot(),
+            verificationLevel: VerificationLevel.Verified,
+            publicStatus: PublicStatus.Active,
+            createdAt: new Date(),
+          });
+        }
+        return base; // hidden by default
+      };
+
+      // 2 visible with 'water', 1 with 'food', 1 hidden (should not count)
+      await repo.save(makeResource('R1', ['water', 'food'], 'VE', true));
+      await repo.save(makeResource('R2', ['water'], 'CO', true));
+      await repo.save(makeResource('R3 hidden', ['water'], 'VE', false));
+
+      const { byCategory, byCountry, total } = await repo.facets(EmergencyId.fromString(EM));
+
+      expect(total).toBe(2);
+      expect(byCategory['water']).toBe(2); // R1 and R2
+      expect(byCategory['food']).toBe(1);  // R1 only
+      expect(byCategory['water']).not.toBe(3); // R3 excluded
+      expect(byCountry['VE']).toBe(1);  // R1
+      expect(byCountry['CO']).toBe(1);  // R2
+    });
+  });
+
   it('DB constraint rejects source_name without external_id (Fix wave 1)', async () => {
     const id = ResourceId.create().value;
     let threw = false;

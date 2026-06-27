@@ -181,7 +181,7 @@ describe('Resource status semaphore (e2e)', () => {
       .get(`/emergencies/${EM}/public/resources`)
       .expect(200);
     const found = (
-      publicList.body as Array<{ id: string; publicStatus: string }>
+      publicList.body.items as Array<{ id: string; publicStatus: string }>
     ).find((r) => r.id === id);
     expect(found).toBeDefined();
     expect(found?.publicStatus).toBe('saturated');
@@ -210,7 +210,7 @@ describe('Resource status semaphore (e2e)', () => {
       .get(`/emergencies/${EM}/public/resources`)
       .expect(200);
     const found = (
-      publicList.body as Array<{ id: string; publicStatus: string }>
+      publicList.body.items as Array<{ id: string; publicStatus: string }>
     ).find((r) => r.id === id);
     expect(found).toBeDefined();
     expect(found?.publicStatus).toBe('paused');
@@ -228,7 +228,7 @@ describe('Resource status semaphore (e2e)', () => {
     const publicList = await request(server)
       .get(`/emergencies/${EM}/public/resources`)
       .expect(200);
-    const found = (publicList.body as Array<{ id: string }>).find(
+    const found = (publicList.body.items as Array<{ id: string }>).find(
       (r) => r.id === id,
     );
     expect(found).toBeUndefined();
@@ -253,7 +253,7 @@ describe('Resource status semaphore (e2e)', () => {
       .get(`/emergencies/${EM}/public/resources`)
       .expect(200);
     const found = (
-      publicList.body as Array<{ id: string; publicStatus: string }>
+      publicList.body.items as Array<{ id: string; publicStatus: string }>
     ).find((r) => r.id === id);
     expect(found).toBeDefined();
     expect(found?.publicStatus).toBe('active');

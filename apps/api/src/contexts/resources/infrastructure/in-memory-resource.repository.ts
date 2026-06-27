@@ -96,4 +96,52 @@ export class InMemoryResourceRepository implements ResourceRepository {
     );
     return Promise.resolve(snap ? Resource.fromSnapshot(snap) : null);
   }
+
+  findVisiblePaged(
+    emergencyId: EmergencyId,
+    q: { page: number; limit: number; category?: string; country?: string },
+  ): Promise<{ items: Resource[]; total: number }> {
+    const visible = new Set<PublicStatus>([
+      PublicStatus.Active,
+      PublicStatus.Saturated,
+      PublicStatus.Paused,
+    ]);
+    let all = [...this.store.values()].filter(
+      (s) => s.emergencyId === emergencyId.value && visible.has(s.publicStatus),
+    );
+    if (q.category) {
+      all = all.filter((s) => s.accepts.includes(q.category!));
+    }
+    if (q.country) {
+      all = all.filter((s) => s.country === q.country);
+    }
+    const total = all.length;
+    const offset = (q.page - 1) * q.limit;
+    const items = all.slice(offset, offset + q.limit).map((s) => Resource.fromSnapshot(s));
+    return Promise.resolve({ items, total });
+  }
+
+  facets(
+    emergencyId: EmergencyId,
+  ): Promise<{ byCategory: Record<string, number>; byCountry: Record<string, number>; total: number }> {
+    const visible = new Set<PublicStatus>([
+      PublicStatus.Active,
+      PublicStatus.Saturated,
+      PublicStatus.Paused,
+    ]);
+    const all = [...this.store.values()].filter(
+      (s) => s.emergencyId === emergencyId.value && visible.has(s.publicStatus),
+    );
+    const byCategory: Record<string, number> = {};
+    const byCountry: Record<string, number> = {};
+    for (const s of all) {
+      for (const cat of s.accepts) {
+        byCategory[cat] = (byCategory[cat] ?? 0) + 1;
+      }
+      if (s.country) {
+        byCountry[s.country] = (byCountry[s.country] ?? 0) + 1;
+      }
+    }
+    return Promise.resolve({ byCategory, byCountry, total: all.length });
+  }
 }

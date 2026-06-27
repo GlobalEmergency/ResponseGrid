@@ -215,8 +215,25 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List published (active) resources for an emergency */
+        /** List published resources for an emergency (paginated + filterable) */
         get: operations["PublicController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/public/resources/facets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get facets (counts by category and country) for visible resources */
+        get: operations["PublicController_facets"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1312,6 +1329,39 @@ export interface components {
              * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
              */
             ownerOrganizationId?: string;
+            /**
+             * @description Contact info for this resource point
+             * @example +58 212 555 0000
+             */
+            contact?: string;
+            /**
+             * @description Operating schedule
+             * @example Lun-Vie 08-18
+             */
+            schedule?: string;
+            /**
+             * @description Responsible manager name
+             * @example Juan Pérez
+             */
+            manager?: string;
+            /**
+             * @description Category slugs this resource accepts
+             * @example [
+             *       "water",
+             *       "food"
+             *     ]
+             */
+            accepts?: string[];
+            /**
+             * @description ISO 3166-1 alpha-2 country code
+             * @example VE
+             */
+            country?: string;
+            /**
+             * @description City name
+             * @example Caracas
+             */
+            city?: string;
         };
         RegisterResourceResponseDto: {
             /**
@@ -1356,7 +1406,7 @@ export interface components {
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
-            description?: string | null;
+            description: string | null;
             location: components["schemas"]["LocationViewDto"];
             /**
              * @example verified
@@ -1369,7 +1419,58 @@ export interface components {
              */
             publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed";
             /** Format: uuid */
-            ownerOrganizationId?: string | null;
+            ownerOrganizationId: string | null;
+            /**
+             * @example [
+             *       "water",
+             *       "food"
+             *     ]
+             */
+            accepts: string[];
+            /** @example +58 212 555 0000 */
+            contact: string | null;
+            /** @example Lun-Vie 08-18 */
+            schedule: string | null;
+            /** @example Juan Pérez */
+            manager: string | null;
+            /** @example acopiove.org */
+            sourceName: string | null;
+            /**
+             * @description ISO 8601 date string
+             * @example 2026-06-27T00:00:00.000Z
+             */
+            externalUpdatedAt: string | null;
+            /** @example VE */
+            country: string | null;
+            /** @example Caracas */
+            city: string | null;
+        };
+        PagedResourcesDto: {
+            items: components["schemas"]["ResourceViewDto"][];
+            /** @example 123 */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 50 */
+            limit: number;
+        };
+        ResourceFacetsDto: {
+            /**
+             * @example {
+             *       "water": 5,
+             *       "food": 3
+             *     }
+             */
+            byCategory: Record<string, never>;
+            /**
+             * @example {
+             *       "VE": 3,
+             *       "CO": 2
+             *     }
+             */
+            byCountry: Record<string, never>;
+            /** @example 8 */
+            total: number;
         };
         CreateTemplateDto: {
             /** @example Terremoto básico */
@@ -2729,6 +2830,38 @@ export interface operations {
     };
     PublicController_list: {
         parameters: {
+            query?: {
+                /** @description Page number (1-based) */
+                page?: number;
+                /** @description Items per page (max 100) */
+                limit?: number;
+                /** @description Filter by category slug */
+                category?: string;
+                /** @description Filter by ISO 3166-1 alpha-2 country code */
+                country?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paged list of published resources */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PagedResourcesDto"];
+                };
+            };
+        };
+    };
+    PublicController_facets: {
+        parameters: {
             query?: never;
             header?: never;
             path: {
@@ -2739,13 +2872,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description List of published resources */
+            /** @description Facets for filtering visible resources */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ResourceViewDto"][];
+                    "application/json": components["schemas"]["ResourceFacetsDto"];
                 };
             };
         };

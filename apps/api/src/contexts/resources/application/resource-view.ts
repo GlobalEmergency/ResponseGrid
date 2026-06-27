@@ -11,6 +11,15 @@ export interface ResourceView {
   verificationLevel: string;
   publicStatus: string;
   ownerOrganizationId: string | null;
+  // enriched fields
+  accepts: string[];
+  contact: string | null;
+  schedule: string | null;
+  manager: string | null;
+  sourceName: string | null;
+  externalUpdatedAt: string | null; // ISO string
+  country: string | null;
+  city: string | null;
 }
 
 export function toResourceView(r: Resource): ResourceView {
@@ -24,5 +33,13 @@ export function toResourceView(r: Resource): ResourceView {
     verificationLevel: r.verificationLevel,
     publicStatus: r.publicStatus,
     ownerOrganizationId: r.ownerOrganizationId,
+    accepts: r.accepts,
+    contact: r.contact,
+    schedule: r.schedule,
+    manager: r.manager,
+    sourceName: r.provenance?.sourceName ?? null,
+    externalUpdatedAt: r.provenance?.externalUpdatedAt?.toISOString() ?? null,
+    country: r.country,
+    city: r.city,
   };
 }

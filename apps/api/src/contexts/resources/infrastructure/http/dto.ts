@@ -4,6 +4,7 @@ import {
   MinLength,
   IsOptional,
   IsNumber,
+  IsInt,
   Min,
   Max,
   ValidateNested,
@@ -127,4 +128,31 @@ export class UpdateResourcePublicStatusDto {
   })
   @IsEnum(['active', 'saturated', 'paused', 'closed'])
   status!: 'active' | 'saturated' | 'paused' | 'closed';
+}
+
+export class PublicResourcesQueryDto {
+  @ApiPropertyOptional({ description: 'Page number (1-based)', example: 1, default: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number;
+
+  @ApiPropertyOptional({ description: 'Items per page (max 100)', example: 50, default: 50 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
+  @ApiPropertyOptional({ description: 'Filter by category slug', example: 'water' })
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by ISO 3166-1 alpha-2 country code', example: 'VE' })
+  @IsOptional()
+  @IsString()
+  country?: string;
 }

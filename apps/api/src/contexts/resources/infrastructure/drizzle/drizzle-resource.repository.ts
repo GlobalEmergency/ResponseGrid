@@ -1,4 +1,4 @@
-import { and, count, eq, inArray } from 'drizzle-orm';
+import { and, count, eq, inArray, sql } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
 import { resourcesTable } from './schema';
 import { ResourceRepository } from '../../domain/ports/resource.repository';
@@ -187,6 +187,91 @@ export class DrizzleResourceRepository implements ResourceRepository {
       )
       .limit(1);
     return rows[0] ? Resource.fromSnapshot(rowToSnapshot(rows[0])) : null;
+  }
+
+  async findVisiblePaged(
+    emergencyId: EmergencyId,
+    q: { page: number; limit: number; category?: string; country?: string },
+  ): Promise<{ items: Resource[]; total: number }> {
+    const VISIBLE = [PublicStatus.Active, PublicStatus.Saturated, PublicStatus.Paused];
+    const offset = (q.page - 1) * q.limit;
+
+    const conditions = [
+      eq(resourcesTable.emergencyId, emergencyId.value),
+      inArray(resourcesTable.publicStatus, VISIBLE),
+    ];
+
+    if (q.category) {
+      conditions.push(sql`${resourcesTable.accepts} @> ARRAY[${q.category}]::text[]`);
+    }
+    if (q.country) {
+      conditions.push(eq(resourcesTable.country, q.country));
+    }
+
+    const whereClause = and(...conditions);
+
+    const [rows, countRows] = await Promise.all([
+      this.db
+        .select()
+        .from(resourcesTable)
+        .where(whereClause)
+        .limit(q.limit)
+        .offset(offset),
+      this.db
+        .select({ cnt: count() })
+        .from(resourcesTable)
+        .where(whereClause),
+    ]);
+
+    return {
+      items: rows.map((r) => Resource.fromSnapshot(rowToSnapshot(r))),
+      total: Number(countRows[0]?.cnt ?? 0),
+    };
+  }
+
+  async facets(
+    emergencyId: EmergencyId,
+  ): Promise<{ byCategory: Record<string, number>; byCountry: Record<string, number>; total: number }> {
+    const VISIBLE = [PublicStatus.Active, PublicStatus.Saturated, PublicStatus.Paused];
+    const visibleWhere = and(
+      eq(resourcesTable.emergencyId, emergencyId.value),
+      inArray(resourcesTable.publicStatus, VISIBLE),
+    );
+
+    const [totalRows, categoryRows, countryRows] = await Promise.all([
+      this.db.select({ cnt: count() }).from(resourcesTable).where(visibleWhere),
+      this.db.execute<{ cat: string; cnt: string }>(sql`
+        SELECT unnest(accepts) AS cat, count(*)::int AS cnt
+        FROM resources
+        WHERE emergency_id = ${emergencyId.value}
+          AND public_status IN ('active', 'saturated', 'paused')
+        GROUP BY cat
+      `),
+      this.db.execute<{ country: string; cnt: string }>(sql`
+        SELECT country, count(*)::int AS cnt
+        FROM resources
+        WHERE emergency_id = ${emergencyId.value}
+          AND public_status IN ('active', 'saturated', 'paused')
+          AND country IS NOT NULL
+        GROUP BY country
+      `),
+    ]);
+
+    const byCategory: Record<string, number> = {};
+    for (const row of categoryRows.rows) {
+      byCategory[row.cat] = Number(row.cnt);
+    }
+
+    const byCountry: Record<string, number> = {};
+    for (const row of countryRows.rows) {
+      if (row.country) byCountry[row.country] = Number(row.cnt);
+    }
+
+    return {
+      byCategory,
+      byCountry,
+      total: Number(totalRows[0]?.cnt ?? 0),
+    };
   }
 
   async countByEmergencyGroupedByPublicStatus(

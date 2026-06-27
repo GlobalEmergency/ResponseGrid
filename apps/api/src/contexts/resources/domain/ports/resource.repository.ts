@@ -23,4 +23,13 @@ export interface ResourceRepository {
   findVisibleByEmergency(emergencyId: EmergencyId): Promise<Resource[]>;
   /** Lookup by external provenance key (sourceName + externalId). Returns null if not found. */
   findByExternal(sourceName: string, externalId: string): Promise<Resource | null>;
+  /** Paginated list of visible resources, optionally filtered by category/country. */
+  findVisiblePaged(
+    emergencyId: EmergencyId,
+    q: { page: number; limit: number; category?: string; country?: string },
+  ): Promise<{ items: Resource[]; total: number }>;
+  /** Aggregated facets (byCategory, byCountry) for visible resources of an emergency. */
+  facets(
+    emergencyId: EmergencyId,
+  ): Promise<{ byCategory: Record<string, number>; byCountry: Record<string, number>; total: number }>;
 }
