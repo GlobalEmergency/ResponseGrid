@@ -101,12 +101,19 @@ describe('acopioveMapper', () => {
     expect(result!.description).toContain('Ayuntamiento');
   });
 
-  it('returns null when latitude is not numeric', () => {
+  it('accepts string coordinates (API may return "34.0456000" as string)', () => {
+    const result = acopioveMapper(makeRecord({ latitude: '39.4699', longitude: '-0.3763' }));
+    expect(result).not.toBeNull();
+    expect(result!.latitude).toBeCloseTo(39.4699);
+    expect(result!.longitude).toBeCloseTo(-0.3763);
+  });
+
+  it('returns null when latitude is not parseable as a number', () => {
     const result = acopioveMapper(makeRecord({ latitude: 'no-es-numero' }));
     expect(result).toBeNull();
   });
 
-  it('returns null when longitude is not numeric', () => {
+  it('returns null when longitude is not parseable as a number', () => {
     const result = acopioveMapper(makeRecord({ longitude: NaN }));
     expect(result).toBeNull();
   });

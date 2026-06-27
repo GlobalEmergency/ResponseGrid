@@ -69,8 +69,13 @@ function isValidUuid(v: unknown): v is string {
   return typeof v === 'string' && UUID_RE.test(v);
 }
 
-function isFiniteNumber(v: unknown): v is number {
-  return typeof v === 'number' && isFinite(v);
+function toFiniteNumber(v: unknown): number | null {
+  if (typeof v === 'number') return isFinite(v) ? v : null;
+  if (typeof v === 'string') {
+    const parsed = parseFloat(v);
+    return isFinite(parsed) ? parsed : null;
+  }
+  return null;
 }
 
 function toStringOrNull(v: unknown): string | null {
@@ -95,9 +100,11 @@ export const acopioveMapper: ResourceMapper = (raw: unknown): MappedResourceInpu
   // Guard: id must be a valid UUID
   if (!isValidUuid(r.id)) return null;
 
-  // Guard: coordinates must be finite numbers
-  if (!isFiniteNumber(r.latitude)) return null;
-  if (!isFiniteNumber(r.longitude)) return null;
+  // Guard: coordinates must be parseable to finite numbers (API may return strings)
+  const latitude = toFiniteNumber(r.latitude);
+  const longitude = toFiniteNumber(r.longitude);
+  if (latitude === null) return null;
+  if (longitude === null) return null;
 
   // Guard: tipo must map to a known type
   const typeMapping = mapTipo(r.tipo);
@@ -124,8 +131,8 @@ export const acopioveMapper: ResourceMapper = (raw: unknown): MappedResourceInpu
     name,
     description,
     address,
-    latitude: r.latitude,
-    longitude: r.longitude,
+    latitude,
+    longitude,
     contact: toStringOrNull(r.contacto),
     schedule: toStringOrNull(r.horario),
     manager: toStringOrNull(r.responsable),
