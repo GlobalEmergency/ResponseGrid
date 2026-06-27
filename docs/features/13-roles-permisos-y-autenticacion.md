@@ -13,6 +13,8 @@
 | D1 | **Delegación entre usuarios** | **Completa con atenuación** desde día 1 | `role:grant` recursivo + atenuación de privilegios. Orgs y managers se autogestionan sin equipo central (§5). |
 | D2 | **Roles custom por organización** | **Catálogo fijo primero** | Roles predefinidos en código (§4); roles custom por org = **fase 2** (§4.4). La atenuación funciona igual con catálogo fijo. |
 | D3 | **Enforcement / token** | **Mantener el JWT actual** (grants embebidos, 12 h) | El `can()` se resuelve **en memoria** contra los grants del token, igual que hoy con `memberships`. Se documenta el riesgo de revocación diferida y su mitigación ligera (§9), y el camino futuro a PDP server-side. Nota: D3 aplica al **plano interno**; el **plano API pública** (#2) tiene credenciales propias (API key/OAuth2) desde el inicio, resolviendo por el mismo `can()` (§8). |
+| D4 | **Apuestas North Star** | **Las 4 comprometidas**: IA en el loop · federación de orgs · break-glass · multi-instancia/soberanía | Se **diseña-para-ellas** desde ya (5 invariantes §18.1); se construyen después. |
+| D5 | **Topología de despliegue** | **Una instancia global, federable después** | MVP single-instance; multi-instancia/jurisdicción = extensión sin reescritura si se respetan las invariantes (§18.3-f). |
 
 > **D1/D2/D3 son el incremento MVP de una visión mayor.** El North Star (infraestructura crítica federada, multi-jurisdicción, con IA en el loop) y la prueba de que estas decisiones no lo hipotecan están en **§18**. La regla: respetar las **5 invariantes de diseño** (§18.1) hace que "pensar en grande" no cueste nada hoy.
 
@@ -544,17 +546,17 @@ El grueso del riesgo está en el paso 3 (tocar muchos controllers): se mitiga co
 2. ✅ **Catálogo fijo de roles** primero; custom = fase 2 (D2).
 3. ✅ **Mantener JWT actual** con grants embebidos; riesgo de revocación mitigado con expiry corto + refresh + denylist (D3).
 
-### Abiertas (para PM / equipo)
-1. **Granularidad del catálogo de permisos:** ¿~45 permisos como en §4.1, o empezar más grueso (por contexto) y refinar? Recomendación: el de §4.1, ya es legible.
-2. **Grupos: ¿por emergencia, por org, o ambos?** El brief sugiere ambos (cuadrillas de emergencia + equipos permanentes de org). Confirmar antes del paso 5.
-3. **`emergency_verifier`: ¿scope global o por emergencia?** El spec admite ambos ("global o por emergencia"). Se modela igual; decisión de producto sobre el default.
-4. **Derivación acreditación → grants (§4.3): ¿automática o requiere acción de coordinador?** Recomendación: explícita (un coordinador la confirma), por trazabilidad.
-5. **Step-up auth para break-glass (pausar todo, override admin): ¿en este corte o futuro?**
-6. **¿Mantener `Verifier` como rol o fusionarlo en permisos de `coordinator`?** Con el modelo nuevo, "verifier" es un bundle más pequeño de permisos de validación; conviene mantenerlo separado para el caso "valida pero no coordina".
-7. **¿Qué permisos se exportan como scopes OAuth2 públicos (#21)?** Recomendación Fase 1: solo `*:read` del subconjunto ya público. Definir el subconjunto _exportable_ del catálogo (§8.2) antes de #16.
-8. **API key: ¿solo `ServiceAccount`, o también _personal access tokens_ que cuelgan de un `User` (#17)?** Recomendación: empezar por `ServiceAccount` (server-to-server, Fase 1); los PAT de usuario, después.
-9. **Coordinación con #16/#17:** este documento debería referenciarse desde el diseño de `/api/public/v1` para que API keys (#17) y scopes (#21) reutilicen el catálogo, no inventen uno paralelo.
-10. **¿Cuándo promover un "hub logístico" de _recurso_ (entity) a _scope_ de primera clase?** Recomendación: mientras un hub sirva a una sola emergencia, basta `entity`/`group`; cuando un mismo nodo (puerto, terminal aérea, almacén central) opere **varias emergencias a la vez**, promoverlo a `scope: 'hub'` (§16). Decisión activable sin migración del modelo.
+### Decididas en esta ronda (cierre técnico)
+1. ✅ **Catálogo de permisos:** el de §4.1 (~45). Legible y estable.
+2. ✅ **Grupos: ambos** — un `Group` cuelga de `emergencyId` (cuadrilla) **o** de `organizationId` (equipo permanente). Coherente con la federación de orgs (D4).
+3. ✅ **`emergency_verifier`:** se permiten **ambos scopes**; **default por-emergencia**, global solo para entidades acreditadas globalmente (§11).
+4. ✅ **Derivación acreditación → grants:** **explícita** (un coordinador la confirma), por trazabilidad y anti-fraude.
+5. ✅ **Break-glass:** **comprometido como North Star** (D4); se diseña como grant time-boxed/auditado (§18.3-d). El **step-up auth** entra en su construcción, no en el día 1 del MVP.
+6. ✅ **`Verifier`:** se **mantiene separado** de `coordinator` (caso "valida pero no coordina").
+7. ✅ **Scopes OAuth2 públicos:** Fase 1 = solo `*:read` del subconjunto ya público; el conjunto _exportable_ excluye toda clase `personal`/`special` (§17.8).
+8. ✅ **API key:** primero **`ServiceAccount`** (server-to-server, Fase 1); PAT de usuario después.
+9. ✅ **Coordinación con #16/#17:** sí — `/api/public/v1` reutiliza este catálogo; no se crea uno paralelo.
+10. ✅ **Hub como scope:** `entity`/`group` mientras sirva una emergencia; promover a `scope:'hub'` cuando opere varias (sin migración del modelo).
 
 ---
 
@@ -768,18 +770,20 @@ La capa 4, donde el spec marca *bloqueante legal* (§11):
 
 **Conclusión:** el eje de privacidad **no** se resuelve con permisos solos, y el modelo no lo pretende: aporta las cuatro capas y, lo importante, las **deriva de una sola fuente** (el grant/scope) para que RLS y enmascarado no se conviertan en un segundo sistema de autorización. El único trabajo no-cubierto-por-arquitectura es **clasificar los campos por sensibilidad** (mecánico) y **cerrar la base legal/retención** (decisión legal del spec §11).
 
-**Decisiones abiertas (privacidad):**
-1. **Base legal por categoría de dato** (spec §11, bloqueante legal): consentimiento vs. interés legítimo vs. interés vital (catástrofe) por cada clase.
-2. **Ventanas de retención y purga** por tipo de dato y al cerrar emergencia.
-3. **Cifrado en reposo / esquema propio** para categoría especial (desaparecidos, sanitario): ¿se activa la puerta de escape del spec §7.5 desde el inicio para estos verticales?
-4. **Propósito formal (ABAC `purpose`):** ¿MVP o fase 2? Recomendación: MVP = consentimiento + auditoría de acceso; propósito formal después.
-5. **`need:read_precise_location` / clases de sensibilidad:** ¿4 clases (`public/operational/personal/special`) o empezar con 2 (público/sensible) como hoy en `0015`? Recomendación: 2 ahora, 4 cuando entren manifiestos y sanitario.
+**Decisiones de privacidad — cierre de esta ronda:**
+1. ⚖️ **Base legal por categoría de dato** — *requiere validación legal* (spec §11, bloqueante). **Propuesta por defecto a validar con asesoría:** _interés vital_ (categoría especial en catástrofe: desaparecidos, sanitario) · _interés legítimo_ (coordinación operativa) · _consentimiento_ (voluntarios, datos de contacto). No se cierra sin jurista.
+2. ⚖️ **Ventanas de retención y purga** — *requiere validación legal*. **Propuesta por defecto:** purga al cerrar la emergencia + ventana corta de gracia (p. ej. 30 d) para export/informe; categoría especial con el mínimo posible. A confirmar por jurisdicción.
+3. ✅ **Cifrado en reposo / esquema propio para categoría especial:** **sí** para desaparecidos y sanitario — se activa la puerta de escape del spec §7.5 para esos verticales desde su entrada.
+4. ✅ **Propósito formal (ABAC `purpose`):** **fase 2.** MVP = consentimiento + auditoría de acceso.
+5. ✅ **Clases de sensibilidad:** **2 ahora** (público/sensible, como `0015`); **4** (`public/operational/personal/special`) cuando entren manifiestos y sanitario.
 
 ---
 
 ## 18. Visión a gran escala (North Star) — qué diseñar AHORA vs construir después
 
 > Pensar en grande no es meter features en el MVP: es elegir las **invariantes** que hacen que el futuro grande sea una **extensión**, no una **reescritura**. ResponseGrid aspira a ser **infraestructura crítica** de respuesta a catástrofes: multi-país, multi-jurisdicción, multi-organización, con ecosistema de API, integraciones gubernamentales y logística internacional. Esta sección fija el destino y prueba que el núcleo (§1–§17) lo aguanta.
+
+> **Decisión (D4/D5):** las **cuatro** apuestas de §18.3 —IA en el loop (a/c), federación de orgs (b), break-glass (d), multi-instancia/soberanía (e/f)— quedan **comprometidas como North Star**: se diseña-para-ellas desde ya, se construyen después. Topología objetivo: **una instancia global, federable después** (multi-instancia es extensión, no reescritura, si se respetan las 5 invariantes).
 
 ### 18.1 Las 5 invariantes de diseño (si se respetan, nada de lo de abajo exige rehacer el núcleo)
 
