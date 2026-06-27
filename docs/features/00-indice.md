@@ -39,6 +39,7 @@
 | [10](10-cola-offline-real.md) | **Cola offline real (IndexedDB + sync)** | Enviar formularios sin conexión y sincronizar al volver la señal (completa la PWA) | 🟡 Media |
 | [11](11-directorio-servicios-gratis.md) | **Directorio de servicios gratis** | Jornadas/exámenes/servicios gratuitos validados, filtrables por ciudad/cercanía | 🟢 Baja |
 | [12](12-cta-emergencia-nacional.md) | **CTA de emergencia nacional** | Número de emergencia por país/emergencia siempre visible (banner + llamar) | 🟢 Baja |
+| [13](13-roles-permisos-y-autenticacion.md) | **Roles, permisos y autenticación** | Rediseño fundacional de autorización: principal/permiso/rol/grant + jerarquía de scopes, delegación con atenuación, grupos/managers, API keys | 🔴 Alta |
 
 ---
 
