@@ -19,6 +19,8 @@ export const tasksTable = pgTable('tasks', {
   createdByUserId: uuid('created_by_user_id').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+  /** F05: link back to the Need that originated this task (no FK for test isolation) */
+  linkedNeedId: uuid('linked_need_id'),
 });
 
 export const taskAssignmentsTable = pgTable('task_assignments', {

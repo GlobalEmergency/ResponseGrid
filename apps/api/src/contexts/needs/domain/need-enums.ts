@@ -1,5 +1,20 @@
 export { Priority } from '../../../shared/domain/priority';
 
+/**
+ * PersonnelSkill mirrors VolunteerSkill values WITHOUT importing from the
+ * volunteers context, keeping hexagonal boundaries intact.
+ * Values must stay in sync with volunteers/domain/volunteer-enums.ts.
+ */
+export enum PersonnelSkill {
+  Driving = 'driving',
+  Medical = 'medical',
+  Logistics = 'logistics',
+  Cooking = 'cooking',
+  Languages = 'languages',
+  Admin = 'admin',
+  General = 'general',
+}
+
 export enum NeedCategory {
   Hygiene = 'hygiene',
   Water = 'water',

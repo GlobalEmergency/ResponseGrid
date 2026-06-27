@@ -4,7 +4,7 @@ import { NeedEmergencyStatusReader } from '../domain/ports/emergency-status-read
 import { Need } from '../domain/need';
 import { NeedId } from '../domain/need-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { Priority, NeedCategory } from '../domain/need-enums';
+import { Priority, NeedCategory, PersonnelSkill } from '../domain/need-enums';
 import { Location } from '../../../shared/domain/location';
 import { NeedItem } from '../domain/need-item';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
@@ -34,6 +34,10 @@ export interface CreateNeedCommand {
   location: CreateNeedLocationCommand;
   priority: Priority;
   items: CreateNeedItemCommand[];
+  /** F05: optional personnel-need fields */
+  requiredSkill?: PersonnelSkill | null;
+  skillSpecialty?: string | null;
+  requestedCount?: number | null;
 }
 
 export class CreateNeed {
@@ -86,6 +90,9 @@ export class CreateNeed {
       requesterOrganizationId: cmd.requesterOrganizationId,
       locationSensitivity,
       items,
+      requiredSkill: cmd.requiredSkill ?? null,
+      skillSpecialty: cmd.skillSpecialty ?? null,
+      requestedCount: cmd.requestedCount ?? null,
     });
 
     await this.repo.save(need);

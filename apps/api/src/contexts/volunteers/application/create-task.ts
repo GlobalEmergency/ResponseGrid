@@ -12,6 +12,8 @@ export interface CreateTaskCommand {
   location?: { address: string; latitude: number; longitude: number } | null;
   requiredSkill?: VolunteerSkill | null;
   createdByUserId: string;
+  /** F05: optional link back to the need that originated this task */
+  linkedNeedId?: string | null;
 }
 
 export class CreateTask {
@@ -35,6 +37,7 @@ export class CreateTask {
       location,
       requiredSkill: cmd.requiredSkill ?? null,
       createdByUserId: cmd.createdByUserId,
+      linkedNeedId: cmd.linkedNeedId ?? null,
     });
 
     await this.repo.save(task);

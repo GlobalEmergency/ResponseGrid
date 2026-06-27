@@ -1,6 +1,6 @@
 import { NeedId } from './need-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { Priority, NeedStatus } from './need-enums';
+import { Priority, NeedStatus, PersonnelSkill } from './need-enums';
 import { NeedNotPendingError } from './need-errors';
 import { DomainEvent } from './events/domain-event';
 import { NeedCreated } from './events/need-created.event';
@@ -32,6 +32,10 @@ export interface CreateNeedProps {
   /** Default: 'public'. Use CreateNeed use case to get the correct auto-derived value. */
   locationSensitivity?: LocationSensitivity;
   items: NeedItem[];
+  /** F05: optional personnel-need fields */
+  requiredSkill?: PersonnelSkill | null;
+  skillSpecialty?: string | null;
+  requestedCount?: number | null;
 }
 
 export interface NeedSnapshot {
@@ -51,6 +55,10 @@ export interface NeedSnapshot {
   createdAt: Date;
   expiresAt: Date | null;
   lastVerifiedAt: Date | null;
+  /** F05: optional personnel-need fields */
+  requiredSkill?: PersonnelSkill | null;
+  skillSpecialty?: string | null;
+  requestedCount?: number | null;
 }
 
 export class Need {
@@ -72,11 +80,23 @@ export class Need {
     public readonly createdAt: Date,
     private _expiresAt: Date | null,
     private _lastVerifiedAt: Date | null,
+    /** F05: optional personnel-need fields */
+    public readonly requiredSkill: PersonnelSkill | null,
+    public readonly skillSpecialty: string | null,
+    public readonly requestedCount: number | null,
   ) {}
 
   static create(props: CreateNeedProps): Need {
     if (!props.items || props.items.length === 0) {
       throw new NeedItemsRequiredError();
+    }
+    // Validate requestedCount coherence (if supplied, must be >= 1)
+    if (
+      props.requestedCount !== undefined &&
+      props.requestedCount !== null &&
+      props.requestedCount < 1
+    ) {
+      throw new Error('requestedCount must be >= 1 when provided');
     }
     const need = new Need(
       props.id,
@@ -94,6 +114,9 @@ export class Need {
       new Date(),
       null,
       null,
+      props.requiredSkill ?? null,
+      props.skillSpecialty ?? null,
+      props.requestedCount ?? null,
     );
     need.events.push(
       new NeedCreated(need.id.value, {
@@ -122,6 +145,9 @@ export class Need {
       s.createdAt,
       s.expiresAt ?? null,
       s.lastVerifiedAt ?? null,
+      (s.requiredSkill as PersonnelSkill) ?? null,
+      s.skillSpecialty ?? null,
+      s.requestedCount ?? null,
     );
   }
 
@@ -214,6 +240,9 @@ export class Need {
       createdAt: this.createdAt,
       expiresAt: this._expiresAt,
       lastVerifiedAt: this._lastVerifiedAt,
+      requiredSkill: this.requiredSkill,
+      skillSpecialty: this.skillSpecialty,
+      requestedCount: this.requestedCount,
     };
   }
 

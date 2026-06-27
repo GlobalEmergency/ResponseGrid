@@ -3,6 +3,7 @@ import { LocationProps } from '../../../shared/domain/location';
 import { NeedItemSnapshot } from '../domain/need-item';
 import { LocationSensitivity } from '../../../shared/domain/location-sensitivity';
 import { approximateLocation } from '../../../shared/domain/approximate-location';
+import { PersonnelSkill } from '../domain/need-enums';
 
 export interface NeedView {
   id: string;
@@ -19,6 +20,14 @@ export interface NeedView {
   createdAt: string;
   expiresAt: string | null;
   lastVerifiedAt: string | null;
+  /** F05: personnel-need fields — skillSpecialty omitted from public view */
+  requiredSkill: PersonnelSkill | null;
+  requestedCount: number | null;
+}
+
+/** F05: Coordinator view includes the sensitive skillSpecialty field */
+export interface CoordinatorNeedView extends NeedView {
+  skillSpecialty: string | null;
 }
 
 /**
@@ -65,6 +74,9 @@ export function toPublicNeedView(n: Need): NeedView {
     createdAt: n.createdAt.toISOString(),
     expiresAt: n.expiresAt ? n.expiresAt.toISOString() : null,
     lastVerifiedAt: n.lastVerifiedAt ? n.lastVerifiedAt.toISOString() : null,
+    // skillSpecialty deliberately excluded from public view (sensitive)
+    requiredSkill: n.requiredSkill,
+    requestedCount: n.requestedCount,
   };
 }
 
@@ -74,7 +86,7 @@ export function toPublicNeedView(n: Need): NeedView {
  * Coordinators always receive exact coordinates regardless of sensitivity
  * level — they need the real address to dispatch volunteers.
  */
-export function toCoordinatorNeedView(n: Need): NeedView {
+export function toCoordinatorNeedView(n: Need): CoordinatorNeedView {
   return {
     id: n.id.value,
     emergencyId: n.emergencyId.value,
@@ -90,6 +102,9 @@ export function toCoordinatorNeedView(n: Need): NeedView {
     createdAt: n.createdAt.toISOString(),
     expiresAt: n.expiresAt ? n.expiresAt.toISOString() : null,
     lastVerifiedAt: n.lastVerifiedAt ? n.lastVerifiedAt.toISOString() : null,
+    requiredSkill: n.requiredSkill,
+    skillSpecialty: n.skillSpecialty,
+    requestedCount: n.requestedCount,
   };
 }
 
@@ -99,6 +114,6 @@ export function toCoordinatorNeedView(n: Need): NeedView {
  * updated to differentiate between public and coordinator views.
  * Defaults to coordinator view (exact coordinates).
  */
-export function toNeedView(n: Need): NeedView {
+export function toNeedView(n: Need): CoordinatorNeedView {
   return toCoordinatorNeedView(n);
 }

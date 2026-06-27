@@ -1,5 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Priority, NeedCategory, NeedStatus } from '../../domain/need-enums';
+import {
+  Priority,
+  NeedCategory,
+  NeedStatus,
+  PersonnelSkill,
+} from '../../domain/need-enums';
 import { LocationSensitivity } from '../../../../shared/domain/location-sensitivity';
 
 export class CreateNeedResponseDto {
@@ -104,4 +109,108 @@ export class NeedViewDto {
     description: 'Timestamp when the need was last verified by a coordinator.',
   })
   lastVerifiedAt!: string | null;
+
+  /**
+   * F05: personnel-need fields.
+   * skillSpecialty is EXCLUDED from this (public) DTO — it is sensitive.
+   */
+  @ApiPropertyOptional({
+    enum: PersonnelSkill,
+    nullable: true,
+    type: String,
+    description: 'Required volunteer skill (personnel needs only)',
+  })
+  requiredSkill!: PersonnelSkill | null;
+
+  @ApiPropertyOptional({
+    example: 3,
+    nullable: true,
+    type: Number,
+    description: 'Number of personnel needed',
+  })
+  requestedCount!: number | null;
+}
+
+/** Extended DTO for coordinator views — includes the sensitive skillSpecialty field. */
+export class CoordinatorNeedViewDto extends NeedViewDto {
+  @ApiPropertyOptional({
+    example: 'Médico urgencias pediátricas',
+    nullable: true,
+    type: String,
+    description: 'Free-text specialty detail (coordinator-only)',
+  })
+  skillSpecialty!: string | null;
+}
+
+export class VolunteerSuggestionDto {
+  @ApiProperty({ format: 'uuid', description: 'Volunteer record ID' })
+  volunteerId!: string;
+
+  @ApiProperty({ format: 'uuid', description: 'User account ID' })
+  userId!: string;
+
+  @ApiProperty({ example: 'Ana García' })
+  name!: string;
+
+  @ApiProperty({ type: [String], description: 'All volunteer skills' })
+  skills!: string[];
+
+  @ApiProperty({ description: 'Whether the volunteer has any vehicle' })
+  hasVehicle!: boolean;
+
+  @ApiProperty({ description: 'Volunteer availability level' })
+  availability!: string;
+}
+
+export class CreatedTaskFromNeedDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  emergencyId!: string;
+
+  @ApiProperty()
+  title!: string;
+
+  @ApiProperty()
+  description!: string;
+
+  @ApiPropertyOptional({ nullable: true, type: String, enum: PersonnelSkill })
+  requiredSkill!: string | null;
+
+  @ApiPropertyOptional({ nullable: true, type: String, format: 'uuid' })
+  linkedNeedId!: string | null;
+
+  @ApiProperty()
+  status!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  createdByUserId!: string;
+
+  @ApiProperty()
+  createdAt!: Date;
+
+  @ApiProperty()
+  updatedAt!: Date;
+
+  @ApiProperty({
+    type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        volunteerId: { type: 'string', format: 'uuid' },
+        assignedAt: { type: 'string', format: 'date-time' },
+        checkedInAt: { type: 'string', format: 'date-time', nullable: true },
+        checkedOutAt: { type: 'string', format: 'date-time', nullable: true },
+        status: { type: 'string' },
+      },
+    },
+  })
+  assignments!: Array<{
+    volunteerId: string;
+    assignedAt: Date;
+    checkedInAt: Date | null;
+    checkedOutAt: Date | null;
+    status: string;
+  }>;
 }

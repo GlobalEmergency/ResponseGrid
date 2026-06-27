@@ -55,6 +55,8 @@ export interface TaskSnapshot {
   createdAt: Date;
   updatedAt: Date;
   assignments: TaskAssignmentSnapshot[];
+  /** F05: link back to the need that originated this task (optional) */
+  linkedNeedId?: string | null;
 }
 
 export interface CreateTaskProps {
@@ -65,6 +67,8 @@ export interface CreateTaskProps {
   location: Location | null;
   requiredSkill: VolunteerSkill | null;
   createdByUserId: string;
+  /** F05: link back to originating need */
+  linkedNeedId?: string | null;
 }
 
 /** Child entity within the Task aggregate. */
@@ -165,6 +169,8 @@ export class Task {
     public readonly createdAt: Date,
     updatedAt: Date,
     assignments: TaskAssignment[],
+    /** F05: link back to the need that originated this task */
+    public readonly linkedNeedId: string | null,
   ) {
     this._status = status;
     this._updatedAt = updatedAt;
@@ -197,6 +203,7 @@ export class Task {
       now,
       now,
       [],
+      props.linkedNeedId ?? null,
     );
   }
 
@@ -223,6 +230,7 @@ export class Task {
       s.createdAt,
       s.updatedAt,
       s.assignments.map((a) => TaskAssignment.fromSnapshot(a)),
+      s.linkedNeedId ?? null,
     );
   }
 
@@ -315,6 +323,7 @@ export class Task {
       createdAt: this.createdAt,
       updatedAt: this._updatedAt,
       assignments: this._assignments.map((a) => a.toSnapshot()),
+      linkedNeedId: this.linkedNeedId,
     };
   }
 }

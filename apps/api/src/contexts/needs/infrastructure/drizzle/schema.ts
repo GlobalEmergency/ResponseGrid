@@ -24,6 +24,10 @@ export const needsTable = pgTable('needs', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
   expiresAt: timestamp('expires_at', { withTimezone: true }),
   lastVerifiedAt: timestamp('last_verified_at', { withTimezone: true }),
+  /** F05: optional personnel-need fields */
+  requiredSkill: text('required_skill'),
+  skillSpecialty: text('skill_specialty'),
+  requestedCount: integer('requested_count'),
 });
 
 export const needItemsTable = pgTable('need_items', {

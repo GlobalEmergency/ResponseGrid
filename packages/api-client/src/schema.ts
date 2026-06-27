@@ -482,6 +482,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/needs/{needId}/volunteer-suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Suggest available volunteers for a personnel need (coordinator only) */
+        get: operations["NeedsController_getVolunteerSuggestions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/needs/{needId}/create-task": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a task from a personnel need (coordinator only)
+         * @description Creates one Task linked to the need and optionally assigns volunteers. Reuses existing CreateTask / AssignVolunteerToTask logic.
+         */
+        post: operations["NeedsController_createTask"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/organizations": {
         parameters: {
             query?: never;
@@ -1494,6 +1531,22 @@ export interface components {
             requesterOrganizationId?: string;
             /** @description List of items needed (minimum 1) */
             items: components["schemas"]["NeedItemDto"][];
+            /**
+             * @description Required volunteer skill for personnel needs
+             * @example medical
+             * @enum {string|null}
+             */
+            requiredSkill?: "driving" | "medical" | "logistics" | "cooking" | "languages" | "admin" | "general" | null;
+            /**
+             * @description Free-text specialty detail (coordinator-only, not exposed publicly)
+             * @example Médico urgencias pediátricas
+             */
+            skillSpecialty?: string | null;
+            /**
+             * @description How many personnel are needed (>= 1)
+             * @example 3
+             */
+            requestedCount?: number | null;
         };
         CreateNeedResponseDto: {
             /**
@@ -1572,6 +1625,16 @@ export interface components {
              * @example 2024-01-01T12:00:00.000Z
              */
             lastVerifiedAt?: string | null;
+            /**
+             * @description Required volunteer skill (personnel needs only)
+             * @enum {string|null}
+             */
+            requiredSkill?: "driving" | "medical" | "logistics" | "cooking" | "languages" | "admin" | "general" | null;
+            /**
+             * @description Number of personnel needed
+             * @example 3
+             */
+            requestedCount?: number | null;
         };
         AssignNeedManagerDto: {
             /**
@@ -1580,6 +1643,65 @@ export interface components {
              * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
              */
             organizationId: string;
+        };
+        VolunteerSuggestionDto: {
+            /**
+             * Format: uuid
+             * @description Volunteer record ID
+             */
+            volunteerId: string;
+            /**
+             * Format: uuid
+             * @description User account ID
+             */
+            userId: string;
+            /** @example Ana García */
+            name: string;
+            /** @description All volunteer skills */
+            skills: string[];
+            /** @description Whether the volunteer has any vehicle */
+            hasVehicle: boolean;
+            /** @description Volunteer availability level */
+            availability: string;
+        };
+        CreateTaskFromNeedDto: {
+            /** @description IDs of volunteers to assign to the task (optional) */
+            volunteerIds?: string[];
+            /**
+             * @description ISO date string for task due date (optional, informational)
+             * @example 2025-12-31
+             */
+            dueDate?: string | null;
+        };
+        CreatedTaskFromNeedDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            emergencyId: string;
+            title: string;
+            description: string;
+            /** @enum {string|null} */
+            requiredSkill?: "driving" | "medical" | "logistics" | "cooking" | "languages" | "admin" | "general" | null;
+            /** Format: uuid */
+            linkedNeedId?: string | null;
+            status: string;
+            /** Format: uuid */
+            createdByUserId: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            assignments: {
+                /** Format: uuid */
+                volunteerId?: string;
+                /** Format: date-time */
+                assignedAt?: string;
+                /** Format: date-time */
+                checkedInAt?: string | null;
+                /** Format: date-time */
+                checkedOutAt?: string | null;
+                status?: string;
+            }[];
         };
         CreateOrganizationDto: {
             /** @example Red Cross Spain */
@@ -3340,6 +3462,108 @@ export interface operations {
             };
             /** @description Coordinator role required */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    NeedsController_getVolunteerSuggestions: {
+        parameters: {
+            query?: {
+                /** @description Maximum number of suggestions (default 20) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Need UUID */
+                needId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of suggested volunteers */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VolunteerSuggestionDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Need not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    NeedsController_createTask: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Need UUID */
+                needId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTaskFromNeedDto"];
+            };
+        };
+        responses: {
+            /** @description Task created and volunteers assigned */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatedTaskFromNeedDto"];
+                };
+            };
+            /** @description Invalid body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Need not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

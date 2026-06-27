@@ -30,10 +30,21 @@ import { GetPublicNeeds } from '../../application/get-public-needs';
 import { GetNeedsQueue } from '../../application/get-needs-queue';
 import { AssignNeedManager } from '../../application/assign-need-manager';
 import { RenewNeed, GetExpiredNeeds } from '../../application/renew-need';
+import { SuggestVolunteersForNeed } from '../../application/suggest-volunteers-for-need';
+import { CreateTaskFromNeed } from '../../application/create-task-from-need';
 import { NeedView } from '../../application/need-view';
 import { NeedCategory, Priority } from '../../domain/need-enums';
-import { CreateNeedDto, AssignNeedManagerDto } from './dto';
-import { CreateNeedResponseDto, NeedViewDto } from './response.dto';
+import {
+  CreateNeedDto,
+  AssignNeedManagerDto,
+  CreateTaskFromNeedDto,
+} from './dto';
+import {
+  CreateNeedResponseDto,
+  NeedViewDto,
+  VolunteerSuggestionDto,
+  CreatedTaskFromNeedDto,
+} from './response.dto';
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
 import { RequireCoordinatorGuard } from '../../../identity/infrastructure/http/require-coordinator.guard';
 import { RequireNeedCoordinatorGuard } from '../../../identity/infrastructure/http/require-need-coordinator.guard';
@@ -53,6 +64,8 @@ export class NeedsController {
     private readonly assignNeedManager: AssignNeedManager,
     private readonly renewNeed: RenewNeed,
     private readonly getExpiredNeeds: GetExpiredNeeds,
+    private readonly suggestVolunteers: SuggestVolunteersForNeed,
+    private readonly createTaskFromNeed: CreateTaskFromNeed,
   ) {}
 
   @Post('emergencies/:emergencyId/needs')
@@ -96,6 +109,9 @@ export class NeedsController {
         unit: i.unit ?? null,
         category: i.category,
       })),
+      requiredSkill: dto.requiredSkill ?? null,
+      skillSpecialty: dto.skillSpecialty ?? null,
+      requestedCount: dto.requestedCount ?? null,
     });
   }
 
@@ -275,5 +291,73 @@ export class NeedsController {
     @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
   ): Promise<NeedView[]> {
     return this.getExpiredNeeds.execute({ emergencyId });
+  }
+
+  // ── F05: GET /needs/:needId/volunteer-suggestions ─────────────────────────
+
+  @Get('needs/:needId/volunteer-suggestions')
+  @UseGuards(JwtAuthGuard, RequireNeedCoordinatorGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Suggest available volunteers for a personnel need (coordinator only)',
+  })
+  @ApiParam({ name: 'needId', description: 'Need UUID', format: 'uuid' })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Maximum number of suggestions (default 20)',
+    type: Number,
+  })
+  @ApiOkResponse({
+    description: 'List of suggested volunteers',
+    type: [VolunteerSuggestionDto],
+  })
+  @ApiNotFoundResponse({ description: 'Need not found' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Coordinator role required' })
+  async getVolunteerSuggestions(
+    @Param('needId', ParseUUIDPipe) needId: string,
+    @Query('limit') limit?: string,
+  ): Promise<VolunteerSuggestionDto[]> {
+    const parsedLimit = limit !== undefined ? parseInt(limit, 10) : undefined;
+    return this.suggestVolunteers.execute({
+      needId,
+      limit: parsedLimit && !isNaN(parsedLimit) ? parsedLimit : undefined,
+    });
+  }
+
+  // ── F05: POST /needs/:needId/create-task ─────────────────────────────────
+
+  @Post('needs/:needId/create-task')
+  @HttpCode(201)
+  @UseGuards(JwtAuthGuard, RequireNeedCoordinatorGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Create a task from a personnel need (coordinator only)',
+    description:
+      'Creates one Task linked to the need and optionally assigns volunteers. ' +
+      'Reuses existing CreateTask / AssignVolunteerToTask logic.',
+  })
+  @ApiParam({ name: 'needId', description: 'Need UUID', format: 'uuid' })
+  @ApiCreatedResponse({
+    description: 'Task created and volunteers assigned',
+    type: CreatedTaskFromNeedDto,
+  })
+  @ApiNotFoundResponse({ description: 'Need not found' })
+  @ApiBadRequestResponse({ description: 'Invalid body' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Coordinator role required' })
+  async createTask(
+    @Param('needId', ParseUUIDPipe) needId: string,
+    @Body() dto: CreateTaskFromNeedDto,
+    @Request() req: AuthenticatedRequest,
+  ): Promise<CreatedTaskFromNeedDto> {
+    return this.createTaskFromNeed.execute({
+      needId,
+      volunteerIds: dto.volunteerIds ?? [],
+      dueDate: dto.dueDate,
+      createdByUserId: req.user.id,
+    });
   }
 }

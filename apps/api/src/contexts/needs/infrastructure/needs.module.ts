@@ -10,6 +10,8 @@ import { GetPublicNeeds } from '../application/get-public-needs';
 import { GetNeedsQueue } from '../application/get-needs-queue';
 import { AssignNeedManager } from '../application/assign-need-manager';
 import { RenewNeed, GetExpiredNeeds } from '../application/renew-need';
+import { SuggestVolunteersForNeed } from '../application/suggest-volunteers-for-need';
+import { CreateTaskFromNeed } from '../application/create-task-from-need';
 import {
   NEED_REPOSITORY,
   NeedRepository,
@@ -19,10 +21,26 @@ import {
   NeedEmergencyStatusReader,
 } from '../domain/ports/emergency-status-reader';
 import { EVENT_BUS, EventBus } from '../domain/ports/event-bus';
+import {
+  VOLUNTEER_MATCHER_PORT,
+  VolunteerMatcherPort,
+} from '../domain/ports/volunteer-matcher.port';
+import {
+  PERSONNEL_TASK_CREATOR_PORT,
+  PersonnelTaskCreatorPort,
+} from '../domain/ports/personnel-task-creator.port';
 import { DrizzleNeedRepository } from './drizzle/drizzle-need.repository';
 import { DrizzleEmergencyStatusReader } from '../../../shared/drizzle-emergency-status-reader';
 import { BullMqEventBus } from './bullmq-event-bus';
 import { IdentityModule } from '../../identity/infrastructure/identity.module';
+import { DrizzleVolunteerMatcher } from '../../volunteers/infrastructure/drizzle/drizzle-volunteer-matcher';
+import { DrizzlePersonnelTaskCreator } from '../../volunteers/infrastructure/drizzle/drizzle-personnel-task-creator';
+import { CreateTask } from '../../volunteers/application/create-task';
+import { AssignVolunteerToTask } from '../../volunteers/application/assign-volunteer-to-task';
+import { VolunteerRepository } from '../../volunteers/domain/ports/volunteer.repository';
+import { TaskRepository } from '../../volunteers/domain/ports/task.repository';
+import { DrizzleVolunteerRepository } from '../../volunteers/infrastructure/drizzle/drizzle-volunteer.repository';
+import { DrizzleTaskRepository } from '../../volunteers/infrastructure/drizzle/drizzle-task.repository';
 
 export const EVENT_QUEUE = Symbol('NeedsEventQueue');
 
@@ -109,6 +127,48 @@ const getExpiredNeedsProvider = {
   useFactory: (repo: NeedRepository) => new GetExpiredNeeds(repo),
 };
 
+// ── F05: volunteers for needs — cross-context via ports ──────────────────────
+// We build the repos directly from DB instead of registering volunteer tokens
+// in this module (would conflict with VolunteersModule token registration).
+
+const volunteerMatcherProvider = {
+  provide: VOLUNTEER_MATCHER_PORT,
+  inject: [DB],
+  useFactory: (db: Db): VolunteerMatcherPort => new DrizzleVolunteerMatcher(db),
+};
+
+const personnelTaskCreatorProvider = {
+  provide: PERSONNEL_TASK_CREATOR_PORT,
+  inject: [DB],
+  useFactory: (db: Db): PersonnelTaskCreatorPort => {
+    const taskRepo: TaskRepository = new DrizzleTaskRepository(db);
+    const volunteerRepo: VolunteerRepository = new DrizzleVolunteerRepository(
+      db,
+    );
+    const createTask = new CreateTask(taskRepo);
+    const assignVolunteer = new AssignVolunteerToTask(taskRepo, volunteerRepo);
+    return new DrizzlePersonnelTaskCreator(
+      createTask,
+      assignVolunteer,
+      taskRepo,
+    );
+  },
+};
+
+const suggestVolunteersProvider = {
+  provide: SuggestVolunteersForNeed,
+  inject: [NEED_REPOSITORY, VOLUNTEER_MATCHER_PORT],
+  useFactory: (repo: NeedRepository, matcher: VolunteerMatcherPort) =>
+    new SuggestVolunteersForNeed(repo, matcher),
+};
+
+const createTaskFromNeedProvider = {
+  provide: CreateTaskFromNeed,
+  inject: [NEED_REPOSITORY, PERSONNEL_TASK_CREATOR_PORT],
+  useFactory: (repo: NeedRepository, creator: PersonnelTaskCreatorPort) =>
+    new CreateTaskFromNeed(repo, creator),
+};
+
 @Module({
   imports: [DatabaseModule, IdentityModule],
   controllers: [NeedsController],
@@ -124,6 +184,11 @@ const getExpiredNeedsProvider = {
     assignNeedManagerProvider,
     renewNeedProvider,
     getExpiredNeedsProvider,
+    // F05: personnel needs ↔ volunteers
+    volunteerMatcherProvider,
+    personnelTaskCreatorProvider,
+    suggestVolunteersProvider,
+    createTaskFromNeedProvider,
   ],
 })
 export class NeedsModule implements OnModuleDestroy {

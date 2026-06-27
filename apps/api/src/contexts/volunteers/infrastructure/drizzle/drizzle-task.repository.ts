@@ -47,6 +47,7 @@ function rowsToSnapshot(
     createdAt: taskRow.createdAt,
     updatedAt: taskRow.updatedAt,
     assignments: assignmentRows.map(rowToAssignmentSnapshot),
+    linkedNeedId: taskRow.linkedNeedId ?? null,
   };
 }
 
@@ -91,6 +92,7 @@ export class DrizzleTaskRepository implements TaskRepository {
           createdByUserId: s.createdByUserId,
           createdAt: s.createdAt,
           updatedAt: s.updatedAt,
+          linkedNeedId: s.linkedNeedId ?? null,
         })
         .onConflictDoUpdate({
           target: tasksTable.id,
@@ -103,6 +105,7 @@ export class DrizzleTaskRepository implements TaskRepository {
             requiredSkill: s.requiredSkill,
             status: s.status,
             updatedAt: s.updatedAt,
+            linkedNeedId: s.linkedNeedId ?? null,
           },
         });
 

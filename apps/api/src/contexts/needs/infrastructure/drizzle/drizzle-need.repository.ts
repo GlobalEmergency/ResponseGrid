@@ -20,7 +20,12 @@ import {
 import { Need, NeedSnapshot } from '../../domain/need';
 import { NeedId } from '../../domain/need-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
-import { Priority, NeedCategory, NeedStatus } from '../../domain/need-enums';
+import {
+  Priority,
+  NeedCategory,
+  NeedStatus,
+  PersonnelSkill,
+} from '../../domain/need-enums';
 import { NeedItemSnapshot } from '../../domain/need-item';
 import { LocationSensitivity } from '../../../../shared/domain/location-sensitivity';
 
@@ -56,6 +61,9 @@ function rowToSnapshot(row: NeedsRow, items: ItemsRow[]): NeedSnapshot {
     createdAt: row.createdAt,
     expiresAt: row.expiresAt ?? null,
     lastVerifiedAt: row.lastVerifiedAt ?? null,
+    requiredSkill: (row.requiredSkill as PersonnelSkill) ?? null,
+    skillSpecialty: row.skillSpecialty ?? null,
+    requestedCount: row.requestedCount ?? null,
   };
 }
 
@@ -85,6 +93,9 @@ export class DrizzleNeedRepository implements NeedRepository {
           createdAt: s.createdAt,
           expiresAt: s.expiresAt,
           lastVerifiedAt: s.lastVerifiedAt,
+          requiredSkill: s.requiredSkill ?? null,
+          skillSpecialty: s.skillSpecialty ?? null,
+          requestedCount: s.requestedCount ?? null,
         })
         .onConflictDoUpdate({
           target: needsTable.id,
@@ -93,6 +104,9 @@ export class DrizzleNeedRepository implements NeedRepository {
             managingOrganizationId: s.managingOrganizationId,
             expiresAt: s.expiresAt,
             lastVerifiedAt: s.lastVerifiedAt,
+            requiredSkill: s.requiredSkill ?? null,
+            skillSpecialty: s.skillSpecialty ?? null,
+            requestedCount: s.requestedCount ?? null,
           },
         });
 
