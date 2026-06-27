@@ -328,10 +328,12 @@ describe('Accreditation (e2e)', () => {
     });
 
     it('admin can revoke an accreditation', async () => {
+      // Use UNACCREDITED_ORG_ID: it has no existing accreditations so the grant
+      // succeeds regardless of the accreditations created by earlier suites.
       const res = await request(server)
         .post('/accreditations')
         .set('Authorization', `Bearer ${adminToken}`)
-        .send({ organizationId: ORG_ID, scope: 'global' })
+        .send({ organizationId: UNACCREDITED_ORG_ID, scope: 'global' })
         .expect(201);
       const id = (res.body as { id: string }).id;
 

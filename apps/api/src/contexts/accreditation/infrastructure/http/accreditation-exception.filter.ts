@@ -6,14 +6,23 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AccreditationNotFoundError } from '../../application/revoke-accreditation';
+import { AccreditationAlreadyExistsError } from '../../application/grant-accreditation';
 
-@Catch(AccreditationNotFoundError)
+type AccreditationError =
+  | AccreditationNotFoundError
+  | AccreditationAlreadyExistsError;
+
+@Catch(AccreditationNotFoundError, AccreditationAlreadyExistsError)
 export class AccreditationExceptionFilter implements ExceptionFilter {
-  catch(exception: AccreditationNotFoundError, host: ArgumentsHost): void {
+  catch(exception: AccreditationError, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    response.status(HttpStatus.NOT_FOUND).json({
-      statusCode: HttpStatus.NOT_FOUND,
+    const statusCode =
+      exception instanceof AccreditationAlreadyExistsError
+        ? HttpStatus.CONFLICT
+        : HttpStatus.NOT_FOUND;
+    response.status(statusCode).json({
+      statusCode,
       message: exception.message,
     });
   }

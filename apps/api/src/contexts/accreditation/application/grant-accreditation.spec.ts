@@ -1,4 +1,7 @@
-import { GrantAccreditation } from './grant-accreditation';
+import {
+  GrantAccreditation,
+  AccreditationAlreadyExistsError,
+} from './grant-accreditation';
 import { InMemoryAccreditationRepository } from '../infrastructure/in-memory-accreditation.repository';
 
 describe('GrantAccreditation use case', () => {
@@ -43,5 +46,51 @@ describe('GrantAccreditation use case', () => {
     });
     expect(await repo.isAccredited('org-3', 'em-1')).toBe(true);
     expect(await repo.isAccredited('org-3', 'em-999')).toBe(false);
+  });
+
+  describe('duplicate accreditation guard (bug fix)', () => {
+    it('throws AccreditationAlreadyExistsError on second global grant for same org', async () => {
+      await useCase.execute({
+        organizationId: 'org-dup',
+        scope: 'global',
+        grantedByUserId: 'admin-1',
+      });
+      await expect(
+        useCase.execute({
+          organizationId: 'org-dup',
+          scope: 'global',
+          grantedByUserId: 'admin-1',
+        }),
+      ).rejects.toThrow(AccreditationAlreadyExistsError);
+    });
+
+    it('throws AccreditationAlreadyExistsError on second emergency-scoped grant for same org+emergency', async () => {
+      await useCase.execute({
+        organizationId: 'org-dup2',
+        scope: { emergencyId: 'em-77' },
+        grantedByUserId: 'admin-1',
+      });
+      await expect(
+        useCase.execute({
+          organizationId: 'org-dup2',
+          scope: { emergencyId: 'em-77' },
+          grantedByUserId: 'admin-1',
+        }),
+      ).rejects.toThrow(AccreditationAlreadyExistsError);
+    });
+
+    it('allows emergency-scoped grant for a different emergency after one already exists', async () => {
+      await useCase.execute({
+        organizationId: 'org-multi',
+        scope: { emergencyId: 'em-1' },
+        grantedByUserId: 'admin-1',
+      });
+      const result = await useCase.execute({
+        organizationId: 'org-multi',
+        scope: { emergencyId: 'em-2' },
+        grantedByUserId: 'admin-1',
+      });
+      expect(result.id).toBeDefined();
+    });
   });
 });
