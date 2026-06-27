@@ -148,6 +148,7 @@ export default async function HomePage() {
 
           <SiteFooter
             t={th}
+            tf={t.common.footer}
             authed={token !== null}
             isAdmin={isAdmin}
             notificationUnreadCount={notificationUnreadCount}

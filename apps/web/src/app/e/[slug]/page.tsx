@@ -323,7 +323,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
             <EmergencyMapWrapper points={mapPoints} emergencyId={emergencyId} />
           </section>
 
-          <LandingFooter slug={slug} te={te} authed={token !== null} />
+          <LandingFooter slug={slug} te={te} tf={t.common.footer} authed={token !== null} />
         </div>
       </div>
     </main>

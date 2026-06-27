@@ -17,6 +17,14 @@ export const es = {
     language: 'Idioma',
     es: 'ES',
     en: 'EN',
+
+    // Atribución y enlaces legales de Global Emergency (compartidos por todos los pies)
+    footer: {
+      project_of: 'Un proyecto de',
+      org: 'Global Emergency',
+      privacy: 'Privacidad',
+      terms: 'Términos y condiciones',
+    },
   },
 
   // ── Home page ─────────────────────────────────────────────────────────────
@@ -64,12 +72,10 @@ export const es = {
     trust_official: 'Organización acreditada',
 
     // Pie SEO
-    footer_org: 'GlobalEmergency',
     footer_tagline:
       'Plataforma de coordinación de ayuda en emergencias. Multi-emergencia, multilingüe (ES/EN), con privacidad por diseño y datos alojados en la UE.',
     footer_about: 'Sobre nosotros',
     footer_transparency: 'Transparencia',
-    footer_privacy: 'Privacidad (RGPD)',
     footer_verify_campaign: 'Verificar campaña',
 
     meta_title: 'ResponseGrid — Emergencias activas',
@@ -221,7 +227,7 @@ export const es = {
     official_label: 'Comunicado oficial',
     last_updated: 'Última actualización:',
     aria_label: 'Comunicado oficial',
-    source: 'GlobalEmergency',
+    source: 'Global Emergency',
   },
 
   // ── Login page ────────────────────────────────────────────────────────────

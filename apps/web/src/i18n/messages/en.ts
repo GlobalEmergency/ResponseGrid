@@ -18,6 +18,14 @@ export const en = {
     language: 'Language',
     es: 'ES',
     en: 'EN',
+
+    // Global Emergency attribution and legal links (shared by every footer)
+    footer: {
+      project_of: 'A project by',
+      org: 'Global Emergency',
+      privacy: 'Privacy',
+      terms: 'Terms & conditions',
+    },
   },
 
   home: {
@@ -64,12 +72,10 @@ export const en = {
     trust_official: 'Accredited organisation',
 
     // SEO footer
-    footer_org: 'GlobalEmergency',
     footer_tagline:
       'Emergency aid coordination platform. Multi-emergency, multilingual (ES/EN), privacy by design and data hosted in the EU.',
     footer_about: 'About us',
     footer_transparency: 'Transparency',
-    footer_privacy: 'Privacy (GDPR)',
     footer_verify_campaign: 'Verify campaign',
 
     meta_title: 'ResponseGrid — Active emergencies',
@@ -208,7 +214,7 @@ export const en = {
     official_label: 'Official announcement',
     last_updated: 'Last updated:',
     aria_label: 'Official announcement',
-    source: 'GlobalEmergency',
+    source: 'Global Emergency',
   },
 
   login: {
