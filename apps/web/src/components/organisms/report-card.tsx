@@ -98,9 +98,13 @@ export function ReportCard({ report, slug }: ReportCardProps) {
       {/* Photo thumbnails */}
       {report.photoUrls != null && report.photoUrls.length > 0 && (
         <ul className="flex flex-wrap gap-2" aria-label="Fotos del parte">
-          {report.photoUrls.map((urlOrKey) => {
-            // Support both full URLs and bare keys
-            const src = urlOrKey.startsWith('http') ? urlOrKey : `${API_BASE}/files/${urlOrKey}`;
+          {report.photoUrls.filter((u) => u !== '').map((urlOrKey) => {
+            // Backend returns a root-relative url like "/files/<key>"; also support full URLs and bare keys.
+            const src = urlOrKey.startsWith('http')
+              ? urlOrKey
+              : urlOrKey.startsWith('/')
+                ? `${API_BASE}${urlOrKey}`
+                : `${API_BASE}/files/${urlOrKey}`;
             return (
               <li key={urlOrKey}>
                 <a
@@ -133,7 +137,7 @@ export function ReportCard({ report, slug }: ReportCardProps) {
           <span>Autor: {report.authorName}</span>
         )}
         {report.createdAt != null && (
-          <time dateTime={report.createdAt}>
+          <time dateTime={report.createdAt} suppressHydrationWarning>
             {new Date(report.createdAt).toLocaleString('es-ES', {
               day: '2-digit',
               month: 'short',
