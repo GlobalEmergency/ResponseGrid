@@ -12,3 +12,4 @@ ALTER TABLE resources
 CREATE UNIQUE INDEX resources_source_ext ON resources(source_name, external_id) WHERE source_name IS NOT NULL;
 CREATE INDEX resources_emergency_country ON resources(emergency_id, country);
 CREATE INDEX resources_accepts_gin ON resources USING gin(accepts);
+ALTER TABLE resources ADD CONSTRAINT resources_source_ext_both_or_neither CHECK ((source_name IS NULL) = (external_id IS NULL));

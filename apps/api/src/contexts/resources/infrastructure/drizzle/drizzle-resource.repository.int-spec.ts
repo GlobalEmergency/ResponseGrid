@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import { createDb, Db } from '../../../../shared/db';
 import { resourcesTable } from './schema';
 import { DrizzleResourceRepository } from './drizzle-resource.repository';
@@ -368,5 +369,59 @@ describe('DrizzleResourceRepository (integration)', () => {
     expect(found!.country).toBeNull();
     expect(found!.city).toBeNull();
     expect(found!.provenance).toBeNull();
+  });
+
+  it('externalId round-trips as a real string, not empty-string fallback (Fix wave 1)', async () => {
+    const r = Resource.register({
+      id: ResourceId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      type: ResourceType.CollectionPoint,
+      stage: ResourceStage.Origin,
+      name: 'Provenance Check',
+      location: baseLocation,
+      ownerUserId: OWNER_ID,
+      provenance: {
+        sourceName: 'test-source',
+        externalId: 'ext-id-42',
+        externalUpdatedAt: null,
+        raw: null,
+      },
+    });
+
+    await repo.save(r);
+    const found = await repo.findById(r.id);
+
+    expect(found!.provenance).not.toBeNull();
+    expect(found!.provenance!.externalId).toBe('ext-id-42');
+    // Confirm it is exactly the stored value and NOT an empty-string fallback
+    expect(found!.provenance!.externalId).not.toBe('');
+  });
+
+  it('DB constraint rejects source_name without external_id (Fix wave 1)', async () => {
+    const id = ResourceId.create().value;
+    let threw = false;
+    let errorDetail = '';
+    try {
+      await db.execute(sql`
+        INSERT INTO resources (
+          id, emergency_id, type, stage, name,
+          address, latitude, longitude,
+          owner_user_id, verification_level, public_status, created_at,
+          source_name, external_id
+        ) VALUES (
+          ${id}, ${EM}, 'collection_point', 'origin', 'Constraint Test',
+          'Calle Test 1, Sevilla', 37.3886, -5.9823,
+          ${OWNER_ID}, 'unverified', 'hidden', NOW(),
+          'some-source', NULL
+        )
+      `);
+    } catch (err: unknown) {
+      threw = true;
+      // Drizzle wraps PG errors; check the cause chain for the constraint name
+      const fullText = JSON.stringify(err) + String(err);
+      errorDetail = fullText;
+    }
+    expect(threw).toBe(true);
+    expect(errorDetail).toMatch(/resources_source_ext_both_or_neither/);
   });
 });

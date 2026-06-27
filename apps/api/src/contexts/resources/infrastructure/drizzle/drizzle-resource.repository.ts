@@ -16,9 +16,11 @@ type Row = typeof resourcesTable.$inferSelect;
 
 function rowToProvenance(row: Row): Provenance | null {
   if (!row.sourceName) return null;
+  // DB constraint ensures external_id is non-null whenever source_name is set.
+  // The cast below is safe: if this throws, the constraint was bypassed.
   return {
     sourceName: row.sourceName,
-    externalId: row.externalId ?? '',
+    externalId: row.externalId as string,
     externalUpdatedAt: row.externalUpdatedAt ?? null,
     raw: row.raw ?? null,
   };
