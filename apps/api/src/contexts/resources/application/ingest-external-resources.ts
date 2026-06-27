@@ -24,7 +24,6 @@ import { ResourceRepository } from '../domain/ports/resource.repository';
 import { Resource } from '../domain/resource';
 import { ResourceId } from '../domain/resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { Location } from '../../../shared/domain/location';
 import {
   VerificationLevel,
   PublicStatus,
@@ -75,7 +74,7 @@ export class IngestExternalResources {
       if (existing !== null) {
         // UPDATE: rebuild the aggregate preserving local-owned fields
         const existingSnap = existing.toSnapshot();
-        const updated_resource = Resource.fromSnapshot({
+        const updatedResource = Resource.fromSnapshot({
           // Preserved (local-owned):
           id: existingSnap.id,
           ownerUserId: existingSnap.ownerUserId,
@@ -109,25 +108,27 @@ export class IngestExternalResources {
           },
         });
 
-        await this.repo.save(updated_resource);
+        await this.repo.save(updatedResource);
         updated++;
       } else {
-        // INSERT: register a new Resource aggregate
-        const location = Location.create({
-          address: mapped.address,
-          latitude: mapped.latitude,
-          longitude: mapped.longitude,
-        });
-
-        const resource = Resource.register({
-          id: ResourceId.create(),
-          emergencyId: emergencyIdVO,
+        // INSERT: build a new Resource via fromSnapshot (Active by default, no domain events)
+        const resource = Resource.fromSnapshot({
+          id: ResourceId.create().value,
+          emergencyId: emergencyIdVO.value,
           type: mapped.type,
           stage: mapped.stage,
           name: mapped.name,
           description: mapped.description,
-          location,
+          location: {
+            address: mapped.address,
+            latitude: mapped.latitude,
+            longitude: mapped.longitude,
+          },
           ownerUserId,
+          ownerOrganizationId: null,
+          verificationLevel: VerificationLevel.Unverified,
+          publicStatus: PublicStatus.Active,
+          createdAt: new Date(),
           contact: mapped.contact,
           schedule: mapped.schedule,
           manager: mapped.manager,

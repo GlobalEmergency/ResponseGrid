@@ -104,7 +104,10 @@ export const acopioveMapper: ResourceMapper = (raw: unknown): MappedResourceInpu
   if (!typeMapping) return null;
 
   const name = toStringOrNull(r.name) ?? 'Sin nombre';
-  const address = toStringOrNull(r.address) ?? '';
+  const ciudad = toStringOrNull(r.ciudad);
+  const pais = toStringOrNull(r.pais);
+  const addressFallback = [ciudad, pais].filter(Boolean).join(', ') || '—';
+  const address = toStringOrNull(r.address) ?? addressFallback;
   const necesitaAhora = toStringOrNull(r.necesitaAhora);
   const fuente = toStringOrNull(r.fuente);
 
@@ -127,8 +130,8 @@ export const acopioveMapper: ResourceMapper = (raw: unknown): MappedResourceInpu
     schedule: toStringOrNull(r.horario),
     manager: toStringOrNull(r.responsable),
     acceptsRawLabels: toStringArray(r.recibe),
-    country: toStringOrNull(r.pais),
-    city: toStringOrNull(r.ciudad),
+    country: pais,
+    city: ciudad,
     externalUpdatedAt: toDateOrNull(r.updatedAt),
     raw,
   };

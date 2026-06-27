@@ -153,7 +153,7 @@ describe('IngestExternalResources', () => {
       expect(found!.stage).toBe(ResourceStage.Origin);
     });
 
-    it('new resource starts with verificationLevel=Unverified and publicStatus=Hidden', async () => {
+    it('new resource starts with verificationLevel=Unverified and publicStatus=Active', async () => {
       const repo = new InMemoryResourceRepository();
       const resolver = makeResolver();
       const useCase = new IngestExternalResources(repo, resolver);
@@ -169,7 +169,7 @@ describe('IngestExternalResources', () => {
       const found = await repo.findByExternal(SOURCE_NAME, EXT_ID_1);
       expect(found).not.toBeNull();
       expect(found!.verificationLevel).toBe(VerificationLevel.Unverified);
-      expect(found!.publicStatus).toBe(PublicStatus.Hidden);
+      expect(found!.publicStatus).toBe(PublicStatus.Active);
     });
   });
 
