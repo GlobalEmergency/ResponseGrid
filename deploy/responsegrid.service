@@ -1,0 +1,19 @@
+# systemd unit that brings the whole stack up on every boot.
+# Installed + enabled by the deploy (see .github/workflows/deploy.yml).
+# Needed because the `api` container depends on the one-shot `migrate` service,
+# so Docker's restart policies alone don't reliably reconcile the stack on reboot.
+[Unit]
+Description=ResponseGrid stack (docker compose up on boot)
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+ConditionPathExists=/opt/responsegrid/deploy/docker-compose.prod.yml
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/responsegrid
+ExecStart=/usr/bin/docker compose -f deploy/docker-compose.prod.yml up -d
+
+[Install]
+WantedBy=multi-user.target
