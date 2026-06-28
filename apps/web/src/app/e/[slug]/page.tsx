@@ -180,19 +180,17 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
   );
 
   const needsSlot = (
-    <div className="flex flex-col gap-3">
-      <NeedsFilter t={t.needs_filter} te={t.emergency} />
-      <NeedsList
-        emergencyId={emergencyId}
-        slug={slug}
-        initialItems={validatedNeeds}
-        te={te}
-        tNearby={t.nearby_needs}
-        emptyTitle={te.needs_empty_title}
-        active={isActive}
-        locale={locale}
-      />
-    </div>
+    <NeedsList
+      emergencyId={emergencyId}
+      slug={slug}
+      initialItems={validatedNeeds}
+      te={te}
+      tNearby={t.nearby_needs}
+      emptyTitle={te.needs_empty_title}
+      active={isActive}
+      locale={locale}
+      filterSlot={<NeedsFilter t={t.needs_filter} te={t.emergency} />}
+    />
   );
 
   return (

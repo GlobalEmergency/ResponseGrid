@@ -118,6 +118,12 @@ export const es = {
     header_status_paused: 'En pausa',
     header_status_closed: 'Cerrada',
 
+    // Menú de opciones (cabecera compacta en móvil)
+    menu_options: 'Opciones',
+    menu_language: 'Idioma',
+    menu_how_it_works: 'Cómo funciona',
+    menu_verify: 'Verificar una campaña',
+
     // Tarjetas de métricas
     metric_tile_open: 'Necesidades abiertas',
     metric_tile_points: 'Puntos activos',

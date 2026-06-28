@@ -117,6 +117,12 @@ export const en = {
     header_status_paused: 'Paused',
     header_status_closed: 'Closed',
 
+    // Options menu (compact header on mobile)
+    menu_options: 'Options',
+    menu_language: 'Language',
+    menu_how_it_works: 'How it works',
+    menu_verify: 'Verify a campaign',
+
     // Metric tiles
     metric_tile_open: 'Open needs',
     metric_tile_points: 'Active points',

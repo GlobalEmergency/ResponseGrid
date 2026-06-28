@@ -69,35 +69,32 @@ export function NearbyButton({
     );
   }
 
+  // Full width + the same height as the filter fields it sits above, so the
+  // whole filter block reads as one tidy form. Info (blue) tone sets the
+  // location action apart from the navy primary CTAs.
+  const baseClass =
+    'flex w-full items-center justify-center gap-2 rounded-lg border border-info-line bg-info-soft px-4 py-3 text-[15px] font-semibold text-info transition-colors hover:brightness-[0.97] focus:outline-none focus:ring-2 focus:ring-info-dot focus:ring-offset-1 disabled:opacity-60';
+
+  const pinIcon = (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px] flex-shrink-0">
+      <path
+        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+
   if (active) {
     return (
-      <button
-        type="button"
-        onClick={onClear}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-info-line bg-info-soft px-3 py-1.5 text-sm font-medium text-info hover:bg-info-soft focus:outline-none focus:ring-2 focus:ring-info-dot focus:ring-offset-2 transition-colors"
-      >
+      <button type="button" onClick={onClear} className={baseClass}>
         {tNearby.button_clear}
       </button>
     );
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleFind}
-      disabled={loading}
-      className="inline-flex items-center gap-1.5 rounded-lg border border-info-line bg-info-soft px-3 py-1.5 text-sm font-medium text-info hover:bg-info-soft focus:outline-none focus:ring-2 focus:ring-info-dot focus:ring-offset-2 disabled:opacity-50 transition-colors"
-    >
-      <svg
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-        className="h-4 w-4 flex-shrink-0"
-      >
-        <path
-          d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-          fill="currentColor"
-        />
-      </svg>
+    <button type="button" onClick={handleFind} disabled={loading} className={baseClass}>
+      {pinIcon}
       {loading ? tNearby.loading : tNearby.button_find}
     </button>
   );

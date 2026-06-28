@@ -15,7 +15,7 @@
  * GetNearbyNeeds), so an exact position is never exposed.
  */
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { createResponseGridClient } from '@reliefhub/api-client';
 import type { components } from '@reliefhub/api-client';
 import { NeedCard } from '@/components/molecules/need-card';
@@ -48,6 +48,8 @@ interface NeedsListProps {
   emptyTitle: string;
   active: boolean;
   locale: Locale;
+  /** Filter controls rendered between the "near me" button and the list. */
+  filterSlot?: ReactNode;
 }
 
 export function NeedsList({
@@ -59,6 +61,7 @@ export function NeedsList({
   emptyTitle,
   active,
   locale,
+  filterSlot,
 }: NeedsListProps) {
   const [nearby, setNearby] = useState<NearbyNeedViewDto[] | null>(null);
   const [geoError, setGeoError] = useState(false);
@@ -81,15 +84,17 @@ export function NeedsList({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-2">
-        <NearbyButton
-          tNearby={tNearby}
-          onLocate={handleLocate}
-          onClear={() => setNearby(null)}
-          onGeoError={() => setGeoError(true)}
-          active={nearby !== null}
-        />
-      </div>
+      {/* "Cerca de mí" is always the first option, above the filters. */}
+      <NearbyButton
+        tNearby={tNearby}
+        onLocate={handleLocate}
+        onClear={() => setNearby(null)}
+        onGeoError={() => setGeoError(true)}
+        active={nearby !== null}
+      />
+
+      {/* Filters apply to the default list only — hidden while in nearby mode. */}
+      {nearby === null && filterSlot}
 
       {geoError && nearby === null && (
         <p
