@@ -4,6 +4,7 @@ import { Db } from '../../../shared/db';
 import { EmergenciesController } from './http/emergencies.controller';
 import { CreateEmergency } from '../application/create-emergency';
 import { ListActiveEmergencies } from '../application/list-active-emergencies';
+import { ListMyEmergencies } from '../application/list-my-emergencies';
 import { GetEmergencyBySlug } from '../application/get-emergency-by-slug';
 import { PauseEmergency } from '../application/pause-emergency';
 import { ResumeEmergency } from '../application/resume-emergency';
@@ -38,6 +39,12 @@ const listActiveProvider = {
   provide: ListActiveEmergencies,
   inject: [EMERGENCY_REPOSITORY],
   useFactory: (repo: EmergencyRepository) => new ListActiveEmergencies(repo),
+};
+
+const listMyProvider = {
+  provide: ListMyEmergencies,
+  inject: [EMERGENCY_REPOSITORY],
+  useFactory: (repo: EmergencyRepository) => new ListMyEmergencies(repo),
 };
 
 const getBySlugProvider = {
@@ -80,6 +87,7 @@ const createFromTemplateProvider = {
     emergencyRepositoryProvider,
     createEmergencyProvider,
     listActiveProvider,
+    listMyProvider,
     getBySlugProvider,
     pauseEmergencyProvider,
     resumeEmergencyProvider,

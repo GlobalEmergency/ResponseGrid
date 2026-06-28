@@ -1574,6 +1574,39 @@
         ]
       }
     },
+    "/emergencies/mine": {
+      "get": {
+        "operationId": "EmergenciesController_listMine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Emergencies the principal holds a grant in — including paused/closed — each with the role ids held at that scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MyEmergencyViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the emergencies the authenticated principal is granted into (any status)",
+        "tags": [
+          "emergencies"
+        ]
+      }
+    },
     "/emergencies/by-slug/{slug}": {
       "get": {
         "operationId": "EmergenciesController_getBySlugRoute",
@@ -4688,8 +4721,8 @@
       },
       "api-key": {
         "type": "apiKey",
-        "name": "X-API-Key",
-        "in": "header"
+        "in": "header",
+        "name": "X-API-Key"
       }
     },
     "schemas": {
@@ -6027,6 +6060,79 @@
           "announcement",
           "dontBringList",
           "updatedAt"
+        ]
+      },
+      "MyEmergencyViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "11111111-1111-4111-8111-111111111111"
+          },
+          "name": {
+            "type": "string",
+            "example": "Emergencia sísmica — Venezuela"
+          },
+          "slug": {
+            "type": "string",
+            "example": "venezuela"
+          },
+          "country": {
+            "type": "string",
+            "example": "VE"
+          },
+          "status": {
+            "type": "string",
+            "example": "active",
+            "enum": [
+              "active",
+              "paused",
+              "closed"
+            ]
+          },
+          "announcement": {
+            "type": "string",
+            "example": "El puente de acceso norte está cortado.",
+            "nullable": true
+          },
+          "dontBringList": {
+            "example": [
+              "mascotas",
+              "joyas",
+              "vehículos grandes"
+            ],
+            "description": "Items volunteers should NOT bring to the emergency",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2026-06-25T10:00:00.000Z"
+          },
+          "roleIds": {
+            "example": [
+              "emergency_verifier",
+              "emergency_coordinator"
+            ],
+            "description": "Role ids the principal holds at this emergency scope",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "country",
+          "status",
+          "announcement",
+          "dontBringList",
+          "updatedAt",
+          "roleIds"
         ]
       },
       "CreateEmergencyFromTemplateDto": {

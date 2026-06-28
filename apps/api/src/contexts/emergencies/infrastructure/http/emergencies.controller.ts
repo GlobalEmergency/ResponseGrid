@@ -8,9 +8,11 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Request,
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
+import { Request as ExpressRequest } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -27,6 +29,7 @@ import {
 } from '@nestjs/swagger';
 import { CreateEmergency } from '../../application/create-emergency';
 import { ListActiveEmergencies } from '../../application/list-active-emergencies';
+import { ListMyEmergencies } from '../../application/list-my-emergencies';
 import { GetEmergencyBySlug } from '../../application/get-emergency-by-slug';
 import { PauseEmergency } from '../../application/pause-emergency';
 import { ResumeEmergency } from '../../application/resume-emergency';
@@ -37,10 +40,14 @@ import {
   CreateEmergencyFromTemplateDto,
   CreateEmergencyResponseDto,
   EmergencyViewDto,
+  MyEmergencyViewDto,
   PublishAnnouncementDto,
 } from './dto';
 import { EmergencyExceptionFilter } from './emergency-exception.filter';
-import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
+import {
+  JwtAuthGuard,
+  AuthenticatedUser,
+} from '../../../identity/infrastructure/http/jwt-auth.guard';
 import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
 import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
 
@@ -51,6 +58,7 @@ export class EmergenciesController {
   constructor(
     private readonly create: CreateEmergency,
     private readonly listActive: ListActiveEmergencies,
+    private readonly listMy: ListMyEmergencies,
     private readonly getBySlug: GetEmergencyBySlug,
     private readonly pause: PauseEmergency,
     private readonly resume: ResumeEmergency,
@@ -90,6 +98,31 @@ export class EmergenciesController {
   })
   async list(): Promise<EmergencyViewDto[]> {
     return this.listActive.execute();
+  }
+
+  @Get('mine')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'List the emergencies the authenticated principal is granted into (any status)',
+  })
+  @ApiOkResponse({
+    description:
+      'Emergencies the principal holds a grant in — including paused/closed — each with the role ids held at that scope',
+    type: [MyEmergencyViewDto],
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  async listMine(
+    @Request() req: ExpressRequest & { user: AuthenticatedUser },
+  ): Promise<MyEmergencyViewDto[]> {
+    return this.listMy.execute(
+      req.user.grants.map((g) => ({
+        roleId: g.roleId,
+        scope: g.scope,
+        expiresAt: g.expiresAt,
+      })),
+    );
   }
 
   @Get('by-slug/:slug')

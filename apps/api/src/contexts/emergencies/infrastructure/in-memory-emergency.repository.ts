@@ -22,6 +22,14 @@ export class InMemoryEmergencyRepository implements EmergencyRepository {
     return Promise.resolve(snap ? Emergency.fromSnapshot(snap) : null);
   }
 
+  findByIds(ids: EmergencyId[]): Promise<Emergency[]> {
+    const wanted = new Set(ids.map((id) => id.value));
+    const result = [...this.store.values()]
+      .filter((s) => wanted.has(s.id))
+      .map((s) => Emergency.fromSnapshot(s));
+    return Promise.resolve(result);
+  }
+
   listActive(): Promise<Emergency[]> {
     const result = [...this.store.values()]
       .filter((s) => s.status === EmergencyStatus.Active)

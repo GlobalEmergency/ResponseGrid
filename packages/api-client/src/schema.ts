@@ -536,6 +536,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/emergencies/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the emergencies the authenticated principal is granted into (any status) */
+        get: operations["EmergenciesController_listMine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/emergencies/by-slug/{slug}": {
         parameters: {
             query?: never;
@@ -2043,6 +2060,42 @@ export interface components {
             dontBringList: string[];
             /** @example 2026-06-25T10:00:00.000Z */
             updatedAt: string;
+        };
+        MyEmergencyViewDto: {
+            /** @example 11111111-1111-4111-8111-111111111111 */
+            id: string;
+            /** @example Emergencia sísmica — Venezuela */
+            name: string;
+            /** @example venezuela */
+            slug: string;
+            /** @example VE */
+            country: string;
+            /**
+             * @example active
+             * @enum {string}
+             */
+            status: "active" | "paused" | "closed";
+            /** @example El puente de acceso norte está cortado. */
+            announcement: string | null;
+            /**
+             * @description Items volunteers should NOT bring to the emergency
+             * @example [
+             *       "mascotas",
+             *       "joyas",
+             *       "vehículos grandes"
+             *     ]
+             */
+            dontBringList: string[];
+            /** @example 2026-06-25T10:00:00.000Z */
+            updatedAt: string;
+            /**
+             * @description Role ids the principal holds at this emergency scope
+             * @example [
+             *       "emergency_verifier",
+             *       "emergency_coordinator"
+             *     ]
+             */
+            roleIds: string[];
         };
         CreateEmergencyFromTemplateDto: {
             /** @example aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa */
@@ -4160,6 +4213,33 @@ export interface operations {
             };
             /** @description Slug already exists */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EmergenciesController_listMine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Emergencies the principal holds a grant in — including paused/closed — each with the role ids held at that scope */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyEmergencyViewDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

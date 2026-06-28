@@ -81,6 +81,15 @@ export class EmergencyViewDto {
   updatedAt!: string;
 }
 
+export class MyEmergencyViewDto extends EmergencyViewDto {
+  @ApiProperty({
+    example: ['emergency_verifier', 'emergency_coordinator'],
+    type: [String],
+    description: 'Role ids the principal holds at this emergency scope',
+  })
+  roleIds!: string[];
+}
+
 export class PublishAnnouncementDto {
   @ApiProperty({
     example: 'Se suspenden las operaciones de rescate hasta nuevo aviso.',
