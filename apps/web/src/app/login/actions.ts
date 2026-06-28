@@ -32,6 +32,6 @@ export async function loginAction(
   const safe =
     typeof next === 'string' && next.startsWith('/') && !next.startsWith('//')
       ? next
-      : '/';
+      : '/panel';
   redirect(safe);
 }
