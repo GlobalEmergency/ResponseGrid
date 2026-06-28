@@ -44,9 +44,6 @@ import { JwtTokenService } from './jwt-token.service';
 import { JwtAuthGuard } from './http/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from './http/optional-jwt-auth.guard';
 import { RequireAdminGuard } from './http/require-admin.guard';
-import { RequireCoordinatorGuard } from './http/require-coordinator.guard';
-import { RequireResourceCoordinatorGuard } from './http/require-resource-coordinator.guard';
-import { RequireNeedCoordinatorGuard } from './http/require-need-coordinator.guard';
 import { DrizzleResourceEmergencyLookup } from './drizzle/drizzle-resource-emergency-lookup';
 import { DrizzleNeedEmergencyLookup } from './drizzle/drizzle-need-emergency-lookup';
 import { DrizzleOfferEmergencyLookup } from './drizzle/drizzle-offer-emergency-lookup';
@@ -62,20 +59,16 @@ import {
   OFFER_EMERGENCY_LOOKUP,
   OfferEmergencyLookup,
 } from '../domain/ports/offer-emergency-lookup';
-import { RequireOfferCoordinatorGuard } from './http/require-offer-coordinator.guard';
-import { RequireVolunteerCoordinatorGuard } from './http/require-volunteer-coordinator.guard';
 import { DrizzleVolunteerEmergencyLookup } from './drizzle/drizzle-volunteer-emergency-lookup';
 import {
   VOLUNTEER_EMERGENCY_LOOKUP,
   VolunteerEmergencyLookup,
 } from '../domain/ports/volunteer-emergency-lookup';
-import { RequireTaskCoordinatorGuard } from './http/require-task-coordinator.guard';
 import { DrizzleTaskEmergencyLookup } from './drizzle/drizzle-task-emergency-lookup';
 import {
   TASK_EMERGENCY_LOOKUP,
   TaskEmergencyLookup,
 } from '../domain/ports/task-emergency-lookup';
-import { RequireReportCoordinatorGuard } from './http/require-report-coordinator.guard';
 import { DrizzleReportEmergencyLookup } from './drizzle/drizzle-report-emergency-lookup';
 import {
   REPORT_EMERGENCY_LOOKUP,
@@ -267,13 +260,6 @@ const authenticateWithProviderProvider = {
     JwtAuthGuard,
     OptionalJwtAuthGuard,
     RequireAdminGuard,
-    RequireCoordinatorGuard,
-    RequireResourceCoordinatorGuard,
-    RequireNeedCoordinatorGuard,
-    RequireOfferCoordinatorGuard,
-    RequireVolunteerCoordinatorGuard,
-    RequireTaskCoordinatorGuard,
-    RequireReportCoordinatorGuard,
     GoogleStrategy,
     FacebookStrategy,
   ],
@@ -294,13 +280,6 @@ const authenticateWithProviderProvider = {
     JwtAuthGuard,
     OptionalJwtAuthGuard,
     RequireAdminGuard,
-    RequireCoordinatorGuard,
-    RequireResourceCoordinatorGuard,
-    RequireNeedCoordinatorGuard,
-    RequireOfferCoordinatorGuard,
-    RequireVolunteerCoordinatorGuard,
-    RequireTaskCoordinatorGuard,
-    RequireReportCoordinatorGuard,
     JwtModule,
   ],
 })

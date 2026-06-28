@@ -20,10 +20,6 @@ import {
 import { DrizzleMissingPersonReportRepository } from './drizzle/drizzle-missing-person-report.repository';
 import { DrizzleEmergencyStatusReader } from '../../../shared/drizzle-emergency-status-reader';
 import { IdentityModule } from '../../identity/infrastructure/identity.module';
-import {
-  REUNIFICATION_REPORT_EMERGENCY_LOOKUP,
-  RequireReunificationReportCoordinatorGuard,
-} from '../../identity/infrastructure/http/require-reunification-report-coordinator.guard';
 import { OptionalJwtAuthGuard } from '../../identity/infrastructure/http/optional-jwt-auth.guard';
 
 // ── Repository providers ─────────────────────────────────────────────────────
@@ -40,16 +36,6 @@ const emergencyStatusReaderProvider = {
   inject: [DB],
   useFactory: (db: Db): ReunificationEmergencyStatusReader =>
     new DrizzleEmergencyStatusReader(db),
-};
-
-// ── Entity coordinator guard (lookup via repository) ─────────────────────────
-
-const reportEmergencyLookupProvider = {
-  provide: REUNIFICATION_REPORT_EMERGENCY_LOOKUP,
-  inject: [MISSING_PERSON_REPORT_REPOSITORY],
-  useFactory: (repo: MissingPersonReportRepository) => ({
-    findEmergencyId: (reportId: string) => repo.findEmergencyId(reportId),
-  }),
 };
 
 // ── Use case providers ───────────────────────────────────────────────────────
@@ -113,8 +99,6 @@ const getMyReportsProvider = {
   providers: [
     reportRepositoryProvider,
     emergencyStatusReaderProvider,
-    reportEmergencyLookupProvider,
-    RequireReunificationReportCoordinatorGuard,
     OptionalJwtAuthGuard,
     createReportProvider,
     listReportsProvider,
