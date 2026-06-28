@@ -1,8 +1,11 @@
 import { and, asc, between, count, eq, inArray, sql } from 'drizzle-orm';
+import { randomUUID } from 'node:crypto';
 import { Db } from '../../../../shared/db';
-import { resourcesTable } from './schema';
+import { resourcesTable, resourceItemsTable } from './schema';
 import { ResourceRepository } from '../../domain/ports/resource.repository';
 import { Resource, ResourceSnapshot, Provenance } from '../../domain/resource';
+import { SupplyLineSnapshot } from '../../../supplies/domain/supply-line';
+import { Category } from '../../../supplies/domain/category';
 import { ResourceId } from '../../domain/resource-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import {
@@ -13,6 +16,17 @@ import {
 } from '../../domain/resource-enums';
 
 type Row = typeof resourcesTable.$inferSelect;
+type ItemsRow = typeof resourceItemsTable.$inferSelect;
+
+function itemsToSnapshots(items: ItemsRow[]): SupplyLineSnapshot[] {
+  return items.map((i) => ({
+    name: i.name,
+    quantity: i.quantity,
+    unit: i.unit ?? null,
+    category: i.category as Category,
+    presentation: i.presentation ?? null,
+  }));
+}
 
 /** Operational statuses a resource must be in to appear in any public read. */
 const PUBLICLY_VISIBLE_STATUSES = [
@@ -137,6 +151,9 @@ function rawRowToSnapshot(row: RawRow): ResourceSnapshot {
     provenance,
     isFinalRecipient: row.is_final_recipient ?? false,
     recipientType: row.recipient_type ?? null,
+    // Raw SQL paths (nearby) power the map, which does not render inventory —
+    // items are intentionally not hydrated here to keep the payload lean.
+    items: [],
   };
 }
 
@@ -152,7 +169,7 @@ function rowToProvenance(row: Row): Provenance | null {
   };
 }
 
-function rowToSnapshot(row: Row): ResourceSnapshot {
+function rowToSnapshot(row: Row, items: ItemsRow[] = []): ResourceSnapshot {
   return {
     id: row.id,
     emergencyId: row.emergencyId,
@@ -179,50 +196,46 @@ function rowToSnapshot(row: Row): ResourceSnapshot {
     provenance: rowToProvenance(row),
     isFinalRecipient: row.isFinalRecipient ?? false,
     recipientType: row.recipientType ?? null,
+    items: itemsToSnapshots(items),
   };
 }
 
 export class DrizzleResourceRepository implements ResourceRepository {
   constructor(private readonly db: Db) {}
 
+  /**
+   * Load the declared inventory of a single resource. Only the single-resource
+   * lookups (findById/findByExternal) hydrate items: the detail page renders
+   * inventory, and ingest must preserve it across re-imports. List/map paths
+   * deliberately skip this to keep their payloads lean.
+   */
+  private loadItems(resourceId: string): Promise<ItemsRow[]> {
+    return this.db
+      .select()
+      .from(resourceItemsTable)
+      .where(eq(resourceItemsTable.resourceId, resourceId));
+  }
+
   async save(resource: Resource): Promise<void> {
     const s = resource.toSnapshot();
-    await this.db
-      .insert(resourcesTable)
-      .values({
-        id: s.id,
-        emergencyId: s.emergencyId,
-        type: s.type,
-        stage: s.stage,
-        name: s.name,
-        description: s.description,
-        address: s.location.address,
-        latitude: s.location.latitude,
-        longitude: s.location.longitude,
-        ownerUserId: s.ownerUserId,
-        ownerOrganizationId: s.ownerOrganizationId,
-        verificationLevel: s.verificationLevel,
-        publicStatus: s.publicStatus,
-        createdAt: s.createdAt,
-        contact: s.contact,
-        schedule: s.schedule,
-        manager: s.manager,
-        accepts: s.accepts,
-        country: s.country,
-        city: s.city,
-        sourceName: s.provenance?.sourceName ?? null,
-        externalId: s.provenance?.externalId ?? null,
-        externalUpdatedAt: s.provenance?.externalUpdatedAt ?? null,
-        raw: s.provenance?.raw ?? null,
-        isFinalRecipient: s.isFinalRecipient,
-        recipientType: s.recipientType,
-      })
-      .onConflictDoUpdate({
-        target: resourcesTable.id,
-        set: {
+    await this.db.transaction(async (tx) => {
+      await tx
+        .insert(resourcesTable)
+        .values({
+          id: s.id,
+          emergencyId: s.emergencyId,
+          type: s.type,
+          stage: s.stage,
+          name: s.name,
+          description: s.description,
+          address: s.location.address,
+          latitude: s.location.latitude,
+          longitude: s.location.longitude,
+          ownerUserId: s.ownerUserId,
+          ownerOrganizationId: s.ownerOrganizationId,
           verificationLevel: s.verificationLevel,
           publicStatus: s.publicStatus,
-          name: s.name,
+          createdAt: s.createdAt,
           contact: s.contact,
           schedule: s.schedule,
           manager: s.manager,
@@ -235,8 +248,48 @@ export class DrizzleResourceRepository implements ResourceRepository {
           raw: s.provenance?.raw ?? null,
           isFinalRecipient: s.isFinalRecipient,
           recipientType: s.recipientType,
-        },
-      });
+        })
+        .onConflictDoUpdate({
+          target: resourcesTable.id,
+          set: {
+            verificationLevel: s.verificationLevel,
+            publicStatus: s.publicStatus,
+            name: s.name,
+            contact: s.contact,
+            schedule: s.schedule,
+            manager: s.manager,
+            accepts: s.accepts,
+            country: s.country,
+            city: s.city,
+            sourceName: s.provenance?.sourceName ?? null,
+            externalId: s.provenance?.externalId ?? null,
+            externalUpdatedAt: s.provenance?.externalUpdatedAt ?? null,
+            raw: s.provenance?.raw ?? null,
+            isFinalRecipient: s.isFinalRecipient,
+            recipientType: s.recipientType,
+          },
+        });
+
+      // Sync inventory items: delete existing then re-insert (clean replace),
+      // mirroring the need_items strategy.
+      await tx
+        .delete(resourceItemsTable)
+        .where(eq(resourceItemsTable.resourceId, s.id));
+
+      if (s.items.length > 0) {
+        await tx.insert(resourceItemsTable).values(
+          s.items.map((item) => ({
+            id: randomUUID(),
+            resourceId: s.id,
+            name: item.name,
+            quantity: item.quantity,
+            unit: item.unit,
+            category: item.category,
+            presentation: item.presentation ?? null,
+          })),
+        );
+      }
+    });
   }
 
   async findById(id: ResourceId): Promise<Resource | null> {
@@ -245,7 +298,9 @@ export class DrizzleResourceRepository implements ResourceRepository {
       .from(resourcesTable)
       .where(eq(resourcesTable.id, id.value))
       .limit(1);
-    return rows[0] ? Resource.fromSnapshot(rowToSnapshot(rows[0])) : null;
+    if (!rows[0]) return null;
+    const items = await this.loadItems(rows[0].id);
+    return Resource.fromSnapshot(rowToSnapshot(rows[0], items));
   }
 
   async findPendingByEmergency(emergencyId: EmergencyId): Promise<Resource[]> {
@@ -374,7 +429,9 @@ export class DrizzleResourceRepository implements ResourceRepository {
         ),
       )
       .limit(1);
-    return rows[0] ? Resource.fromSnapshot(rowToSnapshot(rows[0])) : null;
+    if (!rows[0]) return null;
+    const items = await this.loadItems(rows[0].id);
+    return Resource.fromSnapshot(rowToSnapshot(rows[0], items));
   }
 
   async findVisiblePaged(

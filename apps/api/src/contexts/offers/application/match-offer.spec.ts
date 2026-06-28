@@ -2,7 +2,7 @@ import { MatchOffer, OfferNeedEmergencyMismatchError } from './match-offer';
 import { SubmitOffer } from './submit-offer';
 import { InMemoryOfferRepository } from '../infrastructure/in-memory-offer.repository';
 import { FakeOfferEventBus } from '../infrastructure/fake-event-bus';
-import { NeedCategory, OfferStatus } from '../domain/offer-enums';
+import { Category, OfferStatus } from '../domain/offer-enums';
 import { OfferNotFoundError } from './offer-not-found.error';
 import { OfferEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { NeedLookup } from '../domain/ports/need-lookup';
@@ -59,7 +59,7 @@ async function createOpenOffer(
     emergencyId: EM,
     donorUserId: USER_ID,
     donorOrganizationId: null,
-    category: NeedCategory.Food,
+    category: Category.Food,
     description: 'Rice bags',
     quantity: 20,
     unit: null,

@@ -2,6 +2,8 @@ import { ResourceRepository } from '../domain/ports/resource.repository';
 import { EventBus } from '../domain/ports/event-bus';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { Resource, Provenance } from '../domain/resource';
+import { SupplyLine } from '../../supplies/domain/supply-line';
+import { Category } from '../../supplies/domain/category';
 import { ResourceId } from '../domain/resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { ResourceType, ResourceStage } from '../domain/resource-enums';
@@ -30,6 +32,14 @@ export interface RegisterResourceCommand {
   // destinatario final (#60)
   isFinalRecipient?: boolean;
   recipientType?: string | null;
+  // inventario declarado del lugar (líneas de insumo / qué material tiene)
+  items?: Array<{
+    name: string;
+    quantity: number;
+    unit?: string | null;
+    category: Category;
+    presentation?: string | null;
+  }>;
 }
 
 export class RegisterResource {
@@ -67,6 +77,15 @@ export class RegisterResource {
       provenance: cmd.provenance ?? null,
       isFinalRecipient: cmd.isFinalRecipient ?? false,
       recipientType: cmd.recipientType ?? null,
+      items: (cmd.items ?? []).map((i) =>
+        SupplyLine.create({
+          name: i.name,
+          quantity: i.quantity,
+          unit: i.unit ?? null,
+          category: i.category,
+          presentation: i.presentation ?? null,
+        }),
+      ),
     });
     await this.repo.save(resource);
     await this.bus.publish(resource.pullDomainEvents());

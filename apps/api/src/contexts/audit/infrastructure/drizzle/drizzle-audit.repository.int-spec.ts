@@ -102,6 +102,7 @@ describe('DrizzleAuditRepository (integration)', () => {
     const older = AuditEntry.fromSnapshot({
       id: randomUUID(),
       actorUserId: USER_A,
+      actorName: null,
       action: 'resource.create',
       entityType: 'resource',
       entityId: randomUUID(),
@@ -109,11 +110,15 @@ describe('DrizzleAuditRepository (integration)', () => {
       method: 'POST',
       path: '/resources',
       statusCode: 201,
+      reason: null,
+      changes: null,
+      targetStatus: null,
       createdAt: new Date('2025-01-01T00:00:00Z'),
     });
     const newer = AuditEntry.fromSnapshot({
       id: randomUUID(),
       actorUserId: USER_A,
+      actorName: null,
       action: 'resource.verify',
       entityType: 'resource',
       entityId: randomUUID(),
@@ -121,6 +126,9 @@ describe('DrizzleAuditRepository (integration)', () => {
       method: 'POST',
       path: '/resources/x/verify',
       statusCode: 204,
+      reason: null,
+      changes: null,
+      targetStatus: null,
       createdAt: new Date('2025-01-02T00:00:00Z'),
     });
 
@@ -151,5 +159,25 @@ describe('DrizzleAuditRepository (integration)', () => {
     await repo.save(entry);
     const results = await repo.findAll({});
     expect(results[0].actorUserId).toBeNull();
+  });
+
+  it('round-trips the traceability fields (actorName, reason, changes, targetStatus)', async () => {
+    const entry = makeEntry({
+      action: 'need.discard',
+      entityType: 'need',
+      actorName: 'Coordinadora Ana',
+      reason: 'Duplicada de otra petición ya validada',
+      changes: [{ field: 'status', before: 'pending', after: 'rejected' }],
+      targetStatus: 'rejected',
+    });
+    await repo.save(entry);
+
+    const [found] = await repo.findAll({});
+    expect(found.actorName).toBe('Coordinadora Ana');
+    expect(found.reason).toBe('Duplicada de otra petición ya validada');
+    expect(found.targetStatus).toBe('rejected');
+    expect(found.changes).toEqual([
+      { field: 'status', before: 'pending', after: 'rejected' },
+    ]);
   });
 });

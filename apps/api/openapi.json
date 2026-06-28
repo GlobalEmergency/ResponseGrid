@@ -890,6 +890,112 @@
         ]
       }
     },
+    "/resources/{resourceId}": {
+      "patch": {
+        "operationId": "ResourcesController_editResourceFields",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "Resource UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditResourceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Resource edited"
+          },
+          "400": {
+            "description": "Missing reason or resource is discarded"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Validator/coordinator role required"
+          },
+          "404": {
+            "description": "Resource not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit a resource during verification (validator/coordinator). Requires a reason; recorded in the audit trail.",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
+    "/resources/{resourceId}/discard": {
+      "post": {
+        "operationId": "ResourcesController_discardResourceAction",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "Resource UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscardResourceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Resource discarded"
+          },
+          "400": {
+            "description": "Missing reason or resource is not pending verification"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Validator/coordinator role required"
+          },
+          "404": {
+            "description": "Resource not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Discard a resource during verification (validator/coordinator). Requires a reason; recorded in the audit trail.",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
     "/resources/{resourceId}/status": {
       "post": {
         "operationId": "ResourcesController_updateResourceStatus",
@@ -1390,7 +1496,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ResourceViewDto"
+                  "$ref": "#/components/schemas/ResourceDetailViewDto"
                 }
               }
             }
@@ -1955,9 +2061,10 @@
             "description": "Filter by item category (needs with at least one item of this category)",
             "schema": {
               "enum": [
-                "hygiene",
-                "water",
                 "food",
+                "water",
+                "hygiene",
+                "clothing",
                 "medical",
                 "shelter",
                 "tools",
@@ -2212,9 +2319,10 @@
             "description": "Filter by item category (needs with at least one item of this category)",
             "schema": {
               "enum": [
-                "hygiene",
-                "water",
                 "food",
+                "water",
+                "hygiene",
+                "clothing",
                 "medical",
                 "shelter",
                 "tools",
@@ -2313,6 +2421,112 @@
           }
         ],
         "summary": "Validate a need (coordinator of the need's emergency only)",
+        "tags": [
+          "needs"
+        ]
+      }
+    },
+    "/needs/{needId}": {
+      "patch": {
+        "operationId": "NeedsController_edit",
+        "parameters": [
+          {
+            "name": "needId",
+            "required": true,
+            "in": "path",
+            "description": "Need UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditNeedDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Need edited"
+          },
+          "400": {
+            "description": "Missing reason or need is in a terminal status"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Validator/coordinator role required"
+          },
+          "404": {
+            "description": "Need not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit a need during validation (validator/coordinator). Requires a reason; recorded in the audit trail.",
+        "tags": [
+          "needs"
+        ]
+      }
+    },
+    "/needs/{needId}/discard": {
+      "post": {
+        "operationId": "NeedsController_discard",
+        "parameters": [
+          {
+            "name": "needId",
+            "required": true,
+            "in": "path",
+            "description": "Need UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscardNeedDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Need discarded (rejected)"
+          },
+          "400": {
+            "description": "Missing reason or need is not in pending status"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Validator/coordinator role required"
+          },
+          "404": {
+            "description": "Need not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Discard a need during validation (validator/coordinator). Requires a reason; recorded in the audit trail.",
         "tags": [
           "needs"
         ]
@@ -3323,6 +3537,112 @@
         ]
       }
     },
+    "/offers/{offerId}": {
+      "patch": {
+        "operationId": "OffersController_edit",
+        "parameters": [
+          {
+            "name": "offerId",
+            "required": true,
+            "in": "path",
+            "description": "Offer UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditOfferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Offer edited"
+          },
+          "400": {
+            "description": "Missing reason or offer is in a terminal status"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Offer not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit a donation offer (coordinator). Requires a reason; recorded in the audit trail.",
+        "tags": [
+          "offers"
+        ]
+      }
+    },
+    "/offers/{offerId}/discard": {
+      "post": {
+        "operationId": "OffersController_discard",
+        "parameters": [
+          {
+            "name": "offerId",
+            "required": true,
+            "in": "path",
+            "description": "Offer UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscardOfferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Offer discarded (cancelled)"
+          },
+          "400": {
+            "description": "Missing reason or offer cannot be discarded in its status"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Offer not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Discard a donation offer (coordinator). Requires a reason; recorded in the audit trail.",
+        "tags": [
+          "offers"
+        ]
+      }
+    },
     "/offers/{offerId}/fulfill": {
       "post": {
         "operationId": "OffersController_fulfill",
@@ -4055,6 +4375,398 @@
           }
         ],
         "summary": "List transport capacities for an emergency (coordinator/verifier)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments": {
+      "post": {
+        "operationId": "ShipmentController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateShipmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Shipment created (planned)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateShipmentResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not a coordinator of the emergency"
+          },
+          "409": {
+            "description": "Emergency is not accepting intake (paused/closed)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a shipment / expedición (coordinator)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments/{id}/assign-capacity": {
+      "post": {
+        "operationId": "ShipmentController_assignCapacity",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipment UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignCapacityToShipmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Capacity assigned"
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not a coordinator of the shipment emergency"
+          },
+          "404": {
+            "description": "Shipment not found"
+          },
+          "409": {
+            "description": "Shipment is not in planned status"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assign a transport capacity (and optional carrier) (coordinator)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments/{id}/in-transit": {
+      "post": {
+        "operationId": "ShipmentController_markInTransit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipment UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Shipment marked in transit"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Only the assigned carrier or a coordinator can act"
+          },
+          "404": {
+            "description": "Shipment not found"
+          },
+          "409": {
+            "description": "Shipment is not in assigned status"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark a shipment in transit (assigned carrier or coordinator)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments/{id}/deliver": {
+      "post": {
+        "operationId": "ShipmentController_deliver",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipment UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Shipment delivered"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Only the assigned carrier or a coordinator can act"
+          },
+          "404": {
+            "description": "Shipment not found"
+          },
+          "409": {
+            "description": "Shipment is not in transit"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Confirm a shipment delivery (assigned carrier or coordinator)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments/{id}/cancel": {
+      "post": {
+        "operationId": "ShipmentController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipment UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Shipment cancelled"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not a coordinator of the shipment emergency"
+          },
+          "404": {
+            "description": "Shipment not found"
+          },
+          "409": {
+            "description": "Shipment cannot be cancelled in its current status"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel a shipment (coordinator)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments/mine": {
+      "get": {
+        "operationId": "ShipmentController_listMine",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": false,
+            "in": "query",
+            "description": "Optional emergency scope; omit to list across emergencies",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "My shipments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShipmentViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List my shipments as a carrier (\"mis expediciones\")",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/logistics/shipments": {
+      "get": {
+        "operationId": "ShipmentController_list",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "planned",
+                "assigned",
+                "in_transit",
+                "delivered",
+                "failed",
+                "cancelled"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Shipments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShipmentViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing shipment:read permission"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List shipments for an emergency (coordinator/verifier)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments/{id}/capacity-suggestions": {
+      "get": {
+        "operationId": "ShipmentController_capacitySuggestions",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipment UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Compatible capacities ranked by proximity/coverage fit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CapacityViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not a coordinator of the shipment emergency"
+          },
+          "404": {
+            "description": "Shipment not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Suggest compatible transport capacities for a shipment, ranked (coordinator)",
         "tags": [
           "logistics"
         ]
@@ -4990,6 +5702,108 @@
         ]
       }
     },
+    "/reports/{reportId}": {
+      "patch": {
+        "operationId": "ReportsController_edit",
+        "parameters": [
+          {
+            "name": "reportId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Report edited"
+          },
+          "400": {
+            "description": "Missing reason or report is closed"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Report not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar un reporte durante el triaje (coordinador). Requiere un motivo; se registra en la trazabilidad.",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/reports/{reportId}/discard": {
+      "post": {
+        "operationId": "ReportsController_discard",
+        "parameters": [
+          {
+            "name": "reportId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscardReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Report discarded (closed)"
+          },
+          "400": {
+            "description": "Missing reason or report already closed"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Report not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Descartar un reporte durante el triaje (coordinador). Requiere un motivo; se registra en la trazabilidad.",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
     "/emergencies/{emergencyId}/reports/mine": {
       "get": {
         "operationId": "ReportsController_mine",
@@ -5095,6 +5909,88 @@
           }
         ],
         "summary": "List audit log entries (audit:read)",
+        "tags": [
+          "audit"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/audit": {
+      "get": {
+        "operationId": "EmergencyAuditController_list",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "actorUserId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by actor user ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityType",
+            "required": false,
+            "in": "query",
+            "description": "Filter by entity type (e.g. resource, need)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max results to return (default 100, max 500)",
+            "schema": {
+              "default": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset for pagination (default 0)",
+            "schema": {
+              "default": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "audit:read required (coordinator of this emergency)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Activity trail for an emergency — coordinators of the emergency only",
         "tags": [
           "audit"
         ]
@@ -5491,6 +6387,31 @@
         "summary": "Appoint a member as co-manager (delegated, attenuated)",
         "tags": [
           "groups"
+        ]
+      }
+    },
+    "/categories": {
+      "get": {
+        "operationId": "CategoriesController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The category taxonomy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "List the shared category taxonomy (slug + labels + hierarchy)",
+        "tags": [
+          "categories"
         ]
       }
     }
@@ -6090,6 +7011,54 @@
           "longitude"
         ]
       },
+      "SupplyLineDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Water bottles",
+            "description": "Name of the supply"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 100,
+            "description": "Quantity (positive integer)"
+          },
+          "unit": {
+            "type": "string",
+            "example": "liters",
+            "description": "Unit of measurement (optional)"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "food",
+              "water",
+              "hygiene",
+              "clothing",
+              "medical",
+              "shelter",
+              "tools",
+              "other",
+              "medicines",
+              "medical_equipment",
+              "medical_supplies",
+              "medical_personnel"
+            ],
+            "example": "water"
+          },
+          "presentation": {
+            "type": "string",
+            "example": "ampolla",
+            "description": "Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe… Optional, free-form (#61)."
+          }
+        },
+        "required": [
+          "name",
+          "quantity",
+          "category"
+        ]
+      },
       "RegisterResourceDto": {
         "type": "object",
         "properties": {
@@ -6184,6 +7153,13 @@
             "type": "string",
             "example": "hospital",
             "description": "Recipient type slug (see the emergency recipient-type taxonomy)"
+          },
+          "items": {
+            "description": "Declared inventory: the supply lines this place holds for delivery (optional)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyLineDto"
+            }
           }
         },
         "required": [
@@ -6209,6 +7185,56 @@
       "VerifyResourceDto": {
         "type": "object",
         "properties": {}
+      },
+      "EditResourceDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Motivo de la edición (obligatorio, para trazabilidad)",
+            "minLength": 3,
+            "maxLength": 1000,
+            "example": "Se corrige el nombre y se completa el horario"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nuevo nombre (omitir para no cambiarlo)",
+            "minLength": 2
+          },
+          "description": {
+            "type": "string",
+            "description": "Nueva descripción. Cadena vacía la borra. Omitir para no cambiarla.",
+            "nullable": true
+          },
+          "contact": {
+            "type": "string",
+            "description": "Nuevo contacto. Cadena vacía lo borra. Omitir para no cambiarlo.",
+            "nullable": true
+          },
+          "schedule": {
+            "type": "string",
+            "description": "Nuevo horario. Cadena vacía lo borra. Omitir para no cambiarlo.",
+            "nullable": true
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "DiscardResourceDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Motivo del descarte (obligatorio, para trazabilidad)",
+            "minLength": 3,
+            "maxLength": 1000,
+            "example": "Punto duplicado / fuera del ámbito de la emergencia"
+          }
+        },
+        "required": [
+          "reason"
+        ]
       },
       "UpdateResourcePublicStatusDto": {
         "type": "object",
@@ -6298,7 +7324,8 @@
             "enum": [
               "unverified",
               "verified",
-              "official"
+              "official",
+              "rejected"
             ],
             "example": "verified"
           },
@@ -6475,7 +7502,8 @@
             "enum": [
               "unverified",
               "verified",
-              "official"
+              "official",
+              "rejected"
             ],
             "example": "verified"
           },
@@ -6637,6 +7665,167 @@
           "byCategory",
           "byCountry",
           "total"
+        ]
+      },
+      "ResourceDetailViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "collection_point",
+              "delivery_point",
+              "collection_and_delivery",
+              "warehouse",
+              "transport",
+              "supplier",
+              "venue"
+            ],
+            "example": "collection_point"
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "origin",
+              "intermediate",
+              "destination"
+            ],
+            "example": "origin"
+          },
+          "name": {
+            "type": "string",
+            "example": "Cruz Roja Madrid"
+          },
+          "description": {
+            "type": "string",
+            "example": "Centro de acopio principal",
+            "nullable": true
+          },
+          "location": {
+            "$ref": "#/components/schemas/LocationViewDto"
+          },
+          "verificationLevel": {
+            "type": "string",
+            "enum": [
+              "unverified",
+              "verified",
+              "official",
+              "rejected"
+            ],
+            "example": "verified"
+          },
+          "publicStatus": {
+            "type": "string",
+            "enum": [
+              "hidden",
+              "active",
+              "saturated",
+              "paused",
+              "closed"
+            ],
+            "example": "active"
+          },
+          "ownerOrganizationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "accepts": {
+            "example": [
+              "water",
+              "food"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contact": {
+            "type": "string",
+            "example": "+58 212 555 0000",
+            "nullable": true
+          },
+          "schedule": {
+            "type": "string",
+            "example": "Lun-Vie 08-18",
+            "nullable": true
+          },
+          "manager": {
+            "type": "string",
+            "example": "Juan Pérez",
+            "nullable": true
+          },
+          "sourceName": {
+            "type": "string",
+            "example": "acopiove.org",
+            "nullable": true
+          },
+          "externalUpdatedAt": {
+            "type": "string",
+            "example": "2026-06-27T00:00:00.000Z",
+            "description": "ISO 8601 date string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "example": "Venezuela",
+            "description": "Country string as stored by the ingestion source (e.g. full Spanish name \"Venezuela\"). NOT guaranteed to be an ISO 3166-1 alpha-2 code — value depends on the source `pais` field.",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "example": "Caracas",
+            "nullable": true
+          },
+          "isFinalRecipient": {
+            "type": "boolean",
+            "example": false,
+            "description": "Whether this resource is a final recipient of aid"
+          },
+          "recipientType": {
+            "type": "string",
+            "example": "hospital",
+            "nullable": true,
+            "description": "Recipient type slug (see the emergency recipient-type taxonomy)"
+          },
+          "inventoryCategories": {
+            "example": [
+              "water",
+              "hygiene"
+            ],
+            "description": "Distinct categories of material this place has declared",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "stage",
+          "name",
+          "description",
+          "location",
+          "verificationLevel",
+          "publicStatus",
+          "ownerOrganizationId",
+          "accepts",
+          "contact",
+          "schedule",
+          "manager",
+          "sourceName",
+          "externalUpdatedAt",
+          "country",
+          "city",
+          "isFinalRecipient",
+          "recipientType",
+          "inventoryCategories"
         ]
       },
       "RecipientTypeDto": {
@@ -7002,53 +8191,6 @@
           "longitude"
         ]
       },
-      "NeedItemDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "example": "Water bottles",
-            "description": "Name of the item needed"
-          },
-          "quantity": {
-            "type": "number",
-            "example": 100,
-            "description": "Quantity needed (positive integer)"
-          },
-          "unit": {
-            "type": "string",
-            "example": "liters",
-            "description": "Unit of measurement (optional)"
-          },
-          "category": {
-            "type": "string",
-            "enum": [
-              "hygiene",
-              "water",
-              "food",
-              "medical",
-              "shelter",
-              "tools",
-              "other",
-              "medicines",
-              "medical_equipment",
-              "medical_supplies",
-              "medical_personnel"
-            ],
-            "example": "water"
-          },
-          "presentation": {
-            "type": "string",
-            "example": "ampolla",
-            "description": "Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe, oxígeno… Optional, free-form (#61)."
-          }
-        },
-        "required": [
-          "name",
-          "quantity",
-          "category"
-        ]
-      },
       "CreateNeedDto": {
         "type": "object",
         "properties": {
@@ -7085,7 +8227,7 @@
             "minItems": 1,
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/NeedItemDto"
+              "$ref": "#/components/schemas/SupplyLineDto"
             }
           },
           "requiredSkill": {
@@ -7165,7 +8307,7 @@
           "longitude"
         ]
       },
-      "NeedItemResponseDto": {
+      "SupplyLineResponseDto": {
         "type": "object",
         "properties": {
           "name": {
@@ -7184,9 +8326,10 @@
           "category": {
             "type": "string",
             "enum": [
-              "hygiene",
-              "water",
               "food",
+              "water",
+              "hygiene",
+              "clothing",
               "medical",
               "shelter",
               "tools",
@@ -7268,7 +8411,7 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/NeedItemResponseDto"
+              "$ref": "#/components/schemas/SupplyLineResponseDto"
             }
           },
           "status": {
@@ -7393,7 +8536,7 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/NeedItemResponseDto"
+              "$ref": "#/components/schemas/SupplyLineResponseDto"
             }
           },
           "status": {
@@ -7493,6 +8636,56 @@
         },
         "required": [
           "items"
+        ]
+      },
+      "EditNeedDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Motivo de la edición (obligatorio, para trazabilidad)",
+            "minLength": 3,
+            "maxLength": 1000,
+            "example": "Se corrige la prioridad y se completa la descripción"
+          },
+          "title": {
+            "type": "string",
+            "description": "Nuevo título (omitir para no cambiarlo)",
+            "minLength": 2
+          },
+          "description": {
+            "type": "string",
+            "description": "Nueva descripción. Cadena vacía la borra. Omitir para no cambiarla.",
+            "nullable": true
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "urgent"
+            ],
+            "description": "Nueva prioridad"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "DiscardNeedDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Motivo del descarte (obligatorio, para trazabilidad)",
+            "minLength": 3,
+            "maxLength": 1000,
+            "example": "Petición duplicada; ya validada en otra entrada"
+          }
+        },
+        "required": [
+          "reason"
         ]
       },
       "AssignNeedManagerDto": {
@@ -7988,9 +9181,10 @@
           "category": {
             "type": "string",
             "enum": [
-              "hygiene",
-              "water",
               "food",
+              "water",
+              "hygiene",
+              "clothing",
               "medical",
               "shelter",
               "tools",
@@ -8101,9 +9295,10 @@
           "category": {
             "type": "string",
             "enum": [
-              "hygiene",
-              "water",
               "food",
+              "water",
+              "hygiene",
+              "clothing",
               "medical",
               "shelter",
               "tools",
@@ -8191,15 +9386,66 @@
           "needId"
         ]
       },
+      "EditOfferDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Motivo de la edición (obligatorio, para trazabilidad)",
+            "minLength": 3,
+            "maxLength": 1000,
+            "example": "Se corrige la cantidad y se completa la descripción"
+          },
+          "description": {
+            "type": "string",
+            "description": "Nueva descripción (omitir para no cambiarla)",
+            "minLength": 2
+          },
+          "quantity": {
+            "type": "number",
+            "example": 20,
+            "description": "Nueva cantidad (entero positivo). Omitir para no cambiarla."
+          },
+          "unit": {
+            "type": "string",
+            "description": "Nueva unidad. Cadena vacía la borra. Omitir para no cambiarla.",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "description": "Nuevas notas. Cadena vacía las borra. Omitir para no cambiarlas.",
+            "nullable": true
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "DiscardOfferDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Motivo del descarte (obligatorio, para trazabilidad)",
+            "minLength": 3,
+            "maxLength": 1000,
+            "example": "Oferta duplicada; ya gestionada en otra entrada"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
       "DonationIntakeItemDto": {
         "type": "object",
         "properties": {
           "category": {
             "type": "string",
             "enum": [
-              "hygiene",
-              "water",
               "food",
+              "water",
+              "hygiene",
+              "clothing",
               "medical",
               "shelter",
               "tools",
@@ -8408,9 +9654,10 @@
           "category": {
             "type": "string",
             "enum": [
-              "hygiene",
-              "water",
               "food",
+              "water",
+              "hygiene",
+              "clothing",
               "medical",
               "shelter",
               "tools",
@@ -8966,6 +10213,251 @@
           "updatedAt"
         ]
       },
+      "ShipmentItemDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "example": "5 cajas de agua",
+            "description": "What moves"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 5,
+            "description": "How much (positive). Optional — cargo is often loose.",
+            "nullable": true
+          },
+          "unit": {
+            "type": "string",
+            "example": "cajas",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "food",
+              "water",
+              "hygiene",
+              "clothing",
+              "medical",
+              "shelter",
+              "tools",
+              "other",
+              "medicines",
+              "medical_equipment",
+              "medical_supplies",
+              "medical_personnel"
+            ],
+            "example": "food",
+            "description": "Shared category taxonomy (optional — cargo may be loose)"
+          }
+        },
+        "required": [
+          "description"
+        ]
+      },
+      "CreateShipmentDto": {
+        "type": "object",
+        "properties": {
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Emergency this shipment serves"
+          },
+          "originResourceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Origin resource node (collection point) id"
+          },
+          "destinationResourceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Destination resource node id"
+          },
+          "items": {
+            "description": "Cargo manifest lines (at least one)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentItemDto"
+            }
+          },
+          "manifest": {
+            "type": "string",
+            "example": "Carga frágil, manipular con cuidado",
+            "description": "Free-text cargo manifest note"
+          }
+        },
+        "required": [
+          "emergencyId",
+          "originResourceId",
+          "destinationResourceId",
+          "items"
+        ]
+      },
+      "CreateShipmentResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "AssignShipmentCarrierDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "volunteer",
+              "organization"
+            ],
+            "example": "volunteer"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Volunteer or organization id (polymorphic, no FK)"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ]
+      },
+      "AssignCapacityToShipmentDto": {
+        "type": "object",
+        "properties": {
+          "assignedCapacityId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "TransportCapacity (#105) to earmark for this shipment"
+          },
+          "carrier": {
+            "description": "Optional carrier. Omit for an internal inventory transfer (no carrier).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AssignShipmentCarrierDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "assignedCapacityId"
+        ]
+      },
+      "ShipmentItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "example": "5 cajas de agua"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 5,
+            "nullable": true
+          },
+          "unit": {
+            "type": "string",
+            "example": "cajas",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "example": "alimentacion",
+            "nullable": true
+          }
+        },
+        "required": [
+          "description"
+        ]
+      },
+      "ShipmentViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originResourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationResourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentItemResponseDto"
+            }
+          },
+          "assignedCapacityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "carrierType": {
+            "type": "string",
+            "enum": [
+              "volunteer",
+              "organization"
+            ],
+            "nullable": true,
+            "example": "volunteer"
+          },
+          "carrierId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "manifest": {
+            "type": "string",
+            "example": "Carga frágil",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "assigned",
+              "in_transit",
+              "delivered",
+              "failed",
+              "cancelled"
+            ],
+            "example": "planned"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2026-07-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2026-07-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "emergencyId",
+          "originResourceId",
+          "destinationResourceId",
+          "items",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
       "RegisterVolunteerDto": {
         "type": "object",
         "properties": {
@@ -9485,6 +10977,73 @@
           "priority"
         ]
       },
+      "EditReportDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Motivo de la edición (obligatorio, para trazabilidad)",
+            "minLength": 3,
+            "maxLength": 1000,
+            "example": "Se corrige la prioridad y se completa la nota"
+          },
+          "note": {
+            "type": "string",
+            "description": "Nueva nota (omitir para no cambiarla)",
+            "minLength": 2
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "urgent"
+            ],
+            "description": "Nueva prioridad"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "DiscardReportDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Motivo del descarte (obligatorio, para trazabilidad)",
+            "minLength": 3,
+            "maxLength": 1000,
+            "example": "Reporte duplicado; ya registrado en otra entrada"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "AuditChangeDto": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Name of the field that changed"
+          },
+          "before": {
+            "type": "object",
+            "description": "Value before the change (any JSON type)",
+            "nullable": true
+          },
+          "after": {
+            "type": "object",
+            "description": "Value after the change (any JSON type)",
+            "nullable": true
+          }
+        },
+        "required": [
+          "field"
+        ]
+      },
       "AuditEntryDto": {
         "type": "object",
         "properties": {
@@ -9494,6 +11053,11 @@
           "actorUserId": {
             "type": "string",
             "nullable": true
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Actor display name captured at write time"
           },
           "action": {
             "type": "string"
@@ -9518,6 +11082,24 @@
           },
           "statusCode": {
             "type": "number"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true,
+            "description": "Mandatory reason for edit/discard actions"
+          },
+          "changes": {
+            "nullable": true,
+            "description": "Before/after field changes for edit actions",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditChangeDto"
+            }
+          },
+          "targetStatus": {
+            "type": "string",
+            "nullable": true,
+            "description": "State the entity transitioned to (e.g. rejected)"
           },
           "createdAt": {
             "format": "date-time",
@@ -9754,6 +11336,46 @@
         },
         "required": [
           "userId"
+        ]
+      },
+      "CategoryDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "example": "medicines"
+          },
+          "labelEs": {
+            "type": "string",
+            "example": "Medicamentos"
+          },
+          "labelEn": {
+            "type": "string",
+            "example": "Medicines"
+          },
+          "parentSlug": {
+            "type": "string",
+            "example": "medical",
+            "nullable": true,
+            "description": "Parent category slug, or null for a top-level category"
+          },
+          "vertical": {
+            "type": "string",
+            "example": "general"
+          },
+          "sort": {
+            "type": "number",
+            "example": 41,
+            "description": "Display sort order"
+          }
+        },
+        "required": [
+          "slug",
+          "labelEs",
+          "labelEn",
+          "parentSlug",
+          "vertical",
+          "sort"
         ]
       }
     }

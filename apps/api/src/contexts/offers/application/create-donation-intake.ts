@@ -1,7 +1,7 @@
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { DonationIntake, generateIntakeCode } from '../domain/donation-intake';
 import { DonationIntakeId } from '../domain/donation-intake-id';
-import { NeedCategory } from '../domain/offer-enums';
+import { Category } from '../domain/offer-enums';
 import { DonationIntakeRepository } from '../domain/ports/donation-intake.repository';
 import { OfferEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import {
@@ -18,7 +18,7 @@ const COLLECTION_TYPES = new Set([
 ]);
 
 export interface CreateDonationIntakeLineCommand {
-  category: NeedCategory;
+  category: Category;
   description: string;
   quantity: number;
   unit: string | null;

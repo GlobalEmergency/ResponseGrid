@@ -5,6 +5,7 @@ import { getEmergencyBySlug } from '@/lib/emergencies';
 import { PublicResourceCard } from '@/components/organisms/public-resource-card';
 import { NeedCard } from '@/components/molecules/need-card';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { categoryLabel, categoryColor } from '@/lib/categories';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
@@ -45,6 +46,7 @@ export default async function RecipientResourcePage({ params }: Props) {
   const te = t.emergency;
   const td = t.resource_detail;
   const recipientNeeds = needs ?? [];
+  const inventoryCategories = resource.inventoryCategories ?? [];
 
   return (
     <main className="flex-1 bg-surface">
@@ -64,6 +66,33 @@ export default async function RecipientResourcePage({ params }: Props) {
             tStatusLight={t.status_light}
             locale={locale}
           />
+
+          <section
+            aria-labelledby="resource-inventory-heading"
+            className="flex flex-col gap-3"
+          >
+            <h2
+              id="resource-inventory-heading"
+              className="font-display text-base font-bold text-navy"
+            >
+              {td.inventory_heading}
+            </h2>
+            {inventoryCategories.length === 0 ? (
+              <EmptyState title={td.inventory_empty} />
+            ) : (
+              <div className="flex flex-wrap gap-2" role="list">
+                {inventoryCategories.map((slug) => (
+                  <span
+                    key={slug}
+                    role="listitem"
+                    className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${categoryColor(slug)}`}
+                  >
+                    {categoryLabel(slug, locale)}
+                  </span>
+                ))}
+              </div>
+            )}
+          </section>
 
           <section
             aria-labelledby="recipient-needs-heading"
@@ -86,6 +115,7 @@ export default async function RecipientResourcePage({ params }: Props) {
                       te={te}
                       slug={slug}
                       active={isActive}
+                      locale={locale}
                     />
                   </li>
                 ))}

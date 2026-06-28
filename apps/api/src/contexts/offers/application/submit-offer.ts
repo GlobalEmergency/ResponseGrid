@@ -5,7 +5,7 @@ import { NeedLookup } from '../domain/ports/need-lookup';
 import { DonationOffer } from '../domain/donation-offer';
 import { OfferId } from '../domain/offer-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { NeedCategory } from '../domain/offer-enums';
+import { Category } from '../domain/offer-enums';
 import { Location } from '../../../shared/domain/location';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 
@@ -37,7 +37,7 @@ export interface SubmitOfferCommand {
   emergencyId: string;
   donorUserId: string;
   donorOrganizationId: string | null;
-  category: NeedCategory;
+  category: Category;
   description: string;
   quantity: number;
   unit: string | null;

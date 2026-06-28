@@ -29,6 +29,27 @@ describe('deriveAuditFields', () => {
       });
       expect(r.action).toBe('need.assign');
     });
+
+    it('POST /needs/:needId/validate → need.validate', () => {
+      const r = deriveAuditFields('POST', '/needs/:needId/validate', {
+        needId: 'n1',
+      });
+      expect(r.action).toBe('need.validate');
+    });
+
+    it('POST /needs/:needId/discard → need.discard', () => {
+      const r = deriveAuditFields('POST', '/needs/:needId/discard', {
+        needId: 'n1',
+      });
+      expect(r.action).toBe('need.discard');
+    });
+
+    it('POST /reports/:reportId/discard → report.discard', () => {
+      const r = deriveAuditFields('POST', '/reports/:reportId/discard', {
+        reportId: 'rep1',
+      });
+      expect(r.action).toBe('report.discard');
+    });
   });
 
   describe('action derivation — CRUD fallback', () => {

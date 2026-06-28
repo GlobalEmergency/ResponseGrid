@@ -6,6 +6,7 @@ import {
   doublePrecision,
   jsonb,
   boolean,
+  integer,
 } from 'drizzle-orm/pg-core';
 
 export const resourcesTable = pgTable('resources', {
@@ -37,4 +38,20 @@ export const resourcesTable = pgTable('resources', {
   // destinatario final (0023_resource_recipient_role)
   isFinalRecipient: boolean('is_final_recipient').notNull().default(false),
   recipientType: text('recipient_type'),
+});
+
+// Inventario declarado de un recurso/lugar (0028_resource_inventory):
+// líneas de insumo (SupplyLine) — qué material/productos tiene para entregar,
+// con cantidad/unidad/categoría/presentación. Misma forma que need_items —
+// permite el control de inventario por punto.
+export const resourceItemsTable = pgTable('resource_items', {
+  id: uuid('id').primaryKey(),
+  resourceId: uuid('resource_id')
+    .notNull()
+    .references(() => resourcesTable.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  quantity: integer('quantity').notNull(),
+  unit: text('unit'),
+  category: text('category').notNull(),
+  presentation: text('presentation'),
 });

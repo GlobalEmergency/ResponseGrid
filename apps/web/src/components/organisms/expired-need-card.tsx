@@ -8,9 +8,9 @@ import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
+import { categoryLabel } from '@/lib/categories';
 
 type NeedView = components['schemas']['NeedViewDto'];
-type ItemCategory = components['schemas']['NeedItemResponseDto']['category'];
 
 const INITIAL_STATE: ActionResult = { status: 'idle' };
 
@@ -20,21 +20,8 @@ interface ExpiredNeedCardProps {
 }
 
 export function ExpiredNeedCard({ need, slug }: ExpiredNeedCardProps) {
-  const tc = getMessages(useLocale()).coord;
-
-  const CATEGORY_LABELS: Record<ItemCategory, string> = {
-    hygiene: tc.category_hygiene,
-    water: tc.category_water,
-    food: tc.category_food,
-    medical: tc.category_medical,
-    shelter: tc.category_shelter,
-    tools: tc.category_tools,
-    other: tc.category_other,
-    medicines: tc.category_medicines,
-    medical_equipment: tc.category_medical_equipment,
-    medical_supplies: tc.category_medical_supplies,
-    medical_personnel: tc.category_medical_personnel,
-  };
+  const locale = useLocale();
+  const tc = getMessages(locale).coord;
 
   const PRIORITY_LABELS: Record<NeedView['priority'], string> = {
     low: tc.priority_low,
@@ -67,7 +54,7 @@ export function ExpiredNeedCard({ need, slug }: ExpiredNeedCardProps) {
         <div className="flex flex-wrap gap-3 text-sm text-muted">
           {need.items[0] !== undefined && (
             <span className="font-medium">
-              {CATEGORY_LABELS[need.items[0].category]}
+              {categoryLabel(need.items[0].category, locale)}
             </span>
           )}
           <span aria-hidden="true" className="text-muted-soft">·</span>

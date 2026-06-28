@@ -1,7 +1,12 @@
 import * as crypto from 'node:crypto';
 import { Location, LocationProps } from '../../../shared/domain/location';
 import { ReportType, ReportPriority, ReportStatus } from './report-enums';
-import { ReportAlreadyReviewedError } from './report-errors';
+import {
+  ReportAlreadyClosedError,
+  ReportAlreadyReviewedError,
+  ReportNotEditableError,
+  ReportNoteRequiredError,
+} from './report-errors';
 
 export interface ReportSnapshot {
   id: string;
@@ -29,6 +34,12 @@ export interface CreateReportProps {
   location?: LocationProps | null;
 }
 
+/** Fields a coordinator may change while triaging. Omit a field to keep it. */
+export interface EditReportProps {
+  note?: string;
+  priority?: ReportPriority;
+}
+
 export class Report {
   private constructor(
     public readonly id: string,
@@ -36,7 +47,7 @@ export class Report {
     public readonly resourceId: string | null,
     public readonly reporterUserId: string,
     public readonly type: ReportType,
-    public readonly note: string,
+    private _note: string,
     public readonly photoUrls: string[],
     private _priority: ReportPriority,
     private _status: ReportStatus,
@@ -83,6 +94,10 @@ export class Report {
     return this._status;
   }
 
+  get note(): string {
+    return this._note;
+  }
+
   get priority(): ReportPriority {
     return this._priority;
   }
@@ -100,6 +115,36 @@ export class Report {
   }
 
   close(): void {
+    this._status = ReportStatus.Closed;
+  }
+
+  /**
+   * Coordinator edit during triage: complete or correct the report's note and
+   * priority. Only `undefined` props are left untouched. A closed report is
+   * terminal and immutable.
+   */
+  edit(props: EditReportProps): void {
+    if (this._status === ReportStatus.Closed) {
+      throw new ReportNotEditableError();
+    }
+    if (props.note !== undefined) {
+      const trimmed = props.note.trim();
+      if (trimmed.length === 0) throw new ReportNoteRequiredError();
+      this._note = trimmed;
+    }
+    if (props.priority !== undefined) {
+      this._priority = props.priority;
+    }
+  }
+
+  /**
+   * Discard the report during triage: it transitions to `closed` and is
+   * dismissed. The HTTP layer records the mandatory reason in the audit trail.
+   */
+  discard(): void {
+    if (this._status === ReportStatus.Closed) {
+      throw new ReportAlreadyClosedError();
+    }
     this._status = ReportStatus.Closed;
   }
 

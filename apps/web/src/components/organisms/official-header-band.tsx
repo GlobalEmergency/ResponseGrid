@@ -4,6 +4,7 @@
  * last-updated time. Built on the shared HeaderBandShell.
  */
 import { HeaderBandShell } from '@/components/molecules/header-band-shell';
+import { HeaderAccountEntry } from '@/components/molecules/header-account-entry';
 import { EmergencyHeaderMenu } from '@/components/molecules/emergency-header-menu';
 import { RelativeTime } from '@/components/atoms/relative-time';
 import type { Messages } from '@/i18n/messages/es';
@@ -32,7 +33,13 @@ export function OfficialHeaderBand({ name, status, updatedAt, te }: OfficialHead
         : te.header_status_closed;
 
   return (
-    <HeaderBandShell pb="sm" tight brandSize={22} topRight={<EmergencyHeaderMenu te={te} />}>
+    <HeaderBandShell
+      pb="sm"
+      tight
+      brandSize={22}
+      accountSlot={<HeaderAccountEntry />}
+      topRight={<EmergencyHeaderMenu te={te} />}
+    >
       <div className="lg:flex lg:items-end lg:justify-between lg:gap-6">
         <div>
           <p className="mb-1.5 hidden text-[11px] font-bold uppercase tracking-[0.16em] text-accent lg:block">

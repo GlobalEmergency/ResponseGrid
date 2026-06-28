@@ -13,6 +13,9 @@ import {
   InvalidVerificationLevelError,
   InvalidPublicStatusTransitionError,
   ResourceNotPublishedError,
+  ResourceNotPendingError,
+  ResourceNotEditableError,
+  ResourceNameRequiredError,
 } from '../../domain/resource-errors';
 import { EmergencyNotAcceptingIntakeError } from '../../../emergencies/domain/emergency-not-accepting-intake.error';
 
@@ -24,7 +27,10 @@ type DomainError =
   | EmergencyNotAcceptingIntakeError
   | UnauthorizedStatusChangeError
   | InvalidPublicStatusTransitionError
-  | ResourceNotPublishedError;
+  | ResourceNotPublishedError
+  | ResourceNotPendingError
+  | ResourceNotEditableError
+  | ResourceNameRequiredError;
 
 // Only catches domain errors; everything else (e.g. ValidationPipe's BadRequestException)
 // falls through to Nest's default handler, which already returns clean JSON.
@@ -37,6 +43,9 @@ type DomainError =
   UnauthorizedStatusChangeError,
   InvalidPublicStatusTransitionError,
   ResourceNotPublishedError,
+  ResourceNotPendingError,
+  ResourceNotEditableError,
+  ResourceNameRequiredError,
 )
 export class DomainExceptionFilter implements ExceptionFilter {
   catch(exception: DomainError, host: ArgumentsHost): void {
@@ -52,7 +61,11 @@ export class DomainExceptionFilter implements ExceptionFilter {
               ? HttpStatus.CONFLICT
               : exception instanceof ResourceNotVerifiedError
                 ? HttpStatus.CONFLICT
-                : HttpStatus.BAD_REQUEST;
+                : exception instanceof ResourceNotPendingError
+                  ? HttpStatus.CONFLICT
+                  : exception instanceof ResourceNotEditableError
+                    ? HttpStatus.CONFLICT
+                    : HttpStatus.BAD_REQUEST;
     response
       .status(statusCode)
       .json({ statusCode, message: exception.message });

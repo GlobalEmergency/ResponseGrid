@@ -23,6 +23,7 @@ import { ResourceDetail } from '@/components/organisms/resource-detail';
 import { OfferDetail } from '@/components/organisms/offer-detail';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
+import { categoryLabel } from '@/lib/categories';
 
 type NeedView = components['schemas']['NeedViewDto'];
 type ResourceView = components['schemas']['ResourceViewDto'];
@@ -291,7 +292,8 @@ export function OffersQueue({
   emptyTitle,
   emptyDescription,
 }: OffersQueueProps) {
-  const tc = getMessages(useLocale()).coord;
+  const locale = useLocale();
+  const tc = getMessages(locale).coord;
   const [openId, setOpenId] = useState<string | null>(null);
   const { acted, markActed } = useActedSet();
 
@@ -302,20 +304,6 @@ export function OffersQueue({
     matched: tc.offer_status_matched,
     fulfilled: tc.offer_status_fulfilled,
     cancelled: tc.offer_status_cancelled,
-  };
-
-  const CATEGORY_LABELS: Record<OfferView['category'], string> = {
-    hygiene: tc.category_hygiene,
-    water: tc.category_water,
-    food: tc.category_food,
-    medical: tc.category_medical,
-    shelter: tc.category_shelter,
-    tools: tc.category_tools,
-    other: tc.category_other,
-    medicines: tc.category_medicines,
-    medical_equipment: tc.category_medical_equipment,
-    medical_supplies: tc.category_medical_supplies,
-    medical_personnel: tc.category_medical_personnel,
   };
 
   if (visible.length === 0) {
@@ -351,7 +339,7 @@ export function OffersQueue({
                 </div>
                 <div className={META_ROW_CLASS}>
                   <span className="font-medium">
-                    {CATEGORY_LABELS[offer.category]}
+                    {categoryLabel(offer.category, locale)}
                   </span>
                   <span aria-hidden="true" className="text-muted-soft">
                     ·

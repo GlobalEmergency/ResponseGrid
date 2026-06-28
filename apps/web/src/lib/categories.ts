@@ -79,11 +79,53 @@ const CATEGORY_MAP: Record<string, CategoryMeta> = {
 const FALLBACK: CategoryMeta = CATEGORY_MAP['other']!;
 
 /**
+ * Ordered list of ALL category slugs — the single source mirroring the
+ * canonical `Category` taxonomy of the API's supplies context. Used by pickers
+ * that may reference any category, including needs (which can request
+ * `medical_personnel`).
+ */
+export const ALL_CATEGORIES = [
+  'food',
+  'water',
+  'hygiene',
+  'clothing',
+  'shelter',
+  'medical',
+  'medicines',
+  'medical_equipment',
+  'medical_supplies',
+  'medical_personnel',
+  'tools',
+  'other',
+] as const;
+
+/**
+ * Ordered list of MATERIAL category slugs for supply pickers (offers,
+ * inventory). Same as {@link ALL_CATEGORIES} but excludes `medical_personnel`
+ * (personnel, not material).
+ */
+export const MATERIAL_CATEGORIES = [
+  'food',
+  'water',
+  'hygiene',
+  'clothing',
+  'shelter',
+  'medical',
+  'medicines',
+  'medical_equipment',
+  'medical_supplies',
+  'tools',
+  'other',
+] as const;
+
+/**
  * Returns the human-readable label for a category slug in the given locale.
- * Falls back to the slug itself if the slug is unknown.
+ * Falls back to the slug itself if the slug is unknown (so a new API category
+ * surfaces visibly as its slug rather than being silently mislabelled "Other").
  */
 export function categoryLabel(slug: string, locale: 'es' | 'en'): string {
-  const meta = CATEGORY_MAP[slug] ?? FALLBACK;
+  const meta = CATEGORY_MAP[slug];
+  if (!meta) return slug;
   return locale === 'en' ? meta.labelEn : meta.labelEs;
 }
 

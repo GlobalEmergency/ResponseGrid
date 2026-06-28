@@ -26,6 +26,7 @@
 
 const VERB_SEGMENTS = new Set([
   'verify',
+  'validate',
   'publish',
   'pause',
   'activate',
@@ -34,6 +35,7 @@ const VERB_SEGMENTS = new Set([
   'restore',
   'approve',
   'reject',
+  'discard',
   'read',
   'assign',
   'complete',

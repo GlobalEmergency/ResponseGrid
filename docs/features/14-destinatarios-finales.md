@@ -2,9 +2,7 @@
 
 > Caso de uso capturado de un **parte de campo** (La Guaira, 27‑jun; hospitales Domingo Luciani, Clínico Universitario y Militar Carlos Arvelo) y consolidado tras revisión de producto. Entregable abordable por fases. Tracking en el EPIC #59 y sub-issues #60, #62, #67, #64 (núcleo genérico) + #61, #63 (vertical sanitario).
 
----
-
-## 1. Origen (qué se observó en campo)
+> **Nota (estructura actual):** lo que esta ficha llama `NeedItem` es hoy el value object **`SupplyLine`** del bounded context **`supplies`** (que aporta `Category` + `CategoryDefinition`). El **seguimiento de lo recibido** por el destinatario reutilizaría ese mismo `SupplyLine`. El patrón de taxonomía configurable de la ficha 04 (`EmergencyNeedCategory`) sigue siendo backlog: hoy las categorías se sirven como enum canónico global + tabla `categories` vía `GET /categories`.
 
 Durante la respuesta al sismo, los **centros de salud** reportan que reciben **demasiadas donaciones sin clasificar**: medicamentos en pastillas/jarabes que no sirven para uso hospitalario directo (se necesitan **ampollas / EV / inhaladores**), alimentos que ahora mismo no se requieren, etc. La información de **qué necesita cada centro** está dispersa y es difícil de centralizar; conseguir un **contacto oficial** del centro es el principal cuello de botella.
 

@@ -11,9 +11,10 @@
 | Dominio | Capacidades |
 |---|---|
 | **Emergencias** | Multi-emergencia con estados (activa / en pausa), **kill-switch** (corta altas cuando no está activa), comunicado oficial, **plantillas** (p. ej. "Emergencia sanitaria") y lista de "qué NO llevar ahora". |
-| **Puntos logísticos** | Ficha del punto (almacén/transporte…), rol origen→intermedio→destino (incl. **destinatario final** como receptor del recurso destino), **nivel de confianza** (verificado / oficial vía acreditación), **semáforo de estado** (operativo/saturado/en pausa/cerrado) y autoservicio del responsable. |
+| **Puntos logísticos** | Ficha del punto (almacén/transporte…), rol origen→intermedio→destino (incl. **destinatario final** como receptor del recurso destino), **inventario declarado** (qué material/insumos tiene cada lugar: nombre, cantidad, unidad, categoría y presentación), **nivel de confianza** (verificado / oficial vía acreditación), **semáforo de estado** (operativo/saturado/en pausa/cerrado) y autoservicio del responsable. |
 | **Necesidades** | Ciclo crear→validar→público, categorías (incl. **sanitarias**: medicamentos, equipos, insumos, personal), prioridad, ítems con cantidad, **caducidad/frescura** (48 h, "verifica antes de actuar"), y **personal sanitario ↔ matching con el roster de voluntarios**. |
 | **Ofertas de material** | Oferta general o dirigida a una necesidad concreta + matching oferta↔necesidad desde coordinación. |
+| **Logística / Transporte** | Capacidades de transporte ofrecidas por transportistas (ventanas, ruta, volumen) + **expediciones** (shipments) con ciclo de estado y sugerencia de capacidades para cubrirlas desde coordinación. |
 | **Voluntariado** | Roster con skills / disponibilidad / vehículo + **tareas** con asignación y check-in/out. |
 | **Partes de campo** | Partes de campo (incidencia/stock/estado) con fotos, prioridad y punto logístico relacionado; cola de revisión en coordinación. |
 | **Mapa** | Leaflet con capas (puntos, necesidades), **clustering** de marcadores, **carga por viewport (bounding-box)** (`/in-bounds`), **búsqueda server-side** (`?q=`, pg_trgm), **proximidad geo** ("puntos cerca de ti", `/nearby`) y **privacidad de ubicación** (coordenadas aproximadas para entidades sensibles, "tu ubicación no se publica"). |
@@ -36,7 +37,7 @@ ResponseGrid/
 └─ docs/        Especificaciones, fichas de feature y planes
 ```
 
-**16 bounded contexts** en `apps/api/src/contexts/`: `emergencies`, `resources`, `needs`, `offers`, `volunteers`, `reports`, `identity`, `organizations`, `accreditation`, `templates`, `notifications`, `audit`, `metrics`, `geocoding`, `files`, `taxonomy`. La autorización completa (grants, groups, service-accounts, API keys) vive dentro de `identity`.
+**18 bounded contexts** en `apps/api/src/contexts/`: `emergencies`, `resources`, `needs`, `offers`, `supplies`, `logistics`, `volunteers`, `reports`, `identity`, `groups`, `organizations`, `accreditation`, `templates`, `notifications`, `audit`, `metrics`, `geocoding`, `files`. La autorización (grants, service-accounts, API keys) vive en `identity` y las **cuadrillas** en `groups`. El **dominio de insumos** (`supplies`) es la fuente única del modelo de línea de material —`Category` (enum canónico de categorías), `CategoryDefinition` (tabla `categories`: etiquetas/jerarquía/alias) y el value object **`SupplyLine`** (`nombre/cantidad/unidad/categoría/presentación`)— reutilizado por `needs`, `offers`, `resources` (inventario por lugar) y `logistics`.
 
 **Stack:** NestJS 11 · Next.js 16 · React 19 · TypeScript · Drizzle ORM · PostgreSQL 16 · Redis 7 (BullMQ) · Tailwind · Leaflet · Jest · ESLint + Prettier.
 
@@ -94,9 +95,9 @@ Desarrollo guiado por **TDD**; Clean Code, SOLID y DDD en el backend, Atomic Des
 
 ## 🗺️ Estado y roadmap
 
-**Implementado y verificado:** ciclo de vida de emergencia + kill-switch, confianza/acreditación, semáforo de puntos, voluntariado + tareas, partes de campo + fotos, plantillas, notificaciones, auditoría, PWA, i18n, métricas; categorías sanitarias, caducidad de necesidades, privacidad de ubicación, matching personal↔voluntarios; **autorización completa** (roles/permisos/grants/grupos/cuadrillas/API keys); **operativo escalable** (taxonomía como datos, recursos enriquecidos con accepts/contact/schedule/manager/provenance, paginación/filtros/facets, clustering, fichas ricas); **búsqueda server-side** (`?q=`, pg_trgm); **proximidad geo** (`/nearby` + UX "puntos cerca de ti"); **mapa por bounding-box** (`/in-bounds`); **API pública + portal `/docs`** para desarrolladores; **destinatarios finales** (rol en recurso destino); rebranding **Global Emergency** (marca, footer, páginas SEO, icono).
+**Implementado y verificado:** ciclo de vida de emergencia + kill-switch, confianza/acreditación, semáforo de puntos, voluntariado + tareas, partes de campo + fotos, plantillas, notificaciones, auditoría, PWA, i18n, métricas; categorías sanitarias, caducidad de necesidades, privacidad de ubicación, matching personal↔voluntarios; **autorización completa** (roles/permisos/grants/grupos/cuadrillas/API keys); **dominio de insumos unificado** (`SupplyLine` + `Category` compartidos por necesidades, ofertas, inventario y logística; tabla `categories`/`CategoryDefinition` con etiquetas y jerarquía; `GET /categories`); **inventario declarado por lugar** (qué material tiene cada punto, capturado en `/registrar`); **operativo escalable** (taxonomía como datos, recursos enriquecidos con accepts/contact/schedule/manager/provenance, paginación/filtros/facets, clustering, fichas ricas); **búsqueda server-side** (`?q=`, pg_trgm); **proximidad geo** (`/nearby` + UX "puntos cerca de ti"); **mapa por bounding-box** (`/in-bounds`); **API pública + portal `/docs`** para desarrolladores; **destinatarios finales** (rol en recurso destino); rebranding **Global Emergency** (marca, footer, páginas SEO, icono).
 
-**Backlog (en `docs/features/`):** necesidades nominales por beneficiario, oferta como compromiso de entrega, **rutas/isócronas** (la cercanía puntual ya está), cola offline real, directorio de servicios gratuitos, CTA de emergencia nacional, **inventario y logística de punto de acopio** (existencias, lotes/cajas, traslados e indicadores de impacto), **ingesta multi-fuente** (enchufar fuentes externas como acopiove/REDH).
+**Backlog (en `docs/features/`):** necesidades nominales por beneficiario, oferta como compromiso de entrega, **rutas/isócronas** (la cercanía puntual ya está), cola offline real, directorio de servicios gratuitos, CTA de emergencia nacional, **agrupado y stock vivo** (palés/cajas/lotes sobre `SupplyLine`, movimientos de inventario, reconciliación stock↔necesidades e indicadores de impacto — el inventario declarado por lugar y las capacidades/expediciones de transporte ya están), **catálogo maestro de insumos** (`Supply` referenciado por id → dedupe y matching), **ingesta multi-fuente** (enchufar fuentes externas como acopiove/REDH).
 
 ---
 
@@ -121,5 +122,6 @@ Flujo de trabajo:
 
 ## 📚 Documentación
 
+- [`ARCHITECTURE.md`](ARCHITECTURE.md) — guía corta de arquitectura para nuevos colaboradores.
 - [`docs/features/`](docs/features) — fichas de feature (origen, propuesta DDD+API+Atomic, alcance, privacidad).
 - [`01-especificacion-producto-y-arquitectura.md`](01-especificacion-producto-y-arquitectura.md) y [`especificacion_plataforma_ayuda_solidaria.md`](especificacion_plataforma_ayuda_solidaria.md) — especificación de producto y arquitectura.

@@ -2,9 +2,9 @@ import { InMemoryNeedRepository } from '../infrastructure/in-memory-need.reposit
 import { GetNearbyNeeds } from './get-nearby-needs';
 import { Need } from '../domain/need';
 import { NeedId } from '../domain/need-id';
-import { NeedItem } from '../domain/need-item';
+import { SupplyLine } from '../../supplies/domain/supply-line';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { Priority, NeedCategory } from '../domain/need-enums';
+import { Priority, Category } from '../domain/need-enums';
 import { Location } from '../../../shared/domain/location';
 import { LocationSensitivity } from '../../../shared/domain/location-sensitivity';
 
@@ -36,11 +36,11 @@ function makeValidated(
     requesterOrganizationId: null,
     locationSensitivity: sensitivity,
     items: [
-      NeedItem.create({
+      SupplyLine.create({
         name: 'Water',
         quantity: 10,
         unit: 'liters',
-        category: NeedCategory.Water,
+        category: Category.Water,
       }),
     ],
   });
@@ -129,11 +129,11 @@ describe('GetNearbyNeeds', () => {
       requesterUserId: USER_ID,
       requesterOrganizationId: null,
       items: [
-        NeedItem.create({
+        SupplyLine.create({
           name: 'Water',
           quantity: 10,
           unit: 'liters',
-          category: NeedCategory.Water,
+          category: Category.Water,
         }),
       ],
     });

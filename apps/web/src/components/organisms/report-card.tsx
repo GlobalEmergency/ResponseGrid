@@ -1,9 +1,18 @@
 'use client';
 
 import { useActionState } from 'react';
+import { useRouter } from 'next/navigation';
 import { reviewReport } from '@/app/e/[slug]/reportar/actions';
 import type { ReviewReportResult } from '@/app/e/[slug]/reportar/actions';
+import {
+  editReport,
+  discardReport,
+} from '@/app/e/[slug]/coordinacion/actions';
 import { Button } from '@/components/atoms/button';
+import {
+  ValidationActions,
+  type EditField,
+} from '@/components/organisms/validation-actions';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
 
@@ -49,6 +58,7 @@ const INITIAL_REVIEW_STATE: ReviewReportResult = { status: 'idle' };
 export function ReportCard({ report, slug }: ReportCardProps) {
   const locale = useLocale();
   const tc = getMessages(locale).coord;
+  const router = useRouter();
 
   const PRIORITY_LABELS: Record<ReportPriority, string> = {
     low: tc.priority_low,
@@ -87,6 +97,24 @@ export function ReportCard({ report, slug }: ReportCardProps) {
   const priorityClass = PRIORITY_CLASSES[report.priority] ?? PRIORITY_CLASSES.low;
   const statusClass = STATUS_CLASSES[effectiveStatus];
   const statusLabel = STATUS_LABELS[effectiveStatus];
+
+  const editFields: EditField[] = [
+    {
+      key: 'note',
+      label: tc.edit_field_note,
+      kind: 'textarea',
+      defaultValue: report.note,
+    },
+    {
+      key: 'priority',
+      label: tc.detail_field_priority,
+      kind: 'select',
+      defaultValue: report.priority,
+      options: (
+        ['low', 'medium', 'high', 'urgent'] as ReportPriority[]
+      ).map((p) => ({ value: p, label: PRIORITY_LABELS[p] })),
+    },
+  ];
 
   return (
     <article
@@ -182,6 +210,20 @@ export function ReportCard({ report, slug }: ReportCardProps) {
       {(reviewState.status === 'success' || isReviewed) && (
         <p className="text-xs text-success font-medium">{tc.report_reviewed}</p>
       )}
+
+      <ValidationActions
+        canAct={report.status !== 'closed'}
+        editFields={editFields}
+        onEdit={(reason, values) =>
+          editReport(report.id, slug, {
+            reason,
+            note: values.note,
+            priority: values.priority as ReportPriority,
+          })
+        }
+        onDiscard={(reason) => discardReport(report.id, slug, reason)}
+        onActionSuccess={() => router.refresh()}
+      />
     </article>
   );
 }

@@ -3,7 +3,7 @@ import { CreateNeed } from './create-need';
 import { ValidateNeed } from './validate-need';
 import { InMemoryNeedRepository } from '../infrastructure/in-memory-need.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
-import { NeedCategory, Priority, NeedStatus } from '../domain/need-enums';
+import { Category, Priority, NeedStatus } from '../domain/need-enums';
 import { NeedEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 
 const EM = '11111111-1111-4111-8111-111111111111';
@@ -20,7 +20,7 @@ const baseCmd = {
   description: null,
   location: { address: 'Caracas', latitude: 10.4806, longitude: -66.9036 },
   items: [
-    { name: 'Water', quantity: 10, unit: null, category: NeedCategory.Water },
+    { name: 'Water', quantity: 10, unit: null, category: Category.Water },
   ],
 };
 
@@ -75,13 +75,13 @@ describe('GetPublicNeeds', () => {
           name: 'Water',
           quantity: 100,
           unit: 'liters',
-          category: NeedCategory.Water,
+          category: Category.Water,
         },
         {
           name: 'Food',
           quantity: 50,
           unit: 'boxes',
-          category: NeedCategory.Food,
+          category: Category.Food,
         },
       ],
     });
@@ -111,7 +111,7 @@ describe('GetPublicNeeds', () => {
       title: 'Food need',
       priority: Priority.High,
       items: [
-        { name: 'Rice', quantity: 20, unit: null, category: NeedCategory.Food },
+        { name: 'Rice', quantity: 20, unit: null, category: Category.Food },
       ],
     });
     const { id: waterId } = await createNeed.execute({
@@ -123,7 +123,7 @@ describe('GetPublicNeeds', () => {
           name: 'Bottles',
           quantity: 100,
           unit: null,
-          category: NeedCategory.Water,
+          category: Category.Water,
         },
       ],
     });
@@ -133,7 +133,7 @@ describe('GetPublicNeeds', () => {
 
     const result = await getPublicNeeds.execute({
       emergencyId: EM,
-      category: NeedCategory.Food,
+      category: Category.Food,
     });
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe(foodId);
@@ -145,12 +145,12 @@ describe('GetPublicNeeds', () => {
       title: 'Mixed need',
       priority: Priority.High,
       items: [
-        { name: 'Rice', quantity: 20, unit: null, category: NeedCategory.Food },
+        { name: 'Rice', quantity: 20, unit: null, category: Category.Food },
         {
           name: 'Bandages',
           quantity: 50,
           unit: null,
-          category: NeedCategory.Medical,
+          category: Category.Medical,
         },
       ],
     });
@@ -158,7 +158,7 @@ describe('GetPublicNeeds', () => {
 
     const result = await getPublicNeeds.execute({
       emergencyId: EM,
-      category: NeedCategory.Medical,
+      category: Category.Medical,
     });
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe(id);
@@ -174,7 +174,7 @@ describe('GetPublicNeeds', () => {
           name: 'Water',
           quantity: 10,
           unit: null,
-          category: NeedCategory.Water,
+          category: Category.Water,
         },
       ],
     });
@@ -182,7 +182,7 @@ describe('GetPublicNeeds', () => {
 
     const result = await getPublicNeeds.execute({
       emergencyId: EM,
-      category: NeedCategory.Tools,
+      category: Category.Tools,
     });
     expect(result).toHaveLength(0);
   });
@@ -235,7 +235,7 @@ describe('GetPublicNeeds', () => {
       title: 'Urgent food',
       priority: Priority.Urgent,
       items: [
-        { name: 'Rice', quantity: 10, unit: null, category: NeedCategory.Food },
+        { name: 'Rice', quantity: 10, unit: null, category: Category.Food },
       ],
     });
     const { id: wrongPrioId } = await createNeed.execute({
@@ -243,7 +243,7 @@ describe('GetPublicNeeds', () => {
       title: 'Low food',
       priority: Priority.Low,
       items: [
-        { name: 'Bread', quantity: 5, unit: null, category: NeedCategory.Food },
+        { name: 'Bread', quantity: 5, unit: null, category: Category.Food },
       ],
     });
     const { id: wrongCatId } = await createNeed.execute({
@@ -255,7 +255,7 @@ describe('GetPublicNeeds', () => {
           name: 'Water',
           quantity: 20,
           unit: null,
-          category: NeedCategory.Water,
+          category: Category.Water,
         },
       ],
     });
@@ -266,7 +266,7 @@ describe('GetPublicNeeds', () => {
 
     const result = await getPublicNeeds.execute({
       emergencyId: EM,
-      category: NeedCategory.Food,
+      category: Category.Food,
       priority: Priority.Urgent,
     });
     expect(result).toHaveLength(1);

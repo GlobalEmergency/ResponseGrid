@@ -1,7 +1,7 @@
 import { DonationIntake, generateIntakeCode } from './donation-intake';
 import { DonationIntakeId } from './donation-intake-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { NeedCategory } from './offer-enums';
+import { Category } from './offer-enums';
 import { DonationIntakeStatus } from './donation-intake-enums';
 import {
   DonationIntakeAlreadyProcessedError,
@@ -14,7 +14,7 @@ const RESOURCE = '33333333-3333-4333-8333-333333333331';
 
 function makeLine(overrides?: { quantity?: number }) {
   return {
-    category: NeedCategory.Food,
+    category: Category.Food,
     description: 'Arroz 1kg',
     quantity: overrides?.quantity ?? 10,
     unit: 'bolsas',
@@ -113,7 +113,7 @@ describe('DonationIntake aggregate', () => {
       [
         makeLine(),
         {
-          category: NeedCategory.Water,
+          category: Category.Water,
           description: 'Agua 500ml',
           quantity: 5,
           unit: 'cajas',
@@ -182,7 +182,7 @@ describe('generateIntakeCode', () => {
 describe('DonationIntake line limit', () => {
   it('throws when exceeding MAX lines', () => {
     const lines = Array.from({ length: 101 }, (_, i) => ({
-      category: NeedCategory.Food,
+      category: Category.Food,
       description: `Item ${i}`,
       quantity: 1,
       unit: null,

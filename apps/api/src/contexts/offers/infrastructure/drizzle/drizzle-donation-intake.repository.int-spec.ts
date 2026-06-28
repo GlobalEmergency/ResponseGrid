@@ -7,7 +7,7 @@ import { DrizzleDonationIntakeRepository } from './drizzle-donation-intake.repos
 import { DonationIntake } from '../../domain/donation-intake';
 import { DonationIntakeId } from '../../domain/donation-intake-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
-import { NeedCategory } from '../../domain/offer-enums';
+import { Category } from '../../domain/offer-enums';
 import type { Pool } from 'pg';
 
 const URL =
@@ -31,7 +31,7 @@ function makeIntake(code: string) {
     donorUserId: null,
     lines: [
       {
-        category: NeedCategory.Food,
+        category: Category.Food,
         description: 'Harina',
         quantity: 4,
         unit: 'sacos',
@@ -84,7 +84,7 @@ describe('DrizzleDonationIntakeRepository (integration)', () => {
       },
       [
         {
-          category: NeedCategory.Water,
+          category: Category.Water,
           description: 'Agua',
           quantity: 2,
           unit: null,
@@ -92,7 +92,7 @@ describe('DrizzleDonationIntakeRepository (integration)', () => {
           sortOrder: 0,
         },
         {
-          category: NeedCategory.Food,
+          category: Category.Food,
           description: 'Arroz',
           quantity: 1,
           unit: null,

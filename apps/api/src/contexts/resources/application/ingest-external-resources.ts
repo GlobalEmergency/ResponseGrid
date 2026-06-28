@@ -17,7 +17,7 @@
  *    (the aggregate is not "re-registered", just overwritten in the repository).
  *  - HEXAGONAL CONSTRAINT: this file imports zero @nestjs/* or drizzle modules.
  *    It depends only on the ResourceRepository port (domain/ports) and the pure
- *    CategoryResolver (taxonomy domain).
+ *    CategoryResolver (supplies domain).
  */
 
 import { ResourceRepository } from '../domain/ports/resource.repository';
@@ -25,7 +25,7 @@ import { Resource } from '../domain/resource';
 import { ResourceId } from '../domain/resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { VerificationLevel, PublicStatus } from '../domain/resource-enums';
-import { CategoryResolver } from '../../taxonomy/domain/category-resolver';
+import { CategoryResolver } from '../../supplies/domain/category-resolver';
 import { ResourceMapper } from './acopiove-mapper';
 
 export type IngestInput = {
@@ -87,6 +87,8 @@ export class IngestExternalResources {
           // Preserved (local-owned recipient role — #60):
           isFinalRecipient: existingSnap.isFinalRecipient,
           recipientType: existingSnap.recipientType,
+          // Preserved (local-owned inventory — operators may have declared stock):
+          items: existingSnap.items,
           // Preserved (structural — not changed by source):
           emergencyId: existingSnap.emergencyId,
           // Source-owned (updated):
@@ -136,6 +138,7 @@ export class IngestExternalResources {
           createdAt: new Date(),
           isFinalRecipient: false,
           recipientType: null,
+          items: [],
           contact: mapped.contact,
           schedule: mapped.schedule,
           manager: mapped.manager,

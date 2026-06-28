@@ -16,7 +16,9 @@ export interface CoordinationTabsAccess {
   canVerifyResources: boolean;
   canValidateNeeds: boolean;
   canMatchOffers: boolean;
+  canCoordinateLogistics: boolean;
   canCoordinate: boolean;
+  canViewAudit: boolean;
 }
 
 interface CoordinationTabsProps {
@@ -41,9 +43,15 @@ export function CoordinationTabs({ slug, access }: CoordinationTabsProps) {
   if (access.canMatchOffers) {
     tabs.push({ href: `${base}/ofertas`, label: tc.tab_offers, exact: false });
   }
+  if (access.canCoordinateLogistics) {
+    tabs.push({ href: `${base}/expediciones`, label: tc.tab_shipments, exact: false });
+  }
   if (access.canCoordinate) {
     tabs.push({ href: `${base}/voluntarios`, label: tc.tab_volunteers, exact: false });
     tabs.push({ href: `${base}/reportes`, label: tc.tab_reports, exact: false });
+  }
+  if (access.canViewAudit) {
+    tabs.push({ href: `${base}/actividad`, label: tc.tab_activity, exact: false });
   }
 
   // A lone "overview" tab means the user has no actionable section — the hub

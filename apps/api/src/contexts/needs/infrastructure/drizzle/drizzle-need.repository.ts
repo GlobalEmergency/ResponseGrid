@@ -26,11 +26,11 @@ import { NeedId } from '../../domain/need-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import {
   Priority,
-  NeedCategory,
+  Category,
   NeedStatus,
   PersonnelSkill,
 } from '../../domain/need-enums';
-import { NeedItemSnapshot } from '../../domain/need-item';
+import { SupplyLineSnapshot } from '../../../supplies/domain/supply-line';
 import { LocationSensitivity } from '../../../../shared/domain/location-sensitivity';
 
 type NeedsRow = typeof needsTable.$inferSelect;
@@ -54,11 +54,11 @@ function rowToSnapshot(row: NeedsRow, items: ItemsRow[]): NeedSnapshot {
     locationSensitivity: (row.locationSensitivity ??
       LocationSensitivity.Public) as LocationSensitivity,
     items: items.map(
-      (i): NeedItemSnapshot => ({
+      (i): SupplyLineSnapshot => ({
         name: i.name,
         quantity: i.quantity,
         unit: i.unit ?? null,
-        category: i.category as NeedCategory,
+        category: i.category as Category,
         presentation: i.presentation ?? null,
       }),
     ),

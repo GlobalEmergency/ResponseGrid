@@ -16,7 +16,7 @@
 
 import { IngestExternalResources } from './ingest-external-resources';
 import { InMemoryResourceRepository } from '../infrastructure/in-memory-resource.repository';
-import { CategoryResolver } from '../../taxonomy/domain/category-resolver';
+import { CategoryResolver } from '../../supplies/domain/category-resolver';
 import { MappedResourceInput, ResourceMapper } from './acopiove-mapper';
 import {
   ResourceType,
@@ -253,6 +253,7 @@ describe('IngestExternalResources', () => {
         },
         isFinalRecipient: false,
         recipientType: null,
+        items: [],
       });
       await repo.save(preExisting);
 

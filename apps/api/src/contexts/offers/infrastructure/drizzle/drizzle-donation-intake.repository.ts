@@ -6,7 +6,7 @@ import {
 } from '../../domain/donation-intake';
 import { DonationIntakeId } from '../../domain/donation-intake-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
-import { NeedCategory } from '../../domain/offer-enums';
+import { Category } from '../../domain/offer-enums';
 import { DonationIntakeStatus } from '../../domain/donation-intake-enums';
 import { DonationIntakeRepository } from '../../domain/ports/donation-intake.repository';
 import {
@@ -23,7 +23,7 @@ function linesToSnapshot(lines: LineRow[]) {
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map((line) => ({
       id: line.id,
-      category: line.category as NeedCategory,
+      category: line.category as Category,
       description: line.description,
       quantity: line.quantity,
       unit: line.unit ?? null,

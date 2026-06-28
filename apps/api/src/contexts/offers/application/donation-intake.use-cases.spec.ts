@@ -8,7 +8,7 @@ import {
   IntakeResourceLookup,
   IntakeResourceInfo,
 } from '../domain/ports/intake-resource-lookup';
-import { NeedCategory } from '../domain/offer-enums';
+import { Category } from '../domain/offer-enums';
 import { DonationIntakeStatus } from '../domain/donation-intake-enums';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 import { InvalidIntakeTargetResourceError } from '../domain/donation-intake-errors';
@@ -61,7 +61,7 @@ function makeCmd(
     donorUserId: null,
     items: [
       {
-        category: NeedCategory.Food,
+        category: Category.Food,
         description: 'Arroz 1kg',
         quantity: 10,
         unit: 'bolsas',
@@ -152,7 +152,7 @@ describe('DonationIntake use cases', () => {
         donorEmail: 'maria@test.com',
         items: [
           {
-            category: NeedCategory.Water,
+            category: Category.Water,
             description: 'Agua',
             quantity: 3,
             unit: null,

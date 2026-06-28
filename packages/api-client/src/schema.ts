@@ -330,6 +330,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/resources/{resourceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit a resource during verification (validator/coordinator). Requires a reason; recorded in the audit trail. */
+        patch: operations["ResourcesController_editResourceFields"];
+        trace?: never;
+    };
+    "/resources/{resourceId}/discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Discard a resource during verification (validator/coordinator). Requires a reason; recorded in the audit trail. */
+        post: operations["ResourcesController_discardResourceAction"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/resources/{resourceId}/status": {
         parameters: {
             query?: never;
@@ -740,6 +774,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/needs/{needId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit a need during validation (validator/coordinator). Requires a reason; recorded in the audit trail. */
+        patch: operations["NeedsController_edit"];
+        trace?: never;
+    };
+    "/needs/{needId}/discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Discard a need during validation (validator/coordinator). Requires a reason; recorded in the audit trail. */
+        post: operations["NeedsController_discard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/needs/{needId}/assign-manager": {
         parameters: {
             query?: never;
@@ -1069,6 +1137,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/offers/{offerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit a donation offer (coordinator). Requires a reason; recorded in the audit trail. */
+        patch: operations["OffersController_edit"];
+        trace?: never;
+    };
+    "/offers/{offerId}/discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Discard a donation offer (coordinator). Requires a reason; recorded in the audit trail. */
+        post: operations["OffersController_discard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/offers/{offerId}/fulfill": {
         parameters: {
             query?: never;
@@ -1283,6 +1385,142 @@ export interface paths {
         };
         /** List transport capacities for an emergency (coordinator/verifier) */
         get: operations["LogisticsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a shipment / expedición (coordinator) */
+        post: operations["ShipmentController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments/{id}/assign-capacity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assign a transport capacity (and optional carrier) (coordinator) */
+        post: operations["ShipmentController_assignCapacity"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments/{id}/in-transit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark a shipment in transit (assigned carrier or coordinator) */
+        post: operations["ShipmentController_markInTransit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments/{id}/deliver": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm a shipment delivery (assigned carrier or coordinator) */
+        post: operations["ShipmentController_deliver"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel a shipment (coordinator) */
+        post: operations["ShipmentController_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List my shipments as a carrier ("mis expediciones") */
+        get: operations["ShipmentController_listMine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/logistics/shipments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List shipments for an emergency (coordinator/verifier) */
+        get: operations["ShipmentController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments/{id}/capacity-suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Suggest compatible transport capacities for a shipment, ranked (coordinator) */
+        get: operations["ShipmentController_capacitySuggestions"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1549,6 +1787,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/reports/{reportId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Editar un reporte durante el triaje (coordinador). Requiere un motivo; se registra en la trazabilidad. */
+        patch: operations["ReportsController_edit"];
+        trace?: never;
+    };
+    "/reports/{reportId}/discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Descartar un reporte durante el triaje (coordinador). Requiere un motivo; se registra en la trazabilidad. */
+        post: operations["ReportsController_discard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/emergencies/{emergencyId}/reports/mine": {
         parameters: {
             query?: never;
@@ -1575,6 +1847,23 @@ export interface paths {
         };
         /** List audit log entries (audit:read) */
         get: operations["AuditController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Activity trail for an emergency — coordinators of the emergency only */
+        get: operations["EmergencyAuditController_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1698,6 +1987,23 @@ export interface paths {
         put?: never;
         /** Appoint a member as co-manager (delegated, attenuated) */
         post: operations["GroupsController_assignManager"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the shared category taxonomy (slug + labels + hierarchy) */
+        get: operations["CategoriesController_list"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1895,6 +2201,33 @@ export interface components {
              */
             longitude: number;
         };
+        SupplyLineDto: {
+            /**
+             * @description Name of the supply
+             * @example Water bottles
+             */
+            name: string;
+            /**
+             * @description Quantity (positive integer)
+             * @example 100
+             */
+            quantity: number;
+            /**
+             * @description Unit of measurement (optional)
+             * @example liters
+             */
+            unit?: string;
+            /**
+             * @example water
+             * @enum {string}
+             */
+            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+            /**
+             * @description Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe… Optional, free-form (#61).
+             * @example ampolla
+             */
+            presentation?: string;
+        };
         RegisterResourceDto: {
             /**
              * @example collection_point
@@ -1962,6 +2295,8 @@ export interface components {
              * @example hospital
              */
             recipientType?: string;
+            /** @description Declared inventory: the supply lines this place holds for delivery (optional) */
+            items?: components["schemas"]["SupplyLineDto"][];
         };
         RegisterResourceResponseDto: {
             /**
@@ -1971,6 +2306,28 @@ export interface components {
             id: string;
         };
         VerifyResourceDto: Record<string, never>;
+        EditResourceDto: {
+            /**
+             * @description Motivo de la edición (obligatorio, para trazabilidad)
+             * @example Se corrige el nombre y se completa el horario
+             */
+            reason: string;
+            /** @description Nuevo nombre (omitir para no cambiarlo) */
+            name?: string;
+            /** @description Nueva descripción. Cadena vacía la borra. Omitir para no cambiarla. */
+            description?: string | null;
+            /** @description Nuevo contacto. Cadena vacía lo borra. Omitir para no cambiarlo. */
+            contact?: string | null;
+            /** @description Nuevo horario. Cadena vacía lo borra. Omitir para no cambiarlo. */
+            schedule?: string | null;
+        };
+        DiscardResourceDto: {
+            /**
+             * @description Motivo del descarte (obligatorio, para trazabilidad)
+             * @example Punto duplicado / fuera del ámbito de la emergencia
+             */
+            reason: string;
+        };
         UpdateResourcePublicStatusDto: {
             /**
              * @description Target operational status. Hidden is not allowed; use close() to deactivate.
@@ -2012,7 +2369,7 @@ export interface components {
              * @example verified
              * @enum {string}
              */
-            verificationLevel: "unverified" | "verified" | "official";
+            verificationLevel: "unverified" | "verified" | "official" | "rejected";
             /**
              * @example active
              * @enum {string}
@@ -2092,7 +2449,7 @@ export interface components {
              * @example verified
              * @enum {string}
              */
-            verificationLevel: "unverified" | "verified" | "official";
+            verificationLevel: "unverified" | "verified" | "official" | "rejected";
             /**
              * @example active
              * @enum {string}
@@ -2167,6 +2524,85 @@ export interface components {
             byCountry: Record<string, never>;
             /** @example 8 */
             total: number;
+        };
+        ResourceDetailViewDto: {
+            /**
+             * Format: uuid
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            id: string;
+            /**
+             * @example collection_point
+             * @enum {string}
+             */
+            type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
+            /**
+             * @example origin
+             * @enum {string}
+             */
+            stage: "origin" | "intermediate" | "destination";
+            /** @example Cruz Roja Madrid */
+            name: string;
+            /** @example Centro de acopio principal */
+            description: string | null;
+            location: components["schemas"]["LocationViewDto"];
+            /**
+             * @example verified
+             * @enum {string}
+             */
+            verificationLevel: "unverified" | "verified" | "official" | "rejected";
+            /**
+             * @example active
+             * @enum {string}
+             */
+            publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed";
+            /** Format: uuid */
+            ownerOrganizationId: string | null;
+            /**
+             * @example [
+             *       "water",
+             *       "food"
+             *     ]
+             */
+            accepts: string[];
+            /** @example +58 212 555 0000 */
+            contact: string | null;
+            /** @example Lun-Vie 08-18 */
+            schedule: string | null;
+            /** @example Juan Pérez */
+            manager: string | null;
+            /** @example acopiove.org */
+            sourceName: string | null;
+            /**
+             * @description ISO 8601 date string
+             * @example 2026-06-27T00:00:00.000Z
+             */
+            externalUpdatedAt: string | null;
+            /**
+             * @description Country string as stored by the ingestion source (e.g. full Spanish name "Venezuela"). NOT guaranteed to be an ISO 3166-1 alpha-2 code — value depends on the source `pais` field.
+             * @example Venezuela
+             */
+            country: string | null;
+            /** @example Caracas */
+            city: string | null;
+            /**
+             * @description Whether this resource is a final recipient of aid
+             * @example false
+             */
+            isFinalRecipient: boolean;
+            /**
+             * @description Recipient type slug (see the emergency recipient-type taxonomy)
+             * @example hospital
+             */
+            recipientType: string | null;
+            /**
+             * @description Distinct categories of material this place has declared
+             * @example [
+             *       "water",
+             *       "hygiene"
+             *     ]
+             */
+            inventoryCategories: string[];
         };
         RecipientTypeDto: {
             /** @example hospital */
@@ -2333,33 +2769,6 @@ export interface components {
              */
             longitude: number;
         };
-        NeedItemDto: {
-            /**
-             * @description Name of the item needed
-             * @example Water bottles
-             */
-            name: string;
-            /**
-             * @description Quantity needed (positive integer)
-             * @example 100
-             */
-            quantity: number;
-            /**
-             * @description Unit of measurement (optional)
-             * @example liters
-             */
-            unit?: string;
-            /**
-             * @example water
-             * @enum {string}
-             */
-            category: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
-            /**
-             * @description Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe, oxígeno… Optional, free-form (#61).
-             * @example ampolla
-             */
-            presentation?: string;
-        };
         CreateNeedDto: {
             /** @example Alimentos para 50 familias */
             title: string;
@@ -2378,7 +2787,7 @@ export interface components {
              */
             requesterOrganizationId?: string;
             /** @description List of items needed (minimum 1) */
-            items: components["schemas"]["NeedItemDto"][];
+            items: components["schemas"]["SupplyLineDto"][];
             /**
              * @description Required volunteer skill for personnel needs
              * @example medical
@@ -2417,7 +2826,7 @@ export interface components {
             /** @example -66.9036 */
             longitude: number;
         };
-        NeedItemResponseDto: {
+        SupplyLineResponseDto: {
             /** @example Water bottles */
             name: string;
             /** @example 100 */
@@ -2428,7 +2837,7 @@ export interface components {
              * @example water
              * @enum {string}
              */
-            category: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
             /**
              * @description Presentation / route of administration (ampolla, EV, inhalador…) — #61.
              * @example ampolla
@@ -2466,7 +2875,7 @@ export interface components {
             requesterOrganizationId?: string | null;
             /** Format: uuid */
             managingOrganizationId?: string | null;
-            items: components["schemas"]["NeedItemResponseDto"][];
+            items: components["schemas"]["SupplyLineResponseDto"][];
             /**
              * @example pending
              * @enum {string}
@@ -2531,7 +2940,7 @@ export interface components {
             requesterOrganizationId?: string | null;
             /** Format: uuid */
             managingOrganizationId?: string | null;
-            items: components["schemas"]["NeedItemResponseDto"][];
+            items: components["schemas"]["SupplyLineResponseDto"][];
             /**
              * @example pending
              * @enum {string}
@@ -2575,6 +2984,29 @@ export interface components {
         };
         InBoundsNeedsDto: {
             items: components["schemas"]["NeedViewDto"][];
+        };
+        EditNeedDto: {
+            /**
+             * @description Motivo de la edición (obligatorio, para trazabilidad)
+             * @example Se corrige la prioridad y se completa la descripción
+             */
+            reason: string;
+            /** @description Nuevo título (omitir para no cambiarlo) */
+            title?: string;
+            /** @description Nueva descripción. Cadena vacía la borra. Omitir para no cambiarla. */
+            description?: string | null;
+            /**
+             * @description Nueva prioridad
+             * @enum {string}
+             */
+            priority?: "low" | "medium" | "high" | "urgent";
+        };
+        DiscardNeedDto: {
+            /**
+             * @description Motivo del descarte (obligatorio, para trazabilidad)
+             * @example Petición duplicada; ya validada en otra entrada
+             */
+            reason: string;
         };
         AssignNeedManagerDto: {
             /**
@@ -2785,7 +3217,7 @@ export interface components {
              * @example food
              * @enum {string}
              */
-            category: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
             /**
              * @description Description of the item being offered
              * @example Rice bags 25kg
@@ -2846,7 +3278,7 @@ export interface components {
              * @example food
              * @enum {string}
              */
-            category: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
             /** @example Rice bags 25kg */
             description: string;
             /** @example 50 */
@@ -2877,12 +3309,37 @@ export interface components {
              */
             needId: string;
         };
+        EditOfferDto: {
+            /**
+             * @description Motivo de la edición (obligatorio, para trazabilidad)
+             * @example Se corrige la cantidad y se completa la descripción
+             */
+            reason: string;
+            /** @description Nueva descripción (omitir para no cambiarla) */
+            description?: string;
+            /**
+             * @description Nueva cantidad (entero positivo). Omitir para no cambiarla.
+             * @example 20
+             */
+            quantity?: number;
+            /** @description Nueva unidad. Cadena vacía la borra. Omitir para no cambiarla. */
+            unit?: string | null;
+            /** @description Nuevas notas. Cadena vacía las borra. Omitir para no cambiarlas. */
+            notes?: string | null;
+        };
+        DiscardOfferDto: {
+            /**
+             * @description Motivo del descarte (obligatorio, para trazabilidad)
+             * @example Oferta duplicada; ya gestionada en otra entrada
+             */
+            reason: string;
+        };
         DonationIntakeItemDto: {
             /**
              * @example food
              * @enum {string}
              */
-            category: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
             /** @example Arroz 1kg */
             description: string;
             /** @example 10 */
@@ -2954,7 +3411,7 @@ export interface components {
             /** Format: uuid */
             id: string;
             /** @enum {string} */
-            category: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
             description: string;
             quantity: number;
             unit?: string | null;
@@ -3202,6 +3659,119 @@ export interface components {
             /** @example 2026-07-01T00:00:00.000Z */
             updatedAt: string;
         };
+        ShipmentItemDto: {
+            /**
+             * @description What moves
+             * @example 5 cajas de agua
+             */
+            description: string;
+            /**
+             * @description How much (positive). Optional — cargo is often loose.
+             * @example 5
+             */
+            quantity?: number | null;
+            /** @example cajas */
+            unit?: string | null;
+            /**
+             * @description Shared category taxonomy (optional — cargo may be loose)
+             * @example food
+             * @enum {string}
+             */
+            category?: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+        };
+        CreateShipmentDto: {
+            /**
+             * Format: uuid
+             * @description Emergency this shipment serves
+             */
+            emergencyId: string;
+            /**
+             * Format: uuid
+             * @description Origin resource node (collection point) id
+             */
+            originResourceId: string;
+            /**
+             * Format: uuid
+             * @description Destination resource node id
+             */
+            destinationResourceId: string;
+            /** @description Cargo manifest lines (at least one) */
+            items: components["schemas"]["ShipmentItemDto"][];
+            /**
+             * @description Free-text cargo manifest note
+             * @example Carga frágil, manipular con cuidado
+             */
+            manifest?: string;
+        };
+        CreateShipmentResponseDto: {
+            /**
+             * Format: uuid
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            id: string;
+        };
+        AssignShipmentCarrierDto: {
+            /**
+             * @example volunteer
+             * @enum {string}
+             */
+            type: "volunteer" | "organization";
+            /**
+             * Format: uuid
+             * @description Volunteer or organization id (polymorphic, no FK)
+             */
+            id: string;
+        };
+        AssignCapacityToShipmentDto: {
+            /**
+             * Format: uuid
+             * @description TransportCapacity (#105) to earmark for this shipment
+             */
+            assignedCapacityId: string;
+            /** @description Optional carrier. Omit for an internal inventory transfer (no carrier). */
+            carrier?: components["schemas"]["AssignShipmentCarrierDto"];
+        };
+        ShipmentItemResponseDto: {
+            /** @example 5 cajas de agua */
+            description: string;
+            /** @example 5 */
+            quantity?: number | null;
+            /** @example cajas */
+            unit?: string | null;
+            /** @example alimentacion */
+            category?: string | null;
+        };
+        ShipmentViewDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            emergencyId: string;
+            /** Format: uuid */
+            originResourceId: string;
+            /** Format: uuid */
+            destinationResourceId: string;
+            items: components["schemas"]["ShipmentItemResponseDto"][];
+            /** Format: uuid */
+            assignedCapacityId?: string | null;
+            /**
+             * @example volunteer
+             * @enum {string|null}
+             */
+            carrierType?: "volunteer" | "organization" | null;
+            /** Format: uuid */
+            carrierId?: string | null;
+            /** @example Carga frágil */
+            manifest?: string | null;
+            /**
+             * @example planned
+             * @enum {string}
+             */
+            status: "planned" | "assigned" | "in_transit" | "delivered" | "failed" | "cancelled";
+            /** @example 2026-07-01T00:00:00.000Z */
+            createdAt: string;
+            /** @example 2026-07-01T00:00:00.000Z */
+            updatedAt: string;
+        };
         RegisterVolunteerDto: {
             /** @example Ana García */
             name: string;
@@ -3356,9 +3926,40 @@ export interface components {
             resourceId?: string;
             location?: components["schemas"]["LocationDto"];
         };
+        EditReportDto: {
+            /**
+             * @description Motivo de la edición (obligatorio, para trazabilidad)
+             * @example Se corrige la prioridad y se completa la nota
+             */
+            reason: string;
+            /** @description Nueva nota (omitir para no cambiarla) */
+            note?: string;
+            /**
+             * @description Nueva prioridad
+             * @enum {string}
+             */
+            priority?: "low" | "medium" | "high" | "urgent";
+        };
+        DiscardReportDto: {
+            /**
+             * @description Motivo del descarte (obligatorio, para trazabilidad)
+             * @example Reporte duplicado; ya registrado en otra entrada
+             */
+            reason: string;
+        };
+        AuditChangeDto: {
+            /** @description Name of the field that changed */
+            field: string;
+            /** @description Value before the change (any JSON type) */
+            before?: Record<string, never> | null;
+            /** @description Value after the change (any JSON type) */
+            after?: Record<string, never> | null;
+        };
         AuditEntryDto: {
             id: string;
             actorUserId?: string | null;
+            /** @description Actor display name captured at write time */
+            actorName?: string | null;
             action: string;
             entityType?: string | null;
             entityId?: string | null;
@@ -3366,6 +3967,12 @@ export interface components {
             method: string;
             path: string;
             statusCode: number;
+            /** @description Mandatory reason for edit/discard actions */
+            reason?: string | null;
+            /** @description Before/after field changes for edit actions */
+            changes?: components["schemas"]["AuditChangeDto"][] | null;
+            /** @description State the entity transitioned to (e.g. rejected) */
+            targetStatus?: string | null;
             /** Format: date-time */
             createdAt: string;
         };
@@ -3446,6 +4053,26 @@ export interface components {
              * @description Member to appoint as manager
              */
             userId: string;
+        };
+        CategoryDto: {
+            /** @example medicines */
+            slug: string;
+            /** @example Medicamentos */
+            labelEs: string;
+            /** @example Medicines */
+            labelEn: string;
+            /**
+             * @description Parent category slug, or null for a top-level category
+             * @example medical
+             */
+            parentSlug: string | null;
+            /** @example general */
+            vertical: string;
+            /**
+             * @description Display sort order
+             * @example 41
+             */
+            sort: number;
         };
     };
     responses: never;
@@ -4258,6 +4885,112 @@ export interface operations {
             };
         };
     };
+    ResourcesController_editResourceFields: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource UUID */
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditResourceDto"];
+            };
+        };
+        responses: {
+            /** @description Resource edited */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing reason or resource is discarded */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validator/coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ResourcesController_discardResourceAction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource UUID */
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiscardResourceDto"];
+            };
+        };
+        responses: {
+            /** @description Resource discarded */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing reason or resource is not pending verification */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validator/coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ResourcesController_updateResourceStatus: {
         parameters: {
             query?: never;
@@ -4537,7 +5270,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ResourceViewDto"];
+                    "application/json": components["schemas"]["ResourceDetailViewDto"];
                 };
             };
             /** @description Resource not found or not public */
@@ -5073,7 +5806,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filter by item category (needs with at least one item of this category) */
-                category?: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+                category?: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
                 /** @description Filter by need priority */
                 priority?: "low" | "medium" | "high" | "urgent";
                 /** @description Filter to needs linked to this resource / final recipient */
@@ -5173,7 +5906,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filter by item category (needs with at least one item of this category) */
-                category?: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+                category?: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
                 /** @description Filter by need priority */
                 priority?: "low" | "medium" | "high" | "urgent";
             };
@@ -5245,6 +5978,112 @@ export interface operations {
                 content?: never;
             };
             /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Need not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    NeedsController_edit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Need UUID */
+                needId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditNeedDto"];
+            };
+        };
+        responses: {
+            /** @description Need edited */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing reason or need is in a terminal status */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validator/coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Need not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    NeedsController_discard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Need UUID */
+                needId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiscardNeedDto"];
+            };
+        };
+        responses: {
+            /** @description Need discarded (rejected) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing reason or need is not in pending status */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validator/coordinator role required */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6118,6 +6957,112 @@ export interface operations {
             };
         };
     };
+    OffersController_edit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Offer UUID */
+                offerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditOfferDto"];
+            };
+        };
+        responses: {
+            /** @description Offer edited */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing reason or offer is in a terminal status */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Offer not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OffersController_discard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Offer UUID */
+                offerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiscardOfferDto"];
+            };
+        };
+        responses: {
+            /** @description Offer discarded (cancelled) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing reason or offer cannot be discarded in its status */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Offer not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     OffersController_fulfill: {
         parameters: {
             query?: never;
@@ -6787,6 +7732,379 @@ export interface operations {
             };
             /** @description Missing capacity:read permission */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateShipmentDto"];
+            };
+        };
+        responses: {
+            /** @description Shipment created (planned) */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateShipmentResponseDto"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a coordinator of the emergency */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Emergency is not accepting intake (paused/closed) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_assignCapacity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Shipment UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignCapacityToShipmentDto"];
+            };
+        };
+        responses: {
+            /** @description Capacity assigned */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a coordinator of the shipment emergency */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment is not in planned status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_markInTransit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Shipment UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Shipment marked in transit */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Only the assigned carrier or a coordinator can act */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment is not in assigned status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_deliver: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Shipment UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Shipment delivered */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Only the assigned carrier or a coordinator can act */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment is not in transit */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Shipment UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Shipment cancelled */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a coordinator of the shipment emergency */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment cannot be cancelled in its current status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_listMine: {
+        parameters: {
+            query?: {
+                /** @description Optional emergency scope; omit to list across emergencies */
+                emergencyId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description My shipments */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentViewDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_list: {
+        parameters: {
+            query?: {
+                /** @description Filter by status */
+                status?: "planned" | "assigned" | "in_transit" | "delivered" | "failed" | "cancelled";
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Shipments */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentViewDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing shipment:read permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_capacitySuggestions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Shipment UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Compatible capacities ranked by proximity/coverage fit */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CapacityViewDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a coordinator of the shipment emergency */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7514,6 +8832,110 @@ export interface operations {
             };
         };
     };
+    ReportsController_edit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditReportDto"];
+            };
+        };
+        responses: {
+            /** @description Report edited */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing reason or report is closed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Report not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReportsController_discard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiscardReportDto"];
+            };
+        };
+        responses: {
+            /** @description Report discarded (closed) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing reason or report already closed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Report not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ReportsController_mine: {
         parameters: {
             query?: never;
@@ -7570,6 +8992,51 @@ export interface operations {
                 content?: never;
             };
             /** @description audit:read required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EmergencyAuditController_list: {
+        parameters: {
+            query?: {
+                /** @description Filter by actor user ID */
+                actorUserId?: string;
+                /** @description Filter by entity type (e.g. resource, need) */
+                entityType?: string;
+                /** @description Max results to return (default 100, max 500) */
+                limit?: number;
+                /** @description Offset for pagination (default 0) */
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditListResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description audit:read required (coordinator of this emergency) */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7878,6 +9345,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    CategoriesController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The category taxonomy */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryDto"][];
+                };
             };
         };
     };

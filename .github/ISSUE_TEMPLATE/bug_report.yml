@@ -1,0 +1,40 @@
+name: Reporte de bug
+description: Describe un fallo reproducible
+title: "[BUG] "
+labels: []
+body:
+  - type: textarea
+    id: resumen
+    attributes:
+      label: Resumen
+      description: Qué falla y en qué parte del sistema
+    validations:
+      required: true
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para reproducir
+      description: Lista mínima de pasos
+      placeholder: |
+        1. Ir a ...
+        2. Hacer ...
+        3. Ver ...
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Resultado esperado
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Resultado actual
+    validations:
+      required: true
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto adicional
+      description: Logs, capturas o datos útiles

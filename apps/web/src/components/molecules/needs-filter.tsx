@@ -5,6 +5,8 @@ import type { Messages } from '@/i18n/messages/es';
 import { es } from '@/i18n/messages/es';
 import { Select } from '@/components/atoms/select';
 import { FilterField } from '@/components/molecules/filter-field';
+import { useLocale } from '@/i18n/locale-context';
+import { ALL_CATEGORIES, categoryLabel } from '@/lib/categories';
 
 interface NeedsFilterProps {
   t?: Messages['needs_filter'];
@@ -14,23 +16,17 @@ interface NeedsFilterProps {
 export function NeedsFilter({ t = es.needs_filter, te = es.emergency }: NeedsFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const locale = useLocale();
 
   const currentCategory = searchParams.get('category') ?? '';
   const currentPriority = searchParams.get('priority') ?? '';
 
   const categoryOptions = [
     { value: '', label: t.all_categories },
-    { value: 'food', label: te.category_food },
-    { value: 'water', label: te.category_water },
-    { value: 'hygiene', label: te.category_hygiene },
-    { value: 'medical', label: te.category_medical },
-    { value: 'shelter', label: te.category_shelter },
-    { value: 'tools', label: te.category_tools },
-    { value: 'other', label: te.category_other },
-    { value: 'medicines', label: te.category_medicines },
-    { value: 'medical_equipment', label: te.category_medical_equipment },
-    { value: 'medical_supplies', label: te.category_medical_supplies },
-    { value: 'medical_personnel', label: te.category_medical_personnel },
+    ...ALL_CATEGORIES.map((slug) => ({
+      value: slug,
+      label: categoryLabel(slug, locale),
+    })),
   ];
 
   const priorityOptions = [

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { NeedCategory } from '../../domain/offer-enums';
+import { Category } from '../../domain/offer-enums';
 import { DonationIntakeStatus } from '../../domain/donation-intake-enums';
 
 export class CreateDonationIntakeResponseDto {
@@ -45,7 +45,7 @@ export class DonationIntakeLineViewDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
-  @ApiProperty({ enum: NeedCategory })
+  @ApiProperty({ enum: Category })
   category!: string;
 
   @ApiProperty()

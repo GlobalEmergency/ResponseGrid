@@ -16,7 +16,7 @@ import { createDb } from '../src/shared/db';
 import {
   categoriesTable,
   categoryAliasesTable,
-} from '../src/contexts/taxonomy/infrastructure/drizzle/schema';
+} from '../src/contexts/supplies/infrastructure/drizzle/schema';
 
 interface CategoryRow {
   slug: string;

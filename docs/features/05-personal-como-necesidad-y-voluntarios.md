@@ -2,6 +2,8 @@
 
 > Caso de uso capturado del análisis de REDH para el roadmap de ReliefHub. Entregable independiente y abordable por separado.
 
+> **Nota (estructura actual):** la categoría **Personal** sanitario ya existe como `medical_personnel` en el enum canónico **`Category`** del bounded context **`supplies`**. Donde la ficha dice `NeedItem` la línea es hoy el value object **`SupplyLine`** (persistido en `need_items`). El matching personal↔voluntarios sigue siendo el objeto pendiente de esta ficha.
+
 ---
 
 ## 1. Origen (qué hace REDH)

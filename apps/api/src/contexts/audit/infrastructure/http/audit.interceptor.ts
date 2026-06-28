@@ -16,6 +16,7 @@ import {
   AUDIT_REPOSITORY,
   type AuditRepository,
 } from '../../domain/ports/audit.repository';
+import type { AuditMutationContext } from './audit-context';
 
 /** HTTP methods that trigger audit entries (mutations only). */
 const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
@@ -39,7 +40,12 @@ export class AuditInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const http = context.switchToHttp();
-    const req = http.getRequest<Request & { user?: AuthenticatedUser }>();
+    const req = http.getRequest<
+      Request & {
+        user?: AuthenticatedUser;
+        auditContext?: AuditMutationContext;
+      }
+    >();
     const res = http.getResponse<Response>();
 
     const method = req.method.toUpperCase();
@@ -73,16 +79,25 @@ export class AuditInterceptor implements NestInterceptor {
           const { action, entityType, entityId, emergencyId } =
             deriveAuditFields(method, routeTemplate, params);
 
+          // Controllers handling validation actions enrich the request with the
+          // reason, the before/after diff and the resulting state. The explicit
+          // emergencyId wins because entity-scoped routes carry no :emergencyId.
+          const enrich = req.auditContext;
+
           const entry = AuditEntry.create({
             id: randomUUID(),
             actorUserId: req.user?.id ?? null,
+            actorName: enrich?.actorName ?? req.user?.name ?? null,
             action,
             entityType,
             entityId,
-            emergencyId,
+            emergencyId: enrich?.emergencyId ?? emergencyId,
             method,
             path: routeTemplate,
             statusCode,
+            reason: enrich?.reason ?? null,
+            changes: enrich?.changes ?? null,
+            targetStatus: enrich?.targetStatus ?? null,
           });
 
           // Fire-and-forget: audit persistence MUST NOT affect the response.

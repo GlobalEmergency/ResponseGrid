@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
-import { NeedCategory } from './offer-enums';
+import { Category } from './offer-enums';
 
 export interface DonationIntakeLineProps {
   id?: string;
-  category: NeedCategory;
+  category: Category;
   description: string;
   quantity: number;
   unit: string | null;
@@ -13,7 +13,7 @@ export interface DonationIntakeLineProps {
 
 export interface DonationIntakeLineSnapshot {
   id: string;
-  category: NeedCategory;
+  category: Category;
   description: string;
   quantity: number;
   unit: string | null;
@@ -24,7 +24,7 @@ export interface DonationIntakeLineSnapshot {
 export class DonationIntakeLine {
   private constructor(
     public readonly id: string,
-    public readonly category: NeedCategory,
+    public readonly category: Category,
     public readonly description: string,
     public readonly quantity: number,
     public readonly unit: string | null,
