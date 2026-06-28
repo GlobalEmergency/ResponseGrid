@@ -16,6 +16,17 @@ export class InMemoryGrantRepository implements GrantRepository {
     return Promise.resolve(result);
   }
 
+  findByScope(scopeType: string, scopeId: string | null): Promise<Grant[]> {
+    const result = [...this.store.values()]
+      .filter((s) => {
+        if (s.scope.type !== scopeType) return false;
+        if (s.scope.type === 'platform') return scopeId === null;
+        return 'id' in s.scope && s.scope.id === scopeId;
+      })
+      .map((s) => Grant.fromSnapshot(s));
+    return Promise.resolve(result);
+  }
+
   findById(id: string): Promise<Grant | null> {
     const snapshot = this.store.get(id);
     return Promise.resolve(snapshot ? Grant.fromSnapshot(snapshot) : null);

@@ -5,6 +5,7 @@ import { getToken, authHeaders } from '@/lib/auth';
 import { SiteHeaderBand } from '@/components/organisms/site-header-band';
 import { EmergencyDirectoryCard } from '@/components/organisms/emergency-directory-card';
 import { AccountNav } from '@/components/molecules/account-nav';
+import { hasManagerRole } from '@/lib/admin-scopes';
 import { HowItWorksStep } from '@/components/molecules/how-it-works-step';
 import { TrustLevelsCard } from '@/components/molecules/trust-levels-card';
 import { EmptyState } from '@/components/molecules/empty-state';
@@ -29,6 +30,7 @@ export default async function HomePage() {
   const token = await getToken();
   let notificationUnreadCount = 0;
   let isAdmin = false;
+  let canAdminister = false;
   if (token != null) {
     const [notifResult, meResult] = await Promise.all([
       api.GET('/notifications/mine', { headers: authHeaders(token) }),
@@ -39,6 +41,7 @@ export default async function HomePage() {
     }
     if (meResult.data != null) {
       isAdmin = meResult.data.isAdmin === true;
+      canAdminister = isAdmin || hasManagerRole(meResult.data.grants ?? []);
     }
   }
 
@@ -150,6 +153,7 @@ export default async function HomePage() {
             t={th}
             authed={token !== null}
             isAdmin={isAdmin}
+            canAdminister={canAdminister}
             notificationUnreadCount={notificationUnreadCount}
           />
         </div>
