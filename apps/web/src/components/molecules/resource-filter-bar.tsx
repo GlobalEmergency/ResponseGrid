@@ -21,7 +21,12 @@ import { categoryLabel } from '@/lib/categories';
 interface ResourceFilterBarProps {
   /** Facet counts keyed by category slug, e.g. { water: 5, food: 3 } */
   byCategory: Record<string, number>;
-  /** Facet counts keyed by ISO 3166-1 alpha-2 country code, e.g. { VE: 3, CO: 2 } */
+  /**
+   * Facet counts keyed by the stored country string. The ingestion source
+   * stores full Spanish country names (e.g. { Venezuela: 3, Colombia: 2 }),
+   * which are shown verbatim in the country <select> and sent back as the
+   * `country` filter value — so grouping must match those same strings.
+   */
   byCountry: Record<string, number>;
   activeCategory: string;
   activeCountry: string;
@@ -102,9 +107,9 @@ export function ResourceFilterBar({
               className="rounded-lg border-2 border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-gray-900 focus:outline-none"
             >
               <option value="">{t.all_countries}</option>
-              {countryOptions.map(([code, count]) => (
-                <option key={code} value={code}>
-                  {code} ({count})
+              {countryOptions.map(([country, count]) => (
+                <option key={country} value={country}>
+                  {country} ({count})
                 </option>
               ))}
             </select>

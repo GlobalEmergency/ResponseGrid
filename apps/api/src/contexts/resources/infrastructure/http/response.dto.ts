@@ -117,7 +117,12 @@ export class ResourceFacetsDto {
   @ApiProperty({ example: { water: 5, food: 3 } })
   byCategory!: Record<string, number>;
 
-  @ApiProperty({ example: { VE: 3, CO: 2 } })
+  @ApiProperty({
+    example: { Venezuela: 3, Colombia: 2 },
+    description:
+      'Counts keyed by the stored `country` string. Values mirror the ingestion ' +
+      'source `pais` field (full Spanish names, NOT ISO 3166-1 alpha-2 codes).',
+  })
   byCountry!: Record<string, number>;
 
   @ApiProperty({ example: 8 })
