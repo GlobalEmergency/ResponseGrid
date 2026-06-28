@@ -73,7 +73,8 @@ export default async function CoordinacionPage({ params }: Props) {
 
   // --- Pending counters for each actionable section ---------------------
   // Resources: ask for one row only — we just need the `total`.
-  const [resourcesPending, needsPending, offersPending] = await Promise.all([
+  const [resourcesPending, needsPending, offersPending, shipmentsActive] =
+    await Promise.all([
     access.canVerifyResources
       ? api
           .GET('/emergencies/{emergencyId}/coordination/queue', {
@@ -105,6 +106,20 @@ export default async function CoordinacionPage({ params }: Props) {
           .then(async (r) => {
             await onUnauthorized(r.response.status);
             return r.data?.length ?? 0;
+          })
+      : Promise.resolve(null),
+    access.canCoordinateLogistics
+      ? api
+          .GET('/emergencies/{emergencyId}/logistics/shipments', {
+            params: { path: { emergencyId } },
+            headers,
+          })
+          .then(async (r) => {
+            await onUnauthorized(r.response.status);
+            // Count only the in-flight shipments (not delivered/cancelled).
+            return (r.data ?? []).filter(
+              (s) => s.status !== 'delivered' && s.status !== 'cancelled',
+            ).length;
           })
       : Promise.resolve(null),
   ]);
@@ -147,6 +162,15 @@ export default async function CoordinacionPage({ params }: Props) {
               description={tc.hub_offers_description}
               count={offersPending}
               countAria={tc.hub_count_aria}
+            />
+          )}
+          {shipmentsActive !== null && (
+            <CoordinationSectionLink
+              href={`${base}/expediciones`}
+              label={tc.hub_shipments_label}
+              description={tc.hub_shipments_description}
+              count={shipmentsActive}
+              countAria={tc.hub_shipments_count_aria}
             />
           )}
           {access.canCoordinate && (
