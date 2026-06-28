@@ -8,6 +8,7 @@ import { OFFER_EMERGENCY_LOOKUP } from '../../domain/ports/offer-emergency-looku
 import { VOLUNTEER_EMERGENCY_LOOKUP } from '../../domain/ports/volunteer-emergency-lookup';
 import { TASK_EMERGENCY_LOOKUP } from '../../domain/ports/task-emergency-lookup';
 import { REPORT_EMERGENCY_LOOKUP } from '../../domain/ports/report-emergency-lookup';
+import { INTAKE_EMERGENCY_LOOKUP } from '../../domain/ports/intake-emergency-lookup';
 
 interface EmergencyLookup {
   findEmergencyId(entityId: string): Promise<string | null>;
@@ -40,6 +41,7 @@ export class EntityAwareScopeResolver implements ScopeResolver {
     @Inject(VOLUNTEER_EMERGENCY_LOOKUP) volunteer: EmergencyLookup,
     @Inject(TASK_EMERGENCY_LOOKUP) task: EmergencyLookup,
     @Inject(REPORT_EMERGENCY_LOOKUP) report: EmergencyLookup,
+    @Inject(INTAKE_EMERGENCY_LOOKUP) intake: EmergencyLookup,
   ) {
     this.entityParams = [
       { param: 'resourceId', entityType: 'resource', lookups: [resource] },
@@ -48,6 +50,11 @@ export class EntityAwareScopeResolver implements ScopeResolver {
       { param: 'volunteerId', entityType: 'volunteer', lookups: [volunteer] },
       { param: 'taskId', entityType: 'task', lookups: [task] },
       { param: 'reportId', entityType: 'report', lookups: [report] },
+      {
+        param: 'intakeId',
+        entityType: 'intake',
+        lookups: [intake],
+      },
     ];
   }
 

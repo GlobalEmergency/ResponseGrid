@@ -90,6 +90,8 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'need:prioritize',
       'offer:read',
       'offer:match',
+      'intake:read',
+      'intake:receive',
       'capacity:read',
       'campaign:read',
       'campaign:verify',

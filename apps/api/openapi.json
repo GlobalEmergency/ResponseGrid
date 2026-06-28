@@ -3409,6 +3409,470 @@
         ]
       }
     },
+    "/emergencies/{emergencyId}/donation-intakes": {
+      "post": {
+        "operationId": "DonationIntakesController_create",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDonationIntakeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Intake created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateDonationIntakeResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "409": {
+            "description": "Emergency is not accepting intake (paused/closed)"
+          },
+          "422": {
+            "description": "Invalid collection point"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Pre-register a donation at a collection point (public)",
+        "tags": [
+          "donation-intakes"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/donation-intakes/lookup-contact": {
+      "post": {
+        "operationId": "DonationIntakesController_lookupContact",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LookupDonorByContactDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LookupDonorByContactResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Recognize a returning donor by phone or email (public)",
+        "tags": [
+          "donation-intakes"
+        ]
+      }
+    },
+    "/donation-intakes/{intakeId}": {
+      "patch": {
+        "operationId": "DonationIntakesController_update",
+        "parameters": [
+          {
+            "name": "intakeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDonationIntakeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonationIntakeViewDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "403": {
+            "description": "Contact or code mismatch"
+          },
+          "404": {
+            "description": "Intake not found"
+          },
+          "409": {
+            "description": "Intake already processed"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Update a pending intake (public, requires code + contact)",
+        "tags": [
+          "donation-intakes"
+        ]
+      },
+      "get": {
+        "operationId": "DonationIntakesController_getById",
+        "parameters": [
+          {
+            "name": "intakeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonationIntakeViewDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing intake:read"
+          },
+          "404": {
+            "description": "Intake not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get full intake detail with lines",
+        "tags": [
+          "donation-intakes"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/donation-intakes/search": {
+      "get": {
+        "operationId": "DonationIntakesController_search",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": true,
+            "in": "query",
+            "description": "Phone, email, code or name",
+            "schema": {
+              "example": "ACO-7F3K",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DonationIntakeSearchHitDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing intake:read"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Search intakes by phone, email, code or name",
+        "tags": [
+          "donation-intakes"
+        ]
+      }
+    },
+    "/resources/{resourceId}/donation-intakes/pending": {
+      "get": {
+        "operationId": "DonationIntakesController_listPending",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DonationIntakeSearchHitDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing intake:read"
+          },
+          "404": {
+            "description": "Resource not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List pending intakes for a collection point",
+        "tags": [
+          "donation-intakes"
+        ]
+      }
+    },
+    "/donation-intakes/{intakeId}/receive": {
+      "post": {
+        "operationId": "DonationIntakesController_receive",
+        "parameters": [
+          {
+            "name": "intakeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceiveDonationIntakeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Intake marked as received"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing intake:receive"
+          },
+          "404": {
+            "description": "Intake not found"
+          },
+          "409": {
+            "description": "Intake already processed"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Confirm physical reception of a pending intake",
+        "tags": [
+          "donation-intakes"
+        ]
+      }
+    },
+    "/donation-intakes/{intakeId}/reject": {
+      "post": {
+        "operationId": "DonationIntakesController_reject",
+        "parameters": [
+          {
+            "name": "intakeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectDonationIntakeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Intake marked as rejected"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing intake:receive"
+          },
+          "404": {
+            "description": "Intake not found"
+          },
+          "409": {
+            "description": "Intake already processed"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reject a pending intake at reception",
+        "tags": [
+          "donation-intakes"
+        ]
+      }
+    },
+    "/donation-intakes/{intakeId}/incomplete": {
+      "post": {
+        "operationId": "DonationIntakesController_markIncomplete",
+        "parameters": [
+          {
+            "name": "intakeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkDonationIntakeIncompleteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Intake marked as incomplete"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing intake:receive"
+          },
+          "404": {
+            "description": "Intake not found"
+          },
+          "409": {
+            "description": "Intake already processed"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark a pending intake as incomplete (material mismatch)",
+        "tags": [
+          "donation-intakes"
+        ]
+      }
+    },
     "/logistics/capacities": {
       "post": {
         "operationId": "LogisticsController_publish",
@@ -7726,6 +8190,436 @@
         "required": [
           "needId"
         ]
+      },
+      "DonationIntakeItemDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "hygiene",
+              "water",
+              "food",
+              "medical",
+              "shelter",
+              "tools",
+              "other",
+              "medicines",
+              "medical_equipment",
+              "medical_supplies",
+              "medical_personnel"
+            ],
+            "example": "food"
+          },
+          "description": {
+            "type": "string",
+            "example": "Arroz 1kg"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 10
+          },
+          "unit": {
+            "type": "string",
+            "example": "bolsas",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "category",
+          "description",
+          "quantity"
+        ]
+      },
+      "CreateDonationIntakeDto": {
+        "type": "object",
+        "properties": {
+          "targetResourceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Target collection point"
+          },
+          "donorName": {
+            "type": "string",
+            "example": "María López"
+          },
+          "donorPhone": {
+            "type": "object",
+            "example": "+52 55 1234 5678",
+            "nullable": true
+          },
+          "donorEmail": {
+            "type": "object",
+            "example": "maria@example.com",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DonationIntakeItemDto"
+            }
+          }
+        },
+        "required": [
+          "targetResourceId",
+          "donorName",
+          "items"
+        ]
+      },
+      "CreateDonationIntakeResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "intakeCode": {
+            "type": "string",
+            "example": "ACO-7F3K"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "received",
+              "rejected",
+              "incomplete"
+            ],
+            "example": "pending"
+          }
+        },
+        "required": [
+          "id",
+          "intakeCode",
+          "status"
+        ]
+      },
+      "LookupDonorByContactDto": {
+        "type": "object",
+        "properties": {
+          "donorPhone": {
+            "type": "object",
+            "example": "+52 55 1234 5678",
+            "nullable": true
+          },
+          "donorEmail": {
+            "type": "object",
+            "example": "maria@example.com",
+            "nullable": true
+          }
+        }
+      },
+      "PendingIntakeSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "intakeCode": {
+            "type": "string",
+            "example": "ACO-7F3K"
+          },
+          "targetResourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemCount": {
+            "type": "number",
+            "example": 2
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "intakeCode",
+          "targetResourceId",
+          "itemCount",
+          "createdAt"
+        ]
+      },
+      "LookupDonorByContactResponseDto": {
+        "type": "object",
+        "properties": {
+          "donorName": {
+            "type": "string",
+            "example": "María López",
+            "nullable": true
+          },
+          "pendingIntakes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingIntakeSummaryDto"
+            }
+          }
+        },
+        "required": [
+          "pendingIntakes"
+        ]
+      },
+      "UpdateDonationIntakeDto": {
+        "type": "object",
+        "properties": {
+          "intakeCode": {
+            "type": "string",
+            "example": "ACO-7F3K"
+          },
+          "donorName": {
+            "type": "string",
+            "example": "María López"
+          },
+          "donorPhone": {
+            "type": "object",
+            "example": "+52 55 1234 5678",
+            "nullable": true
+          },
+          "donorEmail": {
+            "type": "object",
+            "example": "maria@example.com",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DonationIntakeItemDto"
+            }
+          }
+        },
+        "required": [
+          "intakeCode",
+          "donorName",
+          "items"
+        ]
+      },
+      "DonationIntakeLineViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "hygiene",
+              "water",
+              "food",
+              "medical",
+              "shelter",
+              "tools",
+              "other",
+              "medicines",
+              "medical_equipment",
+              "medical_supplies",
+              "medical_personnel"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "category",
+          "description",
+          "quantity",
+          "sortOrder"
+        ]
+      },
+      "DonationIntakeViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetResourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "intakeCode": {
+            "type": "string",
+            "example": "ACO-7F3K"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "received",
+              "rejected",
+              "incomplete"
+            ]
+          },
+          "donorName": {
+            "type": "string"
+          },
+          "donorPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "donorEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "donorUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DonationIntakeLineViewDto"
+            }
+          },
+          "volunteerNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "evidenceFileKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "receivedByUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "emergencyId",
+          "targetResourceId",
+          "intakeCode",
+          "status",
+          "donorName",
+          "lines",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "DonationIntakeSearchHitDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "intakeCode": {
+            "type": "string",
+            "example": "ACO-7F3K"
+          },
+          "donorName": {
+            "type": "string"
+          },
+          "donorPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "donorEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "received",
+              "rejected",
+              "incomplete"
+            ]
+          },
+          "targetResourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemCount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "intakeCode",
+          "donorName",
+          "status",
+          "targetResourceId",
+          "itemCount",
+          "createdAt"
+        ]
+      },
+      "ReceiveDonationIntakeDto": {
+        "type": "object",
+        "properties": {
+          "volunteerNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "evidenceFileKey": {
+            "type": "string",
+            "description": "File key from POST /files",
+            "nullable": true
+          }
+        }
+      },
+      "RejectDonationIntakeDto": {
+        "type": "object",
+        "properties": {
+          "volunteerNotes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "MarkDonationIntakeIncompleteDto": {
+        "type": "object",
+        "properties": {
+          "volunteerNotes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
       },
       "PublishCapacityProviderDto": {
         "type": "object",

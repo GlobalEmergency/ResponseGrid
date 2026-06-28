@@ -24,6 +24,7 @@ describe('EntityAwareScopeResolver', () => {
     none,
     none,
     none,
+    none,
   );
 
   it("derives the chain from the entity's real owner, ignoring a client-supplied :emergencyId", async () => {

@@ -96,6 +96,11 @@ import {
   REPORT_EMERGENCY_LOOKUP,
   ReportEmergencyLookup,
 } from '../domain/ports/report-emergency-lookup';
+import { DrizzleIntakeEmergencyLookup } from './drizzle/drizzle-intake-emergency-lookup';
+import {
+  INTAKE_EMERGENCY_LOOKUP,
+  IntakeEmergencyLookup,
+} from '../domain/ports/intake-emergency-lookup';
 import { GoogleStrategy } from './http/google.strategy';
 import { FacebookStrategy } from './http/facebook.strategy';
 
@@ -281,6 +286,13 @@ const reportEmergencyLookupProvider = {
     new DrizzleReportEmergencyLookup(db),
 };
 
+const intakeEmergencyLookupProvider = {
+  provide: INTAKE_EMERGENCY_LOOKUP,
+  inject: [DB],
+  useFactory: (db: Db): IntakeEmergencyLookup =>
+    new DrizzleIntakeEmergencyLookup(db),
+};
+
 const loginProvider = {
   provide: Login,
   inject: [USER_REPOSITORY, PASSWORD_HASHER, TOKEN_SERVICE],
@@ -359,6 +371,7 @@ const authenticateWithProviderProvider = {
     volunteerEmergencyLookupProvider,
     taskEmergencyLookupProvider,
     reportEmergencyLookupProvider,
+    intakeEmergencyLookupProvider,
     accessControlProvider,
     scopeResolverProvider,
     PermissionGuard,
@@ -382,6 +395,7 @@ const authenticateWithProviderProvider = {
     VOLUNTEER_EMERGENCY_LOOKUP,
     TASK_EMERGENCY_LOOKUP,
     REPORT_EMERGENCY_LOOKUP,
+    INTAKE_EMERGENCY_LOOKUP,
     ACCESS_CONTROL,
     SCOPE_RESOLVER,
     PermissionGuard,

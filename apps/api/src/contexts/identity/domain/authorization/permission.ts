@@ -42,6 +42,7 @@ export const PERMISSION_CATALOG = {
   // Capacidad de transporte (#105): ofertar mover carga A->B. 'publish' es de
   // grado ciudadano (como 'offer:create'); 'read' lo consume la coordinación.
   capacity: ['publish', 'read'],
+  intake: ['create', 'read', 'receive', 'update'],
 } as const;
 
 type Catalog = typeof PERMISSION_CATALOG;

@@ -35,6 +35,12 @@ const isTestEnv = process.env.NODE_ENV === 'test';
               ttl: 60_000,
               limit: 10,
             },
+            {
+              // public donation-intake endpoints: 5 requests per 60 seconds per IP
+              name: 'intake',
+              ttl: 60_000,
+              limit: 5,
+            },
           ],
     ),
     DatabaseModule,

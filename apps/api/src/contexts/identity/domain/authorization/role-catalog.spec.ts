@@ -46,6 +46,15 @@ describe('ROLE_CATALOG', () => {
     expect(permissionsForRole('emergency_verifier')).toContain('capacity:read');
   });
 
+  it('wires intake reception permissions (#15)', () => {
+    const coordinator = new Set(permissionsForRole('emergency_coordinator'));
+    expect(coordinator.has('intake:read')).toBe(true);
+    expect(coordinator.has('intake:receive')).toBe(true);
+    expect(permissionsForRole('emergency_verifier')).not.toContain(
+      'intake:receive',
+    );
+  });
+
   it('every role only references permissions that exist in the catalog', () => {
     const valid = new Set<string>(ALL_PERMISSIONS);
     for (const role of Object.values(ROLE_CATALOG)) {
