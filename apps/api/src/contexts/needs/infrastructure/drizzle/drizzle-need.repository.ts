@@ -1,5 +1,6 @@
 import {
   and,
+  between,
   count,
   eq,
   exists,
@@ -223,6 +224,56 @@ export class DrizzleNeedRepository implements NeedRepository {
         };
       })
       .filter((x): x is { need: Need; distanceMeters: number } => x !== null);
+  }
+
+  async findValidatedInBounds(
+    emergencyId: EmergencyId,
+    q: {
+      minLat: number;
+      minLng: number;
+      maxLat: number;
+      maxLng: number;
+      limit: number;
+    },
+  ): Promise<Need[]> {
+    const now = new Date();
+    const notExpired = or(
+      isNull(needsTable.expiresAt),
+      gt(needsTable.expiresAt, now),
+    ) as SQL;
+
+    const rows = await this.db
+      .select()
+      .from(needsTable)
+      .where(
+        and(
+          eq(needsTable.emergencyId, emergencyId.value),
+          eq(needsTable.status, NeedStatus.Validated),
+          notExpired,
+          between(needsTable.latitude, q.minLat, q.maxLat),
+          between(needsTable.longitude, q.minLng, q.maxLng),
+        ),
+      )
+      .limit(q.limit);
+
+    if (rows.length === 0) return [];
+
+    const ids = rows.map((r) => r.id);
+    const allItems = await this.db
+      .select()
+      .from(needItemsTable)
+      .where(inArray(needItemsTable.needId, ids));
+
+    const itemsByNeedId = new Map<string, ItemsRow[]>();
+    for (const item of allItems) {
+      const bucket = itemsByNeedId.get(item.needId) ?? [];
+      bucket.push(item);
+      itemsByNeedId.set(item.needId, bucket);
+    }
+
+    return rows.map((r) =>
+      Need.fromSnapshot(rowToSnapshot(r, itemsByNeedId.get(r.id) ?? [])),
+    );
   }
 
   async findExpiredByEmergency(

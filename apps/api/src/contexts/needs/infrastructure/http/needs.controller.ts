@@ -31,6 +31,7 @@ import {
   GetNearbyNeeds,
   NearbyNeedView,
 } from '../../application/get-nearby-needs';
+import { GetNeedsInBounds } from '../../application/get-needs-in-bounds';
 import { GetNeedsQueue } from '../../application/get-needs-queue';
 import { AssignNeedManager } from '../../application/assign-need-manager';
 import { RenewNeed, GetExpiredNeeds } from '../../application/renew-need';
@@ -43,11 +44,13 @@ import {
   AssignNeedManagerDto,
   CreateTaskFromNeedDto,
   NearbyNeedsQueryDto,
+  InBoundsNeedsQueryDto,
 } from './dto';
 import {
   CreateNeedResponseDto,
   NeedViewDto,
   NearbyNeedsResponseDto,
+  InBoundsNeedsDto,
   VolunteerSuggestionDto,
   CreatedTaskFromNeedDto,
 } from './response.dto';
@@ -67,6 +70,7 @@ export class NeedsController {
     private readonly validateNeed: ValidateNeed,
     private readonly getPublicNeeds: GetPublicNeeds,
     private readonly getNearbyNeeds: GetNearbyNeeds,
+    private readonly getNeedsInBounds: GetNeedsInBounds,
     private readonly getNeedsQueue: GetNeedsQueue,
     private readonly assignNeedManager: AssignNeedManager,
     private readonly renewNeed: RenewNeed,
@@ -201,6 +205,33 @@ export class NeedsController {
       lng: query.lng,
       radiusMeters: query.radius,
       limit: query.limit ?? 50,
+    });
+  }
+
+  @Get('emergencies/:emergencyId/public/needs/in-bounds')
+  @ApiOperation({
+    summary: 'List validated needs within a geographic bounding box (public)',
+  })
+  @ApiParam({
+    name: 'emergencyId',
+    description: 'Emergency UUID',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Validated needs within the bounding box',
+    type: InBoundsNeedsDto,
+  })
+  async needsInBounds(
+    @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
+    @Query() query: InBoundsNeedsQueryDto,
+  ): Promise<{ items: NeedView[] }> {
+    return this.getNeedsInBounds.execute({
+      emergencyId,
+      minLat: query.minLat,
+      minLng: query.minLng,
+      maxLat: query.maxLat,
+      maxLng: query.maxLng,
+      limit: query.limit ?? 500,
     });
   }
 

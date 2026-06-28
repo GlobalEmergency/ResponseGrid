@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useState, useLayoutEffect, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import type { MapPoint } from './emergency-map';
 import { createResponseGridClient } from '@reliefhub/api-client';
 import type { Map as LeafletMap, LatLngBounds } from 'leaflet';
@@ -60,15 +60,8 @@ function createDebounced(fn: (map: LeafletMap) => void) {
 }
 
 export function EmergencyMapWrapper({ points, emergencyId, containerClassName }: EmergencyMapWrapperProps) {
-  // Need points come from the SSR-fetched prop and are kept separately so
-  // we can merge them with whatever the map viewport currently returns.
-  const needPoints = points.filter((p) => p.kind === 'need');
-  const needPointsRef = useRef<MapPoint[]>(needPoints);
-  useLayoutEffect(() => {
-    needPointsRef.current = needPoints;
-  });
-
-  // allMapPoints drives what the map renders. Initially = SSR prop.
+  // allMapPoints drives what the map renders. Initially = SSR prop (resources +
+  // needs, page 1); once the map is ready it is replaced by viewport queries.
   const [allMapPoints, setAllMapPoints] = useState<MapPoint[]>(points);
 
   // Guard against stale in-flight requests: only the latest fetch wins.
@@ -89,7 +82,7 @@ export function EmergencyMapWrapper({ points, emergencyId, containerClassName }:
 
   // fetchForBounds is defined as a stable useCallback so it can be listed as
   // a dep in handleMapReady. The actual work reads from refs (emergencyIdRef,
-  // fetchIdRef, needPointsRef) so it never goes stale between renders.
+  // fetchIdRef, coverageRef) so it never goes stale between renders.
   const fetchForBounds = useCallback(async (map: LeafletMap) => {
     const eid = emergencyIdRef.current;
     if (eid === undefined || eid === '' || API_BASE === '') return;
@@ -113,38 +106,38 @@ export function EmergencyMapWrapper({ points, emergencyId, containerClassName }:
     // Request a padded box (not just the exact viewport) so subsequent small
     // pans/zooms reuse the same data instead of hitting the network again.
     const padded = viewport.pad(BOUNDS_PADDING);
-    const minLat = padded.getSouth();
-    const maxLat = padded.getNorth();
-    const minLng = padded.getWest();
-    const maxLng = padded.getEast();
+    const query = {
+      minLat: padded.getSouth(),
+      minLng: padded.getWest(),
+      maxLat: padded.getNorth(),
+      maxLng: padded.getEast(),
+      limit: IN_BOUNDS_LIMIT,
+    };
 
     try {
       const client = createResponseGridClient(API_BASE);
-      const { data } = await client.GET(
-        '/emergencies/{emergencyId}/public/resources/in-bounds',
-        {
-          params: {
-            path: { emergencyId: eid },
-            query: { minLat, minLng, maxLat, maxLng, limit: IN_BOUNDS_LIMIT },
-          },
-        },
-      );
+      // Resources and needs are both scoped to the viewport so the map stays
+      // fast even with hundreds of each.
+      const [resourcesRes, needsRes] = await Promise.all([
+        client.GET('/emergencies/{emergencyId}/public/resources/in-bounds', {
+          params: { path: { emergencyId: eid }, query },
+        }),
+        client.GET('/emergencies/{emergencyId}/public/needs/in-bounds', {
+          params: { path: { emergencyId: eid }, query },
+        }),
+      ]);
 
       // Discard if a newer fetch has been issued.
       if (currentFetchId !== fetchIdRef.current) return;
-      if (data == null) return;
 
-      // Remember what we now have cached for this box. "complete" means the box
-      // wasn't truncated by the limit, so every point inside it is loaded.
-      coverageRef.current = {
-        bounds: padded,
-        complete: data.items.length < IN_BOUNDS_LIMIT,
-      };
+      const resourceItems = resourcesRes.data?.items ?? null;
+      const needItems = needsRes.data?.items ?? null;
+      if (resourceItems === null && needItems === null) return;
 
-      const resourcePoints: MapPoint[] = [];
-      for (const r of data.items) {
+      const nextPoints: MapPoint[] = [];
+      for (const r of resourceItems ?? []) {
         if (r.location.latitude === 0 && r.location.longitude === 0) continue;
-        resourcePoints.push({
+        nextPoints.push({
           id: r.id,
           lat: r.location.latitude,
           lng: r.location.longitude,
@@ -157,13 +150,32 @@ export function EmergencyMapWrapper({ points, emergencyId, containerClassName }:
           accepts: r.accepts,
         });
       }
+      for (const n of needItems ?? []) {
+        if (n.location.latitude === 0 && n.location.longitude === 0) continue;
+        nextPoints.push({
+          id: n.id,
+          lat: n.location.latitude,
+          lng: n.location.longitude,
+          label: n.title,
+          kind: 'need',
+          approximate: n.locationSensitivity === 'approximate',
+        });
+      }
+      setAllMapPoints(nextPoints);
 
-      setAllMapPoints([...resourcePoints, ...needPointsRef.current]);
+      // "complete" means neither list was truncated by the limit, so every
+      // point in the box is loaded and we can skip refetching inside it.
+      coverageRef.current = {
+        bounds: padded,
+        complete:
+          (resourceItems?.length ?? 0) < IN_BOUNDS_LIMIT &&
+          (needItems?.length ?? 0) < IN_BOUNDS_LIMIT,
+      };
     } catch (err) {
       console.error('[EmergencyMapWrapper] in-bounds fetch error:', err);
     }
-    // Stable: reads from refs (emergencyIdRef, fetchIdRef, needPointsRef) set in
-    // layout effects and useEffect, so the function never captures stale values.
+    // Stable: reads from refs (emergencyIdRef, fetchIdRef, coverageRef), so the
+    // function never captures stale values between renders.
   }, []);
 
   // Called by EmergencyMap when the map instance is ready.

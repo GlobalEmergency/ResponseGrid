@@ -89,6 +89,37 @@ export class InMemoryNeedRepository implements NeedRepository {
     return Promise.resolve(result);
   }
 
+  findValidatedInBounds(
+    emergencyId: EmergencyId,
+    q: {
+      minLat: number;
+      minLng: number;
+      maxLat: number;
+      maxLng: number;
+      limit: number;
+    },
+  ): Promise<Need[]> {
+    const now = new Date();
+    const result = [...this.store.values()]
+      .filter((s) => {
+        if (s.emergencyId !== emergencyId.value) return false;
+        if (s.status !== NeedStatus.Validated) return false;
+        if (
+          s.expiresAt !== null &&
+          s.expiresAt !== undefined &&
+          s.expiresAt <= now
+        )
+          return false;
+        const { latitude, longitude } = s.location;
+        if (latitude < q.minLat || latitude > q.maxLat) return false;
+        if (longitude < q.minLng || longitude > q.maxLng) return false;
+        return true;
+      })
+      .slice(0, q.limit)
+      .map((s) => Need.fromSnapshot(s));
+    return Promise.resolve(result);
+  }
+
   findExpiredByEmergency(
     emergencyId: EmergencyId,
     filters?: NeedFilters,
