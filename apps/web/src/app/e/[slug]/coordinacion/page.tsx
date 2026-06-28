@@ -16,10 +16,8 @@ import { EmergencyControls } from '@/components/organisms/emergency-controls';
 import { NeedsFilter } from '@/components/molecules/needs-filter';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { Badge } from '@/components/atoms/badge';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { getT } from '@/i18n/server';
 import type { Messages } from '@/i18n/messages/es';
-import { logout } from './actions';
 
 // Always fetch live data — never serve a stale cached page.
 export const dynamic = 'force-dynamic';
@@ -185,40 +183,20 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-xl">
-        <PageHeaderBand
-          backHref={`/e/${slug}`}
-          backLabel={emergency.name}
-          title={tc.dashboard_title}
-          subtitle={emergency.name}
-        />
-        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
+      <div className="mx-auto flex w-full max-w-md flex-col gap-8 px-5 pb-12 pt-6 lg:max-w-5xl lg:px-8">
 
-        {/* ── ROL DEL USUARIO ─────────────────────────────────────────── */}
-        {access.roleIds.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <h2 className="text-sm font-semibold text-muted">
-              {tc.your_role_heading}
-            </h2>
-            <div className="flex flex-wrap gap-2">
+        <header className="flex flex-col gap-2">
+          <h1 className="font-display text-xl font-bold text-navy lg:text-2xl">{tc.dashboard_title}</h1>
+          <p className="text-sm text-muted">{emergency.name}</p>
+          {access.roleIds.length > 0 && (
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <span className="text-sm text-muted">{tc.your_role_heading}</span>
               {access.roleIds.map((rid) => (
-                <Badge key={rid} variant="role-owner">
-                  {roleLabel(rid, tc, roleDesc)}
-                </Badge>
+                <Badge key={rid} variant="role-owner">{roleLabel(rid, tc, roleDesc)}</Badge>
               ))}
             </div>
-          </div>
-        )}
-
-        {/* ── SALIR ───────────────────────────────────────────────────── */}
-        <form action={logout} className="flex justify-end">
-          <button
-            type="submit"
-            className="rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-surface-alt focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
-          >
-            {tc.logout}
-          </button>
-        </form>
+          )}
+        </header>
 
         {/* ── CONTROLES (solo coordinación) ───────────────────────────── */}
         {access.canCoordinate && (
@@ -351,7 +329,6 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
           </>
         )}
 
-        </div>
       </div>
     </main>
   );

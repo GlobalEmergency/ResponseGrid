@@ -5,7 +5,6 @@ import { getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { EmptyState } from '@/components/molecules/empty-state';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { ReportCard } from '@/components/organisms/report-card';
 import type { FieldReport } from '@/components/organisms/report-card';
 import { getT } from '@/i18n/server';
@@ -134,14 +133,12 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-xl">
-        <PageHeaderBand
-          backHref={`/e/${slug}/coordinacion`}
-          backLabel={tc.back_coordination}
-          title={tc.reports_title}
-          subtitle={emergency.name}
-        />
-        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
+      <div className="mx-auto flex w-full max-w-md flex-col gap-8 px-5 pb-12 pt-6 lg:max-w-5xl lg:px-8">
+
+        <header className="flex flex-col gap-2">
+          <h1 className="font-display text-xl font-bold text-navy lg:text-2xl">{tc.reports_title}</h1>
+          <p className="text-sm text-muted">{emergency.name}</p>
+        </header>
 
         {/* ── FILTROS ─────────────────────────────────────────────────── */}
         <section aria-labelledby="filters-heading" className="flex flex-col gap-3">
@@ -238,7 +235,6 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
           )}
         </section>
 
-        </div>
       </div>
     </main>
   );

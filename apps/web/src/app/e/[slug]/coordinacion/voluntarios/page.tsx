@@ -8,7 +8,6 @@ import { VolunteerRosterFilter } from '@/components/molecules/volunteer-roster-f
 import { TaskCard } from '@/components/organisms/task-card';
 import { CreateTaskForm } from '@/components/organisms/create-task-form';
 import { EmptyState } from '@/components/molecules/empty-state';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { getT } from '@/i18n/server';
 import type { components } from '@reliefhub/api-client';
 
@@ -117,14 +116,12 @@ export default async function CoordinacionVoluntariosPage({ params, searchParams
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-xl">
-        <PageHeaderBand
-          backHref={`/e/${slug}/coordinacion`}
-          backLabel={tc.back_coordination}
-          title={tc.volunteers_title}
-          subtitle={emergency.name}
-        />
-        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
+      <div className="mx-auto flex w-full max-w-md flex-col gap-8 px-5 pb-12 pt-6 lg:max-w-5xl lg:px-8">
+
+        <header className="flex flex-col gap-2">
+          <h1 className="font-display text-xl font-bold text-navy lg:text-2xl">{tc.volunteers_title}</h1>
+          <p className="text-sm text-muted">{emergency.name}</p>
+        </header>
 
         {/* ── ROSTER DE VOLUNTARIOS ────────────────────────────────── */}
         <section aria-labelledby="roster-heading" className="flex flex-col gap-4">
@@ -188,7 +185,6 @@ export default async function CoordinacionVoluntariosPage({ params, searchParams
           )}
         </section>
 
-        </div>
       </div>
     </main>
   );
