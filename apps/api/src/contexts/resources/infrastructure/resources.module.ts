@@ -44,6 +44,13 @@ import {
   NotificationsPort,
 } from '../../notifications/domain/ports/notifications.port';
 import { NotificationsModule } from '../../notifications/infrastructure/notifications.module';
+import { RecipientTypesController } from './http/recipient-types.controller';
+import { ListRecipientTypes } from '../application/list-recipient-types';
+import {
+  RECIPIENT_TYPE_REPOSITORY,
+  RecipientTypeRepository,
+} from '../domain/ports/recipient-type.repository';
+import { DrizzleRecipientTypeRepository } from './drizzle/drizzle-recipient-type.repository';
 
 export const EVENT_QUEUE = Symbol('ResourcesEventQueue');
 
@@ -171,9 +178,27 @@ const getResourcesInBoundsProvider = {
   useFactory: (repo: ResourceRepository) => new GetResourcesInBounds(repo),
 };
 
+const recipientTypeRepositoryProvider = {
+  provide: RECIPIENT_TYPE_REPOSITORY,
+  inject: [DB],
+  useFactory: (db: Db): RecipientTypeRepository =>
+    new DrizzleRecipientTypeRepository(db),
+};
+
+const listRecipientTypesProvider = {
+  provide: ListRecipientTypes,
+  inject: [RECIPIENT_TYPE_REPOSITORY],
+  useFactory: (repo: RecipientTypeRepository) => new ListRecipientTypes(repo),
+};
+
 @Module({
   imports: [DatabaseModule, IdentityModule, NotificationsModule],
-  controllers: [ResourcesController, CoordinationController, PublicController],
+  controllers: [
+    ResourcesController,
+    CoordinationController,
+    PublicController,
+    RecipientTypesController,
+  ],
   providers: [
     eventQueueProvider,
     resourceRepositoryProvider,
@@ -191,6 +216,8 @@ const getResourcesInBoundsProvider = {
     updateStatusProvider,
     getMyResourcesProvider,
     getResourcesInBoundsProvider,
+    recipientTypeRepositoryProvider,
+    listRecipientTypesProvider,
   ],
 })
 export class ResourcesModule implements OnModuleDestroy {
