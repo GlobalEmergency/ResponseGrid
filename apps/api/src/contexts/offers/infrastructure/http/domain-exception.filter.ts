@@ -10,6 +10,9 @@ import {
   OfferNotOpenError,
   OfferNotMatchedError,
   OfferCannotBeCancelledError,
+  OfferNotEditableError,
+  OfferDescriptionRequiredError,
+  OfferQuantityInvalidError,
 } from '../../domain/offer-errors';
 import { EmergencyNotAcceptingIntakeError } from '../../../emergencies/domain/emergency-not-accepting-intake.error';
 import { OfferCancelUnauthorizedError } from '../../application/cancel-offer';
@@ -25,6 +28,9 @@ type DomainError =
   | OfferNotOpenError
   | OfferNotMatchedError
   | OfferCannotBeCancelledError
+  | OfferNotEditableError
+  | OfferDescriptionRequiredError
+  | OfferQuantityInvalidError
   | EmergencyNotAcceptingIntakeError
   | OfferCancelUnauthorizedError
   | OfferNeedEmergencyMismatchError
@@ -37,6 +43,9 @@ type DomainError =
   OfferNotOpenError,
   OfferNotMatchedError,
   OfferCannotBeCancelledError,
+  OfferNotEditableError,
+  OfferDescriptionRequiredError,
+  OfferQuantityInvalidError,
   EmergencyNotAcceptingIntakeError,
   OfferCancelUnauthorizedError,
   OfferNeedEmergencyMismatchError,
@@ -56,11 +65,15 @@ export class OffersDomainExceptionFilter implements ExceptionFilter {
             ? HttpStatus.UNPROCESSABLE_ENTITY
             : exception instanceof TargetNeedWrongEmergencyError
               ? HttpStatus.UNPROCESSABLE_ENTITY
-              : exception instanceof EmergencyNotAcceptingIntakeError
-                ? HttpStatus.CONFLICT
-                : exception instanceof OfferCancelUnauthorizedError
-                  ? HttpStatus.FORBIDDEN
-                  : HttpStatus.CONFLICT;
+              : exception instanceof OfferDescriptionRequiredError
+                ? HttpStatus.BAD_REQUEST
+                : exception instanceof OfferQuantityInvalidError
+                  ? HttpStatus.BAD_REQUEST
+                  : exception instanceof EmergencyNotAcceptingIntakeError
+                    ? HttpStatus.CONFLICT
+                    : exception instanceof OfferCancelUnauthorizedError
+                      ? HttpStatus.FORBIDDEN
+                      : HttpStatus.CONFLICT;
     response
       .status(statusCode)
       .json({ statusCode, message: exception.message });

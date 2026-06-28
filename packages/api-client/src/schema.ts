@@ -330,6 +330,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/resources/{resourceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit a resource during verification (validator/coordinator). Requires a reason; recorded in the audit trail. */
+        patch: operations["ResourcesController_editResourceFields"];
+        trace?: never;
+    };
+    "/resources/{resourceId}/discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Discard a resource during verification (validator/coordinator). Requires a reason; recorded in the audit trail. */
+        post: operations["ResourcesController_discardResourceAction"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/resources/{resourceId}/status": {
         parameters: {
             query?: never;
@@ -740,6 +774,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/needs/{needId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit a need during validation (validator/coordinator). Requires a reason; recorded in the audit trail. */
+        patch: operations["NeedsController_edit"];
+        trace?: never;
+    };
+    "/needs/{needId}/discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Discard a need during validation (validator/coordinator). Requires a reason; recorded in the audit trail. */
+        post: operations["NeedsController_discard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/needs/{needId}/assign-manager": {
         parameters: {
             query?: never;
@@ -1069,6 +1137,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/offers/{offerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit a donation offer (coordinator). Requires a reason; recorded in the audit trail. */
+        patch: operations["OffersController_edit"];
+        trace?: never;
+    };
+    "/offers/{offerId}/discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Discard a donation offer (coordinator). Requires a reason; recorded in the audit trail. */
+        post: operations["OffersController_discard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/offers/{offerId}/fulfill": {
         parameters: {
             query?: never;
@@ -1361,6 +1463,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/reports/{reportId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Editar un reporte durante el triaje (coordinador). Requiere un motivo; se registra en la trazabilidad. */
+        patch: operations["ReportsController_edit"];
+        trace?: never;
+    };
+    "/reports/{reportId}/discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Descartar un reporte durante el triaje (coordinador). Requiere un motivo; se registra en la trazabilidad. */
+        post: operations["ReportsController_discard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/emergencies/{emergencyId}/reports/mine": {
         parameters: {
             query?: never;
@@ -1387,6 +1523,23 @@ export interface paths {
         };
         /** List audit log entries (audit:read) */
         get: operations["AuditController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Activity trail for an emergency — coordinators of the emergency only */
+        get: operations["EmergencyAuditController_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1783,6 +1936,28 @@ export interface components {
             id: string;
         };
         VerifyResourceDto: Record<string, never>;
+        EditResourceDto: {
+            /**
+             * @description Motivo de la edición (obligatorio, para trazabilidad)
+             * @example Se corrige el nombre y se completa el horario
+             */
+            reason: string;
+            /** @description Nuevo nombre (omitir para no cambiarlo) */
+            name?: string;
+            /** @description Nueva descripción. Cadena vacía la borra. Omitir para no cambiarla. */
+            description?: string | null;
+            /** @description Nuevo contacto. Cadena vacía lo borra. Omitir para no cambiarlo. */
+            contact?: string | null;
+            /** @description Nuevo horario. Cadena vacía lo borra. Omitir para no cambiarlo. */
+            schedule?: string | null;
+        };
+        DiscardResourceDto: {
+            /**
+             * @description Motivo del descarte (obligatorio, para trazabilidad)
+             * @example Punto duplicado / fuera del ámbito de la emergencia
+             */
+            reason: string;
+        };
         UpdateResourcePublicStatusDto: {
             /**
              * @description Target operational status. Hidden is not allowed; use close() to deactivate.
@@ -1824,7 +1999,7 @@ export interface components {
              * @example verified
              * @enum {string}
              */
-            verificationLevel: "unverified" | "verified" | "official";
+            verificationLevel: "unverified" | "verified" | "official" | "rejected";
             /**
              * @example active
              * @enum {string}
@@ -1904,7 +2079,7 @@ export interface components {
              * @example verified
              * @enum {string}
              */
-            verificationLevel: "unverified" | "verified" | "official";
+            verificationLevel: "unverified" | "verified" | "official" | "rejected";
             /**
              * @example active
              * @enum {string}
@@ -2388,6 +2563,29 @@ export interface components {
         InBoundsNeedsDto: {
             items: components["schemas"]["NeedViewDto"][];
         };
+        EditNeedDto: {
+            /**
+             * @description Motivo de la edición (obligatorio, para trazabilidad)
+             * @example Se corrige la prioridad y se completa la descripción
+             */
+            reason: string;
+            /** @description Nuevo título (omitir para no cambiarlo) */
+            title?: string;
+            /** @description Nueva descripción. Cadena vacía la borra. Omitir para no cambiarla. */
+            description?: string | null;
+            /**
+             * @description Nueva prioridad
+             * @enum {string}
+             */
+            priority?: "low" | "medium" | "high" | "urgent";
+        };
+        DiscardNeedDto: {
+            /**
+             * @description Motivo del descarte (obligatorio, para trazabilidad)
+             * @example Petición duplicada; ya validada en otra entrada
+             */
+            reason: string;
+        };
         AssignNeedManagerDto: {
             /**
              * Format: uuid
@@ -2689,6 +2887,31 @@ export interface components {
              */
             needId: string;
         };
+        EditOfferDto: {
+            /**
+             * @description Motivo de la edición (obligatorio, para trazabilidad)
+             * @example Se corrige la cantidad y se completa la descripción
+             */
+            reason: string;
+            /** @description Nueva descripción (omitir para no cambiarla) */
+            description?: string;
+            /**
+             * @description Nueva cantidad (entero positivo). Omitir para no cambiarla.
+             * @example 20
+             */
+            quantity?: number;
+            /** @description Nueva unidad. Cadena vacía la borra. Omitir para no cambiarla. */
+            unit?: string | null;
+            /** @description Nuevas notas. Cadena vacía las borra. Omitir para no cambiarlas. */
+            notes?: string | null;
+        };
+        DiscardOfferDto: {
+            /**
+             * @description Motivo del descarte (obligatorio, para trazabilidad)
+             * @example Oferta duplicada; ya gestionada en otra entrada
+             */
+            reason: string;
+        };
         RegisterVolunteerDto: {
             /** @example Ana García */
             name: string;
@@ -2843,9 +3066,40 @@ export interface components {
             resourceId?: string;
             location?: components["schemas"]["LocationDto"];
         };
+        EditReportDto: {
+            /**
+             * @description Motivo de la edición (obligatorio, para trazabilidad)
+             * @example Se corrige la prioridad y se completa la nota
+             */
+            reason: string;
+            /** @description Nueva nota (omitir para no cambiarla) */
+            note?: string;
+            /**
+             * @description Nueva prioridad
+             * @enum {string}
+             */
+            priority?: "low" | "medium" | "high" | "urgent";
+        };
+        DiscardReportDto: {
+            /**
+             * @description Motivo del descarte (obligatorio, para trazabilidad)
+             * @example Reporte duplicado; ya registrado en otra entrada
+             */
+            reason: string;
+        };
+        AuditChangeDto: {
+            /** @description Name of the field that changed */
+            field: string;
+            /** @description Value before the change (any JSON type) */
+            before?: Record<string, never> | null;
+            /** @description Value after the change (any JSON type) */
+            after?: Record<string, never> | null;
+        };
         AuditEntryDto: {
             id: string;
             actorUserId?: string | null;
+            /** @description Actor display name captured at write time */
+            actorName?: string | null;
             action: string;
             entityType?: string | null;
             entityId?: string | null;
@@ -2853,6 +3107,12 @@ export interface components {
             method: string;
             path: string;
             statusCode: number;
+            /** @description Mandatory reason for edit/discard actions */
+            reason?: string | null;
+            /** @description Before/after field changes for edit actions */
+            changes?: components["schemas"]["AuditChangeDto"][] | null;
+            /** @description State the entity transitioned to (e.g. rejected) */
+            targetStatus?: string | null;
             /** Format: date-time */
             createdAt: string;
         };
@@ -3738,6 +3998,112 @@ export interface operations {
             };
             /** @description Resource not verified yet */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ResourcesController_editResourceFields: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource UUID */
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditResourceDto"];
+            };
+        };
+        responses: {
+            /** @description Resource edited */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing reason or resource is discarded */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validator/coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ResourcesController_discardResourceAction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource UUID */
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiscardResourceDto"];
+            };
+        };
+        responses: {
+            /** @description Resource discarded */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing reason or resource is not pending verification */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validator/coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4747,6 +5113,112 @@ export interface operations {
             };
         };
     };
+    NeedsController_edit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Need UUID */
+                needId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditNeedDto"];
+            };
+        };
+        responses: {
+            /** @description Need edited */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing reason or need is in a terminal status */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validator/coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Need not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    NeedsController_discard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Need UUID */
+                needId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiscardNeedDto"];
+            };
+        };
+        responses: {
+            /** @description Need discarded (rejected) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing reason or need is not in pending status */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validator/coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Need not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     NeedsController_assignManager: {
         parameters: {
             query?: never;
@@ -5605,6 +6077,112 @@ export interface operations {
             };
         };
     };
+    OffersController_edit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Offer UUID */
+                offerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditOfferDto"];
+            };
+        };
+        responses: {
+            /** @description Offer edited */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing reason or offer is in a terminal status */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Offer not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OffersController_discard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Offer UUID */
+                offerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiscardOfferDto"];
+            };
+        };
+        responses: {
+            /** @description Offer discarded (cancelled) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing reason or offer cannot be discarded in its status */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Offer not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     OffersController_fulfill: {
         parameters: {
             query?: never;
@@ -6423,6 +7001,54 @@ export interface operations {
             };
         };
     };
+    ReportsController_edit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditReportDto"];
+            };
+        };
+        responses: {
+            /** @description Report edited */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReportsController_discard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiscardReportDto"];
+            };
+        };
+        responses: {
+            /** @description Report discarded (closed) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ReportsController_mine: {
         parameters: {
             query?: never;
@@ -6479,6 +7105,51 @@ export interface operations {
                 content?: never;
             };
             /** @description audit:read required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EmergencyAuditController_list: {
+        parameters: {
+            query?: {
+                /** @description Filter by actor user ID */
+                actorUserId?: string;
+                /** @description Filter by entity type (e.g. resource, need) */
+                entityType?: string;
+                /** @description Max results to return (default 100, max 500) */
+                limit?: number;
+                /** @description Offset for pagination (default 0) */
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditListResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description audit:read required (coordinator of this emergency) */
             403: {
                 headers: {
                     [name: string]: unknown;

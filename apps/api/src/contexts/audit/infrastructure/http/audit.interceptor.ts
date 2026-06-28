@@ -41,7 +41,10 @@ export class AuditInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const http = context.switchToHttp();
     const req = http.getRequest<
-      Request & { user?: AuthenticatedUser; auditContext?: AuditMutationContext }
+      Request & {
+        user?: AuthenticatedUser;
+        auditContext?: AuditMutationContext;
+      }
     >();
     const res = http.getResponse<Response>();
 

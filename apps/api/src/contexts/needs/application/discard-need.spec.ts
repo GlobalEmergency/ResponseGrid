@@ -38,7 +38,12 @@ describe('DiscardNeed', () => {
       location: { address: 'Caracas', latitude: 10.48, longitude: -66.9 },
       priority: Priority.Medium,
       items: [
-        { name: 'Botellas', quantity: 10, unit: 'u', category: NeedCategory.Water },
+        {
+          name: 'Botellas',
+          quantity: 10,
+          unit: 'u',
+          category: NeedCategory.Water,
+        },
       ],
     });
     bus.published = [];
@@ -56,7 +61,11 @@ describe('DiscardNeed', () => {
     expect(result.emergencyId).toBe(EM);
     expect(result.targetStatus).toBe(NeedStatus.Rejected);
     expect(result.changes).toEqual([
-      { field: 'status', before: NeedStatus.Pending, after: NeedStatus.Rejected },
+      {
+        field: 'status',
+        before: NeedStatus.Pending,
+        after: NeedStatus.Rejected,
+      },
     ]);
     expect(bus.published.map((e) => e.eventName)).toEqual(['need.rejected']);
   });

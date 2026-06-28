@@ -37,12 +37,12 @@ describe('ROLE_CATALOG', () => {
   });
 
   it('emergency_coordinator can read the audit trail but emergency_verifier cannot', () => {
-    expect(new Set(permissionsForRole('emergency_coordinator')).has('audit:read')).toBe(
-      true,
-    );
-    expect(new Set(permissionsForRole('emergency_verifier')).has('audit:read')).toBe(
-      false,
-    );
+    expect(
+      new Set(permissionsForRole('emergency_coordinator')).has('audit:read'),
+    ).toBe(true);
+    expect(
+      new Set(permissionsForRole('emergency_verifier')).has('audit:read'),
+    ).toBe(false);
   });
 
   it('every role only references permissions that exist in the catalog', () => {

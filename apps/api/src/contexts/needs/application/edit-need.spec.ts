@@ -38,7 +38,12 @@ describe('EditNeed', () => {
       location: { address: 'Caracas', latitude: 10.48, longitude: -66.9 },
       priority: Priority.Medium,
       items: [
-        { name: 'Botellas', quantity: 10, unit: 'u', category: NeedCategory.Water },
+        {
+          name: 'Botellas',
+          quantity: 10,
+          unit: 'u',
+          category: NeedCategory.Water,
+        },
       ],
     });
     return id;
@@ -74,7 +79,10 @@ describe('EditNeed', () => {
   it('leaves omitted fields untouched and reports no change for them', async () => {
     const id = await seed();
 
-    const result = await editNeed.execute({ needId: id, title: 'Agua potable' });
+    const result = await editNeed.execute({
+      needId: id,
+      title: 'Agua potable',
+    });
 
     expect(result.changes).toEqual([
       { field: 'title', before: 'Agua', after: 'Agua potable' },
@@ -106,9 +114,9 @@ describe('EditNeed', () => {
     need!.reject();
     await repo.save(need!);
 
-    await expect(
-      editNeed.execute({ needId: id, title: 'x' }),
-    ).rejects.toThrow(NeedNotEditableError);
+    await expect(editNeed.execute({ needId: id, title: 'x' })).rejects.toThrow(
+      NeedNotEditableError,
+    );
   });
 
   it('reports an empty diff when nothing actually changed', async () => {
@@ -117,14 +125,7 @@ describe('EditNeed', () => {
     const result = await editNeed.execute({ needId: id, title: 'Agua' });
 
     expect(result.changes).toEqual([]);
-    expect(need_status(repo, id)).resolves.toBe(NeedStatus.Pending);
+    const need = await repo.findById(NeedId.fromString(id));
+    expect(need!.status).toBe(NeedStatus.Pending);
   });
 });
-
-async function need_status(
-  repo: InMemoryNeedRepository,
-  id: string,
-): Promise<NeedStatus> {
-  const need = await repo.findById(NeedId.fromString(id));
-  return need!.status;
-}

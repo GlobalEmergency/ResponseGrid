@@ -5,6 +5,7 @@ import {
   HttpCode,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -29,12 +30,20 @@ import { VerifyResource } from '../../application/verify-resource';
 import { PublishResource } from '../../application/publish-resource';
 import { UpdateResourcePublicStatus } from '../../application/update-resource-public-status';
 import { GetMyResources } from '../../application/get-my-resources';
+import {
+  EditResource,
+  EditResourceCommand,
+} from '../../application/edit-resource';
+import { DiscardResource } from '../../application/discard-resource';
 import { PublicStatus } from '../../domain/resource-enums';
 import {
   RegisterResourceDto,
   VerifyResourceDto,
   UpdateResourcePublicStatusDto,
+  EditResourceDto,
+  DiscardResourceDto,
 } from './dto';
+import { setAuditContext } from '../../../audit/infrastructure/http/audit-context';
 import { RegisterResourceResponseDto, ResourceViewDto } from './response.dto';
 import {
   JwtAuthGuard,
@@ -53,6 +62,8 @@ export class ResourcesController {
     private readonly publish: PublishResource,
     private readonly updateStatus: UpdateResourcePublicStatus,
     private readonly getMyResources: GetMyResources,
+    private readonly editResource: EditResource,
+    private readonly discardResource: DiscardResource,
   ) {}
 
   @Post('emergencies/:emergencyId/resources')
@@ -150,6 +161,82 @@ export class ResourcesController {
     @Param('resourceId', ParseUUIDPipe) resourceId: string,
   ): Promise<void> {
     await this.publish.execute({ resourceId });
+  }
+
+  @Patch('resources/:resourceId')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('resource:verify')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Edit a resource during verification (validator/coordinator). Requires a reason; recorded in the audit trail.',
+  })
+  @ApiParam({
+    name: 'resourceId',
+    description: 'Resource UUID',
+    format: 'uuid',
+  })
+  @ApiNoContentResponse({ description: 'Resource edited' })
+  @ApiNotFoundResponse({ description: 'Resource not found' })
+  @ApiBadRequestResponse({
+    description: 'Missing reason or resource is discarded',
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Validator/coordinator role required' })
+  async editResourceFields(
+    @Param('resourceId', ParseUUIDPipe) resourceId: string,
+    @Body() dto: EditResourceDto,
+    @Req() req: Request & { user?: AuthenticatedUser },
+  ): Promise<void> {
+    const cmd: EditResourceCommand = { resourceId };
+    if (dto.name !== undefined) cmd.name = dto.name;
+    if (dto.description !== undefined) cmd.description = dto.description;
+    if (dto.contact !== undefined) cmd.contact = dto.contact;
+    if (dto.schedule !== undefined) cmd.schedule = dto.schedule;
+
+    const result = await this.editResource.execute(cmd);
+    setAuditContext(req, {
+      reason: dto.reason,
+      changes: result.changes,
+      targetStatus: result.targetStatus,
+      emergencyId: result.emergencyId,
+    });
+  }
+
+  @Post('resources/:resourceId/discard')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('resource:verify')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Discard a resource during verification (validator/coordinator). Requires a reason; recorded in the audit trail.',
+  })
+  @ApiParam({
+    name: 'resourceId',
+    description: 'Resource UUID',
+    format: 'uuid',
+  })
+  @ApiNoContentResponse({ description: 'Resource discarded' })
+  @ApiNotFoundResponse({ description: 'Resource not found' })
+  @ApiBadRequestResponse({
+    description: 'Missing reason or resource is not pending verification',
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Validator/coordinator role required' })
+  async discardResourceAction(
+    @Param('resourceId', ParseUUIDPipe) resourceId: string,
+    @Body() dto: DiscardResourceDto,
+    @Req() req: Request & { user?: AuthenticatedUser },
+  ): Promise<void> {
+    const result = await this.discardResource.execute({ resourceId });
+    setAuditContext(req, {
+      reason: dto.reason,
+      changes: result.changes,
+      targetStatus: result.targetStatus,
+      emergencyId: result.emergencyId,
+    });
   }
 
   @Post('resources/:resourceId/status')

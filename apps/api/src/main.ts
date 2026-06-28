@@ -7,6 +7,7 @@ import { AppModule } from './app.module';
 import { DomainExceptionFilter } from './contexts/resources/infrastructure/http/domain-exception.filter';
 import { NeedsDomainExceptionFilter } from './contexts/needs/infrastructure/http/domain-exception.filter';
 import { ReportExceptionFilter } from './contexts/reports/infrastructure/http/report-exception.filter';
+import { OffersDomainExceptionFilter } from './contexts/offers/infrastructure/http/domain-exception.filter';
 
 /**
  * Validates that JWT_SECRET is strong enough in production.
@@ -65,6 +66,7 @@ async function bootstrap(): Promise<void> {
     new DomainExceptionFilter(),
     new NeedsDomainExceptionFilter(),
     new ReportExceptionFilter(),
+    new OffersDomainExceptionFilter(),
   );
   app.enableShutdownHooks();
 

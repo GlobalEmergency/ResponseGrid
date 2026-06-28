@@ -7,6 +7,8 @@ import { SubmitReport } from '../application/submit-report';
 import { GetReportsQueue } from '../application/get-reports-queue';
 import { MarkReportReviewed } from '../application/mark-report-reviewed';
 import { GetMyReports } from '../application/get-my-reports';
+import { EditReport } from '../application/edit-report';
+import { DiscardReport } from '../application/discard-report';
 import {
   REPORT_REPOSITORY,
   ReportRepository,
@@ -43,6 +45,18 @@ const getMyReportsProvider = {
   useFactory: (repo: ReportRepository) => new GetMyReports(repo),
 };
 
+const editReportProvider = {
+  provide: EditReport,
+  inject: [REPORT_REPOSITORY],
+  useFactory: (repo: ReportRepository) => new EditReport(repo),
+};
+
+const discardReportProvider = {
+  provide: DiscardReport,
+  inject: [REPORT_REPOSITORY],
+  useFactory: (repo: ReportRepository) => new DiscardReport(repo),
+};
+
 @Module({
   imports: [DatabaseModule, IdentityModule],
   controllers: [ReportsController],
@@ -52,6 +66,8 @@ const getMyReportsProvider = {
     getReportsQueueProvider,
     markReportReviewedProvider,
     getMyReportsProvider,
+    editReportProvider,
+    discardReportProvider,
   ],
 })
 export class ReportsModule {}

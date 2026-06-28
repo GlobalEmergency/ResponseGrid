@@ -5,6 +5,9 @@ import {
   OfferNotOpenError,
   OfferNotMatchedError,
   OfferCannotBeCancelledError,
+  OfferNotEditableError,
+  OfferDescriptionRequiredError,
+  OfferQuantityInvalidError,
 } from './offer-errors';
 import { DomainEvent } from './events/domain-event';
 import { OfferCreated } from './events/offer-created.event';
@@ -25,6 +28,14 @@ export interface CreateDonationOfferProps {
   location: Location;
   targetNeedId: string | null;
   notes: string | null;
+}
+
+/** Fields a coordinator may change. Omit a field to keep it. */
+export interface EditOfferProps {
+  description?: string;
+  quantity?: number;
+  unit?: string | null;
+  notes?: string | null;
 }
 
 export interface DonationOfferSnapshot {
@@ -54,14 +65,14 @@ export class DonationOffer {
     public readonly donorUserId: string,
     public readonly donorOrganizationId: string | null,
     public readonly category: NeedCategory,
-    public readonly description: string,
-    public readonly quantity: number,
-    public readonly unit: string | null,
+    private _description: string,
+    private _quantity: number,
+    private _unit: string | null,
     public readonly location: Location,
     public readonly targetNeedId: string | null,
     private _matchedNeedId: string | null,
     private _status: OfferStatus,
-    public readonly notes: string | null,
+    private _notes: string | null,
     public readonly createdAt: Date,
     private _updatedAt: Date,
   ) {}
@@ -125,8 +136,54 @@ export class DonationOffer {
     return this._matchedNeedId;
   }
 
+  get description(): string {
+    return this._description;
+  }
+
+  get quantity(): number {
+    return this._quantity;
+  }
+
+  get unit(): string | null {
+    return this._unit;
+  }
+
+  get notes(): string | null {
+    return this._notes;
+  }
+
   get updatedAt(): Date {
     return this._updatedAt;
+  }
+
+  /**
+   * Coordinator edit: complete or correct the offer's core fields. Only
+   * `undefined` props are left untouched (passing `null`/'' to unit/notes clears
+   * them). Terminal offers (fulfilled/cancelled) are immutable.
+   */
+  edit(props: EditOfferProps): void {
+    if (
+      this._status === OfferStatus.Fulfilled ||
+      this._status === OfferStatus.Cancelled
+    ) {
+      throw new OfferNotEditableError();
+    }
+    if (props.description !== undefined) {
+      const trimmed = props.description.trim();
+      if (trimmed.length === 0) throw new OfferDescriptionRequiredError();
+      this._description = trimmed;
+    }
+    if (props.quantity !== undefined) {
+      if (props.quantity <= 0) throw new OfferQuantityInvalidError();
+      this._quantity = props.quantity;
+    }
+    if (props.unit !== undefined) {
+      this._unit = props.unit === null ? null : props.unit.trim() || null;
+    }
+    if (props.notes !== undefined) {
+      this._notes = props.notes === null ? null : props.notes.trim() || null;
+    }
+    this._updatedAt = new Date();
   }
 
   /** Assigns this offer to a need. Offer must be Open. */

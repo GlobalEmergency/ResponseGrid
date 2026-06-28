@@ -890,6 +890,112 @@
         ]
       }
     },
+    "/resources/{resourceId}": {
+      "patch": {
+        "operationId": "ResourcesController_editResourceFields",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "Resource UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditResourceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Resource edited"
+          },
+          "400": {
+            "description": "Missing reason or resource is discarded"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Validator/coordinator role required"
+          },
+          "404": {
+            "description": "Resource not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit a resource during verification (validator/coordinator). Requires a reason; recorded in the audit trail.",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
+    "/resources/{resourceId}/discard": {
+      "post": {
+        "operationId": "ResourcesController_discardResourceAction",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "Resource UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscardResourceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Resource discarded"
+          },
+          "400": {
+            "description": "Missing reason or resource is not pending verification"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Validator/coordinator role required"
+          },
+          "404": {
+            "description": "Resource not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Discard a resource during verification (validator/coordinator). Requires a reason; recorded in the audit trail.",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
     "/resources/{resourceId}/status": {
       "post": {
         "operationId": "ResourcesController_updateResourceStatus",
@@ -2318,6 +2424,112 @@
         ]
       }
     },
+    "/needs/{needId}": {
+      "patch": {
+        "operationId": "NeedsController_edit",
+        "parameters": [
+          {
+            "name": "needId",
+            "required": true,
+            "in": "path",
+            "description": "Need UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditNeedDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Need edited"
+          },
+          "400": {
+            "description": "Missing reason or need is in a terminal status"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Validator/coordinator role required"
+          },
+          "404": {
+            "description": "Need not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit a need during validation (validator/coordinator). Requires a reason; recorded in the audit trail.",
+        "tags": [
+          "needs"
+        ]
+      }
+    },
+    "/needs/{needId}/discard": {
+      "post": {
+        "operationId": "NeedsController_discard",
+        "parameters": [
+          {
+            "name": "needId",
+            "required": true,
+            "in": "path",
+            "description": "Need UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscardNeedDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Need discarded (rejected)"
+          },
+          "400": {
+            "description": "Missing reason or need is not in pending status"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Validator/coordinator role required"
+          },
+          "404": {
+            "description": "Need not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Discard a need during validation (validator/coordinator). Requires a reason; recorded in the audit trail.",
+        "tags": [
+          "needs"
+        ]
+      }
+    },
     "/needs/{needId}/assign-manager": {
       "post": {
         "operationId": "NeedsController_assignManager",
@@ -3318,6 +3530,112 @@
           }
         ],
         "summary": "Match an offer to a need (coordinator of the offer's emergency only)",
+        "tags": [
+          "offers"
+        ]
+      }
+    },
+    "/offers/{offerId}": {
+      "patch": {
+        "operationId": "OffersController_edit",
+        "parameters": [
+          {
+            "name": "offerId",
+            "required": true,
+            "in": "path",
+            "description": "Offer UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditOfferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Offer edited"
+          },
+          "400": {
+            "description": "Missing reason or offer is in a terminal status"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Offer not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit a donation offer (coordinator). Requires a reason; recorded in the audit trail.",
+        "tags": [
+          "offers"
+        ]
+      }
+    },
+    "/offers/{offerId}/discard": {
+      "post": {
+        "operationId": "OffersController_discard",
+        "parameters": [
+          {
+            "name": "offerId",
+            "required": true,
+            "in": "path",
+            "description": "Offer UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscardOfferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Offer discarded (cancelled)"
+          },
+          "400": {
+            "description": "Missing reason or offer cannot be discarded in its status"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Offer not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Discard a donation offer (coordinator). Requires a reason; recorded in the audit trail.",
         "tags": [
           "offers"
         ]
@@ -4339,6 +4657,84 @@
         ]
       }
     },
+    "/reports/{reportId}": {
+      "patch": {
+        "operationId": "ReportsController_edit",
+        "parameters": [
+          {
+            "name": "reportId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Report edited"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar un reporte durante el triaje (coordinador). Requiere un motivo; se registra en la trazabilidad.",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/reports/{reportId}/discard": {
+      "post": {
+        "operationId": "ReportsController_discard",
+        "parameters": [
+          {
+            "name": "reportId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscardReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Report discarded (closed)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Descartar un reporte durante el triaje (coordinador). Requiere un motivo; se registra en la trazabilidad.",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
     "/emergencies/{emergencyId}/reports/mine": {
       "get": {
         "operationId": "ReportsController_mine",
@@ -4444,6 +4840,88 @@
           }
         ],
         "summary": "List audit log entries (audit:read)",
+        "tags": [
+          "audit"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/audit": {
+      "get": {
+        "operationId": "EmergencyAuditController_list",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "actorUserId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by actor user ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityType",
+            "required": false,
+            "in": "query",
+            "description": "Filter by entity type (e.g. resource, need)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max results to return (default 100, max 500)",
+            "schema": {
+              "default": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset for pagination (default 0)",
+            "schema": {
+              "default": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "audit:read required (coordinator of this emergency)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Activity trail for an emergency — coordinators of the emergency only",
         "tags": [
           "audit"
         ]
@@ -5559,6 +6037,56 @@
         "type": "object",
         "properties": {}
       },
+      "EditResourceDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Motivo de la edición (obligatorio, para trazabilidad)",
+            "minLength": 3,
+            "maxLength": 1000,
+            "example": "Se corrige el nombre y se completa el horario"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nuevo nombre (omitir para no cambiarlo)",
+            "minLength": 2
+          },
+          "description": {
+            "type": "string",
+            "description": "Nueva descripción. Cadena vacía la borra. Omitir para no cambiarla.",
+            "nullable": true
+          },
+          "contact": {
+            "type": "string",
+            "description": "Nuevo contacto. Cadena vacía lo borra. Omitir para no cambiarlo.",
+            "nullable": true
+          },
+          "schedule": {
+            "type": "string",
+            "description": "Nuevo horario. Cadena vacía lo borra. Omitir para no cambiarlo.",
+            "nullable": true
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "DiscardResourceDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Motivo del descarte (obligatorio, para trazabilidad)",
+            "minLength": 3,
+            "maxLength": 1000,
+            "example": "Punto duplicado / fuera del ámbito de la emergencia"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
       "UpdateResourcePublicStatusDto": {
         "type": "object",
         "properties": {
@@ -5647,7 +6175,8 @@
             "enum": [
               "unverified",
               "verified",
-              "official"
+              "official",
+              "rejected"
             ],
             "example": "verified"
           },
@@ -5824,7 +6353,8 @@
             "enum": [
               "unverified",
               "verified",
-              "official"
+              "official",
+              "rejected"
             ],
             "example": "verified"
           },
@@ -6844,6 +7374,56 @@
           "items"
         ]
       },
+      "EditNeedDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Motivo de la edición (obligatorio, para trazabilidad)",
+            "minLength": 3,
+            "maxLength": 1000,
+            "example": "Se corrige la prioridad y se completa la descripción"
+          },
+          "title": {
+            "type": "string",
+            "description": "Nuevo título (omitir para no cambiarlo)",
+            "minLength": 2
+          },
+          "description": {
+            "type": "string",
+            "description": "Nueva descripción. Cadena vacía la borra. Omitir para no cambiarla.",
+            "nullable": true
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "urgent"
+            ],
+            "description": "Nueva prioridad"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "DiscardNeedDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Motivo del descarte (obligatorio, para trazabilidad)",
+            "minLength": 3,
+            "maxLength": 1000,
+            "example": "Petición duplicada; ya validada en otra entrada"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
       "AssignNeedManagerDto": {
         "type": "object",
         "properties": {
@@ -7540,6 +8120,56 @@
           "needId"
         ]
       },
+      "EditOfferDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Motivo de la edición (obligatorio, para trazabilidad)",
+            "minLength": 3,
+            "maxLength": 1000,
+            "example": "Se corrige la cantidad y se completa la descripción"
+          },
+          "description": {
+            "type": "string",
+            "description": "Nueva descripción (omitir para no cambiarla)",
+            "minLength": 2
+          },
+          "quantity": {
+            "type": "number",
+            "example": 20,
+            "description": "Nueva cantidad (entero positivo). Omitir para no cambiarla."
+          },
+          "unit": {
+            "type": "string",
+            "description": "Nueva unidad. Cadena vacía la borra. Omitir para no cambiarla.",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "description": "Nuevas notas. Cadena vacía las borra. Omitir para no cambiarlas.",
+            "nullable": true
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "DiscardOfferDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Motivo del descarte (obligatorio, para trazabilidad)",
+            "minLength": 3,
+            "maxLength": 1000,
+            "example": "Oferta duplicada; ya gestionada en otra entrada"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
       "RegisterVolunteerDto": {
         "type": "object",
         "properties": {
@@ -8059,6 +8689,73 @@
           "priority"
         ]
       },
+      "EditReportDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Motivo de la edición (obligatorio, para trazabilidad)",
+            "minLength": 3,
+            "maxLength": 1000,
+            "example": "Se corrige la prioridad y se completa la nota"
+          },
+          "note": {
+            "type": "string",
+            "description": "Nueva nota (omitir para no cambiarla)",
+            "minLength": 2
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "urgent"
+            ],
+            "description": "Nueva prioridad"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "DiscardReportDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Motivo del descarte (obligatorio, para trazabilidad)",
+            "minLength": 3,
+            "maxLength": 1000,
+            "example": "Reporte duplicado; ya registrado en otra entrada"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "AuditChangeDto": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Name of the field that changed"
+          },
+          "before": {
+            "type": "object",
+            "description": "Value before the change (any JSON type)",
+            "nullable": true
+          },
+          "after": {
+            "type": "object",
+            "description": "Value after the change (any JSON type)",
+            "nullable": true
+          }
+        },
+        "required": [
+          "field"
+        ]
+      },
       "AuditEntryDto": {
         "type": "object",
         "properties": {
@@ -8068,6 +8765,11 @@
           "actorUserId": {
             "type": "string",
             "nullable": true
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Actor display name captured at write time"
           },
           "action": {
             "type": "string"
@@ -8092,6 +8794,24 @@
           },
           "statusCode": {
             "type": "number"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true,
+            "description": "Mandatory reason for edit/discard actions"
+          },
+          "changes": {
+            "nullable": true,
+            "description": "Before/after field changes for edit actions",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditChangeDto"
+            }
+          },
+          "targetStatus": {
+            "type": "string",
+            "nullable": true,
+            "description": "State the entity transitioned to (e.g. rejected)"
           },
           "createdAt": {
             "format": "date-time",

@@ -307,7 +307,8 @@ export class EditNeedDto {
   title?: string;
 
   @ApiPropertyOptional({
-    description: 'Nueva descripción. Cadena vacía la borra. Omitir para no cambiarla.',
+    description:
+      'Nueva descripción. Cadena vacía la borra. Omitir para no cambiarla.',
     nullable: true,
     type: String,
   })

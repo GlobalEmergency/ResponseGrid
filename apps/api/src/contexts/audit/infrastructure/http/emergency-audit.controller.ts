@@ -54,7 +54,11 @@ export class EmergencyAuditController {
     summary:
       'Activity trail for an emergency — coordinators of the emergency only',
   })
-  @ApiParam({ name: 'emergencyId', description: 'Emergency UUID', format: 'uuid' })
+  @ApiParam({
+    name: 'emergencyId',
+    description: 'Emergency UUID',
+    format: 'uuid',
+  })
   @ApiOkResponse({ type: AuditListResponseDto })
   async list(
     @Param('emergencyId', ParseUUIDPipe) emergencyId: string,

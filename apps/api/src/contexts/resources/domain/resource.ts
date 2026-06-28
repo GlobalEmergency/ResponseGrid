@@ -14,6 +14,9 @@ import {
   ResourceNotPublishedError,
   ResourceNotVerifiedError,
   FinalRecipientMustBeDestinationError,
+  ResourceNotPendingError,
+  ResourceNotEditableError,
+  ResourceNameRequiredError,
 } from './resource-errors';
 import { DomainEvent } from './events/domain-event';
 import { ResourceRegistered } from './events/resource-registered';
@@ -50,6 +53,14 @@ export interface RegisterResourceProps {
   recipientType?: string | null;
 }
 
+/** Fields a coordinator may change while verifying. Omit a field to keep it. */
+export interface EditResourceProps {
+  name?: string;
+  description?: string | null;
+  contact?: string | null;
+  schedule?: string | null;
+}
+
 // Snapshot used by repositories to rehydrate without going through register().
 export interface ResourceSnapshot {
   id: string;
@@ -84,16 +95,16 @@ export class Resource {
     public readonly emergencyId: EmergencyId,
     public readonly type: ResourceType,
     public readonly stage: ResourceStage,
-    public readonly name: string,
-    public readonly description: string | null,
+    private _name: string,
+    private _description: string | null,
     public readonly location: Location,
     public readonly ownerUserId: string,
     public readonly ownerOrganizationId: string | null,
     private _verificationLevel: VerificationLevel,
     private _publicStatus: PublicStatus,
     public readonly createdAt: Date,
-    public readonly contact: string | null,
-    public readonly schedule: string | null,
+    private _contact: string | null,
+    private _schedule: string | null,
     public readonly manager: string | null,
     public readonly accepts: string[],
     public readonly country: string | null,
@@ -170,6 +181,18 @@ export class Resource {
     );
   }
 
+  get name(): string {
+    return this._name;
+  }
+  get description(): string | null {
+    return this._description;
+  }
+  get contact(): string | null {
+    return this._contact;
+  }
+  get schedule(): string | null {
+    return this._schedule;
+  }
   get verificationLevel(): VerificationLevel {
     return this._verificationLevel;
   }
@@ -192,7 +215,10 @@ export class Resource {
   }
 
   publish(): void {
-    if (this._verificationLevel === VerificationLevel.Unverified) {
+    if (
+      this._verificationLevel !== VerificationLevel.Verified &&
+      this._verificationLevel !== VerificationLevel.Official
+    ) {
       throw new ResourceNotVerifiedError();
     }
     if (this._publicStatus !== PublicStatus.Hidden) {
@@ -222,6 +248,47 @@ export class Resource {
       throw new InvalidPublicStatusTransitionError(this._publicStatus, target);
     }
     this._publicStatus = target;
+  }
+
+  /**
+   * Coordinator/validator edit while verifying: complete or correct the
+   * descriptive fields. Omit a field to leave it untouched (passing `null` or
+   * an empty string to description/contact/schedule clears it). A discarded
+   * resource is immutable.
+   */
+  edit(props: EditResourceProps): void {
+    if (this._verificationLevel === VerificationLevel.Rejected) {
+      throw new ResourceNotEditableError();
+    }
+    if (props.name !== undefined) {
+      const trimmed = props.name.trim();
+      if (trimmed.length === 0) throw new ResourceNameRequiredError();
+      this._name = trimmed;
+    }
+    if (props.description !== undefined) {
+      this._description =
+        props.description === null ? null : props.description.trim() || null;
+    }
+    if (props.contact !== undefined) {
+      this._contact =
+        props.contact === null ? null : props.contact.trim() || null;
+    }
+    if (props.schedule !== undefined) {
+      this._schedule =
+        props.schedule === null ? null : props.schedule.trim() || null;
+    }
+  }
+
+  /**
+   * Discard a resource pending verification: it leaves the verification queue
+   * (no longer `unverified`) and can never be published. Only a resource still
+   * pending (unverified, not yet published) can be discarded.
+   */
+  discard(): void {
+    if (this._verificationLevel !== VerificationLevel.Unverified) {
+      throw new ResourceNotPendingError();
+    }
+    this._verificationLevel = VerificationLevel.Rejected;
   }
 
   toSnapshot(): ResourceSnapshot {
