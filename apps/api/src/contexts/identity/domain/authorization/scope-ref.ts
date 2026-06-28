@@ -107,3 +107,14 @@ export class ScopeRef {
     return chain.some((s) => this.equals(s));
   }
 }
+
+/**
+ * The ancestor chain of a scope (the scope itself → platform). Simplified for
+ * the current model, where emergencies and organizations sit directly under
+ * platform; group/org nesting resolution is a later addition (docs/features/13
+ * §16, §18.3-b). Platform is always the root.
+ */
+export function ancestorChain(scope: ScopeRefProps): ScopeRefProps[] {
+  if (scope.type === 'platform') return [{ type: 'platform' }];
+  return [scope, { type: 'platform' }];
+}

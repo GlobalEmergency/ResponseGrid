@@ -5,9 +5,12 @@ import { DB, DatabaseModule } from '../../../shared/database.module';
 import { Db } from '../../../shared/db';
 import { AuthController } from './http/auth.controller';
 import { OAuthController } from './http/oauth.controller';
+import { GrantsController } from './http/grants.controller';
 import { Login } from '../application/login';
 import { RegisterUser } from '../application/register-user';
 import { AuthenticateWithProvider } from '../application/authenticate-with-provider';
+import { GrantRole } from '../application/grant-role';
+import { RevokeGrant } from '../application/revoke-grant';
 import {
   USER_REPOSITORY,
   UserRepository,
@@ -30,6 +33,7 @@ import { DrizzleUserRepository } from './drizzle/drizzle-user.repository';
 import { DrizzleMembershipRepository } from './drizzle/drizzle-membership.repository';
 import { DrizzleGrantRepository } from './drizzle/drizzle-grant.repository';
 import { ACCESS_CONTROL } from '../domain/authorization/access-control';
+import type { AccessControl } from '../domain/authorization/access-control';
 import { LocalAccessControl } from '../domain/authorization/local-access-control';
 import { PermissionGuard } from './http/permission.guard';
 import { SCOPE_RESOLVER, RequestScopeResolver } from './http/scope-resolver';
@@ -106,6 +110,20 @@ const accessControlProvider = {
 const scopeResolverProvider = {
   provide: SCOPE_RESOLVER,
   useClass: RequestScopeResolver,
+};
+
+const grantRoleProvider = {
+  provide: GrantRole,
+  inject: [GRANT_REPOSITORY, ACCESS_CONTROL],
+  useFactory: (grants: GrantRepository, access: AccessControl) =>
+    new GrantRole(grants, access),
+};
+
+const revokeGrantProvider = {
+  provide: RevokeGrant,
+  inject: [GRANT_REPOSITORY, ACCESS_CONTROL],
+  useFactory: (grants: GrantRepository, access: AccessControl) =>
+    new RevokeGrant(grants, access),
 };
 
 const userIdentityRepositoryProvider = {
@@ -210,7 +228,7 @@ const authenticateWithProviderProvider = {
       },
     }),
   ],
-  controllers: [AuthController, OAuthController],
+  controllers: [AuthController, OAuthController, GrantsController],
   providers: [
     userRepositoryProvider,
     membershipRepositoryProvider,
@@ -221,6 +239,8 @@ const authenticateWithProviderProvider = {
     loginProvider,
     registerUserProvider,
     authenticateWithProviderProvider,
+    grantRoleProvider,
+    revokeGrantProvider,
     resourceEmergencyLookupProvider,
     needEmergencyLookupProvider,
     offerEmergencyLookupProvider,

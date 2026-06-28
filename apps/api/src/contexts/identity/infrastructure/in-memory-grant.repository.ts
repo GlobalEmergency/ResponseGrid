@@ -16,6 +16,11 @@ export class InMemoryGrantRepository implements GrantRepository {
     return Promise.resolve(result);
   }
 
+  findById(id: string): Promise<Grant | null> {
+    const snapshot = this.store.get(id);
+    return Promise.resolve(snapshot ? Grant.fromSnapshot(snapshot) : null);
+  }
+
   deleteById(id: string): Promise<void> {
     this.store.delete(id);
     return Promise.resolve();

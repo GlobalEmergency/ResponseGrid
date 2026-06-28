@@ -104,6 +104,15 @@ export class DrizzleGrantRepository implements GrantRepository {
     return rows.map(rowToGrant);
   }
 
+  async findById(id: string): Promise<Grant | null> {
+    const rows = await this.db
+      .select()
+      .from(grantsTable)
+      .where(eq(grantsTable.id, id))
+      .limit(1);
+    return rows.length > 0 ? rowToGrant(rows[0]) : null;
+  }
+
   async deleteById(id: string): Promise<void> {
     await this.db.delete(grantsTable).where(eq(grantsTable.id, id));
   }
