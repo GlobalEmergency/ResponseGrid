@@ -36,6 +36,7 @@ import { AssignGroupManager } from '../../application/assign-group-manager';
 import { ListGroupMembers } from '../../application/list-group-members';
 import { ListGroupsByOwner } from '../../application/list-groups-by-owner';
 import { ListMyGroups } from '../../application/list-my-groups';
+import { GetGroup } from '../../application/get-group';
 import { GroupSnapshot } from '../../domain/group';
 import {
   CreateGroupDto,
@@ -134,6 +135,7 @@ export class GroupsController {
     private readonly listGroupMembers: ListGroupMembers,
     private readonly listGroupsByOwner: ListGroupsByOwner,
     private readonly listMyGroups: ListMyGroups,
+    private readonly getGroup: GetGroup,
   ) {}
 
   @Get('mine')
@@ -167,6 +169,17 @@ export class GroupsController {
       owner: ownerScopeOf(query.ownerKind, query.ownerId),
     });
     return groups.map(toGroupResponse);
+  }
+
+  @Get(':groupId')
+  @ApiOperation({ summary: 'Get a group’s basic info' })
+  @ApiOkResponse({ type: GroupResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  async getOne(
+    @Param('groupId', ParseUUIDPipe) groupId: string,
+  ): Promise<GroupResponseDto> {
+    const group = await this.getGroup.execute(groupId);
+    return toGroupResponse(group);
   }
 
   @Post()

@@ -58,16 +58,16 @@ class GrantListItemDto {
   @ApiProperty()
   scopeType!: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ type: String, nullable: true })
   scopeId!: string | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ type: String, nullable: true })
   grantedByPrincipalId!: string | null;
 
   @ApiProperty()
   grantedAt!: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ type: String, nullable: true })
   expiresAt!: string | null;
 }
 

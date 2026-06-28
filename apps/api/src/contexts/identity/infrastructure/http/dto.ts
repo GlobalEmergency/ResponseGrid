@@ -51,10 +51,18 @@ export class MeGrantDto {
   })
   scopeType!: string;
 
-  @ApiProperty({ nullable: true, description: 'Scope id (null for platform)' })
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description: 'Scope id (null for platform)',
+  })
   scopeId!: string | null;
 
-  @ApiProperty({ nullable: true, description: 'ISO expiry, or null' })
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description: 'ISO expiry, or null',
+  })
   expiresAt!: string | null;
 }
 

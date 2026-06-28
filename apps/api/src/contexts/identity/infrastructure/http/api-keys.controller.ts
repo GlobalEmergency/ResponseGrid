@@ -63,13 +63,13 @@ class ApiKeyListItemDto {
   @ApiProperty()
   active!: boolean;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ type: String, nullable: true })
   expiresAt!: string | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ type: String, nullable: true })
   lastUsedAt!: string | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ type: String, nullable: true })
   revokedAt!: string | null;
 
   @ApiProperty()

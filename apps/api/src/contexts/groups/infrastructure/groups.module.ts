@@ -31,6 +31,7 @@ import { AssignGroupManager } from '../application/assign-group-manager';
 import { ListGroupMembers } from '../application/list-group-members';
 import { ListGroupsByOwner } from '../application/list-groups-by-owner';
 import { ListMyGroups } from '../application/list-my-groups';
+import { GetGroup } from '../application/get-group';
 import { GroupsController } from './http/groups.controller';
 
 const groupRepositoryProvider = {
@@ -135,6 +136,12 @@ const listMyGroupsProvider = {
     new ListMyGroups(groups, members),
 };
 
+const getGroupProvider = {
+  provide: GetGroup,
+  inject: [GROUP_REPOSITORY],
+  useFactory: (groups: GroupRepository) => new GetGroup(groups),
+};
+
 @Module({
   imports: [DatabaseModule, IdentityModule],
   controllers: [GroupsController],
@@ -150,6 +157,7 @@ const listMyGroupsProvider = {
     listGroupMembersProvider,
     listGroupsByOwnerProvider,
     listMyGroupsProvider,
+    getGroupProvider,
   ],
 })
 export class GroupsModule {}
