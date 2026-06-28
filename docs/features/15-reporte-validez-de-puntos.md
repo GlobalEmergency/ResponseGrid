@@ -234,12 +234,16 @@ Tras tocar DTOs/endpoints: **`pnpm gen:api`** y commitear `packages/api-client/s
 
 ---
 
-## 8. Decisiones abiertas (para PM)
+## 8. Decisiones (resueltas — PM, 2026‑06‑28)
 
-1. **Umbral N por defecto = 3** ¿correcto? ¿Global (constante/env) en el MVP y por‑emergencia más adelante?
-2. **¿Excluir al dueño** del recuento de disputa? (propuesta: sí; usa el endpoint de estado).
-3. **Caducidad de reportes abiertos:** ¿TTL (p. ej. 14 días) o solo se limpian al resolver? (propuesta MVP: solo coordinador).
-4. **Fotos ciudadanas:** ¿solo coordinación (propuesta) o también públicas como evidencia?
-5. **Texto del badge público** definitivo ("En verificación · posible cierre" vs otra redacción).
-6. **Reapertura:** ¿cooldown tras "descartar" para impedir re‑flag inmediato del mismo grupo?
-7. **Arquitectura:** concepto propio en `resources` (recomendado) **vs** extender el contexto `reports`.
+| # | Decisión | Resolución |
+|---|---|---|
+| 7 | **Arquitectura** | **Concepto propio en `resources`** (entidad `ResourceValidityReport` + flag `disputed` en `Resource`); sin acoplar con el contexto `reports`. |
+| 1 | **Umbral N** | **N = 3** reportantes distintos. Constante global (override `RESOURCE_DISPUTE_THRESHOLD`); umbral por‑emergencia queda para futuro. |
+| 4 | **Fotos ciudadanas** | **Solo coordinación** (no públicas): PII y riesgo de afirmar "cerrado" sin confirmar. |
+| 3 | **Caducidad de reportes** | **Sin TTL en el MVP**: los reportes abiertos persisten hasta que coordinación resuelve. TTL/ventana de frescura = futuro. |
+| 2 | **Excluir al dueño del recuento** | **Sí**: el dueño usa `POST /resources/:id/status`; no dispara duda sobre su propio punto. |
+| 5 | **Texto del badge público** | **"En verificación · posible cierre"** (genérico; no afirma "CERRADO"). |
+| 6 | **Cooldown tras "descartar"** | **No en el MVP**; se añadirá solo si aparece abuso de re‑marcado. |
+
+> Revisables tras el MVP (ver §4 · Futuro): umbral por‑emergencia, TTL/ventana de frescura, ponderación por confianza del reportante, auto‑ocultado como política por emergencia y cooldown de reapertura.
