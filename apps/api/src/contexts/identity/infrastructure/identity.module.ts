@@ -6,11 +6,15 @@ import { Db } from '../../../shared/db';
 import { AuthController } from './http/auth.controller';
 import { OAuthController } from './http/oauth.controller';
 import { GrantsController } from './http/grants.controller';
+import { ApiKeysController } from './http/api-keys.controller';
 import { Login } from '../application/login';
 import { RegisterUser } from '../application/register-user';
 import { AuthenticateWithProvider } from '../application/authenticate-with-provider';
 import { GrantRole } from '../application/grant-role';
 import { RevokeGrant } from '../application/revoke-grant';
+import { CreateServiceAccount } from '../application/create-service-account';
+import { IssueApiKey } from '../application/issue-api-key';
+import { RevokeApiKey } from '../application/revoke-api-key';
 import {
   USER_REPOSITORY,
   UserRepository,
@@ -24,6 +28,14 @@ import {
   GrantRepository,
 } from '../domain/ports/grant.repository';
 import {
+  SERVICE_ACCOUNT_REPOSITORY,
+  ServiceAccountRepository,
+} from '../domain/ports/service-account.repository';
+import {
+  API_KEY_REPOSITORY,
+  ApiKeyRepository,
+} from '../domain/ports/api-key.repository';
+import {
   USER_IDENTITY_REPOSITORY,
   UserIdentityRepository,
 } from '../domain/ports/user-identity.repository';
@@ -32,10 +44,13 @@ import { TOKEN_SERVICE } from '../domain/ports/token.service';
 import { DrizzleUserRepository } from './drizzle/drizzle-user.repository';
 import { DrizzleMembershipRepository } from './drizzle/drizzle-membership.repository';
 import { DrizzleGrantRepository } from './drizzle/drizzle-grant.repository';
+import { DrizzleServiceAccountRepository } from './drizzle/drizzle-service-account.repository';
+import { DrizzleApiKeyRepository } from './drizzle/drizzle-api-key.repository';
 import { ACCESS_CONTROL } from '../domain/authorization/access-control';
 import type { AccessControl } from '../domain/authorization/access-control';
 import { LocalAccessControl } from '../domain/authorization/local-access-control';
 import { PermissionGuard } from './http/permission.guard';
+import { ApiKeyAuthGuard } from './http/api-key-auth.guard';
 import { SCOPE_RESOLVER } from './http/scope-resolver';
 import { EntityAwareScopeResolver } from './http/entity-aware-scope-resolver';
 import { DrizzleUserIdentityRepository } from './drizzle/drizzle-user-identity.repository';
@@ -123,6 +138,46 @@ const revokeGrantProvider = {
   inject: [GRANT_REPOSITORY, ACCESS_CONTROL],
   useFactory: (grants: GrantRepository, access: AccessControl) =>
     new RevokeGrant(grants, access),
+};
+
+const serviceAccountRepositoryProvider = {
+  provide: SERVICE_ACCOUNT_REPOSITORY,
+  inject: [DB],
+  useFactory: (db: Db): ServiceAccountRepository =>
+    new DrizzleServiceAccountRepository(db),
+};
+
+const apiKeyRepositoryProvider = {
+  provide: API_KEY_REPOSITORY,
+  inject: [DB],
+  useFactory: (db: Db): ApiKeyRepository => new DrizzleApiKeyRepository(db),
+};
+
+const createServiceAccountProvider = {
+  provide: CreateServiceAccount,
+  inject: [SERVICE_ACCOUNT_REPOSITORY, ACCESS_CONTROL],
+  useFactory: (sas: ServiceAccountRepository, access: AccessControl) =>
+    new CreateServiceAccount(sas, access),
+};
+
+const issueApiKeyProvider = {
+  provide: IssueApiKey,
+  inject: [SERVICE_ACCOUNT_REPOSITORY, API_KEY_REPOSITORY, ACCESS_CONTROL],
+  useFactory: (
+    sas: ServiceAccountRepository,
+    keys: ApiKeyRepository,
+    access: AccessControl,
+  ) => new IssueApiKey(sas, keys, access),
+};
+
+const revokeApiKeyProvider = {
+  provide: RevokeApiKey,
+  inject: [SERVICE_ACCOUNT_REPOSITORY, API_KEY_REPOSITORY, ACCESS_CONTROL],
+  useFactory: (
+    sas: ServiceAccountRepository,
+    keys: ApiKeyRepository,
+    access: AccessControl,
+  ) => new RevokeApiKey(sas, keys, access),
 };
 
 const userIdentityRepositoryProvider = {
@@ -234,7 +289,12 @@ const authenticateWithProviderProvider = {
       },
     }),
   ],
-  controllers: [AuthController, OAuthController, GrantsController],
+  controllers: [
+    AuthController,
+    OAuthController,
+    GrantsController,
+    ApiKeysController,
+  ],
   providers: [
     userRepositoryProvider,
     membershipRepositoryProvider,
@@ -247,6 +307,11 @@ const authenticateWithProviderProvider = {
     authenticateWithProviderProvider,
     grantRoleProvider,
     revokeGrantProvider,
+    serviceAccountRepositoryProvider,
+    apiKeyRepositoryProvider,
+    createServiceAccountProvider,
+    issueApiKeyProvider,
+    revokeApiKeyProvider,
     resourceEmergencyLookupProvider,
     needEmergencyLookupProvider,
     offerEmergencyLookupProvider,
@@ -257,6 +322,7 @@ const authenticateWithProviderProvider = {
     accessControlProvider,
     scopeResolverProvider,
     PermissionGuard,
+    ApiKeyAuthGuard,
     JwtAuthGuard,
     OptionalJwtAuthGuard,
     RequireAdminGuard,
@@ -267,6 +333,8 @@ const authenticateWithProviderProvider = {
     USER_REPOSITORY,
     MEMBERSHIP_REPOSITORY,
     GRANT_REPOSITORY,
+    SERVICE_ACCOUNT_REPOSITORY,
+    API_KEY_REPOSITORY,
     TOKEN_SERVICE,
     RESOURCE_EMERGENCY_LOOKUP,
     NEED_EMERGENCY_LOOKUP,
@@ -277,6 +345,7 @@ const authenticateWithProviderProvider = {
     ACCESS_CONTROL,
     SCOPE_RESOLVER,
     PermissionGuard,
+    ApiKeyAuthGuard,
     JwtAuthGuard,
     OptionalJwtAuthGuard,
     RequireAdminGuard,
