@@ -318,6 +318,9 @@ export const es = {
     // Contacto oficial (#64)
     meta_contact_official: 'Contacto oficial:',
     no_official_contact: 'Sin contacto oficial',
+    // Validez reportada por ciudadanos (ficha 15)
+    disputed_label: 'En verificación',
+    report_cta: '¿Algo va mal? Avísanos',
   },
 
   resource_detail: {
@@ -710,6 +713,36 @@ export const es = {
     err_submit_failed: 'No se pudo enviar el parte. Inténtalo de nuevo.',
     err_no_permission_review: 'No tienes permisos para revisar este parte.',
     err_mark_reviewed_failed: 'No se pudo marcar como revisado. Inténtalo de nuevo.',
+  },
+
+  // ── Reportar validez de un punto (ficha 15) ───────────────────────────────
+  reportar_validez: {
+    page_title: 'Reportar este punto',
+    back: 'Volver al punto',
+    intro:
+      'Si este punto está cerrado, ya no existe, se ha mudado o sus datos no son correctos, avísanos. Coordinación lo revisará.',
+    meta_title: 'Reportar un punto — {emergencyName} · ResponseGrid',
+    meta_description:
+      'Avisa de que un punto de acopio está cerrado, ya no existe o tiene datos incorrectos.',
+    reason_label: 'Motivo',
+    select_reason_placeholder: 'Selecciona un motivo…',
+    reason_closed: 'Cerrado / no operativo',
+    reason_nonexistent: 'Ya no existe en esta ubicación',
+    reason_moved: 'Se ha mudado / dirección incorrecta',
+    reason_outdated: 'Datos desactualizados (horario, contacto, qué acepta)',
+    note_label: 'Detalle (opcional)',
+    note_placeholder: 'Cuéntanos qué has visto…',
+    submit: 'Enviar reporte',
+    submitting: 'Enviando…',
+    success_message:
+      'Gracias por avisar. Coordinación revisará el punto en breve.',
+    success_back_to_point: 'Volver al punto',
+    error_fallback: 'Error al enviar el reporte',
+    err_invalid_reason: 'Selecciona un motivo válido.',
+    err_submit_failed: 'No se pudo enviar el reporte. Inténtalo de nuevo.',
+    err_not_visible: 'Este punto ya no está visible; no se puede reportar.',
+    err_owner:
+      'Eres el responsable de este punto; usa el panel para cambiar su estado.',
   },
 
   // ── Página: Sobre nosotros (/sobre) ───────────────────────────────────────
@@ -1546,6 +1579,32 @@ export const es = {
     err_discard_failed: 'No se pudo descartar el elemento.',
     err_reason_required: 'El motivo es obligatorio.',
     tab_activity: 'Actividad',
+    // Puntos en duda (ficha 15)
+    tab_disputes: 'Puntos en duda',
+    hub_disputes_label: 'Puntos en duda',
+    hub_disputes_description:
+      'Puntos reportados por la ciudadanía como cerrados o inexistentes.',
+    disputes_section_meta_title: 'Puntos en duda — {name} · ResponseGrid',
+    disputes_section_meta_description:
+      'Revisa los puntos reportados por la ciudadanía y confirma o descarta.',
+    disputes_heading: 'Puntos en duda',
+    disputes_empty_title: 'No hay puntos en revisión.',
+    disputes_empty_description:
+      'Cuando varios ciudadanos reporten un punto como cerrado o incorrecto, aparecerá aquí.',
+    disputes_list_label: 'Puntos en duda',
+    disputes_reporters_label: '{n} reportes ciudadanos',
+    disputes_last_reported_label: 'Último: {date}',
+    disputes_reason_closed: 'Cerrado',
+    disputes_reason_nonexistent: 'No existe',
+    disputes_reason_moved: 'Mudado',
+    disputes_reason_outdated: 'Desactualizado',
+    disputes_action_confirm_closed: 'Confirmar cierre',
+    disputes_action_mark_invalid: 'Marcar inválido',
+    disputes_action_dismiss: 'Descartar',
+    disputes_resolve_confirm: 'Confirmar',
+    disputes_resolving: 'Procesando…',
+    err_resolve_dispute_failed:
+      'No se pudo resolver la disputa. Inténtalo de nuevo.',
     activity_title: 'Registro de actividad',
     activity_subtitle:
       'Trazabilidad de validaciones y cambios en esta emergencia (solo coordinación).',
@@ -2040,6 +2099,7 @@ export const es = {
     map_kind_need: 'Petición',
     map_accepts: 'Acepta:',
     map_approx_location: 'Ubicación aproximada',
+    map_disputed: 'En verificación · posible cierre',
     map_no_locations: 'Aún no hay ubicaciones en el mapa.',
   },
 

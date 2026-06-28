@@ -20,6 +20,7 @@
 | [12 · CTA de emergencia nacional](12-cta-emergencia-nacional.md) | ⏳ pendiente | [#37](https://github.com/GlobalEmergency/ResponseGrid/issues/37) |
 | [13 · Roles, permisos y autenticación](13-roles-permisos-y-autenticacion.md) | ✅ implementado | — |
 | [14 · Destinatarios finales](14-destinatarios-finales.md) | 🟡 en curso | EPIC [#59](https://github.com/GlobalEmergency/ResponseGrid/issues/59) (· #60 · #62 · #63 · #64 · #67) |
+| [15 · Reporte ciudadano de validez de puntos](15-reporte-validez-de-puntos.md) | 🟡 en curso | EPIC [#120](https://github.com/GlobalEmergency/ResponseGrid/issues/120) (· #121 · #122 · #123 · #124) |
 
 ---
 

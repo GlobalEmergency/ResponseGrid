@@ -67,6 +67,13 @@ export default async function RecipientResourcePage({ params }: Props) {
             locale={locale}
           />
 
+          <Link
+            href={`/e/${slug}/recursos/${resourceId}/reportar-estado`}
+            className="w-fit text-sm font-semibold text-warning hover:underline"
+          >
+            {t.resource_card.report_cta}
+          </Link>
+
           <section
             aria-labelledby="resource-inventory-heading"
             className="flex flex-col gap-3"

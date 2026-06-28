@@ -54,6 +54,15 @@ import {
   RecipientTypeRepository,
 } from '../domain/ports/recipient-type.repository';
 import { DrizzleRecipientTypeRepository } from './drizzle/drizzle-recipient-type.repository';
+import { ReportResourceValidity } from '../application/report-resource-validity';
+import { ResolveResourceDispute } from '../application/resolve-resource-dispute';
+import { GetDisputedResources } from '../application/get-disputed-resources';
+import { GetResourceValidityReports } from '../application/get-resource-validity-reports';
+import {
+  RESOURCE_VALIDITY_REPORT_REPOSITORY,
+  ResourceValidityReportRepository,
+} from '../domain/ports/resource-validity-report.repository';
+import { DrizzleResourceValidityReportRepository } from './drizzle/drizzle-resource-validity-report.repository';
 
 export const EVENT_QUEUE = Symbol('ResourcesEventQueue');
 
@@ -210,6 +219,53 @@ const listRecipientTypesProvider = {
   useFactory: (repo: RecipientTypeRepository) => new ListRecipientTypes(repo),
 };
 
+const validityReportRepositoryProvider = {
+  provide: RESOURCE_VALIDITY_REPORT_REPOSITORY,
+  inject: [DB],
+  useFactory: (db: Db): ResourceValidityReportRepository =>
+    new DrizzleResourceValidityReportRepository(db),
+};
+
+const reportResourceValidityProvider = {
+  provide: ReportResourceValidity,
+  inject: [RESOURCE_REPOSITORY, RESOURCE_VALIDITY_REPORT_REPOSITORY, EVENT_BUS],
+  useFactory: (
+    repo: ResourceRepository,
+    validityRepo: ResourceValidityReportRepository,
+    bus: EventBus,
+  ) => {
+    const raw = Number(process.env.RESOURCE_DISPUTE_THRESHOLD);
+    const threshold = Number.isFinite(raw) && raw > 0 ? raw : undefined;
+    return new ReportResourceValidity(repo, validityRepo, bus, threshold);
+  },
+};
+
+const resolveResourceDisputeProvider = {
+  provide: ResolveResourceDispute,
+  inject: [RESOURCE_REPOSITORY, RESOURCE_VALIDITY_REPORT_REPOSITORY, EVENT_BUS],
+  useFactory: (
+    repo: ResourceRepository,
+    validityRepo: ResourceValidityReportRepository,
+    bus: EventBus,
+  ) => new ResolveResourceDispute(repo, validityRepo, bus),
+};
+
+const getDisputedResourcesProvider = {
+  provide: GetDisputedResources,
+  inject: [RESOURCE_REPOSITORY, RESOURCE_VALIDITY_REPORT_REPOSITORY],
+  useFactory: (
+    repo: ResourceRepository,
+    validityRepo: ResourceValidityReportRepository,
+  ) => new GetDisputedResources(repo, validityRepo),
+};
+
+const getResourceValidityReportsProvider = {
+  provide: GetResourceValidityReports,
+  inject: [RESOURCE_VALIDITY_REPORT_REPOSITORY],
+  useFactory: (validityRepo: ResourceValidityReportRepository) =>
+    new GetResourceValidityReports(validityRepo),
+};
+
 @Module({
   imports: [DatabaseModule, IdentityModule, NotificationsModule],
   controllers: [
@@ -240,6 +296,11 @@ const listRecipientTypesProvider = {
     getPublicResourceProvider,
     recipientTypeRepositoryProvider,
     listRecipientTypesProvider,
+    validityReportRepositoryProvider,
+    reportResourceValidityProvider,
+    resolveResourceDisputeProvider,
+    getDisputedResourcesProvider,
+    getResourceValidityReportsProvider,
   ],
 })
 export class ResourcesModule implements OnModuleDestroy {

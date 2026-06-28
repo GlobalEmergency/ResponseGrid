@@ -35,16 +35,27 @@ import {
   EditResourceCommand,
 } from '../../application/edit-resource';
 import { DiscardResource } from '../../application/discard-resource';
+import { ReportResourceValidity } from '../../application/report-resource-validity';
+import { ResolveResourceDispute } from '../../application/resolve-resource-dispute';
+import { GetResourceValidityReports } from '../../application/get-resource-validity-reports';
 import { PublicStatus } from '../../domain/resource-enums';
+import { ResourceValidityReportSnapshot } from '../../domain/resource-validity-report';
 import {
   RegisterResourceDto,
   VerifyResourceDto,
   UpdateResourcePublicStatusDto,
   EditResourceDto,
   DiscardResourceDto,
+  ReportResourceValidityDto,
+  ResolveResourceDisputeDto,
 } from './dto';
 import { setAuditContext } from '../../../audit/infrastructure/http/audit-context';
-import { RegisterResourceResponseDto, ResourceViewDto } from './response.dto';
+import {
+  RegisterResourceResponseDto,
+  ResourceViewDto,
+  ReportResourceValidityResponseDto,
+  ValidityReportDto,
+} from './response.dto';
 import {
   JwtAuthGuard,
   AuthenticatedUser,
@@ -64,6 +75,9 @@ export class ResourcesController {
     private readonly getMyResources: GetMyResources,
     private readonly editResource: EditResource,
     private readonly discardResource: DiscardResource,
+    private readonly reportValidity: ReportResourceValidity,
+    private readonly resolveDispute: ResolveResourceDispute,
+    private readonly validityReports: GetResourceValidityReports,
   ) {}
 
   @Post('emergencies/:emergencyId/resources')
@@ -309,5 +323,108 @@ export class ResourcesController {
       emergencyId,
       userId: req.user!.id,
     });
+  }
+
+  @Post('resources/:resourceId/validity-reports')
+  @HttpCode(201)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Report a resource as closed / nonexistent / moved / outdated (any authenticated user)',
+  })
+  @ApiParam({
+    name: 'resourceId',
+    description: 'Resource UUID',
+    format: 'uuid',
+  })
+  @ApiCreatedResponse({
+    description: 'Report recorded',
+    type: ReportResourceValidityResponseDto,
+  })
+  @ApiNotFoundResponse({ description: 'Resource not found' })
+  @ApiConflictResponse({ description: 'Resource is not publicly visible' })
+  @ApiForbiddenResponse({
+    description: 'The owner cannot report their own resource',
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  async submitValidityReport(
+    @Param('resourceId', ParseUUIDPipe) resourceId: string,
+    @Body() dto: ReportResourceValidityDto,
+    @Req() req: Request & { user?: AuthenticatedUser },
+  ): Promise<ReportResourceValidityResponseDto> {
+    return this.reportValidity.execute({
+      resourceId,
+      reporterUserId: req.user!.id,
+      reason: dto.reason,
+      note: dto.note ?? null,
+      photoUrls: dto.photoUrls ?? [],
+    });
+  }
+
+  @Post('resources/:resourceId/dispute/resolve')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('resource:edit')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Resolve a disputed resource (coordinator): confirm closure, mark invalid or dismiss. Requires a reason; recorded in the audit trail.',
+  })
+  @ApiParam({
+    name: 'resourceId',
+    description: 'Resource UUID',
+    format: 'uuid',
+  })
+  @ApiNoContentResponse({ description: 'Dispute resolved' })
+  @ApiNotFoundResponse({ description: 'Resource not found' })
+  @ApiConflictResponse({ description: 'Resource is not disputed' })
+  @ApiBadRequestResponse({
+    description: 'Missing reason or invalid resolution',
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Coordinator role required' })
+  async resolveDisputeAction(
+    @Param('resourceId', ParseUUIDPipe) resourceId: string,
+    @Body() dto: ResolveResourceDisputeDto,
+    @Req() req: Request & { user?: AuthenticatedUser },
+  ): Promise<void> {
+    const coordinatorId = req.user?.id ?? 'unknown';
+    const result = await this.resolveDispute.execute({
+      resourceId,
+      coordinatorId,
+      resolution: dto.resolution,
+    });
+    setAuditContext(req, {
+      reason: dto.reason,
+      changes: result.changes,
+      targetStatus: result.targetStatus,
+      emergencyId: result.emergencyId,
+    });
+  }
+
+  @Get('resources/:resourceId/validity-reports')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('resource:read')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'List the citizen validity reports of a resource (coordinator)',
+  })
+  @ApiParam({
+    name: 'resourceId',
+    description: 'Resource UUID',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Validity reports for the resource',
+    type: ValidityReportDto,
+    isArray: true,
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Coordinator role required' })
+  async listValidityReports(
+    @Param('resourceId', ParseUUIDPipe) resourceId: string,
+  ): Promise<ResourceValidityReportSnapshot[]> {
+    return this.validityReports.execute({ resourceId });
   }
 }

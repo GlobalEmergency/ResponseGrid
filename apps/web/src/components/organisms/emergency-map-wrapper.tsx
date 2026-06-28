@@ -144,6 +144,7 @@ export function EmergencyMapWrapper({ points, emergencyId, containerClassName }:
           label: r.name,
           kind: 'resource',
           status: r.publicStatus,
+          disputed: r.disputed,
           resourceType: r.type,
           city: r.city ?? null,
           country: r.country ?? null,

@@ -36,6 +36,8 @@ export interface ResourceRepository {
   ): Promise<Resource[]>;
   /** Visible public resources: Active, Saturated, Paused (excludes Hidden and Closed). */
   findVisibleByEmergency(emergencyId: EmergencyId): Promise<Resource[]>;
+  /** Resources currently flagged `disputed` (citizen reports pending review). */
+  findDisputedByEmergency(emergencyId: EmergencyId): Promise<Resource[]>;
   /** Lookup by external provenance key (sourceName + externalId). Returns null if not found. */
   findByExternal(
     sourceName: string,

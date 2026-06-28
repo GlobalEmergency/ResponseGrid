@@ -157,6 +157,24 @@ export class InMemoryResourceRepository implements ResourceRepository {
     return Promise.resolve(result);
   }
 
+  findDisputedByEmergency(emergencyId: EmergencyId): Promise<Resource[]> {
+    // Mirror the SQL repo: only visible points belong in the dispute queue.
+    const visibleStatuses = [
+      PublicStatus.Active,
+      PublicStatus.Saturated,
+      PublicStatus.Paused,
+    ];
+    const result = [...this.store.values()]
+      .filter(
+        (s) =>
+          s.emergencyId === emergencyId.value &&
+          s.disputed === true &&
+          visibleStatuses.includes(s.publicStatus),
+      )
+      .map((s) => Resource.fromSnapshot(s));
+    return Promise.resolve(result);
+  }
+
   findByExternal(
     sourceName: string,
     externalId: string,

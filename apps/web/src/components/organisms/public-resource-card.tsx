@@ -12,6 +12,7 @@ import {
   recipientTypeColor,
 } from '@/lib/recipient-types';
 import { RecipientTypeBadge } from '@/components/atoms/recipient-type-badge';
+import { DisputedBadge } from '@/components/atoms/disputed-badge';
 
 type ResourceViewDto = components['schemas']['ResourceViewDto'];
 
@@ -81,6 +82,7 @@ export function PublicResourceCard({
       <div className="flex flex-wrap items-center gap-2">
         <VerificationBadge level={resource.verificationLevel} t={tVerification} />
         <StatusLight status={resource.publicStatus} t={tStatusLight} />
+        {resource.disputed && <DisputedBadge label={t.disputed_label} />}
         {resource.isFinalRecipient && (
           <RecipientTypeBadge
             label={recipientTypeText ?? t.final_recipient_label}
@@ -173,6 +175,9 @@ export function PublicResourceCard({
       {resource.externalUpdatedAt != null && (
         <FreshnessIndicator lastVerifiedAt={resource.externalUpdatedAt} />
       )}
+
+      {/* The "report a problem" CTA (ficha 15) lives on the resource detail
+          page, not on every list card — the card name links there. */}
     </Card>
   );
 }

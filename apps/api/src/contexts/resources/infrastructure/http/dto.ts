@@ -16,6 +16,7 @@ import {
 import { Type, Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ResourceType, ResourceStage } from '../../domain/resource-enums';
+import { ValidityReason } from '../../domain/resource-validity-report';
 import { SupplyLineDto } from '../../../supplies/infrastructure/http/supply-line.dto';
 
 export class LocationDto {
@@ -434,4 +435,57 @@ export class EditResourceDto {
   @IsOptional()
   @IsString()
   schedule?: string;
+}
+
+export class ReportResourceValidityDto {
+  @ApiProperty({
+    enum: ValidityReason,
+    example: ValidityReason.Closed,
+    description:
+      'Motivo: cerrado / ya no existe / se ha mudado / datos desactualizados',
+  })
+  @IsEnum(ValidityReason)
+  reason!: ValidityReason;
+
+  @ApiPropertyOptional({
+    description: 'Detalle opcional aportado por el ciudadano',
+    maxLength: 1000,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  note?: string;
+
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'URLs de fotos de evidencia (subidas vía /files)',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  photoUrls?: string[];
+}
+
+export class ResolveResourceDisputeDto {
+  @ApiProperty({
+    enum: ['confirm_closed', 'mark_invalid', 'dismiss'],
+    example: 'confirm_closed',
+    description:
+      'confirm_closed = cerrar (reversible) · mark_invalid = marcar inválido ' +
+      '(rejected, para "ya no existe") · dismiss = descartar (sigue activo)',
+  })
+  @IsEnum(['confirm_closed', 'mark_invalid', 'dismiss'])
+  resolution!: 'confirm_closed' | 'mark_invalid' | 'dismiss';
+
+  @ApiProperty({
+    description: 'Motivo de la resolución (obligatorio, para trazabilidad)',
+    minLength: 3,
+    maxLength: 1000,
+    example: 'Confirmado por teléfono con el responsable: el punto cerró.',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(1000)
+  reason!: string;
 }

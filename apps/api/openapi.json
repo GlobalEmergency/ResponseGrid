@@ -1093,6 +1093,167 @@
         ]
       }
     },
+    "/resources/{resourceId}/validity-reports": {
+      "post": {
+        "operationId": "ResourcesController_submitValidityReport",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "Resource UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportResourceValidityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Report recorded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResourceValidityResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "The owner cannot report their own resource"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "409": {
+            "description": "Resource is not publicly visible"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Report a resource as closed / nonexistent / moved / outdated (any authenticated user)",
+        "tags": [
+          "resources"
+        ]
+      },
+      "get": {
+        "operationId": "ResourcesController_listValidityReports",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "Resource UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validity reports for the resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ValidityReportDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the citizen validity reports of a resource (coordinator)",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
+    "/resources/{resourceId}/dispute/resolve": {
+      "post": {
+        "operationId": "ResourcesController_resolveDisputeAction",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "Resource UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveResourceDisputeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Dispute resolved"
+          },
+          "400": {
+            "description": "Missing reason or invalid resolution"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "409": {
+            "description": "Resource is not disputed"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Resolve a disputed resource (coordinator): confirm closure, mark invalid or dismiss. Requires a reason; recorded in the audit trail.",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
     "/emergencies/{emergencyId}/coordination/queue": {
       "get": {
         "operationId": "CoordinationController_list",
@@ -1186,6 +1347,53 @@
           }
         ],
         "summary": "Get the verification queue for an emergency (paginated + searchable)",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/coordination/disputed": {
+      "get": {
+        "operationId": "CoordinationController_disputedQueue",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Disputed resources for the emergency",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DisputedResourceDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required for this emergency"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List resources flagged as disputed by citizens, with a reason breakdown",
         "tags": [
           "resources"
         ]
@@ -3948,7 +4156,7 @@
             "description": "Missing or invalid token"
           },
           "403": {
-            "description": "Missing shipment:create permission"
+            "description": "Not a coordinator of the emergency"
           },
           "409": {
             "description": "Emergency is not accepting intake (paused/closed)"
@@ -4001,7 +4209,7 @@
             "description": "Missing or invalid token"
           },
           "403": {
-            "description": "Missing shipment:assign permission"
+            "description": "Not a coordinator of the shipment emergency"
           },
           "404": {
             "description": "Shipment not found"
@@ -4130,7 +4338,7 @@
             "description": "Missing or invalid token"
           },
           "403": {
-            "description": "Missing shipment:update permission"
+            "description": "Not a coordinator of the shipment emergency"
           },
           "404": {
             "description": "Shipment not found"
@@ -4291,7 +4499,7 @@
             "description": "Missing or invalid token"
           },
           "403": {
-            "description": "Missing shipment:read permission"
+            "description": "Not a coordinator of the shipment emergency"
           },
           "404": {
             "description": "Shipment not found"
@@ -6938,6 +7146,17 @@
             "example": "hospital",
             "nullable": true,
             "description": "Recipient type slug (see the emergency recipient-type taxonomy)"
+          },
+          "disputed": {
+            "type": "boolean",
+            "example": false,
+            "description": "Whether enough citizens have reported this point as invalid; it stays visible with an \"in review\" warning until a coordinator resolves it."
+          },
+          "disputedAt": {
+            "type": "string",
+            "example": "2026-06-28T12:00:00.000Z",
+            "nullable": true,
+            "description": "When the point was flagged as disputed (ISO 8601), or null"
           }
         },
         "required": [
@@ -6959,7 +7178,162 @@
           "country",
           "city",
           "isFinalRecipient",
-          "recipientType"
+          "recipientType",
+          "disputed",
+          "disputedAt"
+        ]
+      },
+      "ReportResourceValidityDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": [
+              "closed",
+              "nonexistent",
+              "moved",
+              "outdated"
+            ],
+            "example": "closed",
+            "description": "Motivo: cerrado / ya no existe / se ha mudado / datos desactualizados"
+          },
+          "note": {
+            "type": "string",
+            "description": "Detalle opcional aportado por el ciudadano",
+            "maxLength": 1000
+          },
+          "photoUrls": {
+            "description": "URLs de fotos de evidencia (subidas vía /files)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "ReportResourceValidityResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "disputed": {
+            "type": "boolean",
+            "example": false,
+            "description": "Whether this report pushed the resource over the threshold to disputed"
+          }
+        },
+        "required": [
+          "id",
+          "disputed"
+        ]
+      },
+      "ResolveResourceDisputeDto": {
+        "type": "object",
+        "properties": {
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "confirm_closed",
+              "mark_invalid",
+              "dismiss"
+            ],
+            "example": "confirm_closed",
+            "description": "confirm_closed = cerrar (reversible) · mark_invalid = marcar inválido (rejected, para \"ya no existe\") · dismiss = descartar (sigue activo)"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Motivo de la resolución (obligatorio, para trazabilidad)",
+            "minLength": 3,
+            "maxLength": 1000,
+            "example": "Confirmado por teléfono con el responsable: el punto cerró."
+          }
+        },
+        "required": [
+          "resolution",
+          "reason"
+        ]
+      },
+      "ValidityReportDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "resourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reporterUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "closed",
+              "nonexistent",
+              "moved",
+              "outdated"
+            ],
+            "example": "closed"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "photoUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "accepted",
+              "dismissed"
+            ],
+            "example": "open"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolvedByUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "resourceId",
+          "emergencyId",
+          "reporterUserId",
+          "reason",
+          "note",
+          "photoUrls",
+          "status",
+          "createdAt",
+          "resolvedByUserId",
+          "resolvedAt"
         ]
       },
       "PagedResourcesDto": {
@@ -6989,6 +7363,41 @@
           "total",
           "page",
           "limit"
+        ]
+      },
+      "DisputedResourceDto": {
+        "type": "object",
+        "properties": {
+          "resource": {
+            "$ref": "#/components/schemas/ResourceViewDto"
+          },
+          "distinctReporters": {
+            "type": "number",
+            "example": 3,
+            "description": "Distinct citizens with an open report on this resource"
+          },
+          "byReason": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "example": {
+              "closed": 2,
+              "moved": 1
+            },
+            "description": "Open-report counts keyed by reason"
+          },
+          "lastReportedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "resource",
+          "distinctReporters",
+          "byReason",
+          "lastReportedAt"
         ]
       },
       "NearbyResourceViewDto": {
@@ -7117,6 +7526,17 @@
             "nullable": true,
             "description": "Recipient type slug (see the emergency recipient-type taxonomy)"
           },
+          "disputed": {
+            "type": "boolean",
+            "example": false,
+            "description": "Whether enough citizens have reported this point as invalid; it stays visible with an \"in review\" warning until a coordinator resolves it."
+          },
+          "disputedAt": {
+            "type": "string",
+            "example": "2026-06-28T12:00:00.000Z",
+            "nullable": true,
+            "description": "When the point was flagged as disputed (ISO 8601), or null"
+          },
           "distanceMeters": {
             "type": "number",
             "example": 1234,
@@ -7143,6 +7563,8 @@
           "city",
           "isFinalRecipient",
           "recipientType",
+          "disputed",
+          "disputedAt",
           "distanceMeters"
         ]
       },
@@ -7329,6 +7751,17 @@
             "nullable": true,
             "description": "Recipient type slug (see the emergency recipient-type taxonomy)"
           },
+          "disputed": {
+            "type": "boolean",
+            "example": false,
+            "description": "Whether enough citizens have reported this point as invalid; it stays visible with an \"in review\" warning until a coordinator resolves it."
+          },
+          "disputedAt": {
+            "type": "string",
+            "example": "2026-06-28T12:00:00.000Z",
+            "nullable": true,
+            "description": "When the point was flagged as disputed (ISO 8601), or null"
+          },
           "inventoryCategories": {
             "example": [
               "water",
@@ -7361,6 +7794,8 @@
           "city",
           "isFinalRecipient",
           "recipientType",
+          "disputed",
+          "disputedAt",
           "inventoryCategories"
         ]
       },
