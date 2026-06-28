@@ -174,6 +174,11 @@ export const en = {
     needs_offer_button: 'Offer for this need',
     needs_aria_label: 'Validated needs',
 
+    // Segmented explorer (Points | Needs)
+    tab_points: 'Points',
+    tab_needs: 'Needs',
+    explore_aria: 'Active points and validated needs',
+
     map_heading: 'Emergency map',
     map_legend_active: 'Operational',
     map_legend_saturated: 'Saturated',

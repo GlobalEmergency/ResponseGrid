@@ -180,6 +180,11 @@ export const es = {
     needs_offer_button: 'Ofrecer para esta necesidad',
     needs_aria_label: 'Necesidades validadas',
 
+    // Explorador segmentado (Puntos | Necesidades)
+    tab_points: 'Puntos',
+    tab_needs: 'Necesidades',
+    explore_aria: 'Puntos activos y necesidades validadas',
+
     // Map
     map_heading: 'Mapa de la emergencia',
     map_legend_active: 'Operativo',
