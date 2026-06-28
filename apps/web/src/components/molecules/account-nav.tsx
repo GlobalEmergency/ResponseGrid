@@ -27,16 +27,22 @@ export function AccountNav({ t, authed, isAdmin, notificationUnreadCount }: Acco
       </span>
       <Link href="/organizaciones" className={linkClass}>{t.my_orgs}</Link>
       {authed && (
-        <Link href="/notificaciones" className={linkClass}>
-          {notificationUnreadCount > 0
-            ? t.notifications_with_count.replace('{count}', String(notificationUnreadCount))
-            : t.notifications}
-        </Link>
+        <>
+          <Link href="/grupos" className={linkClass}>{t.groups}</Link>
+          <Link href="/mis-permisos" className={linkClass}>{t.my_permissions}</Link>
+          <Link href="/notificaciones" className={linkClass}>
+            {notificationUnreadCount > 0
+              ? t.notifications_with_count.replace('{count}', String(notificationUnreadCount))
+              : t.notifications}
+          </Link>
+        </>
       )}
       <Link href="/login" className={linkClass}>{t.coordination_access}</Link>
       {isAdmin && (
         <>
           <Link href="/admin/acreditaciones" className={linkClass}>{t.admin}</Link>
+          <Link href="/admin/permisos" className={linkClass}>{t.admin_permissions}</Link>
+          <Link href="/admin/api-keys" className={linkClass}>{t.admin_api_keys}</Link>
           <Link href="/admin/templates" className={linkClass}>{t.templates}</Link>
           <Link href="/admin/auditoria" className={linkClass}>{t.audit}</Link>
         </>
