@@ -228,6 +228,20 @@ describe('Emergency lifecycle (e2e)', () => {
     expect(typeof body.updatedAt).toBe('string');
   });
 
+  it('by-slug with a non-canonical slug → 404 (not 500) — #93', async () => {
+    // Uppercase, underscores and spaces are not canonical slugs. Before #93
+    // these surfaced a plain Error → 500; now they resolve as "not found".
+    for (const slug of ['Terremoto', 'abc_def', 'lifecycle E2E']) {
+      await request(server)
+        .get(`/emergencies/by-slug/${encodeURIComponent(slug)}`)
+        .expect(404);
+    }
+  });
+
+  it('by-slug with a canonical but unknown slug → 404', async () => {
+    await request(server).get('/emergencies/by-slug/zzz-no-existe').expect(404);
+  });
+
   // ── 5. Resume: intake resumes ───────────────────────────────────────────────
 
   it('coordinator resumes the emergency → 204', async () => {
