@@ -1,6 +1,7 @@
-import { NeedCategory } from '../../needs/domain/need-enums';
+// Offers share the single Category taxonomy owned by the supplies context.
+import { Category } from '../../supplies/domain/category';
 
-export { NeedCategory };
+export { Category };
 
 export enum OfferStatus {
   Open = 'open',

@@ -8,6 +8,7 @@ import {
   PublicStatus,
   VerificationLevel,
 } from '../domain/resource-enums';
+import { Category } from '../../supplies/domain/category';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const OTHER_EM = '22222222-2222-4222-8222-222222222222';
@@ -37,6 +38,7 @@ function snapshot(
     provenance: null,
     isFinalRecipient: true,
     recipientType: 'hospital',
+    items: [],
     ...overrides,
   };
 }
@@ -61,6 +63,46 @@ describe('GetPublicResource', () => {
     expect(view!.id).toBe(ID);
     expect(view!.isFinalRecipient).toBe(true);
     expect(view!.recipientType).toBe('hospital');
+  });
+
+  it('aggregates the declared inventory to distinct categories (no names/quantities)', async () => {
+    const resource = Resource.fromSnapshot(
+      snapshot({
+        id: ID,
+        items: [
+          {
+            name: 'Agua',
+            quantity: 100,
+            unit: 'litros',
+            category: Category.Water,
+          },
+          // Same category as above → must be deduplicated.
+          {
+            name: 'Botellas',
+            quantity: 50,
+            unit: null,
+            category: Category.Water,
+          },
+          {
+            name: 'Mantas',
+            quantity: 5,
+            unit: null,
+            category: Category.Shelter,
+          },
+        ],
+      }),
+    );
+    const useCase = new GetPublicResource(repoWith(resource));
+
+    const view = await useCase.execute({ emergencyId: EM, resourceId: ID });
+
+    // Privacy: only the distinct categories are exposed — never names/quantities.
+    expect(view!.inventoryCategories).toEqual([
+      Category.Water,
+      Category.Shelter,
+    ]);
+    expect(JSON.stringify(view)).not.toContain('Botellas');
+    expect(JSON.stringify(view)).not.toContain('100');
   });
 
   it('returns null when the resource does not exist', async () => {

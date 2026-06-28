@@ -4,9 +4,9 @@ import { NeedEmergencyStatusReader } from '../domain/ports/emergency-status-read
 import { Need } from '../domain/need';
 import { NeedId } from '../domain/need-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { Priority, NeedCategory, PersonnelSkill } from '../domain/need-enums';
+import { Priority, Category, PersonnelSkill } from '../domain/need-enums';
 import { Location } from '../../../shared/domain/location';
-import { NeedItem } from '../domain/need-item';
+import { SupplyLine } from '../../supplies/domain/supply-line';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 import { LocationSensitivity } from '../../../shared/domain/location-sensitivity';
 
@@ -16,7 +16,7 @@ export interface CreateNeedItemCommand {
   name: string;
   quantity: number;
   unit: string | null;
-  category: NeedCategory;
+  category: Category;
   /** Presentation / route of administration (#61). Optional. */
   presentation?: string | null;
 }
@@ -67,7 +67,7 @@ export class CreateNeed {
     });
 
     const items = cmd.items.map((i) =>
-      NeedItem.create({
+      SupplyLine.create({
         name: i.name,
         quantity: i.quantity,
         unit: i.unit,

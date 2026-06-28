@@ -183,6 +183,7 @@ export function NeedsList({
                       te={te}
                       slug={slug}
                       active={active}
+                      locale={locale}
                     />
                     <div className="mt-1 flex justify-end px-1">
                       <DistanceBadge
@@ -207,7 +208,13 @@ export function NeedsList({
           >
             {items.map((need) => (
               <li key={need.id}>
-                <NeedCard need={need} te={te} slug={slug} active={active} />
+                <NeedCard
+                  need={need}
+                  te={te}
+                  slug={slug}
+                  active={active}
+                  locale={locale}
+                />
               </li>
             ))}
           </ul>

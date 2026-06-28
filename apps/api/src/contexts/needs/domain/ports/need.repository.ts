@@ -1,12 +1,12 @@
 import { Need } from '../need';
 import { NeedId } from '../need-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
-import { NeedCategory, NeedStatus, Priority } from '../need-enums';
+import { Category, NeedStatus, Priority } from '../need-enums';
 
 export const NEED_REPOSITORY = Symbol('NeedRepository');
 
 export interface NeedFilters {
-  category?: NeedCategory;
+  category?: Category;
   priority?: Priority;
   /** Filter by linked resource / final recipient (#60). */
   resourceId?: string | null;

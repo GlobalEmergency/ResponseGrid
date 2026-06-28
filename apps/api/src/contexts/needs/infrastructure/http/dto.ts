@@ -5,7 +5,6 @@ import {
   IsLongitude,
   IsNotEmpty,
   IsOptional,
-  IsPositive,
   IsString,
   IsUUID,
   MinLength,
@@ -18,50 +17,8 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  NeedCategory,
-  Priority,
-  PersonnelSkill,
-} from '../../domain/need-enums';
-
-export class NeedItemDto {
-  @ApiProperty({
-    example: 'Water bottles',
-    description: 'Name of the item needed',
-  })
-  @IsString()
-  @IsNotEmpty()
-  name!: string;
-
-  @ApiProperty({
-    example: 100,
-    description: 'Quantity needed (positive integer)',
-  })
-  @IsInt()
-  @IsPositive()
-  quantity!: number;
-
-  @ApiPropertyOptional({
-    example: 'liters',
-    description: 'Unit of measurement (optional)',
-  })
-  @IsOptional()
-  @IsString()
-  unit?: string;
-
-  @ApiProperty({ enum: NeedCategory, example: NeedCategory.Water })
-  @IsEnum(NeedCategory)
-  category!: NeedCategory;
-
-  @ApiPropertyOptional({
-    example: 'ampolla',
-    description:
-      'Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe, oxígeno… Optional, free-form (#61).',
-  })
-  @IsOptional()
-  @IsString()
-  presentation?: string;
-}
+import { Priority, PersonnelSkill } from '../../domain/need-enums';
+import { SupplyLineDto } from '../../../supplies/infrastructure/http/supply-line.dto';
 
 export class NeedLocationDto {
   @ApiProperty({ example: '123 Main Street, Caracas, Venezuela' })
@@ -108,14 +65,14 @@ export class CreateNeedDto {
   requesterOrganizationId?: string;
 
   @ApiProperty({
-    type: [NeedItemDto],
+    type: [SupplyLineDto],
     description: 'List of items needed (minimum 1)',
     minItems: 1,
   })
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  @Type(() => NeedItemDto)
-  items!: NeedItemDto[];
+  @Type(() => SupplyLineDto)
+  items!: SupplyLineDto[];
 
   /**
    * F05: Optional personnel-need fields.

@@ -2,7 +2,7 @@ import { DiscardOffer } from './discard-offer';
 import { SubmitOffer } from './submit-offer';
 import { InMemoryOfferRepository } from '../infrastructure/in-memory-offer.repository';
 import { FakeOfferEventBus } from '../infrastructure/fake-event-bus';
-import { NeedCategory, OfferStatus } from '../domain/offer-enums';
+import { Category, OfferStatus } from '../domain/offer-enums';
 import { OfferNotFoundError } from './offer-not-found.error';
 import { OfferCannotBeCancelledError } from '../domain/offer-errors';
 import { OfferEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
@@ -57,7 +57,7 @@ describe('DiscardOffer', () => {
       emergencyId: EM,
       donorUserId: DONOR_ID,
       donorOrganizationId: null,
-      category: NeedCategory.Food,
+      category: Category.Food,
       description: 'Arroz 25kg',
       quantity: 10,
       unit: 'sacos',

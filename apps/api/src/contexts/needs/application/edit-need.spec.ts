@@ -2,7 +2,7 @@ import { EditNeed } from './edit-need';
 import { CreateNeed } from './create-need';
 import { InMemoryNeedRepository } from '../infrastructure/in-memory-need.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
-import { NeedCategory, Priority, NeedStatus } from '../domain/need-enums';
+import { Category, Priority, NeedStatus } from '../domain/need-enums';
 import { NeedNotFoundError } from './need-not-found.error';
 import { NeedNotEditableError } from '../domain/need-errors';
 import { NeedEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
@@ -42,7 +42,7 @@ describe('EditNeed', () => {
           name: 'Botellas',
           quantity: 10,
           unit: 'u',
-          category: NeedCategory.Water,
+          category: Category.Water,
         },
       ],
     });

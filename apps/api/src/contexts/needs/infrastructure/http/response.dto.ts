@@ -1,11 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  Priority,
-  NeedCategory,
-  NeedStatus,
-  PersonnelSkill,
-} from '../../domain/need-enums';
+import { Priority, NeedStatus, PersonnelSkill } from '../../domain/need-enums';
 import { LocationSensitivity } from '../../../../shared/domain/location-sensitivity';
+import { SupplyLineResponseDto } from '../../../supplies/infrastructure/http/supply-line.dto';
 
 export class CreateNeedResponseDto {
   @ApiProperty({
@@ -24,29 +20,6 @@ export class NeedLocationResponseDto {
 
   @ApiProperty({ example: -66.9036 })
   longitude!: number;
-}
-
-export class NeedItemResponseDto {
-  @ApiProperty({ example: 'Water bottles' })
-  name!: string;
-
-  @ApiProperty({ example: 100 })
-  quantity!: number;
-
-  @ApiPropertyOptional({ example: 'liters', nullable: true, type: String })
-  unit!: string | null;
-
-  @ApiProperty({ enum: NeedCategory, example: NeedCategory.Water })
-  category!: NeedCategory;
-
-  @ApiPropertyOptional({
-    example: 'ampolla',
-    nullable: true,
-    type: String,
-    description:
-      'Presentation / route of administration (ampolla, EV, inhalador…) — #61.',
-  })
-  presentation!: string | null;
 }
 
 export class NeedViewDto {
@@ -93,8 +66,8 @@ export class NeedViewDto {
   @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
   managingOrganizationId!: string | null;
 
-  @ApiProperty({ type: [NeedItemResponseDto] })
-  items!: NeedItemResponseDto[];
+  @ApiProperty({ type: [SupplyLineResponseDto] })
+  items!: SupplyLineResponseDto[];
 
   @ApiProperty({ enum: NeedStatus, example: NeedStatus.Pending })
   status!: NeedStatus;

@@ -11,44 +11,18 @@ import { Select } from '@/components/atoms/select';
 import { FilterField } from '@/components/molecules/filter-field';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
-
-const CATEGORY_VALUES = [
-  'food',
-  'water',
-  'hygiene',
-  'medical',
-  'shelter',
-  'tools',
-  'other',
-  'medicines',
-  'medical_equipment',
-  'medical_supplies',
-  'medical_personnel',
-] as const;
+import { ALL_CATEGORIES, categoryLabel } from '@/lib/categories';
 
 const STATUS_VALUES = ['open', 'matched', 'fulfilled', 'cancelled'] as const;
 
 export function OffersFilter() {
-  const tc = getMessages(useLocale()).coord;
+  const locale = useLocale();
+  const tc = getMessages(locale).coord;
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const currentCategory = searchParams.get('category') ?? '';
   const currentStatus = searchParams.get('status') ?? '';
-
-  const CATEGORY_LABELS: Record<(typeof CATEGORY_VALUES)[number], string> = {
-    food: tc.category_food,
-    water: tc.category_water,
-    hygiene: tc.category_hygiene,
-    medical: tc.category_medical,
-    shelter: tc.category_shelter,
-    tools: tc.category_tools,
-    other: tc.category_other,
-    medicines: tc.category_medicines,
-    medical_equipment: tc.category_medical_equipment,
-    medical_supplies: tc.category_medical_supplies,
-    medical_personnel: tc.category_medical_personnel,
-  };
 
   const STATUS_LABELS: Record<(typeof STATUS_VALUES)[number], string> = {
     open: tc.offer_status_open,
@@ -80,9 +54,9 @@ export function OffersFilter() {
           aria-label={tc.offers_filter_category_aria}
         >
           <option value="">{tc.offers_filter_category_all}</option>
-          {CATEGORY_VALUES.map((value) => (
+          {ALL_CATEGORIES.map((value) => (
             <option key={value} value={value}>
-              {CATEGORY_LABELS[value]}
+              {categoryLabel(value, locale)}
             </option>
           ))}
         </Select>

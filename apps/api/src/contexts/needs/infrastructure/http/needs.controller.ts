@@ -41,7 +41,7 @@ import { RenewNeed, GetExpiredNeeds } from '../../application/renew-need';
 import { SuggestVolunteersForNeed } from '../../application/suggest-volunteers-for-need';
 import { CreateTaskFromNeed } from '../../application/create-task-from-need';
 import { NeedView } from '../../application/need-view';
-import { NeedCategory, Priority } from '../../domain/need-enums';
+import { Category, Priority } from '../../domain/need-enums';
 import {
   CreateNeedDto,
   AssignNeedManagerDto,
@@ -145,7 +145,7 @@ export class NeedsController {
   })
   @ApiQuery({
     name: 'category',
-    enum: NeedCategory,
+    enum: Category,
     required: false,
     description:
       'Filter by item category (needs with at least one item of this category)',
@@ -184,10 +184,8 @@ export class NeedsController {
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
   ): Promise<NeedView[]> {
-    const validCategory = Object.values(NeedCategory).includes(
-      category as NeedCategory,
-    )
-      ? (category as NeedCategory)
+    const validCategory = Object.values(Category).includes(category as Category)
+      ? (category as Category)
       : undefined;
     const validPriority = Object.values(Priority).includes(priority as Priority)
       ? (priority as Priority)
@@ -282,7 +280,7 @@ export class NeedsController {
   })
   @ApiQuery({
     name: 'category',
-    enum: NeedCategory,
+    enum: Category,
     required: false,
     description:
       'Filter by item category (needs with at least one item of this category)',
@@ -303,10 +301,8 @@ export class NeedsController {
     @Query('category') category?: string,
     @Query('priority') priority?: string,
   ): Promise<NeedView[]> {
-    const validCategory = Object.values(NeedCategory).includes(
-      category as NeedCategory,
-    )
-      ? (category as NeedCategory)
+    const validCategory = Object.values(Category).includes(category as Category)
+      ? (category as Category)
       : undefined;
     const validPriority = Object.values(Priority).includes(priority as Priority)
       ? (priority as Priority)

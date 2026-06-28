@@ -3,32 +3,21 @@
 import { useEffect, useState } from 'react';
 import type { Messages } from '@/i18n/messages/es';
 import { PersonnelNeedFields } from '@/components/molecules/personnel-need-fields';
-
-type Category =
-  | 'hygiene'
-  | 'water'
-  | 'food'
-  | 'medical'
-  | 'shelter'
-  | 'tools'
-  | 'other'
-  | 'medicines'
-  | 'medical_equipment'
-  | 'medical_supplies'
-  | 'medical_personnel';
+import { useLocale } from '@/i18n/locale-context';
+import { ALL_CATEGORIES, categoryLabel } from '@/lib/categories';
 
 interface Item {
   id: number;
   name: string;
   quantity: number;
   unit: string;
-  category: Category;
+  category: string;
 }
 
 let nextId = 1;
 
 function makeItem(): Item {
-  return { id: nextId++, name: '', quantity: 1, unit: '', category: 'other' };
+  return { id: nextId++, name: '', quantity: 1, unit: '', category: 'food' };
 }
 
 interface ItemsFieldProps {
@@ -37,23 +26,17 @@ interface ItemsFieldProps {
 
 export function ItemsField({ t }: ItemsFieldProps) {
   const [items, setItems] = useState<Item[]>([makeItem()]);
+  const locale = useLocale();
 
   // Show personnel fields when at least one item is in the medical_personnel category
-  const hasPersonnelCategory = items.some((item) => item.category === 'medical_personnel');
+  const hasPersonnelCategory = items.some(
+    (item) => item.category === 'medical_personnel',
+  );
 
-  const categories = [
-    { value: 'hygiene' as Category, label: t.category_hygiene },
-    { value: 'water' as Category, label: t.category_water },
-    { value: 'food' as Category, label: t.category_food },
-    { value: 'medical' as Category, label: t.category_medical },
-    { value: 'shelter' as Category, label: t.category_shelter },
-    { value: 'tools' as Category, label: t.category_tools },
-    { value: 'other' as Category, label: t.category_other },
-    { value: 'medicines' as Category, label: t.category_medicines },
-    { value: 'medical_equipment' as Category, label: t.category_medical_equipment },
-    { value: 'medical_supplies' as Category, label: t.category_medical_supplies },
-    { value: 'medical_personnel' as Category, label: t.category_medical_personnel },
-  ];
+  const categories = ALL_CATEGORIES.map((slug) => ({
+    value: slug,
+    label: categoryLabel(slug, locale),
+  }));
 
   // Serialize to hidden input on every change
   const serialized = JSON.stringify(
@@ -194,7 +177,7 @@ export function ItemsField({ t }: ItemsFieldProps) {
               required
               value={item.category}
               onChange={(e) =>
-                updateItem(item.id, { category: e.target.value as Category })
+                updateItem(item.id, { category: e.target.value })
               }
               className="w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
             >
