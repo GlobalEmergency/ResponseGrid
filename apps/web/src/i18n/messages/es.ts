@@ -1034,6 +1034,7 @@ export const es = {
     f_type_company: 'Empresa',
     f_type_public: 'Administración pública',
     f_type_association: 'Asociación',
+    f_type_transport: 'Operador de transporte',
     f_type_other: 'Otra',
     f_taxid: 'NIF / CIF',
     f_email: 'Email de contacto',

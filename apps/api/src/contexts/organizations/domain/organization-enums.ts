@@ -3,6 +3,7 @@ export enum OrganizationType {
   Company = 'company',
   PublicAdmin = 'public_admin',
   Association = 'association',
+  TransportOperator = 'transport_operator',
   Other = 'other',
 }
 

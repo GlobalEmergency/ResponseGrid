@@ -18,6 +18,21 @@ describe('permission catalog', () => {
     }
   });
 
+  it('includes the transport logistics permissions (EPIC #103)', () => {
+    const logistics: Permission[] = [
+      'shipment:create',
+      'shipment:read',
+      'shipment:track',
+      'manifest:sign',
+    ];
+    for (const p of logistics) {
+      expect(ALL_PERMISSIONS).toContain(p);
+    }
+    expect(isPermission('shipment:track')).toBe(true);
+    // shipment:read is a `*:read`, so it joins the viewer/read-only set
+    expect(READ_ONLY_PERMISSIONS).toContain('shipment:read');
+  });
+
   it('has no duplicates', () => {
     expect(new Set(ALL_PERMISSIONS).size).toBe(ALL_PERMISSIONS.length);
   });

@@ -19,6 +19,7 @@ export function CreateOrgForm() {
     { value: 'company', label: to.f_type_company },
     { value: 'public_admin', label: to.f_type_public },
     { value: 'association', label: to.f_type_association },
+    { value: 'transport_operator', label: to.f_type_transport },
     { value: 'other', label: to.f_type_other },
   ];
 
