@@ -1603,8 +1603,15 @@ export const es = {
     disputes_action_dismiss: 'Descartar',
     disputes_resolve_confirm: 'Confirmar',
     disputes_resolving: 'Procesando…',
+    disputes_evidence_show: 'Ver evidencia',
+    disputes_evidence_hide: 'Ocultar evidencia',
+    disputes_evidence_loading: 'Cargando reportes…',
+    disputes_evidence_empty: 'Sin reportes individuales.',
+    disputes_evidence_no_note: 'Sin nota',
+    disputes_evidence_photo: 'Foto {n}',
     err_resolve_dispute_failed:
       'No se pudo resolver la disputa. Inténtalo de nuevo.',
+    err_load_reports_failed: 'No se pudieron cargar los reportes.',
     activity_title: 'Registro de actividad',
     activity_subtitle:
       'Trazabilidad de validaciones y cambios en esta emergencia (solo coordinación).',
@@ -2100,6 +2107,7 @@ export const es = {
     map_accepts: 'Acepta:',
     map_approx_location: 'Ubicación aproximada',
     map_disputed: 'En verificación · posible cierre',
+    map_report_cta: '¿Algo va mal? Avísanos',
     map_no_locations: 'Aún no hay ubicaciones en el mapa.',
   },
 

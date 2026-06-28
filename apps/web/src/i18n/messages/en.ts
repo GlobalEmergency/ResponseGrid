@@ -1575,8 +1575,15 @@ export const en = {
     disputes_action_dismiss: 'Dismiss',
     disputes_resolve_confirm: 'Confirm',
     disputes_resolving: 'Working…',
+    disputes_evidence_show: 'View evidence',
+    disputes_evidence_hide: 'Hide evidence',
+    disputes_evidence_loading: 'Loading reports…',
+    disputes_evidence_empty: 'No individual reports.',
+    disputes_evidence_no_note: 'No note',
+    disputes_evidence_photo: 'Photo {n}',
     err_resolve_dispute_failed:
       'Couldn’t resolve the dispute. Please try again.',
+    err_load_reports_failed: 'Couldn’t load the reports.',
     activity_title: 'Activity log',
     activity_subtitle:
       'Traceability of validations and changes in this emergency (coordination only).',
@@ -2069,6 +2076,7 @@ export const en = {
     map_accepts: 'Accepts:',
     map_approx_location: 'Approximate location',
     map_disputed: 'In review · possible closure',
+    map_report_cta: 'Something wrong? Tell us',
     map_no_locations: 'No locations on the map yet.',
   },
 

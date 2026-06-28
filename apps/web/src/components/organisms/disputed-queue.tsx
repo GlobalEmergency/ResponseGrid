@@ -11,11 +11,13 @@ import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
 import type { Messages } from '@/i18n/messages/es';
 import {
+  getValidityReports,
   resolveDispute,
   type DisputeResolution,
 } from '@/app/e/[slug]/coordinacion/actions';
 
 type DisputedResource = components['schemas']['DisputedResourceDto'];
+type ValidityReport = components['schemas']['ValidityReportDto'];
 
 const INPUT_CLASS =
   'w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink focus:border-navy focus:outline-none';
@@ -72,6 +74,10 @@ function DisputedCard({
   const [error, setError] = useState<string | null>(null);
   const [active, setActive] = useState<DisputeResolution | null>(null);
   const [reason, setReason] = useState('');
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const [evidence, setEvidence] = useState<ValidityReport[] | null>(null);
+  const [evidenceLoading, setEvidenceLoading] = useState(false);
+  const [evidenceError, setEvidenceError] = useState<string | null>(null);
 
   const r = item.resource;
   const reasonLabels: Record<string, string> = {
@@ -103,6 +109,23 @@ function DisputedCard({
       } else if (res.status === 'error') {
         setError(res.message ?? tc.error_unknown);
       }
+    });
+  }
+
+  function toggleEvidence(): void {
+    if (evidenceOpen) {
+      setEvidenceOpen(false);
+      return;
+    }
+    setEvidenceOpen(true);
+    // Lazy-load once; keep the result cached across toggles.
+    if (evidence !== null || evidenceLoading) return;
+    setEvidenceLoading(true);
+    setEvidenceError(null);
+    void getValidityReports(r.id, slug).then((res) => {
+      setEvidenceLoading(false);
+      if (res.status === 'success') setEvidence(res.reports);
+      else setEvidenceError(res.message);
     });
   }
 
@@ -141,6 +164,73 @@ function DisputedCard({
               new Date(item.lastReportedAt).toLocaleDateString(),
             )}
       </p>
+
+      <div className="flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={toggleEvidence}
+          aria-expanded={evidenceOpen}
+          className="w-fit text-xs font-semibold text-navy hover:underline focus:outline-none"
+        >
+          {evidenceOpen ? tc.disputes_evidence_hide : tc.disputes_evidence_show}
+        </button>
+
+        {evidenceOpen && (
+          <div className="flex flex-col gap-2">
+            {evidenceLoading && (
+              <p className="text-xs text-muted">
+                {tc.disputes_evidence_loading}
+              </p>
+            )}
+            {evidenceError !== null && <ErrorMessage message={evidenceError} />}
+            {evidence !== null && evidence.length === 0 && (
+              <p className="text-xs text-muted">
+                {tc.disputes_evidence_empty}
+              </p>
+            )}
+            {evidence?.map((report) => (
+              <div
+                key={report.id}
+                className="rounded-md border border-line bg-surface-alt p-2 text-xs"
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-semibold text-warning">
+                    {reasonLabels[report.reason] ?? report.reason}
+                  </span>
+                  <span className="text-muted">
+                    {new Date(report.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                {report.note != null && report.note.trim() !== '' ? (
+                  <p className="mt-1 text-ink">{report.note}</p>
+                ) : (
+                  <p className="mt-1 italic text-muted">
+                    {tc.disputes_evidence_no_note}
+                  </p>
+                )}
+                {report.photoUrls.length > 0 && (
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {report.photoUrls.map((url, i) => (
+                      <a
+                        key={url}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-info underline"
+                      >
+                        {tc.disputes_evidence_photo.replace(
+                          '{n}',
+                          String(i + 1),
+                        )}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {error !== null && <ErrorMessage message={error} />}
 

@@ -95,6 +95,11 @@ interface EmergencyMapProps {
    * to make the map a full-height hero (mobile) / sticky panel (desktop).
    */
   containerClassName?: string;
+  /**
+   * Emergency slug — when set, resource popups link their name to the public
+   * detail page and offer a "report a problem" CTA (ficha 15, #155).
+   */
+  slug?: string;
 }
 
 // ── Inner component that draws uncertainty circles for approximate needs ──────
@@ -149,7 +154,13 @@ function escapeHtml(s: string): string {
 }
 
 // ── Inner component that renders clustered resource/need markers ──────────────
-function ClusteredMarkersLayer({ points }: { points: MapPoint[] }) {
+function ClusteredMarkersLayer({
+  points,
+  slug,
+}: {
+  points: MapPoint[];
+  slug?: string;
+}) {
   const map = useMap();
   const locale = useLocale();
   const clusterRef = useRef<L.MarkerClusterGroup | null>(null);
@@ -199,7 +210,22 @@ function ClusteredMarkersLayer({ points }: { points: MapPoint[] }) {
           ? `<br/><span style="font-size:11px;color:#b45309;">⚠️ ${escapeHtml(tc.map_disputed)}</span>`
           : '';
 
-      const popupHtml = `<strong>${escapeHtml(point.label)}</strong><br/><span style="font-size:11px;color:#6b7280;">${kindLabel}</span>${typeLabel}${locationLabel}${acceptsLabel}${approximateLabel}${disputedLabel}`;
+      // Resource popups (only on the public landing, where slug is provided)
+      // link the name to the detail page and offer a "report a problem" CTA.
+      const detailHref =
+        point.kind === 'resource' && slug != null && slug !== ''
+          ? `/e/${encodeURIComponent(slug)}/recursos/${encodeURIComponent(point.id)}`
+          : null;
+      const titleHtml =
+        detailHref !== null
+          ? `<a href="${escapeHtml(detailHref)}" style="color:#0f172a;font-weight:700;text-decoration:underline;">${escapeHtml(point.label)}</a>`
+          : `<strong>${escapeHtml(point.label)}</strong>`;
+      const reportLink =
+        detailHref !== null
+          ? `<br/><a href="${escapeHtml(`${detailHref}/reportar-estado`)}" style="font-size:11px;color:#b45309;font-weight:600;">${escapeHtml(tc.map_report_cta)}</a>`
+          : '';
+
+      const popupHtml = `${titleHtml}<br/><span style="font-size:11px;color:#6b7280;">${kindLabel}</span>${typeLabel}${locationLabel}${acceptsLabel}${approximateLabel}${disputedLabel}${reportLink}`;
 
       L.marker([point.lat, point.lng], { icon })
         .bindPopup(popupHtml)
@@ -209,7 +235,7 @@ function ClusteredMarkersLayer({ points }: { points: MapPoint[] }) {
     return () => {
       group.clearLayers();
     };
-  }, [map, points, locale]);
+  }, [map, points, locale, slug]);
 
   // Remove the cluster group when the component unmounts.
   // Read clusterRef.current INSIDE the cleanup so we always get the value
@@ -289,6 +315,7 @@ export default function EmergencyMap({
   points,
   onMapReady,
   containerClassName = 'h-80 rounded-lg border-2 border-line',
+  slug,
 }: EmergencyMapProps) {
   const t = getMessages(useLocale()).ui;
   // Default centre (Spain) used only when there are no points
@@ -311,7 +338,7 @@ export default function EmergencyMap({
         {onMapReady && <MapReadyEmitter onMapReady={onMapReady} />}
         <BoundsFitter points={points} />
         <ApproximateCirclesLayer points={points} />
-        <ClusteredMarkersLayer points={points} />
+        <ClusteredMarkersLayer points={points} slug={slug} />
       </MapContainer>
 
       {/* Empty-state overlay rendered on top of the map */}
