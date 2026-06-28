@@ -89,6 +89,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
       params: {
         path: { emergencyId },
         query: {
+          limit: '50',
           ...(category !== undefined && { category }),
           ...(priority !== undefined && { priority }),
         },
@@ -186,9 +187,12 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
       initialItems={validatedNeeds}
       te={te}
       tNearby={t.nearby_needs}
+      tList={t.resource_list}
       emptyTitle={te.needs_empty_title}
       active={isActive}
       locale={locale}
+      {...(category !== undefined && { category })}
+      {...(priority !== undefined && { priority })}
       filterSlot={<NeedsFilter t={t.needs_filter} te={t.emergency} />}
     />
   );

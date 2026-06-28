@@ -21,36 +21,47 @@ export class InMemoryNeedRepository implements NeedRepository {
   findValidatedByEmergency(
     emergencyId: EmergencyId,
     filters?: NeedFilters,
+    pagination?: { limit: number; offset: number },
   ): Promise<Need[]> {
     const now = new Date();
-    const result = [...this.store.values()]
-      .filter((s) => {
-        if (s.emergencyId !== emergencyId.value) return false;
-        if (s.status !== NeedStatus.Validated) return false;
-        // Exclude expired: expiresAt IS NOT NULL AND expiresAt <= now
-        if (
-          s.expiresAt !== null &&
-          s.expiresAt !== undefined &&
-          s.expiresAt <= now
-        )
-          return false;
-        if (filters?.priority !== undefined && s.priority !== filters.priority)
-          return false;
-        if (
-          filters?.category !== undefined &&
-          !s.items.some((i) => i.category === filters.category)
-        )
-          return false;
-        if (
-          filters?.resourceId !== undefined &&
-          filters.resourceId !== null &&
-          (s.resourceId ?? null) !== filters.resourceId
-        )
-          return false;
-        return true;
-      })
-      .map((s) => Need.fromSnapshot(s));
-    return Promise.resolve(result);
+    let snaps = [...this.store.values()].filter((s) => {
+      if (s.emergencyId !== emergencyId.value) return false;
+      if (s.status !== NeedStatus.Validated) return false;
+      // Exclude expired: expiresAt IS NOT NULL AND expiresAt <= now
+      if (
+        s.expiresAt !== null &&
+        s.expiresAt !== undefined &&
+        s.expiresAt <= now
+      )
+        return false;
+      if (filters?.priority !== undefined && s.priority !== filters.priority)
+        return false;
+      if (
+        filters?.category !== undefined &&
+        !s.items.some((i) => i.category === filters.category)
+      )
+        return false;
+      if (
+        filters?.resourceId !== undefined &&
+        filters.resourceId !== null &&
+        (s.resourceId ?? null) !== filters.resourceId
+      )
+        return false;
+      return true;
+    });
+
+    if (pagination !== undefined) {
+      // Match the drizzle order: newest first, id as a stable tiebreaker.
+      snaps = snaps
+        .sort((a, b) => {
+          const diff = b.createdAt.getTime() - a.createdAt.getTime();
+          if (diff !== 0) return diff;
+          return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+        })
+        .slice(pagination.offset, pagination.offset + pagination.limit);
+    }
+
+    return Promise.resolve(snaps.map((s) => Need.fromSnapshot(s)));
   }
 
   findNearbyValidated(

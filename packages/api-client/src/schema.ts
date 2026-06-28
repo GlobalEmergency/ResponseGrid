@@ -4510,6 +4510,10 @@ export interface operations {
                 priority?: "low" | "medium" | "high" | "urgent";
                 /** @description Filter to needs linked to this resource / final recipient */
                 resourceId?: string;
+                /** @description Page size for pagination (1-100). Omit to return all. */
+                limit?: string;
+                /** @description Number of items to skip (pagination). Defaults to 0. */
+                offset?: string;
             };
             header?: never;
             path: {

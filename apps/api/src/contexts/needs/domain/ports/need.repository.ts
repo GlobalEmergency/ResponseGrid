@@ -18,6 +18,12 @@ export interface NeedRepository {
   findValidatedByEmergency(
     emergencyId: EmergencyId,
     filters?: NeedFilters,
+    /**
+     * Optional server-side pagination. When omitted the full validated set is
+     * returned (back-compat); when provided, results are deterministically
+     * ordered (newest first, id as tiebreaker) and windowed.
+     */
+    pagination?: { limit: number; offset: number },
   ): Promise<Need[]>;
   /**
    * Returns validated (non-expired) needs within `radiusMeters` of the given

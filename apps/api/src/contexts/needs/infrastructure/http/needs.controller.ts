@@ -154,6 +154,16 @@ export class NeedsController {
     format: 'uuid',
     description: 'Filter to needs linked to this resource / final recipient',
   })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Page size for pagination (1-100). Omit to return all.',
+  })
+  @ApiQuery({
+    name: 'offset',
+    required: false,
+    description: 'Number of items to skip (pagination). Defaults to 0.',
+  })
   @ApiOkResponse({
     description: 'List of validated needs',
     type: [NeedViewDto],
@@ -163,6 +173,8 @@ export class NeedsController {
     @Query('category') category?: string,
     @Query('priority') priority?: string,
     @Query('resourceId') resourceId?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
   ): Promise<NeedView[]> {
     const validCategory = Object.values(NeedCategory).includes(
       category as NeedCategory,
@@ -173,11 +185,24 @@ export class NeedsController {
       ? (priority as Priority)
       : undefined;
 
+    // Pagination is opt-in: only applied when a valid `limit` is supplied, so
+    // existing callers that omit it still receive the full validated list.
+    const parsedLimit =
+      limit !== undefined
+        ? Math.min(Math.max(Number.parseInt(limit, 10) || 50, 1), 100)
+        : undefined;
+    const parsedOffset =
+      offset !== undefined
+        ? Math.max(Number.parseInt(offset, 10) || 0, 0)
+        : undefined;
+
     return this.getPublicNeeds.execute({
       emergencyId,
       ...(validCategory !== undefined && { category: validCategory }),
       ...(validPriority !== undefined && { priority: validPriority }),
       ...(resourceId !== undefined && { resourceId }),
+      ...(parsedLimit !== undefined && { limit: parsedLimit }),
+      ...(parsedOffset !== undefined && { offset: parsedOffset }),
     });
   }
 
