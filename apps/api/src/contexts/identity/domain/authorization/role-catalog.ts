@@ -118,15 +118,23 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
   },
   group_manager: {
     id: 'group_manager',
-    description: 'Gestiona un grupo/cuadrilla de voluntarios.',
+    description:
+      'Gestiona un grupo/cuadrilla: aprueba/añade miembros, asigna tareas y ' +
+      'puede nombrar sub-managers (mismo rol) por atenuación.',
     defaultScopeType: 'group',
     permissions: [
+      'group:read',
+      'group:manage_members',
       'volunteer:read',
       'volunteer:assign',
       'task:create',
       'task:assign',
       'task:read',
       'report:read',
+      // Delegation within the group: invite users and appoint sub-managers.
+      // Attenuation (§5) limits this to roles whose permissions ⊆ these.
+      'user:invite',
+      'role:grant',
     ],
   },
   volunteer_operative: {

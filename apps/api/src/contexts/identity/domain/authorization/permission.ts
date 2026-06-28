@@ -29,6 +29,7 @@ export const PERMISSION_CATALOG = {
   incident: ['create', 'resolve'],
   reunification: ['create', 'read_private', 'match'],
   org: ['create', 'edit', 'read'],
+  group: ['create', 'read', 'manage_members'],
   accreditation: ['grant', 'revoke'],
   user: ['invite', 'read'],
   role: ['grant', 'revoke', 'create_custom'],
