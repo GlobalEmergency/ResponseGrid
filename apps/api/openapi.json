@@ -1936,6 +1936,79 @@
         ]
       }
     },
+    "/emergencies/{emergencyId}/public/needs/nearby": {
+      "get": {
+        "operationId": "NeedsController_listNearby",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "lat",
+            "required": true,
+            "in": "query",
+            "description": "Latitude between -90 and 90",
+            "schema": {
+              "example": 10.4806,
+              "type": "number"
+            }
+          },
+          {
+            "name": "lng",
+            "required": true,
+            "in": "query",
+            "description": "Longitude between -180 and 180",
+            "schema": {
+              "example": -66.9036,
+              "type": "number"
+            }
+          },
+          {
+            "name": "radius",
+            "required": true,
+            "in": "query",
+            "description": "Search radius in meters (max 100000)",
+            "schema": {
+              "example": 5000,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max results (default 50, max 100)",
+            "schema": {
+              "example": 50,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validated needs within radius ordered by distance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NearbyNeedsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List validated needs near a GPS point, ordered by distance (public, #57)",
+        "tags": [
+          "needs"
+        ]
+      }
+    },
     "/emergencies/{emergencyId}/needs/queue": {
       "get": {
         "operationId": "NeedsController_listQueue",
@@ -4607,6 +4680,18 @@
   ],
   "servers": [],
   "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      },
+      "api-key": {
+        "type": "apiKey",
+        "name": "X-API-Key",
+        "in": "header"
+      }
+    },
     "schemas": {
       "LoginDto": {
         "type": "object",
@@ -6343,6 +6428,151 @@
           "items",
           "status",
           "createdAt"
+        ]
+      },
+      "NearbyNeedViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "11111111-1111-4111-8111-111111111111"
+          },
+          "title": {
+            "type": "string",
+            "example": "Alimentos para 50 familias"
+          },
+          "description": {
+            "type": "string",
+            "example": "Descripción detallada",
+            "nullable": true
+          },
+          "location": {
+            "$ref": "#/components/schemas/NeedLocationResponseDto"
+          },
+          "locationSensitivity": {
+            "type": "string",
+            "enum": [
+              "public",
+              "approximate"
+            ],
+            "example": "approximate",
+            "description": "When \"approximate\", the coordinates in location are jittered for privacy. Coordinators always receive exact coordinates regardless of this value."
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "urgent"
+            ],
+            "example": "high"
+          },
+          "requesterOrganizationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "managingOrganizationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NeedItemResponseDto"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "validated",
+              "rejected",
+              "fulfilled"
+            ],
+            "example": "pending"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-01-01T00:00:00.000Z"
+          },
+          "expiresAt": {
+            "type": "string",
+            "example": "2024-01-03T00:00:00.000Z",
+            "nullable": true,
+            "description": "Timestamp when the need expires (48 h after validation). Null for legacy needs."
+          },
+          "lastVerifiedAt": {
+            "type": "string",
+            "example": "2024-01-01T12:00:00.000Z",
+            "nullable": true,
+            "description": "Timestamp when the need was last verified by a coordinator."
+          },
+          "requiredSkill": {
+            "type": "string",
+            "enum": [
+              "driving",
+              "medical",
+              "logistics",
+              "cooking",
+              "languages",
+              "admin",
+              "general"
+            ],
+            "nullable": true,
+            "description": "Required volunteer skill (personnel needs only)"
+          },
+          "requestedCount": {
+            "type": "number",
+            "example": 3,
+            "nullable": true,
+            "description": "Number of personnel needed"
+          },
+          "resourceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Linked resource / final recipient id (#60), or null if standalone."
+          },
+          "distanceMeters": {
+            "type": "number",
+            "example": 1850,
+            "description": "Distance in meters from the queried location to the (public) need location."
+          }
+        },
+        "required": [
+          "id",
+          "emergencyId",
+          "title",
+          "location",
+          "locationSensitivity",
+          "priority",
+          "items",
+          "status",
+          "createdAt",
+          "distanceMeters"
+        ]
+      },
+      "NearbyNeedsResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NearbyNeedViewDto"
+            }
+          }
+        },
+        "required": [
+          "items"
         ]
       },
       "AssignNeedManagerDto": {

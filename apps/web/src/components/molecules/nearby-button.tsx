@@ -1,37 +1,37 @@
 'use client';
 
 /**
- * NearbyButton — triggers geolocation and fetches nearby resources.
+ * NearbyButton — triggers browser geolocation and hands the ephemeral
+ * coordinates to the parent via `onLocate`. It is intentionally agnostic about
+ * what is fetched (resources, needs, …); the parent decides.
  *
- * Privacy: coordinates are ephemeral — passed as query params to one API call
- * and never stored. They are obtained from navigator.geolocation.getCurrentPosition,
- * used immediately in the API call, and discarded once the call resolves.
- * Coordinates are NEVER written to localStorage, sessionStorage, cookies,
+ * Privacy: coordinates are ephemeral — obtained from
+ * navigator.geolocation.getCurrentPosition, passed once to `onLocate`, and then
+ * discarded. They are NEVER written to localStorage, sessionStorage, cookies,
  * or any persistent React state.
  */
 
 import { useState } from 'react';
-import { createResponseGridClient } from '@reliefhub/api-client';
-import type { components } from '@reliefhub/api-client';
 import type { Messages } from '@/i18n/messages/es';
 
-type NearbyResourceViewDto = components['schemas']['NearbyResourceViewDto'];
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
-
 interface NearbyButtonProps {
-  emergencyId: string;
+  /**
+   * Labels for the button. Structurally compatible with both `nearby_points`
+   * and `nearby_needs` message blocks (only button_find / button_clear /
+   * loading are read here).
+   */
   tNearby: Messages['nearby_points'];
-  onNearbyResults: (items: NearbyResourceViewDto[]) => void;
+  /** Called with the ephemeral coordinates. May be async (the button stays in
+   * its loading state until it settles). Throwing triggers onGeoError. */
+  onLocate: (coords: { lat: number; lng: number }) => Promise<void> | void;
   onClear: () => void;
   onGeoError: () => void;
   active: boolean;
 }
 
 export function NearbyButton({
-  emergencyId,
   tNearby,
-  onNearbyResults,
+  onLocate,
   onClear,
   onGeoError,
   active,
@@ -48,27 +48,12 @@ export function NearbyButton({
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        // Coordinates are ephemeral — used only for this one API call.
+        // Coordinates are ephemeral — used only for this one call.
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
 
         try {
-          const client = createResponseGridClient(API_URL);
-          const { data } = await client.GET(
-            '/emergencies/{emergencyId}/public/resources/nearby',
-            {
-              params: {
-                path: { emergencyId },
-                query: { lat, lng, radius: 50000, limit: 50 },
-              },
-            },
-          );
-
-          if (data != null) {
-            onNearbyResults(data.items);
-          } else {
-            onGeoError();
-          }
+          await onLocate({ lat, lng });
         } catch {
           onGeoError();
         } finally {

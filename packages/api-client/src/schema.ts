@@ -655,6 +655,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/emergencies/{emergencyId}/public/needs/nearby": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List validated needs near a GPS point, ordered by distance (public, #57) */
+        get: operations["NeedsController_listNearby"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/emergencies/{emergencyId}/needs/queue": {
         parameters: {
             query?: never;
@@ -2224,6 +2241,79 @@ export interface components {
              * @description Linked resource / final recipient id (#60), or null if standalone.
              */
             resourceId?: string | null;
+        };
+        NearbyNeedViewDto: {
+            /**
+             * Format: uuid
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            id: string;
+            /**
+             * Format: uuid
+             * @example 11111111-1111-4111-8111-111111111111
+             */
+            emergencyId: string;
+            /** @example Alimentos para 50 familias */
+            title: string;
+            /** @example Descripción detallada */
+            description?: string | null;
+            location: components["schemas"]["NeedLocationResponseDto"];
+            /**
+             * @description When "approximate", the coordinates in location are jittered for privacy. Coordinators always receive exact coordinates regardless of this value.
+             * @example approximate
+             * @enum {string}
+             */
+            locationSensitivity: "public" | "approximate";
+            /**
+             * @example high
+             * @enum {string}
+             */
+            priority: "low" | "medium" | "high" | "urgent";
+            /** Format: uuid */
+            requesterOrganizationId?: string | null;
+            /** Format: uuid */
+            managingOrganizationId?: string | null;
+            items: components["schemas"]["NeedItemResponseDto"][];
+            /**
+             * @example pending
+             * @enum {string}
+             */
+            status: "pending" | "validated" | "rejected" | "fulfilled";
+            /** @example 2024-01-01T00:00:00.000Z */
+            createdAt: string;
+            /**
+             * @description Timestamp when the need expires (48 h after validation). Null for legacy needs.
+             * @example 2024-01-03T00:00:00.000Z
+             */
+            expiresAt?: string | null;
+            /**
+             * @description Timestamp when the need was last verified by a coordinator.
+             * @example 2024-01-01T12:00:00.000Z
+             */
+            lastVerifiedAt?: string | null;
+            /**
+             * @description Required volunteer skill (personnel needs only)
+             * @enum {string|null}
+             */
+            requiredSkill?: "driving" | "medical" | "logistics" | "cooking" | "languages" | "admin" | "general" | null;
+            /**
+             * @description Number of personnel needed
+             * @example 3
+             */
+            requestedCount?: number | null;
+            /**
+             * Format: uuid
+             * @description Linked resource / final recipient id (#60), or null if standalone.
+             */
+            resourceId?: string | null;
+            /**
+             * @description Distance in meters from the queried location to the (public) need location.
+             * @example 1850
+             */
+            distanceMeters: number;
+        };
+        NearbyNeedsResponseDto: {
+            items: components["schemas"]["NearbyNeedViewDto"][];
         };
         AssignNeedManagerDto: {
             /**
@@ -4383,6 +4473,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NeedViewDto"][];
+                };
+            };
+        };
+    };
+    NeedsController_listNearby: {
+        parameters: {
+            query: {
+                /** @description Latitude between -90 and 90 */
+                lat: number;
+                /** @description Longitude between -180 and 180 */
+                lng: number;
+                /** @description Search radius in meters (max 100000) */
+                radius: number;
+                /** @description Max results (default 50, max 100) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Validated needs within radius ordered by distance */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NearbyNeedsResponseDto"];
                 };
             };
         };

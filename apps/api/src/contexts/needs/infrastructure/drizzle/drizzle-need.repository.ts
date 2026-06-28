@@ -8,6 +8,7 @@ import {
   isNull,
   lt,
   or,
+  sql,
   SQL,
 } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
@@ -164,6 +165,64 @@ export class DrizzleNeedRepository implements NeedRepository {
       filters,
       [notExpired],
     );
+  }
+
+  async findNearbyValidated(
+    emergencyId: EmergencyId,
+    q: { lat: number; lng: number; radiusMeters: number; limit: number },
+  ): Promise<Array<{ need: Need; distanceMeters: number }>> {
+    const now = new Date();
+    // Geo filter + ordering via the cube/earthdistance index (migration 0019),
+    // mirroring findNearbyVisible for resources. Only the id + distance are
+    // selected here; the full aggregates (with items) are loaded below.
+    const result = await this.db.execute<{ id: string; dist: number }>(sql`
+      SELECT id,
+        earth_distance(ll_to_earth(${q.lat}, ${q.lng}), ll_to_earth(latitude, longitude)) AS dist
+      FROM needs
+      WHERE emergency_id = ${emergencyId.value}
+        AND status = ${NeedStatus.Validated}
+        AND (expires_at IS NULL OR expires_at > ${now})
+        AND earth_box(ll_to_earth(${q.lat}, ${q.lng}), ${q.radiusMeters}) @> ll_to_earth(latitude, longitude)
+        AND earth_distance(ll_to_earth(${q.lat}, ${q.lng}), ll_to_earth(latitude, longitude)) <= ${q.radiusMeters}
+      ORDER BY dist ASC
+      LIMIT ${q.limit}
+    `);
+
+    const ranked = result.rows;
+    if (ranked.length === 0) return [];
+
+    const ids = ranked.map((r) => r.id);
+    const distById = new Map(ranked.map((r) => [r.id, Number(r.dist)]));
+
+    const [needRows, allItems] = await Promise.all([
+      this.db.select().from(needsTable).where(inArray(needsTable.id, ids)),
+      this.db
+        .select()
+        .from(needItemsTable)
+        .where(inArray(needItemsTable.needId, ids)),
+    ]);
+
+    const itemsByNeedId = new Map<string, ItemsRow[]>();
+    for (const item of allItems) {
+      const bucket = itemsByNeedId.get(item.needId) ?? [];
+      bucket.push(item);
+      itemsByNeedId.set(item.needId, bucket);
+    }
+    const needRowById = new Map(needRows.map((r) => [r.id, r]));
+
+    // Preserve the distance ordering from the ranked query.
+    return ids
+      .map((id) => {
+        const row = needRowById.get(id);
+        if (row === undefined) return null;
+        return {
+          need: Need.fromSnapshot(
+            rowToSnapshot(row, itemsByNeedId.get(id) ?? []),
+          ),
+          distanceMeters: Math.round(distById.get(id) ?? 0),
+        };
+      })
+      .filter((x): x is { need: Need; distanceMeters: number } => x !== null);
   }
 
   async findExpiredByEmergency(

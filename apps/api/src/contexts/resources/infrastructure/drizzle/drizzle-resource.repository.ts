@@ -1,4 +1,4 @@
-import { and, between, count, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, between, count, eq, inArray, sql } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
 import { resourcesTable } from './schema';
 import { ResourceRepository } from '../../domain/ports/resource.repository';
@@ -367,6 +367,15 @@ export class DrizzleResourceRepository implements ResourceRepository {
         .select()
         .from(resourcesTable)
         .where(whereClause)
+        // Deterministic order (#58): points WITHOUT contact data sink to the
+        // bottom (they help the citizen less — there is nobody to call). Within
+        // each group, order by name, then id as a stable tiebreaker so paging is
+        // consistent across pages.
+        .orderBy(
+          asc(sql`(${resourcesTable.contact} IS NULL)`),
+          asc(resourcesTable.name),
+          asc(resourcesTable.id),
+        )
         .limit(q.limit)
         .offset(offset),
       this.db.select({ cnt: count() }).from(resourcesTable).where(whereClause),

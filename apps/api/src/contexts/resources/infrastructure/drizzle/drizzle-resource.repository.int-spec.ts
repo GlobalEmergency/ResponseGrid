@@ -562,6 +562,50 @@ describe('DrizzleResourceRepository (integration)', () => {
       expect(items.map((r) => r.name)).toEqual(['Verified']);
     });
 
+    it('orders points without contact to the end (#58)', async () => {
+      const makeWithContact = (name: string, contact: string | null) =>
+        Resource.fromSnapshot({
+          ...Resource.register({
+            id: ResourceId.create(),
+            emergencyId: EmergencyId.fromString(EM),
+            type: ResourceType.CollectionPoint,
+            stage: ResourceStage.Origin,
+            name,
+            location: baseLocation,
+            ownerUserId: OWNER_ID,
+            contact,
+          }).toSnapshot(),
+          verificationLevel: VerificationLevel.Verified,
+          publicStatus: PublicStatus.Active,
+          createdAt: new Date(),
+        });
+
+      // Insert in an order that is NOT the desired output order.
+      await repo.save(makeWithContact('Zeta sin contacto', null));
+      await repo.save(makeWithContact('Alfa con contacto', '+58 212 555 0001'));
+      await repo.save(makeWithContact('Beta sin contacto', null));
+      await repo.save(
+        makeWithContact('Gamma con contacto', '+58 212 555 0002'),
+      );
+
+      const { items } = await repo.findVisiblePaged(
+        EmergencyId.fromString(EM),
+        {
+          page: 1,
+          limit: 10,
+        },
+      );
+
+      const names = items.map((r) => r.name);
+      // Points with contact come first (sorted by name), then the ones without.
+      expect(names).toEqual([
+        'Alfa con contacto',
+        'Gamma con contacto',
+        'Beta sin contacto',
+        'Zeta sin contacto',
+      ]);
+    });
+
     it('filters by category (accepts @> ARRAY[category])', async () => {
       const withWater = Resource.fromSnapshot({
         ...Resource.register({

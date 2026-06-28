@@ -162,6 +162,15 @@ export class InMemoryResourceRepository implements ResourceRepository {
           (s.city != null && s.city.toLowerCase().includes(term)),
       );
     }
+    // Deterministic order (#58): points without contact sink to the bottom,
+    // then by name, then id — mirrors the SQL ORDER BY in the Drizzle repo.
+    all.sort((a, b) => {
+      const aNoContact = a.contact == null ? 1 : 0;
+      const bNoContact = b.contact == null ? 1 : 0;
+      if (aNoContact !== bNoContact) return aNoContact - bNoContact;
+      if (a.name !== b.name) return a.name < b.name ? -1 : 1;
+      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+    });
     const total = all.length;
     const offset = (q.page - 1) * q.limit;
     const items = all
