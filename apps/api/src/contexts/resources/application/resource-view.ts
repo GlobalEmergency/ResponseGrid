@@ -31,6 +31,9 @@ export interface ResourceView {
   // destinatario final (#60)
   isFinalRecipient: boolean;
   recipientType: string | null;
+  // validez reportada por ciudadanos (ficha 15)
+  disputed: boolean;
+  disputedAt: string | null; // ISO 8601, or null
 }
 
 /**
@@ -69,6 +72,8 @@ export function toResourceView(r: Resource): ResourceView {
     city: r.city,
     isFinalRecipient: r.isFinalRecipient,
     recipientType: r.recipientType,
+    disputed: r.disputed,
+    disputedAt: r.disputedAt ? r.disputedAt.toISOString() : null,
   };
 }
 

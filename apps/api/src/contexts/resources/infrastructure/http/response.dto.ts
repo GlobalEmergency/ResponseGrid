@@ -5,6 +5,10 @@ import {
   VerificationLevel,
   PublicStatus,
 } from '../../domain/resource-enums';
+import {
+  ValidityReason,
+  ValidityReportStatus,
+} from '../../domain/resource-validity-report';
 
 export class RegisterResourceResponseDto {
   @ApiProperty({
@@ -114,6 +118,24 @@ export class ResourceViewDto {
       'Recipient type slug (see the emergency recipient-type taxonomy)',
   })
   recipientType!: string | null;
+
+  // ── validez reportada por ciudadanos (ficha 15) ───────────────────────────
+
+  @ApiProperty({
+    example: false,
+    description:
+      'Whether enough citizens have reported this point as invalid; it stays ' +
+      'visible with an "in review" warning until a coordinator resolves it.',
+  })
+  disputed!: boolean;
+
+  @ApiProperty({
+    example: '2026-06-28T12:00:00.000Z',
+    nullable: true,
+    type: String,
+    description: 'When the point was flagged as disputed (ISO 8601), or null',
+  })
+  disputedAt!: string | null;
 }
 
 /**
@@ -177,4 +199,77 @@ export class ResourceFacetsDto {
 
   @ApiProperty({ example: 8 })
   total!: number;
+}
+
+export class ReportResourceValidityResponseDto {
+  @ApiProperty({
+    format: 'uuid',
+    example: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+  })
+  id!: string;
+
+  @ApiProperty({
+    example: false,
+    description:
+      'Whether this report pushed the resource over the threshold to disputed',
+  })
+  disputed!: boolean;
+}
+
+export class ValidityReportDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  resourceId!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  emergencyId!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  reporterUserId!: string;
+
+  @ApiProperty({ enum: ValidityReason, example: ValidityReason.Closed })
+  reason!: ValidityReason;
+
+  @ApiProperty({ nullable: true, type: String })
+  note!: string | null;
+
+  @ApiProperty({ type: [String] })
+  photoUrls!: string[];
+
+  @ApiProperty({
+    enum: ValidityReportStatus,
+    example: ValidityReportStatus.Open,
+  })
+  status!: ValidityReportStatus;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  createdAt!: string;
+
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  resolvedByUserId!: string | null;
+
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  resolvedAt!: string | null;
+}
+
+export class DisputedResourceDto {
+  @ApiProperty({ type: ResourceViewDto })
+  resource!: ResourceViewDto;
+
+  @ApiProperty({
+    example: 3,
+    description: 'Distinct citizens with an open report on this resource',
+  })
+  distinctReporters!: number;
+
+  @ApiProperty({
+    example: { closed: 2, moved: 1 },
+    description: 'Open-report counts keyed by reason',
+  })
+  byReason!: Record<string, number>;
+
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  lastReportedAt!: string | null;
 }

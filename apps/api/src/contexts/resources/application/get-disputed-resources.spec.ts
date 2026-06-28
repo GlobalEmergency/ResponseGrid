@@ -57,19 +57,16 @@ describe('GetDisputedResources', () => {
     const id = await seedPublished();
     const rep = new ReportResourceValidity(resources, reports, bus, 3);
     await rep.execute({
-      emergencyId: EM,
       resourceId: id,
       reporterUserId: 'user-1',
       reason: ValidityReason.Closed,
     });
     await rep.execute({
-      emergencyId: EM,
       resourceId: id,
       reporterUserId: 'user-2',
       reason: ValidityReason.Closed,
     });
     await rep.execute({
-      emergencyId: EM,
       resourceId: id,
       reporterUserId: 'user-3',
       reason: ValidityReason.Moved,

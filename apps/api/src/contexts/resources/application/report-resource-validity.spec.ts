@@ -62,7 +62,6 @@ describe('ReportResourceValidity', () => {
     new ReportResourceValidity(resources, reports, bus, threshold);
 
   const cmd = (resourceId: string, reporterUserId: string) => ({
-    emergencyId: EM,
     resourceId,
     reporterUserId,
     reason: ValidityReason.Closed,

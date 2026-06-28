@@ -15,7 +15,6 @@ import {
 import { ResourceNotFoundError } from './resource-not-found.error';
 
 export interface ReportResourceValidityCommand {
-  emergencyId: string;
   resourceId: string;
   reporterUserId: string;
   reason: ValidityReason;
@@ -46,7 +45,7 @@ export class ReportResourceValidity {
     const resource = await this.resources.findById(
       ResourceId.fromString(cmd.resourceId),
     );
-    if (!resource || resource.emergencyId.value !== cmd.emergencyId) {
+    if (!resource) {
       throw new ResourceNotFoundError(cmd.resourceId);
     }
     const visible =
@@ -74,7 +73,7 @@ export class ReportResourceValidity {
       report = ResourceValidityReport.open({
         id: randomUUID(),
         resourceId: cmd.resourceId,
-        emergencyId: cmd.emergencyId,
+        emergencyId: resource.emergencyId.value,
         reporterUserId: cmd.reporterUserId,
         reason: cmd.reason,
         note: cmd.note ?? null,

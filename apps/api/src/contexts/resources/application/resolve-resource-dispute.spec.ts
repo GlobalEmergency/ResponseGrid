@@ -68,7 +68,6 @@ describe('ResolveResourceDispute', () => {
     const rep = new ReportResourceValidity(resources, reports, bus, 3);
     for (const user of ['user-1', 'user-2', 'user-3']) {
       await rep.execute({
-        emergencyId: EM,
         resourceId: id,
         reporterUserId: user,
         reason: ValidityReason.Closed,

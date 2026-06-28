@@ -17,7 +17,11 @@ import {
   ApiForbiddenResponse,
 } from '@nestjs/swagger';
 import { GetCoordinationQueue } from '../../application/get-coordination-queue';
-import { PagedResourcesDto } from './response.dto';
+import {
+  GetDisputedResources,
+  DisputedResourceView,
+} from '../../application/get-disputed-resources';
+import { PagedResourcesDto, DisputedResourceDto } from './response.dto';
 import { CoordinationQueueQueryDto } from './dto';
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
 import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
@@ -26,7 +30,10 @@ import { RequirePermission } from '../../../identity/infrastructure/http/require
 @ApiTags('resources')
 @Controller()
 export class CoordinationController {
-  constructor(private readonly queue: GetCoordinationQueue) {}
+  constructor(
+    private readonly queue: GetCoordinationQueue,
+    private readonly disputed: GetDisputedResources,
+  ) {}
 
   @Get('emergencies/:emergencyId/coordination/queue')
   @UseGuards(JwtAuthGuard, PermissionGuard)
@@ -61,5 +68,33 @@ export class CoordinationController {
       ...(query.type !== undefined && { type: query.type }),
       ...(query.q !== undefined && query.q !== '' && { q: query.q }),
     });
+  }
+
+  @Get('emergencies/:emergencyId/coordination/disputed')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('resource:read')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'List resources flagged as disputed by citizens, with a reason breakdown',
+  })
+  @ApiParam({
+    name: 'emergencyId',
+    description: 'Emergency UUID',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Disputed resources for the emergency',
+    type: DisputedResourceDto,
+    isArray: true,
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({
+    description: 'Coordinator role required for this emergency',
+  })
+  async disputedQueue(
+    @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
+  ): Promise<DisputedResourceView[]> {
+    return this.disputed.execute({ emergencyId });
   }
 }
