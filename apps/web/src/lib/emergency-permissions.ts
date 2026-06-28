@@ -90,3 +90,42 @@ export function resolveEmergencyAccess(
     canViewAudit,
   };
 }
+
+/**
+ * Permissions that mean "this principal can validate or coordinate an
+ * emergency". Any one of them grants reach into a coordination/validation
+ * queue — `need:validate` / `resource:verify` (the validation surfaces),
+ * `offer:match`, plus the coordinator-grade capabilities.
+ */
+const PLATFORM_COORDINATION_PERMISSIONS = [
+  'need:validate',
+  'resource:verify',
+  'offer:match',
+  ...COORDINATOR_PERMISSIONS,
+];
+
+/**
+ * True when the principal can coordinate/validate at the PLATFORM level —
+ * i.e. holds a non-expired **platform-scoped** grant whose role confers any
+ * coordination/validation permission. Because platform grants resolve as an
+ * ancestor of every emergency, such a principal (e.g. `platform_admin`,
+ * `platform_operator`) can validate ANY active emergency even with no
+ * emergency-scoped grant. Used to surface the active-emergencies overlay in
+ * the panel so admins/operators reach validation in one click; a plain
+ * citizen (no platform coordination grant) gets `false` and never sees it.
+ */
+export function canCoordinateAtPlatform(
+  grants: MeGrant[],
+  roles: RoleCatalogEntry[],
+  now: number = Date.now(),
+): boolean {
+  const permsByRole = new Map(roles.map((r) => [r.id, new Set(r.permissions)]));
+  for (const g of grants) {
+    if (g.scopeType !== 'platform') continue;
+    if (g.expiresAt && new Date(g.expiresAt).getTime() <= now) continue;
+    const perms = permsByRole.get(g.roleId);
+    if (perms == null) continue;
+    if (PLATFORM_COORDINATION_PERMISSIONS.some((p) => perms.has(p))) return true;
+  }
+  return false;
+}

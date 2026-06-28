@@ -57,6 +57,33 @@ export const getMyEmergencies = cache(async (): Promise<MyEmergencyNav[]> => {
   }));
 });
 
+/** An active emergency, slimmed to what the panel overlay renders. */
+export interface ActiveEmergencyNav {
+  id: string;
+  slug: string;
+  name: string;
+  status: 'active' | 'paused' | 'closed';
+}
+
+/**
+ * The publicly listed ACTIVE emergencies, backed by `GET /emergencies` (the
+ * same list the landing uses). Unauthenticated — the endpoint is public — so
+ * it never needs the principal's token. The panel uses this to give platform
+ * coordinators/admins (who hold no emergency-scoped grant) a one-click path
+ * into any emergency's coordination/validation queues.
+ */
+export const getActiveEmergencies = cache(
+  async (): Promise<ActiveEmergencyNav[]> => {
+    const { data } = await api.GET('/emergencies', {});
+    return (data ?? []).map((e) => ({
+      id: e.id,
+      slug: e.slug,
+      name: e.name,
+      status: e.status,
+    }));
+  },
+);
+
 /** Everything the dashboard shell needs in one cached call. */
 export const getNavContext = cache(async () => {
   const [me, roles, myEmergencies, notificationUnread] = await Promise.all([
