@@ -32,7 +32,9 @@ import { ConfirmShipmentDelivery } from '../../application/confirm-shipment-deli
 import { CancelShipment } from '../../application/cancel-shipment';
 import { ListShipments } from '../../application/list-shipments';
 import { GetMyShipments } from '../../application/get-my-shipments';
+import { SuggestCapacitiesForShipment } from '../../application/suggest-capacities-for-shipment';
 import { ShipmentView } from '../../application/shipment-view';
+import { CapacityView } from '../../application/capacity-view';
 import {
   CreateShipmentDto,
   AssignCapacityToShipmentDto,
@@ -43,6 +45,7 @@ import {
   CreateShipmentResponseDto,
   ShipmentViewDto,
 } from './shipment-response.dto';
+import { CapacityViewDto } from './response.dto';
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
 import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
 import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
@@ -72,6 +75,7 @@ export class ShipmentController {
     private readonly cancelShipment: CancelShipment,
     private readonly listShipments: ListShipments,
     private readonly getMyShipments: GetMyShipments,
+    private readonly suggestCapacitiesForShipment: SuggestCapacitiesForShipment,
     @Inject(SHIPMENT_AUTHORIZATION_LOOKUP)
     private readonly shipmentAuthLookup: ShipmentAuthorizationLookup,
     @Inject(MEMBERSHIP_REPOSITORY)
@@ -279,5 +283,27 @@ export class ShipmentController {
       emergencyId,
       ...(query.status !== undefined ? { status: query.status } : {}),
     });
+  }
+
+  @Get('logistics/shipments/:id/capacity-suggestions')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('shipment:read')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Suggest compatible transport capacities for a shipment, ranked (coordinator)',
+  })
+  @ApiParam({ name: 'id', description: 'Shipment UUID', format: 'uuid' })
+  @ApiOkResponse({
+    description: 'Compatible capacities ranked by proximity/coverage fit',
+    type: [CapacityViewDto],
+  })
+  @ApiNotFoundResponse({ description: 'Shipment not found' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Missing shipment:read permission' })
+  async capacitySuggestions(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<CapacityView[]> {
+    return this.suggestCapacitiesForShipment.execute({ shipmentId: id });
   }
 }

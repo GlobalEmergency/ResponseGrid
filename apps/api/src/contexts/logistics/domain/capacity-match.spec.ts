@@ -68,14 +68,20 @@ describe('capacityMatchesShipment', () => {
     it('matches when the required mode equals the capacity mode', () => {
       const snap = snapshot({ mode: TransportMode.Air });
       expect(
-        capacityMatchesShipment(snap, criteria({ requiredMode: TransportMode.Air })),
+        capacityMatchesShipment(
+          snap,
+          criteria({ requiredMode: TransportMode.Air }),
+        ),
       ).toBe(true);
     });
 
     it('excludes when the required mode differs from the capacity mode', () => {
       const snap = snapshot({ mode: TransportMode.Road });
       expect(
-        capacityMatchesShipment(snap, criteria({ requiredMode: TransportMode.Air })),
+        capacityMatchesShipment(
+          snap,
+          criteria({ requiredMode: TransportMode.Air }),
+        ),
       ).toBe(false);
     });
 
@@ -147,7 +153,10 @@ describe('capacityMatchesShipment', () => {
         capacityMatchesShipment(
           snap,
           criteria({
-            window: { from: '2026-09-01T00:00:00Z', to: '2026-09-30T00:00:00Z' },
+            window: {
+              from: '2026-09-01T00:00:00Z',
+              to: '2026-09-30T00:00:00Z',
+            },
           }),
         ),
       ).toBe(false);
@@ -164,7 +173,10 @@ describe('capacityMatchesShipment', () => {
         capacityMatchesShipment(
           snap,
           criteria({
-            window: { from: '2026-07-10T00:00:00Z', to: '2026-07-20T00:00:00Z' },
+            window: {
+              from: '2026-07-10T00:00:00Z',
+              to: '2026-07-20T00:00:00Z',
+            },
           }),
         ),
       ).toBe(true);

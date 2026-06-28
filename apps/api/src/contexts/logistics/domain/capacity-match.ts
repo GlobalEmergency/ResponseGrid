@@ -17,7 +17,10 @@ export function capacityMatchesShipment(
   criteria: ShipmentMatchCriteria,
 ): boolean {
   // mode: only when the shipment requires one.
-  if (criteria.requiredMode !== null && capacity.mode !== criteria.requiredMode) {
+  if (
+    criteria.requiredMode !== null &&
+    capacity.mode !== criteria.requiredMode
+  ) {
     return false;
   }
 
@@ -104,10 +107,12 @@ function slackOf(
 ): number {
   let slack = 0;
   if (criteria.weightKg !== null && capacity.capacity.weightKg !== null) {
-    slack += (capacity.capacity.weightKg - criteria.weightKg) / criteria.weightKg;
+    slack +=
+      (capacity.capacity.weightKg - criteria.weightKg) / criteria.weightKg;
   }
   if (criteria.volumeM3 !== null && capacity.capacity.volumeM3 !== null) {
-    slack += (capacity.capacity.volumeM3 - criteria.volumeM3) / criteria.volumeM3;
+    slack +=
+      (capacity.capacity.volumeM3 - criteria.volumeM3) / criteria.volumeM3;
   }
   return slack;
 }

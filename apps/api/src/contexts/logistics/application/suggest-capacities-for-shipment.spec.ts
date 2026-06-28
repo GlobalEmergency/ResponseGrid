@@ -225,9 +225,8 @@ describe('SuggestCapacitiesForShipment', () => {
 
     const result = await useCase.execute({ shipmentId });
     expect(result).toHaveLength(2);
-    const nearOriginLat = (
-      result[0].coverage as { originLat: number }
-    ).originLat;
+    const nearOriginLat = (result[0].coverage as { originLat: number })
+      .originLat;
     expect(nearOriginLat).toBe(10.49);
   });
 

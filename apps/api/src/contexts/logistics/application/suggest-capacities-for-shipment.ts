@@ -63,7 +63,9 @@ export class SuggestCapacitiesForShipment {
       origin,
     );
 
-    return ranked.map((r) => toCapacityView(TransportCapacity.fromSnapshot(r.capacity)));
+    return ranked.map((r) =>
+      toCapacityView(TransportCapacity.fromSnapshot(r.capacity)),
+    );
   }
 
   private async resolveOrigin(
