@@ -97,6 +97,8 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'shipment:assign',
       'shipment:update',
       'shipment:read',
+      'container:manage',
+      'container:read',
       'campaign:read',
       'campaign:verify',
       'campaign:block',
@@ -132,6 +134,7 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'campaign:verify',
       'offer:read',
       'capacity:read',
+      'container:read',
     ],
   },
   group_manager: {
@@ -185,6 +188,8 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'shipment:read',
       'shipment:track',
       'manifest:sign',
+      'container:manage',
+      'container:read',
     ],
   },
   viewer: {

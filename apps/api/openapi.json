@@ -6622,6 +6622,462 @@
           "categories"
         ]
       }
+    },
+    "/supplies/containers": {
+      "post": {
+        "operationId": "ContainerController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContainerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Container created (open), with a generated code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateContainerResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not a coordinator of the emergency"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a trackable container (palet/caja/lote) (coordinator)",
+        "tags": [
+          "supplies"
+        ]
+      }
+    },
+    "/supplies/containers/{id}/lines": {
+      "post": {
+        "operationId": "ContainerController_addLine",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Container UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplyLineDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Line added"
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not a coordinator of the emergency"
+          },
+          "404": {
+            "description": "Container not found"
+          },
+          "409": {
+            "description": "Container is sealed (lines immutable)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a supply line to a container (coordinator)",
+        "tags": [
+          "supplies"
+        ]
+      }
+    },
+    "/supplies/containers/{id}/lines/{index}": {
+      "delete": {
+        "operationId": "ContainerController_removeLine",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Container UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "index",
+            "required": true,
+            "in": "path",
+            "description": "Zero-based line index",
+            "schema": {
+              "example": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Line removed"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not a coordinator of the emergency"
+          },
+          "404": {
+            "description": "Container not found"
+          },
+          "409": {
+            "description": "Container is sealed (lines immutable)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove the supply line at an index from a container (coordinator)",
+        "tags": [
+          "supplies"
+        ]
+      }
+    },
+    "/supplies/containers/{id}/nest": {
+      "post": {
+        "operationId": "ContainerController_nest",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Container UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NestContainerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Container re-parented"
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not a coordinator of the emergency"
+          },
+          "404": {
+            "description": "Container or parent not found"
+          },
+          "409": {
+            "description": "Would create a cycle, or parent is a different emergency"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Nest a container under a parent, or un-nest it (coordinator)",
+        "tags": [
+          "supplies"
+        ]
+      }
+    },
+    "/supplies/containers/{id}/seal": {
+      "post": {
+        "operationId": "ContainerController_seal",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Container UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Container sealed"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not a coordinator of the emergency"
+          },
+          "404": {
+            "description": "Container not found"
+          },
+          "409": {
+            "description": "Container is already sealed"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Seal (precintar) a container (coordinator)",
+        "tags": [
+          "supplies"
+        ]
+      }
+    },
+    "/supplies/containers/{id}/move": {
+      "post": {
+        "operationId": "ContainerController_move",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Container UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveContainerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Container moved"
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not a coordinator of the emergency"
+          },
+          "404": {
+            "description": "Container not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Move a container to a holder (resource ↔ shipment) (coordinator)",
+        "tags": [
+          "supplies"
+        ]
+      }
+    },
+    "/supplies/containers/{id}": {
+      "get": {
+        "operationId": "ContainerController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Container UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Container tree",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContainerTreeViewDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not a coordinator/verifier of the emergency"
+          },
+          "404": {
+            "description": "Container not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a container tree with aggregated weight/volume (coordinator/verifier)",
+        "tags": [
+          "supplies"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/supplies/containers": {
+      "get": {
+        "operationId": "ContainerController_list",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pallet",
+                "box",
+                "lote"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "open",
+                "sealed"
+              ]
+            }
+          },
+          {
+            "name": "holderType",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "resource",
+                "shipment"
+              ]
+            }
+          },
+          {
+            "name": "holderId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "topLevelOnly",
+            "required": false,
+            "in": "query",
+            "description": "Only top-level containers (the roots of the trees)",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Containers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ContainerViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing container:read permission"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List containers for an emergency (coordinator/verifier)",
+        "tags": [
+          "supplies"
+        ]
+      }
     }
   },
   "info": {
@@ -11772,6 +12228,314 @@
           "parentSlug",
           "vertical",
           "sort"
+        ]
+      },
+      "ContainerHolderDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "resource",
+              "shipment"
+            ],
+            "example": "resource"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Resource node or shipment id (polymorphic, no FK)"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ]
+      },
+      "CreateContainerDto": {
+        "type": "object",
+        "properties": {
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Emergency this container serves"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "pallet",
+              "box",
+              "lote"
+            ],
+            "example": "pallet"
+          },
+          "lines": {
+            "description": "Optional initial loose supply lines",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyLineDto"
+            }
+          },
+          "grossWeightKg": {
+            "type": "number",
+            "example": 120,
+            "description": "Declared gross weight in kg (positive)"
+          },
+          "grossVolumeM3": {
+            "type": "number",
+            "example": 1.2,
+            "description": "Declared gross volume in m³ (positive)"
+          },
+          "holder": {
+            "description": "Optional initial holder (e.g. the hub it is created at)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContainerHolderDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "emergencyId",
+          "type"
+        ]
+      },
+      "CreateContainerResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "example": "PAL-0001",
+            "description": "Generated trackable code"
+          }
+        },
+        "required": [
+          "id",
+          "code"
+        ]
+      },
+      "NestContainerDto": {
+        "type": "object",
+        "properties": {
+          "parentContainerId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "New parent container, or null to un-nest (make it top-level)"
+          }
+        }
+      },
+      "MoveContainerDto": {
+        "type": "object",
+        "properties": {
+          "holder": {
+            "nullable": true,
+            "description": "New holder (resource ↔ shipment), or null to detach",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContainerHolderDto"
+              }
+            ]
+          }
+        }
+      },
+      "ContainerTreeViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "example": "PAL-0001"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "pallet",
+              "box",
+              "lote"
+            ],
+            "example": "pallet"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentContainerId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyLineResponseDto"
+            }
+          },
+          "grossWeightKg": {
+            "type": "number",
+            "example": 120,
+            "nullable": true
+          },
+          "grossVolumeM3": {
+            "type": "number",
+            "example": 1.2,
+            "nullable": true
+          },
+          "holderType": {
+            "type": "string",
+            "enum": [
+              "resource",
+              "shipment"
+            ],
+            "nullable": true,
+            "example": "resource"
+          },
+          "holderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "sealed"
+            ],
+            "example": "open"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2026-07-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2026-07-01T00:00:00.000Z"
+          },
+          "children": {
+            "description": "Direct children (recursive)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContainerTreeViewDto"
+            }
+          },
+          "totalWeightKg": {
+            "type": "number",
+            "example": 145,
+            "nullable": true,
+            "description": "Aggregated weight (own + Σ children), null if none declared"
+          },
+          "totalVolumeM3": {
+            "type": "number",
+            "example": 2.5,
+            "nullable": true,
+            "description": "Aggregated volume (own + Σ children), null if none declared"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "type",
+          "emergencyId",
+          "lines",
+          "status",
+          "createdAt",
+          "updatedAt",
+          "children"
+        ]
+      },
+      "ContainerViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "example": "PAL-0001"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "pallet",
+              "box",
+              "lote"
+            ],
+            "example": "pallet"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentContainerId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyLineResponseDto"
+            }
+          },
+          "grossWeightKg": {
+            "type": "number",
+            "example": 120,
+            "nullable": true
+          },
+          "grossVolumeM3": {
+            "type": "number",
+            "example": 1.2,
+            "nullable": true
+          },
+          "holderType": {
+            "type": "string",
+            "enum": [
+              "resource",
+              "shipment"
+            ],
+            "nullable": true,
+            "example": "resource"
+          },
+          "holderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "sealed"
+            ],
+            "example": "open"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2026-07-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2026-07-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "type",
+          "emergencyId",
+          "lines",
+          "status",
+          "createdAt",
+          "updatedAt"
         ]
       }
     }
