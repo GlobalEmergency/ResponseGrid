@@ -34,6 +34,7 @@ export function GlobalFooter({ tf }: GlobalFooterProps) {
     { href: '/como-funciona', label: tf.resources_how },
     { href: '/transparencia', label: tf.resources_transparency },
     { href: '/verificar', label: tf.resources_verify },
+    { href: '/docs', label: tf.resources_developers },
   ];
 
   return (
