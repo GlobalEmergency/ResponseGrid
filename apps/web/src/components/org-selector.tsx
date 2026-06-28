@@ -31,14 +31,14 @@ export async function OrgSelector() {
     <div className="flex flex-col gap-1.5">
       <label
         htmlFor="organizationId"
-        className="text-sm font-semibold text-gray-900"
+        className="text-sm font-semibold text-ink"
       >
         ¿En nombre de quién?
       </label>
       <select
         id="organizationId"
         name="organizationId"
-        className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+        className="w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
       >
         <option value="">A título particular</option>
         {orgs.map((org) => (

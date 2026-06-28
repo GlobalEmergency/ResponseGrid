@@ -46,17 +46,17 @@ export function PersonnelNeedFields() {
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="personnel-skill"
-          className="text-sm font-medium text-gray-700"
+          className="text-sm font-medium text-ink-soft"
         >
           Habilidad requerida{' '}
-          <span className="text-gray-400 font-normal">(opcional)</span>
+          <span className="text-muted-soft font-normal">(opcional)</span>
         </label>
         <select
           id="personnel-skill"
           name="requiredSkill"
           value={skill}
           onChange={(e) => setSkill(e.target.value as SkillValue | '')}
-          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+          className="w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
         >
           <option value="">Sin especificar</option>
           {SKILL_OPTIONS.map(({ value, label }) => (
@@ -71,10 +71,10 @@ export function PersonnelNeedFields() {
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="personnel-specialty"
-          className="text-sm font-medium text-gray-700"
+          className="text-sm font-medium text-ink-soft"
         >
           Especialidad{' '}
-          <span className="text-gray-400 font-normal">(opcional)</span>
+          <span className="text-muted-soft font-normal">(opcional)</span>
         </label>
         <input
           id="personnel-specialty"
@@ -83,7 +83,7 @@ export function PersonnelNeedFields() {
           value={specialty}
           onChange={(e) => setSpecialty(e.target.value)}
           placeholder="Ej. médico urgencias pediátricas"
-          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+          className="w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink placeholder:text-muted-soft focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
         />
       </div>
 
@@ -91,10 +91,10 @@ export function PersonnelNeedFields() {
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="personnel-count"
-          className="text-sm font-medium text-gray-700"
+          className="text-sm font-medium text-ink-soft"
         >
           Personas necesarias{' '}
-          <span className="text-gray-400 font-normal">(opcional)</span>
+          <span className="text-muted-soft font-normal">(opcional)</span>
         </label>
         <input
           id="personnel-count"
@@ -104,7 +104,7 @@ export function PersonnelNeedFields() {
           step={1}
           value={count}
           onChange={(e) => setCount(Math.max(1, Number(e.target.value)))}
-          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+          className="w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
         />
       </div>
     </div>

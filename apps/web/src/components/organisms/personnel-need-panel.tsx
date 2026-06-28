@@ -98,7 +98,7 @@ export function PersonnelNeedPanel({
         <div className="flex flex-wrap gap-2 items-center">
           {skillLabel !== null && <SkillTag skill={need.requiredSkill ?? ''} />}
           {need.requestedCount != null && (
-            <span className="text-sm text-gray-700">
+            <span className="text-sm text-ink-soft">
               {String(need.requestedCount)} persona{need.requestedCount !== 1 ? 's' : ''}
             </span>
           )}
@@ -107,12 +107,12 @@ export function PersonnelNeedPanel({
 
       {/* Volunteer suggestions */}
       <div className="flex flex-col gap-2">
-        <p className="text-sm font-semibold text-gray-900">
+        <p className="text-sm font-semibold text-ink">
           Voluntarios disponibles con este perfil
         </p>
 
         {suggestions.length === 0 ? (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted">
             No hay voluntarios disponibles con la habilidad requerida en este momento.
           </p>
         ) : (
@@ -138,7 +138,7 @@ export function PersonnelNeedPanel({
         type="button"
         onClick={handleCreateTask}
         disabled={isPending}
-        className="w-full rounded-lg border-2 border-gray-900 bg-gray-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full rounded-lg border-2 border-navy bg-navy px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-700 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isPending
           ? 'Creando tarea…'

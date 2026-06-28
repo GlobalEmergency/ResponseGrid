@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -9,6 +8,7 @@ import { DeleteTemplateButton } from './delete-template-button';
 import { CreateFromTemplateForm } from './create-from-template-form';
 import { TemplateCard } from '@/components/molecules/template-card';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { PageHeaderBand } from '@/components/molecules/page-header-band';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,37 +41,19 @@ export default async function TemplatesPage() {
   const templates = await fetchTemplates();
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-start bg-white px-4 py-10">
-      <div className="w-full max-w-xl flex flex-col gap-10">
-
-        {/* ── CABECERA ────────────────────────────────────────────────── */}
-        <header className="flex flex-col gap-2">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
-            >
-              ← Inicio
-            </Link>
-            <span className="text-gray-300" aria-hidden="true">/</span>
-            <Link
-              href="/admin/acreditaciones"
-              className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
-            >
-              Acreditaciones
-            </Link>
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Plantillas de emergencia
-          </h1>
-          <p className="text-base text-gray-600">
-            Crea plantillas reutilizables para nuevas emergencias. Solo administradores.
-          </p>
-        </header>
+    <main className="flex-1 bg-surface">
+      <div className="mx-auto w-full max-w-xl">
+        <PageHeaderBand
+          backHref="/"
+          backLabel="← Inicio"
+          title="Plantillas de emergencia"
+          subtitle="Crea plantillas reutilizables para nuevas emergencias. Solo administradores."
+        />
+        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
 
         {/* ── LISTADO ─────────────────────────────────────────────────── */}
         <section aria-labelledby="list-heading" className="flex flex-col gap-4">
-          <h2 id="list-heading" className="text-xl font-bold text-gray-900">
+          <h2 id="list-heading" className="text-xl font-bold text-ink">
             Plantillas disponibles ({templates.length})
           </h2>
 
@@ -97,29 +79,30 @@ export default async function TemplatesPage() {
           )}
         </section>
 
-        <hr className="border-gray-200" />
+        <hr className="border-line" />
 
         {/* ── CREAR PLANTILLA ─────────────────────────────────────────── */}
         <section aria-labelledby="create-template-heading" className="flex flex-col gap-4">
-          <h2 id="create-template-heading" className="text-xl font-bold text-gray-900">
+          <h2 id="create-template-heading" className="text-xl font-bold text-ink">
             Nueva plantilla
           </h2>
           <CreateTemplateForm />
         </section>
 
-        <hr className="border-gray-200" />
+        <hr className="border-line" />
 
         {/* ── CREAR EMERGENCIA DESDE PLANTILLA ────────────────────────── */}
         <section aria-labelledby="create-emergency-heading" className="flex flex-col gap-4">
-          <h2 id="create-emergency-heading" className="text-xl font-bold text-gray-900">
+          <h2 id="create-emergency-heading" className="text-xl font-bold text-ink">
             Crear emergencia desde plantilla
           </h2>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted">
             La nueva emergencia heredará la lista «qué no llevar» y el comunicado por defecto de la plantilla.
           </p>
           <CreateFromTemplateForm templates={templates} />
         </section>
 
+        </div>
       </div>
     </main>
   );

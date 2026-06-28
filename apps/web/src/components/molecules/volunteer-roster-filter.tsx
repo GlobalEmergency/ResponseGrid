@@ -55,11 +55,11 @@ export function VolunteerRosterFilter() {
   }
 
   const selectClass =
-    'rounded-lg border-2 border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-gray-900 focus:outline-none';
+    'rounded-lg border-2 border-line bg-white px-3 py-1.5 text-sm text-ink focus:border-navy focus:outline-none';
 
   return (
     <div className="flex flex-wrap gap-3" role="group" aria-label="Filtros del roster">
-      <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+      <label className="flex flex-col gap-1 text-xs font-medium text-muted">
         <span>Habilidad</span>
         <select
           value={currentSkill}
@@ -75,7 +75,7 @@ export function VolunteerRosterFilter() {
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+      <label className="flex flex-col gap-1 text-xs font-medium text-muted">
         <span>Disponibilidad</span>
         <select
           value={currentAvailability}
@@ -91,7 +91,7 @@ export function VolunteerRosterFilter() {
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+      <label className="flex flex-col gap-1 text-xs font-medium text-muted">
         <span>Vehículo</span>
         <select
           value={currentVehicle}
@@ -107,7 +107,7 @@ export function VolunteerRosterFilter() {
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+      <label className="flex flex-col gap-1 text-xs font-medium text-muted">
         <span>Estado</span>
         <select
           value={currentStatus}

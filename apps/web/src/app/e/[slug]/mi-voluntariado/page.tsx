@@ -7,6 +7,7 @@ import { fetchMyVolunteerProfile, fetchMyTasks } from './actions';
 import { TaskCard } from './task-card';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { Badge } from '@/components/atoms/badge';
+import { PageHeaderBand } from '@/components/molecules/page-header-band';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,42 +76,33 @@ export default async function MiVoluntariadoPage({ params }: Props) {
   ]);
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-start bg-white px-4 py-10">
-      <div className="w-full max-w-xl flex flex-col gap-8">
-
-        {/* ── CABECERA ──────────────────────────────────────────────── */}
-        <header className="flex flex-col gap-2">
-          <Link
-            href={`/e/${slug}`}
-            className="text-sm text-gray-400 underline underline-offset-2 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded w-fit"
-          >
-            ← {emergency.name}
-          </Link>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Mi voluntariado
-          </h1>
-          <p className="text-base text-gray-600">
-            Tu perfil y las tareas en las que participas.
-          </p>
-        </header>
+    <main className="flex-1 bg-surface">
+      <div className="mx-auto w-full max-w-xl">
+        <PageHeaderBand
+          backHref={`/e/${slug}`}
+          backLabel={emergency.name}
+          title="Mi voluntariado"
+          subtitle="Tu perfil y las tareas en las que participas."
+        />
+        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
 
         {/* ── PERFIL ────────────────────────────────────────────────── */}
         <section aria-labelledby="profile-heading" className="flex flex-col gap-4">
-          <h2 id="profile-heading" className="text-xl font-bold text-gray-900">
+          <h2 id="profile-heading" className="text-xl font-bold text-ink">
             Tu perfil
           </h2>
 
           {profile === null ? (
-            <div className="flex flex-col gap-4 rounded-lg border-2 border-dashed border-gray-300 px-6 py-8 text-center">
-              <p className="text-base font-semibold text-gray-700">
+            <div className="flex flex-col gap-4 rounded-lg border-2 border-dashed border-line px-6 py-8 text-center">
+              <p className="text-base font-semibold text-ink-soft">
                 Aún no estás apuntado como voluntario.
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted">
                 Regístrate para que el equipo de coordinación pueda contactarte y asignarte tareas.
               </p>
               <Link
                 href={`/e/${slug}/voluntario`}
-                className="inline-flex items-center justify-center self-center rounded-lg border-2 border-gray-900 px-5 py-3 text-sm font-semibold text-white bg-gray-900 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors"
+                className="inline-flex items-center justify-center self-center rounded-lg border-2 border-navy px-5 py-3 text-sm font-semibold text-white bg-navy hover:bg-navy-700 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors"
               >
                 Apuntarme como voluntario
               </Link>
@@ -118,15 +110,15 @@ export default async function MiVoluntariadoPage({ params }: Props) {
           ) : (
             <article
               aria-label="Tu perfil de voluntario"
-              className="flex flex-col gap-4 rounded-lg border-2 border-gray-900 bg-white p-5"
+              className="flex flex-col gap-4 rounded-lg border-2 border-navy bg-white p-5"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex flex-col gap-1">
-                  <h3 className="text-lg font-bold text-gray-900 leading-tight">
+                  <h3 className="text-lg font-bold text-ink leading-tight">
                     {profile.name}
                   </h3>
-                  <p className="text-sm text-gray-500">{profile.contact}</p>
-                  <p className="text-sm text-gray-500">{profile.municipality}</p>
+                  <p className="text-sm text-muted">{profile.contact}</p>
+                  <p className="text-sm text-muted">{profile.municipality}</p>
                 </div>
                 <span
                   className={[
@@ -135,7 +127,7 @@ export default async function MiVoluntariadoPage({ params }: Props) {
                       ? 'border border-green-400 bg-green-50 text-green-800'
                       : profile.status === 'assigned'
                         ? 'border border-blue-400 bg-blue-50 text-blue-800'
-                        : 'border border-gray-300 bg-gray-100 text-gray-500',
+                        : 'border border-line bg-surface-alt text-muted',
                   ].join(' ')}
                   aria-label={`Estado: ${VOLUNTEER_STATUS_LABELS[profile.status] ?? profile.status}`}
                 >
@@ -146,7 +138,7 @@ export default async function MiVoluntariadoPage({ params }: Props) {
               {/* Skills */}
               {profile.skills.length > 0 && (
                 <div className="flex flex-col gap-2">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  <p className="text-xs font-semibold text-muted uppercase tracking-wide">
                     Habilidades
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -160,7 +152,7 @@ export default async function MiVoluntariadoPage({ params }: Props) {
               )}
 
               {/* Meta */}
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 border-t border-gray-200 pt-3">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted border-t border-line pt-3">
                 <span>
                   Disponibilidad:{' '}
                   <span className="font-semibold">
@@ -177,7 +169,7 @@ export default async function MiVoluntariadoPage({ params }: Props) {
 
               <Link
                 href={`/e/${slug}/voluntario`}
-                className="inline-flex items-center justify-center self-start rounded-lg border-2 border-gray-900 px-4 py-2 text-sm font-semibold text-gray-900 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors"
+                className="inline-flex items-center justify-center self-start rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink bg-white hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors"
               >
                 Editar mis datos
               </Link>
@@ -188,7 +180,7 @@ export default async function MiVoluntariadoPage({ params }: Props) {
         {/* ── MIS TAREAS ────────────────────────────────────────────── */}
         {profile !== null && (
           <section aria-labelledby="tasks-heading" className="flex flex-col gap-4">
-            <h2 id="tasks-heading" className="text-xl font-bold text-gray-900">
+            <h2 id="tasks-heading" className="text-xl font-bold text-ink">
               Mis tareas
             </h2>
 
@@ -213,6 +205,7 @@ export default async function MiVoluntariadoPage({ params }: Props) {
           </section>
         )}
 
+        </div>
       </div>
     </main>
   );

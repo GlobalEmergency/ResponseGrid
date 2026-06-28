@@ -46,29 +46,29 @@ export function GrantAccreditationForm() {
 
       {/* Scope radio group */}
       <fieldset className="flex flex-col gap-2">
-        <legend className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+        <legend className="text-sm font-semibold text-ink uppercase tracking-wide">
           Alcance
         </legend>
         <div className="flex flex-col gap-2">
-          <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-800">
+          <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-ink">
             <input
               type="radio"
               name="scopeType"
               value="global"
               checked={scopeType === 'global'}
               onChange={() => setScopeType('global')}
-              className="accent-gray-900"
+              className="accent-navy"
             />
             Global (válida para todas las emergencias)
           </label>
-          <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-800">
+          <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-ink">
             <input
               type="radio"
               name="scopeType"
               value="emergency"
               checked={scopeType === 'emergency'}
               onChange={() => setScopeType('emergency')}
-              className="accent-gray-900"
+              className="accent-navy"
             />
             Esta emergencia (emergencia específica)
           </label>

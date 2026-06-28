@@ -24,14 +24,14 @@ export function CreateOrgForm() {
   );
 
   return (
-    <form action={formAction} className="flex flex-col gap-5 rounded-lg border-2 border-gray-200 p-6">
+    <form action={formAction} className="flex flex-col gap-5 rounded-lg border-2 border-line p-6">
       {state.status === 'error' && (
         <ErrorMessage message={state.message ?? 'Error al crear la organización'} />
       )}
 
       {/* Name */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="org-name" className="text-sm font-semibold text-gray-900">
+        <label htmlFor="org-name" className="text-sm font-semibold text-ink">
           Nombre <span aria-hidden="true">*</span>
         </label>
         <Input
@@ -45,7 +45,7 @@ export function CreateOrgForm() {
 
       {/* Type */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="org-type" className="text-sm font-semibold text-gray-900">
+        <label htmlFor="org-type" className="text-sm font-semibold text-ink">
           Tipo <span aria-hidden="true">*</span>
         </label>
         <Select id="org-type" name="type" required defaultValue="">
@@ -58,9 +58,9 @@ export function CreateOrgForm() {
 
       {/* Tax ID */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="org-taxid" className="text-sm font-semibold text-gray-900">
+        <label htmlFor="org-taxid" className="text-sm font-semibold text-ink">
           NIF / CIF
-          <span className="ml-1 text-xs font-normal text-gray-500">(opcional)</span>
+          <span className="ml-1 text-xs font-normal text-muted">(opcional)</span>
         </label>
         <Input
           id="org-taxid"
@@ -72,9 +72,9 @@ export function CreateOrgForm() {
 
       {/* Contact email */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="org-email" className="text-sm font-semibold text-gray-900">
+        <label htmlFor="org-email" className="text-sm font-semibold text-ink">
           Email de contacto
-          <span className="ml-1 text-xs font-normal text-gray-500">(opcional)</span>
+          <span className="ml-1 text-xs font-normal text-muted">(opcional)</span>
         </label>
         <Input
           id="org-email"

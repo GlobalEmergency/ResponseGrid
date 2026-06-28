@@ -28,24 +28,24 @@ export function VolunteerSuggestionCard({
       aria-label={`Voluntario sugerido: ${volunteer.name}`}
       className={`flex flex-col gap-3 rounded-lg border-2 p-4 transition-colors ${
         selected
-          ? 'border-gray-900 bg-gray-50'
-          : 'border-gray-200 bg-white hover:border-gray-400'
+          ? 'border-navy bg-surface'
+          : 'border-line bg-white hover:border-line'
       }`}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-0.5">
-          <h4 className="text-base font-bold text-gray-900 leading-tight">
+          <h4 className="text-base font-bold text-ink leading-tight">
             {volunteer.name}
           </h4>
-          <div className="flex flex-wrap gap-3 text-xs text-gray-600">
+          <div className="flex flex-wrap gap-3 text-xs text-muted">
             <span>
               <span className="font-medium">Disponibilidad:</span>{' '}
               {availabilityLabel}
             </span>
             {volunteer.hasVehicle && (
               <>
-                <span aria-hidden="true" className="text-gray-300">·</span>
+                <span aria-hidden="true" className="text-muted-soft">·</span>
                 <span className="font-medium">Con vehículo</span>
               </>
             )}
@@ -62,10 +62,10 @@ export function VolunteerSuggestionCard({
               ? `Deseleccionar a ${volunteer.name}`
               : `Seleccionar a ${volunteer.name}`
           }
-          className={`flex-shrink-0 rounded-lg border-2 px-3 py-1.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 ${
+          className={`flex-shrink-0 rounded-lg border-2 px-3 py-1.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 ${
             selected
-              ? 'border-gray-900 bg-gray-900 text-white hover:bg-gray-700'
-              : 'border-gray-900 bg-white text-gray-900 hover:bg-gray-100'
+              ? 'border-navy bg-navy text-white hover:bg-navy-700'
+              : 'border-navy bg-white text-ink hover:bg-surface-alt'
           }`}
         >
           {selected ? 'Seleccionado' : 'Seleccionar'}

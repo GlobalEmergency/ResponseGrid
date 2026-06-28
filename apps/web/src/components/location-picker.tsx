@@ -103,7 +103,7 @@ export function LocationPicker({ defaultValue }: LocationPickerProps) {
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="location-search"
-          className="text-sm font-semibold text-gray-900"
+          className="text-sm font-semibold text-ink"
         >
           Buscar dirección
         </label>
@@ -120,12 +120,12 @@ export function LocationPicker({ defaultValue }: LocationPickerProps) {
             value={query}
             onChange={(e) => handleInputChange(e.target.value)}
             placeholder="Calle Mayor 1, Madrid…"
-            className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+            className="w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink placeholder:text-muted-soft focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
           />
           {loading && (
             <span
               aria-live="polite"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-soft"
             >
               Buscando…
             </span>
@@ -138,7 +138,7 @@ export function LocationPicker({ defaultValue }: LocationPickerProps) {
             id="location-results"
             role="listbox"
             aria-label="Resultados de geocodificación"
-            className="mt-1 max-h-52 overflow-auto rounded-lg border-2 border-gray-200 bg-white shadow-lg"
+            className="mt-1 max-h-52 overflow-auto rounded-lg border-2 border-line bg-white shadow-lg"
           >
             {results.map((result) => (
               <li key={`${result.latitude},${result.longitude}`} role="option" aria-selected={false}>
@@ -149,7 +149,7 @@ export function LocationPicker({ defaultValue }: LocationPickerProps) {
                     e.preventDefault();
                     handleSelect(result);
                   }}
-                  className="w-full px-4 py-3 text-left text-sm text-gray-800 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                  className="w-full px-4 py-3 text-left text-sm text-ink hover:bg-surface focus:bg-surface focus:outline-none"
                 >
                   {result.address}
                 </button>
@@ -180,7 +180,7 @@ export function LocationPicker({ defaultValue }: LocationPickerProps) {
             longitude={selected.longitude}
             address={selected.address}
           />
-          <p className="mt-1 text-xs text-gray-500">{selected.address}</p>
+          <p className="mt-1 text-xs text-muted">{selected.address}</p>
         </div>
       )}
     </div>

@@ -64,7 +64,7 @@ export function EmergencyControls({
     <section aria-labelledby="controls-heading" className="flex flex-col gap-6">
       <h2
         id="controls-heading"
-        className="text-xl font-bold text-gray-900"
+        className="text-xl font-bold text-ink"
       >
         Controles de la emergencia
       </h2>
@@ -72,7 +72,7 @@ export function EmergencyControls({
       {/* ── Kill-switch ─────────────────────────────────────────────────── */}
       {!isClosed && (
         <div className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-muted">
             Estado de la recogida
           </h3>
 
@@ -112,7 +112,7 @@ export function EmergencyControls({
 
       {/* ── Official announcement ───────────────────────────────────────── */}
       <div className="flex flex-col gap-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted">
           Comunicado oficial
         </h3>
 

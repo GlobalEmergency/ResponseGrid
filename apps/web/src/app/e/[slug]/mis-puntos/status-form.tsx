@@ -39,7 +39,7 @@ export function StatusForm({ resourceId, currentStatus, slug }: StatusFormProps)
   return (
     <form action={formAction} className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-500 font-medium">Actual:</span>
+        <span className="text-xs text-muted font-medium">Actual:</span>
         <StatusLight status={currentStatus} />
       </div>
 

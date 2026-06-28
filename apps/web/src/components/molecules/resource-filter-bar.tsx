@@ -81,12 +81,12 @@ export function ResourceFilterBar({
       {/* ── Selects row ───────────────────────────────────────────────── */}
       <div className="flex flex-wrap gap-3">
         {/* Category */}
-        <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+        <label className="flex flex-col gap-1 text-xs font-medium text-muted">
           <span>{t.category_label}</span>
           <select
             value={activeCategory}
             onChange={(e) => onCategoryChange(e.target.value)}
-            className="rounded-lg border-2 border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-gray-900 focus:outline-none"
+            className="rounded-lg border-2 border-line bg-white px-3 py-1.5 text-sm text-ink focus:border-navy focus:outline-none"
           >
             <option value="">{t.all_categories}</option>
             {categoryOptions.map(([slug, count]) => (
@@ -99,12 +99,12 @@ export function ResourceFilterBar({
 
         {/* Country */}
         {countryOptions.length > 0 && (
-          <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+          <label className="flex flex-col gap-1 text-xs font-medium text-muted">
             <span>{t.country_label}</span>
             <select
               value={activeCountry}
               onChange={(e) => onCountryChange(e.target.value)}
-              className="rounded-lg border-2 border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-gray-900 focus:outline-none"
+              className="rounded-lg border-2 border-line bg-white px-3 py-1.5 text-sm text-ink focus:border-navy focus:outline-none"
             >
               <option value="">{t.all_countries}</option>
               {countryOptions.map(([country, count]) => (
@@ -117,12 +117,12 @@ export function ResourceFilterBar({
         )}
 
         {/* Search */}
-        <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+        <label className="flex flex-col gap-1 text-xs font-medium text-muted">
           <span>{t.search_label}</span>
           <div className="relative">
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
+              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-soft text-sm"
             >
               🔍
             </span>
@@ -131,7 +131,7 @@ export function ResourceFilterBar({
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder={t.search_placeholder}
-              className="rounded-lg border-2 border-gray-200 bg-white pl-8 pr-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none"
+              className="rounded-lg border-2 border-line bg-white pl-8 pr-3 py-1.5 text-sm text-ink placeholder-gray-400 focus:border-navy focus:outline-none"
             />
           </div>
         </label>
@@ -148,14 +148,14 @@ export function ResourceFilterBar({
             <span
               key={f.key}
               role="listitem"
-              className="inline-flex items-center gap-1.5 rounded-full border border-gray-900 bg-gray-900 px-3 py-0.5 text-xs font-medium text-white"
+              className="inline-flex items-center gap-1.5 rounded-full border border-navy bg-navy px-3 py-0.5 text-xs font-medium text-white"
             >
               {f.label}
               <button
                 type="button"
                 onClick={() => dismissFilter(f.key)}
                 aria-label={t.remove_filter.replace('{label}', f.label)}
-                className="ml-0.5 flex-shrink-0 rounded-full text-white hover:text-gray-300 focus:outline-none focus:ring-1 focus:ring-white"
+                className="ml-0.5 flex-shrink-0 rounded-full text-white hover:text-muted-soft focus:outline-none focus:ring-1 focus:ring-white"
               >
                 ×
               </button>

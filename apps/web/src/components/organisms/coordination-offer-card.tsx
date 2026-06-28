@@ -107,12 +107,12 @@ export function CoordinationOfferCard({
   return (
     <article
       aria-label={`Oferta: ${offer.description}`}
-      className="flex flex-col gap-4 rounded-lg border-2 border-gray-900 bg-white p-5"
+      className="flex flex-col gap-4 rounded-lg border-2 border-navy bg-white p-5"
     >
       {/* Header */}
       <div className="flex flex-col gap-2">
         <div className="flex items-start justify-between gap-3 flex-wrap">
-          <h3 className="text-lg font-bold text-gray-900 leading-tight break-words">
+          <h3 className="text-lg font-bold text-ink leading-tight break-words">
             {offer.description}
           </h3>
           <Badge variant={STATUS_BADGE[offer.status]}>
@@ -120,14 +120,14 @@ export function CoordinationOfferCard({
           </Badge>
         </div>
 
-        <div className="flex flex-wrap gap-3 text-sm text-gray-600">
+        <div className="flex flex-wrap gap-3 text-sm text-muted">
           <span className="font-medium">{CATEGORY_LABELS[offer.category]}</span>
-          <span aria-hidden="true" className="text-gray-300">·</span>
+          <span aria-hidden="true" className="text-muted-soft">·</span>
           <span>
             {offer.quantity}
             {unit !== null ? ` ${unit}` : ''}
           </span>
-          <span aria-hidden="true" className="text-gray-300">·</span>
+          <span aria-hidden="true" className="text-muted-soft">·</span>
           <span className="truncate max-w-[200px]">{offer.location.address}</span>
         </div>
 

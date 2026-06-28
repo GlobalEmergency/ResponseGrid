@@ -64,11 +64,11 @@ export function LoginForm({ next, t }: LoginFormProps) {
 
       <SocialLoginButtons />
 
-      <p className="text-center text-sm text-gray-600">
+      <p className="text-center text-sm text-muted">
         {t.no_account}{' '}
         <Link
           href="/signup"
-          className="font-semibold text-gray-900 underline underline-offset-2 hover:text-gray-700"
+          className="font-semibold text-ink underline underline-offset-2 hover:text-ink-soft"
         >
           {t.create_account}
         </Link>

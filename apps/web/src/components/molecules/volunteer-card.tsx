@@ -45,7 +45,7 @@ const STATUS_BADGE_CLASSES: Record<VolunteerStatus, string> = {
   assigned:
     'inline-flex items-center rounded-full border border-amber-400 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800',
   inactive:
-    'inline-flex items-center rounded-full border border-gray-300 bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-500',
+    'inline-flex items-center rounded-full border border-line bg-surface-alt px-2.5 py-0.5 text-xs font-semibold text-muted',
 };
 
 const INITIAL_STATE: ActionResult = { status: 'idle' };
@@ -76,13 +76,13 @@ export function VolunteerCard({ volunteer, slug }: VolunteerCardProps) {
   return (
     <article
       aria-label={`Voluntario: ${volunteer.name}`}
-      className="flex flex-col gap-3 rounded-lg border-2 border-gray-200 bg-white p-4"
+      className="flex flex-col gap-3 rounded-lg border-2 border-line bg-white p-4"
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex flex-col gap-0.5">
-          <h3 className="text-base font-bold text-gray-900 leading-tight">{volunteer.name}</h3>
-          <p className="text-sm text-gray-500">{volunteer.municipality}</p>
+          <h3 className="text-base font-bold text-ink leading-tight">{volunteer.name}</h3>
+          <p className="text-sm text-muted">{volunteer.municipality}</p>
         </div>
         <span className={STATUS_BADGE_CLASSES[volunteer.status]}>
           {STATUS_LABELS[volunteer.status]}
@@ -101,12 +101,12 @@ export function VolunteerCard({ volunteer, slug }: VolunteerCardProps) {
       )}
 
       {/* Meta row */}
-      <div className="flex flex-wrap gap-3 text-xs text-gray-600">
+      <div className="flex flex-wrap gap-3 text-xs text-muted">
         <span>
           <span className="font-medium">Disponibilidad:</span>{' '}
           {AVAILABILITY_LABELS[volunteer.availability]}
         </span>
-        <span aria-hidden="true" className="text-gray-300">·</span>
+        <span aria-hidden="true" className="text-muted-soft">·</span>
         <span>
           <span className="font-medium">Vehículo:</span>{' '}
           {VEHICLE_LABELS[volunteer.vehicle]}
@@ -118,14 +118,14 @@ export function VolunteerCard({ volunteer, slug }: VolunteerCardProps) {
 
       {/* Status change form */}
       <form action={formAction} className="flex items-center gap-2 flex-wrap">
-        <label htmlFor={`status-${volunteer.id}`} className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+        <label htmlFor={`status-${volunteer.id}`} className="text-xs font-semibold text-ink-soft uppercase tracking-wide">
           Cambiar estado:
         </label>
         <select
           id={`status-${volunteer.id}`}
           name="status"
           defaultValue={volunteer.status}
-          className="flex-1 min-w-[140px] rounded-lg border-2 border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-gray-900 focus:outline-none"
+          className="flex-1 min-w-[140px] rounded-lg border-2 border-line bg-white px-3 py-1.5 text-sm text-ink focus:border-navy focus:outline-none"
         >
           {STATUS_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -136,7 +136,7 @@ export function VolunteerCard({ volunteer, slug }: VolunteerCardProps) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg border-2 border-gray-900 bg-gray-900 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="rounded-lg border-2 border-navy bg-navy px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-navy-700 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {pending ? 'Guardando…' : 'Guardar'}
         </button>

@@ -86,13 +86,13 @@ export function ItemsField({ t }: ItemsFieldProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+        <p className="text-sm font-semibold text-ink uppercase tracking-wide">
           {t.items_heading} <span aria-hidden="true">*</span>
         </p>
         <button
           type="button"
           onClick={addItem}
-          className="text-sm font-semibold text-gray-900 underline underline-offset-2 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded"
+          className="text-sm font-semibold text-ink underline underline-offset-2 hover:text-muted focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 rounded"
         >
           {t.items_add}
         </button>
@@ -101,10 +101,10 @@ export function ItemsField({ t }: ItemsFieldProps) {
       {items.map((item, index) => (
         <div
           key={item.id}
-          className="flex flex-col gap-3 rounded-lg border-2 border-gray-200 p-4"
+          className="flex flex-col gap-3 rounded-lg border-2 border-line p-4"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            <span className="text-xs font-semibold text-muted uppercase tracking-wide">
               {t.item_number.replace('{n}', String(index + 1))}
             </span>
             {items.length > 1 && (
@@ -123,7 +123,7 @@ export function ItemsField({ t }: ItemsFieldProps) {
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor={`item-name-${item.id}`}
-              className="text-sm font-medium text-gray-700"
+              className="text-sm font-medium text-ink-soft"
             >
               {t.item_name_label} <span aria-hidden="true">*</span>
             </label>
@@ -134,7 +134,7 @@ export function ItemsField({ t }: ItemsFieldProps) {
               value={item.name}
               onChange={(e) => updateItem(item.id, { name: e.target.value })}
               placeholder={t.item_name_placeholder}
-              className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+              className="w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink placeholder:text-muted-soft focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
             />
           </div>
 
@@ -143,7 +143,7 @@ export function ItemsField({ t }: ItemsFieldProps) {
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor={`item-qty-${item.id}`}
-                className="text-sm font-medium text-gray-700"
+                className="text-sm font-medium text-ink-soft"
               >
                 {t.item_quantity_label} <span aria-hidden="true">*</span>
               </label>
@@ -157,7 +157,7 @@ export function ItemsField({ t }: ItemsFieldProps) {
                 onChange={(e) =>
                   updateItem(item.id, { quantity: Math.max(1, Number(e.target.value)) })
                 }
-                className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+                className="w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
               />
             </div>
 
@@ -165,10 +165,10 @@ export function ItemsField({ t }: ItemsFieldProps) {
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor={`item-unit-${item.id}`}
-                className="text-sm font-medium text-gray-700"
+                className="text-sm font-medium text-ink-soft"
               >
                 {t.item_unit_label}{' '}
-                <span className="text-gray-400 font-normal">{t.item_unit_opt}</span>
+                <span className="text-muted-soft font-normal">{t.item_unit_opt}</span>
               </label>
               <input
                 id={`item-unit-${item.id}`}
@@ -176,7 +176,7 @@ export function ItemsField({ t }: ItemsFieldProps) {
                 value={item.unit}
                 onChange={(e) => updateItem(item.id, { unit: e.target.value })}
                 placeholder={t.item_unit_placeholder}
-                className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+                className="w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink placeholder:text-muted-soft focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
               />
             </div>
           </div>
@@ -185,7 +185,7 @@ export function ItemsField({ t }: ItemsFieldProps) {
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor={`item-cat-${item.id}`}
-              className="text-sm font-medium text-gray-700"
+              className="text-sm font-medium text-ink-soft"
             >
               {t.item_category_label} <span aria-hidden="true">*</span>
             </label>
@@ -196,7 +196,7 @@ export function ItemsField({ t }: ItemsFieldProps) {
               onChange={(e) =>
                 updateItem(item.id, { category: e.target.value as Category })
               }
-              className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+              className="w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
             >
               {categories.map(({ value, label }) => (
                 <option key={value} value={value}>

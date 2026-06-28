@@ -53,24 +53,24 @@ export function ExpiredNeedCard({ need, slug }: ExpiredNeedCardProps) {
   return (
     <article
       aria-label={`Petición caducada: ${need.title}`}
-      className="flex flex-col gap-4 rounded-lg border-2 border-gray-300 bg-gray-50 p-5 opacity-75"
+      className="flex flex-col gap-4 rounded-lg border-2 border-line bg-surface p-5 opacity-75"
     >
       {/* Header */}
       <div className="flex flex-col gap-1">
-        <h2 className="text-xl font-bold text-gray-700 leading-tight break-words">
+        <h2 className="text-xl font-bold text-ink-soft leading-tight break-words">
           {need.title}
         </h2>
-        <div className="flex flex-wrap gap-3 text-sm text-gray-500">
+        <div className="flex flex-wrap gap-3 text-sm text-muted">
           {need.items[0] !== undefined && (
             <span className="font-medium">
               {CATEGORY_LABELS[need.items[0].category]}
             </span>
           )}
-          <span aria-hidden="true" className="text-gray-300">·</span>
+          <span aria-hidden="true" className="text-muted-soft">·</span>
           <span>Prioridad: {PRIORITY_LABELS[need.priority]}</span>
           {need.expiresAt != null && (
             <>
-              <span aria-hidden="true" className="text-gray-300">·</span>
+              <span aria-hidden="true" className="text-muted-soft">·</span>
               <span>
                 Caducó:{' '}
                 <time dateTime={need.expiresAt} suppressHydrationWarning>

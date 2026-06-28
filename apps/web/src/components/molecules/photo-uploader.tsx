@@ -212,13 +212,13 @@ export function PhotoUploader({ onUrlsChange }: PhotoUploaderProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+      <p className="text-sm font-semibold text-ink uppercase tracking-wide">
         Fotos (opcional)
       </p>
 
       <label
         htmlFor="photo-input"
-        className="flex items-center justify-center w-full rounded-lg border-2 border-dashed border-gray-400 bg-gray-50 px-4 py-6 text-sm text-gray-600 cursor-pointer hover:border-gray-900 hover:bg-gray-100 transition-colors focus-within:ring-2 focus-within:ring-gray-900 focus-within:ring-offset-2"
+        className="flex items-center justify-center w-full rounded-lg border-2 border-dashed border-line bg-surface px-4 py-6 text-sm text-muted cursor-pointer hover:border-navy hover:bg-surface-alt transition-colors focus-within:ring-2 focus-within:ring-navy focus-within:ring-offset-2"
       >
         <span>Seleccionar imágenes</span>
         <input
@@ -241,7 +241,7 @@ export function PhotoUploader({ onUrlsChange }: PhotoUploaderProps) {
               key={photo.id}
               className="relative flex flex-col items-center gap-1"
             >
-              <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-100">
+              <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-line bg-surface-alt">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={photo.previewUrl}
@@ -250,7 +250,7 @@ export function PhotoUploader({ onUrlsChange }: PhotoUploaderProps) {
                 />
                 {photo.uploading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-white/70">
-                    <span className="text-xs text-gray-600 font-medium">Subiendo…</span>
+                    <span className="text-xs text-muted font-medium">Subiendo…</span>
                   </div>
                 )}
                 {photo.uploadedUrl != null && !photo.uploading && (

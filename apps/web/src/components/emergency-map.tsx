@@ -233,7 +233,7 @@ export default function EmergencyMap({ points }: EmergencyMapProps) {
   const defaultZoom = 5;
 
   return (
-    <div className="relative w-full h-80 rounded-lg overflow-hidden border-2 border-gray-200">
+    <div className="relative w-full h-80 rounded-lg overflow-hidden border-2 border-line">
       <MapContainer
         center={defaultCenter}
         zoom={defaultZoom}
@@ -253,7 +253,7 @@ export default function EmergencyMap({ points }: EmergencyMapProps) {
       {/* Empty-state overlay rendered on top of the map */}
       {points.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-[1000] pointer-events-none">
-          <p className="text-sm font-medium text-gray-500">
+          <p className="text-sm font-medium text-muted">
             Aún no hay ubicaciones en el mapa.
           </p>
         </div>

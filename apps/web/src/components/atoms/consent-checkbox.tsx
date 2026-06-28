@@ -30,11 +30,11 @@ export function ConsentCheckbox({
         name={name}
         type="checkbox"
         required
-        className="mt-1 h-4 w-4 flex-shrink-0 cursor-pointer rounded border-2 border-gray-900 accent-gray-900"
+        className="mt-1 h-4 w-4 flex-shrink-0 cursor-pointer rounded border-2 border-navy accent-navy"
       />
       <label
         htmlFor={id}
-        className="text-sm text-gray-700 leading-snug cursor-pointer"
+        className="text-sm text-ink-soft leading-snug cursor-pointer"
       >
         {label}{' '}
         <span aria-hidden="true" className="text-red-600 font-bold">

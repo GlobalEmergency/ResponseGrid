@@ -5,6 +5,7 @@ import { getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { ReportCard } from '@/components/organisms/report-card';
 import type { FieldReport } from '@/components/organisms/report-card';
 
@@ -127,35 +128,19 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
   const baseUrl = `/e/${slug}/coordinacion/reportes`;
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-start px-4 py-10 bg-white">
-      <div className="w-full max-w-xl flex flex-col gap-8">
-
-        {/* ── CABECERA ────────────────────────────────────────────────── */}
-        <header className="flex flex-col gap-2">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex flex-col gap-0.5">
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                Reportes de campo
-              </h1>
-              <p className="text-base text-gray-600 font-medium">
-                {emergency.name}
-              </p>
-            </div>
-
-            <Link
-              href={`/e/${slug}/coordinacion`}
-              className="flex-shrink-0 rounded-lg border-2 border-gray-900 px-4 py-2 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
-            >
-              ← Coordinación
-            </Link>
-          </div>
-        </header>
-
-        <hr className="border-gray-200" />
+    <main className="flex-1 bg-surface">
+      <div className="mx-auto w-full max-w-xl">
+        <PageHeaderBand
+          backHref={`/e/${slug}/coordinacion`}
+          backLabel="Coordinación"
+          title="Reportes de campo"
+          subtitle={emergency.name}
+        />
+        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
 
         {/* ── FILTROS ─────────────────────────────────────────────────── */}
         <section aria-labelledby="filters-heading" className="flex flex-col gap-3">
-          <h2 id="filters-heading" className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+          <h2 id="filters-heading" className="text-sm font-semibold text-ink uppercase tracking-wide">
             Filtrar
           </h2>
 
@@ -165,10 +150,10 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
               <Link
                 href={baseUrl}
                 className={[
-                  'rounded-lg border-2 px-3 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1',
+                  'rounded-lg border-2 px-3 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-1',
                   statusFilter === undefined
-                    ? 'border-gray-900 bg-gray-900 text-white'
-                    : 'border-gray-300 text-gray-600 hover:border-gray-900 hover:text-gray-900',
+                    ? 'border-navy bg-navy text-white'
+                    : 'border-line text-muted hover:border-navy hover:text-ink',
                 ].join(' ')}
               >
                 Todos
@@ -178,10 +163,10 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
                   key={s}
                   href={`${baseUrl}?status=${s}${priorityFilter !== undefined ? `&priority=${priorityFilter}` : ''}`}
                   className={[
-                    'rounded-lg border-2 px-3 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1',
+                    'rounded-lg border-2 px-3 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-1',
                     statusFilter === s
-                      ? 'border-gray-900 bg-gray-900 text-white'
-                      : 'border-gray-300 text-gray-600 hover:border-gray-900 hover:text-gray-900',
+                      ? 'border-navy bg-navy text-white'
+                      : 'border-line text-muted hover:border-navy hover:text-ink',
                   ].join(' ')}
                 >
                   {STATUS_LABELS[s]}
@@ -196,10 +181,10 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
                   key={p}
                   href={`${baseUrl}?${statusFilter !== undefined ? `status=${statusFilter}&` : ''}priority=${p}`}
                   className={[
-                    'rounded-lg border-2 px-3 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1',
+                    'rounded-lg border-2 px-3 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-1',
                     priorityFilter === p
-                      ? 'border-gray-900 bg-gray-900 text-white'
-                      : 'border-gray-300 text-gray-600 hover:border-gray-900 hover:text-gray-900',
+                      ? 'border-navy bg-navy text-white'
+                      : 'border-line text-muted hover:border-navy hover:text-ink',
                   ].join(' ')}
                 >
                   {PRIORITY_LABELS[p]}
@@ -212,21 +197,21 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
           {(statusFilter !== undefined || priorityFilter !== undefined) && (
             <Link
               href={baseUrl}
-              className="text-xs text-gray-400 underline underline-offset-2 hover:text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-900 rounded w-fit"
+              className="text-xs text-muted-soft underline underline-offset-2 hover:text-ink-soft focus:outline-none focus:ring-1 focus:ring-navy rounded w-fit"
             >
               Limpiar filtros
             </Link>
           )}
         </section>
 
-        <hr className="border-gray-200" />
+        <hr className="border-line" />
 
         {/* ── LISTA DE PARTES ─────────────────────────────────────────── */}
         <section aria-labelledby="reports-heading" className="flex flex-col gap-4">
-          <h2 id="reports-heading" className="text-xl font-bold text-gray-900">
+          <h2 id="reports-heading" className="text-xl font-bold text-ink">
             Partes recibidos
             {reports.length > 0 && (
-              <span className="ml-2 text-sm font-normal text-gray-500">
+              <span className="ml-2 text-sm font-normal text-muted">
                 ({reports.length})
               </span>
             )}
@@ -248,6 +233,7 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
           )}
         </section>
 
+        </div>
       </div>
     </main>
   );

@@ -31,12 +31,12 @@ export function FormField({
       {labelAs === 'label' ? (
         <Label
           htmlFor={htmlFor}
-          className="text-sm font-semibold text-gray-900 uppercase tracking-wide"
+          className="text-sm font-semibold text-ink uppercase tracking-wide"
         >
           {label}
         </Label>
       ) : (
-        <p className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+        <p className="text-sm font-semibold text-ink uppercase tracking-wide">
           {label}
         </p>
       )}

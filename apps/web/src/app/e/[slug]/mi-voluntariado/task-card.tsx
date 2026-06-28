@@ -65,33 +65,33 @@ export function TaskCard({ task, volunteerId, slug }: TaskCardProps) {
   return (
     <article
       aria-label={`Tarea: ${task.title}`}
-      className="flex flex-col gap-4 rounded-lg border-2 border-gray-900 bg-white p-5"
+      className="flex flex-col gap-4 rounded-lg border-2 border-navy bg-white p-5"
     >
       {/* Header */}
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-lg font-bold text-gray-900 leading-tight flex-1">
+          <h3 className="text-lg font-bold text-ink leading-tight flex-1">
             {task.title}
           </h3>
           <AssignmentBadge status={myStatus} />
         </div>
         {task.description !== '' && (
-          <p className="text-sm text-gray-600">{task.description}</p>
+          <p className="text-sm text-muted">{task.description}</p>
         )}
       </div>
 
       {/* Metadata */}
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
         <span>
           Estado de la tarea:{' '}
-          <span className="font-semibold text-gray-700">
+          <span className="font-semibold text-ink-soft">
             {TASK_STATUS_LABELS[task.status] ?? task.status}
           </span>
         </span>
         {task.requiredSkill != null && (
           <span>
             Habilidad requerida:{' '}
-            <span className="font-semibold text-gray-700">
+            <span className="font-semibold text-ink-soft">
               {SKILL_LABELS[task.requiredSkill] ?? task.requiredSkill}
             </span>
           </span>
@@ -99,7 +99,7 @@ export function TaskCard({ task, volunteerId, slug }: TaskCardProps) {
         {task.location != null && (
           <span>
             Lugar:{' '}
-            <span className="font-semibold text-gray-700">{task.location.address}</span>
+            <span className="font-semibold text-ink-soft">{task.location.address}</span>
           </span>
         )}
       </div>
@@ -180,7 +180,7 @@ function AssignmentBadge({ status }: { status: string }) {
     return (
       <span
         aria-label={`Estado de asignación: ${label}`}
-        className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-500 flex-shrink-0"
+        className="inline-flex items-center rounded-full border border-line bg-surface-alt px-3 py-1 text-sm font-semibold text-muted flex-shrink-0"
       >
         {label}
       </span>

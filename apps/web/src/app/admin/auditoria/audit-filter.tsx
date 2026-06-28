@@ -16,7 +16,7 @@ const ENTITY_TYPE_OPTIONS = [
 ] as const;
 
 const selectClass =
-  'rounded-lg border-2 border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-gray-900 focus:outline-none';
+  'rounded-lg border-2 border-line bg-white px-3 py-1.5 text-sm text-ink focus:border-navy focus:outline-none';
 
 /**
  * AuditFilter — client component that drives `entityType` and
@@ -45,7 +45,7 @@ export function AuditFilter() {
 
   return (
     <div className="flex flex-wrap gap-3" role="group" aria-label="Filtros del registro de auditoría">
-      <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+      <label className="flex flex-col gap-1 text-xs font-medium text-muted">
         <span>Tipo de entidad</span>
         <select
           value={currentEntityType}
@@ -61,7 +61,7 @@ export function AuditFilter() {
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+      <label className="flex flex-col gap-1 text-xs font-medium text-muted">
         <span>ID de emergencia</span>
         <input
           type="text"

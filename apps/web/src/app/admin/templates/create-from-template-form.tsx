@@ -105,7 +105,7 @@ export function CreateFromTemplateForm({ templates }: CreateFromTemplateFormProp
       </Button>
 
       {templates.length === 0 && (
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted">
           Crea al menos una plantilla antes de usarla aquí.
         </p>
       )}

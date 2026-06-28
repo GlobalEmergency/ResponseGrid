@@ -20,7 +20,7 @@ export function AddMemberForm({ orgId }: AddMemberFormProps) {
   );
 
   return (
-    <form action={formAction} className="flex flex-col gap-4 rounded-lg border-2 border-gray-200 p-5">
+    <form action={formAction} className="flex flex-col gap-4 rounded-lg border-2 border-line p-5">
       {state.status === 'error' && (
         <ErrorMessage message={state.message ?? 'Error al añadir el miembro'} />
       )}

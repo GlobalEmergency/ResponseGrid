@@ -11,6 +11,7 @@ import { ExpiredNeedCard } from '@/components/organisms/expired-need-card';
 import { EmergencyControls } from '@/components/organisms/emergency-controls';
 import { NeedsFilter } from '@/components/needs-filter';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { logout } from './actions';
 
 // Always fetch live data — never serve a stale cached page.
@@ -113,32 +114,25 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
   const expiredNeeds = expiredNeedsResult.data ?? [];
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-start px-4 py-10 bg-white">
-      <div className="w-full max-w-xl flex flex-col gap-8">
+    <main className="flex-1 bg-surface">
+      <div className="mx-auto w-full max-w-xl">
+        <PageHeaderBand
+          backHref={`/e/${slug}`}
+          backLabel={emergency.name}
+          title="Panel de coordinación"
+          subtitle={emergency.name}
+        />
+        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
 
-        {/* ── CABECERA ────────────────────────────────────────────────── */}
-        <header className="flex flex-col gap-2">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex flex-col gap-0.5">
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                Panel de coordinación
-              </h1>
-              <p className="text-base text-gray-600 font-medium">
-                {emergency.name}
-              </p>
-            </div>
-
-            {/* Logout button */}
-            <form action={logout} className="flex-shrink-0">
-              <button
-                type="submit"
-                className="rounded-lg border-2 border-gray-900 px-4 py-2 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
-              >
-                Salir
-              </button>
-            </form>
-          </div>
-        </header>
+        {/* ── SALIR ───────────────────────────────────────────────────── */}
+        <form action={logout} className="flex justify-end">
+          <button
+            type="submit"
+            className="rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-surface-alt focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
+          >
+            Salir
+          </button>
+        </form>
 
         {/* ── CONTROLES DE LA EMERGENCIA ──────────────────────────────── */}
         <EmergencyControls
@@ -155,7 +149,7 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
         {/* ── ENLACE A VOLUNTARIOS Y TAREAS ───────────────────────────── */}
         <Link
           href={`/e/${slug}/coordinacion/voluntarios`}
-          className="flex items-center justify-between gap-3 rounded-lg border-2 border-gray-900 bg-white px-5 py-4 font-semibold text-gray-900 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+          className="flex items-center justify-between gap-3 rounded-lg border-2 border-navy bg-white px-5 py-4 font-semibold text-ink transition-colors hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
         >
           <span>Voluntarios y tareas</span>
           <span aria-hidden="true" className="text-lg">→</span>
@@ -164,19 +158,19 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
         {/* ── ENLACE A REPORTES DE CAMPO ──────────────────────────────── */}
         <Link
           href={`/e/${slug}/coordinacion/reportes`}
-          className="flex items-center justify-between gap-3 rounded-lg border-2 border-gray-900 bg-white px-5 py-4 font-semibold text-gray-900 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+          className="flex items-center justify-between gap-3 rounded-lg border-2 border-navy bg-white px-5 py-4 font-semibold text-ink transition-colors hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
         >
           <span>Reportes de campo</span>
           <span aria-hidden="true" className="text-lg">→</span>
         </Link>
 
-        <hr className="border-gray-200" />
+        <hr className="border-line" />
 
         {/* ── RECURSOS PENDIENTES ─────────────────────────────────────── */}
         <section aria-labelledby="resources-heading" className="flex flex-col gap-4">
           <h2
             id="resources-heading"
-            className="text-xl font-bold text-gray-900"
+            className="text-xl font-bold text-ink"
           >
             Recursos pendientes
           </h2>
@@ -201,7 +195,7 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
         <section aria-labelledby="needs-heading" className="flex flex-col gap-4">
           <h2
             id="needs-heading"
-            className="text-xl font-bold text-gray-900"
+            className="text-xl font-bold text-ink"
           >
             Peticiones pendientes
           </h2>
@@ -224,13 +218,13 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
           )}
         </section>
 
-        <hr className="border-gray-200" />
+        <hr className="border-line" />
 
         {/* ── OFERTAS DE MATERIAL ─────────────────────────────────────── */}
         <section aria-labelledby="offers-heading" className="flex flex-col gap-4">
           <h2
             id="offers-heading"
-            className="text-xl font-bold text-gray-900"
+            className="text-xl font-bold text-ink"
           >
             Ofertas de material
           </h2>
@@ -255,13 +249,13 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
           )}
         </section>
 
-        <hr className="border-gray-200" />
+        <hr className="border-line" />
 
         {/* ── PETICIONES CADUCADAS ────────────────────────────────────── */}
         <section aria-labelledby="expired-heading" className="flex flex-col gap-4">
           <h2
             id="expired-heading"
-            className="text-xl font-bold text-gray-900"
+            className="text-xl font-bold text-ink"
           >
             Peticiones caducadas
           </h2>
@@ -282,6 +276,7 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
           )}
         </section>
 
+        </div>
       </div>
     </main>
   );

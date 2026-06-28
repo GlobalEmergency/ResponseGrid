@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { completeOAuthAction } from './actions';
 
 /**
@@ -33,8 +34,13 @@ export default function AuthCompletePage() {
   }, []);
 
   return (
-    <main className="flex-1 flex items-center justify-center bg-white">
-      <p className="text-base text-gray-500">Conectando…</p>
+    <main className="flex-1 bg-surface">
+      <div className="mx-auto w-full max-w-sm">
+        <PageHeaderBand />
+        <div className="flex flex-col items-center text-center gap-6 px-4 pb-12 pt-6">
+          <p className="text-base text-muted">Conectando…</p>
+        </div>
+      </div>
     </main>
   );
 }

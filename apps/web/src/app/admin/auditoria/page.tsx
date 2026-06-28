@@ -7,6 +7,7 @@ import { fetchAuditEntries } from './actions';
 import { AuditFilter } from './audit-filter';
 import { AuditEntryCard, AuditEntryRow } from '@/components/molecules/audit-entry-row';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { PageHeaderBand } from '@/components/molecules/page-header-band';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,39 +76,22 @@ export default async function AuditoriaPage({ searchParams }: PageProps) {
   }
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-start bg-white px-4 py-10">
-      <div className="w-full max-w-5xl flex flex-col gap-10">
+    <main className="flex-1 bg-surface">
+      <div className="mx-auto w-full max-w-5xl">
+        <PageHeaderBand
+          backHref="/"
+          backLabel="← Inicio"
+          title="Registro de auditoría"
+          subtitle="Actividad registrada en el sistema. Solo administradores."
+        />
+        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
 
-        {/* ── CABECERA ────────────────────────────────────────────────── */}
-        <header className="flex flex-col gap-2">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
-            >
-              ← Inicio
-            </Link>
-            <span className="text-gray-300" aria-hidden="true">/</span>
-            <Link
-              href="/admin/acreditaciones"
-              className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
-            >
-              Admin
-            </Link>
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Registro de auditoría
-          </h1>
-          <p className="text-base text-gray-600">
-            Actividad registrada en el sistema. Solo administradores.
+        {total > 0 && (
+          <p className="text-xs text-muted-soft">
+            {total} entrada{total !== 1 ? 's' : ''} en total
+            {hasFilters ? ' (filtrado)' : ''}
           </p>
-          {total > 0 && (
-            <p className="text-xs text-gray-400">
-              {total} entrada{total !== 1 ? 's' : ''} en total
-              {hasFilters ? ' (filtrado)' : ''}
-            </p>
-          )}
-        </header>
+        )}
 
         {/* ── FILTROS ─────────────────────────────────────────────────── */}
         <section aria-label="Filtros">
@@ -116,7 +100,7 @@ export default async function AuditoriaPage({ searchParams }: PageProps) {
 
         {/* ── LISTADO ─────────────────────────────────────────────────── */}
         <section aria-labelledby="audit-heading" className="flex flex-col gap-4">
-          <h2 id="audit-heading" className="text-xl font-bold text-gray-900">
+          <h2 id="audit-heading" className="text-xl font-bold text-ink">
             Entradas recientes
           </h2>
 
@@ -139,26 +123,26 @@ export default async function AuditoriaPage({ searchParams }: PageProps) {
               </ul>
 
               {/* ── Desktop: table ─────────────────────────────────────── */}
-              <div className="hidden md:block overflow-x-auto rounded-lg border-2 border-gray-900">
+              <div className="hidden md:block overflow-x-auto rounded-lg border-2 border-navy">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-gray-50 border-b-2 border-gray-900">
-                      <th scope="col" className="py-3 px-4 text-xs font-bold uppercase tracking-wide text-gray-700">
+                    <tr className="bg-surface border-b-2 border-navy">
+                      <th scope="col" className="py-3 px-4 text-xs font-bold uppercase tracking-wide text-ink-soft">
                         Acción
                       </th>
-                      <th scope="col" className="py-3 px-4 text-xs font-bold uppercase tracking-wide text-gray-700">
+                      <th scope="col" className="py-3 px-4 text-xs font-bold uppercase tracking-wide text-ink-soft">
                         Actor
                       </th>
-                      <th scope="col" className="py-3 px-4 text-xs font-bold uppercase tracking-wide text-gray-700">
+                      <th scope="col" className="py-3 px-4 text-xs font-bold uppercase tracking-wide text-ink-soft">
                         Entidad
                       </th>
-                      <th scope="col" className="py-3 px-4 text-xs font-bold uppercase tracking-wide text-gray-700">
+                      <th scope="col" className="py-3 px-4 text-xs font-bold uppercase tracking-wide text-ink-soft">
                         Petición
                       </th>
-                      <th scope="col" className="py-3 px-4 text-xs font-bold uppercase tracking-wide text-gray-700">
+                      <th scope="col" className="py-3 px-4 text-xs font-bold uppercase tracking-wide text-ink-soft">
                         Estado
                       </th>
-                      <th scope="col" className="py-3 px-4 text-xs font-bold uppercase tracking-wide text-gray-700">
+                      <th scope="col" className="py-3 px-4 text-xs font-bold uppercase tracking-wide text-ink-soft">
                         Fecha
                       </th>
                     </tr>
@@ -180,20 +164,20 @@ export default async function AuditoriaPage({ searchParams }: PageProps) {
                   {hasPrev ? (
                     <Link
                       href={paginationHref(prevOffset)}
-                      className="text-sm font-medium text-gray-600 hover:text-gray-900 underline underline-offset-2 transition-colors"
+                      className="text-sm font-medium text-muted hover:text-ink underline underline-offset-2 transition-colors"
                     >
                       ← Anterior
                     </Link>
                   ) : (
                     <span />
                   )}
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-muted-soft">
                     {offset + 1}–{Math.min(offset + PAGE_LIMIT, total)} de {total}
                   </span>
                   {hasNext ? (
                     <Link
                       href={paginationHref(nextOffset)}
-                      className="text-sm font-medium text-gray-600 hover:text-gray-900 underline underline-offset-2 transition-colors"
+                      className="text-sm font-medium text-muted hover:text-ink underline underline-offset-2 transition-colors"
                     >
                       Siguiente →
                     </Link>
@@ -206,6 +190,7 @@ export default async function AuditoriaPage({ searchParams }: PageProps) {
           )}
         </section>
 
+        </div>
       </div>
     </main>
   );

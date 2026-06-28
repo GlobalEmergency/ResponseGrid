@@ -42,7 +42,7 @@ export function StatusLight({
   const label = t[LABEL_KEY[status]] as string;
   return (
     <span
-      className={`inline-flex items-center gap-1.5 text-sm font-medium text-gray-700 ${className}`.trim()}
+      className={`inline-flex items-center gap-1.5 text-sm font-medium text-ink-soft ${className}`.trim()}
       aria-label={`${t.aria_prefix} ${label}`}
     >
       <span

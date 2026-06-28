@@ -6,6 +6,7 @@ import { getEmergencyBySlug } from '@/lib/emergencies';
 import { fetchMyResources } from './actions';
 import { StatusForm } from './status-form';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { PageHeaderBand } from '@/components/molecules/page-header-band';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,24 +59,15 @@ export default async function MisPuntosPage({ params }: Props) {
   const myResources = await fetchMyResources(emergency.id, slug);
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-start bg-white px-4 py-10">
-      <div className="w-full max-w-xl flex flex-col gap-8">
-
-        {/* ── CABECERA ──────────────────────────────────────────────── */}
-        <header className="flex flex-col gap-2">
-          <Link
-            href={`/e/${slug}`}
-            className="text-sm text-gray-400 underline underline-offset-2 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded w-fit"
-          >
-            ← {emergency.name}
-          </Link>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Mis puntos
-          </h1>
-          <p className="text-base text-gray-600">
-            Actualiza el estado operativo de los puntos que has registrado.
-          </p>
-        </header>
+    <main className="flex-1 bg-surface">
+      <div className="mx-auto w-full max-w-xl">
+        <PageHeaderBand
+          backHref={`/e/${slug}`}
+          backLabel={emergency.name}
+          title="Mis puntos"
+          subtitle="Actualiza el estado operativo de los puntos que has registrado."
+        />
+        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
 
         {/* ── LISTA DE PUNTOS ───────────────────────────────────────── */}
         <section aria-labelledby="my-points-heading" className="flex flex-col gap-4">
@@ -94,13 +86,13 @@ export default async function MisPuntosPage({ params }: Props) {
                 <li key={resource.id}>
                   <article
                     aria-label={`Punto: ${resource.name}`}
-                    className="flex flex-col gap-4 rounded-lg border-2 border-gray-900 bg-white p-5"
+                    className="flex flex-col gap-4 rounded-lg border-2 border-navy bg-white p-5"
                   >
                     <div className="flex flex-col gap-1">
-                      <h3 className="text-lg font-bold text-gray-900 leading-tight">
+                      <h3 className="text-lg font-bold text-ink leading-tight">
                         {resource.name}
                       </h3>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted">
                         {TYPE_LABELS[resource.type] ?? resource.type}
                         {' · '}
                         {STAGE_LABELS[resource.stage] ?? resource.stage}
@@ -115,7 +107,7 @@ export default async function MisPuntosPage({ params }: Props) {
 
                     <Link
                       href={`/e/${slug}/reportar?resourceId=${resource.id}`}
-                      className="inline-flex items-center justify-center rounded-lg border-2 border-gray-900 px-4 py-2 text-sm font-semibold text-gray-900 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors w-fit"
+                      className="inline-flex items-center justify-center rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink bg-white hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors w-fit"
                     >
                       Reportar incidencia
                     </Link>
@@ -126,6 +118,7 @@ export default async function MisPuntosPage({ params }: Props) {
           )}
         </section>
 
+        </div>
       </div>
     </main>
   );

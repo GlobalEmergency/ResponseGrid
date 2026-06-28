@@ -5,6 +5,7 @@ import { getToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { submitReport } from './actions';
 import { ReportForm } from './report-form';
+import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { getT } from '@/i18n/server';
 
 type Props = {
@@ -70,25 +71,24 @@ export default async function ReportarPage({ params, searchParams }: Props) {
   const boundAction = submitReport.bind(null, emergency.id);
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-start px-4 py-10 bg-white">
-      <div className="w-full max-w-md flex flex-col gap-8">
-        <header className="flex flex-col gap-1">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            {t.reportar.page_title}
-          </h1>
-          <p className="text-base text-gray-600">
-            {emergency.name}
-          </p>
-        </header>
-
-        <ReportForm
-          action={boundAction}
-          slug={slug}
-          myResources={myResources}
-          prefilledResourceId={prefilledResourceId}
-          t={t.reportar}
-          backToEmergencyLabel={t.common.back_to_emergency}
+    <main className="flex-1 bg-surface">
+      <div className="mx-auto w-full max-w-md">
+        <PageHeaderBand
+          backHref={`/e/${slug}`}
+          backLabel={t.common.back_to_emergency}
+          title={t.reportar.page_title}
+          subtitle={emergency.name}
         />
+        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
+          <ReportForm
+            action={boundAction}
+            slug={slug}
+            myResources={myResources}
+            prefilledResourceId={prefilledResourceId}
+            t={t.reportar}
+            backToEmergencyLabel={t.common.back_to_emergency}
+          />
+        </div>
       </div>
     </main>
   );

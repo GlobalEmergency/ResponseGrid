@@ -1,6 +1,6 @@
 import type { LabelHTMLAttributes } from 'react';
 
-const LABEL_CLASS = 'text-sm font-semibold text-gray-900';
+const LABEL_CLASS = 'text-sm font-semibold text-ink';
 
 interface LabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
   className?: string;

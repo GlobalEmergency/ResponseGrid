@@ -182,7 +182,7 @@ export function DonarForm({
             label={
               <>
                 {t.unit_label}{' '}
-                <span className="text-gray-400 font-normal normal-case">(opcional)</span>
+                <span className="text-muted-soft font-normal normal-case">(opcional)</span>
               </>
             }
           >
@@ -216,7 +216,7 @@ export function DonarForm({
         label={
           <>
             {t.notes_label}{' '}
-            <span className="text-gray-400 font-normal normal-case">(opcional)</span>
+            <span className="text-muted-soft font-normal normal-case">(opcional)</span>
           </>
         }
       >

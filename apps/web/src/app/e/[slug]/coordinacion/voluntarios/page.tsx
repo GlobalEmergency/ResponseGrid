@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -9,6 +8,7 @@ import { VolunteerRosterFilter } from '@/components/molecules/volunteer-roster-f
 import { TaskCard } from '@/components/organisms/task-card';
 import { CreateTaskForm } from '@/components/organisms/create-task-form';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import type { components } from '@reliefhub/api-client';
 
 // Always fetch live data — never serve a stale cached page.
@@ -111,38 +111,21 @@ export default async function CoordinacionVoluntariosPage({ params, searchParams
     : volunteers.filter((v) => v.status === 'available');
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-start px-4 py-10 bg-white">
-      <div className="w-full max-w-xl flex flex-col gap-8">
-
-        {/* ── CABECERA ─────────────────────────────────────────────── */}
-        <header className="flex flex-col gap-2">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex flex-col gap-0.5">
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                Voluntarios y tareas
-              </h1>
-              <p className="text-base text-gray-600 font-medium">
-                {emergency.name}
-              </p>
-            </div>
-
-            {/* Back link */}
-            <Link
-              href={`/e/${slug}/coordinacion`}
-              className="flex-shrink-0 rounded-lg border-2 border-gray-900 px-4 py-2 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
-            >
-              ← Coordinación
-            </Link>
-          </div>
-        </header>
-
-        <hr className="border-gray-200" />
+    <main className="flex-1 bg-surface">
+      <div className="mx-auto w-full max-w-xl">
+        <PageHeaderBand
+          backHref={`/e/${slug}/coordinacion`}
+          backLabel="Coordinación"
+          title="Voluntarios y tareas"
+          subtitle={emergency.name}
+        />
+        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
 
         {/* ── ROSTER DE VOLUNTARIOS ────────────────────────────────── */}
         <section aria-labelledby="roster-heading" className="flex flex-col gap-4">
           <h2
             id="roster-heading"
-            className="text-xl font-bold text-gray-900"
+            className="text-xl font-bold text-ink"
           >
             Roster de voluntarios
           </h2>
@@ -165,13 +148,13 @@ export default async function CoordinacionVoluntariosPage({ params, searchParams
           )}
         </section>
 
-        <hr className="border-gray-200" />
+        <hr className="border-line" />
 
         {/* ── TAREAS ───────────────────────────────────────────────── */}
         <section aria-labelledby="tasks-heading" className="flex flex-col gap-6">
           <h2
             id="tasks-heading"
-            className="text-xl font-bold text-gray-900"
+            className="text-xl font-bold text-ink"
           >
             Tareas
           </h2>
@@ -200,6 +183,7 @@ export default async function CoordinacionVoluntariosPage({ params, searchParams
           )}
         </section>
 
+        </div>
       </div>
     </main>
   );

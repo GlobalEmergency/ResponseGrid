@@ -11,14 +11,14 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const BASE =
-  'flex items-center justify-center rounded-lg font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
+  'flex items-center justify-center rounded-lg font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'text-white bg-gray-900 border-2 border-gray-900 hover:bg-gray-700',
+  primary: 'text-white bg-navy border border-navy hover:bg-navy-700',
   secondary:
-    'text-gray-900 bg-white border-2 border-gray-900 hover:bg-gray-50',
+    'text-navy bg-white border border-navy hover:bg-surface',
   'danger-outline':
-    'text-red-700 border-2 border-red-600 hover:bg-red-50 focus:ring-red-600',
+    'text-danger border border-danger hover:bg-danger-soft focus:ring-danger',
 };
 
 const SIZES: Record<'sm' | 'md' | 'lg', string> = {

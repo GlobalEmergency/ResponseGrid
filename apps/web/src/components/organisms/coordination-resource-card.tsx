@@ -49,19 +49,19 @@ export function CoordinationResourceCard({
   return (
     <article
       aria-label={`Recurso: ${resource.name}`}
-      className="flex flex-col gap-4 rounded-lg border-2 border-gray-900 bg-white p-5"
+      className="flex flex-col gap-4 rounded-lg border-2 border-navy bg-white p-5"
     >
       {/* Header row */}
       <div className="flex flex-col gap-1">
         <div className="flex items-start justify-between gap-3">
-          <h2 className="text-xl font-bold text-gray-900 leading-tight break-words">
+          <h2 className="text-xl font-bold text-ink leading-tight break-words">
             {resource.name}
           </h2>
           <VerificationBadge level={resource.verificationLevel} />
         </div>
-        <div className="flex flex-wrap gap-3 text-sm text-gray-600">
+        <div className="flex flex-wrap gap-3 text-sm text-muted">
           <span className="font-medium">{TYPE_LABELS[resource.type]}</span>
-          <span aria-hidden="true" className="text-gray-300">·</span>
+          <span aria-hidden="true" className="text-muted-soft">·</span>
           <span>{STAGE_LABELS[resource.stage]}</span>
         </div>
       </div>

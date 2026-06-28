@@ -19,7 +19,7 @@ const PRIORITY_LABELS: Record<ReportPriority, string> = {
 };
 
 const PRIORITY_CLASSES: Record<ReportPriority, string> = {
-  low: 'inline-flex items-center rounded-full border border-gray-300 bg-gray-50 px-2.5 py-0.5 text-xs font-semibold text-gray-600',
+  low: 'inline-flex items-center rounded-full border border-line bg-surface px-2.5 py-0.5 text-xs font-semibold text-muted',
   medium: 'inline-flex items-center rounded-full border border-blue-300 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-800',
   high: 'inline-flex items-center rounded-full border border-amber-400 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800',
   urgent: 'inline-flex items-center rounded-full border border-red-600 bg-red-50 px-2.5 py-0.5 text-xs font-bold text-red-700',
@@ -28,7 +28,7 @@ const PRIORITY_CLASSES: Record<ReportPriority, string> = {
 const STATUS_CLASSES: Record<ReportStatus, string> = {
   open: 'inline-flex items-center rounded-full border border-blue-400 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-800',
   reviewed: 'inline-flex items-center rounded-full border border-green-400 bg-green-50 px-2.5 py-0.5 text-xs font-semibold text-green-800',
-  closed: 'inline-flex items-center rounded-full border border-gray-300 bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-500',
+  closed: 'inline-flex items-center rounded-full border border-line bg-surface-alt px-2.5 py-0.5 text-xs font-semibold text-muted',
 };
 
 const STATUS_LABELS: Record<ReportStatus, string> = {
@@ -86,14 +86,14 @@ export function ReportCard({ report, slug }: ReportCardProps) {
   return (
     <article
       aria-label={`Parte: ${TYPE_LABELS[report.type] ?? report.type}`}
-      className="flex flex-col gap-4 rounded-lg border-2 border-gray-900 bg-white p-5"
+      className="flex flex-col gap-4 rounded-lg border-2 border-navy bg-white p-5"
     >
       {/* Header row */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm font-bold text-gray-900">
+        <span className="text-sm font-bold text-ink">
           {TYPE_LABELS[report.type] ?? report.type}
         </span>
-        <span aria-hidden="true" className="text-gray-300">·</span>
+        <span aria-hidden="true" className="text-muted-soft">·</span>
         <span className={priorityClass}>
           {PRIORITY_LABELS[report.priority] ?? report.priority}
         </span>
@@ -101,7 +101,7 @@ export function ReportCard({ report, slug }: ReportCardProps) {
       </div>
 
       {/* Note */}
-      <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
+      <p className="text-sm text-ink leading-relaxed whitespace-pre-wrap">
         {report.note}
       </p>
 
@@ -120,7 +120,7 @@ export function ReportCard({ report, slug }: ReportCardProps) {
                   href={src}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block rounded overflow-hidden border border-gray-200 hover:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1"
+                  className="block rounded overflow-hidden border border-line hover:border-navy focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-1"
                   aria-label="Ver foto a tamaño completo"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -138,7 +138,7 @@ export function ReportCard({ report, slug }: ReportCardProps) {
       )}
 
       {/* Meta info */}
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
         {report.resourceName != null && (
           <span>Punto: {report.resourceName}</span>
         )}

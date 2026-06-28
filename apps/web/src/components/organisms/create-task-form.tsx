@@ -46,10 +46,10 @@ export function CreateTaskForm({ emergencyId, slug }: CreateTaskFormProps) {
     <form
       ref={formRef}
       action={formAction}
-      className="flex flex-col gap-4 rounded-lg border-2 border-gray-200 bg-gray-50 p-5"
+      className="flex flex-col gap-4 rounded-lg border-2 border-line bg-surface p-5"
       aria-label="Crear nueva tarea"
     >
-      <h3 className="text-base font-bold text-gray-900">Nueva tarea</h3>
+      <h3 className="text-base font-bold text-ink">Nueva tarea</h3>
 
       {state.status === 'success' && (
         <p
@@ -90,7 +90,7 @@ export function CreateTaskForm({ emergencyId, slug }: CreateTaskFormProps) {
           id="task-skill"
           name="requiredSkill"
           defaultValue=""
-          className="w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+          className="w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
         >
           {SKILL_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -101,8 +101,8 @@ export function CreateTaskForm({ emergencyId, slug }: CreateTaskFormProps) {
       </FormField>
 
       {/* Optional location */}
-      <fieldset className="flex flex-col gap-3 rounded-lg border border-gray-200 p-4">
-        <legend className="px-1 text-xs font-semibold text-gray-700 uppercase tracking-wide">
+      <fieldset className="flex flex-col gap-3 rounded-lg border border-line p-4">
+        <legend className="px-1 text-xs font-semibold text-ink-soft uppercase tracking-wide">
           Ubicación (opcional)
         </legend>
 

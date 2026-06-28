@@ -57,28 +57,28 @@ export function CoordinationNeedCard({
   return (
     <article
       aria-label={`Petición: ${need.title}`}
-      className="flex flex-col gap-4 rounded-lg border-2 border-gray-900 bg-white p-5"
+      className="flex flex-col gap-4 rounded-lg border-2 border-navy bg-white p-5"
     >
       {/* Header */}
       <div className="flex flex-col gap-1">
-        <h2 className="text-xl font-bold text-gray-900 leading-tight break-words">
+        <h2 className="text-xl font-bold text-ink leading-tight break-words">
           {need.title}
         </h2>
         <FreshnessIndicator
           expiresAt={need.expiresAt}
           lastVerifiedAt={need.lastVerifiedAt}
         />
-        <div className="flex flex-wrap gap-3 text-sm text-gray-600">
+        <div className="flex flex-wrap gap-3 text-sm text-muted">
           {need.items[0] !== undefined && (
             <span className="font-medium">
               {CATEGORY_LABELS[need.items[0].category]}
             </span>
           )}
-          <span aria-hidden="true" className="text-gray-300">·</span>
+          <span aria-hidden="true" className="text-muted-soft">·</span>
           <span>Prioridad: {PRIORITY_LABELS[need.priority]}</span>
           {need.items.length > 0 && (
             <>
-              <span aria-hidden="true" className="text-gray-300">·</span>
+              <span aria-hidden="true" className="text-muted-soft">·</span>
               <span>
                 {String(need.items[0]?.quantity ?? '')}
                 {need.items[0]?.unit != null
