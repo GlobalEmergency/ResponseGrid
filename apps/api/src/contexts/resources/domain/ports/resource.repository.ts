@@ -37,4 +37,9 @@ export interface ResourceRepository {
     byCountry: Record<string, number>;
     total: number;
   }>;
+  /** Visible resources near a point, ordered by distance ascending. */
+  findNearbyVisible(
+    emergencyId: EmergencyId,
+    q: { lat: number; lng: number; radiusMeters: number; limit: number },
+  ): Promise<Array<{ resource: Resource; distanceMeters: number }>>;
 }

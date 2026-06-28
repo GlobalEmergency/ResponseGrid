@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { createDb, Db } from '../../../../shared/db';
 import { resourcesTable } from './schema';
 import { DrizzleResourceRepository } from './drizzle-resource.repository';
@@ -633,6 +633,151 @@ describe('DrizzleResourceRepository (integration)', () => {
       expect(byCategory['water']).not.toBe(3); // R3 excluded
       expect(byCountry['VE']).toBe(1); // R1
       expect(byCountry['CO']).toBe(1); // R2
+    });
+  });
+
+  // ─── Issue #28: findNearbyVisible ──────────────────────────────────────────
+
+  describe('findNearbyVisible', () => {
+    // Query point: Caracas, Venezuela
+    const GEO_EM = '28280000-0000-4000-8000-000000000028';
+    const GEO_LAT = 10.4806;
+    const GEO_LNG = -66.9036;
+
+    const makeGeoResource = (
+      name: string,
+      lat: number,
+      lng: number,
+      status: PublicStatus,
+    ) => {
+      const base = Resource.register({
+        id: ResourceId.create(),
+        emergencyId: EmergencyId.fromString(GEO_EM),
+        type: ResourceType.CollectionPoint,
+        stage: ResourceStage.Origin,
+        name,
+        location: Location.create({
+          address: `${name} addr`,
+          latitude: lat,
+          longitude: lng,
+        }),
+        ownerUserId: OWNER_ID,
+      });
+      return Resource.fromSnapshot({
+        ...base.toSnapshot(),
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: status,
+        createdAt: new Date(),
+      });
+    };
+
+    beforeEach(async () => {
+      // Clean only the geo emergency to avoid interfering with other tests
+      await db
+        .delete(resourcesTable)
+        .where(eq(resourcesTable.emergencyId, GEO_EM));
+    });
+
+    it('returns resources within radius ordered by distance, excludes far and hidden', async () => {
+      // R1: at origin ~0m — ACTIVE
+      const r1 = makeGeoResource(
+        'R1 origin',
+        GEO_LAT,
+        GEO_LNG,
+        PublicStatus.Active,
+      );
+      // R2: ~1.3km away — ACTIVE
+      const r2 = makeGeoResource(
+        'R2 nearby',
+        10.49,
+        -66.903,
+        PublicStatus.Active,
+      );
+      // R3: ~8km away — SATURATED (still visible, within 10km radius)
+      const r3 = makeGeoResource(
+        'R3 saturated',
+        10.553,
+        -66.9036,
+        PublicStatus.Saturated,
+      );
+      // R_far: ~35km away — ACTIVE (beyond 10km radius)
+      const rFar = makeGeoResource('R_far', 10.8, -66.9, PublicStatus.Active);
+      // R_hidden: same coords as R1 — HIDDEN (excluded by status)
+      const rHidden = makeGeoResource(
+        'R_hidden',
+        GEO_LAT,
+        GEO_LNG,
+        PublicStatus.Hidden,
+      );
+
+      await repo.save(r1);
+      await repo.save(r2);
+      await repo.save(r3);
+      await repo.save(rFar);
+      await repo.save(rHidden);
+
+      const results = await repo.findNearbyVisible(
+        EmergencyId.fromString(GEO_EM),
+        { lat: GEO_LAT, lng: GEO_LNG, radiusMeters: 10000, limit: 10 },
+      );
+
+      const names = results.map((r) => r.resource.name);
+      expect(names).toContain('R1 origin');
+      expect(names).toContain('R2 nearby');
+      expect(names).toContain('R3 saturated');
+      expect(names).not.toContain('R_far');
+      expect(names).not.toContain('R_hidden');
+      expect(results).toHaveLength(3);
+
+      // Ordered by distance ascending
+      expect(results[0].resource.name).toBe('R1 origin');
+      expect(results[1].distanceMeters).toBeGreaterThan(
+        results[0].distanceMeters,
+      );
+      expect(results[2].distanceMeters).toBeGreaterThan(
+        results[1].distanceMeters,
+      );
+
+      // Distance checks
+      expect(results[0].distanceMeters).toBeLessThan(10);
+      expect(results[1].distanceMeters).toBeGreaterThan(0);
+      expect(results[2].distanceMeters).toBeGreaterThan(
+        results[1].distanceMeters,
+      );
+      for (const r of results) {
+        expect(r.distanceMeters).toBeLessThanOrEqual(10000);
+      }
+    });
+
+    it('with radiusMeters=2000 returns only resources within 2km', async () => {
+      const r1 = makeGeoResource(
+        'R1 origin',
+        GEO_LAT,
+        GEO_LNG,
+        PublicStatus.Active,
+      );
+      const r2 = makeGeoResource(
+        'R2 nearby',
+        10.49,
+        -66.903,
+        PublicStatus.Active,
+      );
+      const r3 = makeGeoResource('R3 far', 10.6, -66.9, PublicStatus.Saturated);
+
+      await repo.save(r1);
+      await repo.save(r2);
+      await repo.save(r3);
+
+      const results = await repo.findNearbyVisible(
+        EmergencyId.fromString(GEO_EM),
+        { lat: GEO_LAT, lng: GEO_LNG, radiusMeters: 2000, limit: 10 },
+      );
+
+      const names = results.map((r) => r.resource.name);
+      expect(names).toContain('R1 origin');
+      expect(names).toContain('R2 nearby');
+      expect(names).not.toContain('R3 far');
+      expect(results).toHaveLength(2);
     });
   });
 

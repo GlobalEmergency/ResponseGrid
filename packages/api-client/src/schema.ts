@@ -225,6 +225,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/emergencies/{emergencyId}/public/resources/nearby": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Find visible resources near a GPS point, ordered by distance */
+        get: operations["PublicController_nearby"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/emergencies/{emergencyId}/public/resources/facets": {
         parameters: {
             query?: never;
@@ -1440,7 +1457,10 @@ export interface components {
              * @example 2026-06-27T00:00:00.000Z
              */
             externalUpdatedAt: string | null;
-            /** @example VE */
+            /**
+             * @description Country string as stored by the ingestion source (e.g. full Spanish name "Venezuela"). NOT guaranteed to be an ISO 3166-1 alpha-2 code — value depends on the source `pais` field.
+             * @example Venezuela
+             */
             country: string | null;
             /** @example Caracas */
             city: string | null;
@@ -1454,6 +1474,75 @@ export interface components {
             /** @example 50 */
             limit: number;
         };
+        NearbyResourceViewDto: {
+            /**
+             * Format: uuid
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            id: string;
+            /**
+             * @example collection_point
+             * @enum {string}
+             */
+            type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
+            /**
+             * @example origin
+             * @enum {string}
+             */
+            stage: "origin" | "intermediate" | "destination";
+            /** @example Cruz Roja Madrid */
+            name: string;
+            /** @example Centro de acopio principal */
+            description: string | null;
+            location: components["schemas"]["LocationViewDto"];
+            /**
+             * @example verified
+             * @enum {string}
+             */
+            verificationLevel: "unverified" | "verified" | "official";
+            /**
+             * @example active
+             * @enum {string}
+             */
+            publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed";
+            /** Format: uuid */
+            ownerOrganizationId: string | null;
+            /**
+             * @example [
+             *       "water",
+             *       "food"
+             *     ]
+             */
+            accepts: string[];
+            /** @example +58 212 555 0000 */
+            contact: string | null;
+            /** @example Lun-Vie 08-18 */
+            schedule: string | null;
+            /** @example Juan Pérez */
+            manager: string | null;
+            /** @example acopiove.org */
+            sourceName: string | null;
+            /**
+             * @description ISO 8601 date string
+             * @example 2026-06-27T00:00:00.000Z
+             */
+            externalUpdatedAt: string | null;
+            /**
+             * @description Country string as stored by the ingestion source (e.g. full Spanish name "Venezuela"). NOT guaranteed to be an ISO 3166-1 alpha-2 code — value depends on the source `pais` field.
+             * @example Venezuela
+             */
+            country: string | null;
+            /** @example Caracas */
+            city: string | null;
+            /**
+             * @description Distance from query point in meters (rounded)
+             * @example 1234
+             */
+            distanceMeters: number;
+        };
+        NearbyResourcesResponseDto: {
+            items: components["schemas"]["NearbyResourceViewDto"][];
+        };
         ResourceFacetsDto: {
             /**
              * @example {
@@ -1463,9 +1552,10 @@ export interface components {
              */
             byCategory: Record<string, never>;
             /**
+             * @description Counts keyed by the stored `country` string. Values mirror the ingestion source `pais` field (full Spanish names, NOT ISO 3166-1 alpha-2 codes).
              * @example {
-             *       "VE": 3,
-             *       "CO": 2
+             *       "Venezuela": 3,
+             *       "Colombia": 2
              *     }
              */
             byCountry: Record<string, never>;
@@ -2856,6 +2946,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PagedResourcesDto"];
+                };
+            };
+        };
+    };
+    PublicController_nearby: {
+        parameters: {
+            query: {
+                /** @description Latitude between -90 and 90 */
+                lat: number;
+                /** @description Longitude between -180 and 180 */
+                lng: number;
+                /** @description Search radius in meters (max 100000) */
+                radius: number;
+                /** @description Max results (default 50, max 100) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Resources within radius ordered by distance */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NearbyResourcesResponseDto"];
                 };
             };
         };

@@ -99,6 +99,19 @@ export class ResourceViewDto {
   city!: string | null;
 }
 
+export class NearbyResourceViewDto extends ResourceViewDto {
+  @ApiProperty({
+    example: 1234,
+    description: 'Distance from query point in meters (rounded)',
+  })
+  distanceMeters!: number;
+}
+
+export class NearbyResourcesResponseDto {
+  @ApiProperty({ type: [NearbyResourceViewDto] })
+  items!: NearbyResourceViewDto[];
+}
+
 export class PagedResourcesDto {
   @ApiProperty({ type: [ResourceViewDto] })
   items!: ResourceViewDto[];

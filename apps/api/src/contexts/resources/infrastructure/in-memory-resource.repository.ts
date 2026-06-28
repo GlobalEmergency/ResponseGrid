@@ -4,6 +4,23 @@ import { ResourceId } from '../domain/resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { VerificationLevel, PublicStatus } from '../domain/resource-enums';
 
+function haversineMeters(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number,
+): number {
+  const R = 6371000;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 export class InMemoryResourceRepository implements ResourceRepository {
   private store = new Map<string, ReturnType<Resource['toSnapshot']>>();
 
@@ -124,6 +141,41 @@ export class InMemoryResourceRepository implements ResourceRepository {
       .slice(offset, offset + q.limit)
       .map((s) => Resource.fromSnapshot(s));
     return Promise.resolve({ items, total });
+  }
+
+  findNearbyVisible(
+    emergencyId: EmergencyId,
+    q: { lat: number; lng: number; radiusMeters: number; limit: number },
+  ): Promise<Array<{ resource: Resource; distanceMeters: number }>> {
+    const visible = new Set<PublicStatus>([
+      PublicStatus.Active,
+      PublicStatus.Saturated,
+      PublicStatus.Paused,
+    ]);
+    const withDist = [...this.store.values()]
+      .filter(
+        (s) =>
+          s.emergencyId === emergencyId.value && visible.has(s.publicStatus),
+      )
+      .map((s) => {
+        const dist = haversineMeters(
+          q.lat,
+          q.lng,
+          s.location.latitude,
+          s.location.longitude,
+        );
+        return { snap: s, dist };
+      })
+      .filter(({ dist }) => dist <= q.radiusMeters)
+      .sort((a, b) => a.dist - b.dist)
+      .slice(0, q.limit);
+
+    return Promise.resolve(
+      withDist.map(({ snap, dist }) => ({
+        resource: Resource.fromSnapshot(snap),
+        distanceMeters: Math.round(dist),
+      })),
+    );
   }
 
   facets(emergencyId: EmergencyId): Promise<{

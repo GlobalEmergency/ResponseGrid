@@ -7,8 +7,13 @@ import {
 } from '@nestjs/swagger';
 import { GetPublicResources } from '../../application/get-public-resources';
 import { GetResourceFacets } from '../../application/get-resource-facets';
-import { PagedResourcesDto, ResourceFacetsDto } from './response.dto';
-import { PublicResourcesQueryDto } from './dto';
+import { GetNearbyResources } from '../../application/get-nearby-resources';
+import {
+  PagedResourcesDto,
+  ResourceFacetsDto,
+  NearbyResourcesResponseDto,
+} from './response.dto';
+import { PublicResourcesQueryDto, NearbyResourcesQueryDto } from './dto';
 
 @ApiTags('public')
 @Controller()
@@ -16,6 +21,7 @@ export class PublicController {
   constructor(
     private readonly getPublicResources: GetPublicResources,
     private readonly getResourceFacets: GetResourceFacets,
+    private readonly getNearbyResources: GetNearbyResources,
   ) {}
 
   @Get('emergencies/:emergencyId/public/resources')
@@ -42,6 +48,32 @@ export class PublicController {
       limit: query.limit ?? 50,
       ...(query.category !== undefined && { category: query.category }),
       ...(query.country !== undefined && { country: query.country }),
+    });
+  }
+
+  @Get('emergencies/:emergencyId/public/resources/nearby')
+  @ApiOperation({
+    summary: 'Find visible resources near a GPS point, ordered by distance',
+  })
+  @ApiParam({
+    name: 'emergencyId',
+    description: 'Emergency UUID',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Resources within radius ordered by distance',
+    type: NearbyResourcesResponseDto,
+  })
+  async nearby(
+    @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
+    @Query() query: NearbyResourcesQueryDto,
+  ): Promise<NearbyResourcesResponseDto> {
+    return this.getNearbyResources.execute({
+      emergencyId,
+      lat: query.lat,
+      lng: query.lng,
+      radiusMeters: query.radius,
+      limit: query.limit ?? 50,
     });
   }
 
