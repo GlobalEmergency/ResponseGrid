@@ -209,6 +209,7 @@ export const es = {
     // Footer links
     footer_my_points: 'Mis puntos',
     footer_my_volunteer: 'Mi voluntariado',
+    footer_my_shipments: 'Mis expediciones',
     footer_report: 'Reportar',
     footer_coordination: 'Acceso de coordinación',
 
@@ -1285,6 +1286,16 @@ export const es = {
 
     update_status_forbidden: 'No tienes permisos para cambiar el estado de este punto.',
     update_status_failed: 'No se pudo actualizar el estado. Inténtalo de nuevo.',
+
+    // Mis expediciones (transportista) — metadata + header + lista
+    ship_meta_title: 'Mis expediciones — {name} · ResponseGrid',
+    ship_meta_description: 'Las expediciones que tienes asignadas en {name}.',
+    ship_title: 'Mis expediciones',
+    ship_subtitle: 'Los envíos que tienes asignados como transportista.',
+    ship_list_label: 'Lista de mis expediciones',
+    ship_empty_title: 'No tienes expediciones asignadas.',
+    ship_empty_description:
+      'Cuando coordinación te asigne un envío aparecerá aquí para que lo marques en tránsito y confirmes la entrega.',
   },
 
   admin: {
@@ -1637,6 +1648,7 @@ export const es = {
     tab_resources: 'Recursos',
     tab_needs: 'Peticiones',
     tab_offers: 'Ofertas',
+    tab_shipments: 'Expediciones',
     tab_volunteers: 'Voluntarios',
     tab_reports: 'Reportes',
     tabs_aria: 'Secciones de coordinación',
@@ -1653,6 +1665,9 @@ export const es = {
     hub_volunteers_description: 'Coordina el roster y asigna tareas.',
     hub_reports_label: 'Reportes de campo',
     hub_reports_description: 'Revisa los partes enviados desde el terreno.',
+    hub_shipments_label: 'Expediciones',
+    hub_shipments_description: 'Planifica y sigue los envíos de material entre puntos.',
+    hub_shipments_count_aria: 'en curso',
 
     search_placeholder: 'Buscar…',
     search_aria: 'Buscar',
@@ -1818,6 +1833,97 @@ export const es = {
     personnel_fields_specialty_placeholder: 'Ej. médico urgencias pediátricas',
     personnel_fields_count_label: 'Personas necesarias',
 
+    // ── Expediciones / Shipment (#106) ────────────────────────────────
+    shipments_heading: 'Expediciones',
+    shipments_list_label: 'Lista de expediciones',
+    shipments_empty_title: 'Todavía no hay expediciones.',
+    shipments_empty_description:
+      'Crea una expedición para mover material entre puntos de la emergencia.',
+    shipments_no_match_title: 'Sin expediciones con este estado.',
+    shipments_no_match_description: 'Cambia el filtro de estado para ver más.',
+    shipments_section_meta_title:
+      'Expediciones — Coordinación de {name} · ResponseGrid',
+    shipments_section_meta_description:
+      'Planificación y seguimiento de envíos de material de {name}.',
+
+    shipments_filter_group_label: 'Filtros de expediciones',
+    shipments_filter_status_label: 'Estado',
+    shipments_filter_status_aria: 'Filtrar por estado',
+    shipments_filter_status_all: 'Todos los estados',
+
+    ship_route: '{origin} → {destination}',
+    ship_drawer_open: 'Ver detalle de la expedición: {route}',
+    ship_section_route: 'Ruta',
+    ship_section_items: 'Carga',
+    ship_section_assignment: 'Asignación',
+    ship_field_origin: 'Origen',
+    ship_field_destination: 'Destino',
+    ship_field_items: 'Artículos',
+    ship_field_manifest: 'Manifiesto',
+    ship_field_capacity: 'Capacidad asignada',
+    ship_field_carrier: 'Transportista',
+
+    ship_status_planned: 'Planificada',
+    ship_status_assigned: 'Asignada',
+    ship_status_in_transit: 'En tránsito',
+    ship_status_delivered: 'Entregada',
+    ship_status_failed: 'Fallida',
+    ship_status_cancelled: 'Cancelada',
+
+    ship_carrier_volunteer: 'Voluntario',
+    ship_carrier_organization: 'Organización',
+
+    ship_mode_road: 'Carretera',
+    ship_mode_sea: 'Marítimo',
+    ship_mode_air: 'Aéreo',
+
+    // Lifecycle actions
+    ship_assign_select_label: 'Seleccionar capacidad para asignar',
+    ship_assign_placeholder: 'Selecciona una capacidad…',
+    ship_assign_none: 'No hay capacidades disponibles',
+    ship_assign_cta: 'Asignar capacidad',
+    ship_mark_in_transit: 'Marcar en tránsito',
+    ship_confirm_delivery: 'Confirmar entrega',
+    ship_cancel: 'Cancelar expedición',
+
+    // Crear expedición
+    ship_create_cta: '+ Crear expedición',
+    ship_create_title: 'Nueva expedición',
+    ship_create_submit: 'Crear expedición',
+    ship_creating: 'Creando…',
+    ship_select_resource_placeholder: 'Selecciona un punto…',
+    ship_items_legend: 'Carga',
+    ship_item_description_label: 'Descripción del artículo',
+    ship_item_description_placeholder: 'Ej. Cajas de agua',
+    ship_item_quantity_label: 'Cantidad',
+    ship_item_quantity_placeholder: 'Cantidad',
+    ship_item_unit_label: 'Unidad',
+    ship_item_unit_placeholder: 'Unidad',
+    ship_item_add: '+ Añadir artículo',
+    ship_item_remove: 'Quitar',
+    ship_manifest_placeholder: 'Notas del manifiesto: carga frágil, instrucciones…',
+
+    // Capacidades disponibles (read-only, #105)
+    cap_heading: 'Capacidades disponibles',
+    cap_subtitle: 'Transporte ofrecido para esta emergencia. Asígnalo desde una expedición.',
+    cap_list_label: 'Lista de capacidades de transporte',
+    cap_empty_title: 'No hay capacidades de transporte.',
+    cap_empty_description:
+      'Cuando alguien ofrezca transporte para esta emergencia aparecerá aquí.',
+    cap_field_capacity: 'Capacidad:',
+    cap_field_coverage: 'Cobertura:',
+    cap_field_window: 'Ventana:',
+    cap_status_available: 'Disponible',
+    cap_status_reserved: 'Reservada',
+    cap_status_withdrawn: 'Retirada',
+    cap_filter_group_label: 'Filtros de capacidades',
+    cap_filter_mode_label: 'Modo',
+    cap_filter_mode_aria: 'Filtrar por modo de transporte',
+    cap_filter_mode_all: 'Todos los modos',
+    cap_filter_status_label: 'Estado',
+    cap_filter_status_aria: 'Filtrar por estado',
+    cap_filter_status_all: 'Todos los estados',
+
     // server-action messages
     err_no_permission_match: 'No tienes permisos para asignar esta oferta.',
     err_offer_not_open: 'La oferta no está en estado abierto.',
@@ -1867,6 +1973,27 @@ export const es = {
     vol_err_no_permission_cancel: 'No tienes permisos para cancelar esta tarea.',
     vol_err_already_completed: 'La tarea ya está completada.',
     vol_err_cancel_failed: 'No se pudo cancelar la tarea. Inténtalo de nuevo.',
+
+    // Expediciones (#106) — server-action messages
+    ship_err_endpoints_required: 'Selecciona origen y destino.',
+    ship_err_same_endpoint: 'El origen y el destino deben ser distintos.',
+    ship_err_items_required: 'Añade al menos un artículo a la carga.',
+    ship_err_quantity_invalid: 'Las cantidades deben ser números positivos.',
+    ship_err_capacity_required: 'Selecciona una capacidad para asignar.',
+    ship_err_no_permission_create: 'No tienes permisos para crear expediciones.',
+    ship_err_create_failed: 'No se pudo crear la expedición. Inténtalo de nuevo.',
+    ship_err_no_permission_assign: 'No tienes permisos para asignar capacidad.',
+    ship_err_no_permission_act: 'No tienes permisos para actualizar esta expedición.',
+    ship_err_no_permission_cancel: 'No tienes permisos para cancelar esta expedición.',
+    ship_err_not_found: 'Expedición no encontrada.',
+    ship_err_not_planned: 'La expedición ya no está en estado planificada.',
+    ship_err_not_assigned: 'La expedición no está en estado asignada.',
+    ship_err_not_in_transit: 'La expedición no está en tránsito.',
+    ship_err_cannot_cancel: 'La expedición no puede cancelarse en su estado actual.',
+    ship_err_assign_failed: 'No se pudo asignar la capacidad. Inténtalo de nuevo.',
+    ship_err_transit_failed: 'No se pudo marcar en tránsito. Inténtalo de nuevo.',
+    ship_err_deliver_failed: 'No se pudo confirmar la entrega. Inténtalo de nuevo.',
+    ship_err_cancel_failed: 'No se pudo cancelar la expedición. Inténtalo de nuevo.',
   },
 
   // Shared leaf-component strings
