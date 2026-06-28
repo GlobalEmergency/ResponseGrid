@@ -1,3 +1,5 @@
+> ⚠️ **DEPRECADO** — ficha congelada como referencia histórica. El seguimiento de esta feature vive en **GitHub Issues**: rutas/isócronas #29 · #31 (cercanía `/nearby` ✅). No edites esta ficha; trabaja en el issue. Convención: ver `AGENTS.md` y [`00-indice.md`](00-indice.md).
+
 # 08 · Cercanía y rutas — Dominio: Mapa y geolocalización
 
 > Caso de uso capturado del análisis de REDH para el roadmap de ReliefHub. Entregable independiente y abordable por separado.

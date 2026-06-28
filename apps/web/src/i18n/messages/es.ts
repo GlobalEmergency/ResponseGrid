@@ -126,7 +126,7 @@ export const es = {
     menu_verify: 'Verificar una campaña',
 
     // Tarjetas de métricas
-    metric_tile_open: 'Necesidades abiertas',
+    metric_tile_open: 'Necesidades registradas',
     metric_tile_points: 'Puntos activos',
     metric_tile_covered: 'Cubiertas',
     metric_tile_queue: 'En cola',

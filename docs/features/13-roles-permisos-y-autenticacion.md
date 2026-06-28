@@ -1,3 +1,5 @@
+> ⚠️ **DEPRECADO** — ficha congelada como referencia histórica. El seguimiento de esta feature vive en **GitHub Issues**: implementada. No edites esta ficha; trabaja en el issue. Convención: ver `AGENTS.md` y [`00-indice.md`](00-indice.md).
+
 # 13 · Roles, permisos y autenticación — Dominio: Plataforma y acceso
 
 > Rediseño fundacional del sistema de autorización de ReliefHub. No es una feature operativa: es la **capa transversal** sobre la que se apoyan todas las demás (coordinación, voluntarios, acreditación, reunificación…). Sustituye los tres mecanismos de autorización actuales —incompatibles entre sí— por un único modelo escalable.

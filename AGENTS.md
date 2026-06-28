@@ -37,19 +37,31 @@ Hexagonal bounded contexts in `apps/api/src/contexts/` (18):
 - DB changes **always** as versioned migrations `apps/api/drizzle/NNNN_name.sql` (next free number — check the dir; gaps exist because removed features deleted their migrations). Applied idempotently by `deploy/migrate.sh` (prod) and the test `global-setup` (tracked by filename). `drizzle-kit migrate/generate` hangs on Windows → write the `.sql` by hand. **UTF-8 SQL via file → `psql < f.sql`, never via shell args** (Windows mangles accents).
 - After touching DTOs/endpoints: **`pnpm gen:api`** and commit `packages/api-client/src/schema.ts` (verify the new paths are in it).
 - Prefer the **typed Drizzle query builder** over raw `db.execute(sql\`SELECT *\`)` — raw SQL returns timestamptz/numeric/array columns as **strings**, which 500s on `.toISOString()` etc. If you must use raw SQL, coerce via the repo's `rawRowToSnapshot` helpers.
-- Deliverable docs naming: `{NN}-{kebab-case}.{ext}`. Product/feature backlog lives in `docs/features/` + GitHub Issues.
+- Deliverable docs naming: `{NN}-{kebab-case}.{ext}`.
+- **Tracking lives in GitHub Issues — the single source of truth** for features, bugs, docs work, status, priority and the whole backlog. Use the issue templates (`.github/ISSUE_TEMPLATE/`: epic/feature/bug), the labels (`epic`/`feature`/`task`/`docs` · `area:*` · `P0`/`P1`/`P2` · `in-progress`), **EPIC** issues that group sub-issues (checklist + `Closes #NN`), and the **Claiming an issue** protocol below. **Do not track work, status or backlog in markdown.** `docs/features/*.md` is **frozen legacy** (historical specs only, each linked from its issue) — do not add or edit them; open/curate the GitHub issue instead.
 
 ## Workflow — branch protection is ACTIVE on `main`
 
 **There is NO direct push to `main`.** Multiple parallel agent sessions merge here, so `main` moves fast. Every change:
 
-1. Sync: `git checkout main && git fetch origin && git merge --ff-only origin/main`.
-2. Branch: `git checkout -b feature/NN-short` (or `fix/...`, `docs/...`).
-3. Implement (TDD). Run the **full gate locally** (below) — the CI enforces all of it and a red check blocks the merge.
-4. `git push -u origin <branch>` → `gh pr create --base main --body "Closes #NN …"` → `gh pr merge <branch> --auto --squash`.
-5. CI runs the 4 required checks (`Format check`, `Lint`, `Build`, `Test`); on green it **auto-merges (squash)**, closes the linked issue, **deletes the branch**, and triggers the deploy.
+1. **Claim the issue** so no two agents take the same one — see **Claiming an issue** below. Only start one that is open, has no `in-progress` label, and is not already linked by an open PR.
+2. Sync: `git checkout main && git fetch origin && git merge --ff-only origin/main`.
+3. Branch: `git checkout -b feature/NN-short` (or `fix/...`, `docs/...`).
+4. Implement (TDD). Run the **full gate locally** (below) — the CI enforces all of it and a red check blocks the merge.
+5. `git push -u origin <branch>` → `gh pr create --base main --body "Closes #NN …"` → `gh pr merge <branch> --auto --squash`.
+6. CI runs the 4 required checks (`Format check`, `Lint`, `Build`, `Test`); on green it **auto-merges (squash)**, closes the linked issue, **deletes the branch**, and triggers the deploy.
 
 Repo settings: squash-only, delete-branch-on-merge, auto-merge ON, `strict=false` (no up-to-date requirement — but always sync `main` before push to minimise drift), 0 required approvals (the CI is the gate, not human review). Work from GitHub issues; put `Closes #NN` in the PR body.
+
+### Claiming an issue (parallel-agent coordination)
+
+Several agent sessions (Claude, Codex, …) run at once and share one GitHub identity, so **claim an issue before working it** — the `in-progress` label is the lock. Skip this only for ad-hoc work with no issue.
+
+1. **Check it's free:** the issue is open, has **no `in-progress` label**, and **no open PR links it** (`gh pr list --state open --search "NN in:body"`).
+2. **Claim it:** `gh issue edit NN --add-label in-progress`, then leave a claim comment — `gh issue comment NN --body "🤖 WIP · <branch> · $(date -u +%FT%TZ)"`. The session identity goes in the comment (not the assignee), since sessions share a token.
+3. **Confirm you won the race:** re-read it (`gh issue view NN --comments`). If another claim comment **predates yours**, you lost — remove the label only if you added it (`gh issue edit NN --remove-label in-progress`), retract your comment, and pick a different issue.
+4. **Release:** when your PR merges, `Closes #NN` closes the issue and the lock is moot. If you **abandon** it, `gh issue edit NN --remove-label in-progress` and comment why, so it's free again.
+5. **Stale claim:** an `in-progress` issue with **no linked open PR and no claim/branch activity for >24h** counts as abandoned — remove the stale label and re-claim it.
 
 ## The gate (run locally before pushing — CI runs ALL of these)
 
