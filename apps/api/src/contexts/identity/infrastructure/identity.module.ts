@@ -17,6 +17,10 @@ import {
   MembershipRepository,
 } from '../domain/ports/membership.repository';
 import {
+  GRANT_REPOSITORY,
+  GrantRepository,
+} from '../domain/ports/grant.repository';
+import {
   USER_IDENTITY_REPOSITORY,
   UserIdentityRepository,
 } from '../domain/ports/user-identity.repository';
@@ -24,6 +28,7 @@ import { PASSWORD_HASHER } from '../domain/ports/password-hasher';
 import { TOKEN_SERVICE } from '../domain/ports/token.service';
 import { DrizzleUserRepository } from './drizzle/drizzle-user.repository';
 import { DrizzleMembershipRepository } from './drizzle/drizzle-membership.repository';
+import { DrizzleGrantRepository } from './drizzle/drizzle-grant.repository';
 import { DrizzleUserIdentityRepository } from './drizzle/drizzle-user-identity.repository';
 import { BcryptPasswordHasher } from './bcrypt-password-hasher';
 import { JwtTokenService } from './jwt-token.service';
@@ -81,6 +86,12 @@ const membershipRepositoryProvider = {
   inject: [DB],
   useFactory: (db: Db): MembershipRepository =>
     new DrizzleMembershipRepository(db),
+};
+
+const grantRepositoryProvider = {
+  provide: GRANT_REPOSITORY,
+  inject: [DB],
+  useFactory: (db: Db): GrantRepository => new DrizzleGrantRepository(db),
 };
 
 const userIdentityRepositoryProvider = {
@@ -189,6 +200,7 @@ const authenticateWithProviderProvider = {
   providers: [
     userRepositoryProvider,
     membershipRepositoryProvider,
+    grantRepositoryProvider,
     userIdentityRepositoryProvider,
     passwordHasherProvider,
     tokenServiceProvider,
@@ -217,6 +229,7 @@ const authenticateWithProviderProvider = {
   exports: [
     USER_REPOSITORY,
     MEMBERSHIP_REPOSITORY,
+    GRANT_REPOSITORY,
     TOKEN_SERVICE,
     RESOURCE_EMERGENCY_LOOKUP,
     NEED_EMERGENCY_LOOKUP,
