@@ -1,4 +1,4 @@
-# ResponseGrid — all-in-one production stack for a single EC2 t3.micro.
+# ResponseGrid — all-in-one production stack for a single EC2 t3.small.
 # API + Postgres + Redis + automatic HTTPS (Caddy), with idempotent migrations.
 #
 # Usage (on the EC2, repo cloned):
@@ -13,6 +13,15 @@ services:
     image: postgres:16
     restart: unless-stopped
     env_file: .env
+    # pg_stat_statements is required for Datadog DBM (query-level monitoring).
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - track_activity_query_size=4096
+      - -c
+      - pg_stat_statements.track=all
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -22,7 +31,7 @@ services:
       retries: 10
     labels:
       com.datadoghq.ad.checks: |
-        {"postgres":{"init_config":{},"instances":[{"host":"%%host%%","port":5432,"username":"datadog","password":"%%env_DD_POSTGRES_PASSWORD%%","dbname":"%%env_POSTGRES_DB%%"}]}}
+        {"postgres":{"init_config":{},"instances":[{"host":"%%host%%","port":5432,"username":"datadog","password":"%%env_DD_POSTGRES_PASSWORD%%","dbname":"%%env_POSTGRES_DB%%","dbm":true}]}}
 
   redis:
     image: redis:7
@@ -54,6 +63,14 @@ services:
       dockerfile: apps/api/Dockerfile
     restart: unless-stopped
     env_file: .env
+    # APM: send traces to the datadog agent container; correlate logs with traces.
+    environment:
+      - DD_TRACE_ENABLED=true
+      - DD_AGENT_HOST=datadog
+      - DD_TRACE_AGENT_PORT=8126
+      - DD_ENV=prod
+      - DD_SERVICE=responsegrid-api
+      - DD_LOGS_INJECTION=true
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -92,14 +109,15 @@ services:
       - DD_LOGS_ENABLED=true
       - DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true
       - DD_PROCESS_AGENT_ENABLED=false
-      - DD_APM_ENABLED=false
+      - DD_APM_ENABLED=true
+      - DD_APM_NON_LOCAL_TRAFFIC=true
       - DD_CONTAINER_EXCLUDE=name:datadog
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /proc/:/host/proc/:ro
       - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
       - dd-run:/opt/datadog-agent/run:rw
-    mem_limit: 512m
+    mem_limit: 768m
     depends_on:
       - postgres
       - redis

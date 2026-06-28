@@ -33,6 +33,7 @@
     "bullmq": "^5.79.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
+    "dd-trace": "^5.110.0",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "helmet": "^8.2.0",

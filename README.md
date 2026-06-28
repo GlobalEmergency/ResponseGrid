@@ -116,7 +116,8 @@ Flujo de trabajo:
 
 ## 🚀 Despliegue
 
-- [`docs/deploy/aws-free-tier.md`](docs/deploy/aws-free-tier.md) — guía paso a paso: **web en Vercel + API/Postgres/Redis en una EC2 t3.micro (capa gratuita) + S3**. Artefactos en [`deploy/`](deploy) (Dockerfile, `docker-compose.prod.yml`, migraciones, Caddy).
+- [`docs/deploy/aws-free-tier.md`](docs/deploy/aws-free-tier.md) — guía paso a paso: **web en Vercel + API/Postgres/Redis en una EC2 + S3** (la guía usa t3.micro free-tier; producción corre en **t3.small** por el agente de observabilidad). Artefactos en [`deploy/`](deploy) (Dockerfile, `docker-compose.prod.yml`, migraciones, Caddy).
+- [`deploy/datadog.md`](deploy/datadog.md) — observabilidad: agente **Datadog** (host, contenedores, Postgres+DBM, Redis, logs y **APM/trazas**), sitio EU.
 
 ## 📚 Documentación
 
