@@ -1,0 +1,43 @@
+name: Épica
+description: Propuesta de una épica con objetivo, sub-issues y Definition of Done.
+title: "[EPIC] "
+labels:
+  - epic
+body:
+  - type: textarea
+    id: objetivo
+    attributes:
+      label: Objetivo
+      description: Describe qué problema resuelve esta épica.
+      placeholder: Qué queremos conseguir y por qué importa.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alcance
+    attributes:
+      label: Alcance
+      description: Enumera los sub-issues o bloques de trabajo previstos.
+      placeholder: Sub-issues, dependencias y límites.
+    validations:
+      required: true
+
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Criterios de aceptación
+      description: Qué debe cumplirse para dar la épica por terminada.
+      placeholder: Resultados observables y verificables.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: done
+    attributes:
+      label: Definition of Done
+      description: Marca solo lo que realmente vaya a quedar terminado en esta épica.
+      options:
+        - label: El alcance está implementado y verificado.
+        - label: Los tests y la validación mínima pasan.
+        - label: La documentación o notas de uso necesarias están actualizadas.
+        - label: No quedan TODOs de la épica sin seguimiento.
