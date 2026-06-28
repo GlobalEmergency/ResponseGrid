@@ -1,14 +1,9 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
-import { DomainExceptionFilter } from './contexts/resources/infrastructure/http/domain-exception.filter';
-import { NeedsDomainExceptionFilter } from './contexts/needs/infrastructure/http/domain-exception.filter';
-import { ReportExceptionFilter } from './contexts/reports/infrastructure/http/report-exception.filter';
-import { OffersDomainExceptionFilter } from './contexts/offers/infrastructure/http/domain-exception.filter';
-import { LogisticsDomainExceptionFilter } from './contexts/logistics/infrastructure/http/domain-exception.filter';
+import { configureHttpApp } from './shared/configure-http-app';
 
 /**
  * Validates that JWT_SECRET is strong enough in production.
@@ -56,20 +51,7 @@ async function bootstrap(): Promise<void> {
     credentials: true,
   });
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
-  app.useGlobalFilters(
-    new DomainExceptionFilter(),
-    new NeedsDomainExceptionFilter(),
-    new ReportExceptionFilter(),
-    new OffersDomainExceptionFilter(),
-    new LogisticsDomainExceptionFilter(),
-  );
+  configureHttpApp(app);
   app.enableShutdownHooks();
 
   const config = new DocumentBuilder()

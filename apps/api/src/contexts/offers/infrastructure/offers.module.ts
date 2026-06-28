@@ -4,6 +4,7 @@ import IORedis from 'ioredis';
 import { DB, DatabaseModule } from '../../../shared/database.module';
 import { Db } from '../../../shared/db';
 import { OffersController } from './http/offers.controller';
+import { DonationIntakesController } from './http/donation-intakes.controller';
 import { SubmitOffer } from '../application/submit-offer';
 import { MatchOffer } from '../application/match-offer';
 import { MarkOfferFulfilled } from '../application/mark-offer-fulfilled';
@@ -14,6 +15,15 @@ import { GetOffersQueue } from '../application/get-offers-queue';
 import { ListOffersForNeed } from '../application/list-offers-for-need';
 import { SuggestOffersForNeedWithLocation } from '../application/suggest-offers-for-need';
 import { GetMyOffers } from '../application/get-my-offers';
+import { CreateDonationIntake } from '../application/create-donation-intake';
+import { LookupDonorByContact } from '../application/lookup-donor-by-contact';
+import { UpdateDonationIntake } from '../application/update-donation-intake';
+import { SearchDonationIntakes } from '../application/search-donation-intakes';
+import { GetDonationIntakeById } from '../application/get-donation-intake-by-id';
+import { ListPendingIntakesByResource } from '../application/list-pending-intakes-by-resource';
+import { ConfirmIntakeReception } from '../application/confirm-intake-reception';
+import { RejectIntake } from '../application/reject-intake';
+import { MarkIntakeIncomplete } from '../application/mark-intake-incomplete';
 import {
   OFFER_REPOSITORY,
   OfferRepository,
@@ -28,6 +38,16 @@ import { DrizzleOfferRepository } from './drizzle/drizzle-offer.repository';
 import { DrizzleEmergencyStatusReader } from '../../../shared/drizzle-emergency-status-reader';
 import { BullMqOfferEventBus } from './bullmq-event-bus';
 import { DrizzleNeedLookup } from './drizzle/drizzle-need-lookup';
+import {
+  DONATION_INTAKE_REPOSITORY,
+  DonationIntakeRepository,
+} from '../domain/ports/donation-intake.repository';
+import {
+  INTAKE_RESOURCE_LOOKUP,
+  IntakeResourceLookup,
+} from '../domain/ports/intake-resource-lookup';
+import { DrizzleDonationIntakeRepository } from './drizzle/drizzle-donation-intake.repository';
+import { DrizzleIntakeResourceLookup } from './drizzle/drizzle-intake-resource-lookup';
 import { IdentityModule } from '../../identity/infrastructure/identity.module';
 import {
   NOTIFICATIONS_PORT,
@@ -158,9 +178,92 @@ const getMyOffersProvider = {
   useFactory: (repo: OfferRepository) => new GetMyOffers(repo),
 };
 
+const donationIntakeRepositoryProvider = {
+  provide: DONATION_INTAKE_REPOSITORY,
+  inject: [DB],
+  useFactory: (db: Db): DonationIntakeRepository =>
+    new DrizzleDonationIntakeRepository(db),
+};
+
+const intakeResourceLookupProvider = {
+  provide: INTAKE_RESOURCE_LOOKUP,
+  inject: [DB],
+  useFactory: (db: Db): IntakeResourceLookup =>
+    new DrizzleIntakeResourceLookup(db),
+};
+
+const createDonationIntakeProvider = {
+  provide: CreateDonationIntake,
+  inject: [
+    DONATION_INTAKE_REPOSITORY,
+    OFFER_EMERGENCY_STATUS_READER,
+    INTAKE_RESOURCE_LOOKUP,
+  ],
+  useFactory: (
+    repo: DonationIntakeRepository,
+    statusReader: OfferEmergencyStatusReader,
+    resourceLookup: IntakeResourceLookup,
+  ) => new CreateDonationIntake(repo, statusReader, resourceLookup),
+};
+
+const lookupDonorByContactProvider = {
+  provide: LookupDonorByContact,
+  inject: [DONATION_INTAKE_REPOSITORY],
+  useFactory: (repo: DonationIntakeRepository) =>
+    new LookupDonorByContact(repo),
+};
+
+const updateDonationIntakeProvider = {
+  provide: UpdateDonationIntake,
+  inject: [DONATION_INTAKE_REPOSITORY],
+  useFactory: (repo: DonationIntakeRepository) =>
+    new UpdateDonationIntake(repo),
+};
+
+const searchDonationIntakesProvider = {
+  provide: SearchDonationIntakes,
+  inject: [DONATION_INTAKE_REPOSITORY],
+  useFactory: (repo: DonationIntakeRepository) =>
+    new SearchDonationIntakes(repo),
+};
+
+const getDonationIntakeByIdProvider = {
+  provide: GetDonationIntakeById,
+  inject: [DONATION_INTAKE_REPOSITORY],
+  useFactory: (repo: DonationIntakeRepository) =>
+    new GetDonationIntakeById(repo),
+};
+
+const listPendingIntakesByResourceProvider = {
+  provide: ListPendingIntakesByResource,
+  inject: [DONATION_INTAKE_REPOSITORY],
+  useFactory: (repo: DonationIntakeRepository) =>
+    new ListPendingIntakesByResource(repo),
+};
+
+const confirmIntakeReceptionProvider = {
+  provide: ConfirmIntakeReception,
+  inject: [DONATION_INTAKE_REPOSITORY, OFFER_EVENT_BUS],
+  useFactory: (repo: DonationIntakeRepository, bus: EventBus) =>
+    new ConfirmIntakeReception(repo, bus),
+};
+
+const rejectIntakeProvider = {
+  provide: RejectIntake,
+  inject: [DONATION_INTAKE_REPOSITORY],
+  useFactory: (repo: DonationIntakeRepository) => new RejectIntake(repo),
+};
+
+const markIntakeIncompleteProvider = {
+  provide: MarkIntakeIncomplete,
+  inject: [DONATION_INTAKE_REPOSITORY],
+  useFactory: (repo: DonationIntakeRepository) =>
+    new MarkIntakeIncomplete(repo),
+};
+
 @Module({
   imports: [DatabaseModule, IdentityModule, NotificationsModule],
-  controllers: [OffersController],
+  controllers: [OffersController, DonationIntakesController],
   providers: [
     eventQueueProvider,
     offerRepositoryProvider,
@@ -177,6 +280,17 @@ const getMyOffersProvider = {
     listOffersForNeedProvider,
     suggestOffersForNeedProvider,
     getMyOffersProvider,
+    donationIntakeRepositoryProvider,
+    intakeResourceLookupProvider,
+    createDonationIntakeProvider,
+    lookupDonorByContactProvider,
+    updateDonationIntakeProvider,
+    searchDonationIntakesProvider,
+    getDonationIntakeByIdProvider,
+    listPendingIntakesByResourceProvider,
+    confirmIntakeReceptionProvider,
+    rejectIntakeProvider,
+    markIntakeIncompleteProvider,
   ],
 })
 export class OffersModule implements OnModuleDestroy {

@@ -1257,6 +1257,143 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/emergencies/{emergencyId}/donation-intakes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pre-register a donation at a collection point (public) */
+        post: operations["DonationIntakesController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/donation-intakes/lookup-contact": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Recognize a returning donor by phone or email (public) */
+        post: operations["DonationIntakesController_lookupContact"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/donation-intakes/{intakeId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get full intake detail with lines */
+        get: operations["DonationIntakesController_getById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update a pending intake (public, requires code + contact) */
+        patch: operations["DonationIntakesController_update"];
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/donation-intakes/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search intakes by phone, email, code or name */
+        get: operations["DonationIntakesController_search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/resources/{resourceId}/donation-intakes/pending": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List pending intakes for a collection point */
+        get: operations["DonationIntakesController_listPending"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/donation-intakes/{intakeId}/receive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm physical reception of a pending intake */
+        post: operations["DonationIntakesController_receive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/donation-intakes/{intakeId}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reject a pending intake at reception */
+        post: operations["DonationIntakesController_reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/donation-intakes/{intakeId}/incomplete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark a pending intake as incomplete (material mismatch) */
+        post: operations["DonationIntakesController_markIncomplete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/logistics/capacities": {
         parameters: {
             query?: never;
@@ -3363,6 +3500,141 @@ export interface components {
              * @example Oferta duplicada; ya gestionada en otra entrada
              */
             reason: string;
+        };
+        CreateDonationIntakeDto: {
+            /**
+             * Format: uuid
+             * @description Target collection point
+             */
+            targetResourceId: string;
+            /** @example María López */
+            donorName: string;
+            /** @example +52 55 1234 5678 */
+            donorPhone?: Record<string, never> | null;
+            /** @example maria@example.com */
+            donorEmail?: Record<string, never> | null;
+            items: components["schemas"]["SupplyLineDto"][];
+        };
+        CreateDonationIntakeResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example ACO-7F3K */
+            intakeCode: string;
+            /**
+             * @example pending
+             * @enum {string}
+             */
+            status: "pending" | "received" | "rejected" | "incomplete";
+        };
+        LookupDonorByContactDto: {
+            /** @example +52 55 1234 5678 */
+            donorPhone?: Record<string, never> | null;
+            /** @example maria@example.com */
+            donorEmail?: Record<string, never> | null;
+        };
+        PendingIntakeSummaryDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example ACO-7F3K */
+            intakeCode: string;
+            /** Format: uuid */
+            targetResourceId: string;
+            /** @example 2 */
+            itemCount: number;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        LookupDonorByContactResponseDto: {
+            /** @example María López */
+            donorName?: string | null;
+            pendingIntakes: components["schemas"]["PendingIntakeSummaryDto"][];
+        };
+        UpdateDonationIntakeDto: {
+            /** @example ACO-7F3K */
+            intakeCode: string;
+            /** @example María López */
+            donorName: string;
+            /** @example +52 55 1234 5678 */
+            donorPhone?: Record<string, never> | null;
+            /** @example maria@example.com */
+            donorEmail?: Record<string, never> | null;
+            items: components["schemas"]["SupplyLineDto"][];
+        };
+        IntakeLineViewDto: {
+            /** @example Water bottles */
+            name: string;
+            /** @example 100 */
+            quantity: number;
+            /** @example liters */
+            unit?: string | null;
+            /**
+             * @example water
+             * @enum {string}
+             */
+            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+            /**
+             * @description Presentation / route of administration (ampolla, EV, inhalador…) — #61.
+             * @example ampolla
+             */
+            presentation?: string | null;
+            /** Format: uuid */
+            id: string;
+            sortOrder: number;
+        };
+        DonationIntakeViewDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            emergencyId: string;
+            /** Format: uuid */
+            targetResourceId: string;
+            /** @example ACO-7F3K */
+            intakeCode: string;
+            /** @enum {string} */
+            status: "pending" | "received" | "rejected" | "incomplete";
+            donorName: string;
+            donorPhone?: string | null;
+            donorEmail?: string | null;
+            /** Format: uuid */
+            donorUserId?: string | null;
+            lines: components["schemas"]["IntakeLineViewDto"][];
+            volunteerNotes?: string | null;
+            evidenceFileKey?: string | null;
+            /** Format: date-time */
+            receivedAt?: string | null;
+            /** Format: uuid */
+            receivedByUserId?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        DonationIntakeSearchHitDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example ACO-7F3K */
+            intakeCode: string;
+            donorName: string;
+            donorPhone?: string | null;
+            donorEmail?: string | null;
+            /** @enum {string} */
+            status: "pending" | "received" | "rejected" | "incomplete";
+            /** Format: uuid */
+            targetResourceId: string;
+            itemCount: number;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        ReceiveDonationIntakeDto: {
+            volunteerNotes?: string | null;
+            /** @description File key from POST /files */
+            evidenceFileKey?: string | null;
+        };
+        RejectDonationIntakeDto: {
+            volunteerNotes?: string | null;
+        };
+        MarkDonationIntakeIncompleteDto: {
+            volunteerNotes?: string | null;
         };
         PublishCapacityProviderDto: {
             /**
@@ -7233,6 +7505,437 @@ export interface operations {
                 content?: never;
             };
             /** @description Offer cannot be cancelled in its current status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DonationIntakesController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateDonationIntakeDto"];
+            };
+        };
+        responses: {
+            /** @description Intake created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateDonationIntakeResponseDto"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Emergency is not accepting intake (paused/closed) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid collection point */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DonationIntakesController_lookupContact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LookupDonorByContactDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LookupDonorByContactResponseDto"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DonationIntakesController_getById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                intakeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DonationIntakeViewDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing intake:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Intake not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DonationIntakesController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                intakeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateDonationIntakeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DonationIntakeViewDto"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Contact or code mismatch */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Intake not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Intake already processed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DonationIntakesController_search: {
+        parameters: {
+            query: {
+                /** @description Phone, email, code or name */
+                q: string;
+            };
+            header?: never;
+            path: {
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DonationIntakeSearchHitDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing intake:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DonationIntakesController_listPending: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DonationIntakeSearchHitDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing intake:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DonationIntakesController_receive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                intakeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReceiveDonationIntakeDto"];
+            };
+        };
+        responses: {
+            /** @description Intake marked as received */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing intake:receive */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Intake not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Intake already processed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DonationIntakesController_reject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                intakeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectDonationIntakeDto"];
+            };
+        };
+        responses: {
+            /** @description Intake marked as rejected */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing intake:receive */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Intake not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Intake already processed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DonationIntakesController_markIncomplete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                intakeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MarkDonationIntakeIncompleteDto"];
+            };
+        };
+        responses: {
+            /** @description Intake marked as incomplete */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing intake:receive */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Intake not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Intake already processed */
             409: {
                 headers: {
                     [name: string]: unknown;

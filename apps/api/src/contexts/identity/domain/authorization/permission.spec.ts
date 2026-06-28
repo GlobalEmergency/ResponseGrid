@@ -48,6 +48,15 @@ describe('permission catalog', () => {
     expect(READ_ONLY_PERMISSIONS).toContain('capacity:read');
   });
 
+  it('includes the donation intake permissions (#15)', () => {
+    expect(ALL_PERMISSIONS).toContain('intake:create');
+    expect(ALL_PERMISSIONS).toContain('intake:read');
+    expect(ALL_PERMISSIONS).toContain('intake:receive');
+    expect(ALL_PERMISSIONS).toContain('intake:update');
+    expect(isPermission('intake:read')).toBe(true);
+    expect(READ_ONLY_PERMISSIONS).toContain('intake:read');
+  });
+
   it('has no duplicates', () => {
     expect(new Set(ALL_PERMISSIONS).size).toBe(ALL_PERMISSIONS.length);
   });

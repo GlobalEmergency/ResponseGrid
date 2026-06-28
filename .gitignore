@@ -27,3 +27,6 @@ apps/api/uploads/
 
 # Scratch de orquestación (ledger SDD)
 .superpowers/
+
+# Entorno local personal (scripts, seeds, docker extra) — no subir al repo
+.local/
