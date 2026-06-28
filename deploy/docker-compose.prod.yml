@@ -20,6 +20,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    labels:
+      com.datadoghq.ad.checks: |
+        {"postgres":{"init_config":{},"instances":[{"host":"%%host%%","port":5432,"username":"datadog","password":"%%env_DD_POSTGRES_PASSWORD%%","dbname":"%%env_POSTGRES_DB%%"}]}}
 
   redis:
     image: redis:7
@@ -27,6 +30,9 @@ services:
     command: ['redis-server', '--save', '60', '1']
     volumes:
       - redisdata:/data
+    labels:
+      com.datadoghq.ad.checks: |
+        {"redisdb":{"init_config":{},"instances":[{"host":"%%host%%","port":6379}]}}
 
   # One-shot, idempotent migration runner: applies apps/api/drizzle/*.sql once
   # each (tracked in a _migrations table), then exits.
@@ -72,8 +78,35 @@ services:
       - caddydata:/data
       - caddyconfig:/config
 
+  # Datadog Agent (lean): host metrics + containers + Postgres + Redis + logs.
+  # EU site and secrets (DD_API_KEY, DD_SITE, DD_POSTGRES_PASSWORD) come from
+  # deploy/.env via env_file (never committed). APM and process-agent are off
+  # to stay light on the box; see deploy/datadog.md.
+  datadog:
+    image: datadog/agent:7
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - DD_HOSTNAME=responsegrid-prod
+      - DD_TAGS=env:prod
+      - DD_LOGS_ENABLED=true
+      - DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true
+      - DD_PROCESS_AGENT_ENABLED=false
+      - DD_APM_ENABLED=false
+      - DD_CONTAINER_EXCLUDE=name:datadog
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+      - dd-run:/opt/datadog-agent/run:rw
+    mem_limit: 512m
+    depends_on:
+      - postgres
+      - redis
+
 volumes:
   pgdata:
   redisdata:
   caddydata:
   caddyconfig:
+  dd-run:
