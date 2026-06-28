@@ -33,6 +33,14 @@ describe('permission catalog', () => {
     expect(READ_ONLY_PERMISSIONS).toContain('shipment:read');
   });
 
+  it('includes the transport-capacity permissions (#105)', () => {
+    expect(ALL_PERMISSIONS).toContain('capacity:publish');
+    expect(ALL_PERMISSIONS).toContain('capacity:read');
+    expect(isPermission('capacity:publish')).toBe(true);
+    // capacity:read is a `*:read`, so it joins the viewer/read-only set
+    expect(READ_ONLY_PERMISSIONS).toContain('capacity:read');
+  });
+
   it('has no duplicates', () => {
     expect(new Set(ALL_PERMISSIONS).size).toBe(ALL_PERMISSIONS.length);
   });

@@ -1103,6 +1103,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/logistics/capacities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish a transport-capacity offer (authenticated, citizen-grade) */
+        post: operations["LogisticsController_publish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/capacities/{id}/withdraw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Withdraw a transport-capacity offer (provider or coordinator) */
+        post: operations["LogisticsController_withdraw"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/logistics/capacities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List transport capacities for an emergency (coordinator/verifier) */
+        get: operations["LogisticsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/emergencies/{emergencyId}/volunteers": {
         parameters: {
             query?: never;
@@ -2688,6 +2739,192 @@ export interface components {
              * @description The need to match this offer against
              */
             needId: string;
+        };
+        PublishCapacityProviderDto: {
+            /**
+             * @example volunteer
+             * @enum {string}
+             */
+            type: "volunteer" | "organization";
+            /**
+             * Format: uuid
+             * @description Volunteer or organization id (polymorphic, no FK)
+             */
+            id: string;
+        };
+        CapacityAmountDto: {
+            /**
+             * @description Carrying weight in kilograms (positive)
+             * @example 1500
+             */
+            weightKg?: number | null;
+            /**
+             * @description Carrying volume in cubic metres (positive)
+             * @example 12
+             */
+            volumeM3?: number | null;
+        };
+        CoverageDto: {
+            /**
+             * @example corridor
+             * @enum {string}
+             */
+            kind: "corridor" | "area";
+            /**
+             * Format: uuid
+             * @description Corridor: origin collection point (resource) id
+             */
+            originResourceId?: string;
+            /**
+             * Format: uuid
+             * @description Corridor: destination collection point (resource) id
+             */
+            destinationResourceId?: string;
+            /**
+             * @description Corridor: origin lat
+             * @example 10.4806
+             */
+            originLat?: number;
+            /**
+             * @description Corridor: origin lng
+             * @example -66.9036
+             */
+            originLng?: number;
+            /**
+             * @description Corridor: destination lat
+             * @example 10.6
+             */
+            destinationLat?: number;
+            /**
+             * @description Corridor: destination lng
+             * @example -67
+             */
+            destinationLng?: number;
+            /**
+             * @description Area: free-text served area (required when kind=area)
+             * @example Estado Vargas
+             */
+            area?: string;
+        };
+        CapacityWindowDto: {
+            /**
+             * @description Availability start (ISO-8601)
+             * @example 2026-07-01T00:00:00.000Z
+             */
+            from?: string;
+            /**
+             * @description Availability end (ISO-8601)
+             * @example 2026-07-31T00:00:00.000Z
+             */
+            to?: string;
+        };
+        PublishCapacityDto: {
+            /**
+             * Format: uuid
+             * @description Emergency this capacity serves
+             */
+            emergencyId: string;
+            provider: components["schemas"]["PublishCapacityProviderDto"];
+            /**
+             * @example road
+             * @enum {string}
+             */
+            mode: "road" | "sea" | "air";
+            /** @description At least one of weightKg / volumeM3 is required */
+            capacity: components["schemas"]["CapacityAmountDto"];
+            coverage: components["schemas"]["CoverageDto"];
+            window?: components["schemas"]["CapacityWindowDto"];
+            /**
+             * @description Free-form constraints
+             * @example [
+             *       "refrigerated",
+             *       "hazmat"
+             *     ]
+             */
+            constraints?: string[];
+            /**
+             * @description Additional notes
+             * @example Salida diaria a las 08:00
+             */
+            notes?: string;
+        };
+        PublishCapacityResponseDto: {
+            /**
+             * Format: uuid
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            id: string;
+        };
+        CapacityAmountResponseDto: {
+            /** @example 1500 */
+            weightKg?: number | null;
+            /** @example 12 */
+            volumeM3?: number | null;
+        };
+        CoverageResponseDto: {
+            /**
+             * @example corridor
+             * @enum {string}
+             */
+            kind: "corridor" | "area";
+            /** Format: uuid */
+            originResourceId?: string | null;
+            /** Format: uuid */
+            destinationResourceId?: string | null;
+            /** @example 10.4806 */
+            originLat?: number | null;
+            /** @example -66.9036 */
+            originLng?: number | null;
+            /** @example 10.6 */
+            destinationLat?: number | null;
+            /** @example -67 */
+            destinationLng?: number | null;
+            /** @example Estado Vargas */
+            area?: string;
+        };
+        CapacityWindowResponseDto: {
+            /** @example 2026-07-01T00:00:00.000Z */
+            from?: string | null;
+            /** @example 2026-07-31T00:00:00.000Z */
+            to?: string | null;
+        };
+        CapacityViewDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            emergencyId: string;
+            /**
+             * @example volunteer
+             * @enum {string}
+             */
+            providerType: "volunteer" | "organization";
+            /** Format: uuid */
+            providerId: string;
+            /**
+             * @example road
+             * @enum {string}
+             */
+            mode: "road" | "sea" | "air";
+            capacity: components["schemas"]["CapacityAmountResponseDto"];
+            coverage: components["schemas"]["CoverageResponseDto"];
+            window: components["schemas"]["CapacityWindowResponseDto"];
+            /**
+             * @example [
+             *       "refrigerated"
+             *     ]
+             */
+            constraints: string[];
+            /**
+             * @example available
+             * @enum {string}
+             */
+            status: "available" | "reserved" | "withdrawn";
+            /** @example Salida diaria a las 08:00 */
+            notes?: string | null;
+            /** @example 2026-07-01T00:00:00.000Z */
+            createdAt: string;
+            /** @example 2026-07-01T00:00:00.000Z */
+            updatedAt: string;
         };
         RegisterVolunteerDto: {
             /** @example Ana García */
@@ -5696,6 +5933,153 @@ export interface operations {
             };
             /** @description Offer cannot be cancelled in its current status */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    LogisticsController_publish: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublishCapacityDto"];
+            };
+        };
+        responses: {
+            /** @description Capacity published */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublishCapacityResponseDto"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing capacity:publish permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Emergency is not accepting intake (paused/closed) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    LogisticsController_withdraw: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Capacity UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Capacity withdrawn */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Only the provider or a coordinator can withdraw */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Capacity not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Capacity cannot be withdrawn in its current status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    LogisticsController_list: {
+        parameters: {
+            query?: {
+                /** @description Filter by mode */
+                mode?: "road" | "sea" | "air";
+                /** @description Filter by status */
+                status?: "available" | "reserved" | "withdrawn";
+                /** @description Keep capacities available at/after this instant (ISO-8601) */
+                availableFrom?: string;
+                /** @description Keep capacities available at/before this instant (ISO-8601) */
+                availableTo?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Capacities */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CapacityViewDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing capacity:read permission */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
