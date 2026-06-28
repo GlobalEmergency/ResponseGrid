@@ -5,6 +5,7 @@ import {
   HttpCode,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
   Request,
@@ -26,6 +27,8 @@ import {
 } from '@nestjs/swagger';
 import { CreateNeed } from '../../application/create-need';
 import { ValidateNeed } from '../../application/validate-need';
+import { EditNeed, EditNeedCommand } from '../../application/edit-need';
+import { DiscardNeed } from '../../application/discard-need';
 import { GetPublicNeeds } from '../../application/get-public-needs';
 import {
   GetNearbyNeeds,
@@ -45,7 +48,10 @@ import {
   CreateTaskFromNeedDto,
   NearbyNeedsQueryDto,
   InBoundsNeedsQueryDto,
+  EditNeedDto,
+  DiscardNeedDto,
 } from './dto';
+import { setAuditContext } from '../../../audit/infrastructure/http/audit-context';
 import {
   CreateNeedResponseDto,
   NeedViewDto,
@@ -68,6 +74,8 @@ export class NeedsController {
   constructor(
     private readonly createNeed: CreateNeed,
     private readonly validateNeed: ValidateNeed,
+    private readonly editNeed: EditNeed,
+    private readonly discardNeed: DiscardNeed,
     private readonly getPublicNeeds: GetPublicNeeds,
     private readonly getNearbyNeeds: GetNearbyNeeds,
     private readonly getNeedsInBounds: GetNeedsInBounds,
@@ -329,6 +337,73 @@ export class NeedsController {
     @Param('needId', ParseUUIDPipe) needId: string,
   ): Promise<void> {
     await this.validateNeed.execute({ needId });
+  }
+
+  @Patch('needs/:needId')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('need:validate')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Edit a need during validation (validator/coordinator). Requires a reason; recorded in the audit trail.',
+  })
+  @ApiParam({ name: 'needId', description: 'Need UUID', format: 'uuid' })
+  @ApiNoContentResponse({ description: 'Need edited' })
+  @ApiNotFoundResponse({ description: 'Need not found' })
+  @ApiBadRequestResponse({
+    description: 'Missing reason or need is in a terminal status',
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Validator/coordinator role required' })
+  async edit(
+    @Param('needId', ParseUUIDPipe) needId: string,
+    @Body() dto: EditNeedDto,
+    @Request() req: AuthenticatedRequest,
+  ): Promise<void> {
+    const cmd: EditNeedCommand = { needId };
+    if (dto.title !== undefined) cmd.title = dto.title;
+    if (dto.description !== undefined) cmd.description = dto.description;
+    if (dto.priority !== undefined) cmd.priority = dto.priority;
+
+    const result = await this.editNeed.execute(cmd);
+    setAuditContext(req, {
+      reason: dto.reason,
+      changes: result.changes,
+      targetStatus: result.targetStatus,
+      emergencyId: result.emergencyId,
+    });
+  }
+
+  @Post('needs/:needId/discard')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('need:validate')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Discard a need during validation (validator/coordinator). Requires a reason; recorded in the audit trail.',
+  })
+  @ApiParam({ name: 'needId', description: 'Need UUID', format: 'uuid' })
+  @ApiNoContentResponse({ description: 'Need discarded (rejected)' })
+  @ApiNotFoundResponse({ description: 'Need not found' })
+  @ApiBadRequestResponse({
+    description: 'Missing reason or need is not in pending status',
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Validator/coordinator role required' })
+  async discard(
+    @Param('needId', ParseUUIDPipe) needId: string,
+    @Body() dto: DiscardNeedDto,
+    @Request() req: AuthenticatedRequest,
+  ): Promise<void> {
+    const result = await this.discardNeed.execute({ needId });
+    setAuditContext(req, {
+      reason: dto.reason,
+      changes: result.changes,
+      targetStatus: result.targetStatus,
+      emergencyId: result.emergencyId,
+    });
   }
 
   @Post('needs/:needId/assign-manager')

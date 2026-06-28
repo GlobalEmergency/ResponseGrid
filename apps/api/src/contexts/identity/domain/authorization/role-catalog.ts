@@ -105,6 +105,10 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'group:create',
       'group:read',
       'group:manage_members',
+      // Trazabilidad: el coordinador (no el verificador) ve el registro de
+      // actividad de SU emergencia. El scope emergency del grant limita la
+      // lectura a su propia emergencia (ver EmergencyAuditController).
+      'audit:read',
     ],
   },
   emergency_verifier: {

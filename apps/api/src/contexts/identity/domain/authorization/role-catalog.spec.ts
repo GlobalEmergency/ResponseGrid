@@ -36,6 +36,15 @@ describe('ROLE_CATALOG', () => {
     expect(hubManager.has('shipment:track')).toBe(true);
   });
 
+  it('emergency_coordinator can read the audit trail but emergency_verifier cannot', () => {
+    expect(new Set(permissionsForRole('emergency_coordinator')).has('audit:read')).toBe(
+      true,
+    );
+    expect(new Set(permissionsForRole('emergency_verifier')).has('audit:read')).toBe(
+      false,
+    );
+  });
+
   it('every role only references permissions that exist in the catalog', () => {
     const valid = new Set<string>(ALL_PERMISSIONS);
     for (const role of Object.values(ROLE_CATALOG)) {

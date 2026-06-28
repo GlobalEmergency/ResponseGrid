@@ -1,7 +1,11 @@
 import { NeedId } from './need-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Priority, NeedStatus, PersonnelSkill } from './need-enums';
-import { NeedNotPendingError } from './need-errors';
+import {
+  NeedNotPendingError,
+  NeedNotEditableError,
+  NeedTitleRequiredError,
+} from './need-errors';
 import { DomainEvent } from './events/domain-event';
 import { NeedCreated } from './events/need-created.event';
 import { NeedValidated } from './events/need-validated.event';
@@ -40,6 +44,13 @@ export interface CreateNeedProps {
   resourceId?: string | null;
 }
 
+/** Fields a coordinator may change while validating. Omit a field to keep it. */
+export interface EditNeedProps {
+  title?: string;
+  description?: string | null;
+  priority?: Priority;
+}
+
 export interface NeedSnapshot {
   id: string;
   emergencyId: string;
@@ -71,10 +82,10 @@ export class Need {
   private constructor(
     public readonly id: NeedId,
     public readonly emergencyId: EmergencyId,
-    public readonly title: string,
-    public readonly description: string | null,
+    private _title: string,
+    private _description: string | null,
     public readonly location: Location,
-    public readonly priority: Priority,
+    private _priority: Priority,
     public readonly requesterUserId: string,
     public readonly requesterOrganizationId: string | null,
     private _managingOrganizationId: string | null,
@@ -158,6 +169,18 @@ export class Need {
     );
   }
 
+  get title(): string {
+    return this._title;
+  }
+
+  get description(): string | null {
+    return this._description;
+  }
+
+  get priority(): Priority {
+    return this._priority;
+  }
+
   get status(): NeedStatus {
     return this._status;
   }
@@ -209,6 +232,33 @@ export class Need {
     this.events.push(
       new NeedRejected(this.id.value, { emergencyId: this.emergencyId.value }),
     );
+  }
+
+  /**
+   * Coordinator edit during validation: complete or correct the need's core
+   * fields. Only `undefined` props are left untouched (passing `null` to
+   * `description` clears it). Terminal needs (rejected/fulfilled) are immutable.
+   */
+  edit(props: EditNeedProps): void {
+    if (
+      this._status === NeedStatus.Rejected ||
+      this._status === NeedStatus.Fulfilled
+    ) {
+      throw new NeedNotEditableError();
+    }
+    if (props.title !== undefined) {
+      const trimmed = props.title.trim();
+      if (trimmed.length === 0) throw new NeedTitleRequiredError();
+      this._title = trimmed;
+    }
+    if (props.description !== undefined) {
+      const next =
+        props.description === null ? null : props.description.trim() || null;
+      this._description = next;
+    }
+    if (props.priority !== undefined) {
+      this._priority = props.priority;
+    }
   }
 
   /**

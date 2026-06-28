@@ -2,7 +2,11 @@ import { Need, NeedItemsRequiredError, NEED_VALIDITY_HOURS } from './need';
 import { NeedId } from './need-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Priority, NeedCategory, NeedStatus } from './need-enums';
-import { NeedNotPendingError } from './need-errors';
+import {
+  NeedNotPendingError,
+  NeedNotEditableError,
+  NeedTitleRequiredError,
+} from './need-errors';
 import { Location } from '../../../shared/domain/location';
 import { NeedItem } from './need-item';
 import { LocationSensitivity } from '../../../shared/domain/location-sensitivity';
@@ -57,6 +61,44 @@ describe('Need aggregate', () => {
     expect(need.requesterUserId).toBe(USER_ID);
     expect(need.managingOrganizationId).toBeNull();
     expect(need.requesterOrganizationId).toBeNull();
+  });
+
+  describe('edit()', () => {
+    it('updates only the provided fields', () => {
+      const need = makeNeed();
+      need.edit({ title: 'Agua potable', priority: Priority.Low });
+      expect(need.title).toBe('Agua potable');
+      expect(need.priority).toBe(Priority.Low);
+      // description left untouched
+      expect(need.description).toBe('Urgent water supply needed');
+    });
+
+    it('trims the title and rejects an empty one', () => {
+      const need = makeNeed();
+      need.edit({ title: '  Comida  ' });
+      expect(need.title).toBe('Comida');
+      expect(() => need.edit({ title: '   ' })).toThrow(NeedTitleRequiredError);
+    });
+
+    it('clears the description with an empty string', () => {
+      const need = makeNeed();
+      need.edit({ description: '' });
+      expect(need.description).toBeNull();
+    });
+
+    it('cannot edit a rejected (discarded) need', () => {
+      const need = makeNeed();
+      need.reject();
+      expect(() => need.edit({ title: 'x' })).toThrow(NeedNotEditableError);
+    });
+
+    it('reflects edited fields in the snapshot', () => {
+      const need = makeNeed();
+      need.edit({ title: 'Nuevo', priority: Priority.Low });
+      const snap = need.toSnapshot();
+      expect(snap.title).toBe('Nuevo');
+      expect(snap.priority).toBe(Priority.Low);
+    });
   });
 
   it('create() stores items on the aggregate', () => {

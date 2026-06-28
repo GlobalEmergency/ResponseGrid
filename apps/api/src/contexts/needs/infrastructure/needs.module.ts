@@ -6,6 +6,8 @@ import { Db } from '../../../shared/db';
 import { NeedsController } from './http/needs.controller';
 import { CreateNeed } from '../application/create-need';
 import { ValidateNeed } from '../application/validate-need';
+import { EditNeed } from '../application/edit-need';
+import { DiscardNeed } from '../application/discard-need';
 import { GetPublicNeeds } from '../application/get-public-needs';
 import { GetNearbyNeeds } from '../application/get-nearby-needs';
 import { GetNeedsInBounds } from '../application/get-needs-in-bounds';
@@ -97,6 +99,19 @@ const validateNeedProvider = {
   inject: [NEED_REPOSITORY, EVENT_BUS],
   useFactory: (repo: NeedRepository, bus: EventBus) =>
     new ValidateNeed(repo, bus),
+};
+
+const editNeedProvider = {
+  provide: EditNeed,
+  inject: [NEED_REPOSITORY],
+  useFactory: (repo: NeedRepository) => new EditNeed(repo),
+};
+
+const discardNeedProvider = {
+  provide: DiscardNeed,
+  inject: [NEED_REPOSITORY, EVENT_BUS],
+  useFactory: (repo: NeedRepository, bus: EventBus) =>
+    new DiscardNeed(repo, bus),
 };
 
 const getPublicNeedsProvider = {
@@ -193,6 +208,8 @@ const createTaskFromNeedProvider = {
     eventBusProvider,
     createNeedProvider,
     validateNeedProvider,
+    editNeedProvider,
+    discardNeedProvider,
     getPublicNeedsProvider,
     getNearbyNeedsProvider,
     getNeedsInBoundsProvider,
