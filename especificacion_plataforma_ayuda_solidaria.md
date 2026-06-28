@@ -10,7 +10,7 @@
 
 # 1. Resumen ejecutivo
 
-La aplicación debe servir para coordinar iniciativas espontáneas de ayuda, puntos de recogida, voluntariado, donaciones en especie, donaciones económicas verificadas y necesidades logísticas.
+La aplicación debe servir para coordinar iniciativas espontáneas de ayuda, puntos de recogida, voluntariado, donaciones en especie y necesidades logísticas.
 
 El problema principal no es solo recibir ayuda, sino evitar que la ayuda desorganizada se convierta en un segundo problema operativo: almacenes saturados, material inútil, medicamentos sin control, campañas falsas, transporte sin destino, expectativas irreales y voluntarios sin tarea.
 
@@ -47,7 +47,6 @@ Lecciones principales:
 
 - La ayuda internacional requiere más control que la ayuda local.
 - Los envíos en especie necesitan documentación, aduanas, destino, receptor y logística confirmada.
-- Las donaciones económicas verificadas suelen ser más eficaces que enviar material desde lejos.
 - Los medicamentos y productos sanitarios requieren trazabilidad, conservación y canal autorizado.
 - Los contenedores o envíos improvisados pueden quedarse bloqueados o llegar tarde.
 - Es fundamental diferenciar entre “quiero ayudar” y “hay una necesidad validada”.
@@ -79,9 +78,7 @@ Si una donación, campaña, punto o iniciativa no supera estas preguntas, el sis
 
 # 4. Principios rectores
 
-## 4.1. Priorizar donación económica verificada
-
-Por defecto, el sistema debe recomendar donación económica a entidades verificadas.
+## 4.1. Activar la ayuda en especie solo cuando esté validada
 
 La ayuda en especie solo debe activarse cuando exista:
 
@@ -141,7 +138,6 @@ Pero debe ser estricto con:
 Puede:
 
 - consultar cómo ayudar;
-- ver campañas económicas verificadas;
 - ofrecer material;
 - ofrecer transporte;
 - ofrecer espacio;
@@ -607,7 +603,6 @@ El sistema debe responder con una de estas salidas:
 - aceptado;
 - aceptado solo con validación;
 - no aceptado;
-- mejor donar dinero;
 - pendiente de revisión;
 - canal especializado.
 
@@ -905,14 +900,13 @@ Al activarla:
 - se bloquean nuevas citas;
 - se muestra aviso público;
 - se permite solo registro de ofrecimientos;
-- se prioriza donación económica;
 - se avisa a responsables de puntos;
 - se avisa a voluntarios;
 - se genera informe de saturación.
 
 Mensaje público recomendado:
 
-> Temporalmente se pausan las recogidas de material para evitar saturación logística. No lleves material a ningún punto no autorizado. La forma más eficaz de ayudar ahora es mediante donación económica verificada o esperando nuevas instrucciones.
+> Temporalmente se pausan las recogidas de material para evitar saturación logística. No lleves material a ningún punto no autorizado. La forma más eficaz de ayudar ahora es esperar a que se publique una necesidad concreta o a recibir nuevas instrucciones.
 
 ---
 
@@ -1319,7 +1313,7 @@ No debe asignarse automáticamente.
 
 ## 32.1. Material no solicitado
 
-> Gracias por querer ayudar. En este momento no estamos aceptando este tipo de material porque puede saturar la logística y retrasar la ayuda prioritaria. La forma más eficaz de colaborar ahora es mediante donación económica a entidades verificadas o esperando a que se publique una necesidad concreta.
+> Gracias por querer ayudar. En este momento no estamos aceptando este tipo de material porque puede saturar la logística y retrasar la ayuda prioritaria. La forma más eficaz de colaborar ahora es esperar a que se publique una necesidad concreta.
 
 ## 32.2. Apertura de punto
 
@@ -1331,11 +1325,11 @@ No debe asignarse automáticamente.
 
 ## 32.4. Punto saturado
 
-> Este punto está temporalmente cerrado por saturación. No lleves más material. Consulta otros puntos disponibles o realiza una donación económica verificada.
+> Este punto está temporalmente cerrado por saturación. No lleves más material. Consulta otros puntos disponibles o espera a que se publique una necesidad concreta.
 
 ## 32.5. Pausa general de recogidas
 
-> Temporalmente se han pausado las recogidas de material para evitar saturación logística. No lleves material a puntos no autorizados. La ayuda más eficaz ahora es económica, a través de entidades verificadas.
+> Temporalmente se han pausado las recogidas de material para evitar saturación logística. No lleves material a puntos no autorizados. La forma más eficaz de ayudar ahora es esperar a que se publique una necesidad concreta o a recibir nuevas instrucciones.
 
 ---
 

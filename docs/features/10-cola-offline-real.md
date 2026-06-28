@@ -65,7 +65,6 @@ Añadir middleware de idempotencia en los endpoints que entran en cola:
 | `POST /emergencies/:id/offers` | offers |
 | `POST /emergencies/:id/volunteers` | volunteers |
 | `POST /emergencies/:id/reports` | reports |
-| `POST /reunification-requests` | reunification (feature 01) |
 
 Comportamiento: si llega una request con `Idempotency-Key` ya procesada en las últimas 24 h → devolver la respuesta original cacheada (201 + payload) sin ejecutar de nuevo el caso de uso. Almacenamiento sugerido: tabla `idempotency_keys (key, response_body, status_code, created_at)` con TTL de 24 h (índice en `created_at`).
 
@@ -120,7 +119,6 @@ El kill-switch existente (emergencia pausada → 409) ya opera correctamente. El
 
 - Background Sync API en el SW (mejora la experiencia en Chromium cuando la app está cerrada).
 - Soporte de reintentos escalonados (backoff exponencial).
-- Cola para formularios de reunificación (feature 01, puede estar disponible antes).
 - Panel de cola en `/perfil` para que el usuario vea y gestione sus envíos pendientes.
 - Soporte de adjuntos (fotos de reporte): serializar como Blob en IndexedDB y subir como multipart al sincronizar.
 - Sincronización parcial: si un ítem de una need ya no existe al sincronizar, preguntar al usuario si quiere redirigir la oferta.
@@ -131,7 +129,6 @@ El kill-switch existente (emergencia pausada → 409) ya opera correctamente. El
 |-------------|------|------|
 | PWA service worker existente (`public/sw.js`) | Interna | Se amplía, no se reemplaza |
 | `useFormDraft` | Interna | Complementario; no se toca |
-| Feature 01 (reunificación) | Interna opcional | Si está lista, su formulario entra en la cola |
 | Formularios existentes (resource/need/offer/volunteer/report) | Interna | Se integra el wrapper sin refactor interno |
 | `idb` o `idb-keyval` | Externa (npm) | Wrapper ligero sobre IndexedDB API; alternativa: IndexedDB nativo |
 | Tabla `idempotency_keys` en Postgres | Backend | Migración Drizzle nueva; aplicar a mano con psql (gotcha entorno) |
@@ -140,7 +137,7 @@ El kill-switch existente (emergencia pausada → 409) ya opera correctamente. El
 
 - Los datos pendientes se almacenan en **IndexedDB del dispositivo del usuario** (mismo origen, no sale a la red). No hay acceso por parte del servidor hasta que se sincroniza.
 - Si el usuario cierra sesión, el hook debe **vaciar la cola** (o al menos advertir que los datos pendientes se borrarán) para evitar envíos no autorizados desde otra sesión.
-- Los datos en cola pueden contener información personal (nombre de persona en reunificación, datos de voluntario). Informar en la UI: "tus datos se guardan en este dispositivo hasta que haya conexión".
+- Los datos en cola pueden contener información personal (datos de contacto, datos de voluntario). Informar en la UI: "tus datos se guardan en este dispositivo hasta que haya conexión".
 - La tabla `idempotency_keys` solo almacena la respuesta del servidor (no el payload original); TTL de 24 h limita la retención.
 - No hay datos de terceros ni transferencias fuera del sistema propio.
 
@@ -156,7 +153,7 @@ Desglose orientativo:
 
 ## 8. Decisiones abiertas (para PM)
 
-1. **¿Qué formularios entran en cola en el MVP?** Propuesta: recurso, petición, oferta de material, voluntario, reporte. ¿Entra reunificación desde el inicio o se pospone?
+1. **¿Qué formularios entran en cola en el MVP?** Propuesta: recurso, petición, oferta de material, voluntario, reporte.
 
 2. **Idempotencia en backend: ¿implementar o diferir?** Sin idempotencia, un reenvío duplica el registro. Con idempotencia, añadimos una migración y un interceptor. ¿Vale la pena en MVP o se acepta la deuda de posibles duplicados con una nota operacional?
 
