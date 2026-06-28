@@ -4156,7 +4156,7 @@
             "description": "Missing or invalid token"
           },
           "403": {
-            "description": "Missing shipment:create permission"
+            "description": "Not a coordinator of the emergency"
           },
           "409": {
             "description": "Emergency is not accepting intake (paused/closed)"
@@ -4209,7 +4209,7 @@
             "description": "Missing or invalid token"
           },
           "403": {
-            "description": "Missing shipment:assign permission"
+            "description": "Not a coordinator of the shipment emergency"
           },
           "404": {
             "description": "Shipment not found"
@@ -4338,7 +4338,7 @@
             "description": "Missing or invalid token"
           },
           "403": {
-            "description": "Missing shipment:update permission"
+            "description": "Not a coordinator of the shipment emergency"
           },
           "404": {
             "description": "Shipment not found"
@@ -4499,7 +4499,7 @@
             "description": "Missing or invalid token"
           },
           "403": {
-            "description": "Missing shipment:read permission"
+            "description": "Not a coordinator of the shipment emergency"
           },
           "404": {
             "description": "Shipment not found"

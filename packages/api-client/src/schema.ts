@@ -7424,7 +7424,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Missing shipment:create permission */
+            /** @description Not a coordinator of the emergency */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7477,7 +7477,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Missing shipment:assign permission */
+            /** @description Not a coordinator of the shipment emergency */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7624,7 +7624,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Missing shipment:update permission */
+            /** @description Not a coordinator of the shipment emergency */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7745,7 +7745,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Missing shipment:read permission */
+            /** @description Not a coordinator of the shipment emergency */
             403: {
                 headers: {
                     [name: string]: unknown;
