@@ -364,6 +364,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/emergencies/{emergencyId}/public/resources/in-bounds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Find visible resources within a geographic bounding box */
+        get: operations["PublicController_inBounds"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/emergencies/{emergencyId}/public/resources/facets": {
         parameters: {
             query?: never;
@@ -1764,6 +1781,9 @@ export interface components {
         };
         NearbyResourcesResponseDto: {
             items: components["schemas"]["NearbyResourceViewDto"][];
+        };
+        InBoundsResourcesDto: {
+            items: components["schemas"]["ResourceViewDto"][];
         };
         ResourceFacetsDto: {
             /**
@@ -3430,6 +3450,8 @@ export interface operations {
                 category?: string;
                 /** @description Filter by ISO 3166-1 alpha-2 country code */
                 country?: string;
+                /** @description Full-text search string matched against name, address, and city (case-insensitive, max 100 chars) */
+                q?: string;
             };
             header?: never;
             path: {
@@ -3479,6 +3501,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NearbyResourcesResponseDto"];
+                };
+            };
+        };
+    };
+    PublicController_inBounds: {
+        parameters: {
+            query: {
+                /** @description South latitude bound (-90 to 90) */
+                minLat: number;
+                /** @description West longitude bound (-180 to 180) */
+                minLng: number;
+                /** @description North latitude bound (-90 to 90) */
+                maxLat: number;
+                /** @description East longitude bound (-180 to 180) */
+                maxLng: number;
+                /** @description Max results (default 500, max 1000) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Resources within the bounding box */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InBoundsResourcesDto"];
                 };
             };
         };
