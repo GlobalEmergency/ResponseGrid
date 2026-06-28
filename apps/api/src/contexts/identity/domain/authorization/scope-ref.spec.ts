@@ -30,6 +30,14 @@ describe('ScopeRef', () => {
         ),
       ).toBe(false);
     });
+    it('same-id hubs are equal; a hub and a corridor with the same id are not', () => {
+      expect(ScopeRef.hub('valencia').equals(ScopeRef.hub('valencia'))).toBe(
+        true,
+      );
+      expect(
+        ScopeRef.hub('valencia').equals(ScopeRef.corridor('valencia')),
+      ).toBe(false);
+    });
   });
 
   describe('coversAnyOf()', () => {
@@ -47,6 +55,16 @@ describe('ScopeRef', () => {
       const chain = [ScopeRef.emergency('e2'), ScopeRef.platform()];
       expect(ScopeRef.emergency('e1').coversAnyOf(chain)).toBe(false);
     });
+    it('a hub scope covers a multi-parent chain that transits it (cross-emergency)', () => {
+      const chain = [
+        ScopeRef.entity('shipment', 's1'),
+        ScopeRef.hub('valencia'),
+        ScopeRef.emergency('dana'),
+        ScopeRef.platform(),
+      ];
+      expect(ScopeRef.hub('valencia').coversAnyOf(chain)).toBe(true);
+      expect(ScopeRef.hub('barcelona').coversAnyOf(chain)).toBe(false);
+    });
   });
 
   describe('fromProps() / toPlain()', () => {
@@ -56,12 +74,24 @@ describe('ScopeRef', () => {
         true,
       );
     });
+    it('round-trips hub and corridor scopes', () => {
+      const hub = ScopeRef.hub('valencia').toPlain();
+      expect(ScopeRef.fromProps(hub).equals(ScopeRef.hub('valencia'))).toBe(
+        true,
+      );
+      const corridor = ScopeRef.corridor('caracas-valencia').toPlain();
+      expect(
+        ScopeRef.fromProps(corridor).equals(
+          ScopeRef.corridor('caracas-valencia'),
+        ),
+      ).toBe(true);
+    });
     it('throws on an empty id', () => {
       expect(() => ScopeRef.emergency('')).toThrow();
     });
     it('rejects an unknown scope type (fail-closed, never platform)', () => {
       // Grant snapshots arrive from JWTs and are not type-checked at runtime.
-      const forged = { type: 'hub', id: 'x' } as unknown as Parameters<
+      const forged = { type: 'customs_zone', id: 'x' } as unknown as Parameters<
         typeof ScopeRef.fromProps
       >[0];
       expect(() => ScopeRef.fromProps(forged)).toThrow(/unknown scope type/);
