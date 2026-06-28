@@ -1301,7 +1301,7 @@ export const en = {
     acc_meta_description: 'Management of organization accreditations.',
     acc_title: 'Accreditations',
     acc_subtitle: 'Management of organization accreditations. Administrators only.',
-    acc_manual_note: 'Note: the organization ID must be entered manually (no global organization listing is available).',
+    acc_manual_note: 'Note: the organization ID must be entered manually. You can copy it from the global organization list.',
     acc_list_heading: 'Active accreditations ({count})',
     acc_empty_title: 'No active accreditations.',
     acc_empty_description: 'Use the form below to grant the first one.',
@@ -1375,6 +1375,61 @@ export const en = {
     audit_emergency_id_aria: 'Filter by emergency ID',
     audit_card_actor: 'Actor:',
     audit_card_entity: 'Entity:',
+
+    // Organizations (global list + detail)
+    orgs_meta_title: 'Organizations — Admin · ResponseGrid',
+    orgs_meta_description: 'Global list of organizations. Admins only.',
+    orgs_title: 'Organizations',
+    orgs_subtitle: 'Global list of all organizations. Admins only.',
+    orgs_list_heading: 'Organizations ({count})',
+    orgs_search_label: 'Search organization',
+    orgs_search_ph: 'Search by name, tax ID or email…',
+    orgs_empty_title: 'No organizations registered.',
+    orgs_empty_description: 'Organizations will appear here once created.',
+    orgs_no_results_title: 'No results.',
+    orgs_no_results_description: 'No organization matches your search.',
+    orgs_type_label: 'Type:',
+    orgs_taxid_label: 'Tax ID:',
+    orgs_contact_label: 'Contact:',
+    orgs_members_label: 'Members:',
+    orgs_members_count: '{count} members',
+    orgs_none: '—',
+
+    // Organization types
+    orgs_type_ngo: 'NGO',
+    orgs_type_company: 'Company',
+    orgs_type_public_admin: 'Public administration',
+    orgs_type_association: 'Association',
+    orgs_type_transport_operator: 'Transport operator',
+    orgs_type_other: 'Other',
+
+    // Accreditation status
+    orgs_accr_global: 'Accredited (global)',
+    orgs_accr_emergency: 'Accredited (emergency)',
+    orgs_accr_none: 'Not accredited',
+
+    // Verification level
+    orgs_verif_official: 'Official',
+    orgs_verif_verified: 'Verified',
+    orgs_verif_unverified: 'Unverified',
+
+    // Detail view
+    orgs_detail_back: '← Organizations',
+    orgs_detail_meta_title: 'Organization — Admin · ResponseGrid',
+    orgs_detail_not_found: 'Organization not found.',
+    orgs_detail_created_label: 'Created:',
+    orgs_detail_members_heading: 'Members ({count})',
+    orgs_detail_members_empty: 'This organization has no members.',
+    orgs_detail_role_owner: 'Owner',
+    orgs_detail_role_member: 'Member',
+    orgs_detail_accounts_heading: 'Service accounts ({count})',
+    orgs_detail_accounts_empty: 'This organization has no service accounts.',
+    orgs_detail_keys_summary: '{total} keys · {active} active',
+    orgs_detail_accreditations_heading: 'Accreditations ({count})',
+    orgs_detail_accreditations_empty: 'This organization has no accreditations.',
+    orgs_detail_emergencies_heading: 'Participating emergencies ({count})',
+    orgs_detail_emergencies_empty: 'Not participating in any emergency.',
+    orgs_link: 'Organizations (global) →',
   },
 
   templates: {

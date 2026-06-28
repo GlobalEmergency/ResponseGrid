@@ -18,7 +18,10 @@ import { ListOrganizationsAdmin } from '../../application/list-organizations-adm
 import { GetOrganizationAdminDetail } from '../../application/get-organization-admin-detail';
 import { Organization } from '../../domain/organization';
 import { OrganizationId } from '../../domain/organization-id';
-import { OrganizationType, OrganizationRole } from '../../domain/organization-enums';
+import {
+  OrganizationType,
+  OrganizationRole,
+} from '../../domain/organization-enums';
 import { ServiceAccount } from '../../../identity/domain/service-account';
 import { ApiKey } from '../../../identity/domain/api-key';
 import { Accreditation } from '../../../accreditation/domain/accreditation';

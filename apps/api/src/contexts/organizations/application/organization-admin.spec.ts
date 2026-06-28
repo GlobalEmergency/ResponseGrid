@@ -4,7 +4,10 @@ import { CreateOrganization } from './create-organization';
 import { InMemoryOrganizationRepository } from '../infrastructure/in-memory-organization.repository';
 import { InMemoryOrganizationMemberRepository } from '../infrastructure/in-memory-organization-member.repository';
 import { InMemoryUserDirectory } from '../infrastructure/in-memory-user-directory';
-import { OrganizationType, OrganizationRole } from '../domain/organization-enums';
+import {
+  OrganizationType,
+  OrganizationRole,
+} from '../domain/organization-enums';
 import { OrganizationNotFoundError } from '../domain/errors';
 import {
   AccreditationReader,
@@ -90,10 +93,16 @@ describe('ListOrganizationsAdmin', () => {
     const ownerB = 'bbbbbbbb-0000-4000-8000-000000000001';
     const ownerA = 'aaaaaaaa-0000-4000-8000-000000000001';
 
-    const orgBId = await seedOrg(create, 'Zebra Aid', OrganizationType.Ngo, ownerB, {
-      taxId: 'B-1',
-      contactEmail: 'z@aid.example',
-    });
+    const orgBId = await seedOrg(
+      create,
+      'Zebra Aid',
+      OrganizationType.Ngo,
+      ownerB,
+      {
+        taxId: 'B-1',
+        contactEmail: 'z@aid.example',
+      },
+    );
     const orgAId = await seedOrg(
       create,
       'Alpha Relief',
@@ -232,10 +241,16 @@ describe('GetOrganizationAdminDetail', () => {
       name: 'Member Two',
     });
 
-    const orgId = await seedOrg(create, 'Cruz Roja', OrganizationType.Ngo, ownerId, {
-      taxId: 'ES-1',
-      contactEmail: 'info@cruzroja.example',
-    });
+    const orgId = await seedOrg(
+      create,
+      'Cruz Roja',
+      OrganizationType.Ngo,
+      ownerId,
+      {
+        taxId: 'ES-1',
+        contactEmail: 'info@cruzroja.example',
+      },
+    );
     await memberRepo.add(orgId, memberId, OrganizationRole.Member);
 
     accreditations.set(orgId, [

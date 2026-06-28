@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -58,7 +59,13 @@ export default async function AcreditacionesPage() {
         <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
 
         <p className="text-xs text-warning bg-warning-soft border border-warning rounded px-3 py-2">
-          {ta.acc_manual_note}
+          {ta.acc_manual_note}{' '}
+          <Link
+            href="/admin/organizaciones"
+            className="font-semibold underline underline-offset-2 hover:text-ink"
+          >
+            {ta.orgs_link}
+          </Link>
         </p>
 
         {/* ── LISTADO DE ACREDITACIONES ────────────────────────────────── */}

@@ -163,12 +163,20 @@ function ScopeCard({
       </div>
       <span className="text-sm text-gray-600">{subtitle}</span>
       {scope.scopeType === 'platform' && (
-        <Link
-          href="/admin/api-keys"
-          className="text-xs font-medium text-gray-500 underline underline-offset-2 hover:text-gray-900"
-        >
-          Cuentas de servicio y API keys →
-        </Link>
+        <div className="flex flex-col gap-1">
+          <Link
+            href="/admin/organizaciones"
+            className="text-xs font-medium text-gray-500 underline underline-offset-2 hover:text-gray-900"
+          >
+            Organizaciones (global) →
+          </Link>
+          <Link
+            href="/admin/api-keys"
+            className="text-xs font-medium text-gray-500 underline underline-offset-2 hover:text-gray-900"
+          >
+            Cuentas de servicio y API keys →
+          </Link>
+        </div>
       )}
     </div>
   );

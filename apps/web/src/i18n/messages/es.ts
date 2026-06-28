@@ -1329,7 +1329,7 @@ export const es = {
     acc_meta_description: 'Gestión de acreditaciones de organizaciones.',
     acc_title: 'Acreditaciones',
     acc_subtitle: 'Gestión de acreditaciones de organizaciones. Solo administradores.',
-    acc_manual_note: 'Nota: el ID de organización debe introducirse manualmente (no hay listado global de organizaciones disponible).',
+    acc_manual_note: 'Nota: el ID de organización debe introducirse manualmente. Puedes copiarlo desde el listado global de organizaciones.',
     acc_list_heading: 'Acreditaciones vigentes ({count})',
     acc_empty_title: 'No hay acreditaciones vigentes.',
     acc_empty_description: 'Usa el formulario de abajo para conceder la primera.',
@@ -1403,6 +1403,61 @@ export const es = {
     audit_emergency_id_aria: 'Filtrar por ID de emergencia',
     audit_card_actor: 'Actor:',
     audit_card_entity: 'Entidad:',
+
+    // Organizaciones (listado global + ficha)
+    orgs_meta_title: 'Organizaciones — Admin · ResponseGrid',
+    orgs_meta_description: 'Listado global de organizaciones. Solo administradores.',
+    orgs_title: 'Organizaciones',
+    orgs_subtitle: 'Listado global de todas las organizaciones. Solo administradores.',
+    orgs_list_heading: 'Organizaciones ({count})',
+    orgs_search_label: 'Buscar organización',
+    orgs_search_ph: 'Buscar por nombre, NIF/CIF o email…',
+    orgs_empty_title: 'No hay organizaciones registradas.',
+    orgs_empty_description: 'Cuando se cree una organización aparecerá aquí.',
+    orgs_no_results_title: 'Sin resultados.',
+    orgs_no_results_description: 'Ninguna organización coincide con la búsqueda.',
+    orgs_type_label: 'Tipo:',
+    orgs_taxid_label: 'NIF/CIF:',
+    orgs_contact_label: 'Contacto:',
+    orgs_members_label: 'Miembros:',
+    orgs_members_count: '{count} miembros',
+    orgs_none: '—',
+
+    // Tipos de organización
+    orgs_type_ngo: 'ONG',
+    orgs_type_company: 'Empresa',
+    orgs_type_public_admin: 'Administración pública',
+    orgs_type_association: 'Asociación',
+    orgs_type_transport_operator: 'Operador de transporte',
+    orgs_type_other: 'Otra',
+
+    // Estado de acreditación
+    orgs_accr_global: 'Acreditada (global)',
+    orgs_accr_emergency: 'Acreditada (emergencia)',
+    orgs_accr_none: 'Sin acreditar',
+
+    // Nivel de verificación
+    orgs_verif_official: 'Oficial',
+    orgs_verif_verified: 'Verificada',
+    orgs_verif_unverified: 'Sin verificar',
+
+    // Ficha de detalle
+    orgs_detail_back: '← Organizaciones',
+    orgs_detail_meta_title: 'Organización — Admin · ResponseGrid',
+    orgs_detail_not_found: 'Organización no encontrada.',
+    orgs_detail_created_label: 'Alta:',
+    orgs_detail_members_heading: 'Miembros ({count})',
+    orgs_detail_members_empty: 'Esta organización no tiene miembros.',
+    orgs_detail_role_owner: 'Propietario',
+    orgs_detail_role_member: 'Miembro',
+    orgs_detail_accounts_heading: 'Cuentas de servicio ({count})',
+    orgs_detail_accounts_empty: 'Esta organización no tiene cuentas de servicio.',
+    orgs_detail_keys_summary: '{total} claves · {active} activas',
+    orgs_detail_accreditations_heading: 'Acreditaciones ({count})',
+    orgs_detail_accreditations_empty: 'Esta organización no tiene acreditaciones.',
+    orgs_detail_emergencies_heading: 'Emergencias en las que participa ({count})',
+    orgs_detail_emergencies_empty: 'No participa en ninguna emergencia.',
+    orgs_link: 'Organizaciones (global) →',
   },
 
   templates: {
