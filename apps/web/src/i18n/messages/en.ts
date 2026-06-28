@@ -125,7 +125,7 @@ export const en = {
     menu_verify: 'Verify a campaign',
 
     // Metric tiles
-    metric_tile_open: 'Open needs',
+    metric_tile_open: 'Registered needs',
     metric_tile_points: 'Active points',
     metric_tile_covered: 'Covered',
     metric_tile_queue: 'In queue',
