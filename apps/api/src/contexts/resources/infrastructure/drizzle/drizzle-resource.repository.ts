@@ -14,7 +14,12 @@ import {
 
 type Row = typeof resourcesTable.$inferSelect;
 
-/** Raw snake_case row returned by db.execute() (no Drizzle camelCase mapping). */
+/**
+ * Raw snake_case row returned by db.execute() (no Drizzle camelCase mapping).
+ * NOTE: the `pg` driver returns timestamptz columns as strings and
+ * double-precision columns as strings when going through raw SQL, so we use
+ * `unknown` / loose types here and coerce in rawRowToSnapshot().
+ */
 type RawRow = {
   id: string;
   emergency_id: string;
@@ -23,31 +28,66 @@ type RawRow = {
   name: string;
   description: string | null;
   address: string;
-  latitude: number;
-  longitude: number;
+  latitude: unknown;
+  longitude: unknown;
   owner_user_id: string;
   owner_organization_id: string | null;
   verification_level: string;
   public_status: string;
-  created_at: Date;
+  created_at: unknown;
   contact: string | null;
   schedule: string | null;
   manager: string | null;
-  accepts: string[] | null;
+  accepts: unknown;
   source_name: string | null;
   external_id: string | null;
-  external_updated_at: Date | null;
+  external_updated_at: unknown;
   country: string | null;
   city: string | null;
   raw: unknown;
 };
+
+/**
+ * Coerce a raw value from db.execute() to a Date.
+ * The pg driver may return timestamptz as a string or already as a Date.
+ */
+function toDate(value: unknown): Date {
+  if (value instanceof Date) return value;
+  return new Date(value as string);
+}
+
+function toDateOrNull(value: unknown): Date | null {
+  if (value == null) return null;
+  if (value instanceof Date) return value;
+  return new Date(value as string);
+}
+
+/**
+ * Parse the PostgreSQL text-array literal returned by the pg driver for
+ * raw SQL queries (e.g. `{water,food}`) into a JS string array.
+ * If the driver already returned a proper JS array, it is returned as-is.
+ */
+function toStringArray(value: unknown): string[] {
+  if (value == null) return [];
+  if (Array.isArray(value)) return value as string[];
+  // PostgreSQL array literal: `{val1,val2}` — strip braces and split.
+  const str = (value as string).trim();
+  if (str === '{}') return [];
+  if (str.startsWith('{') && str.endsWith('}')) {
+    return str
+      .slice(1, -1)
+      .split(',')
+      .map((s) => s.trim());
+  }
+  return [];
+}
 
 function rawRowToSnapshot(row: RawRow): ResourceSnapshot {
   const provenance: Provenance | null = row.source_name
     ? {
         sourceName: row.source_name,
         externalId: row.external_id as string,
-        externalUpdatedAt: row.external_updated_at ?? null,
+        externalUpdatedAt: toDateOrNull(row.external_updated_at),
         raw: row.raw ?? null,
       }
     : null;
@@ -60,18 +100,18 @@ function rawRowToSnapshot(row: RawRow): ResourceSnapshot {
     description: row.description ?? null,
     location: {
       address: row.address,
-      latitude: row.latitude,
-      longitude: row.longitude,
+      latitude: Number(row.latitude),
+      longitude: Number(row.longitude),
     },
     ownerUserId: row.owner_user_id,
     ownerOrganizationId: row.owner_organization_id ?? null,
     verificationLevel: row.verification_level as VerificationLevel,
     publicStatus: row.public_status as PublicStatus,
-    createdAt: row.created_at,
+    createdAt: toDate(row.created_at),
     contact: row.contact ?? null,
     schedule: row.schedule ?? null,
     manager: row.manager ?? null,
-    accepts: row.accepts ?? [],
+    accepts: toStringArray(row.accepts),
     country: row.country ?? null,
     city: row.city ?? null,
     provenance,
