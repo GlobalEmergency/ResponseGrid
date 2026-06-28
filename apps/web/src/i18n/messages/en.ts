@@ -35,6 +35,7 @@ export const en = {
       resources_how: 'How it works',
       resources_transparency: 'Transparency',
       resources_verify: 'Verify a campaign',
+      resources_developers: 'Developer API',
       legal_heading: 'Legal',
       privacy: 'Privacy',
       terms: 'Terms & conditions',
@@ -662,5 +663,236 @@ export const en = {
     cta_heading: 'Check verified campaigns',
     cta_body: 'Enter an active emergency and filter by verified points and campaigns.',
     cta_button: 'View active emergencies',
+  },
+
+  // ── Page: Developer API (/docs) ───────────────────────────────────────────
+  docs: {
+    meta_title: 'Developer API — ResponseGrid',
+    meta_description:
+      "ResponseGrid public API docs: read every emergency's verified logistics points and validated needs without login, to build maps and services on top of the source of truth.",
+    overline: 'Developer API',
+    h1: 'Build on the source of truth',
+    lead:
+      'The ResponseGrid public API gives you login-free access to the verified logistics points and validated needs of every emergency. It exists so any project —a map, a search tool, a dashboard— can consume official, real-time data instead of duplicating it.',
+
+    toc_heading: 'On this page',
+    nav_intro: 'Overview',
+    nav_concepts: 'Concepts',
+    nav_auth: 'Authentication',
+    nav_quickstart: 'Quickstart: a map of points',
+    nav_emergencies: 'List emergencies',
+    nav_resources: 'Logistics points (read)',
+    nav_needs: 'Needs (read)',
+    nav_enums: 'States & categories',
+    nav_write: 'Contribute data (with a token)',
+    nav_practices: 'Best practices',
+    nav_license: 'License & attribution',
+    nav_links: 'Reference & links',
+
+    // Overview
+    intro_heading: 'Overview',
+    intro_p1:
+      'ResponseGrid coordinates aid during a disaster: it publishes verified logistics points, gathers and validates needs, and keeps it all on a real-time map. This API exposes that same information so you can integrate it into your own product.',
+    intro_p2:
+      "The goal is to avoid a hundred conflicting maps: you consume the verified data and we are the source of truth. Only what local coordination has validated is published, so what you read is already vetted.",
+    base_url_heading: 'Base URL',
+    base_url_note:
+      'The base URL depends on the deployment; use the production one we give you. The examples on this page use this instance.',
+    overview_format_label: 'Format',
+    overview_format_value: 'JSON over HTTPS. All responses are UTF-8.',
+    overview_read_label: 'Reads',
+    overview_read_value: 'Public, no authentication. Every GET in this section is anonymous.',
+    overview_write_label: 'Writes',
+    overview_write_value: 'Require a JWT (Bearer) token. See “Contribute data”.',
+    overview_scope_label: 'Scope',
+    overview_scope_value: 'Everything hangs off an emergency, identified by its UUID or slug.',
+    overview_license_label: 'Data licence',
+    overview_license_value: 'CC BY-SA 4.0 — attribution required + share-alike.',
+
+    // Concepts
+    concepts_heading: 'Concepts',
+    concepts_intro: 'Four ideas are enough to consume the API with confidence:',
+    concept_emergency_t: 'Emergency',
+    concept_emergency_b:
+      'The container for everything. It has a name, a human-readable slug (e.g. “venezuela”), a country and a status (active / paused / closed). Every point and need belongs to an emergency.',
+    concept_resource_t: 'Logistics point',
+    concept_resource_b:
+      'A physical site: a collection or delivery point, warehouse, transport, supplier or venue. It carries a name, a location (address + coordinates), what it accepts, contact, schedule and an operational status light.',
+    concept_need_t: 'Need',
+    concept_need_b:
+      'What is requested on the ground (water, food, medical supplies, personnel…), with a priority and items. Only needs validated by coordination are exposed publicly.',
+    concept_trust_t: 'Trust levels',
+    concept_trust_b:
+      'Every point carries a level: queued (not trustworthy yet), verified (validated by local coordination) or official (accredited organisation). The public API only returns verified or official points — that is what makes it a source of truth.',
+
+    // Authentication
+    auth_heading: 'Authentication',
+    auth_intro: 'There are two planes. Tell them apart before integrating.',
+    auth_read_t: 'Reads — no token',
+    auth_read_b:
+      'The read endpoints (emergencies, public points, public needs) need no credentials. If all you want is to display data, you do not need to authenticate.',
+    auth_write_t: 'Writes — Bearer token',
+    auth_write_b:
+      'To create needs, offers or points you need an account. Register or log in and you get an accessToken (JWT) that you send in the Authorization: Bearer <token> header.',
+
+    // Quickstart
+    qs_heading: 'Quickstart: a map of points',
+    qs_intro:
+      'The most common case: plot on a map where aid can be collected or delivered. Three calls and you are done.',
+    qs_step1: 'Pick an emergency: list the active ones and keep its id (or resolve the slug).',
+    qs_step2: 'Fetch its public points, paginating (up to 100 per page).',
+    qs_step3: 'Draw a marker per point and colour it by its status.',
+    qs_note:
+      'Consume the API from your backend (server to server). Browser requests from another domain are subject to the API’s CORS allowlist; if your app is client-only, proxy through your own server.',
+
+    // List emergencies
+    e_heading: 'List emergencies',
+    e_intro:
+      'Returns the active emergencies. Use it to get the emergencyId the rest of the calls need.',
+    e_byslug:
+      'If you already know the slug (you see it in the public URL, e.g. /e/venezuela) you can resolve the emergency directly:',
+    e_fields:
+      'Each emergency includes id, name, slug, country, status, announcement (official notice or null), dontBringList (what NOT to bring) and updatedAt.',
+
+    // Logistics points (read) — star
+    r_heading: 'Logistics points (read)',
+    r_intro:
+      'The main endpoint. Returns, paginated, the published points of an emergency: only the verified or official and visible ones. This is what you would plot on a map.',
+    r_params_heading: 'Query parameters',
+    r_param_page: 'Page, starting at 1.',
+    r_param_limit: 'Items per page. Default 50, maximum 100.',
+    r_param_category: 'Filter by a category the point accepts (slug, e.g. water, food).',
+    r_param_country: 'Filter by country as stored by the source (e.g. VE or “Venezuela”).',
+    r_response_heading: 'Response',
+    r_response_intro: 'A paged object: items (the points), total, page and limit.',
+    r_fields_heading: 'Public fields of a point',
+    r_fields_intro:
+      'The public information is minimal but enough to locate and decide: name, where it is, what it accepts and how it is operating.',
+    r_facets_heading: 'Facets (to build filters)',
+    r_facets_intro:
+      'If you need to build filters in your UI, this endpoint gives you the counts by category and by country of the visible points, without having to download them all.',
+
+    // Needs (read)
+    n_heading: 'Needs (read)',
+    n_intro:
+      'Returns the validated needs of an emergency. Useful to show what is required and where. Accepts filters by category (category) and priority (priority).',
+    n_privacy:
+      'Privacy: some needs expose approximate coordinates (locationSensitivity: "approximate") so as not to reveal a requester’s home. Do not try to de-obfuscate them; treat them as indicative.',
+    n_fields:
+      'Each need includes id, title, description, location, locationSensitivity, priority, items (with name, quantity, unit and category), status, createdAt, expiresAt and lastVerifiedAt.',
+
+    // States & categories
+    enums_heading: 'States & categories',
+    enums_intro:
+      'Values you will see in responses. Show them to your users instead of inventing your own: that way your app speaks the same language as the rest of the ecosystem.',
+    enum_status_heading: 'Operational status (status light)',
+    enum_status_intro: 'The publicStatus field of each point:',
+    status_active: 'Operational and accepting aid.',
+    status_saturated: 'Overwhelmed: better not to bring more supplies right now.',
+    status_paused: 'Temporarily paused.',
+    status_closed: 'Closed.',
+    enum_verification_heading: 'Trust level',
+    enum_verification_intro: 'The verificationLevel field (the public API only returns the last two):',
+    verification_unverified: 'Queued, not validated (not shown in the public API).',
+    verification_verified: 'Validated by local coordination.',
+    verification_official: 'Published by an accredited organisation.',
+    enum_type_heading: 'Point type',
+    enum_type_intro: 'The type field:',
+    enum_stage_heading: 'Role in the chain',
+    enum_stage_intro: 'The stage field: origin, intermediate or destination.',
+    enum_category_heading: 'Categories',
+    enum_category_intro: 'Used in accepts (points), in items[].category (needs) and as the category filter.',
+    enum_priority_heading: 'Priority',
+    enum_priority_intro: 'The priority field of needs: low, medium, high, urgent.',
+
+    // Contribute data
+    w_heading: 'Contribute data (with a token)',
+    w_intro:
+      'Beyond reading, you can feed the platform from your integration: register needs, supply offers (deliveries) or logistics points. These operations require a token (see Authentication).',
+    w_moderation_note:
+      'Important: what you submit is not published instantly. Needs start as “pending” and points as “unverified”; local coordination validates them before they appear in the public endpoints. That is what keeps the source clean.',
+    w_auth_step: 'First, get a token:',
+    w_need_t: 'Create a need',
+    w_need_b: 'Minimum: title, priority, location and items (at least one). Returns the created id.',
+    w_offer_t: 'Offer supplies (a delivery)',
+    w_offer_b:
+      'A donation, general or directed at a specific need (targetNeedId). Minimum: category, description, quantity and location. If the emergency is not accepting intake (paused/closed) it returns 409.',
+    w_resource_t: 'Register a logistics point',
+    w_resource_b:
+      'Minimum: type, stage, name and location. Optional: accepts, contact, schedule, country, city. It starts unverified until coordination publishes it.',
+
+    // Best practices
+    bp_heading: 'Best practices',
+    bp_cache_t: 'Cache and poll sensibly',
+    bp_cache_b:
+      'Do not hammer the API: paginate, cache responses and refresh every few minutes. Use updatedAt, lastVerifiedAt and externalUpdatedAt to know how fresh a datum is.',
+    bp_attribution_t: 'Cite the source (required)',
+    bp_attribution_b:
+      'Not just courtesy: the data licence (CC BY-SA 4.0) requires you to attribute ResponseGrid / Global Emergency and link back. Ready-to-paste text is in “License & attribution”.',
+    bp_canonical_t: 'Respect the trust levels',
+    bp_canonical_b:
+      'Show your users the verificationLevel and publicStatus. An “official and operational” point is not the same as a “verified and saturated” one: that signal is exactly the value we add.',
+    bp_privacy_t: 'Protect privacy',
+    bp_privacy_b:
+      'Treat approximate locations as such and do not cross-reference data to re-identify people. Aid comes before a pretty dataset.',
+    bp_cors_t: 'Call from your server',
+    bp_cors_b:
+      'The public GETs are anonymous, but the API restricts browser CORS to allowed origins. Consume server to server, or proxy through your backend.',
+
+    // License & attribution
+    license_heading: 'License & attribution',
+    license_intro:
+      'The data returned by the API is published under Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0). You may use, redistribute and adapt it —including commercially— as long as you meet two conditions. (This is the licence of the data; the project code has its own licence.)',
+    license_attribution_t: 'Attribution required',
+    license_attribution_b:
+      'Credit ResponseGrid / Global Emergency, state the licence and link back to the source. The credit must be visible wherever you show the data.',
+    license_sharealike_t: 'Share-alike',
+    license_sharealike_b:
+      'If you remix, transform or build a database from this data and distribute it, you must release it under this same licence, CC BY-SA 4.0.',
+    license_snippet_intro: 'Ready-to-paste attribution:',
+    license_full_link: 'Full legal text of the licence',
+
+    // Reference & links
+    links_heading: 'Reference & links',
+    links_swagger_t: 'Interactive reference (Swagger)',
+    links_swagger_b: 'Explore and try every endpoint live.',
+    links_openapi_t: 'OpenAPI specification',
+    links_openapi_b: 'The OpenAPI JSON, to generate clients or import into your tools.',
+    links_client_t: 'Typed TypeScript client',
+    links_client_b:
+      'The @reliefhub/api-client package (openapi-fetch): types and autocomplete to consume the API from TypeScript.',
+
+    // Tables
+    th_field: 'Field',
+    th_type: 'Type',
+    th_desc: 'Description',
+    th_param: 'Parameter',
+    th_value: 'Value',
+
+    // Point field descriptions
+    f_id: 'Unique identifier of the point.',
+    f_name: 'Name of the centre or point.',
+    f_type: 'Point type (see “Point type”).',
+    f_stage: 'Role in the chain: origin, intermediate or destination.',
+    f_description: 'Free-text description. May be null.',
+    f_location: 'Address and coordinates (latitude, longitude).',
+    f_status: 'Operational status: the status light (active, saturated, paused, closed).',
+    f_verification: 'Trust level: verified or official.',
+    f_accepts: 'Categories the point accepts (e.g. ["water","food"]).',
+    f_contact: 'Phone or contact for the point. May be null.',
+    f_schedule: 'Opening hours. May be null.',
+    f_manager: 'Person in charge. May be null.',
+    f_source: 'Origin of the data when it comes from an external source. May be null.',
+    f_freshness: 'Date (ISO 8601) of the last update at the source. May be null.',
+    f_country: 'Country as stored by the source (often the full name). May be null.',
+    f_city: 'City. May be null.',
+    f_owner: 'Organisation that owns the point. May be null.',
+
+    cta_heading: 'Building something with this?',
+    cta_body: 'Start from the active emergencies and pull their public points. Cite us as the source and link back.',
+    cta_button: 'View active emergencies',
+
+    copy: 'Copy',
+    copied: 'Copied',
   },
 } as Messages;
