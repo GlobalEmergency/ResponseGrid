@@ -229,6 +229,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
           <EmergencyMapWrapper
             points={mapPoints}
             emergencyId={emergencyId}
+            slug={slug}
             containerClassName="h-[44vh] min-h-[300px] max-h-[480px] border-y border-line lg:h-full lg:min-h-0 lg:max-h-none lg:border-y-0 lg:border-r"
           />
           {/* Leyenda flotante sobre el mapa */}

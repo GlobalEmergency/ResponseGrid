@@ -16,6 +16,9 @@ interface EmergencyMapWrapperProps {
   emergencyId?: string;
   /** Tailwind classes for the map container (forwarded to EmergencyMap). */
   containerClassName?: string;
+  /** Emergency slug — forwarded to the map so resource popups can link to the
+   * detail page and the "report a problem" flow (ficha 15, #155). */
+  slug?: string;
 }
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/$/, '');
@@ -59,7 +62,7 @@ function createDebounced(fn: (map: LeafletMap) => void) {
   return invoke;
 }
 
-export function EmergencyMapWrapper({ points, emergencyId, containerClassName }: EmergencyMapWrapperProps) {
+export function EmergencyMapWrapper({ points, emergencyId, containerClassName, slug }: EmergencyMapWrapperProps) {
   // allMapPoints drives what the map renders. Initially = SSR prop (resources +
   // needs, page 1); once the map is ready it is replaced by viewport queries.
   const [allMapPoints, setAllMapPoints] = useState<MapPoint[]>(points);
@@ -212,6 +215,7 @@ export function EmergencyMapWrapper({ points, emergencyId, containerClassName }:
       points={effectivePoints}
       onMapReady={handleMapReady}
       {...(containerClassName !== undefined && { containerClassName })}
+      {...(slug !== undefined && { slug })}
     />
   );
 }

@@ -583,6 +583,47 @@ export async function resolveDispute(
   return { status: 'success' };
 }
 
+type ValidityReport = components['schemas']['ValidityReportDto'];
+
+export type ValidityReportsResult =
+  | { status: 'success'; reports: ValidityReport[] }
+  | { status: 'error'; message: string };
+
+/**
+ * Loads the individual citizen validity reports of a disputed resource so a
+ * coordinator can review the evidence (reason · note · photos) before
+ * resolving (#154). Coordinator-only (`resource:read`); photos are
+ * coordination-only by design (ficha 15 §6).
+ */
+export async function getValidityReports(
+  resourceId: string,
+  slug: string,
+): Promise<ValidityReportsResult> {
+  const token = await getToken();
+  if (token === null)
+    redirect(`/login?next=/e/${slug}/coordinacion/puntos-en-duda`);
+
+  const { t } = await getT();
+
+  const { data, error, response } = await api.GET(
+    '/resources/{resourceId}/validity-reports',
+    {
+      params: { path: { resourceId } },
+      headers: authHeaders(token),
+    },
+  );
+
+  if (error !== undefined || data === undefined) {
+    if (response.status === 401) {
+      await clearToken();
+      redirect(`/login?next=/e/${slug}/coordinacion/puntos-en-duda`);
+    }
+    return { status: 'error', message: t.coord.err_load_reports_failed };
+  }
+
+  return { status: 'success', reports: data };
+}
+
 export async function editOffer(
   offerId: string,
   slug: string,
