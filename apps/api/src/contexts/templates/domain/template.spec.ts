@@ -10,6 +10,7 @@ describe('Template', () => {
       name: 'Terremoto básico',
       description: 'Template para terremotos de magnitud moderada',
       dontBringList: ['mascotas', 'vehículos grandes'],
+      recommendedList: ['agua', 'dieta líquida'],
       defaultAnnouncement: 'No traer mascotas al centro de acopio',
     });
 
@@ -17,6 +18,7 @@ describe('Template', () => {
     expect(t.name).toBe('Terremoto básico');
     expect(t.description).toBe('Template para terremotos de magnitud moderada');
     expect(t.dontBringList).toEqual(['mascotas', 'vehículos grandes']);
+    expect(t.recommendedList).toEqual(['agua', 'dieta líquida']);
     expect(t.defaultAnnouncement).toBe('No traer mascotas al centro de acopio');
     expect(t.createdAt).toBeInstanceOf(Date);
   });
@@ -27,6 +29,7 @@ describe('Template', () => {
       name: 'Template sin anuncio',
       description: 'Descripción',
       dontBringList: [],
+      recommendedList: [],
       defaultAnnouncement: null,
     });
 
@@ -40,6 +43,7 @@ describe('Template', () => {
       name: 'Template round-trip',
       description: 'Desc',
       dontBringList: ['item1', 'item2'],
+      recommendedList: ['itemA'],
       defaultAnnouncement: 'Anuncio',
     });
 
@@ -49,6 +53,7 @@ describe('Template', () => {
     expect(restored.name).toBe(original.name);
     expect(restored.description).toBe(original.description);
     expect(restored.dontBringList).toEqual(original.dontBringList);
+    expect(restored.recommendedList).toEqual(original.recommendedList);
     expect(restored.defaultAnnouncement).toBe(original.defaultAnnouncement);
     expect(restored.createdAt).toEqual(original.createdAt);
   });

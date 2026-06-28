@@ -10,6 +10,7 @@ describe('CreateTemplate', () => {
       name: 'Terremoto',
       description: 'Template básico para terremotos',
       dontBringList: ['mascotas', 'joyas'],
+      recommendedList: ['agua', 'dieta líquida'],
       defaultAnnouncement: 'No traer mascotas',
     });
 
@@ -20,6 +21,7 @@ describe('CreateTemplate', () => {
     expect(all).toHaveLength(1);
     expect(all[0].name).toBe('Terremoto');
     expect(all[0].dontBringList).toEqual(['mascotas', 'joyas']);
+    expect(all[0].recommendedList).toEqual(['agua', 'dieta líquida']);
     expect(all[0].defaultAnnouncement).toBe('No traer mascotas');
   });
 
@@ -31,6 +33,7 @@ describe('CreateTemplate', () => {
       name: 'Inundación',
       description: 'Template para inundaciones',
       dontBringList: [],
+      recommendedList: [],
     });
 
     expect(typeof result.id).toBe('string');

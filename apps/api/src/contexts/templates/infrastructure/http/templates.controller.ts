@@ -64,6 +64,7 @@ export class TemplatesController {
       name: dto.name,
       description: dto.description,
       dontBringList: dto.dontBringList,
+      recommendedList: dto.recommendedList,
       ...(dto.defaultAnnouncement !== undefined && {
         defaultAnnouncement: dto.defaultAnnouncement,
       }),

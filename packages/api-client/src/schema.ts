@@ -1972,6 +1972,15 @@ export interface components {
             dontBringList: string[];
             /** @example No se aceptan mascotas en el centro de acopio. */
             defaultAnnouncement?: string | null;
+            /**
+             * @description Items and priorities people SHOULD bring
+             * @example [
+             *       "agua",
+             *       "dieta líquida",
+             *       "ítems EV"
+             *     ]
+             */
+            recommendedList: string[];
         };
         CreateTemplateResponseDto: {
             /** @example aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa */
@@ -1995,6 +2004,13 @@ export interface components {
             defaultAnnouncement: string | null;
             /** @example 2026-06-27T10:00:00.000Z */
             createdAt: string;
+            /**
+             * @example [
+             *       "agua",
+             *       "dieta líquida"
+             *     ]
+             */
+            recommendedList: string[];
         };
         CreateEmergencyDto: {
             /** @example Emergencia sísmica — Venezuela */
@@ -2043,6 +2059,15 @@ export interface components {
             dontBringList: string[];
             /** @example 2026-06-25T10:00:00.000Z */
             updatedAt: string;
+            /**
+             * @description Items and priorities people SHOULD bring to the emergency
+             * @example [
+             *       "agua",
+             *       "dieta líquida",
+             *       "ítems EV"
+             *     ]
+             */
+            recommendedList: string[];
         };
         CreateEmergencyFromTemplateDto: {
             /** @example aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa */

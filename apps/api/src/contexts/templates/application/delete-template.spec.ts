@@ -13,6 +13,7 @@ describe('DeleteTemplate', () => {
       name: 'To Delete',
       description: 'Desc',
       dontBringList: [],
+      recommendedList: [],
     });
 
     await deleteUc.execute({ id });

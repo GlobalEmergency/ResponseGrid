@@ -157,6 +157,17 @@ export const es = {
       'No acudas por tu cuenta a la zona afectada.',
     ],
 
+    // "Qué SÍ llevar"
+    recommended_heading: 'Qué SÍ llevar ahora',
+    recommended_intro:
+      'Prioriza lo que realmente ayuda en la fase actual de la emergencia.',
+    recommended_items: [
+      'Agua potable en envase limpio y cerrado.',
+      'Dieta líquida o alimentos fáciles de digerir.',
+      'Ítems EV, ampollas y material sanitario priorizado por coordinación.',
+      'Documentación básica si la coordinación la ha pedido.',
+    ],
+
     // "¿Cómo quieres colaborar?"
     actions_heading: '¿Cómo quieres colaborar?',
     action_offer_resource: 'Ofrecer un recurso',
@@ -1307,7 +1318,7 @@ export const es = {
     empty_description: 'Usa el formulario de abajo para crear la primera plantilla.',
     new_heading: 'Nueva plantilla',
     create_from_heading: 'Crear emergencia desde plantilla',
-    inheritance_note: 'La nueva emergencia heredará la lista «qué no llevar» y el comunicado por defecto de la plantilla.',
+    inheritance_note: 'La nueva emergencia heredará las listas «qué no llevar» y «qué sí llevar», además del comunicado por defecto de la plantilla.',
     // Create-template form
     f_name_label: 'Nombre de la plantilla',
     f_name_ph: 'Ej: Terremoto básico',
@@ -1315,6 +1326,8 @@ export const es = {
     f_description_ph: 'Describe cuándo usar esta plantilla',
     f_dont_bring_label: 'Qué NO llevar (una línea por ítem)',
     f_dont_bring_ph: 'Ropa usada sin clasificar\nMedicamentos sin validación\nAlimentos caseros',
+    f_recommended_label: 'Qué SÍ llevar (una línea por ítem)',
+    f_recommended_ph: 'Agua potable\nDieta líquida\nÍtems EV',
     f_announcement_label: 'Comunicado por defecto (opcional)',
     f_announcement_ph: 'Texto que aparecerá como comunicado inicial de la emergencia',
     f_submit: 'Crear plantilla',
@@ -1340,6 +1353,7 @@ export const es = {
     err_name_required: 'El nombre es obligatorio.',
     err_description_required: 'La descripción es obligatoria.',
     err_dont_bring_empty: 'La lista "qué no llevar" debe tener al menos un ítem.',
+    err_recommended_empty: 'La lista "qué sí llevar" debe tener al menos un ítem.',
     err_no_permission_create: 'No tienes permisos para crear plantillas.',
     err_invalid_data: 'Datos inválidos. Revisa los campos.',
     err_create_failed: 'Error al crear la plantilla. Inténtalo de nuevo.',
@@ -1676,6 +1690,7 @@ export const es = {
     on_behalf_of: '¿En nombre de quién?',
     as_individual: 'A título particular',
     template_dont_bring_items: '{count} ítems «qué no llevar»',
+    template_recommended_items: '{count} ítems «qué sí llevar»',
     created: 'Creada',
     search_address: 'Buscar dirección',
     address_placeholder: 'Calle Mayor 1, Madrid…',

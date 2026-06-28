@@ -6,6 +6,7 @@ export interface CreateTemplateCommand {
   name: string;
   description: string;
   dontBringList: string[];
+  recommendedList: string[];
   defaultAnnouncement?: string;
 }
 
@@ -18,6 +19,7 @@ export class CreateTemplate {
       name: cmd.name,
       description: cmd.description,
       dontBringList: cmd.dontBringList,
+      recommendedList: cmd.recommendedList,
       defaultAnnouncement: cmd.defaultAnnouncement ?? null,
     });
     await this.repo.save(template);

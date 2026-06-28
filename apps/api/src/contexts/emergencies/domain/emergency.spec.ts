@@ -26,6 +26,7 @@ describe('Emergency', () => {
   it('creates with null announcement and updatedAt equal to createdAt', () => {
     const e = makeEmergency();
     expect(e.announcement).toBeNull();
+    expect(e.recommendedList).toEqual([]);
     expect(e.updatedAt.toISOString()).toBe(e.createdAt.toISOString());
   });
 
@@ -132,6 +133,7 @@ describe('Emergency', () => {
     expect(restored.slug.equals(e.slug)).toBe(true);
     expect(restored.status).toBe(EmergencyStatus.Paused);
     expect(restored.announcement).toBe('Round-trip test');
+    expect(restored.recommendedList).toEqual([]);
     expect(restored.updatedAt.toISOString()).toBe(e.updatedAt.toISOString());
     expect(restored.country).toBe('TR');
     expect(restored.createdAt.toISOString()).toBe(e.createdAt.toISOString());

@@ -76,6 +76,7 @@ export default async function TemplatesPage() {
                     name={t.name}
                     description={t.description}
                     dontBringCount={t.dontBringList.length}
+                    recommendedCount={t.recommendedList.length}
                     createdAt={t.createdAt}
                     actions={<DeleteTemplateButton templateId={t.id} />}
                   />

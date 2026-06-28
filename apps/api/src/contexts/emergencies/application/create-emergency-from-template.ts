@@ -37,6 +37,7 @@ export class CreateEmergencyFromTemplate {
       slug,
       country: cmd.country,
       dontBringList: template.dontBringList,
+      recommendedList: template.recommendedList,
       announcement: template.defaultAnnouncement,
     });
 

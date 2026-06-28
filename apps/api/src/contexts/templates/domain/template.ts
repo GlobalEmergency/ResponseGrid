@@ -5,6 +5,7 @@ export interface CreateTemplateProps {
   name: string;
   description: string;
   dontBringList: string[];
+  recommendedList?: string[];
   defaultAnnouncement: string | null;
 }
 
@@ -13,6 +14,7 @@ export interface TemplateSnapshot {
   name: string;
   description: string;
   dontBringList: string[];
+  recommendedList: string[];
   defaultAnnouncement: string | null;
   createdAt: Date;
 }
@@ -23,6 +25,7 @@ export class Template {
     public readonly name: string,
     public readonly description: string,
     public readonly dontBringList: string[],
+    public readonly recommendedList: string[],
     public readonly defaultAnnouncement: string | null,
     public readonly createdAt: Date,
   ) {}
@@ -33,6 +36,7 @@ export class Template {
       props.name,
       props.description,
       props.dontBringList,
+      props.recommendedList ?? [],
       props.defaultAnnouncement,
       new Date(),
     );
@@ -44,6 +48,7 @@ export class Template {
       snap.name,
       snap.description,
       snap.dontBringList,
+      snap.recommendedList,
       snap.defaultAnnouncement,
       snap.createdAt,
     );
@@ -55,6 +60,7 @@ export class Template {
       name: this.name,
       description: this.description,
       dontBringList: this.dontBringList,
+      recommendedList: this.recommendedList,
       defaultAnnouncement: this.defaultAnnouncement,
       createdAt: this.createdAt,
     };

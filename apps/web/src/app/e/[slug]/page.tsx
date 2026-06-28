@@ -140,6 +140,8 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
 
   const te = t.emergency;
   const dontList = emergency.dontBringList.length > 0 ? emergency.dontBringList : te.dont_bring_items;
+  const recommendedList =
+    emergency.recommendedList.length > 0 ? emergency.recommendedList : te.recommended_items;
   const sectionTitle = 'font-display text-base font-bold text-navy';
 
   return (
@@ -225,6 +227,27 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
                     className="flex h-[22px] w-[22px] flex-shrink-0 items-center justify-center rounded-full bg-danger-soft text-xs font-extrabold text-danger"
                   >
                     ✕
+                  </span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {/* Qué SÍ llevar ahora */}
+          <section aria-labelledby="bring-heading" className="flex flex-col gap-3">
+            <div>
+              <h2 id="bring-heading" className={sectionTitle}>{te.recommended_heading}</h2>
+              <p className="mt-0.5 text-[12.5px] text-muted">{te.recommended_intro}</p>
+            </div>
+            <ul className="flex flex-col gap-2.5" role="list">
+              {recommendedList.map((item) => (
+                <li key={item} className="flex items-center gap-2.5 text-sm text-ink">
+                  <span
+                    aria-hidden="true"
+                    className="flex h-[22px] w-[22px] flex-shrink-0 items-center justify-center rounded-full bg-success-soft text-xs font-extrabold text-success"
+                  >
+                    ✓
                   </span>
                   {item}
                 </li>

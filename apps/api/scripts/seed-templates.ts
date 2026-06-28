@@ -24,6 +24,14 @@ const DONT_BRING_LIST = [
   'Personas sin formación sanitaria mínima en zonas de atención',
 ];
 
+const RECOMMENDED_LIST = [
+  'Agua potable y alimento de fácil consumo',
+  'Documento de identidad y tarjeta sanitaria',
+  'Medicamentos personales con receta o prospecto',
+  'Ropa de recambio y cargadores portátiles',
+  'Mascarillas, guantes y gel hidroalcohólico',
+];
+
 const DEFAULT_ANNOUNCEMENT =
   'Activado protocolo de emergencia sanitaria. Coordinamos necesidades de ' +
   'medicamentos, equipos e insumos médicos. Solo personal sanitario ' +
@@ -46,6 +54,7 @@ async function seed(): Promise<void> {
           'Plantilla para emergencias del vertical sanitario: hospitales, ' +
           'refugios médicos y situaciones que requieren taxonomía médica.',
         dontBringList: DONT_BRING_LIST,
+        recommendedList: RECOMMENDED_LIST,
         defaultAnnouncement: DEFAULT_ANNOUNCEMENT,
         createdAt: new Date(),
       })
@@ -54,9 +63,10 @@ async function seed(): Promise<void> {
         set: {
           name: 'Emergencia sanitaria',
           description:
-            'Plantilla para emergencias del vertical sanitario: hospitales, ' +
-            'refugios médicos y situaciones que requieren taxonomía médica.',
+          'Plantilla para emergencias del vertical sanitario: hospitales, ' +
+          'refugios médicos y situaciones que requieren taxonomía médica.',
           dontBringList: DONT_BRING_LIST,
+          recommendedList: RECOMMENDED_LIST,
           defaultAnnouncement: DEFAULT_ANNOUNCEMENT,
         },
       });

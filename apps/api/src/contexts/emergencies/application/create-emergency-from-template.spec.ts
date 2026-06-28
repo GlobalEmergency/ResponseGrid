@@ -12,6 +12,7 @@ const TEMPLATE_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 describe('CreateEmergencyFromTemplate', () => {
   function makeTemplate(opts: {
     dontBringList?: string[];
+    recommendedList?: string[];
     defaultAnnouncement?: string | null;
   }) {
     return Template.create({
@@ -19,16 +20,18 @@ describe('CreateEmergencyFromTemplate', () => {
       name: 'Terremoto básico',
       description: 'Template de prueba',
       dontBringList: opts.dontBringList ?? [],
+      recommendedList: opts.recommendedList ?? [],
       defaultAnnouncement: opts.defaultAnnouncement ?? null,
     });
   }
 
-  it('creates an emergency copying dontBringList and announcement from template', async () => {
+  it('creates an emergency copying lists and announcement from template', async () => {
     const emergencyRepo = new InMemoryEmergencyRepository();
     const templateRepo = new InMemoryTemplateRepository();
     await templateRepo.save(
       makeTemplate({
         dontBringList: ['mascotas', 'joyas'],
+        recommendedList: ['agua', 'dieta líquida'],
         defaultAnnouncement: 'No traer mascotas',
       }),
     );
@@ -52,6 +55,7 @@ describe('CreateEmergencyFromTemplate', () => {
     );
     expect(created).not.toBeNull();
     expect(created?.dontBringList).toEqual(['mascotas', 'joyas']);
+    expect(created?.recommendedList).toEqual(['agua', 'dieta líquida']);
     expect(created?.announcement).toBe('No traer mascotas');
   });
 
@@ -59,7 +63,11 @@ describe('CreateEmergencyFromTemplate', () => {
     const emergencyRepo = new InMemoryEmergencyRepository();
     const templateRepo = new InMemoryTemplateRepository();
     await templateRepo.save(
-      makeTemplate({ dontBringList: [], defaultAnnouncement: null }),
+      makeTemplate({
+        dontBringList: [],
+        recommendedList: [],
+        defaultAnnouncement: null,
+      }),
     );
 
     const useCase = new CreateEmergencyFromTemplate(

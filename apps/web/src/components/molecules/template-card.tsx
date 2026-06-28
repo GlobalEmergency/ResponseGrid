@@ -5,6 +5,7 @@ interface TemplateCardProps {
   name: string;
   description: string;
   dontBringCount: number;
+  recommendedCount: number;
   createdAt: string;
   actions?: ReactNode;
 }
@@ -17,6 +18,7 @@ export async function TemplateCard({
   name,
   description,
   dontBringCount,
+  recommendedCount,
   createdAt,
   actions,
 }: TemplateCardProps) {
@@ -27,7 +29,11 @@ export async function TemplateCard({
         <h3 className="text-sm font-bold text-ink break-words">{name}</h3>
         <p className="text-xs text-muted break-words">{description}</p>
         <p className="text-xs text-muted-soft">
-          {t.ui.template_dont_bring_items.replace('{count}', String(dontBringCount))} · {t.ui.created}{' '}
+          {t.ui.template_dont_bring_items.replace('{count}', String(dontBringCount))}
+          {' · '}
+          {t.ui.template_recommended_items.replace('{count}', String(recommendedCount))}
+          {' · '}
+          {t.ui.created}{' '}
           <time dateTime={createdAt} suppressHydrationWarning>
             {new Date(createdAt).toLocaleDateString(locale === 'en' ? 'en-GB' : 'es-ES')}
           </time>

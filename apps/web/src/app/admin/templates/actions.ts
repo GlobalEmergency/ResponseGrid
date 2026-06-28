@@ -45,6 +45,7 @@ export async function createTemplateAction(
   const name = String(formData.get('name') ?? '').trim();
   const description = String(formData.get('description') ?? '').trim();
   const dontBringRaw = String(formData.get('dontBringList') ?? '');
+  const recommendedRaw = String(formData.get('recommendedList') ?? '');
   const defaultAnnouncement =
     String(formData.get('defaultAnnouncement') ?? '').trim() || null;
 
@@ -59,6 +60,10 @@ export async function createTemplateAction(
     .split('\n')
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
+  const recommendedList = recommendedRaw
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
 
   if (dontBringList.length === 0) {
     return {
@@ -66,9 +71,15 @@ export async function createTemplateAction(
       message: t.templates.err_dont_bring_empty,
     };
   }
+  if (recommendedList.length === 0) {
+    return {
+      status: 'error',
+      message: t.templates.err_recommended_empty,
+    };
+  }
 
   const { error, response } = await api.POST('/templates', {
-    body: { name, description, dontBringList, defaultAnnouncement },
+    body: { name, description, dontBringList, recommendedList, defaultAnnouncement },
     headers: authHeaders(token),
   });
 

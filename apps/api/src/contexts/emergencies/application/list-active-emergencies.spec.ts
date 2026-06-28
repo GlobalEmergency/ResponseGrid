@@ -23,7 +23,11 @@ describe('ListActiveEmergencies', () => {
       slug: 'closed-relief',
       country: 'ES',
       status: EmergencyStatus.Closed,
+      announcement: null,
+      dontBringList: [],
+      recommendedList: [],
       createdAt: new Date(),
+      updatedAt: new Date(),
     });
     await repo.save(closed);
 

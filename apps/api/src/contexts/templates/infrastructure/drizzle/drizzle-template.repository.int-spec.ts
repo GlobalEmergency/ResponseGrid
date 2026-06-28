@@ -34,6 +34,7 @@ describe('DrizzleTemplateRepository (integration)', () => {
       name: 'Terremoto básico',
       description: 'Template para terremotos',
       dontBringList: ['mascotas', 'joyas'],
+      recommendedList: ['agua', 'dieta líquida'],
       defaultAnnouncement: 'No traer mascotas',
     });
 
@@ -45,6 +46,7 @@ describe('DrizzleTemplateRepository (integration)', () => {
     expect(found?.name).toBe('Terremoto básico');
     expect(found?.description).toBe('Template para terremotos');
     expect(found?.dontBringList).toEqual(['mascotas', 'joyas']);
+    expect(found?.recommendedList).toEqual(['agua', 'dieta líquida']);
     expect(found?.defaultAnnouncement).toBe('No traer mascotas');
   });
 
@@ -55,6 +57,7 @@ describe('DrizzleTemplateRepository (integration)', () => {
         name: 'T1',
         description: 'D1',
         dontBringList: [],
+        recommendedList: [],
         defaultAnnouncement: null,
       }),
     );
@@ -64,6 +67,7 @@ describe('DrizzleTemplateRepository (integration)', () => {
         name: 'T2',
         description: 'D2',
         dontBringList: ['x'],
+        recommendedList: ['y'],
         defaultAnnouncement: null,
       }),
     );
@@ -80,6 +84,7 @@ describe('DrizzleTemplateRepository (integration)', () => {
         name: 'To Delete',
         description: 'Desc',
         dontBringList: [],
+        recommendedList: [],
         defaultAnnouncement: null,
       }),
     );

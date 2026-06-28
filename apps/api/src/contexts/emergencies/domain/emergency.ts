@@ -9,6 +9,7 @@ export interface CreateEmergencyProps {
   slug: Slug;
   country: string;
   dontBringList?: string[];
+  recommendedList?: string[];
   announcement?: string | null;
 }
 
@@ -20,6 +21,7 @@ export interface EmergencySnapshot {
   status: EmergencyStatus;
   announcement: string | null;
   dontBringList: string[];
+  recommendedList: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,6 +35,7 @@ export class Emergency {
     private _status: EmergencyStatus,
     private _announcement: string | null,
     private _dontBringList: string[],
+    private _recommendedList: string[],
     public readonly createdAt: Date,
     private _updatedAt: Date,
   ) {}
@@ -47,6 +50,7 @@ export class Emergency {
       EmergencyStatus.Active,
       props.announcement ?? null,
       props.dontBringList ?? [],
+      props.recommendedList ?? [],
       now,
       now,
     );
@@ -61,6 +65,7 @@ export class Emergency {
       snap.status,
       snap.announcement,
       snap.dontBringList,
+      snap.recommendedList,
       snap.createdAt,
       snap.updatedAt,
     );
@@ -76,6 +81,10 @@ export class Emergency {
 
   get dontBringList(): string[] {
     return this._dontBringList;
+  }
+
+  get recommendedList(): string[] {
+    return this._recommendedList;
   }
 
   get updatedAt(): Date {
@@ -117,6 +126,7 @@ export class Emergency {
       status: this._status,
       announcement: this._announcement,
       dontBringList: this._dontBringList,
+      recommendedList: this._recommendedList,
       createdAt: this.createdAt,
       updatedAt: this._updatedAt,
     };

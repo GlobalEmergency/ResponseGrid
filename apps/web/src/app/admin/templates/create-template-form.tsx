@@ -68,6 +68,19 @@ export function CreateTemplateForm() {
       </FormField>
 
       <FormField
+        htmlFor="recommendedList"
+        label={t.f_recommended_label}
+      >
+        <Textarea
+          id="recommendedList"
+          name="recommendedList"
+          rows={5}
+          placeholder={t.f_recommended_ph}
+          required
+        />
+      </FormField>
+
+      <FormField
         htmlFor="defaultAnnouncement"
         label={t.f_announcement_label}
       >

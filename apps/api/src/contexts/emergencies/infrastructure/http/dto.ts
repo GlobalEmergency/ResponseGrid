@@ -77,6 +77,13 @@ export class EmergencyViewDto {
   })
   dontBringList!: string[];
 
+  @ApiProperty({
+    example: ['agua', 'dieta líquida', 'ítems EV'],
+    type: [String],
+    description: 'Items and priorities people SHOULD bring to the emergency',
+  })
+  recommendedList!: string[];
+
   @ApiProperty({ example: '2026-06-25T10:00:00.000Z' })
   updatedAt!: string;
 }

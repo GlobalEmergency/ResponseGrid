@@ -13,6 +13,7 @@ function rowToSnapshot(row: Row): TemplateSnapshot {
     name: row.name,
     description: row.description,
     dontBringList: row.dontBringList,
+    recommendedList: row.recommendedList,
     defaultAnnouncement: row.defaultAnnouncement ?? null,
     createdAt: row.createdAt,
   };
@@ -30,6 +31,7 @@ export class DrizzleTemplateRepository implements TemplateRepository {
         name: s.name,
         description: s.description,
         dontBringList: s.dontBringList,
+        recommendedList: s.recommendedList,
         defaultAnnouncement: s.defaultAnnouncement,
         createdAt: s.createdAt,
       })
@@ -39,6 +41,7 @@ export class DrizzleTemplateRepository implements TemplateRepository {
           name: s.name,
           description: s.description,
           dontBringList: s.dontBringList,
+          recommendedList: s.recommendedList,
           defaultAnnouncement: s.defaultAnnouncement,
         },
       });

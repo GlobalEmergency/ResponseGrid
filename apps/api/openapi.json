@@ -5861,12 +5861,25 @@
             "type": "string",
             "example": "No se aceptan mascotas en el centro de acopio.",
             "nullable": true
+          },
+          "recommendedList": {
+            "example": [
+              "agua",
+              "dieta líquida",
+              "ítems EV"
+            ],
+            "description": "Items and priorities people SHOULD bring",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
           "name",
           "description",
-          "dontBringList"
+          "dontBringList",
+          "recommendedList"
         ]
       },
       "CreateTemplateResponseDto": {
@@ -5914,6 +5927,16 @@
           "createdAt": {
             "type": "string",
             "example": "2026-06-27T10:00:00.000Z"
+          },
+          "recommendedList": {
+            "example": [
+              "agua",
+              "dieta líquida"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -5922,7 +5945,8 @@
           "description",
           "dontBringList",
           "defaultAnnouncement",
-          "createdAt"
+          "createdAt",
+          "recommendedList"
         ]
       },
       "CreateEmergencyDto": {
@@ -6016,6 +6040,18 @@
           "updatedAt": {
             "type": "string",
             "example": "2026-06-25T10:00:00.000Z"
+          },
+          "recommendedList": {
+            "example": [
+              "agua",
+              "dieta líquida",
+              "ítems EV"
+            ],
+            "description": "Items and priorities people SHOULD bring to the emergency",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -6026,7 +6062,8 @@
           "status",
           "announcement",
           "dontBringList",
-          "updatedAt"
+          "updatedAt",
+          "recommendedList"
         ]
       },
       "CreateEmergencyFromTemplateDto": {

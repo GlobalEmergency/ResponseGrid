@@ -154,6 +154,16 @@ export const en = {
       'Do not go to the affected area on your own.',
     ],
 
+    // "What SHOULD bring"
+    recommended_heading: 'What to bring now',
+    recommended_intro: 'Prioritise the items that help in this stage of the emergency.',
+    recommended_items: [
+      'Clean, sealed drinking water.',
+      'Liquid diet or easy-to-digest food.',
+      'IV items, ampoules and medical material prioritised by coordination.',
+      'Basic documentation if coordination has requested it.',
+    ],
+
     actions_heading: 'How do you want to help?',
     action_offer_resource: 'Offer a resource',
     action_submit_petition: 'Submit a request',
@@ -1279,7 +1289,7 @@ export const en = {
     empty_description: 'Use the form below to create the first template.',
     new_heading: 'New template',
     create_from_heading: 'Create emergency from template',
-    inheritance_note: 'The new emergency will inherit the “what not to bring” list and the template’s default announcement.',
+    inheritance_note: 'The new emergency will inherit the “what not to bring” and “what to bring” lists, plus the template’s default announcement.',
     // Create-template form
     f_name_label: 'Template name',
     f_name_ph: 'e.g. Basic earthquake',
@@ -1287,6 +1297,8 @@ export const en = {
     f_description_ph: 'Describe when to use this template',
     f_dont_bring_label: 'What NOT to bring (one item per line)',
     f_dont_bring_ph: 'Unsorted used clothing\nUnvalidated medicines\nHomemade food',
+    f_recommended_label: 'What to bring (one item per line)',
+    f_recommended_ph: 'Drinking water\nLiquid diet\nIV items',
     f_announcement_label: 'Default announcement (optional)',
     f_announcement_ph: 'Text shown as the emergency’s initial announcement',
     f_submit: 'Create template',
@@ -1312,6 +1324,7 @@ export const en = {
     err_name_required: 'Name is required.',
     err_description_required: 'Description is required.',
     err_dont_bring_empty: 'The “what not to bring” list must have at least one item.',
+    err_recommended_empty: 'The “what to bring” list must have at least one item.',
     err_no_permission_create: 'You don’t have permission to create templates.',
     err_invalid_data: 'Invalid data. Check the fields.',
     err_create_failed: 'Couldn’t create the template. Please try again.',
@@ -1648,6 +1661,7 @@ export const en = {
     on_behalf_of: 'On whose behalf?',
     as_individual: 'As an individual',
     template_dont_bring_items: '{count} “what not to bring” items',
+    template_recommended_items: '{count} “what to bring” items',
     created: 'Created',
     search_address: 'Search address',
     address_placeholder: '123 Main St, London…',

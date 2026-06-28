@@ -5,6 +5,7 @@ export const templatesTable = pgTable('templates', {
   name: text('name').notNull(),
   description: text('description').notNull(),
   dontBringList: text('dont_bring_list').array().notNull().default([]),
+  recommendedList: text('recommended_list').array().notNull().default([]),
   defaultAnnouncement: text('default_announcement'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
 });

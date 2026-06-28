@@ -30,6 +30,15 @@ export class CreateTemplateDto {
   dontBringList!: string[];
 
   @ApiProperty({
+    example: ['agua', 'dieta líquida', 'ítems EV'],
+    type: [String],
+    description: 'Items and priorities people SHOULD bring',
+  })
+  @IsArray()
+  @IsString({ each: true })
+  recommendedList!: string[];
+
+  @ApiProperty({
     example: 'No se aceptan mascotas en el centro de acopio.',
     nullable: true,
     required: false,
@@ -56,6 +65,9 @@ export class TemplateViewDto {
 
   @ApiProperty({ example: ['mascotas', 'joyas'], type: [String] })
   dontBringList!: string[];
+
+  @ApiProperty({ example: ['agua', 'dieta líquida'], type: [String] })
+  recommendedList!: string[];
 
   @ApiProperty({
     example: 'No se aceptan mascotas.',

@@ -5,6 +5,7 @@ export interface TemplateView {
   name: string;
   description: string;
   dontBringList: string[];
+  recommendedList: string[];
   defaultAnnouncement: string | null;
   createdAt: string;
 }
@@ -15,6 +16,7 @@ export function toTemplateView(t: Template): TemplateView {
     name: t.name,
     description: t.description,
     dontBringList: t.dontBringList,
+    recommendedList: t.recommendedList,
     defaultAnnouncement: t.defaultAnnouncement,
     createdAt: t.createdAt.toISOString(),
   };

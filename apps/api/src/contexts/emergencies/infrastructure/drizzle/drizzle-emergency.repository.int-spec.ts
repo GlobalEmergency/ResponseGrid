@@ -36,6 +36,7 @@ describe('DrizzleEmergencyRepository (integration)', () => {
       name: 'Emergencia sísmica — Venezuela',
       slug: Slug.fromString('venezuela'),
       country: 'VE',
+      recommendedList: ['agua', 'dieta líquida'],
     });
 
     await repo.save(emergency);
@@ -47,6 +48,7 @@ describe('DrizzleEmergencyRepository (integration)', () => {
     expect(found?.slug.value).toBe('venezuela');
     expect(found?.country).toBe('VE');
     expect(found?.status).toBe(EmergencyStatus.Active);
+    expect(found?.recommendedList).toEqual(['agua', 'dieta líquida']);
   });
 
   it('findBySlug returns the correct emergency', async () => {
@@ -55,6 +57,7 @@ describe('DrizzleEmergencyRepository (integration)', () => {
       name: 'Emergencia sísmica — Venezuela',
       slug: Slug.fromString('venezuela'),
       country: 'VE',
+      recommendedList: ['agua'],
     });
 
     await repo.save(emergency);
@@ -75,6 +78,7 @@ describe('DrizzleEmergencyRepository (integration)', () => {
       name: 'Active Emergency',
       slug: Slug.fromString('active-emergency'),
       country: 'VE',
+      recommendedList: ['agua'],
     });
 
     const closed = Emergency.create({
@@ -82,6 +86,7 @@ describe('DrizzleEmergencyRepository (integration)', () => {
       name: 'Closed Emergency',
       slug: Slug.fromString('closed-emergency'),
       country: 'CO',
+      recommendedList: ['agua'],
     });
     closed.close();
 
@@ -101,6 +106,7 @@ describe('DrizzleEmergencyRepository (integration)', () => {
       slug: Slug.fromString('dont-bring-test'),
       country: 'VE',
       dontBringList: ['mascotas', 'joyas'],
+      recommendedList: ['agua', 'dieta líquida'],
     });
 
     await repo.save(emergency);
@@ -108,5 +114,6 @@ describe('DrizzleEmergencyRepository (integration)', () => {
 
     expect(found).not.toBeNull();
     expect(found?.dontBringList).toEqual(['mascotas', 'joyas']);
+    expect(found?.recommendedList).toEqual(['agua', 'dieta líquida']);
   });
 });
