@@ -749,6 +749,66 @@ describe('DrizzleResourceRepository (integration)', () => {
       }
     });
 
+    it('regression: findNearbyVisible maps externalUpdatedAt string to Date (fixes 500)', async () => {
+      // This test reproduces the prod 500: db.execute() returns timestamptz columns
+      // as strings; rawRowToSnapshot must coerce them to Date so toISOString() works.
+      const externalUpdatedAt = new Date('2026-06-15T12:00:00.000Z');
+      const r = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(GEO_EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'Provenance Nearby',
+          location: Location.create({
+            address: 'Near addr',
+            latitude: GEO_LAT,
+            longitude: GEO_LNG,
+          }),
+          ownerUserId: OWNER_ID,
+          accepts: ['water'],
+          provenance: {
+            sourceName: 'test-source',
+            externalId: 'ext-nearby-1',
+            externalUpdatedAt,
+            raw: { x: 1 },
+          },
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+      await repo.save(r);
+
+      const results = await repo.findNearbyVisible(
+        EmergencyId.fromString(GEO_EM),
+        { lat: GEO_LAT, lng: GEO_LNG, radiusMeters: 500, limit: 10 },
+      );
+
+      expect(results).toHaveLength(1);
+      const found = results[0].resource;
+
+      // provenance.externalUpdatedAt must be a Date, not a string
+      expect(found.provenance?.externalUpdatedAt).toBeInstanceOf(Date);
+      // And it must serialise cleanly — this is what toResourceView() calls;
+      // if the value is still a string this throws: "not a function"
+      expect(() =>
+        found.provenance?.externalUpdatedAt?.toISOString(),
+      ).not.toThrow();
+      expect(found.provenance?.externalUpdatedAt?.toISOString()).toBe(
+        '2026-06-15T12:00:00.000Z',
+      );
+
+      // createdAt must also be a Date
+      expect(found.createdAt).toBeInstanceOf(Date);
+
+      // accepts must be a proper array (not a raw PG literal like {water})
+      expect(found.accepts).toEqual(['water']);
+
+      // distanceMeters must be a finite number
+      expect(results[0].distanceMeters).toBeLessThan(10);
+    });
+
     it('with radiusMeters=2000 returns only resources within 2km', async () => {
       const r1 = makeGeoResource(
         'R1 origin',
