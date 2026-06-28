@@ -37,7 +37,8 @@ Hexagonal bounded contexts in `apps/api/src/contexts/` (18):
 - DB changes **always** as versioned migrations `apps/api/drizzle/NNNN_name.sql` (next free number — check the dir; gaps exist because removed features deleted their migrations). Applied idempotently by `deploy/migrate.sh` (prod) and the test `global-setup` (tracked by filename). `drizzle-kit migrate/generate` hangs on Windows → write the `.sql` by hand. **UTF-8 SQL via file → `psql < f.sql`, never via shell args** (Windows mangles accents).
 - After touching DTOs/endpoints: **`pnpm gen:api`** and commit `packages/api-client/src/schema.ts` (verify the new paths are in it).
 - Prefer the **typed Drizzle query builder** over raw `db.execute(sql\`SELECT *\`)` — raw SQL returns timestamptz/numeric/array columns as **strings**, which 500s on `.toISOString()` etc. If you must use raw SQL, coerce via the repo's `rawRowToSnapshot` helpers.
-- Deliverable docs naming: `{NN}-{kebab-case}.{ext}`. Product/feature backlog lives in `docs/features/` + GitHub Issues.
+- Deliverable docs naming: `{NN}-{kebab-case}.{ext}`.
+- **Tracking lives in GitHub Issues — the single source of truth** for features, bugs, docs work, status, priority and the whole backlog. Use the issue templates (`.github/ISSUE_TEMPLATE/`: epic/feature/bug), the labels (`epic`/`feature`/`task`/`docs` · `area:*` · `P0`/`P1`/`P2` · `in-progress`), **EPIC** issues that group sub-issues (checklist + `Closes #NN`), and the **Claiming an issue** protocol below. **Do not track work, status or backlog in markdown.** `docs/features/*.md` is **frozen legacy** (historical specs only, each linked from its issue) — do not add or edit them; open/curate the GitHub issue instead.
 
 ## Workflow — branch protection is ACTIVE on `main`
 
