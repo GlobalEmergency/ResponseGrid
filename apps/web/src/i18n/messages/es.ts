@@ -1579,6 +1579,32 @@ export const es = {
     err_discard_failed: 'No se pudo descartar el elemento.',
     err_reason_required: 'El motivo es obligatorio.',
     tab_activity: 'Actividad',
+    // Puntos en duda (ficha 15)
+    tab_disputes: 'Puntos en duda',
+    hub_disputes_label: 'Puntos en duda',
+    hub_disputes_description:
+      'Puntos reportados por la ciudadanía como cerrados o inexistentes.',
+    disputes_section_meta_title: 'Puntos en duda — {name} · ResponseGrid',
+    disputes_section_meta_description:
+      'Revisa los puntos reportados por la ciudadanía y confirma o descarta.',
+    disputes_heading: 'Puntos en duda',
+    disputes_empty_title: 'No hay puntos en revisión.',
+    disputes_empty_description:
+      'Cuando varios ciudadanos reporten un punto como cerrado o incorrecto, aparecerá aquí.',
+    disputes_list_label: 'Puntos en duda',
+    disputes_reporters_label: '{n} reportes ciudadanos',
+    disputes_last_reported_label: 'Último: {date}',
+    disputes_reason_closed: 'Cerrado',
+    disputes_reason_nonexistent: 'No existe',
+    disputes_reason_moved: 'Mudado',
+    disputes_reason_outdated: 'Desactualizado',
+    disputes_action_confirm_closed: 'Confirmar cierre',
+    disputes_action_mark_invalid: 'Marcar inválido',
+    disputes_action_dismiss: 'Descartar',
+    disputes_resolve_confirm: 'Confirmar',
+    disputes_resolving: 'Procesando…',
+    err_resolve_dispute_failed:
+      'No se pudo resolver la disputa. Inténtalo de nuevo.',
     activity_title: 'Registro de actividad',
     activity_subtitle:
       'Trazabilidad de validaciones y cambios en esta emergencia (solo coordinación).',
@@ -2073,6 +2099,7 @@ export const es = {
     map_kind_need: 'Petición',
     map_accepts: 'Acepta:',
     map_approx_location: 'Ubicación aproximada',
+    map_disputed: 'En verificación · posible cierre',
     map_no_locations: 'Aún no hay ubicaciones en el mapa.',
   },
 

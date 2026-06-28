@@ -1551,6 +1551,32 @@ export const en = {
     err_discard_failed: 'Could not discard the item.',
     err_reason_required: 'A reason is required.',
     tab_activity: 'Activity',
+    // Disputed points (ficha 15)
+    tab_disputes: 'Disputed points',
+    hub_disputes_label: 'Disputed points',
+    hub_disputes_description:
+      'Points reported by citizens as closed or non-existent.',
+    disputes_section_meta_title: 'Disputed points — {name} · ResponseGrid',
+    disputes_section_meta_description:
+      'Review points reported by citizens and confirm or dismiss them.',
+    disputes_heading: 'Disputed points',
+    disputes_empty_title: 'No points in review.',
+    disputes_empty_description:
+      'When several citizens report a point as closed or incorrect, it will appear here.',
+    disputes_list_label: 'Disputed points',
+    disputes_reporters_label: '{n} citizen reports',
+    disputes_last_reported_label: 'Latest: {date}',
+    disputes_reason_closed: 'Closed',
+    disputes_reason_nonexistent: 'Doesn’t exist',
+    disputes_reason_moved: 'Moved',
+    disputes_reason_outdated: 'Out of date',
+    disputes_action_confirm_closed: 'Confirm closure',
+    disputes_action_mark_invalid: 'Mark invalid',
+    disputes_action_dismiss: 'Dismiss',
+    disputes_resolve_confirm: 'Confirm',
+    disputes_resolving: 'Working…',
+    err_resolve_dispute_failed:
+      'Couldn’t resolve the dispute. Please try again.',
     activity_title: 'Activity log',
     activity_subtitle:
       'Traceability of validations and changes in this emergency (coordination only).',
@@ -2042,6 +2068,7 @@ export const en = {
     map_kind_need: 'Request',
     map_accepts: 'Accepts:',
     map_approx_location: 'Approximate location',
+    map_disputed: 'In review · possible closure',
     map_no_locations: 'No locations on the map yet.',
   },
 
