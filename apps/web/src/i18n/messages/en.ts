@@ -342,6 +342,17 @@ export const en = {
     privacy_note: 'Your location is only used in your browser to sort by proximity; it is never stored.',
   },
 
+  // ── Nearby needs (#57) ────────────────────────────────────────────────────
+  nearby_needs: {
+    button_find: 'Find needs near me',
+    button_clear: 'Back to list',
+    loading: 'Looking for nearby needs…',
+    geo_error: 'Could not get your location. Check your browser permissions.',
+    geo_error_dismiss: 'Dismiss',
+    showing_nearby: '{n} nearby needs',
+    privacy_note: 'Your location is only used in your browser to sort by proximity; it is never stored.',
+  },
+
   verification_badge: {
     official: 'Official',
     verified: 'Verified',

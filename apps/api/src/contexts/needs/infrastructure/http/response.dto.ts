@@ -149,6 +149,22 @@ export class NeedViewDto {
   resourceId!: string | null;
 }
 
+/** A validated need annotated with its distance from the queried point (#57). */
+export class NearbyNeedViewDto extends NeedViewDto {
+  @ApiProperty({
+    example: 1850,
+    description:
+      'Distance in meters from the queried location to the (public) need location.',
+  })
+  distanceMeters!: number;
+}
+
+/** Response wrapper for the "needs near me" endpoint (#57). */
+export class NearbyNeedsResponseDto {
+  @ApiProperty({ type: [NearbyNeedViewDto] })
+  items!: NearbyNeedViewDto[];
+}
+
 /** Extended DTO for coordinator views — includes the sensitive skillSpecialty field. */
 export class CoordinatorNeedViewDto extends NeedViewDto {
   @ApiPropertyOptional({

@@ -7,12 +7,11 @@ import { OfficialHeaderBand } from '@/components/organisms/official-header-band'
 import { ResourceList } from '@/components/organisms/resource-list';
 import { EmergencyMapWrapper } from '@/components/organisms/emergency-map-wrapper';
 import { NeedsFilter } from '@/components/molecules/needs-filter';
-import { EmptyState } from '@/components/molecules/empty-state';
 import { MetricCard } from '@/components/molecules/metric-card';
 import { StatusBanner } from '@/components/molecules/status-banner';
 import { AnnouncementCard } from '@/components/molecules/announcement-card';
 import { HelpActionRow } from '@/components/molecules/help-action-row';
-import { NeedCard } from '@/components/molecules/need-card';
+import { NeedsList } from '@/components/organisms/needs-list';
 import { EmergencyQuickLinks } from '@/components/molecules/emergency-quick-links';
 import type { MapPoint } from '@/components/organisms/emergency-map';
 import { getT } from '@/i18n/server';
@@ -261,17 +260,16 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
           <section aria-labelledby="needs-heading" className="flex flex-col gap-3">
             <h2 id="needs-heading" className={sectionTitle}>{te.needs_heading}</h2>
             <NeedsFilter t={t.needs_filter} te={t.emergency} />
-            {validatedNeeds.length === 0 ? (
-              <EmptyState title={te.needs_empty_title} />
-            ) : (
-              <ul className="flex flex-col gap-2.5" role="list" aria-label={te.needs_aria_label}>
-                {validatedNeeds.map((need) => (
-                  <li key={need.id}>
-                    <NeedCard need={need} te={te} slug={slug} active={isActive} />
-                  </li>
-                ))}
-              </ul>
-            )}
+            <NeedsList
+              emergencyId={emergencyId}
+              slug={slug}
+              initialItems={validatedNeeds}
+              te={te}
+              tNearby={t.nearby_needs}
+              emptyTitle={te.needs_empty_title}
+              active={isActive}
+              locale={locale}
+            />
           </section>
           </div>
 
