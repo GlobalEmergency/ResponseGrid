@@ -2,6 +2,8 @@
 
 > **Solicitud de producto:** permitir que un usuario reporte un **centro logístico / punto de acopio** como **cerrado, inexistente, mudado o desactualizado**, de forma que coordinación reciba una señal accionable y el punto se marque visualmente como "dudoso" cuando varios ciudadanos coinciden. Entregable abordable por fases.
 >
+> **Tracking:** EPIC #120 · sub-issues #121 (backend) · #122 (API) · #123 (web ciudadano) · #124 (web coordinación).
+>
 > **Decisiones de producto ya tomadas** (PM, 2026‑06‑28):
 > 1. **Acceso:** requiere **login** (reutiliza el flujo y permisos actuales; sin superficie anónima en el MVP).
 > 2. **Efecto:** **marcar el punto como "dudoso" tras N reportes** independientes — el punto **sigue visible** con un aviso; un **coordinador confirma** (cierra/oculta) o **descarta** (sigue abierto). *No* hay auto‑ocultado automático en el MVP.
