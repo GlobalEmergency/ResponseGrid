@@ -9,6 +9,8 @@ import { PublicController } from './http/public.controller';
 import { RegisterResource } from '../application/register-resource';
 import { GetCoordinationQueue } from '../application/get-coordination-queue';
 import { GetPublicResources } from '../application/get-public-resources';
+import { GetResourceFacets } from '../application/get-resource-facets';
+import { GetNearbyResources } from '../application/get-nearby-resources';
 import { GetMyResources } from '../application/get-my-resources';
 import { VerifyResource } from '../application/verify-resource';
 import { PublishResource } from '../application/publish-resource';
@@ -128,6 +130,12 @@ const publicResourcesProvider = {
   useFactory: (repo: ResourceRepository) => new GetPublicResources(repo),
 };
 
+const getResourceFacetsProvider = {
+  provide: GetResourceFacets,
+  inject: [RESOURCE_REPOSITORY],
+  useFactory: (repo: ResourceRepository) => new GetResourceFacets(repo),
+};
+
 const membershipReaderProvider = {
   provide: RESOURCE_MEMBERSHIP_READER,
   inject: [DB],
@@ -142,6 +150,12 @@ const updateStatusProvider = {
     repo: ResourceRepository,
     membershipReader: ResourceMembershipReader,
   ) => new UpdateResourcePublicStatus(repo, membershipReader),
+};
+
+const getNearbyResourcesProvider = {
+  provide: GetNearbyResources,
+  inject: [RESOURCE_REPOSITORY],
+  useFactory: (repo: ResourceRepository) => new GetNearbyResources(repo),
 };
 
 const getMyResourcesProvider = {
@@ -165,6 +179,8 @@ const getMyResourcesProvider = {
     verifyProvider,
     publishProvider,
     publicResourcesProvider,
+    getResourceFacetsProvider,
+    getNearbyResourcesProvider,
     updateStatusProvider,
     getMyResourcesProvider,
   ],

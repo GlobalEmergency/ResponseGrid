@@ -70,7 +70,7 @@ export class JwtAuthGuard implements CanActivate {
       memberships: membershipSnapshots,
       // Legacy-derived grants (live source of truth for coordinator/verifier/
       // admin) merged with persisted grants (new role types: group_manager,
-      // reunification_officer, delegated and break-glass grants). See §9.
+      // delegated and break-glass grants). See §9.
       grants: [
         ...deriveGrantsFromLegacy(
           user.id.value,

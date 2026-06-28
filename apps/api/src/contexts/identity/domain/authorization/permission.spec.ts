@@ -10,7 +10,7 @@ describe('permission catalog', () => {
     const known: Permission[] = [
       'resource:verify',
       'role:grant',
-      'reunification:read_private',
+      'group:manage_members',
       'apikey:create',
     ];
     for (const p of known) {

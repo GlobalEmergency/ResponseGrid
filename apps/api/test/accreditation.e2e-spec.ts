@@ -235,8 +235,8 @@ describe('Accreditation (e2e)', () => {
         .get(`/emergencies/${EM}/public/resources`)
         .expect(200);
       const resource = (
-        pub.body as { id: string; verificationLevel: string }[]
-      ).find((r) => r.id === id);
+        pub.body as { items: { id: string; verificationLevel: string }[] }
+      ).items.find((r) => r.id === id);
       expect(resource?.verificationLevel).toBe('official');
     });
 
@@ -269,8 +269,8 @@ describe('Accreditation (e2e)', () => {
         .get(`/emergencies/${EM}/public/resources`)
         .expect(200);
       const resource = (
-        pub.body as { id: string; verificationLevel: string }[]
-      ).find((r) => r.id === id);
+        pub.body as { items: { id: string; verificationLevel: string }[] }
+      ).items.find((r) => r.id === id);
       expect(resource?.verificationLevel).toBe('verified');
     });
 
@@ -303,8 +303,8 @@ describe('Accreditation (e2e)', () => {
         .get(`/emergencies/${EM}/public/resources`)
         .expect(200);
       const resource = (
-        pub.body as { id: string; verificationLevel: string }[]
-      ).find((r) => r.id === id);
+        pub.body as { items: { id: string; verificationLevel: string }[] }
+      ).items.find((r) => r.id === id);
       expect(resource?.verificationLevel).toBe('verified');
     });
 

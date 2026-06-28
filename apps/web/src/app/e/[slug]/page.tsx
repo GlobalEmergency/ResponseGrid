@@ -4,18 +4,16 @@ import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { getToken } from '@/lib/auth';
 import { OfficialHeaderBand } from '@/components/organisms/official-header-band';
-import { PublicResourceCard } from '@/components/organisms/public-resource-card';
+import { ResourceList } from '@/components/organisms/resource-list';
 import { EmergencyMapWrapper } from '@/components/emergency-map-wrapper';
 import { NeedsFilter } from '@/components/needs-filter';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { MetricCard } from '@/components/molecules/metric-card';
 import { StatusBanner } from '@/components/molecules/status-banner';
 import { AnnouncementCard } from '@/components/molecules/announcement-card';
-import { EffectiveActionCard } from '@/components/molecules/effective-action-card';
 import { HelpActionRow } from '@/components/molecules/help-action-row';
-import { FamilySearchCard } from '@/components/molecules/family-search-card';
 import { NeedCard } from '@/components/molecules/need-card';
-import { LandingFooter } from '@/components/molecules/landing-footer';
+import { EmergencyQuickLinks } from '@/components/molecules/emergency-quick-links';
 import type { MapPoint } from '@/components/emergency-map';
 import { getT } from '@/i18n/server';
 
@@ -56,7 +54,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
   const emergency = await getEmergencyBySlug(slug);
-  const { t } = await getT();
+  const { t, locale } = await getT();
 
   if (!emergency) {
     notFound();
@@ -73,11 +71,18 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
   const priority = VALID_PRIORITIES.includes(rawPriority as Priority) ? rawPriority as Priority : undefined;
 
   const [
-    { data: resources },
+    { data: resourcesPage },
+    { data: facets },
     { data: needs },
     { data: metrics },
   ] = await Promise.all([
     api.GET('/emergencies/{emergencyId}/public/resources', {
+      params: {
+        path: { emergencyId },
+        query: { page: 1, limit: 50 },
+      },
+    }),
+    api.GET('/emergencies/{emergencyId}/public/resources/facets', {
       params: { path: { emergencyId } },
     }),
     api.GET('/emergencies/{emergencyId}/public/needs', {
@@ -94,10 +99,19 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
     }),
   ]);
 
-  const activeResources = resources ?? [];
+  const activeResources = resourcesPage?.items ?? [];
+  const resourcesTotal = resourcesPage?.total ?? 0;
+  // Facets: the schema types byCategory/byCountry as Record<string, never> due
+  // to OpenAPI's additionalProperties representation, but at runtime they are
+  // Record<string, number>. We cast here and default to empty objects.
+  const facetsByCategory = (facets?.byCategory ?? {}) as Record<string, number>;
+  const facetsByCountry = (facets?.byCountry ?? {}) as Record<string, number>;
   const validatedNeeds = needs ?? [];
 
-  // Build map points from resources and needs that have valid coordinates
+  // Build map points from the SSR-fetched resources (page 1) and needs (all)
+  // that have valid coordinates. EmergencyMapWrapper re-fetches ALL resource
+  // points client-side and merges them with these needs, so the map is never
+  // limited to the first page even though the list paginates.
   const mapPoints: MapPoint[] = [
     ...activeResources
       .filter((r) => r.location.latitude !== 0 && r.location.longitude !== 0)
@@ -130,7 +144,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
   const sectionTitle = 'font-display text-base font-bold text-navy';
 
   return (
-    <main className="min-h-screen bg-surface">
+    <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-md bg-surface lg:max-w-6xl">
         <OfficialHeaderBand
           name={emergency.name}
@@ -142,30 +156,12 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
         <div className="flex flex-col gap-5 px-4 pb-12 pt-5 lg:gap-6 lg:px-8">
           <StatusBanner status={emergency.status} t={t.status_banner} />
 
-          {/* Comunicado oficial + "Lo más eficaz ahora" (lado a lado en escritorio) */}
-          {isActive ? (
-            <div className="grid gap-5 lg:grid-cols-3">
-              <div className="lg:col-span-2">
-                <AnnouncementCard
-                  announcement={typeof emergency.announcement === 'string' ? emergency.announcement : null}
-                  updatedAt={emergency.updatedAt}
-                  t={t.announcement}
-                />
-              </div>
-              <EffectiveActionCard
-                href={`/e/${slug}/donar`}
-                overline={te.effective_overline}
-                title={te.effective_title}
-                cta={te.effective_cta}
-              />
-            </div>
-          ) : (
-            <AnnouncementCard
-              announcement={typeof emergency.announcement === 'string' ? emergency.announcement : null}
-              updatedAt={emergency.updatedAt}
-              t={t.announcement}
-            />
-          )}
+          {/* Comunicado oficial */}
+          <AnnouncementCard
+            announcement={typeof emergency.announcement === 'string' ? emergency.announcement : null}
+            updatedAt={emergency.updatedAt}
+            t={t.announcement}
+          />
 
           {/* Métricas (fila de KPIs) */}
           {metrics !== undefined && (
@@ -206,20 +202,8 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
                   title={te.action_submit_petition}
                   subtitle={te.help_petition_subtitle}
                 />
-                <HelpActionRow
-                  href={`/e/${slug}/reportar`}
-                  icon="⚠️"
-                  title={te.help_report_title}
-                  variant="danger"
-                />
               </div>
             )}
-
-            <FamilySearchCard
-              href={`/e/${slug}/buscar-familiar`}
-              title={te.family_title}
-              subtitle={te.family_subtitle}
-            />
 
             {!isActive && (
               <p className="rounded-card border border-line bg-surface-alt px-4 py-4 text-sm text-muted">
@@ -249,32 +233,27 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
             </ul>
           </section>
 
-          {/* Puntos activos */}
+          {/* Puntos activos — lista paginada con filtros, búsqueda y agrupación geográfica */}
           <section aria-labelledby="points-heading" className="flex flex-col gap-3">
-            <div className="flex items-baseline justify-between gap-2">
-              <h2 id="points-heading" className={sectionTitle}>{te.points_heading}</h2>
-              {activeResources.length > 0 && (
-                <span className="text-xs text-muted-soft">
-                  {te.points_count.replace('{count}', String(activeResources.length))}
-                </span>
-              )}
-            </div>
-            {activeResources.length === 0 ? (
-              <EmptyState title={te.points_empty_title} description={te.points_empty_description} />
-            ) : (
-              <ul className="flex flex-col gap-2.5" aria-label={te.points_aria_label} role="list">
-                {activeResources.map((resource) => (
-                  <li key={resource.id}>
-                    <PublicResourceCard
-                      resource={resource}
-                      t={t.resource_card}
-                      tVerification={t.verification_badge}
-                      tStatusLight={t.status_light}
-                    />
-                  </li>
-                ))}
-              </ul>
-            )}
+            <h2 id="points-heading" className={sectionTitle}>{te.points_heading}</h2>
+            <ResourceList
+              emergencyId={emergencyId}
+              initialItems={activeResources}
+              total={resourcesTotal}
+              facetsByCategory={facetsByCategory}
+              facetsByCountry={facetsByCountry}
+              t={t.resource_card}
+              tVerification={t.verification_badge}
+              tStatusLight={t.status_light}
+              tList={t.resource_list}
+              tFilter={t.resource_filter}
+              tNearby={t.nearby_points}
+              tEmpty={{
+                title: te.points_empty_title,
+                description: te.points_empty_description,
+              }}
+              locale={locale}
+            />
           </section>
 
           {/* Necesidades validadas */}
@@ -323,7 +302,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
             <EmergencyMapWrapper points={mapPoints} emergencyId={emergencyId} />
           </section>
 
-          <LandingFooter slug={slug} te={te} authed={token !== null} />
+          <EmergencyQuickLinks slug={slug} te={te} authed={token !== null} />
         </div>
       </div>
     </main>

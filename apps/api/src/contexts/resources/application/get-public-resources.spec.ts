@@ -23,7 +23,7 @@ const activeReader: ResourceEmergencyStatusReader = {
 };
 
 describe('GetPublicResources', () => {
-  it('returns only published (active) resources of the emergency as views', async () => {
+  it('returns only published (active) resources of the emergency as paged views', async () => {
     const repo = new InMemoryResourceRepository();
     const bus = new FakeEventBus();
     const register = new RegisterResource(repo, bus, activeReader);
@@ -45,17 +45,20 @@ describe('GetPublicResources', () => {
     });
     await publish.execute({ resourceId: id });
 
-    const views = await new GetPublicResources(repo).execute({
+    const result = await new GetPublicResources(repo).execute({
       emergencyId: EM,
     });
 
-    expect(views).toHaveLength(1);
-    expect(views[0]).toMatchObject({
+    expect(result.items).toHaveLength(1);
+    expect(result.total).toBe(1);
+    expect(result.page).toBe(1);
+    expect(result.limit).toBe(50);
+    expect(result.items[0]).toMatchObject({
       name: 'Almacén Público',
       publicStatus: PublicStatus.Active,
       stage: ResourceStage.Origin,
     });
-    expect(views[0].location).toEqual(baseLocation);
+    expect(result.items[0].location).toEqual(baseLocation);
   });
 
   it('does not return unverified or unpublished resources', async () => {
@@ -72,10 +75,101 @@ describe('GetPublicResources', () => {
       ownerUserId: 'user-unverified-test',
     });
 
-    const views = await new GetPublicResources(repo).execute({
+    const result = await new GetPublicResources(repo).execute({
       emergencyId: EM,
     });
 
-    expect(views).toHaveLength(0);
+    expect(result.items).toHaveLength(0);
+    expect(result.total).toBe(0);
+  });
+
+  it('respects page and limit query params', async () => {
+    const repo = new InMemoryResourceRepository();
+    const bus = new FakeEventBus();
+    const register = new RegisterResource(repo, bus, activeReader);
+    const verify = new VerifyResource(repo, bus);
+    const publish = new PublishResource(repo, bus);
+
+    // Create 3 visible resources
+    for (let i = 1; i <= 3; i++) {
+      const { id } = await register.execute({
+        emergencyId: EM,
+        type: ResourceType.Warehouse,
+        stage: ResourceStage.Origin,
+        name: `Resource ${i}`,
+        location: baseLocation,
+        ownerUserId: `user-${i}`,
+      });
+      await verify.execute({
+        resourceId: id,
+        level: 'verified' as const,
+        coordinatorId: 'c1',
+      });
+      await publish.execute({ resourceId: id });
+    }
+
+    const result = await new GetPublicResources(repo).execute({
+      emergencyId: EM,
+      page: 1,
+      limit: 2,
+    });
+
+    expect(result.items).toHaveLength(2);
+    expect(result.total).toBe(3);
+    expect(result.page).toBe(1);
+    expect(result.limit).toBe(2);
+  });
+
+  it('clamps limit to 100 max', async () => {
+    const repo = new InMemoryResourceRepository();
+
+    const result = await new GetPublicResources(repo).execute({
+      emergencyId: EM,
+      limit: 999,
+    });
+
+    expect(result.limit).toBe(100);
+  });
+
+  it('includes enriched fields in the view (accepts, contact, country, etc.)', async () => {
+    const repo = new InMemoryResourceRepository();
+    const bus = new FakeEventBus();
+    const register = new RegisterResource(repo, bus, activeReader);
+    const verify = new VerifyResource(repo, bus);
+    const publish = new PublishResource(repo, bus);
+
+    const { id } = await register.execute({
+      emergencyId: EM,
+      type: ResourceType.CollectionPoint,
+      stage: ResourceStage.Origin,
+      name: 'Centro Acopio',
+      location: baseLocation,
+      ownerUserId: 'user-enriched',
+      accepts: ['water', 'food'],
+      contact: '+58 212 555 0000',
+      schedule: 'Lun-Vie 08-18',
+      manager: 'Juan Pérez',
+      country: 'VE',
+      city: 'Caracas',
+    });
+    await verify.execute({
+      resourceId: id,
+      level: 'verified' as const,
+      coordinatorId: 'c1',
+    });
+    await publish.execute({ resourceId: id });
+
+    const result = await new GetPublicResources(repo).execute({
+      emergencyId: EM,
+    });
+
+    expect(result.items[0]).toMatchObject({
+      accepts: ['water', 'food'],
+      contact: '+58 212 555 0000',
+      schedule: 'Lun-Vie 08-18',
+      manager: 'Juan Pérez',
+      country: 'VE',
+      city: 'Caracas',
+    });
   });
 });

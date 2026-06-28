@@ -2,7 +2,7 @@
 
 export default function OfflinePage() {
   return (
-    <main className="flex min-h-full flex-col items-center justify-center gap-6 px-4 py-16 text-center">
+    <main className="flex flex-1 flex-col items-center justify-center gap-6 px-4 py-16 text-center">
       <div
         aria-hidden="true"
         className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-gray-300 text-gray-400 text-3xl"

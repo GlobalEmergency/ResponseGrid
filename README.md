@@ -15,9 +15,8 @@
 | **Necesidades** | Ciclo crear→validar→público, categorías (incl. **sanitarias**: medicamentos, equipos, insumos, personal), prioridad, ítems con cantidad, **caducidad/frescura** (48 h, "verifica antes de actuar"), y **personal sanitario ↔ matching con el roster de voluntarios**. |
 | **Ofertas de material** | Oferta general o dirigida a una necesidad concreta + matching oferta↔necesidad desde coordinación. |
 | **Voluntariado** | Roster con skills / disponibilidad / vehículo + **tareas** con asignación y check-in/out. |
-| **Campo / SAR** | Partes de campo (incidencia/stock/estado) con fotos; **daños estructurales y personas atrapadas** con prioridad automática y **capa de daños en el mapa**. |
-| **Reunificación familiar** | Alta **pública anónima** con consentimiento RGPD; cola de coordinación con búsqueda por documento; datos privados (la lista nunca expone el documento). |
-| **Mapa** | Leaflet con capas (puntos, necesidades, daños), **privacidad de ubicación** (coordenadas aproximadas para entidades sensibles, "tu ubicación no se publica"). |
+| **Partes de campo** | Partes de campo (incidencia/stock/estado) con fotos, prioridad y punto logístico relacionado; cola de revisión en coordinación. |
+| **Mapa** | Leaflet con capas (puntos, necesidades), **privacidad de ubicación** (coordenadas aproximadas para entidades sensibles, "tu ubicación no se publica"). |
 | **Plataforma** | Identidad JWT + OAuth (Google/Facebook), acreditación de organizaciones, notificaciones in-app, **auditoría** de acciones, métricas, geocodificación (Nominatim), almacenamiento de ficheros, **i18n ES/EN**, **PWA** (manifest + service worker + autoguardado de borradores) y seguridad (Helmet, rate-limit, CORS). |
 
 ---
@@ -36,7 +35,7 @@ ResponseGrid/
 └─ docs/        Especificaciones, fichas de feature y planes
 ```
 
-**16 bounded contexts** en `apps/api/src/contexts/`: `emergencies`, `resources`, `needs`, `offers`, `volunteers`, `reports`, `reunification`, `identity`, `organizations`, `accreditation`, `templates`, `notifications`, `audit`, `metrics`, `geocoding`, `files`. Cada uno con `domain` (agregados, value objects, puertos), `application` (casos de uso) e `infrastructure` (HTTP, Drizzle, adaptadores).
+**15 bounded contexts** en `apps/api/src/contexts/`: `emergencies`, `resources`, `needs`, `offers`, `volunteers`, `reports`, `identity`, `organizations`, `accreditation`, `templates`, `notifications`, `audit`, `metrics`, `geocoding`, `files`. Cada uno con `domain` (agregados, value objects, puertos), `application` (casos de uso) e `infrastructure` (HTTP, Drizzle, adaptadores).
 
 **Stack:** NestJS 11 · Next.js 16 · React 19 · TypeScript · Drizzle ORM · PostgreSQL 16 · Redis 7 (BullMQ) · Tailwind · Leaflet · Jest · ESLint + Prettier.
 
@@ -93,7 +92,7 @@ Desarrollo guiado por **TDD**; Clean Code, SOLID y DDD en el backend, Atomic Des
 
 ## 🗺️ Estado y roadmap
 
-**Implementado y verificado:** ciclo de vida de emergencia + kill-switch, confianza/acreditación, semáforo de puntos, voluntariado + tareas, partes de campo + fotos, plantillas, notificaciones, auditoría, PWA, i18n, métricas, y las features capturadas del análisis competitivo: categorías sanitarias, caducidad de necesidades, reunificación familiar, SAR/daños estructurales, privacidad de ubicación y matching personal↔voluntarios.
+**Implementado y verificado:** ciclo de vida de emergencia + kill-switch, confianza/acreditación, semáforo de puntos, voluntariado + tareas, partes de campo + fotos, plantillas, notificaciones, auditoría, PWA, i18n, métricas, y las features capturadas del análisis competitivo: categorías sanitarias, caducidad de necesidades, privacidad de ubicación y matching personal↔voluntarios.
 
 **Backlog (en `docs/features/`):** necesidades nominales por beneficiario, oferta como compromiso de entrega, cercanía/rutas, cola offline real, directorio de servicios gratuitos, CTA de emergencia nacional, e **inventario y logística de punto de acopio** (existencias, lotes/cajas, traslados e indicadores de impacto).
 

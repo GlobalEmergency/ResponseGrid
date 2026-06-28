@@ -21,4 +21,25 @@ export interface ResourceRepository {
   ): Promise<Resource[]>;
   /** Visible public resources: Active, Saturated, Paused (excludes Hidden and Closed). */
   findVisibleByEmergency(emergencyId: EmergencyId): Promise<Resource[]>;
+  /** Lookup by external provenance key (sourceName + externalId). Returns null if not found. */
+  findByExternal(
+    sourceName: string,
+    externalId: string,
+  ): Promise<Resource | null>;
+  /** Paginated list of visible resources, optionally filtered by category/country. */
+  findVisiblePaged(
+    emergencyId: EmergencyId,
+    q: { page: number; limit: number; category?: string; country?: string },
+  ): Promise<{ items: Resource[]; total: number }>;
+  /** Aggregated facets (byCategory, byCountry) for visible resources of an emergency. */
+  facets(emergencyId: EmergencyId): Promise<{
+    byCategory: Record<string, number>;
+    byCountry: Record<string, number>;
+    total: number;
+  }>;
+  /** Visible resources near a point, ordered by distance ascending. */
+  findNearbyVisible(
+    emergencyId: EmergencyId,
+    q: { lat: number; lng: number; radiusMeters: number; limit: number },
+  ): Promise<Array<{ resource: Resource; distanceMeters: number }>>;
 }

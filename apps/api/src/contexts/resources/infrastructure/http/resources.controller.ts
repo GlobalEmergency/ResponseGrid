@@ -88,6 +88,12 @@ export class ResourcesController {
       location: dto.location,
       ownerUserId,
       ownerOrganizationId: dto.ownerOrganizationId ?? null,
+      contact: dto.contact ?? null,
+      schedule: dto.schedule ?? null,
+      manager: dto.manager ?? null,
+      accepts: dto.accepts ?? [],
+      country: dto.country ?? null,
+      city: dto.city ?? null,
     });
   }
 

@@ -46,13 +46,6 @@ function makeRepo(): ReportRepository {
         ),
       );
     },
-    findPublishedStructuralByEmergencyId(
-      emergencyId: string,
-    ): Promise<Report[]> {
-      return Promise.resolve(
-        [...store.values()].filter((r) => r.emergencyId === emergencyId),
-      );
-    },
   };
 }
 

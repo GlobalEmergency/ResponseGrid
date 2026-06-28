@@ -213,7 +213,6 @@ export const PERMISSIONS = {
   task:      ['create','assign','checkin_self','read'],
   report:    ['create','triage','read'],
   incident:  ['create','resolve'],
-  reunification: ['create','read_private','match'],   // ← "personal autorizado" (feature 01)
   org:       ['create','edit','read'],
   accreditation: ['grant','revoke'],
   user:      ['invite','read'],
@@ -225,6 +224,8 @@ export const PERMISSIONS = {
 ```
 
 > **Doble uso (ver §8.2):** este catálogo es también la fuente de los **scopes OAuth2** de la API pública (#21). Un subconjunto _exportable_ (p. ej. los `*:read`) se expone como scope público; permisos sensibles (`role:grant`, `accreditation:grant`) **nunca** se exportan. Una sola moneda para web interna y terceros.
+
+> **Nota (post-#51):** la feature de **reunificación familiar** (F01) y los informes de **daños estructurales/SAR** se retiraron del producto en #51. Por eso el permiso `reunification:*` y el rol `reunification_officer` **ya no están en el catálogo implementado** (se eliminaron de `permission.ts` y `role-catalog.ts`). El eje de privacidad/categoría especial (§17) **sigue plenamente vigente** para los verticales sensibles que permanecen —ubicaciones (F09), necesidades nominales (F02/#24) y datos sanitarios (F04)—: los ejemplos basados en "desaparecidos" se conservan como ilustración del **modelo** de dato de categoría especial, no como contrato de una feature activa.
 
 ### 4.2 Roles del catálogo fijo (mapeo de TUS actores)
 
@@ -239,7 +240,6 @@ export const PERMISSIONS = {
 | **Manager de grupo de voluntarios** | `group_manager` | **group** | `volunteer:read+assign`, `task:create` (en su grupo) |
 | Voluntario operativo | `volunteer_operative` | emergency / group | `task:checkin_self`, `report:create`, `volunteer:read` (propio) |
 | **"Otros solo pueden ver"** | `viewer` | cualquiera | `*:read` |
-| Personal de reunificación | `reunification_officer` | emergency | `reunification:read_private/match` |
 | Ciudadano logueado (default) | `citizen` | platform | `offer:create`, `resource:register`, lecturas públicas |
 
 ```ts

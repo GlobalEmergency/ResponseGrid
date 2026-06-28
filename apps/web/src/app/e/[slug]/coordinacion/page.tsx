@@ -113,7 +113,7 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
   const expiredNeeds = expiredNeedsResult.data ?? [];
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-start px-4 py-10 bg-white">
+    <main className="flex-1 flex flex-col items-center justify-start px-4 py-10 bg-white">
       <div className="w-full max-w-xl flex flex-col gap-8">
 
         {/* ── CABECERA ────────────────────────────────────────────────── */}
@@ -167,15 +167,6 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
           className="flex items-center justify-between gap-3 rounded-lg border-2 border-gray-900 bg-white px-5 py-4 font-semibold text-gray-900 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
         >
           <span>Reportes de campo</span>
-          <span aria-hidden="true" className="text-lg">→</span>
-        </Link>
-
-        {/* ── ENLACE A REUNIFICACIÓN FAMILIAR ─────────────────────────── */}
-        <Link
-          href={`/e/${slug}/coordinacion/reunificacion`}
-          className="flex items-center justify-between gap-3 rounded-lg border-2 border-amber-600 bg-amber-50 px-5 py-4 font-semibold text-gray-900 transition-colors hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2"
-        >
-          <span>Reunificación familiar</span>
           <span aria-hidden="true" className="text-lg">→</span>
         </Link>
 

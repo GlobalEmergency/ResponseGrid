@@ -90,11 +90,6 @@ import {
   REPORT_EMERGENCY_LOOKUP,
   ReportEmergencyLookup,
 } from '../domain/ports/report-emergency-lookup';
-import {
-  REUNIFICATION_EMERGENCY_LOOKUP,
-  ReunificationEmergencyLookup,
-} from '../domain/ports/reunification-emergency-lookup';
-import { DrizzleReunificationEmergencyLookup } from './drizzle/drizzle-reunification-emergency-lookup';
 import { GoogleStrategy } from './http/google.strategy';
 import { FacebookStrategy } from './http/facebook.strategy';
 
@@ -241,13 +236,6 @@ const reportEmergencyLookupProvider = {
     new DrizzleReportEmergencyLookup(db),
 };
 
-const reunificationEmergencyLookupProvider = {
-  provide: REUNIFICATION_EMERGENCY_LOOKUP,
-  inject: [DB],
-  useFactory: (db: Db): ReunificationEmergencyLookup =>
-    new DrizzleReunificationEmergencyLookup(db),
-};
-
 const loginProvider = {
   provide: Login,
   inject: [USER_REPOSITORY, PASSWORD_HASHER, TOKEN_SERVICE],
@@ -320,7 +308,6 @@ const authenticateWithProviderProvider = {
     volunteerEmergencyLookupProvider,
     taskEmergencyLookupProvider,
     reportEmergencyLookupProvider,
-    reunificationEmergencyLookupProvider,
     accessControlProvider,
     scopeResolverProvider,
     PermissionGuard,

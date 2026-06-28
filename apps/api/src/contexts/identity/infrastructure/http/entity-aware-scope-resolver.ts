@@ -8,7 +8,6 @@ import { OFFER_EMERGENCY_LOOKUP } from '../../domain/ports/offer-emergency-looku
 import { VOLUNTEER_EMERGENCY_LOOKUP } from '../../domain/ports/volunteer-emergency-lookup';
 import { TASK_EMERGENCY_LOOKUP } from '../../domain/ports/task-emergency-lookup';
 import { REPORT_EMERGENCY_LOOKUP } from '../../domain/ports/report-emergency-lookup';
-import { REUNIFICATION_EMERGENCY_LOOKUP } from '../../domain/ports/reunification-emergency-lookup';
 
 interface EmergencyLookup {
   findEmergencyId(entityId: string): Promise<string | null>;
@@ -17,7 +16,7 @@ interface EmergencyLookup {
 interface EntityParam {
   param: string;
   entityType: string;
-  /** Tried in order until one resolves (e.g. reportId: reports → reunification). */
+  /** Tried in order until one resolves. */
   lookups: EmergencyLookup[];
 }
 
@@ -29,10 +28,6 @@ interface EntityParam {
  * the legacy 404 when the targeted entity does not exist, so migrating a route
  * from the old guard to @RequirePermission is behavior-preserving. See
  * docs/features/13 §9.
- *
- * `reportId` is shared by two contexts (field reports and reunification
- * reports); it is resolved by trying both lookups in turn — UUID id spaces do
- * not collide.
  */
 @Injectable()
 export class EntityAwareScopeResolver implements ScopeResolver {
@@ -45,7 +40,6 @@ export class EntityAwareScopeResolver implements ScopeResolver {
     @Inject(VOLUNTEER_EMERGENCY_LOOKUP) volunteer: EmergencyLookup,
     @Inject(TASK_EMERGENCY_LOOKUP) task: EmergencyLookup,
     @Inject(REPORT_EMERGENCY_LOOKUP) report: EmergencyLookup,
-    @Inject(REUNIFICATION_EMERGENCY_LOOKUP) reunification: EmergencyLookup,
   ) {
     this.entityParams = [
       { param: 'resourceId', entityType: 'resource', lookups: [resource] },
@@ -53,11 +47,7 @@ export class EntityAwareScopeResolver implements ScopeResolver {
       { param: 'offerId', entityType: 'offer', lookups: [offer] },
       { param: 'volunteerId', entityType: 'volunteer', lookups: [volunteer] },
       { param: 'taskId', entityType: 'task', lookups: [task] },
-      {
-        param: 'reportId',
-        entityType: 'report',
-        lookups: [report, reunification],
-      },
+      { param: 'reportId', entityType: 'report', lookups: [report] },
     ];
   }
 

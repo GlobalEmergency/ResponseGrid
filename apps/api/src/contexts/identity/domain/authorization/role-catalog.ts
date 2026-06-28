@@ -154,18 +154,6 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'volunteer:read',
     ],
   },
-  reunification_officer: {
-    id: 'reunification_officer',
-    description:
-      'Personal autorizado de reunificación (acceso a datos privados de desaparecidos).',
-    defaultScopeType: 'emergency',
-    permissions: [
-      'reunification:read_private',
-      'reunification:match',
-      'reunification:create',
-      'emergency:read',
-    ],
-  },
   viewer: {
     id: 'viewer',
     description: 'Solo lectura.',
@@ -184,7 +172,6 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'resource:read',
       'need:read',
       'campaign:read',
-      'reunification:create',
       'volunteer:register',
     ],
   },

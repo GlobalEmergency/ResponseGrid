@@ -1,3 +1,4 @@
+import { eq, sql } from 'drizzle-orm';
 import { createDb, Db } from '../../../../shared/db';
 import { resourcesTable } from './schema';
 import { DrizzleResourceRepository } from './drizzle-resource.repository';
@@ -304,5 +305,567 @@ describe('DrizzleResourceRepository (integration)', () => {
       EmergencyId.fromString(EM),
     );
     expect(counts[PublicStatus.Hidden]).toBe(1);
+  });
+
+  it('round-trips enriched fields through Postgres (Task 2)', async () => {
+    const externalUpdatedAt = new Date('2026-06-27T00:00:00.000Z');
+    const r = Resource.register({
+      id: ResourceId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      type: ResourceType.CollectionPoint,
+      stage: ResourceStage.Origin,
+      name: 'Acopio Venezuela',
+      location: baseLocation,
+      ownerUserId: OWNER_ID,
+      accepts: ['water', 'food'],
+      contact: '+58 212 555 0000',
+      schedule: 'Lun-Vie 08-18',
+      manager: 'Juan Pérez',
+      country: 'VE',
+      city: 'Caracas',
+      provenance: {
+        sourceName: 'acopiove.org',
+        externalId: 'abc',
+        externalUpdatedAt,
+        raw: { x: 1 },
+      },
+    });
+
+    await repo.save(r);
+    const found = await repo.findById(r.id);
+
+    expect(found).not.toBeNull();
+    expect(found!.accepts).toEqual(['water', 'food']);
+    expect(found!.contact).toBe('+58 212 555 0000');
+    expect(found!.schedule).toBe('Lun-Vie 08-18');
+    expect(found!.manager).toBe('Juan Pérez');
+    expect(found!.country).toBe('VE');
+    expect(found!.city).toBe('Caracas');
+    expect(found!.provenance?.sourceName).toBe('acopiove.org');
+    expect(found!.provenance?.externalId).toBe('abc');
+    expect(found!.provenance?.externalUpdatedAt).toEqual(externalUpdatedAt);
+    expect(found!.provenance?.raw).toEqual({ x: 1 });
+  });
+
+  it('round-trips resource with no enriched fields (defaults)', async () => {
+    const r = Resource.register({
+      id: ResourceId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      type: ResourceType.Warehouse,
+      stage: ResourceStage.Origin,
+      name: 'Plain Resource',
+      location: baseLocation,
+      ownerUserId: OWNER_ID,
+    });
+
+    await repo.save(r);
+    const found = await repo.findById(r.id);
+
+    expect(found).not.toBeNull();
+    expect(found!.accepts).toEqual([]);
+    expect(found!.contact).toBeNull();
+    expect(found!.schedule).toBeNull();
+    expect(found!.manager).toBeNull();
+    expect(found!.country).toBeNull();
+    expect(found!.city).toBeNull();
+    expect(found!.provenance).toBeNull();
+  });
+
+  it('externalId round-trips as a real string, not empty-string fallback (Fix wave 1)', async () => {
+    const r = Resource.register({
+      id: ResourceId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      type: ResourceType.CollectionPoint,
+      stage: ResourceStage.Origin,
+      name: 'Provenance Check',
+      location: baseLocation,
+      ownerUserId: OWNER_ID,
+      provenance: {
+        sourceName: 'test-source',
+        externalId: 'ext-id-42',
+        externalUpdatedAt: null,
+        raw: null,
+      },
+    });
+
+    await repo.save(r);
+    const found = await repo.findById(r.id);
+
+    expect(found!.provenance).not.toBeNull();
+    expect(found!.provenance!.externalId).toBe('ext-id-42');
+    // Confirm it is exactly the stored value and NOT an empty-string fallback
+    expect(found!.provenance!.externalId).not.toBe('');
+  });
+
+  it('findByExternal returns the resource matching sourceName + externalId', async () => {
+    const SOURCE = 'acopiove';
+    const EXT_ID = 'ext-find-by-external-test';
+    const r = Resource.register({
+      id: ResourceId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      type: ResourceType.CollectionPoint,
+      stage: ResourceStage.Origin,
+      name: 'Acopio Externo',
+      location: baseLocation,
+      ownerUserId: OWNER_ID,
+      provenance: {
+        sourceName: SOURCE,
+        externalId: EXT_ID,
+        externalUpdatedAt: null,
+        raw: { test: true },
+      },
+    });
+    await repo.save(r);
+
+    const found = await repo.findByExternal(SOURCE, EXT_ID);
+    expect(found).not.toBeNull();
+    expect(found!.id.value).toBe(r.id.value);
+    expect(found!.provenance?.sourceName).toBe(SOURCE);
+    expect(found!.provenance?.externalId).toBe(EXT_ID);
+  });
+
+  it('findByExternal returns null when no match', async () => {
+    const result = await repo.findByExternal(
+      'nonexistent-source',
+      'nonexistent-id',
+    );
+    expect(result).toBeNull();
+  });
+
+  it('findByExternal does not match wrong sourceName', async () => {
+    const r = Resource.register({
+      id: ResourceId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      type: ResourceType.CollectionPoint,
+      stage: ResourceStage.Origin,
+      name: 'Scoped Source',
+      location: baseLocation,
+      ownerUserId: OWNER_ID,
+      provenance: {
+        sourceName: 'source-a',
+        externalId: 'shared-ext-id',
+        externalUpdatedAt: null,
+        raw: null,
+      },
+    });
+    await repo.save(r);
+
+    const result = await repo.findByExternal('source-b', 'shared-ext-id');
+    expect(result).toBeNull();
+  });
+
+  // ─── Task 4: findVisiblePaged + facets ─────────────────────────────────────
+
+  describe('findVisiblePaged', () => {
+    it('returns paged items with correct total', async () => {
+      const makeVisible = (name: string) => {
+        const base = Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name,
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+        });
+        return Resource.fromSnapshot({
+          ...base.toSnapshot(),
+          verificationLevel: VerificationLevel.Verified,
+          publicStatus: PublicStatus.Active,
+          createdAt: new Date(),
+        });
+      };
+
+      for (let i = 1; i <= 5; i++) {
+        await repo.save(makeVisible(`Visible ${i}`));
+      }
+      // one hidden (default)
+      await repo.save(
+        Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'Hidden One',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+        }),
+      );
+
+      const { items, total } = await repo.findVisiblePaged(
+        EmergencyId.fromString(EM),
+        { page: 1, limit: 2 },
+      );
+      expect(items).toHaveLength(2);
+      expect(total).toBe(5);
+    });
+
+    it('filters by category (accepts @> ARRAY[category])', async () => {
+      const withWater = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'Water Resource',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+          accepts: ['water', 'food'],
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+      const withFood = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'Food Only',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+          accepts: ['food'],
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+
+      await repo.save(withWater);
+      await repo.save(withFood);
+
+      const { items, total } = await repo.findVisiblePaged(
+        EmergencyId.fromString(EM),
+        { page: 1, limit: 10, category: 'water' },
+      );
+      expect(items.every((r) => r.accepts.includes('water'))).toBe(true);
+      expect(total).toBe(1);
+      expect(items[0].name).toBe('Water Resource');
+    });
+
+    it('filters by country', async () => {
+      const ve = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'VE Resource',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+          country: 'VE',
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+      const co = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'CO Resource',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+          country: 'CO',
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+
+      await repo.save(ve);
+      await repo.save(co);
+
+      const { items, total } = await repo.findVisiblePaged(
+        EmergencyId.fromString(EM),
+        { page: 1, limit: 10, country: 'VE' },
+      );
+      expect(total).toBe(1);
+      expect(items[0].name).toBe('VE Resource');
+    });
+  });
+
+  describe('facets', () => {
+    it('counts byCategory (unnesting accepts), byCountry, and total visible only', async () => {
+      const makeResource = (
+        name: string,
+        accepts: string[],
+        country: string | null,
+        visible: boolean,
+      ) => {
+        const base = Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name,
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+          accepts,
+          country: country ?? undefined,
+        });
+        if (visible) {
+          return Resource.fromSnapshot({
+            ...base.toSnapshot(),
+            verificationLevel: VerificationLevel.Verified,
+            publicStatus: PublicStatus.Active,
+            createdAt: new Date(),
+          });
+        }
+        return base; // hidden by default
+      };
+
+      // 2 visible with 'water', 1 with 'food', 1 hidden (should not count)
+      await repo.save(makeResource('R1', ['water', 'food'], 'VE', true));
+      await repo.save(makeResource('R2', ['water'], 'CO', true));
+      await repo.save(makeResource('R3 hidden', ['water'], 'VE', false));
+
+      const { byCategory, byCountry, total } = await repo.facets(
+        EmergencyId.fromString(EM),
+      );
+
+      expect(total).toBe(2);
+      expect(byCategory['water']).toBe(2); // R1 and R2
+      expect(byCategory['food']).toBe(1); // R1 only
+      expect(byCategory['water']).not.toBe(3); // R3 excluded
+      expect(byCountry['VE']).toBe(1); // R1
+      expect(byCountry['CO']).toBe(1); // R2
+    });
+  });
+
+  // ─── Issue #28: findNearbyVisible ──────────────────────────────────────────
+
+  describe('findNearbyVisible', () => {
+    // Query point: Caracas, Venezuela
+    const GEO_EM = '28280000-0000-4000-8000-000000000028';
+    const GEO_LAT = 10.4806;
+    const GEO_LNG = -66.9036;
+
+    const makeGeoResource = (
+      name: string,
+      lat: number,
+      lng: number,
+      status: PublicStatus,
+    ) => {
+      const base = Resource.register({
+        id: ResourceId.create(),
+        emergencyId: EmergencyId.fromString(GEO_EM),
+        type: ResourceType.CollectionPoint,
+        stage: ResourceStage.Origin,
+        name,
+        location: Location.create({
+          address: `${name} addr`,
+          latitude: lat,
+          longitude: lng,
+        }),
+        ownerUserId: OWNER_ID,
+      });
+      return Resource.fromSnapshot({
+        ...base.toSnapshot(),
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: status,
+        createdAt: new Date(),
+      });
+    };
+
+    beforeEach(async () => {
+      // Clean only the geo emergency to avoid interfering with other tests
+      await db
+        .delete(resourcesTable)
+        .where(eq(resourcesTable.emergencyId, GEO_EM));
+    });
+
+    it('returns resources within radius ordered by distance, excludes far and hidden', async () => {
+      // R1: at origin ~0m — ACTIVE
+      const r1 = makeGeoResource(
+        'R1 origin',
+        GEO_LAT,
+        GEO_LNG,
+        PublicStatus.Active,
+      );
+      // R2: ~1.3km away — ACTIVE
+      const r2 = makeGeoResource(
+        'R2 nearby',
+        10.49,
+        -66.903,
+        PublicStatus.Active,
+      );
+      // R3: ~8km away — SATURATED (still visible, within 10km radius)
+      const r3 = makeGeoResource(
+        'R3 saturated',
+        10.553,
+        -66.9036,
+        PublicStatus.Saturated,
+      );
+      // R_far: ~35km away — ACTIVE (beyond 10km radius)
+      const rFar = makeGeoResource('R_far', 10.8, -66.9, PublicStatus.Active);
+      // R_hidden: same coords as R1 — HIDDEN (excluded by status)
+      const rHidden = makeGeoResource(
+        'R_hidden',
+        GEO_LAT,
+        GEO_LNG,
+        PublicStatus.Hidden,
+      );
+
+      await repo.save(r1);
+      await repo.save(r2);
+      await repo.save(r3);
+      await repo.save(rFar);
+      await repo.save(rHidden);
+
+      const results = await repo.findNearbyVisible(
+        EmergencyId.fromString(GEO_EM),
+        { lat: GEO_LAT, lng: GEO_LNG, radiusMeters: 10000, limit: 10 },
+      );
+
+      const names = results.map((r) => r.resource.name);
+      expect(names).toContain('R1 origin');
+      expect(names).toContain('R2 nearby');
+      expect(names).toContain('R3 saturated');
+      expect(names).not.toContain('R_far');
+      expect(names).not.toContain('R_hidden');
+      expect(results).toHaveLength(3);
+
+      // Ordered by distance ascending
+      expect(results[0].resource.name).toBe('R1 origin');
+      expect(results[1].distanceMeters).toBeGreaterThan(
+        results[0].distanceMeters,
+      );
+      expect(results[2].distanceMeters).toBeGreaterThan(
+        results[1].distanceMeters,
+      );
+
+      // Distance checks
+      expect(results[0].distanceMeters).toBeLessThan(10);
+      expect(results[1].distanceMeters).toBeGreaterThan(0);
+      expect(results[2].distanceMeters).toBeGreaterThan(
+        results[1].distanceMeters,
+      );
+      for (const r of results) {
+        expect(r.distanceMeters).toBeLessThanOrEqual(10000);
+      }
+    });
+
+    it('regression: findNearbyVisible maps externalUpdatedAt string to Date (fixes 500)', async () => {
+      // This test reproduces the prod 500: db.execute() returns timestamptz columns
+      // as strings; rawRowToSnapshot must coerce them to Date so toISOString() works.
+      const externalUpdatedAt = new Date('2026-06-15T12:00:00.000Z');
+      const r = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(GEO_EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'Provenance Nearby',
+          location: Location.create({
+            address: 'Near addr',
+            latitude: GEO_LAT,
+            longitude: GEO_LNG,
+          }),
+          ownerUserId: OWNER_ID,
+          accepts: ['water'],
+          provenance: {
+            sourceName: 'test-source',
+            externalId: 'ext-nearby-1',
+            externalUpdatedAt,
+            raw: { x: 1 },
+          },
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+      await repo.save(r);
+
+      const results = await repo.findNearbyVisible(
+        EmergencyId.fromString(GEO_EM),
+        { lat: GEO_LAT, lng: GEO_LNG, radiusMeters: 500, limit: 10 },
+      );
+
+      expect(results).toHaveLength(1);
+      const found = results[0].resource;
+
+      // provenance.externalUpdatedAt must be a Date, not a string
+      expect(found.provenance?.externalUpdatedAt).toBeInstanceOf(Date);
+      // And it must serialise cleanly — this is what toResourceView() calls;
+      // if the value is still a string this throws: "not a function"
+      expect(() =>
+        found.provenance?.externalUpdatedAt?.toISOString(),
+      ).not.toThrow();
+      expect(found.provenance?.externalUpdatedAt?.toISOString()).toBe(
+        '2026-06-15T12:00:00.000Z',
+      );
+
+      // createdAt must also be a Date
+      expect(found.createdAt).toBeInstanceOf(Date);
+
+      // accepts must be a proper array (not a raw PG literal like {water})
+      expect(found.accepts).toEqual(['water']);
+
+      // distanceMeters must be a finite number
+      expect(results[0].distanceMeters).toBeLessThan(10);
+    });
+
+    it('with radiusMeters=2000 returns only resources within 2km', async () => {
+      const r1 = makeGeoResource(
+        'R1 origin',
+        GEO_LAT,
+        GEO_LNG,
+        PublicStatus.Active,
+      );
+      const r2 = makeGeoResource(
+        'R2 nearby',
+        10.49,
+        -66.903,
+        PublicStatus.Active,
+      );
+      const r3 = makeGeoResource('R3 far', 10.6, -66.9, PublicStatus.Saturated);
+
+      await repo.save(r1);
+      await repo.save(r2);
+      await repo.save(r3);
+
+      const results = await repo.findNearbyVisible(
+        EmergencyId.fromString(GEO_EM),
+        { lat: GEO_LAT, lng: GEO_LNG, radiusMeters: 2000, limit: 10 },
+      );
+
+      const names = results.map((r) => r.resource.name);
+      expect(names).toContain('R1 origin');
+      expect(names).toContain('R2 nearby');
+      expect(names).not.toContain('R3 far');
+      expect(results).toHaveLength(2);
+    });
+  });
+
+  it('DB constraint rejects source_name without external_id (Fix wave 1)', async () => {
+    const id = ResourceId.create().value;
+    let threw = false;
+    let errorDetail = '';
+    try {
+      await db.execute(sql`
+        INSERT INTO resources (
+          id, emergency_id, type, stage, name,
+          address, latitude, longitude,
+          owner_user_id, verification_level, public_status, created_at,
+          source_name, external_id
+        ) VALUES (
+          ${id}, ${EM}, 'collection_point', 'origin', 'Constraint Test',
+          'Calle Test 1, Sevilla', 37.3886, -5.9823,
+          ${OWNER_ID}, 'unverified', 'hidden', NOW(),
+          'some-source', NULL
+        )
+      `);
+    } catch (err: unknown) {
+      threw = true;
+      // Drizzle wraps PG errors; check the cause chain for the constraint name
+      const fullText = JSON.stringify(err) + String(err);
+      errorDetail = fullText;
+    }
+    expect(threw).toBe(true);
+    expect(errorDetail).toMatch(/resources_source_ext_both_or_neither/);
   });
 });

@@ -215,8 +215,42 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List published (active) resources for an emergency */
+        /** List published resources for an emergency (paginated + filterable) */
         get: operations["PublicController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/public/resources/nearby": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Find visible resources near a GPS point, ordered by distance */
+        get: operations["PublicController_nearby"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/public/resources/facets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get facets (counts by category and country) for visible resources */
+        get: operations["PublicController_facets"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1052,40 +1086,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/reports/{reportId}/publish": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Publish a structural damage report */
-        post: operations["ReportsController_publish"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/emergencies/{emergencyId}/reports/damage-layer": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get published structural damage reports as a GeoJSON FeatureCollection (public) */
-        get: operations["ReportsController_damageLayer"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/emergencies/{emergencyId}/reports/mine": {
         parameters: {
             query?: never;
@@ -1114,109 +1114,6 @@ export interface paths {
         get: operations["AuditController_list"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/emergencies/{emergencyId}/reunification": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List missing person reports for an emergency (coordinator only) */
-        get: operations["ReunificationController_listReports"];
-        put?: never;
-        /** Create a missing person report for an emergency (public, anonymous-with-contact) */
-        post: operations["ReunificationController_createReport"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/emergencies/{emergencyId}/reunification/search": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Search missing person reports by documentId (coordinator only) */
-        get: operations["ReunificationController_searchByDocumentId"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/emergencies/{emergencyId}/reunification/mine": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get my missing person reports for an emergency (authenticated user) */
-        get: operations["ReunificationController_getMyReports"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/reunification/{reportId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get full detail of a missing person report (coordinator only) */
-        get: operations["ReunificationController_getReport"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/reunification/{reportId}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Update the status of a missing person report (coordinator only) */
-        patch: operations["ReunificationController_updateStatus"];
-        trace?: never;
-    };
-    "/reunification/{reportId}/sightings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Register a sighting for a missing person report (authenticated users) */
-        post: operations["ReunificationController_registerSighting"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1312,6 +1209,39 @@ export interface components {
              * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
              */
             ownerOrganizationId?: string;
+            /**
+             * @description Contact info for this resource point
+             * @example +58 212 555 0000
+             */
+            contact?: string;
+            /**
+             * @description Operating schedule
+             * @example Lun-Vie 08-18
+             */
+            schedule?: string;
+            /**
+             * @description Responsible manager name
+             * @example Juan Pérez
+             */
+            manager?: string;
+            /**
+             * @description Category slugs this resource accepts
+             * @example [
+             *       "water",
+             *       "food"
+             *     ]
+             */
+            accepts?: string[];
+            /**
+             * @description ISO 3166-1 alpha-2 country code
+             * @example VE
+             */
+            country?: string;
+            /**
+             * @description City name
+             * @example Caracas
+             */
+            city?: string;
         };
         RegisterResourceResponseDto: {
             /**
@@ -1356,7 +1286,7 @@ export interface components {
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
-            description?: string | null;
+            description: string | null;
             location: components["schemas"]["LocationViewDto"];
             /**
              * @example verified
@@ -1369,7 +1299,131 @@ export interface components {
              */
             publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed";
             /** Format: uuid */
-            ownerOrganizationId?: string | null;
+            ownerOrganizationId: string | null;
+            /**
+             * @example [
+             *       "water",
+             *       "food"
+             *     ]
+             */
+            accepts: string[];
+            /** @example +58 212 555 0000 */
+            contact: string | null;
+            /** @example Lun-Vie 08-18 */
+            schedule: string | null;
+            /** @example Juan Pérez */
+            manager: string | null;
+            /** @example acopiove.org */
+            sourceName: string | null;
+            /**
+             * @description ISO 8601 date string
+             * @example 2026-06-27T00:00:00.000Z
+             */
+            externalUpdatedAt: string | null;
+            /**
+             * @description Country string as stored by the ingestion source (e.g. full Spanish name "Venezuela"). NOT guaranteed to be an ISO 3166-1 alpha-2 code — value depends on the source `pais` field.
+             * @example Venezuela
+             */
+            country: string | null;
+            /** @example Caracas */
+            city: string | null;
+        };
+        PagedResourcesDto: {
+            items: components["schemas"]["ResourceViewDto"][];
+            /** @example 123 */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 50 */
+            limit: number;
+        };
+        NearbyResourceViewDto: {
+            /**
+             * Format: uuid
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            id: string;
+            /**
+             * @example collection_point
+             * @enum {string}
+             */
+            type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
+            /**
+             * @example origin
+             * @enum {string}
+             */
+            stage: "origin" | "intermediate" | "destination";
+            /** @example Cruz Roja Madrid */
+            name: string;
+            /** @example Centro de acopio principal */
+            description: string | null;
+            location: components["schemas"]["LocationViewDto"];
+            /**
+             * @example verified
+             * @enum {string}
+             */
+            verificationLevel: "unverified" | "verified" | "official";
+            /**
+             * @example active
+             * @enum {string}
+             */
+            publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed";
+            /** Format: uuid */
+            ownerOrganizationId: string | null;
+            /**
+             * @example [
+             *       "water",
+             *       "food"
+             *     ]
+             */
+            accepts: string[];
+            /** @example +58 212 555 0000 */
+            contact: string | null;
+            /** @example Lun-Vie 08-18 */
+            schedule: string | null;
+            /** @example Juan Pérez */
+            manager: string | null;
+            /** @example acopiove.org */
+            sourceName: string | null;
+            /**
+             * @description ISO 8601 date string
+             * @example 2026-06-27T00:00:00.000Z
+             */
+            externalUpdatedAt: string | null;
+            /**
+             * @description Country string as stored by the ingestion source (e.g. full Spanish name "Venezuela"). NOT guaranteed to be an ISO 3166-1 alpha-2 code — value depends on the source `pais` field.
+             * @example Venezuela
+             */
+            country: string | null;
+            /** @example Caracas */
+            city: string | null;
+            /**
+             * @description Distance from query point in meters (rounded)
+             * @example 1234
+             */
+            distanceMeters: number;
+        };
+        NearbyResourcesResponseDto: {
+            items: components["schemas"]["NearbyResourceViewDto"][];
+        };
+        ResourceFacetsDto: {
+            /**
+             * @example {
+             *       "water": 5,
+             *       "food": 3
+             *     }
+             */
+            byCategory: Record<string, never>;
+            /**
+             * @description Counts keyed by the stored `country` string. Values mirror the ingestion source `pais` field (full Spanish names, NOT ISO 3166-1 alpha-2 codes).
+             * @example {
+             *       "Venezuela": 3,
+             *       "Colombia": 2
+             *     }
+             */
+            byCountry: Record<string, never>;
+            /** @example 8 */
+            total: number;
         };
         CreateTemplateDto: {
             /** @example Terremoto básico */
@@ -2078,19 +2132,9 @@ export interface components {
             /** Format: uuid */
             volunteerId: string;
         };
-        StructuralDetailDto: {
-            /** @enum {string} */
-            damageLevel: "collapsed" | "severe" | "moderate";
-            /** @description Estimated number of trapped persons (null if unknown) */
-            trappedPersonsEstimate?: number;
-            /** @description Whether the site is accessible for rescue teams */
-            accessibleForRescue?: boolean;
-            /** @description Building type (e.g. residential, school, hospital) */
-            buildingType?: string;
-        };
         SubmitReportDto: {
             /** @enum {string} */
-            type: "incident" | "stock" | "status" | "other" | "structural_damage" | "trapped_persons";
+            type: "incident" | "stock" | "status" | "other";
             /** @example Road blocked near bridge */
             note: string;
             /** @enum {string} */
@@ -2100,12 +2144,6 @@ export interface components {
             /** @description Resource ID this report refers to */
             resourceId?: string;
             location?: components["schemas"]["LocationDto"];
-            /** @description Required for structural_damage and trapped_persons types; ignored otherwise */
-            structuralDetail?: components["schemas"]["StructuralDetailDto"];
-        };
-        PublishReportDto: {
-            /** @description Optional public note added by coordinator when publishing */
-            publishNote?: string;
         };
         AuditEntryDto: {
             id: string;
@@ -2123,116 +2161,6 @@ export interface components {
         AuditListResponseDto: {
             entries: components["schemas"]["AuditEntryDto"][];
             total: number;
-        };
-        CoordsDto: {
-            address: string;
-            latitude: number;
-            longitude: number;
-        };
-        PersonDto: {
-            firstName: string;
-            lastName: string;
-            documentId?: string;
-            approximateAge?: number;
-            lastKnownLocation: string;
-            lastKnownCoords?: components["schemas"]["CoordsDto"];
-            description?: string;
-        };
-        ReporterDto: {
-            name: string;
-            phone: string;
-            email?: string;
-        };
-        CreateMissingPersonReportDto: {
-            person: components["schemas"]["PersonDto"];
-            reporter: components["schemas"]["ReporterDto"];
-            /** @description Must be true to create a report */
-            consentGiven: boolean;
-        };
-        CreateMissingPersonReportResponseDto: {
-            id: string;
-            status: string;
-        };
-        CoordsResponseDto: {
-            address: string;
-            latitude: number;
-            longitude: number;
-        };
-        PersonResponseDto: {
-            firstName: string;
-            lastName: string;
-            approximateAge: Record<string, never>;
-            lastKnownLocation: string;
-            lastKnownCoords?: components["schemas"]["CoordsResponseDto"];
-            description?: Record<string, never>;
-        };
-        MissingPersonReportListItemDto: {
-            id: string;
-            status: string;
-            person: components["schemas"]["PersonResponseDto"];
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        PersonDetailResponseDto: {
-            firstName: string;
-            lastName: string;
-            approximateAge: Record<string, never>;
-            lastKnownLocation: string;
-            lastKnownCoords?: components["schemas"]["CoordsResponseDto"];
-            description?: Record<string, never>;
-            documentId?: Record<string, never>;
-        };
-        SightingResponseDto: {
-            id: string;
-            reportedByUserId?: Record<string, never>;
-            reportedByName?: Record<string, never>;
-            location: string;
-            coords?: components["schemas"]["CoordsResponseDto"];
-            note: string;
-            /** Format: date-time */
-            reportedAt: string;
-        };
-        MissingPersonReportDetailDto: {
-            id: string;
-            emergencyId: string;
-            status: string;
-            person: components["schemas"]["PersonDetailResponseDto"];
-            reporterName: string;
-            reporterPhone: string;
-            reporterEmail?: Record<string, never>;
-            sightings: components["schemas"]["SightingResponseDto"][];
-            matchNote?: Record<string, never>;
-            reviewedByUserId?: Record<string, never>;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        MyReportResponseDto: {
-            id: string;
-            emergencyId: string;
-            status: string;
-            person: components["schemas"]["PersonResponseDto"];
-            sightings: components["schemas"]["SightingResponseDto"][];
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        UpdateReportStatusDto: {
-            /** @enum {string} */
-            status: "open" | "under_review" | "matched" | "closed";
-            matchNote?: string;
-        };
-        RegisterSightingDto: {
-            location: string;
-            coords?: components["schemas"]["CoordsDto"];
-            note: string;
-        };
-        RegisterSightingResponseDto: {
-            sightingId: string;
         };
     };
     responses: never;
@@ -2729,6 +2657,70 @@ export interface operations {
     };
     PublicController_list: {
         parameters: {
+            query?: {
+                /** @description Page number (1-based) */
+                page?: number;
+                /** @description Items per page (max 100) */
+                limit?: number;
+                /** @description Filter by category slug */
+                category?: string;
+                /** @description Filter by ISO 3166-1 alpha-2 country code */
+                country?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paged list of published resources */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PagedResourcesDto"];
+                };
+            };
+        };
+    };
+    PublicController_nearby: {
+        parameters: {
+            query: {
+                /** @description Latitude between -90 and 90 */
+                lat: number;
+                /** @description Longitude between -180 and 180 */
+                lng: number;
+                /** @description Search radius in meters (max 100000) */
+                radius: number;
+                /** @description Max results (default 50, max 100) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Resources within radius ordered by distance */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NearbyResourcesResponseDto"];
+                };
+            };
+        };
+    };
+    PublicController_facets: {
+        parameters: {
             query?: never;
             header?: never;
             path: {
@@ -2739,13 +2731,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description List of published resources */
+            /** @description Facets for filtering visible resources */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ResourceViewDto"][];
+                    "application/json": components["schemas"]["ResourceFacetsDto"];
                 };
             };
         };
@@ -4950,12 +4942,12 @@ export interface operations {
     ReportsController_getQueue: {
         parameters: {
             query?: {
-                status?: "open" | "reviewed" | "published" | "closed";
+                status?: "open" | "reviewed" | "closed";
                 priority?: "low" | "medium" | "high" | "urgent";
                 /** @description Filter by resource ID */
                 resourceId?: string;
                 /** @description Filter by type */
-                type?: "incident" | "stock" | "status" | "other" | "structural_damage" | "trapped_persons";
+                type?: "incident" | "stock" | "status" | "other";
             };
             header?: never;
             path: {
@@ -5011,57 +5003,6 @@ export interface operations {
         responses: {
             /** @description Report marked as reviewed */
             204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ReportsController_publish: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                reportId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PublishReportDto"];
-            };
-        };
-        responses: {
-            /** @description Report published */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Report is not in reviewed status */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ReportsController_damageLayer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                emergencyId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description GeoJSON FeatureCollection of published damage reports */
-            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5126,285 +5067,6 @@ export interface operations {
             };
             /** @description Admin access required */
             403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ReunificationController_listReports: {
-        parameters: {
-            query?: {
-                status?: "open" | "under_review" | "matched" | "closed";
-            };
-            header?: never;
-            path: {
-                emergencyId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MissingPersonReportListItemDto"][];
-                };
-            };
-            /** @description Missing or invalid token */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Coordinator role required */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ReunificationController_createReport: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Emergency UUID */
-                emergencyId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateMissingPersonReportDto"];
-            };
-        };
-        responses: {
-            /** @description Report created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CreateMissingPersonReportResponseDto"];
-                };
-            };
-            /** @description Invalid UUID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Emergency not active (paused/closed) */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description No consent or invalid data */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ReunificationController_searchByDocumentId: {
-        parameters: {
-            query: {
-                documentId: string;
-            };
-            header?: never;
-            path: {
-                emergencyId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MissingPersonReportDetailDto"][];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ReunificationController_getMyReports: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                emergencyId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MyReportResponseDto"][];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ReunificationController_getReport: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                reportId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MissingPersonReportDetailDto"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ReunificationController_updateStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                reportId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateReportStatusDto"];
-            };
-        };
-        responses: {
-            /** @description Status updated */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid status transition */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ReunificationController_registerSighting: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                reportId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RegisterSightingDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RegisterSightingResponseDto"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Report is matched or closed */
-            422: {
                 headers: {
                     [name: string]: unknown;
                 };

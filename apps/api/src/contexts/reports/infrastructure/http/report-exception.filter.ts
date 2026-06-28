@@ -8,41 +8,18 @@ import { Response } from 'express';
 import {
   ReportAlreadyReviewedError,
   ReportNotFoundError,
-  ReportNotPublishableError,
-  ReportNotInReviewedStatusError,
-  ReportStructuralDetailRequiredError,
 } from '../../domain/report-errors';
 
-type ReportDomainError =
-  | ReportAlreadyReviewedError
-  | ReportNotFoundError
-  | ReportNotPublishableError
-  | ReportNotInReviewedStatusError
-  | ReportStructuralDetailRequiredError;
+type ReportDomainError = ReportAlreadyReviewedError | ReportNotFoundError;
 
-@Catch(
-  ReportAlreadyReviewedError,
-  ReportNotFoundError,
-  ReportNotPublishableError,
-  ReportNotInReviewedStatusError,
-  ReportStructuralDetailRequiredError,
-)
+@Catch(ReportAlreadyReviewedError, ReportNotFoundError)
 export class ReportExceptionFilter implements ExceptionFilter {
   catch(exception: ReportDomainError, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<Response>();
-    let statusCode: number;
-
-    if (exception instanceof ReportNotFoundError) {
-      statusCode = HttpStatus.NOT_FOUND;
-    } else if (
-      exception instanceof ReportAlreadyReviewedError ||
-      exception instanceof ReportNotPublishableError
-    ) {
-      statusCode = HttpStatus.CONFLICT;
-    } else {
-      // ReportNotInReviewedStatusError, ReportStructuralDetailRequiredError
-      statusCode = HttpStatus.UNPROCESSABLE_ENTITY;
-    }
+    const statusCode =
+      exception instanceof ReportNotFoundError
+        ? HttpStatus.NOT_FOUND
+        : HttpStatus.CONFLICT;
 
     response
       .status(statusCode)

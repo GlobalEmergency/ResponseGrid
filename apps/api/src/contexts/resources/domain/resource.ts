@@ -19,6 +19,13 @@ import { ResourceRegistered } from './events/resource-registered';
 import { ResourceVerified } from './events/resource-verified';
 import { ResourcePublished } from './events/resource-published';
 
+export type Provenance = {
+  sourceName: string;
+  externalId: string;
+  externalUpdatedAt: Date | null;
+  raw: unknown;
+};
+
 export interface RegisterResourceProps {
   id: ResourceId;
   emergencyId: EmergencyId;
@@ -29,6 +36,14 @@ export interface RegisterResourceProps {
   location: Location;
   ownerUserId: string;
   ownerOrganizationId?: string | null;
+  // enriched optional fields
+  contact?: string | null;
+  schedule?: string | null;
+  manager?: string | null;
+  accepts?: string[];
+  country?: string | null;
+  city?: string | null;
+  provenance?: Provenance | null;
 }
 
 // Snapshot used by repositories to rehydrate without going through register().
@@ -45,6 +60,14 @@ export interface ResourceSnapshot {
   verificationLevel: VerificationLevel;
   publicStatus: PublicStatus;
   createdAt: Date;
+  // enriched fields
+  contact: string | null;
+  schedule: string | null;
+  manager: string | null;
+  accepts: string[];
+  country: string | null;
+  city: string | null;
+  provenance: Provenance | null;
 }
 
 export class Resource {
@@ -63,6 +86,13 @@ export class Resource {
     private _verificationLevel: VerificationLevel,
     private _publicStatus: PublicStatus,
     public readonly createdAt: Date,
+    public readonly contact: string | null,
+    public readonly schedule: string | null,
+    public readonly manager: string | null,
+    public readonly accepts: string[],
+    public readonly country: string | null,
+    public readonly city: string | null,
+    public readonly provenance: Provenance | null,
   ) {}
 
   static register(props: RegisterResourceProps): Resource {
@@ -79,6 +109,13 @@ export class Resource {
       VerificationLevel.Unverified,
       PublicStatus.Hidden,
       new Date(),
+      props.contact ?? null,
+      props.schedule ?? null,
+      props.manager ?? null,
+      props.accepts ?? [],
+      props.country ?? null,
+      props.city ?? null,
+      props.provenance ?? null,
     );
     r.events.push(
       new ResourceRegistered(r.id.value, {
@@ -105,6 +142,13 @@ export class Resource {
       s.verificationLevel,
       s.publicStatus,
       s.createdAt,
+      s.contact ?? null,
+      s.schedule ?? null,
+      s.manager ?? null,
+      s.accepts ?? [],
+      s.country ?? null,
+      s.city ?? null,
+      s.provenance ?? null,
     );
   }
 
@@ -176,6 +220,13 @@ export class Resource {
       verificationLevel: this._verificationLevel,
       publicStatus: this._publicStatus,
       createdAt: this.createdAt,
+      contact: this.contact,
+      schedule: this.schedule,
+      manager: this.manager,
+      accepts: this.accepts,
+      country: this.country,
+      city: this.city,
+      provenance: this.provenance,
     };
   }
 

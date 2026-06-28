@@ -27,7 +27,6 @@ export const PERMISSION_CATALOG = {
   task: ['create', 'assign', 'checkin_self', 'read'],
   report: ['create', 'triage', 'read'],
   incident: ['create', 'resolve'],
-  reunification: ['create', 'read_private', 'match'],
   org: ['create', 'edit', 'read'],
   group: ['create', 'read', 'manage_members'],
   accreditation: ['grant', 'revoke'],

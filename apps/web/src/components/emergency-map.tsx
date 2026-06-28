@@ -1,10 +1,12 @@
 'use client';
 
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import L from 'leaflet';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import 'leaflet.markercluster';
+import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import { useEffect, useRef } from 'react';
-import type { DamageLevel } from '@/components/atoms/damage-level-badge';
 
 // ── Icon helpers ───────────────────────────────────────────────────────────────
 // Uses the pointhi/leaflet-color-markers CDN so bundlers never break icon URLs.
@@ -52,17 +54,11 @@ export interface MapPoint {
    * Only meaningful for kind === 'need'. Resources are always 'public'.
    */
   approximate?: boolean;
-}
-
-export interface DamageMapFeature {
-  id: string;
-  type: string;
-  damageLevel: DamageLevel;
-  trappedPersonsEstimate?: number | null;
-  publishNote?: string | null;
-  photoUrl?: string | null;
-  lat: number;
-  lng: number;
+  /** Rich popup fields — only present for kind === 'resource' (Task 8) */
+  resourceType?: string;
+  city?: string | null;
+  country?: string | null;
+  accepts?: string[];
 }
 
 function resourceIcon(status: ResourcePublicStatus | undefined): L.Icon {
@@ -82,104 +78,6 @@ function resourceIcon(status: ResourcePublicStatus | undefined): L.Icon {
 
 interface EmergencyMapProps {
   points: MapPoint[];
-  /** Optional damage layer features — rendered as separate markers */
-  damageFeatures?: DamageMapFeature[];
-  /** Whether the damage layer is currently visible (controlled by parent) */
-  damageLayerVisible?: boolean;
-}
-
-// ── Damage marker icons ───────────────────────────────────────────────────────
-const DAMAGE_ICONS: Record<DamageLevel, L.Icon> = {
-  collapsed: L.icon({
-    iconUrl: `${BASE}/marker-icon-2x-red.png`,
-    iconRetinaUrl: `${BASE}/marker-icon-2x-red.png`,
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-  }),
-  severe: L.icon({
-    iconUrl: `${BASE}/marker-icon-2x-orange.png`,
-    iconRetinaUrl: `${BASE}/marker-icon-2x-orange.png`,
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-  }),
-  moderate: L.icon({
-    iconUrl: `${BASE}/marker-icon-2x-gold.png`,
-    iconRetinaUrl: `${BASE}/marker-icon-2x-gold.png`,
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-  }),
-};
-
-const DAMAGE_LEVEL_LABELS: Record<DamageLevel, string> = {
-  collapsed: '🔴 Colapsada',
-  severe: '🟠 Daño grave',
-  moderate: '🟡 Daño moderado',
-};
-
-const API_BASE_MAP = (
-  typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_API_URL ?? '') : ''
-).replace(/\/$/, '');
-
-// ── Inner component that renders damage markers inside MapContainer ────────────
-function DamageMarkersLayer({ features }: { features: DamageMapFeature[] }) {
-  const map = useMap();
-  const groupRef = useRef<L.LayerGroup | null>(null);
-
-  useEffect(() => {
-    if (groupRef.current === null) {
-      groupRef.current = L.layerGroup().addTo(map);
-    }
-    const group = groupRef.current;
-    group.clearLayers();
-
-    for (const f of features) {
-      const icon = DAMAGE_ICONS[f.damageLevel] ?? DAMAGE_ICONS.moderate;
-      const trapped =
-        f.trappedPersonsEstimate != null && f.trappedPersonsEstimate > 0
-          ? `<br/><span>🧍 ${f.trappedPersonsEstimate} atrapados</span>`
-          : f.type === 'trapped_persons'
-            ? '<br/><span>🧍 Atrapados: desconocido</span>'
-            : '';
-
-      const noteHtml =
-        f.publishNote != null && f.publishNote.trim().length > 0
-          ? `<br/><em style="font-size:11px;color:#555;">${f.publishNote}</em>`
-          : '';
-
-      const photoHtml =
-        f.photoUrl != null && f.photoUrl.trim().length > 0
-          ? (() => {
-              const src = f.photoUrl.startsWith('http')
-                ? f.photoUrl
-                : f.photoUrl.startsWith('/')
-                  ? `${API_BASE_MAP}${f.photoUrl}`
-                  : `${API_BASE_MAP}/files/${f.photoUrl}`;
-              return `<br/><img src="${src}" alt="" style="width:80px;height:60px;object-fit:cover;border-radius:4px;margin-top:4px;" loading="lazy"/>`;
-            })()
-          : '';
-
-      L.marker([f.lat, f.lng], { icon })
-        .bindPopup(
-          `<strong>${DAMAGE_LEVEL_LABELS[f.damageLevel]}</strong>${trapped}${noteHtml}${photoHtml}`,
-        )
-        .addTo(group);
-    }
-
-    return () => {
-      group.clearLayers();
-    };
-  }, [map, features]);
-
-  return null;
 }
 
 // ── Inner component that draws uncertainty circles for approximate needs ──────
@@ -223,6 +121,89 @@ function ApproximateCirclesLayer({ points }: { points: MapPoint[] }) {
   return null;
 }
 
+// ── XSS helper ───────────────────────────────────────────────────────────────
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// ── Inner component that renders clustered resource/need markers ──────────────
+function ClusteredMarkersLayer({ points }: { points: MapPoint[] }) {
+  const map = useMap();
+  const clusterRef = useRef<L.MarkerClusterGroup | null>(null);
+
+  useEffect(() => {
+    // Create the cluster group once and keep it alive.
+    // L.markerClusterGroup is injected by the 'leaflet.markercluster' side-effect import.
+    if (clusterRef.current === null) {
+      clusterRef.current = L.markerClusterGroup({
+        chunkedLoading: true,
+        maxClusterRadius: 60,
+      });
+      clusterRef.current.addTo(map);
+    }
+
+    const group = clusterRef.current;
+    group.clearLayers();
+
+    for (const point of points) {
+      const icon =
+        point.kind === 'resource' ? resourceIcon(point.status) : ICONS.red;
+
+      // Build rich popup HTML — all free-text values are escaped to prevent XSS
+      const kindLabel = point.kind === 'resource' ? 'Recurso' : 'Petición';
+      const typeLabel =
+        point.resourceType != null && point.resourceType !== ''
+          ? `<br/><span style="font-size:11px;color:#555;">${escapeHtml(point.resourceType)}</span>`
+          : '';
+      const locationParts: string[] = [];
+      if (point.city != null && point.city !== '') locationParts.push(escapeHtml(point.city));
+      if (point.country != null && point.country !== '') locationParts.push(escapeHtml(point.country));
+      const locationLabel =
+        locationParts.length > 0
+          ? `<br/><span style="font-size:11px;color:#555;">${locationParts.join(', ')}</span>`
+          : '';
+      const acceptsLabel =
+        point.accepts != null && point.accepts.length > 0
+          ? `<br/><span style="font-size:11px;color:#555;">Acepta: ${point.accepts.map(escapeHtml).join(', ')}</span>`
+          : '';
+      const approximateLabel =
+        point.kind === 'need' && point.approximate === true
+          ? '<br/><span style="font-size:11px;color:#b45309;">📍 Ubicación aproximada</span>'
+          : '';
+
+      const popupHtml = `<strong>${escapeHtml(point.label)}</strong><br/><span style="font-size:11px;color:#6b7280;">${kindLabel}</span>${typeLabel}${locationLabel}${acceptsLabel}${approximateLabel}`;
+
+      L.marker([point.lat, point.lng], { icon })
+        .bindPopup(popupHtml)
+        .addTo(group);
+    }
+
+    return () => {
+      group.clearLayers();
+    };
+  }, [map, points]);
+
+  // Remove the cluster group when the component unmounts.
+  // Read clusterRef.current INSIDE the cleanup so we always get the value
+  // set by the other effect, not the null captured at registration time.
+  useEffect(() => {
+    return () => {
+      if (clusterRef.current !== null) {
+        map.removeLayer(clusterRef.current);
+        clusterRef.current = null;
+      }
+    };
+    // Only on unmount
+  }, [map]);
+
+  return null;
+}
+
 // ── Inner component that fits the bounds once the map is ready ────────────────
 function BoundsFitter({ points }: { points: MapPoint[] }) {
   const map = useMap();
@@ -246,11 +227,7 @@ function BoundsFitter({ points }: { points: MapPoint[] }) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function EmergencyMap({
-  points,
-  damageFeatures = [],
-  damageLayerVisible = false,
-}: EmergencyMapProps) {
+export default function EmergencyMap({ points }: EmergencyMapProps) {
   // Default centre (Spain) used only when there are no points
   const defaultCenter: [number, number] = [40.4168, -3.7038];
   const defaultZoom = 5;
@@ -270,39 +247,11 @@ export default function EmergencyMap({
 
         <BoundsFitter points={points} />
         <ApproximateCirclesLayer points={points} />
-
-        {points.map((point) => (
-          <Marker
-            key={point.id}
-            position={[point.lat, point.lng]}
-            icon={point.kind === 'resource' ? resourceIcon(point.status) : ICONS.red}
-          >
-            <Popup>
-              <strong>{point.label}</strong>
-              <br />
-              <span className="text-xs text-gray-500">
-                {point.kind === 'resource' ? 'Recurso' : 'Petición'}
-              </span>
-              {point.kind === 'need' && point.approximate === true && (
-                <>
-                  <br />
-                  <span className="text-xs text-amber-700">
-                    📍 Ubicación aproximada
-                  </span>
-                </>
-              )}
-            </Popup>
-          </Marker>
-        ))}
-
-        {/* Damage layer — only rendered when toggle is on */}
-        {damageLayerVisible && damageFeatures.length > 0 && (
-          <DamageMarkersLayer features={damageFeatures} />
-        )}
+        <ClusteredMarkersLayer points={points} />
       </MapContainer>
 
       {/* Empty-state overlay rendered on top of the map */}
-      {points.length === 0 && damageFeatures.length === 0 && (
+      {points.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-[1000] pointer-events-none">
           <p className="text-sm font-medium text-gray-500">
             Aún no hay ubicaciones en el mapa.
