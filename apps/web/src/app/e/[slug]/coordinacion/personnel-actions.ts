@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { getT } from '@/i18n/server';
 
 export type PersonnelActionResult =
   | { status: 'idle' }
@@ -25,6 +26,8 @@ export async function createTaskFromNeed(
     redirect(`/login?next=/e/${slug}/coordinacion`);
   }
 
+  const { t } = await getT();
+
   const { data, error, response } = await api.POST('/needs/{needId}/create-task', {
     params: { path: { needId } },
     body: {
@@ -42,14 +45,14 @@ export async function createTaskFromNeed(
   if (response.status === 403) {
     return {
       status: 'error',
-      message: 'No tienes permisos para crear tareas desde esta necesidad.',
+      message: t.coord.err_no_permission_create_task,
     };
   }
 
   if (response.status === 404) {
     return {
       status: 'error',
-      message: 'Necesidad no encontrada.',
+      message: t.coord.err_need_not_found,
     };
   }
 
@@ -60,7 +63,7 @@ export async function createTaskFromNeed(
       'message' in error &&
       typeof (error as { message: unknown }).message === 'string'
         ? (error as { message: string }).message
-        : 'No se pudo crear la tarea. Inténtalo de nuevo.';
+        : t.coord.err_create_task_failed;
     return { status: 'error', message: msg };
   }
 

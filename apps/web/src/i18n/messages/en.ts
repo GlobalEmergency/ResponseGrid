@@ -43,6 +43,10 @@ export const en = {
       built_by: 'Built by volunteers',
       aria_label: 'Footer',
     },
+
+    // server-action messages
+    default_address: 'No address',
+    intake_paused: 'Intake is paused for this emergency. Please try again later.',
   },
 
   home: {
@@ -228,6 +232,7 @@ export const en = {
     no_account: "Don't have an account?",
     create_account: 'Create account',
     error_fallback: 'Login error',
+    err_invalid_credentials: 'Invalid credentials.',
     meta_title: 'Sign in — ResponseGrid',
     meta_description: 'Sign in to ResponseGrid.',
   },
@@ -246,6 +251,12 @@ export const en = {
     error_fallback: 'Error creating account',
     meta_title: 'Create account — ResponseGrid',
     meta_description: 'Sign up to ResponseGrid to coordinate emergencies.',
+
+    // server-action messages
+    err_all_fields_required: 'All fields are required.',
+    err_password_too_short: 'Password must be at least 8 characters.',
+    err_email_exists: 'That email is already registered.',
+    err_signup_failed: 'Couldn’t create the account. Please try again.',
   },
 
   needs_filter: {
@@ -368,6 +379,13 @@ export const en = {
       'Thank you, you are registered. Do not receive materials or publish anything until we validate you.',
     success_register_another: 'Register another resource',
     error_fallback: 'Error registering resource',
+
+    // server-action messages
+    err_invalid_type: 'Invalid resource type.',
+    err_invalid_stage: 'Invalid stage.',
+    err_name_too_short: 'Name must be at least 2 characters.',
+    err_location_required: 'Select a location.',
+    err_register_failed: 'Couldn’t register. Please try again.',
   },
 
   peticion: {
@@ -422,6 +440,14 @@ export const en = {
     category_medical_equipment: '🩺 Medical equipment',
     category_medical_supplies: '📦 Medical supplies',
     category_medical_personnel: '🧑‍⚕️ Medical personnel',
+
+    // server-action messages
+    err_title_too_short: 'Title must be at least 2 characters.',
+    err_invalid_priority: 'Invalid priority.',
+    err_location_required: 'Select a location.',
+    err_items_required: 'Add at least one item.',
+    err_invalid_items: 'Check the items: each one needs a name, quantity and category.',
+    err_submit_failed: 'Couldn’t submit the request. Please try again.',
   },
 
   donar: {
@@ -458,6 +484,13 @@ export const en = {
       'Thank you! Your offer has been received. The coordination team will review it and contact you if needed.',
     success_donate_again: 'Make another offer',
     error_fallback: 'Error submitting offer',
+
+    // server-action messages
+    err_invalid_category: 'Invalid category.',
+    err_description_too_short: 'Describe the item (at least 2 characters).',
+    err_invalid_quantity: 'Quantity must be a positive whole number.',
+    err_location_required: 'Select a location.',
+    err_submit_failed: 'Couldn’t submit the offer. Please try again.',
   },
 
   voluntario: {
@@ -507,6 +540,17 @@ export const en = {
       'Thank you! You are registered as a volunteer. The coordination team will get in touch with you.',
     success_update: 'Details updated! Your volunteer profile has been saved.',
     view_volunteering: 'View my volunteering',
+
+    // server-action messages
+    err_name_too_short: 'Name must be at least 2 characters.',
+    err_contact_too_short: 'Contact must be at least 2 characters.',
+    err_municipality_too_short: 'Municipality must be at least 2 characters.',
+    err_invalid_availability: 'Invalid availability.',
+    err_invalid_vehicle: 'Invalid vehicle type.',
+    err_consent_required: 'You must accept the consent to register as a volunteer.',
+    err_intake_paused: 'This emergency isn’t accepting volunteers right now (paused).',
+    err_consent_data_required: 'You must accept the data-processing consent to register.',
+    err_register_failed: 'Couldn’t register. Please try again.',
   },
 
   reportar: {
@@ -539,6 +583,15 @@ export const en = {
     success_message: 'Report submitted successfully. The coordinator will review it shortly.',
     success_send_another: 'Submit another report',
     error_fallback: 'Error submitting report',
+
+    // server-action messages
+    err_invalid_type: 'Select a valid report type.',
+    err_invalid_priority: 'Select a valid priority.',
+    err_note_required: 'The note can’t be empty.',
+    err_no_permission: 'You don’t have permission to submit reports for this emergency.',
+    err_submit_failed: 'Couldn’t submit the report. Please try again.',
+    err_no_permission_review: 'You don’t have permission to review this report.',
+    err_mark_reviewed_failed: 'Couldn’t mark as reviewed. Please try again.',
   },
 
   // ── Page: About us (/sobre) ───────────────────────────────────────────────
@@ -925,6 +978,17 @@ export const en = {
     f_email: 'Contact email',
     f_email_ph: 'contact@org.org',
     creating: 'Creating…',
+
+    // server-action messages
+    err_name_type_required: 'Name and type are required.',
+    err_create_failed: 'Couldn’t create the organization. Please try again.',
+    err_email_required: 'Email is required.',
+    err_owner_only: 'Only the owner can manage members.',
+    err_user_not_found: 'No user exists with that email.',
+    err_already_member: 'This user is already a member of the organization.',
+    err_add_member_failed: 'Couldn’t add the member. Please try again.',
+    err_owner_cannot_remove_self: 'The owner can’t remove themselves.',
+    err_remove_member_failed: 'Couldn’t remove the member. Please try again.',
   },
 
   org_detail: {
@@ -964,6 +1028,12 @@ export const en = {
     item_unread_aria: 'Unread notification',
     mark_read_label: 'Mark as read',
     mark_read: 'Mark read',
+
+    // server-action messages
+    err_mark_read_forbidden: 'You can’t mark this notification as read.',
+    err_not_found: 'Notification not found.',
+    err_mark_read_failed: 'Couldn’t mark the notification. Please try again.',
+    err_mark_all_read_failed: 'Couldn’t mark all notifications. Please try again.',
   },
 
   account: {
@@ -1485,6 +1555,56 @@ export const en = {
     personnel_fields_specialty_label: 'Specialty',
     personnel_fields_specialty_placeholder: 'e.g. pediatric emergency physician',
     personnel_fields_count_label: 'People needed',
+
+    // server-action messages
+    err_no_permission_match: 'You don’t have permission to assign this offer.',
+    err_offer_not_open: 'The offer isn’t in an open state.',
+    err_not_found_offer_need: 'Offer or need not found.',
+    err_match_failed: 'Couldn’t assign the offer. Please try again.',
+    err_no_permission_fulfill: 'You don’t have permission to mark this offer as delivered.',
+    err_offer_not_assigned: 'The offer isn’t in an assigned state.',
+    err_fulfill_failed: 'Couldn’t mark the offer as delivered.',
+    err_no_permission_cancel: 'You don’t have permission to cancel this offer.',
+    err_offer_cannot_cancel: 'The offer can’t be cancelled in its current state.',
+    err_cancel_failed: 'Couldn’t cancel the offer.',
+    err_verify_failed: 'Couldn’t verify the resource. Please try again.',
+    err_publish_resource_failed: 'Resource verified but couldn’t be published. Contact the administrator.',
+    err_validate_failed: 'Couldn’t validate the request. Please try again.',
+    err_no_permission_renew: 'You don’t have permission to renew this request.',
+    err_request_not_found: 'Request not found.',
+    err_renew_failed: 'Couldn’t renew the request. Please try again.',
+    err_no_permission_pause: 'You don’t have permission to pause this emergency.',
+    err_already_paused: 'The emergency is already paused.',
+    err_pause_failed: 'Couldn’t pause the emergency. Please try again.',
+    err_no_permission_resume: 'You don’t have permission to resume this emergency.',
+    err_not_paused: 'The emergency isn’t paused.',
+    err_resume_failed: 'Couldn’t resume the emergency. Please try again.',
+    err_no_permission_announce: 'You don’t have permission to publish announcements for this emergency.',
+    err_announce_failed: 'Couldn’t publish the announcement. Please try again.',
+    err_no_permission_create_task: 'You don’t have permission to create tasks from this need.',
+    err_need_not_found: 'Need not found.',
+    err_create_task_failed: 'Couldn’t create the task. Please try again.',
+    vol_err_no_permission_status: 'You don’t have permission to change this volunteer’s status.',
+    vol_err_not_found: 'Volunteer not found.',
+    vol_err_update_status_failed: 'Couldn’t update the status. Please try again.',
+    vol_err_title_required: 'Title is required.',
+    vol_err_description_required: 'Description is required.',
+    vol_err_no_permission_create: 'You don’t have permission to create tasks for this emergency.',
+    vol_err_create_failed: 'Couldn’t create the task. Please try again.',
+    vol_err_no_permission_assign: 'You don’t have permission to assign volunteers.',
+    vol_err_task_or_volunteer_not_found: 'Task or volunteer not found.',
+    vol_err_already_assigned: 'The volunteer is already assigned or the task can’t take more assignments.',
+    vol_err_assign_failed: 'Couldn’t assign the volunteer. Please try again.',
+    vol_err_no_permission_unassign: 'You don’t have permission to remove volunteers.',
+    vol_err_task_not_found: 'Task not found.',
+    vol_err_not_assigned: 'The volunteer wasn’t assigned to this task.',
+    vol_err_unassign_failed: 'Couldn’t remove the volunteer. Please try again.',
+    vol_err_no_permission_complete: 'You don’t have permission to complete this task.',
+    vol_err_already_cancelled: 'The task is already cancelled.',
+    vol_err_complete_failed: 'Couldn’t complete the task. Please try again.',
+    vol_err_no_permission_cancel: 'You don’t have permission to cancel this task.',
+    vol_err_already_completed: 'The task is already completed.',
+    vol_err_cancel_failed: 'Couldn’t cancel the task. Please try again.',
   },
 
   // Shared leaf-component strings

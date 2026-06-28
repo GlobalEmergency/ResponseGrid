@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { getToken, authHeaders, clearToken } from '@/lib/auth';
+import { getT } from '@/i18n/server';
 
 type NeedCategory = components['schemas']['NeedItemDto']['category'];
 type NeedPriority = components['schemas']['CreateNeedDto']['priority'];
@@ -93,6 +94,8 @@ export async function submitPeticion(
     redirect('/login');
   }
 
+  const { t } = await getT();
+
   const rawTitle = formData.get('title');
   const rawDescription = formData.get('description');
   const rawPriority = formData.get('priority');
@@ -105,35 +108,35 @@ export async function submitPeticion(
   const title = typeof rawTitle === 'string' ? rawTitle.trim() : '';
 
   if (title.length < 2) {
-    return { status: 'error', message: 'El título debe tener al menos 2 caracteres.' };
+    return { status: 'error', message: t.peticion.err_title_too_short };
   }
   if (!isPriority(rawPriority)) {
-    return { status: 'error', message: 'Prioridad no válida.' };
+    return { status: 'error', message: t.peticion.err_invalid_priority };
   }
 
   const latStr = typeof rawLatitude === 'string' ? rawLatitude.trim() : '';
   const lonStr = typeof rawLongitude === 'string' ? rawLongitude.trim() : '';
 
   if (latStr === '' || lonStr === '') {
-    return { status: 'error', message: 'Selecciona una ubicación.' };
+    return { status: 'error', message: t.peticion.err_location_required };
   }
 
   const address =
     typeof rawAddress === 'string' && rawAddress.trim() !== ''
       ? rawAddress.trim()
-      : 'Sin dirección';
+      : t.common.default_address;
   const latitude = Number(latStr);
   const longitude = Number(lonStr);
 
   if (typeof rawItems !== 'string' || rawItems.trim() === '') {
-    return { status: 'error', message: 'Añade al menos un artículo.' };
+    return { status: 'error', message: t.peticion.err_items_required };
   }
 
   const items = parseItems(rawItems);
   if (items === null) {
     return {
       status: 'error',
-      message: 'Revisa los artículos: cada uno necesita nombre, cantidad y categoría.',
+      message: t.peticion.err_invalid_items,
     };
   }
 
@@ -171,7 +174,7 @@ export async function submitPeticion(
   if (response.status === 409) {
     return {
       status: 'error',
-      message: 'El alta está en pausa en esta emergencia. Inténtalo más tarde.',
+      message: t.common.intake_paused,
     };
   }
 
@@ -182,7 +185,7 @@ export async function submitPeticion(
       'message' in error &&
       typeof (error as { message: unknown }).message === 'string'
         ? (error as { message: string }).message
-        : 'Error al enviar la petición. Inténtalo de nuevo.';
+        : t.peticion.err_submit_failed;
     return { status: 'error', message: msg };
   }
 

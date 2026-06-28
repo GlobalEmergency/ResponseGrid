@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { getToken, authHeaders, clearToken } from '@/lib/auth';
+import { getT } from '@/i18n/server';
 
 type OfferCategory = components['schemas']['SubmitOfferDto']['category'];
 
@@ -36,6 +37,8 @@ export async function submitOffer(
     redirect('/login');
   }
 
+  const { t } = await getT();
+
   const rawCategory = formData.get('category');
   const rawDescription = formData.get('description');
   const rawQuantity = formData.get('quantity');
@@ -48,7 +51,7 @@ export async function submitOffer(
   const rawTargetNeedId = formData.get('targetNeedId');
 
   if (!isCategory(rawCategory)) {
-    return { status: 'error', message: 'Categoría no válida.' };
+    return { status: 'error', message: t.donar.err_invalid_category };
   }
 
   const description =
@@ -56,27 +59,27 @@ export async function submitOffer(
   if (description.length < 2) {
     return {
       status: 'error',
-      message: 'Describe el material (al menos 2 caracteres).',
+      message: t.donar.err_description_too_short,
     };
   }
 
   const quantityRaw =
     typeof rawQuantity === 'string' ? Number(rawQuantity) : NaN;
   if (!Number.isInteger(quantityRaw) || quantityRaw <= 0) {
-    return { status: 'error', message: 'La cantidad debe ser un número entero positivo.' };
+    return { status: 'error', message: t.donar.err_invalid_quantity };
   }
 
   const latStr = typeof rawLatitude === 'string' ? rawLatitude.trim() : '';
   const lonStr = typeof rawLongitude === 'string' ? rawLongitude.trim() : '';
 
   if (latStr === '' || lonStr === '') {
-    return { status: 'error', message: 'Selecciona una ubicación.' };
+    return { status: 'error', message: t.donar.err_location_required };
   }
 
   const address =
     typeof rawAddress === 'string' && rawAddress.trim() !== ''
       ? rawAddress.trim()
-      : 'Sin dirección';
+      : t.common.default_address;
   const latitude = Number(latStr);
   const longitude = Number(lonStr);
 
@@ -126,7 +129,7 @@ export async function submitOffer(
   if (response.status === 409) {
     return {
       status: 'error',
-      message: 'El alta está en pausa en esta emergencia. Inténtalo más tarde.',
+      message: t.common.intake_paused,
     };
   }
 
@@ -137,7 +140,7 @@ export async function submitOffer(
       'message' in error &&
       typeof (error as { message: unknown }).message === 'string'
         ? (error as { message: string }).message
-        : 'Error al enviar la oferta. Inténtalo de nuevo.';
+        : t.donar.err_submit_failed;
     return { status: 'error', message: msg };
   }
 

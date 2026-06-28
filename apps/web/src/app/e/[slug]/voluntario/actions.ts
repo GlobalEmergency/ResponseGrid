@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { getToken, authHeaders, clearToken } from '@/lib/auth';
+import { getT } from '@/i18n/server';
 
 type Skill = components['schemas']['RegisterVolunteerDto']['skills'][number];
 type Availability = components['schemas']['RegisterVolunteerDto']['availability'];
@@ -50,6 +51,8 @@ export async function registerVolunteer(
     redirect('/login');
   }
 
+  const { t } = await getT();
+
   const rawName = formData.get('name');
   const rawContact = formData.get('contact');
   const rawMunicipality = formData.get('municipality');
@@ -62,19 +65,19 @@ export async function registerVolunteer(
   const municipality = typeof rawMunicipality === 'string' ? rawMunicipality.trim() : '';
 
   if (name.length < 2) {
-    return { status: 'error', message: 'El nombre debe tener al menos 2 caracteres.' };
+    return { status: 'error', message: t.voluntario.err_name_too_short };
   }
   if (contact.length < 2) {
-    return { status: 'error', message: 'El contacto debe tener al menos 2 caracteres.' };
+    return { status: 'error', message: t.voluntario.err_contact_too_short };
   }
   if (municipality.length < 2) {
-    return { status: 'error', message: 'El municipio debe tener al menos 2 caracteres.' };
+    return { status: 'error', message: t.voluntario.err_municipality_too_short };
   }
   if (!isAvailability(rawAvailability)) {
-    return { status: 'error', message: 'Disponibilidad no válida.' };
+    return { status: 'error', message: t.voluntario.err_invalid_availability };
   }
   if (!isVehicle(rawVehicle)) {
-    return { status: 'error', message: 'Tipo de vehículo no válido.' };
+    return { status: 'error', message: t.voluntario.err_invalid_vehicle };
   }
 
   const skills: Skill[] = formData.getAll('skills').filter(isSkill);
@@ -82,7 +85,7 @@ export async function registerVolunteer(
   const consentAccepted = rawConsent === 'on' || rawConsent === 'true';
 
   if (!consentAccepted) {
-    return { status: 'error', message: 'Debes aceptar el consentimiento para registrarte como voluntario.' };
+    return { status: 'error', message: t.voluntario.err_consent_required };
   }
 
   const { data, error, response } = await api.POST(
@@ -110,14 +113,14 @@ export async function registerVolunteer(
   if (response.status === 409) {
     return {
       status: 'error',
-      message: 'Esta emergencia no está aceptando voluntarios en este momento (en pausa).',
+      message: t.voluntario.err_intake_paused,
     };
   }
 
   if (response.status === 422) {
     return {
       status: 'error',
-      message: 'Debes aceptar el consentimiento de tratamiento de datos para registrarte.',
+      message: t.voluntario.err_consent_data_required,
     };
   }
 
@@ -128,7 +131,7 @@ export async function registerVolunteer(
       'message' in error &&
       typeof (error as { message: unknown }).message === 'string'
         ? (error as { message: string }).message
-        : 'Error al registrar. Inténtalo de nuevo.';
+        : t.voluntario.err_register_failed;
     return { status: 'error', message: msg };
   }
 

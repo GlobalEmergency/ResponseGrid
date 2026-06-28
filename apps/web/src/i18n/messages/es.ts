@@ -42,6 +42,10 @@ export const es = {
       built_by: 'Hecho por voluntarios',
       aria_label: 'Pie de página',
     },
+
+    // server-action messages
+    default_address: 'Sin dirección',
+    intake_paused: 'El alta está en pausa en esta emergencia. Inténtalo más tarde.',
   },
 
   // ── Home page ─────────────────────────────────────────────────────────────
@@ -241,6 +245,7 @@ export const es = {
     no_account: '¿No tienes cuenta?',
     create_account: 'Crear cuenta',
     error_fallback: 'Error al iniciar sesión',
+    err_invalid_credentials: 'Credenciales incorrectas.',
     meta_title: 'Iniciar sesión — ResponseGrid',
     meta_description: 'Inicia sesión en ResponseGrid.',
   },
@@ -260,6 +265,12 @@ export const es = {
     error_fallback: 'Error al crear la cuenta',
     meta_title: 'Crear cuenta — ResponseGrid',
     meta_description: 'Regístrate en ResponseGrid para coordinar emergencias.',
+
+    // server-action messages
+    err_all_fields_required: 'Todos los campos son obligatorios.',
+    err_password_too_short: 'La contraseña debe tener al menos 8 caracteres.',
+    err_email_exists: 'Ese email ya está registrado.',
+    err_signup_failed: 'Error al crear la cuenta. Inténtalo de nuevo.',
   },
 
   // ── Needs filter ──────────────────────────────────────────────────────────
@@ -389,6 +400,13 @@ export const es = {
       'Gracias, quedas registrado. No recibas material ni publiques nada hasta que te validemos.',
     success_register_another: 'Registrar otro recurso',
     error_fallback: 'Error al registrar el recurso',
+
+    // server-action messages
+    err_invalid_type: 'Tipo de recurso no válido.',
+    err_invalid_stage: 'Etapa no válida.',
+    err_name_too_short: 'El nombre debe tener al menos 2 caracteres.',
+    err_location_required: 'Selecciona una ubicación.',
+    err_register_failed: 'Error al registrar. Inténtalo de nuevo.',
   },
 
   // ── Petición form ─────────────────────────────────────────────────────────
@@ -445,6 +463,14 @@ export const es = {
     category_medical_equipment: '🩺 Equipos médicos',
     category_medical_supplies: '📦 Insumos médicos',
     category_medical_personnel: '🧑‍⚕️ Personal sanitario',
+
+    // server-action messages
+    err_title_too_short: 'El título debe tener al menos 2 caracteres.',
+    err_invalid_priority: 'Prioridad no válida.',
+    err_location_required: 'Selecciona una ubicación.',
+    err_items_required: 'Añade al menos un artículo.',
+    err_invalid_items: 'Revisa los artículos: cada uno necesita nombre, cantidad y categoría.',
+    err_submit_failed: 'Error al enviar la petición. Inténtalo de nuevo.',
   },
 
   // ── Donar form ────────────────────────────────────────────────────────────
@@ -482,6 +508,13 @@ export const es = {
       '¡Gracias! Tu oferta ha sido recibida. El equipo de coordinación la revisará y te contactará si es necesario.',
     success_donate_again: 'Hacer otra oferta',
     error_fallback: 'Error al enviar la oferta',
+
+    // server-action messages
+    err_invalid_category: 'Categoría no válida.',
+    err_description_too_short: 'Describe el material (al menos 2 caracteres).',
+    err_invalid_quantity: 'La cantidad debe ser un número entero positivo.',
+    err_location_required: 'Selecciona una ubicación.',
+    err_submit_failed: 'Error al enviar la oferta. Inténtalo de nuevo.',
   },
 
   // ── Voluntario form ───────────────────────────────────────────────────────
@@ -532,6 +565,17 @@ export const es = {
       '¡Gracias! Quedas registrado como voluntario. El equipo de coordinación se pondrá en contacto contigo.',
     success_update: '¡Datos actualizados! Tu perfil de voluntario ha sido guardado.',
     view_volunteering: 'Ver mi voluntariado',
+
+    // server-action messages
+    err_name_too_short: 'El nombre debe tener al menos 2 caracteres.',
+    err_contact_too_short: 'El contacto debe tener al menos 2 caracteres.',
+    err_municipality_too_short: 'El municipio debe tener al menos 2 caracteres.',
+    err_invalid_availability: 'Disponibilidad no válida.',
+    err_invalid_vehicle: 'Tipo de vehículo no válido.',
+    err_consent_required: 'Debes aceptar el consentimiento para registrarte como voluntario.',
+    err_intake_paused: 'Esta emergencia no está aceptando voluntarios en este momento (en pausa).',
+    err_consent_data_required: 'Debes aceptar el consentimiento de tratamiento de datos para registrarte.',
+    err_register_failed: 'Error al registrar. Inténtalo de nuevo.',
   },
 
   // ── Reportar form ─────────────────────────────────────────────────────────
@@ -565,6 +609,15 @@ export const es = {
     success_message: 'Parte enviado correctamente. El coordinador lo revisará en breve.',
     success_send_another: 'Enviar otro parte',
     error_fallback: 'Error al enviar el parte',
+
+    // server-action messages
+    err_invalid_type: 'Selecciona un tipo de parte válido.',
+    err_invalid_priority: 'Selecciona una prioridad válida.',
+    err_note_required: 'La nota no puede estar vacía.',
+    err_no_permission: 'No tienes permisos para enviar partes en esta emergencia.',
+    err_submit_failed: 'No se pudo enviar el parte. Inténtalo de nuevo.',
+    err_no_permission_review: 'No tienes permisos para revisar este parte.',
+    err_mark_reviewed_failed: 'No se pudo marcar como revisado. Inténtalo de nuevo.',
   },
 
   // ── Página: Sobre nosotros (/sobre) ───────────────────────────────────────
@@ -954,6 +1007,17 @@ export const es = {
     f_email: 'Email de contacto',
     f_email_ph: 'contacto@org.es',
     creating: 'Creando…',
+
+    // server-action messages
+    err_name_type_required: 'El nombre y el tipo son obligatorios.',
+    err_create_failed: 'Error al crear la organización. Inténtalo de nuevo.',
+    err_email_required: 'El email es obligatorio.',
+    err_owner_only: 'Solo el propietario puede gestionar miembros.',
+    err_user_not_found: 'No existe un usuario con ese email.',
+    err_already_member: 'Este usuario ya es miembro de la organización.',
+    err_add_member_failed: 'Error al añadir el miembro. Inténtalo de nuevo.',
+    err_owner_cannot_remove_self: 'El propietario no puede eliminarse a sí mismo.',
+    err_remove_member_failed: 'Error al eliminar el miembro. Inténtalo de nuevo.',
   },
 
   org_detail: {
@@ -993,6 +1057,12 @@ export const es = {
     item_unread_aria: 'Notificación no leída',
     mark_read_label: 'Marcar como leída',
     mark_read: 'Marcar leída',
+
+    // server-action messages
+    err_mark_read_forbidden: 'No puedes marcar esta notificación como leída.',
+    err_not_found: 'Notificación no encontrada.',
+    err_mark_read_failed: 'No se pudo marcar la notificación. Inténtalo de nuevo.',
+    err_mark_all_read_failed: 'No se pudieron marcar todas las notificaciones. Inténtalo de nuevo.',
   },
 
   account: {
@@ -1514,6 +1584,56 @@ export const es = {
     personnel_fields_specialty_label: 'Especialidad',
     personnel_fields_specialty_placeholder: 'Ej. médico urgencias pediátricas',
     personnel_fields_count_label: 'Personas necesarias',
+
+    // server-action messages
+    err_no_permission_match: 'No tienes permisos para asignar esta oferta.',
+    err_offer_not_open: 'La oferta no está en estado abierto.',
+    err_not_found_offer_need: 'Oferta o necesidad no encontrada.',
+    err_match_failed: 'No se pudo asignar la oferta. Inténtalo de nuevo.',
+    err_no_permission_fulfill: 'No tienes permisos para marcar esta oferta como entregada.',
+    err_offer_not_assigned: 'La oferta no está en estado asignado.',
+    err_fulfill_failed: 'No se pudo marcar la oferta como entregada.',
+    err_no_permission_cancel: 'No tienes permisos para cancelar esta oferta.',
+    err_offer_cannot_cancel: 'La oferta no puede cancelarse en su estado actual.',
+    err_cancel_failed: 'No se pudo cancelar la oferta.',
+    err_verify_failed: 'No se pudo verificar el recurso. Inténtalo de nuevo.',
+    err_publish_resource_failed: 'Recurso verificado pero no se pudo publicar. Contacta al administrador.',
+    err_validate_failed: 'No se pudo validar la petición. Inténtalo de nuevo.',
+    err_no_permission_renew: 'No tienes permisos para renovar esta petición.',
+    err_request_not_found: 'Petición no encontrada.',
+    err_renew_failed: 'No se pudo renovar la petición. Inténtalo de nuevo.',
+    err_no_permission_pause: 'No tienes permisos para pausar esta emergencia.',
+    err_already_paused: 'La emergencia ya está en pausa.',
+    err_pause_failed: 'No se pudo pausar la emergencia. Inténtalo de nuevo.',
+    err_no_permission_resume: 'No tienes permisos para reanudar esta emergencia.',
+    err_not_paused: 'La emergencia no está en pausa.',
+    err_resume_failed: 'No se pudo reanudar la emergencia. Inténtalo de nuevo.',
+    err_no_permission_announce: 'No tienes permisos para publicar comunicados en esta emergencia.',
+    err_announce_failed: 'No se pudo publicar el comunicado. Inténtalo de nuevo.',
+    err_no_permission_create_task: 'No tienes permisos para crear tareas desde esta necesidad.',
+    err_need_not_found: 'Necesidad no encontrada.',
+    err_create_task_failed: 'No se pudo crear la tarea. Inténtalo de nuevo.',
+    vol_err_no_permission_status: 'No tienes permisos para cambiar el estado de este voluntario.',
+    vol_err_not_found: 'Voluntario no encontrado.',
+    vol_err_update_status_failed: 'No se pudo actualizar el estado. Inténtalo de nuevo.',
+    vol_err_title_required: 'El título es obligatorio.',
+    vol_err_description_required: 'La descripción es obligatoria.',
+    vol_err_no_permission_create: 'No tienes permisos para crear tareas en esta emergencia.',
+    vol_err_create_failed: 'No se pudo crear la tarea. Inténtalo de nuevo.',
+    vol_err_no_permission_assign: 'No tienes permisos para asignar voluntarios.',
+    vol_err_task_or_volunteer_not_found: 'Tarea o voluntario no encontrado.',
+    vol_err_already_assigned: 'El voluntario ya está asignado o la tarea no admite más asignaciones.',
+    vol_err_assign_failed: 'No se pudo asignar el voluntario. Inténtalo de nuevo.',
+    vol_err_no_permission_unassign: 'No tienes permisos para quitar voluntarios.',
+    vol_err_task_not_found: 'Tarea no encontrada.',
+    vol_err_not_assigned: 'El voluntario no estaba asignado a esta tarea.',
+    vol_err_unassign_failed: 'No se pudo quitar el voluntario. Inténtalo de nuevo.',
+    vol_err_no_permission_complete: 'No tienes permisos para completar esta tarea.',
+    vol_err_already_cancelled: 'La tarea ya está cancelada.',
+    vol_err_complete_failed: 'No se pudo completar la tarea. Inténtalo de nuevo.',
+    vol_err_no_permission_cancel: 'No tienes permisos para cancelar esta tarea.',
+    vol_err_already_completed: 'La tarea ya está completada.',
+    vol_err_cancel_failed: 'No se pudo cancelar la tarea. Inténtalo de nuevo.',
   },
 
   // Shared leaf-component strings

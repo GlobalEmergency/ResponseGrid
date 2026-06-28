@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { getToken, authHeaders, clearToken } from '@/lib/auth';
+import { getT } from '@/i18n/server';
 
 type ResourceType = components['schemas']['RegisterResourceDto']['type'];
 type Stage = components['schemas']['RegisterResourceDto']['stage'];
@@ -43,6 +44,8 @@ export async function registerResource(
     redirect('/login');
   }
 
+  const { t } = await getT();
+
   const rawType = formData.get('type');
   const rawStage = formData.get('stage');
   const rawName = formData.get('name');
@@ -55,26 +58,26 @@ export async function registerResource(
   const name = typeof rawName === 'string' ? rawName.trim() : '';
 
   if (!isResourceType(rawType)) {
-    return { status: 'error', message: 'Tipo de recurso no válido.' };
+    return { status: 'error', message: t.registrar.err_invalid_type };
   }
   if (!isStage(rawStage)) {
-    return { status: 'error', message: 'Etapa no válida.' };
+    return { status: 'error', message: t.registrar.err_invalid_stage };
   }
   if (name.length < 2) {
-    return { status: 'error', message: 'El nombre debe tener al menos 2 caracteres.' };
+    return { status: 'error', message: t.registrar.err_name_too_short };
   }
 
   const latStr = typeof rawLatitude === 'string' ? rawLatitude.trim() : '';
   const lonStr = typeof rawLongitude === 'string' ? rawLongitude.trim() : '';
 
   if (latStr === '' || lonStr === '') {
-    return { status: 'error', message: 'Selecciona una ubicación.' };
+    return { status: 'error', message: t.registrar.err_location_required };
   }
 
   const address =
     typeof rawAddress === 'string' && rawAddress.trim() !== ''
       ? rawAddress.trim()
-      : 'Sin dirección';
+      : t.common.default_address;
   const latitude = Number(latStr);
   const longitude = Number(lonStr);
 
@@ -112,7 +115,7 @@ export async function registerResource(
   if (response.status === 409) {
     return {
       status: 'error',
-      message: 'El alta está en pausa en esta emergencia. Inténtalo más tarde.',
+      message: t.common.intake_paused,
     };
   }
 
@@ -123,7 +126,7 @@ export async function registerResource(
       'message' in error &&
       typeof (error as { message: unknown }).message === 'string'
         ? (error as { message: string }).message
-        : 'Error al registrar. Inténtalo de nuevo.';
+        : t.registrar.err_register_failed;
     return { status: 'error', message: msg };
   }
 
