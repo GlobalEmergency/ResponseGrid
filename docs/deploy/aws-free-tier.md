@@ -14,6 +14,8 @@ Navegador ──► Vercel (Next.js)
 ```
 
 > **Coste:** 0 € durante 12 meses (EC2/S3 free tier). Después, ~7-9 $/mes la t3.micro + céntimos de S3. El web en Vercel es gratis siempre.
+>
+> **Nota:** la instancia en producción se subió a **t3.small** (2 GB) para dar holgura al **agente de observabilidad (Datadog)** — ver [`deploy/datadog.md`](../../deploy/datadog.md). La **t3.micro** sigue valiendo para un despliegue mínimo sin Datadog.
 
 **Necesitas:** una cuenta AWS, un **dominio** (para el HTTPS del API; vale un subdominio `api.tudominio.com`), y acceso al repo privado.
 

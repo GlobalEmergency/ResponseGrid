@@ -23,4 +23,6 @@ COPY --from=builder /prod/dist ./dist
 COPY --from=builder /prod/node_modules ./node_modules
 COPY --from=builder /prod/package.json ./package.json
 EXPOSE 3000
-CMD ["node", "dist/main"]
+# --require dd-trace/init loads APM tracing before the app (auto-instruments
+# http/express/nest/pg/ioredis). Controlled by DD_* env (see deploy/.env + compose).
+CMD ["node", "--require", "dd-trace/init", "dist/main"]

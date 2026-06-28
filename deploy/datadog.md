@@ -10,12 +10,13 @@ Corre como un servicio más del stack (`datadog` en `deploy/docker-compose.prod.
 - **Postgres** — conexiones, locks, tamaño de BD, transacciones (integración `postgres` por Autodiscovery; usuario de solo lectura `datadog` con rol `pg_monitor`).
 - **Redis** — memoria, ops, clientes (integración `redisdb` por Autodiscovery).
 - **Logs** — de **todos** los contenedores (API, Postgres, Redis, Caddy) → ver errores en vivo.
+- **APM / trazas** — peticiones de la API instrumentadas con `dd-trace`: latencia y errores por endpoint, con spans de Postgres y Redis. Correlación logs↔trazas (`DD_LOGS_INJECTION`).
 
 ## Decisiones (caja pequeña)
 
 - **Sitio: EU** (`DD_SITE=datadoghq.eu`).
-- **APM y process-agent desactivados** (`DD_APM_ENABLED=false`, `DD_PROCESS_AGENT_ENABLED=false`) para no cargar la instancia. `mem_limit: 512m`.
-- **DBM (query-level)**: pendiente como paso 2 — requiere `shared_preload_libraries=pg_stat_statements` (reinicio de Postgres) + esquema `datadog`. Ver más abajo.
+- **APM activado** (`DD_APM_ENABLED=true` + `DD_APM_NON_LOCAL_TRAFFIC=true`); la API envía trazas al agente (`DD_AGENT_HOST=datadog`, puerto 8126). **process-agent desactivado**. `mem_limit: 768m`.
+- **DBM (query-level) activado** — Postgres arranca con `shared_preload_libraries=pg_stat_statements` y el rol `datadog` tiene el esquema/función de explain. Setup más abajo.
 
 ## Secretos (nunca en git)
 
@@ -45,11 +46,12 @@ docker exec deploy-datadog-1 agent health                    # Agent health: PAS
 ```
 En Datadog (EU): **Infrastructure → Host map** (host `responsegrid-prod`), **Integrations → Postgres/Redis**, **Logs**.
 
-## Activar DBM (paso 2, opcional)
+## DBM (query-level) — setup
 
-1. En el servicio `postgres` del compose añadir:
+1. El servicio `postgres` del compose arranca con
    `command: ["postgres","-c","shared_preload_libraries=pg_stat_statements","-c","track_activity_query_size=4096","-c","pg_stat_statements.track=all"]`
-2. Desplegar (recrea Postgres, ~10 s de corte) y luego:
+   y la label de Autodiscovery lleva `"dbm":true`.
+2. Una vez desplegado (el cambio de `command` recrea Postgres, ~10 s de corte):
    ```sql
    CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
    CREATE SCHEMA IF NOT EXISTS datadog;
