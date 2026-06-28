@@ -79,6 +79,8 @@ type RawRow = {
   raw: unknown;
   is_final_recipient: boolean | null;
   recipient_type: string | null;
+  disputed: boolean | null;
+  disputed_at: unknown;
 };
 
 /**
@@ -151,6 +153,8 @@ function rawRowToSnapshot(row: RawRow): ResourceSnapshot {
     provenance,
     isFinalRecipient: row.is_final_recipient ?? false,
     recipientType: row.recipient_type ?? null,
+    disputed: row.disputed ?? false,
+    disputedAt: toDateOrNull(row.disputed_at),
     // Raw SQL paths (nearby) power the map, which does not render inventory —
     // items are intentionally not hydrated here to keep the payload lean.
     items: [],
@@ -196,6 +200,8 @@ function rowToSnapshot(row: Row, items: ItemsRow[] = []): ResourceSnapshot {
     provenance: rowToProvenance(row),
     isFinalRecipient: row.isFinalRecipient ?? false,
     recipientType: row.recipientType ?? null,
+    disputed: row.disputed ?? false,
+    disputedAt: row.disputedAt ?? null,
     items: itemsToSnapshots(items),
   };
 }
@@ -248,6 +254,8 @@ export class DrizzleResourceRepository implements ResourceRepository {
           raw: s.provenance?.raw ?? null,
           isFinalRecipient: s.isFinalRecipient,
           recipientType: s.recipientType,
+          disputed: s.disputed ?? false,
+          disputedAt: s.disputedAt ?? null,
         })
         .onConflictDoUpdate({
           target: resourcesTable.id,
@@ -267,6 +275,8 @@ export class DrizzleResourceRepository implements ResourceRepository {
             raw: s.provenance?.raw ?? null,
             isFinalRecipient: s.isFinalRecipient,
             recipientType: s.recipientType,
+            disputed: s.disputed ?? false,
+            disputedAt: s.disputedAt ?? null,
           },
         });
 
@@ -410,6 +420,19 @@ export class DrizzleResourceRepository implements ResourceRepository {
             PublicStatus.Saturated,
             PublicStatus.Paused,
           ]),
+        ),
+      );
+    return rows.map((r) => Resource.fromSnapshot(rowToSnapshot(r)));
+  }
+
+  async findDisputedByEmergency(emergencyId: EmergencyId): Promise<Resource[]> {
+    const rows = await this.db
+      .select()
+      .from(resourcesTable)
+      .where(
+        and(
+          eq(resourcesTable.emergencyId, emergencyId.value),
+          eq(resourcesTable.disputed, true),
         ),
       );
     return rows.map((r) => Resource.fromSnapshot(rowToSnapshot(r)));

@@ -122,7 +122,7 @@ GET  /emergencies/:id/public/resources/nearby      → items[].disputed
 
 **Permisos:** reutiliza los existentes `resource:read` (cola) y `resource:edit` (resolver). El envío ciudadano solo exige JWT, igual que `POST /emergencies/:id/reports` y el registro de puntos (no necesita permiso propio).
 
-**Migración Drizzle** (`apps/api/drizzle/0028_resource_validity_reports.sql`; aplicar en dev y test vía `psql < f.sql`, *no* drizzle‑kit — cuelga en Windows):
+**Migración Drizzle** (`apps/api/drizzle/0031_resource_validity_reports.sql`; aplicar en dev y test vía `psql < f.sql`, *no* drizzle‑kit — cuelga en Windows):
 
 ```sql
 ALTER TABLE resources ADD COLUMN disputed     BOOLEAN NOT NULL DEFAULT false;
@@ -186,7 +186,7 @@ Tras tocar DTOs/endpoints: **`pnpm gen:api`** y commitear `packages/api-client/s
 ## 4. Alcance
 
 ### Primer corte (MVP)
-- Columnas `disputed`/`disputed_at` en `resources` + tabla `resource_validity_reports` + migración `0028`.
+- Columnas `disputed`/`disputed_at` en `resources` + tabla `resource_validity_reports` + migración `0031`.
 - Dominio: `flagDisputed` / `clearDispute` + eventos; entidad `ResourceValidityReport`; recuento distinto + umbral N (default 3).
 - Casos de uso `ReportResourceValidity`, `ResolveResourceDispute`, `GetDisputedResources`, `GetResourceValidityReports`.
 - Endpoints (envío ciudadano + cola/resolución coordinación) + `disputed` en los 4 read models públicos + `pnpm gen:api`.
@@ -249,3 +249,22 @@ Tras tocar DTOs/endpoints: **`pnpm gen:api`** y commitear `packages/api-client/s
 | 6 | **Cooldown tras "descartar"** | **No en el MVP**; se añadirá solo si aparece abuso de re‑marcado. |
 
 > Revisables tras el MVP (ver §4 · Futuro): umbral por‑emergencia, TTL/ventana de frescura, ponderación por confianza del reportante, auto‑ocultado como política por emergencia y cooldown de reapertura.
+
+---
+
+## 9. Ajustes tras sincronizar `main` (2026‑06‑28)
+
+Al traer `main`, varios cambios recientes **encajan** y **simplifican** esta feature:
+
+- **Migración → `0031`** (no `0028`): `main` ocupó `0028`–`0030` (inventario de recursos, capacidad de transporte, expediciones, enriquecimiento del audit trail).
+- **Auditoría "con motivo" reutilizada** (PR #135): `ResolveResourceDispute` devuelve `MutationAuditResult` (`apps/api/src/shared/domain/mutation-audit.ts`); el controlador adjunta el motivo con `setAuditContext` y el `AuditInterceptor` lo persiste en `audit_log` (visible en `/coordinacion/actividad`). Trazabilidad coordinador-only sin código de auditoría nuevo.
+- **Resolución de 3 vías** (aprovecha `Resource.discard()` / `VerificationLevel.Rejected`, nuevos en `main`):
+  - `confirm_closed` → `changePublicStatus(Closed)` (reversible).
+  - `mark_invalid` → `Resource.markInvalid()` → `Rejected` (para "ya no existe"; sale de los listados públicos).
+  - `dismiss` → `clearDispute()` (el punto sigue activo).
+- **Permiso `resource:close`** (existía sin uso) → "confirmar cierre"; `resource:edit` / `resource:read` para el resto.
+- **Coordinación por pestañas** (#117): la cola de #124 será una pestaña `/coordinacion/puntos-en-duda` reutilizando `CoordinationTabs`, `SearchBox`, `Pagination`, `ValidationActions` y el patrón `coordination-queues`.
+- **`safeNextPath`** (#125): el flujo ciudadano (#123) lo reutiliza para el auth-gate; el formulario va como modal sobre `DetailDrawer`.
+- **`Resource` ahora tiene `items: SupplyLine[]`** (inventario): ortogonal, sin impacto en la disputa.
+
+**Estado:** el **backend (#121)** está implementado en este PR — dominio (`disputed`/`disputedAt`, `flagDisputed`/`clearDispute`/`markInvalid`, eventos), entidad `ResourceValidityReport`, migración `0031`, casos de uso (`ReportResourceValidity` con dedup + umbral, `ResolveResourceDispute` de 3 vías, `GetDisputedResources`, `GetResourceValidityReports`), repos (puerto + Drizzle + en memoria) y wiring. Gate verde (build · lint · prettier · test). Pendiente: API (#122) y web (#123/#124).

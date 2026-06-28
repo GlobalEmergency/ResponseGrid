@@ -54,3 +54,37 @@ export class ResourceNameRequiredError extends Error {
     this.name = 'ResourceNameRequiredError';
   }
 }
+export class ResourceNotDisputableError extends Error {
+  constructor() {
+    super(
+      'Only a published (Active/Saturated/Paused) resource can be flagged as disputed',
+    );
+    this.name = 'ResourceNotDisputableError';
+  }
+}
+export class ResourceNotDisputedError extends Error {
+  constructor() {
+    super('Resource is not currently disputed; nothing to resolve');
+    this.name = 'ResourceNotDisputedError';
+  }
+}
+export class OwnerCannotReportValidityError extends Error {
+  constructor() {
+    super(
+      'The owner cannot report their own resource; use the status endpoint instead',
+    );
+    this.name = 'OwnerCannotReportValidityError';
+  }
+}
+export class ResourceNotReportableError extends Error {
+  constructor() {
+    super('Only a publicly visible resource can be reported');
+    this.name = 'ResourceNotReportableError';
+  }
+}
+export class ValidityReportNotOpenError extends Error {
+  constructor() {
+    super('A resolved validity report can no longer be changed');
+    this.name = 'ValidityReportNotOpenError';
+  }
+}

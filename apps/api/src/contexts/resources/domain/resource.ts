@@ -17,11 +17,14 @@ import {
   ResourceNotPendingError,
   ResourceNotEditableError,
   ResourceNameRequiredError,
+  ResourceNotDisputableError,
 } from './resource-errors';
 import { DomainEvent } from './events/domain-event';
 import { ResourceRegistered } from './events/resource-registered';
 import { ResourceVerified } from './events/resource-verified';
 import { ResourcePublished } from './events/resource-published';
+import { ResourceDisputed } from './events/resource-disputed';
+import { ResourceDisputeResolved } from './events/resource-dispute-resolved';
 import {
   SupplyLine,
   SupplyLineSnapshot,
@@ -92,6 +95,8 @@ export interface ResourceSnapshot {
   isFinalRecipient: boolean;
   recipientType: string | null;
   items: SupplyLineSnapshot[];
+  disputed?: boolean;
+  disputedAt?: Date | null;
 }
 
 export class Resource {
@@ -120,6 +125,8 @@ export class Resource {
     public readonly isFinalRecipient: boolean,
     public readonly recipientType: string | null,
     public readonly items: SupplyLine[],
+    private _disputed: boolean,
+    private _disputedAt: Date | null,
   ) {}
 
   static register(props: RegisterResourceProps): Resource {
@@ -152,6 +159,8 @@ export class Resource {
       props.isFinalRecipient ?? false,
       props.recipientType ?? null,
       props.items ?? [],
+      false,
+      null,
     );
     r.events.push(
       new ResourceRegistered(r.id.value, {
@@ -188,6 +197,8 @@ export class Resource {
       s.isFinalRecipient ?? false,
       s.recipientType ?? null,
       (s.items ?? []).map((i) => SupplyLine.fromSnapshot(i)),
+      s.disputed ?? false,
+      s.disputedAt ?? null,
     );
   }
 
@@ -208,6 +219,12 @@ export class Resource {
   }
   get publicStatus(): PublicStatus {
     return this._publicStatus;
+  }
+  get disputed(): boolean {
+    return this._disputed;
+  }
+  get disputedAt(): Date | null {
+    return this._disputedAt;
   }
 
   verify(level: VerificationLevel, coordinatorId: string): void {
@@ -301,6 +318,49 @@ export class Resource {
     this._verificationLevel = VerificationLevel.Rejected;
   }
 
+  /**
+   * Flag the resource as disputed: enough distinct citizens reported it as
+   * invalid. It stays visible (still Active/Saturated/Paused) with a warning
+   * until a coordinator resolves the dispute. Only a published resource can be
+   * disputed.
+   */
+  flagDisputed(): void {
+    const visible =
+      this._publicStatus === PublicStatus.Active ||
+      this._publicStatus === PublicStatus.Saturated ||
+      this._publicStatus === PublicStatus.Paused;
+    if (!visible) {
+      throw new ResourceNotDisputableError();
+    }
+    this._disputed = true;
+    this._disputedAt = new Date();
+    this.events.push(
+      new ResourceDisputed(this.id.value, {
+        emergencyId: this.emergencyId.value,
+      }),
+    );
+  }
+
+  /** Clear the disputed flag when a coordinator resolves it. */
+  clearDispute(resolution: string): void {
+    this._disputed = false;
+    this._disputedAt = null;
+    this.events.push(
+      new ResourceDisputeResolved(this.id.value, {
+        emergencyId: this.emergencyId.value,
+        resolution,
+      }),
+    );
+  }
+
+  /**
+   * Coordinator confirms the resource is invalid (e.g. it never existed):
+   * verification level becomes `rejected`, removing it from public listings.
+   */
+  markInvalid(): void {
+    this._verificationLevel = VerificationLevel.Rejected;
+  }
+
   toSnapshot(): ResourceSnapshot {
     return {
       id: this.id.value,
@@ -325,6 +385,8 @@ export class Resource {
       isFinalRecipient: this.isFinalRecipient,
       recipientType: this.recipientType,
       items: this.items.map((i) => i.toSnapshot()),
+      disputed: this._disputed,
+      disputedAt: this._disputedAt,
     };
   }
 

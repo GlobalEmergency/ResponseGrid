@@ -157,6 +157,13 @@ export class InMemoryResourceRepository implements ResourceRepository {
     return Promise.resolve(result);
   }
 
+  findDisputedByEmergency(emergencyId: EmergencyId): Promise<Resource[]> {
+    const result = [...this.store.values()]
+      .filter((s) => s.emergencyId === emergencyId.value && s.disputed === true)
+      .map((s) => Resource.fromSnapshot(s));
+    return Promise.resolve(result);
+  }
+
   findByExternal(
     sourceName: string,
     externalId: string,
