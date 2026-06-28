@@ -5,6 +5,7 @@ import { getEmergencyBySlug } from '@/lib/emergencies';
 import { PublicResourceCard } from '@/components/organisms/public-resource-card';
 import { NeedCard } from '@/components/molecules/need-card';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { categoryLabel, categoryColor } from '@/lib/categories';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
@@ -45,6 +46,7 @@ export default async function RecipientResourcePage({ params }: Props) {
   const te = t.emergency;
   const td = t.resource_detail;
   const recipientNeeds = needs ?? [];
+  const inventoryItems = resource.items ?? [];
 
   return (
     <main className="flex-1 bg-surface">
@@ -64,6 +66,45 @@ export default async function RecipientResourcePage({ params }: Props) {
             tStatusLight={t.status_light}
             locale={locale}
           />
+
+          <section
+            aria-labelledby="resource-inventory-heading"
+            className="flex flex-col gap-3"
+          >
+            <h2
+              id="resource-inventory-heading"
+              className="font-display text-base font-bold text-navy"
+            >
+              {td.inventory_heading}
+            </h2>
+            {inventoryItems.length === 0 ? (
+              <EmptyState title={td.inventory_empty} />
+            ) : (
+              <ul className="flex flex-col gap-2" role="list">
+                {inventoryItems.map((item, i) => (
+                  <li
+                    key={i}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-line bg-white px-4 py-3"
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold text-ink">
+                        {item.name}
+                      </span>
+                      <span className="text-xs text-muted">
+                        {item.quantity}
+                        {item.unit ? ` ${item.unit}` : ''}
+                      </span>
+                    </div>
+                    <span
+                      className={`inline-block shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${categoryColor(item.category)}`}
+                    >
+                      {categoryLabel(item.category, locale)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
 
           <section
             aria-labelledby="recipient-needs-heading"

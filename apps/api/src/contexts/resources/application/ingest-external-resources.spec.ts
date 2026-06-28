@@ -253,6 +253,7 @@ describe('IngestExternalResources', () => {
         },
         isFinalRecipient: false,
         recipientType: null,
+        items: [],
       });
       await repo.save(preExisting);
 

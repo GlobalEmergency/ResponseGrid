@@ -19,6 +19,7 @@ import { DomainEvent } from './events/domain-event';
 import { ResourceRegistered } from './events/resource-registered';
 import { ResourceVerified } from './events/resource-verified';
 import { ResourcePublished } from './events/resource-published';
+import { ResourceItem, ResourceItemSnapshot } from './resource-item';
 
 export type Provenance = {
   sourceName: string;
@@ -48,6 +49,8 @@ export interface RegisterResourceProps {
   // destinatario final (#60)
   isFinalRecipient?: boolean;
   recipientType?: string | null;
+  // inventario declarado del lugar (qué material tiene para entregar)
+  items?: ResourceItem[];
 }
 
 // Snapshot used by repositories to rehydrate without going through register().
@@ -74,6 +77,7 @@ export interface ResourceSnapshot {
   provenance: Provenance | null;
   isFinalRecipient: boolean;
   recipientType: string | null;
+  items: ResourceItemSnapshot[];
 }
 
 export class Resource {
@@ -101,6 +105,7 @@ export class Resource {
     public readonly provenance: Provenance | null,
     public readonly isFinalRecipient: boolean,
     public readonly recipientType: string | null,
+    public readonly items: ResourceItem[],
   ) {}
 
   static register(props: RegisterResourceProps): Resource {
@@ -132,6 +137,7 @@ export class Resource {
       props.provenance ?? null,
       props.isFinalRecipient ?? false,
       props.recipientType ?? null,
+      props.items ?? [],
     );
     r.events.push(
       new ResourceRegistered(r.id.value, {
@@ -167,6 +173,7 @@ export class Resource {
       s.provenance ?? null,
       s.isFinalRecipient ?? false,
       s.recipientType ?? null,
+      (s.items ?? []).map((i) => ResourceItem.fromSnapshot(i)),
     );
   }
 
@@ -247,6 +254,7 @@ export class Resource {
       provenance: this.provenance,
       isFinalRecipient: this.isFinalRecipient,
       recipientType: this.recipientType,
+      items: this.items.map((i) => i.toSnapshot()),
     };
   }
 

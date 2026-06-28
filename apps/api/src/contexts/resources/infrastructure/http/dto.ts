@@ -5,6 +5,8 @@ import {
   IsOptional,
   IsNumber,
   IsInt,
+  IsPositive,
+  IsNotEmpty,
   Min,
   Max,
   MaxLength,
@@ -36,6 +38,40 @@ export class LocationDto {
   @Min(-180)
   @Max(180)
   longitude!: number;
+}
+
+export class ResourceItemDto {
+  @ApiProperty({
+    example: 'Agua embotellada',
+    description: 'Name of the material/product held at this place',
+  })
+  @IsString()
+  @IsNotEmpty()
+  name!: string;
+
+  @ApiProperty({
+    example: 100,
+    description: 'Quantity available (positive integer)',
+  })
+  @IsInt()
+  @IsPositive()
+  quantity!: number;
+
+  @ApiPropertyOptional({
+    example: 'litros',
+    description: 'Unit of measurement (optional)',
+  })
+  @IsOptional()
+  @IsString()
+  unit?: string;
+
+  @ApiProperty({
+    example: 'water',
+    description: 'Category slug (same taxonomy as `accepts`)',
+  })
+  @IsString()
+  @IsNotEmpty()
+  category!: string;
 }
 
 export class RegisterResourceDto {
@@ -142,6 +178,17 @@ export class RegisterResourceDto {
   @IsOptional()
   @IsString()
   recipientType?: string;
+
+  @ApiPropertyOptional({
+    type: [ResourceItemDto],
+    description:
+      'Declared inventory: what material/products this place holds for delivery (optional)',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ResourceItemDto)
+  items?: ResourceItemDto[];
 }
 
 /**

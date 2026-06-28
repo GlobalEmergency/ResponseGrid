@@ -32,6 +32,22 @@ export interface ResourceView {
   recipientType: string | null;
 }
 
+export interface ResourceItemView {
+  name: string;
+  quantity: number;
+  unit: string | null;
+  category: string;
+}
+
+/**
+ * Detail view: the base view plus the declared inventory of the place. Only the
+ * single-resource endpoint returns this — list/map views use the lighter
+ * ResourceView (they do not render inventory).
+ */
+export interface ResourceDetailView extends ResourceView {
+  items: ResourceItemView[];
+}
+
 export function toResourceView(r: Resource): ResourceView {
   return {
     id: r.id.value,
@@ -53,5 +69,17 @@ export function toResourceView(r: Resource): ResourceView {
     city: r.city,
     isFinalRecipient: r.isFinalRecipient,
     recipientType: r.recipientType,
+  };
+}
+
+export function toResourceDetailView(r: Resource): ResourceDetailView {
+  return {
+    ...toResourceView(r),
+    items: r.items.map((i) => ({
+      name: i.name,
+      quantity: i.quantity,
+      unit: i.unit,
+      category: i.category,
+    })),
   };
 }

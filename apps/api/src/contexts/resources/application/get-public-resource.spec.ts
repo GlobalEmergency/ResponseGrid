@@ -37,6 +37,7 @@ function snapshot(
     provenance: null,
     isFinalRecipient: true,
     recipientType: 'hospital',
+    items: [],
     ...overrides,
   };
 }
@@ -61,6 +62,24 @@ describe('GetPublicResource', () => {
     expect(view!.id).toBe(ID);
     expect(view!.isFinalRecipient).toBe(true);
     expect(view!.recipientType).toBe('hospital');
+  });
+
+  it('exposes the declared inventory items in the detail view', async () => {
+    const resource = Resource.fromSnapshot(
+      snapshot({
+        id: ID,
+        items: [
+          { name: 'Agua', quantity: 100, unit: 'litros', category: 'water' },
+        ],
+      }),
+    );
+    const useCase = new GetPublicResource(repoWith(resource));
+
+    const view = await useCase.execute({ emergencyId: EM, resourceId: ID });
+
+    expect(view!.items).toEqual([
+      { name: 'Agua', quantity: 100, unit: 'litros', category: 'water' },
+    ]);
   });
 
   it('returns null when the resource does not exist', async () => {

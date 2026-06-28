@@ -116,6 +116,30 @@ export class ResourceViewDto {
   recipientType!: string | null;
 }
 
+export class ResourceItemViewDto {
+  @ApiProperty({ example: 'Agua embotellada' })
+  name!: string;
+
+  @ApiProperty({ example: 100 })
+  quantity!: number;
+
+  @ApiProperty({ example: 'litros', nullable: true, type: String })
+  unit!: string | null;
+
+  @ApiProperty({ example: 'water' })
+  category!: string;
+}
+
+/**
+ * Detail view returned by the single-resource endpoint: the base view plus the
+ * declared inventory of the place. List/map endpoints return ResourceViewDto
+ * (no inventory).
+ */
+export class ResourceDetailViewDto extends ResourceViewDto {
+  @ApiProperty({ type: [ResourceItemViewDto] })
+  items!: ResourceItemViewDto[];
+}
+
 export class NearbyResourceViewDto extends ResourceViewDto {
   @ApiProperty({
     example: 1234,

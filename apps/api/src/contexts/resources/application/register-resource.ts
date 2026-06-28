@@ -2,6 +2,7 @@ import { ResourceRepository } from '../domain/ports/resource.repository';
 import { EventBus } from '../domain/ports/event-bus';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { Resource, Provenance } from '../domain/resource';
+import { ResourceItem } from '../domain/resource-item';
 import { ResourceId } from '../domain/resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { ResourceType, ResourceStage } from '../domain/resource-enums';
@@ -30,6 +31,13 @@ export interface RegisterResourceCommand {
   // destinatario final (#60)
   isFinalRecipient?: boolean;
   recipientType?: string | null;
+  // inventario declarado del lugar (qué material tiene para entregar)
+  items?: Array<{
+    name: string;
+    quantity: number;
+    unit?: string | null;
+    category: string;
+  }>;
 }
 
 export class RegisterResource {
@@ -67,6 +75,14 @@ export class RegisterResource {
       provenance: cmd.provenance ?? null,
       isFinalRecipient: cmd.isFinalRecipient ?? false,
       recipientType: cmd.recipientType ?? null,
+      items: (cmd.items ?? []).map((i) =>
+        ResourceItem.create({
+          name: i.name,
+          quantity: i.quantity,
+          unit: i.unit ?? null,
+          category: i.category,
+        }),
+      ),
     });
     await this.repo.save(resource);
     await this.bus.publish(resource.pullDomainEvents());

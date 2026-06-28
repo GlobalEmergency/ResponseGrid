@@ -1707,6 +1707,28 @@ export interface components {
              */
             longitude: number;
         };
+        ResourceItemDto: {
+            /**
+             * @description Name of the material/product held at this place
+             * @example Agua embotellada
+             */
+            name: string;
+            /**
+             * @description Quantity available (positive integer)
+             * @example 100
+             */
+            quantity: number;
+            /**
+             * @description Unit of measurement (optional)
+             * @example litros
+             */
+            unit?: string;
+            /**
+             * @description Category slug (same taxonomy as `accepts`)
+             * @example water
+             */
+            category: string;
+        };
         RegisterResourceDto: {
             /**
              * @example collection_point
@@ -1774,6 +1796,8 @@ export interface components {
              * @example hospital
              */
             recipientType?: string;
+            /** @description Declared inventory: what material/products this place holds for delivery (optional) */
+            items?: components["schemas"]["ResourceItemDto"][];
         };
         RegisterResourceResponseDto: {
             /**
@@ -1961,9 +1985,6 @@ export interface components {
         InBoundsResourcesDto: {
             items: components["schemas"]["ResourceViewDto"][];
         };
-        InBoundsNeedsDto: {
-            items: components["schemas"]["NeedViewDto"][];
-        };
         ResourceFacetsDto: {
             /**
              * @example {
@@ -1982,6 +2003,88 @@ export interface components {
             byCountry: Record<string, never>;
             /** @example 8 */
             total: number;
+        };
+        ResourceItemViewDto: {
+            /** @example Agua embotellada */
+            name: string;
+            /** @example 100 */
+            quantity: number;
+            /** @example litros */
+            unit: string | null;
+            /** @example water */
+            category: string;
+        };
+        ResourceDetailViewDto: {
+            /**
+             * Format: uuid
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            id: string;
+            /**
+             * @example collection_point
+             * @enum {string}
+             */
+            type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
+            /**
+             * @example origin
+             * @enum {string}
+             */
+            stage: "origin" | "intermediate" | "destination";
+            /** @example Cruz Roja Madrid */
+            name: string;
+            /** @example Centro de acopio principal */
+            description: string | null;
+            location: components["schemas"]["LocationViewDto"];
+            /**
+             * @example verified
+             * @enum {string}
+             */
+            verificationLevel: "unverified" | "verified" | "official";
+            /**
+             * @example active
+             * @enum {string}
+             */
+            publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed";
+            /** Format: uuid */
+            ownerOrganizationId: string | null;
+            /**
+             * @example [
+             *       "water",
+             *       "food"
+             *     ]
+             */
+            accepts: string[];
+            /** @example +58 212 555 0000 */
+            contact: string | null;
+            /** @example Lun-Vie 08-18 */
+            schedule: string | null;
+            /** @example Juan Pérez */
+            manager: string | null;
+            /** @example acopiove.org */
+            sourceName: string | null;
+            /**
+             * @description ISO 8601 date string
+             * @example 2026-06-27T00:00:00.000Z
+             */
+            externalUpdatedAt: string | null;
+            /**
+             * @description Country string as stored by the ingestion source (e.g. full Spanish name "Venezuela"). NOT guaranteed to be an ISO 3166-1 alpha-2 code — value depends on the source `pais` field.
+             * @example Venezuela
+             */
+            country: string | null;
+            /** @example Caracas */
+            city: string | null;
+            /**
+             * @description Whether this resource is a final recipient of aid
+             * @example false
+             */
+            isFinalRecipient: boolean;
+            /**
+             * @description Recipient type slug (see the emergency recipient-type taxonomy)
+             * @example hospital
+             */
+            recipientType: string | null;
+            items: components["schemas"]["ResourceItemViewDto"][];
         };
         RecipientTypeDto: {
             /** @example hospital */
@@ -2387,6 +2490,9 @@ export interface components {
         };
         NearbyNeedsResponseDto: {
             items: components["schemas"]["NearbyNeedViewDto"][];
+        };
+        InBoundsNeedsDto: {
+            items: components["schemas"]["NeedViewDto"][];
         };
         AssignNeedManagerDto: {
             /**
@@ -3972,40 +4078,6 @@ export interface operations {
             };
         };
     };
-    NeedsController_needsInBounds: {
-        parameters: {
-            query: {
-                /** @description South latitude bound (-90 to 90) */
-                minLat: number;
-                /** @description West longitude bound (-180 to 180) */
-                minLng: number;
-                /** @description North latitude bound (-90 to 90) */
-                maxLat: number;
-                /** @description East longitude bound (-180 to 180) */
-                maxLng: number;
-                /** @description Max results (default 500, max 1000) */
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                /** @description Emergency UUID */
-                emergencyId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Validated needs within the bounding box */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InBoundsNeedsDto"];
-                };
-            };
-        };
-    };
     PublicController_facets: {
         parameters: {
             query?: never;
@@ -4049,7 +4121,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ResourceViewDto"];
+                    "application/json": components["schemas"]["ResourceDetailViewDto"];
                 };
             };
             /** @description Resource not found or not public */
@@ -4643,6 +4715,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NearbyNeedsResponseDto"];
+                };
+            };
+        };
+    };
+    NeedsController_needsInBounds: {
+        parameters: {
+            query: {
+                /** @description South latitude bound (-90 to 90) */
+                minLat: number;
+                /** @description West longitude bound (-180 to 180) */
+                minLng: number;
+                /** @description North latitude bound (-90 to 90) */
+                maxLat: number;
+                /** @description East longitude bound (-180 to 180) */
+                maxLng: number;
+                /** @description Max results (default 500, max 1000) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Validated needs within the bounding box */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InBoundsNeedsDto"];
                 };
             };
         };

@@ -12,6 +12,7 @@ import { FormField } from '@/components/molecules/form-field';
 import { FormSuccessScreen } from '@/components/molecules/form-success-screen';
 import { DraftRestoredBanner } from '@/components/atoms/draft-restored-banner';
 import { useFormDraft } from '@/lib/use-form-draft';
+import { InventoryField } from './inventory-field';
 import type { Messages } from '@/i18n/messages/es';
 
 const INITIAL_STATE: ActionState = { status: 'idle' };
@@ -192,6 +193,9 @@ export function RegistrarForm({
 
       {/* Organización */}
       {orgSelector}
+
+      {/* Inventario / material disponible (opcional) */}
+      <InventoryField t={t} />
 
       {/* Submit */}
       <Button type="submit" disabled={pending} fullWidth>

@@ -1,4 +1,5 @@
 import { Resource } from './resource';
+import { ResourceItem } from './resource-item';
 import { ResourceId } from './resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import {
@@ -43,6 +44,39 @@ describe('Resource', () => {
     const events = r.pullDomainEvents();
     expect(events.map((e) => e.eventName)).toEqual(['resource.registered']);
     expect(r.pullDomainEvents()).toEqual([]); // buffer drained
+  });
+
+  it('defaults to an empty inventory and carries declared items through a snapshot', () => {
+    expect(make().items).toEqual([]);
+
+    const r = Resource.register({
+      id: ResourceId.create(),
+      emergencyId: EmergencyId.fromString(
+        '11111111-1111-4111-8111-111111111111',
+      ),
+      type: ResourceType.Warehouse,
+      stage: ResourceStage.Origin,
+      name: 'Almacén con stock',
+      location: makeLocation(),
+      ownerUserId: 'user-abc-123',
+      items: [
+        ResourceItem.create({
+          name: 'Agua',
+          quantity: 100,
+          unit: 'litros',
+          category: 'water',
+        }),
+      ],
+    });
+
+    expect(r.items).toHaveLength(1);
+    const restored = Resource.fromSnapshot(r.toSnapshot());
+    expect(restored.items[0].toSnapshot()).toEqual({
+      name: 'Agua',
+      quantity: 100,
+      unit: 'litros',
+      category: 'water',
+    });
   });
 
   it('stores stage, location, ownerUserId and optional ownerOrganizationId', () => {

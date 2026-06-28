@@ -96,6 +96,12 @@ export class ResourcesController {
       city: dto.city ?? null,
       isFinalRecipient: dto.isFinalRecipient ?? false,
       recipientType: dto.recipientType ?? null,
+      items: (dto.items ?? []).map((i) => ({
+        name: i.name,
+        quantity: i.quantity,
+        unit: i.unit ?? null,
+        category: i.category,
+      })),
     });
   }
 

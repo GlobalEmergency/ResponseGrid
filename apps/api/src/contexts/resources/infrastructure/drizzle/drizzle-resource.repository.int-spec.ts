@@ -3,6 +3,7 @@ import { createDb, Db } from '../../../../shared/db';
 import { resourcesTable } from './schema';
 import { DrizzleResourceRepository } from './drizzle-resource.repository';
 import { Resource } from '../../domain/resource';
+import { ResourceItem } from '../../domain/resource-item';
 import { ResourceId } from '../../domain/resource-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import {
@@ -60,6 +61,56 @@ describe('DrizzleResourceRepository (integration)', () => {
     expect(found?.ownerUserId).toBe('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
     expect(found?.ownerOrganizationId).toBeNull();
     expect(found?.verificationLevel).toBe(VerificationLevel.Unverified);
+  });
+
+  it('round-trips declared inventory items and replaces them on re-save', async () => {
+    const id = ResourceId.create();
+    const withItems = Resource.register({
+      id,
+      emergencyId: EmergencyId.fromString(EM),
+      type: ResourceType.Warehouse,
+      stage: ResourceStage.Origin,
+      name: 'Almacén con inventario',
+      location: baseLocation,
+      ownerUserId: OWNER_ID,
+      items: [
+        ResourceItem.create({
+          name: 'Agua',
+          quantity: 200,
+          unit: 'litros',
+          category: 'water',
+        }),
+        ResourceItem.create({
+          name: 'Mantas',
+          quantity: 50,
+          unit: null,
+          category: 'shelter',
+        }),
+      ],
+    });
+    await repo.save(withItems);
+
+    const found = await repo.findById(id);
+    expect(found?.items).toHaveLength(2);
+    expect(found?.items.map((i) => i.toSnapshot())).toEqual(
+      expect.arrayContaining([
+        { name: 'Agua', quantity: 200, unit: 'litros', category: 'water' },
+        { name: 'Mantas', quantity: 50, unit: null, category: 'shelter' },
+      ]),
+    );
+
+    // Re-save with a different inventory: the previous lines must be replaced,
+    // not accumulated.
+    const reSaved = Resource.fromSnapshot({
+      ...found!.toSnapshot(),
+      items: [{ name: 'Arroz', quantity: 30, unit: 'kg', category: 'food' }],
+    });
+    await repo.save(reSaved);
+
+    const reFound = await repo.findById(id);
+    expect(reFound?.items.map((i) => i.toSnapshot())).toEqual([
+      { name: 'Arroz', quantity: 30, unit: 'kg', category: 'food' },
+    ]);
   });
 
   it('round-trips resource with description and ownerOrganizationId', async () => {

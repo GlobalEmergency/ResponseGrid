@@ -87,6 +87,8 @@ export class IngestExternalResources {
           // Preserved (local-owned recipient role — #60):
           isFinalRecipient: existingSnap.isFinalRecipient,
           recipientType: existingSnap.recipientType,
+          // Preserved (local-owned inventory — operators may have declared stock):
+          items: existingSnap.items,
           // Preserved (structural — not changed by source):
           emergencyId: existingSnap.emergencyId,
           // Source-owned (updated):
@@ -136,6 +138,7 @@ export class IngestExternalResources {
           createdAt: new Date(),
           isFinalRecipient: false,
           recipientType: null,
+          items: [],
           contact: mapped.contact,
           schedule: mapped.schedule,
           manager: mapped.manager,

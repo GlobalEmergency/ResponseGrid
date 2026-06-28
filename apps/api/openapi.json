@@ -1342,7 +1342,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ResourceViewDto"
+                  "$ref": "#/components/schemas/ResourceDetailViewDto"
                 }
               }
             }
@@ -1946,6 +1946,24 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size for pagination (1-100). Omit to return all.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of items to skip (pagination). Defaults to 0.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2037,6 +2055,89 @@
           }
         },
         "summary": "List validated needs near a GPS point, ordered by distance (public, #57)",
+        "tags": [
+          "needs"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/public/needs/in-bounds": {
+      "get": {
+        "operationId": "NeedsController_needsInBounds",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "minLat",
+            "required": true,
+            "in": "query",
+            "description": "South latitude bound (-90 to 90)",
+            "schema": {
+              "example": 10.3,
+              "type": "number"
+            }
+          },
+          {
+            "name": "minLng",
+            "required": true,
+            "in": "query",
+            "description": "West longitude bound (-180 to 180)",
+            "schema": {
+              "example": -67.2,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxLat",
+            "required": true,
+            "in": "query",
+            "description": "North latitude bound (-90 to 90)",
+            "schema": {
+              "example": 10.7,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxLng",
+            "required": true,
+            "in": "query",
+            "description": "East longitude bound (-180 to 180)",
+            "schema": {
+              "example": -66.6,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max results (default 500, max 1000)",
+            "schema": {
+              "example": 500,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validated needs within the bounding box",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InBoundsNeedsDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List validated needs within a geographic bounding box (public)",
         "tags": [
           "needs"
         ]
@@ -5290,6 +5391,36 @@
           "longitude"
         ]
       },
+      "ResourceItemDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Agua embotellada",
+            "description": "Name of the material/product held at this place"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 100,
+            "description": "Quantity available (positive integer)"
+          },
+          "unit": {
+            "type": "string",
+            "example": "litros",
+            "description": "Unit of measurement (optional)"
+          },
+          "category": {
+            "type": "string",
+            "example": "water",
+            "description": "Category slug (same taxonomy as `accepts`)"
+          }
+        },
+        "required": [
+          "name",
+          "quantity",
+          "category"
+        ]
+      },
       "RegisterResourceDto": {
         "type": "object",
         "properties": {
@@ -5384,6 +5515,13 @@
             "type": "string",
             "example": "hospital",
             "description": "Recipient type slug (see the emergency recipient-type taxonomy)"
+          },
+          "items": {
+            "description": "Declared inventory: what material/products this place holds for delivery (optional)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResourceItemDto"
+            }
           }
         },
         "required": [
@@ -5837,6 +5975,189 @@
           "byCategory",
           "byCountry",
           "total"
+        ]
+      },
+      "ResourceItemViewDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Agua embotellada"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 100
+          },
+          "unit": {
+            "type": "string",
+            "example": "litros",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "example": "water"
+          }
+        },
+        "required": [
+          "name",
+          "quantity",
+          "unit",
+          "category"
+        ]
+      },
+      "ResourceDetailViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "collection_point",
+              "delivery_point",
+              "collection_and_delivery",
+              "warehouse",
+              "transport",
+              "supplier",
+              "venue"
+            ],
+            "example": "collection_point"
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "origin",
+              "intermediate",
+              "destination"
+            ],
+            "example": "origin"
+          },
+          "name": {
+            "type": "string",
+            "example": "Cruz Roja Madrid"
+          },
+          "description": {
+            "type": "string",
+            "example": "Centro de acopio principal",
+            "nullable": true
+          },
+          "location": {
+            "$ref": "#/components/schemas/LocationViewDto"
+          },
+          "verificationLevel": {
+            "type": "string",
+            "enum": [
+              "unverified",
+              "verified",
+              "official"
+            ],
+            "example": "verified"
+          },
+          "publicStatus": {
+            "type": "string",
+            "enum": [
+              "hidden",
+              "active",
+              "saturated",
+              "paused",
+              "closed"
+            ],
+            "example": "active"
+          },
+          "ownerOrganizationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "accepts": {
+            "example": [
+              "water",
+              "food"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contact": {
+            "type": "string",
+            "example": "+58 212 555 0000",
+            "nullable": true
+          },
+          "schedule": {
+            "type": "string",
+            "example": "Lun-Vie 08-18",
+            "nullable": true
+          },
+          "manager": {
+            "type": "string",
+            "example": "Juan Pérez",
+            "nullable": true
+          },
+          "sourceName": {
+            "type": "string",
+            "example": "acopiove.org",
+            "nullable": true
+          },
+          "externalUpdatedAt": {
+            "type": "string",
+            "example": "2026-06-27T00:00:00.000Z",
+            "description": "ISO 8601 date string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "example": "Venezuela",
+            "description": "Country string as stored by the ingestion source (e.g. full Spanish name \"Venezuela\"). NOT guaranteed to be an ISO 3166-1 alpha-2 code — value depends on the source `pais` field.",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "example": "Caracas",
+            "nullable": true
+          },
+          "isFinalRecipient": {
+            "type": "boolean",
+            "example": false,
+            "description": "Whether this resource is a final recipient of aid"
+          },
+          "recipientType": {
+            "type": "string",
+            "example": "hospital",
+            "nullable": true,
+            "description": "Recipient type slug (see the emergency recipient-type taxonomy)"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResourceItemViewDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "stage",
+          "name",
+          "description",
+          "location",
+          "verificationLevel",
+          "publicStatus",
+          "ownerOrganizationId",
+          "accepts",
+          "contact",
+          "schedule",
+          "manager",
+          "sourceName",
+          "externalUpdatedAt",
+          "country",
+          "city",
+          "isFinalRecipient",
+          "recipientType",
+          "items"
         ]
       },
       "RecipientTypeDto": {
@@ -6681,6 +7002,20 @@
           "items"
         ]
       },
+      "InBoundsNeedsDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NeedViewDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
       "AssignNeedManagerDto": {
         "type": "object",
         "properties": {
@@ -6862,6 +7197,7 @@
               "company",
               "public_admin",
               "association",
+              "transport_operator",
               "other"
             ],
             "example": "ngo"
@@ -6908,6 +7244,7 @@
               "company",
               "public_admin",
               "association",
+              "transport_operator",
               "other"
             ]
           },

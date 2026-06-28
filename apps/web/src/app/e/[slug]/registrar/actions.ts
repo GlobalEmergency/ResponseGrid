@@ -8,6 +8,48 @@ import { getT } from '@/i18n/server';
 
 type ResourceType = components['schemas']['RegisterResourceDto']['type'];
 type Stage = components['schemas']['RegisterResourceDto']['stage'];
+type ResourceItem = components['schemas']['ResourceItemDto'];
+
+/**
+ * Parse the inventory items serialized by InventoryField (a JSON array in the
+ * hidden `items` input). Returns the typed list, or `null` when the payload is
+ * malformed (tampered) so the action can surface a validation error. An absent
+ * or empty list yields `[]` (inventory is optional).
+ */
+function parseItems(raw: FormDataEntryValue | null): ResourceItem[] | null {
+  if (typeof raw !== 'string' || raw.trim() === '') return [];
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(parsed)) return null;
+
+  const items: ResourceItem[] = [];
+  for (const entry of parsed) {
+    if (typeof entry !== 'object' || entry === null) return null;
+    const { name, quantity, unit, category } = entry as Record<string, unknown>;
+    if (typeof name !== 'string' || name.trim() === '') return null;
+    if (
+      typeof quantity !== 'number' ||
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return null;
+    }
+    if (typeof category !== 'string' || category.trim() === '') return null;
+    items.push({
+      name: name.trim(),
+      quantity,
+      category: category.trim(),
+      ...(typeof unit === 'string' && unit.trim() !== ''
+        ? { unit: unit.trim() }
+        : {}),
+    });
+  }
+  return items;
+}
 
 export type ActionState =
   | { status: 'idle' }
@@ -91,6 +133,11 @@ export async function registerResource(
       ? rawOrgId.trim()
       : undefined;
 
+  const items = parseItems(formData.get('items'));
+  if (items === null) {
+    return { status: 'error', message: t.registrar.err_invalid_items };
+  }
+
   const { data, error, response } = await api.POST(
     '/emergencies/{emergencyId}/resources',
     {
@@ -103,6 +150,7 @@ export async function registerResource(
         ...(description !== undefined ? { description } : {}),
         location: { address, latitude, longitude },
         ...(ownerOrganizationId !== undefined ? { ownerOrganizationId } : {}),
+        ...(items.length > 0 ? { items } : {}),
       },
     },
   );
