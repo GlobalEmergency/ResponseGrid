@@ -28,6 +28,8 @@ export const needsTable = pgTable('needs', {
   requiredSkill: text('required_skill'),
   skillSpecialty: text('skill_specialty'),
   requestedCount: integer('requested_count'),
+  /** Optional link to the resource / final recipient (#60). */
+  resourceId: uuid('resource_id'),
 });
 
 export const needItemsTable = pgTable('need_items', {

@@ -141,6 +141,18 @@ export class CreateNeedDto {
   @IsInt()
   @Min(1)
   requestedCount?: number;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    example: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    description:
+      'Link this need to a resource / final recipient (#60). Optional.',
+    nullable: true,
+    type: String,
+  })
+  @IsOptional()
+  @IsUUID()
+  resourceId?: string;
 }
 
 export class AssignNeedManagerDto {

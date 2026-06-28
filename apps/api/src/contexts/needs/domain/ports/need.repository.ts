@@ -8,6 +8,8 @@ export const NEED_REPOSITORY = Symbol('NeedRepository');
 export interface NeedFilters {
   category?: NeedCategory;
   priority?: Priority;
+  /** Filter by linked resource / final recipient (#60). */
+  resourceId?: string | null;
 }
 
 export interface NeedRepository {
