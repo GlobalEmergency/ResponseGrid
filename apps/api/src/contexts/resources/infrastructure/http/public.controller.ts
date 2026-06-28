@@ -48,6 +48,7 @@ export class PublicController {
       limit: query.limit ?? 50,
       ...(query.category !== undefined && { category: query.category }),
       ...(query.country !== undefined && { country: query.country }),
+      ...(query.q !== undefined && query.q !== '' && { q: query.q }),
     });
   }
 

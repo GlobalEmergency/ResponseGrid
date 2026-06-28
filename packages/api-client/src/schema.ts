@@ -2666,6 +2666,8 @@ export interface operations {
                 category?: string;
                 /** @description Filter by ISO 3166-1 alpha-2 country code */
                 country?: string;
+                /** @description Full-text search string matched against name, address, and city (case-insensitive, max 100 chars) */
+                q?: string;
             };
             header?: never;
             path: {

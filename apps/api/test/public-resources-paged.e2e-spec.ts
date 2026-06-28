@@ -299,6 +299,53 @@ describe('Public resources paged (e2e)', () => {
       .expect(400);
   });
 
+  describe('?q= text search', () => {
+    it('?q=caritas returns only the Caritas resource', async () => {
+      await withCleanRepo(async (repo) => {
+        await repo.save(
+          makeVisible('Caritas Madrid', { accepts: ['food'], country: 'ES' }),
+        );
+        await repo.save(
+          makeVisible('Cruz Roja', { accepts: ['water'], country: 'ES' }),
+        );
+        await repo.save(
+          makeVisible('Banco de Alimentos', { accepts: [], country: 'ES' }),
+        );
+      });
+
+      const res = await request(server)
+        .get(`/emergencies/${EM}/public/resources?q=caritas`)
+        .expect(200);
+
+      const body = res.body as PagedResourcesBody;
+      expect(body.total).toBe(1);
+      expect(body.items).toHaveLength(1);
+      expect(body.items[0].name).toBe('Caritas Madrid');
+    });
+
+    it('?q= (empty string) returns all resources (empty treated as no filter)', async () => {
+      await withCleanRepo(async (repo) => {
+        await repo.save(makeVisible('Caritas Madrid'));
+        await repo.save(makeVisible('Cruz Roja'));
+      });
+
+      const res = await request(server)
+        .get(`/emergencies/${EM}/public/resources?q=`)
+        .expect(200);
+
+      const body = res.body as PagedResourcesBody;
+      expect(body.total).toBe(2);
+      expect(body.items).toHaveLength(2);
+    });
+
+    it('?q=<string longer than 100 chars> returns 400', async () => {
+      const longQ = 'a'.repeat(101);
+      await request(server)
+        .get(`/emergencies/${EM}/public/resources?q=${longQ}`)
+        .expect(400);
+    });
+  });
+
   it('ResourceViewDto returns provenance fields when resource has sourceName + externalUpdatedAt', async () => {
     const provenanceDate = new Date('2026-06-25T12:00:00.000Z');
     await withCleanRepo(async (repo) => {

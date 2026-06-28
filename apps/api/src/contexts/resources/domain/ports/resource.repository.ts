@@ -26,10 +26,16 @@ export interface ResourceRepository {
     sourceName: string,
     externalId: string,
   ): Promise<Resource | null>;
-  /** Paginated list of visible resources, optionally filtered by category/country. */
+  /** Paginated list of visible resources, optionally filtered by category/country/q. */
   findVisiblePaged(
     emergencyId: EmergencyId,
-    q: { page: number; limit: number; category?: string; country?: string },
+    q: {
+      page: number;
+      limit: number;
+      category?: string;
+      country?: string;
+      q?: string;
+    },
   ): Promise<{ items: Resource[]; total: number }>;
   /** Aggregated facets (byCategory, byCountry) for visible resources of an emergency. */
   facets(emergencyId: EmergencyId): Promise<{
