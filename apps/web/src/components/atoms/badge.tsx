@@ -14,7 +14,8 @@ type BadgeVariant =
   | 'priority-urgent'
   | 'priority-high'
   | 'priority-medium'
-  | 'priority-low';
+  | 'priority-low'
+  | 'disputed';
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   variant: BadgeVariant;
@@ -50,6 +51,8 @@ const VARIANT_CLASSES: Record<BadgeVariant, string> = {
     'inline-flex items-center rounded-full bg-official-soft px-2 py-0.5 text-[10.5px] font-extrabold uppercase tracking-[0.05em] text-navy',
   'priority-low':
     'inline-flex items-center rounded-full bg-line-soft px-2 py-0.5 text-[10.5px] font-extrabold uppercase tracking-[0.05em] text-muted',
+  disputed:
+    'inline-flex items-center gap-1 rounded-full border border-warning bg-warning-soft px-3 py-1 text-sm font-semibold text-warning flex-shrink-0',
 };
 
 export function Badge({ variant, className = '', children, ...props }: BadgeProps) {

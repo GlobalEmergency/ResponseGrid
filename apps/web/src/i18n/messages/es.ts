@@ -318,6 +318,9 @@ export const es = {
     // Contacto oficial (#64)
     meta_contact_official: 'Contacto oficial:',
     no_official_contact: 'Sin contacto oficial',
+    // Validez reportada por ciudadanos (ficha 15)
+    disputed_label: 'En verificación',
+    report_cta: '¿Algo va mal? Avísanos',
   },
 
   resource_detail: {
@@ -710,6 +713,36 @@ export const es = {
     err_submit_failed: 'No se pudo enviar el parte. Inténtalo de nuevo.',
     err_no_permission_review: 'No tienes permisos para revisar este parte.',
     err_mark_reviewed_failed: 'No se pudo marcar como revisado. Inténtalo de nuevo.',
+  },
+
+  // ── Reportar validez de un punto (ficha 15) ───────────────────────────────
+  reportar_validez: {
+    page_title: 'Reportar este punto',
+    back: 'Volver al punto',
+    intro:
+      'Si este punto está cerrado, ya no existe, se ha mudado o sus datos no son correctos, avísanos. Coordinación lo revisará.',
+    meta_title: 'Reportar un punto — {emergencyName} · ResponseGrid',
+    meta_description:
+      'Avisa de que un punto de acopio está cerrado, ya no existe o tiene datos incorrectos.',
+    reason_label: 'Motivo',
+    select_reason_placeholder: 'Selecciona un motivo…',
+    reason_closed: 'Cerrado / no operativo',
+    reason_nonexistent: 'Ya no existe en esta ubicación',
+    reason_moved: 'Se ha mudado / dirección incorrecta',
+    reason_outdated: 'Datos desactualizados (horario, contacto, qué acepta)',
+    note_label: 'Detalle (opcional)',
+    note_placeholder: 'Cuéntanos qué has visto…',
+    submit: 'Enviar reporte',
+    submitting: 'Enviando…',
+    success_message:
+      'Gracias por avisar. Coordinación revisará el punto en breve.',
+    success_back_to_point: 'Volver al punto',
+    error_fallback: 'Error al enviar el reporte',
+    err_invalid_reason: 'Selecciona un motivo válido.',
+    err_submit_failed: 'No se pudo enviar el reporte. Inténtalo de nuevo.',
+    err_not_visible: 'Este punto ya no está visible; no se puede reportar.',
+    err_owner:
+      'Eres el responsable de este punto; usa el panel para cambiar su estado.',
   },
 
   // ── Página: Sobre nosotros (/sobre) ───────────────────────────────────────
