@@ -5942,6 +5942,11 @@
               "medical_personnel"
             ],
             "example": "water"
+          },
+          "presentation": {
+            "type": "string",
+            "example": "ampolla",
+            "description": "Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe, oxígeno… Optional, free-form (#61)."
           }
         },
         "required": [
@@ -6098,6 +6103,12 @@
               "medical_personnel"
             ],
             "example": "water"
+          },
+          "presentation": {
+            "type": "string",
+            "example": "ampolla",
+            "nullable": true,
+            "description": "Presentation / route of administration (ampolla, EV, inhalador…) — #61."
           }
         },
         "required": [

@@ -45,6 +45,11 @@ export function NeedCard({ need, te, slug, active }: NeedCardProps) {
       </div>
       <h3 className="text-[15px] font-bold leading-tight text-ink">{need.title}</h3>
       {detail !== '' && <p className="text-[12.5px] text-muted">{detail}</p>}
+      {item?.presentation != null && (
+        <p className="text-[12.5px] font-semibold text-ink">
+          {item.presentation}
+        </p>
+      )}
       {approximate && <PrivacyLocationNotice text={te.privacy_approximate_location} />}
       {active && (
         <Link

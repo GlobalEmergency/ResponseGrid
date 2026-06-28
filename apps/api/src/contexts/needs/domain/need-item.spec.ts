@@ -103,4 +103,35 @@ describe('NeedItem value object', () => {
     expect(restored.unit).toBe('kits');
     expect(restored.category).toBe(NeedCategory.Medical);
   });
+
+  it('stores presentation and defaults it to null (#61)', () => {
+    const withPres = NeedItem.create({
+      name: 'Clindamicina',
+      quantity: 10,
+      unit: 'amp',
+      category: NeedCategory.Medicines,
+      presentation: 'EV/ampolla',
+    });
+    expect(withPres.presentation).toBe('EV/ampolla');
+
+    const withoutPres = NeedItem.create({
+      name: 'Agua',
+      quantity: 1,
+      unit: null,
+      category: NeedCategory.Water,
+    });
+    expect(withoutPres.presentation).toBeNull();
+  });
+
+  it('round-trip preserves presentation (#61)', () => {
+    const original = NeedItem.create({
+      name: 'Budesonida',
+      quantity: 5,
+      unit: null,
+      category: NeedCategory.Medicines,
+      presentation: 'inhalador',
+    });
+    const restored = NeedItem.fromSnapshot(original.toSnapshot());
+    expect(restored.presentation).toBe('inhalador');
+  });
 });

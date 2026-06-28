@@ -2041,6 +2041,11 @@ export interface components {
              * @enum {string}
              */
             category: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+            /**
+             * @description Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe, oxígeno… Optional, free-form (#61).
+             * @example ampolla
+             */
+            presentation?: string;
         };
         CreateNeedDto: {
             /** @example Alimentos para 50 familias */
@@ -2111,6 +2116,11 @@ export interface components {
              * @enum {string}
              */
             category: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+            /**
+             * @description Presentation / route of administration (ampolla, EV, inhalador…) — #61.
+             * @example ampolla
+             */
+            presentation?: string | null;
         };
         NeedViewDto: {
             /**

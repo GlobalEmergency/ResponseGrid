@@ -108,6 +108,7 @@ export class NeedsController {
         quantity: i.quantity,
         unit: i.unit ?? null,
         category: i.category,
+        presentation: i.presentation ?? null,
       })),
       requiredSkill: dto.requiredSkill ?? null,
       skillSpecialty: dto.skillSpecialty ?? null,

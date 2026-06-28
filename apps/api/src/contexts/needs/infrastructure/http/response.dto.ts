@@ -38,6 +38,15 @@ export class NeedItemResponseDto {
 
   @ApiProperty({ enum: NeedCategory, example: NeedCategory.Water })
   category!: NeedCategory;
+
+  @ApiPropertyOptional({
+    example: 'ampolla',
+    nullable: true,
+    type: String,
+    description:
+      'Presentation / route of administration (ampolla, EV, inhalador…) — #61.',
+  })
+  presentation!: string | null;
 }
 
 export class NeedViewDto {

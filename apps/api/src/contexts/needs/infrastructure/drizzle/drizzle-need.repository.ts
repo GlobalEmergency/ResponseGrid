@@ -55,6 +55,7 @@ function rowToSnapshot(row: NeedsRow, items: ItemsRow[]): NeedSnapshot {
         quantity: i.quantity,
         unit: i.unit ?? null,
         category: i.category as NeedCategory,
+        presentation: i.presentation ?? null,
       }),
     ),
     status: row.status as NeedStatus,
@@ -124,6 +125,7 @@ export class DrizzleNeedRepository implements NeedRepository {
             quantity: item.quantity,
             unit: item.unit,
             category: item.category,
+            presentation: item.presentation ?? null,
           })),
         );
       }
