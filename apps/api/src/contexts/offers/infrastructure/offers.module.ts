@@ -24,6 +24,12 @@ import { ListPendingIntakesByResource } from '../application/list-pending-intake
 import { ConfirmIntakeReception } from '../application/confirm-intake-reception';
 import { RejectIntake } from '../application/reject-intake';
 import { MarkIntakeIncomplete } from '../application/mark-intake-incomplete';
+import { GetIntakeDeepLink } from '../application/get-intake-deep-link';
+import {
+  INTAKE_QR_ENCODER,
+  IntakeQrEncoder,
+} from '../domain/ports/intake-qr-encoder';
+import { QrcodeIntakeQrEncoder } from './qrcode-intake-qr-encoder';
 import {
   OFFER_REPOSITORY,
   OfferRepository,
@@ -261,6 +267,22 @@ const markIntakeIncompleteProvider = {
     new MarkIntakeIncomplete(repo),
 };
 
+const intakeQrEncoderProvider = {
+  provide: INTAKE_QR_ENCODER,
+  useFactory: (): IntakeQrEncoder => new QrcodeIntakeQrEncoder(),
+};
+
+const getIntakeDeepLinkProvider = {
+  provide: GetIntakeDeepLink,
+  inject: [INTAKE_RESOURCE_LOOKUP, INTAKE_QR_ENCODER],
+  useFactory: (lookup: IntakeResourceLookup, encoder: IntakeQrEncoder) =>
+    new GetIntakeDeepLink(
+      lookup,
+      process.env.FRONTEND_URL ?? 'http://localhost:3001',
+      encoder,
+    ),
+};
+
 @Module({
   imports: [DatabaseModule, IdentityModule, NotificationsModule],
   controllers: [OffersController, DonationIntakesController],
@@ -291,6 +313,8 @@ const markIntakeIncompleteProvider = {
     confirmIntakeReceptionProvider,
     rejectIntakeProvider,
     markIntakeIncompleteProvider,
+    intakeQrEncoderProvider,
+    getIntakeDeepLinkProvider,
   ],
 })
 export class OffersModule implements OnModuleDestroy {

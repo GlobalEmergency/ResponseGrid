@@ -1326,6 +1326,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/resources/{resourceId}/intake-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the public deep link for pre-registering at this acopio */
+        get: operations["DonationIntakesController_getIntakeLink"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/resources/{resourceId}/intake-qr": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Generate a QR code PNG for the intake deep link of this acopio */
+        get: operations["DonationIntakesController_getIntakeQr"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/resources/{resourceId}/donation-intakes/pending": {
         parameters: {
             query?: never;
@@ -3624,6 +3658,16 @@ export interface components {
             itemCount: number;
             /** Format: date-time */
             createdAt: string;
+        };
+        IntakeDeepLinkDto: {
+            /** @example http://localhost:3001/e/mexico-demo/donar-acopio?resourceId=33333333-3333-4333-8333-333333333331 */
+            url: string;
+            /** @example Acopio CDMX Norte */
+            resourceName: string;
+            /** @example mexico-demo */
+            slug: string;
+            /** Format: uuid */
+            resourceId: string;
         };
         ReceiveDonationIntakeDto: {
             volunteerNotes?: string | null;
@@ -7739,6 +7783,105 @@ export interface operations {
             };
             /** @description Missing intake:read */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DonationIntakesController_getIntakeLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IntakeDeepLinkDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing intake:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource is not a published collection point */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DonationIntakesController_getIntakeQr: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PNG image */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": string;
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing intake:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource is not a published collection point */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

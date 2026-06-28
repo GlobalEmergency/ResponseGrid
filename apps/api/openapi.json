@@ -4196,6 +4196,105 @@
         ]
       }
     },
+    "/resources/{resourceId}/intake-link": {
+      "get": {
+        "operationId": "DonationIntakesController_getIntakeLink",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntakeDeepLinkDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing intake:read"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "422": {
+            "description": "Resource is not a published collection point"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the public deep link for pre-registering at this acopio",
+        "tags": [
+          "donation-intakes"
+        ]
+      }
+    },
+    "/resources/{resourceId}/intake-qr": {
+      "get": {
+        "operationId": "DonationIntakesController_getIntakeQr",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PNG image",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing intake:read"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "422": {
+            "description": "Resource is not a published collection point"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Generate a QR code PNG for the intake deep link of this acopio",
+        "tags": [
+          "donation-intakes"
+        ]
+      }
+    },
     "/resources/{resourceId}/donation-intakes/pending": {
       "get": {
         "operationId": "DonationIntakesController_listPending",
@@ -10230,6 +10329,33 @@
           "targetResourceId",
           "itemCount",
           "createdAt"
+        ]
+      },
+      "IntakeDeepLinkDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "example": "http://localhost:3001/e/mexico-demo/donar-acopio?resourceId=33333333-3333-4333-8333-333333333331"
+          },
+          "resourceName": {
+            "type": "string",
+            "example": "Acopio CDMX Norte"
+          },
+          "slug": {
+            "type": "string",
+            "example": "mexico-demo"
+          },
+          "resourceId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "url",
+          "resourceName",
+          "slug",
+          "resourceId"
         ]
       },
       "ReceiveDonationIntakeDto": {

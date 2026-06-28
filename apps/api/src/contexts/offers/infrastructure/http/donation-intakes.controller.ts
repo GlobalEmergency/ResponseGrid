@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   Request,
+  StreamableFile,
   UseGuards,
 } from '@nestjs/common';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
@@ -37,6 +38,7 @@ import { ListPendingIntakesByResource } from '../../application/list-pending-int
 import { ConfirmIntakeReception } from '../../application/confirm-intake-reception';
 import { RejectIntake } from '../../application/reject-intake';
 import { MarkIntakeIncomplete } from '../../application/mark-intake-incomplete';
+import { GetIntakeDeepLink } from '../../application/get-intake-deep-link';
 import {
   CreateDonationIntakeDto,
   LookupDonorByContactDto,
@@ -51,6 +53,7 @@ import {
   LookupDonorByContactResponseDto,
   DonationIntakeViewDto,
   DonationIntakeSearchHitDto,
+  IntakeDeepLinkDto,
 } from './donation-intake-response.dto';
 import {
   JwtAuthGuard,
@@ -88,6 +91,7 @@ export class DonationIntakesController {
     private readonly confirmIntakeReception: ConfirmIntakeReception,
     private readonly rejectIntake: RejectIntake,
     private readonly markIntakeIncomplete: MarkIntakeIncomplete,
+    private readonly getIntakeDeepLink: GetIntakeDeepLink,
   ) {}
 
   @Post('emergencies/:emergencyId/donation-intakes')
@@ -207,6 +211,55 @@ export class DonationIntakesController {
     @Param('intakeId', ParseUUIDPipe) intakeId: string,
   ): Promise<DonationIntakeViewDto> {
     return this.getDonationIntakeById.execute(intakeId);
+  }
+
+  @Get('resources/:resourceId/intake-link')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('intake:read')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get the public deep link for pre-registering at this acopio',
+  })
+  @ApiParam({ name: 'resourceId', format: 'uuid' })
+  @ApiOkResponse({ type: IntakeDeepLinkDto })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Missing intake:read' })
+  @ApiNotFoundResponse({ description: 'Resource not found' })
+  @ApiUnprocessableEntityResponse({
+    description: 'Resource is not a published collection point',
+  })
+  async getIntakeLink(
+    @Param('resourceId', ParseUUIDPipe) resourceId: string,
+  ): Promise<IntakeDeepLinkDto> {
+    return this.getIntakeDeepLink.execute(resourceId);
+  }
+
+  @Get('resources/:resourceId/intake-qr')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('intake:read')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Generate a QR code PNG for the intake deep link of this acopio',
+  })
+  @ApiParam({ name: 'resourceId', format: 'uuid' })
+  @ApiOkResponse({
+    description: 'PNG image',
+    content: { 'image/png': { schema: { type: 'string', format: 'binary' } } },
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Missing intake:read' })
+  @ApiNotFoundResponse({ description: 'Resource not found' })
+  @ApiUnprocessableEntityResponse({
+    description: 'Resource is not a published collection point',
+  })
+  async getIntakeQr(
+    @Param('resourceId', ParseUUIDPipe) resourceId: string,
+  ): Promise<StreamableFile> {
+    const png = await this.getIntakeDeepLink.generateQr(resourceId);
+    return new StreamableFile(png, {
+      type: 'image/png',
+      disposition: `inline; filename="intake-${resourceId}.png"`,
+    });
   }
 
   @Get('resources/:resourceId/donation-intakes/pending')

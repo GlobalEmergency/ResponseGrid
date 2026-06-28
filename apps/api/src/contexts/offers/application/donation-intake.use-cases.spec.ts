@@ -25,6 +25,8 @@ import {
 } from '../domain/donation-intake-errors';
 import { FakeOfferEventBus } from '../infrastructure/fake-event-bus';
 import { DonationIntakeId } from '../domain/donation-intake-id';
+import { GetIntakeDeepLink } from './get-intake-deep-link';
+import { IntakeQrEncoder } from '../domain/ports/intake-qr-encoder';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const RESOURCE = '33333333-3333-4333-8333-333333333331';
@@ -43,9 +45,17 @@ class FakeResourceLookup implements IntakeResourceLookup {
   }
 }
 
+class FakeQrEncoder implements IntakeQrEncoder {
+  encodeToPng(url: string): Promise<Buffer> {
+    return Promise.resolve(Buffer.from(`qr:${url}`));
+  }
+}
+
 const validResource: IntakeResourceInfo = {
   id: RESOURCE,
   emergencyId: EM,
+  emergencySlug: 'mexico-demo',
+  name: 'Acopio CDMX Norte',
   type: 'collection_point',
   publicStatus: 'active',
 };
@@ -266,6 +276,51 @@ describe('DonationIntake use cases', () => {
       );
       expect(() => saved!.confirmReception('vol-2', null, null)).toThrow(
         DonationIntakeAlreadyProcessedError,
+      );
+    });
+  });
+
+  describe('GetIntakeDeepLink', () => {
+    it('builds the canonical donar-acopio URL for a published collection point', async () => {
+      const uc = new GetIntakeDeepLink(
+        new FakeResourceLookup(validResource),
+        'http://localhost:3001',
+        new FakeQrEncoder(),
+      );
+
+      const result = await uc.execute(RESOURCE);
+
+      expect(result).toEqual({
+        url: `http://localhost:3001/e/mexico-demo/donar-acopio?resourceId=${RESOURCE}`,
+        resourceName: 'Acopio CDMX Norte',
+        slug: 'mexico-demo',
+        resourceId: RESOURCE,
+      });
+    });
+
+    it('rejects a non-collection resource', async () => {
+      const uc = new GetIntakeDeepLink(
+        new FakeResourceLookup({ ...validResource, type: 'delivery_point' }),
+        'http://localhost:3001',
+        new FakeQrEncoder(),
+      );
+
+      await expect(uc.execute(RESOURCE)).rejects.toBeInstanceOf(
+        InvalidIntakeTargetResourceError,
+      );
+    });
+
+    it('generates QR bytes from the deep link URL', async () => {
+      const uc = new GetIntakeDeepLink(
+        new FakeResourceLookup(validResource),
+        'http://localhost:3001',
+        new FakeQrEncoder(),
+      );
+
+      const png = await uc.generateQr(RESOURCE);
+
+      expect(png.toString()).toBe(
+        `qr:http://localhost:3001/e/mexico-demo/donar-acopio?resourceId=${RESOURCE}`,
       );
     });
   });

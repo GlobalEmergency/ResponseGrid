@@ -304,4 +304,41 @@ describe('Donation intake flow (e2e)', () => {
       .send({ volunteerNotes: 'Faltan bolsas' })
       .expect(204);
   });
+
+  it('returns intake deep link for a published collection point', async () => {
+    const res = await request(server)
+      .get(`/resources/${RESOURCE}/intake-link`)
+      .set('Authorization', `Bearer ${coordToken}`)
+      .expect(200);
+
+    const body = res.body as {
+      url: string;
+      resourceName: string;
+      slug: string;
+      resourceId: string;
+    };
+    expect(body.resourceName).toBe('Acopio E2E');
+    expect(body.slug).toBe('intake-e2e-emergency');
+    expect(body.resourceId).toBe(RESOURCE);
+    expect(body.url).toBe(
+      `http://localhost:3001/e/intake-e2e-emergency/donar-acopio?resourceId=${RESOURCE}`,
+    );
+  });
+
+  it('returns PNG QR for intake deep link', async () => {
+    const res = await request(server)
+      .get(`/resources/${RESOURCE}/intake-qr`)
+      .set('Authorization', `Bearer ${coordToken}`)
+      .expect(200);
+
+    expect(res.headers['content-type']).toMatch(/image\/png/);
+    expect((res.body as Buffer).length).toBeGreaterThan(100);
+  });
+
+  it('returns 404 for intake link on unknown resource', async () => {
+    await request(server)
+      .get(`/resources/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/intake-link`)
+      .set('Authorization', `Bearer ${coordToken}`)
+      .expect(404);
+  });
 });

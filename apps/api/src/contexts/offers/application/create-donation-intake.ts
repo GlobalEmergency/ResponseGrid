@@ -3,19 +3,13 @@ import { DonationIntake, generateIntakeCode } from '../domain/donation-intake';
 import { DonationIntakeId } from '../domain/donation-intake-id';
 import { DonationIntakeRepository } from '../domain/ports/donation-intake.repository';
 import { OfferEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
-import {
-  IntakeResourceLookup,
-  IntakeResourceInfo,
-} from '../domain/ports/intake-resource-lookup';
-import { InvalidIntakeTargetResourceError } from '../domain/donation-intake-errors';
+import { IntakeResourceLookup } from '../domain/ports/intake-resource-lookup';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 import { SupplyLineProps } from '../../supplies/domain/supply-line';
-
-const ACTIVE_STATUS = 'active';
-const COLLECTION_TYPES = new Set([
-  'collection_point',
-  'collection_and_delivery',
-]);
+import {
+  INTAKE_ACTIVE_STATUS,
+  resolveIntakeTargetResource,
+} from './resolve-intake-target-resource';
 
 export interface CreateDonationIntakeCommand {
   emergencyId: string;
@@ -38,14 +32,18 @@ export class CreateDonationIntake {
     cmd: CreateDonationIntakeCommand,
   ): Promise<{ id: string; intakeCode: string; status: string }> {
     const status = await this.emergencyStatusReader.getStatus(cmd.emergencyId);
-    if (status !== ACTIVE_STATUS) {
+    if (status !== INTAKE_ACTIVE_STATUS) {
       throw new EmergencyNotAcceptingIntakeError(
         cmd.emergencyId,
         status ?? 'not-found',
       );
     }
 
-    await this.assertValidTarget(cmd.emergencyId, cmd.targetResourceId);
+    await resolveIntakeTargetResource(
+      this.resourceLookup,
+      cmd.targetResourceId,
+      cmd.emergencyId,
+    );
 
     const emergencyId = EmergencyId.fromString(cmd.emergencyId);
     const intakeCode = await this.allocateCode(emergencyId);
@@ -76,34 +74,6 @@ export class CreateDonationIntake {
     };
   }
 
-  private async assertValidTarget(
-    emergencyId: string,
-    resourceId: string,
-  ): Promise<void> {
-    const resource = await this.resourceLookup.findForIntake(resourceId);
-    if (!resource) {
-      throw new InvalidIntakeTargetResourceError(resourceId, 'not found');
-    }
-    if (resource.emergencyId !== emergencyId) {
-      throw new InvalidIntakeTargetResourceError(
-        resourceId,
-        'belongs to another emergency',
-      );
-    }
-    if (!COLLECTION_TYPES.has(resource.type)) {
-      throw new InvalidIntakeTargetResourceError(
-        resourceId,
-        `type '${resource.type}' is not a collection point`,
-      );
-    }
-    if (resource.publicStatus !== ACTIVE_STATUS) {
-      throw new InvalidIntakeTargetResourceError(
-        resourceId,
-        `public status is '${resource.publicStatus}'`,
-      );
-    }
-  }
-
   private async allocateCode(emergencyId: EmergencyId): Promise<string> {
     for (let attempt = 0; attempt < 10; attempt++) {
       const code = generateIntakeCode();
@@ -112,14 +82,4 @@ export class CreateDonationIntake {
     }
     throw new Error('Failed to allocate unique intake code');
   }
-}
-
-export function isValidIntakeResource(
-  resource: IntakeResourceInfo | null,
-  emergencyId: string,
-): resource is IntakeResourceInfo {
-  if (!resource) return false;
-  if (resource.emergencyId !== emergencyId) return false;
-  if (!COLLECTION_TYPES.has(resource.type)) return false;
-  return resource.publicStatus === ACTIVE_STATUS;
 }
