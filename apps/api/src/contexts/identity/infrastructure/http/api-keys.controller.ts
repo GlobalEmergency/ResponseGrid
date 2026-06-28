@@ -27,6 +27,8 @@ import { Request } from 'express';
 import { CreateServiceAccount } from '../../application/create-service-account';
 import { IssueApiKey } from '../../application/issue-api-key';
 import { RevokeApiKey } from '../../application/revoke-api-key';
+import { ListApiKeys } from '../../application/list-api-keys';
+import { ListServiceAccountsByOrg } from '../../application/list-service-accounts-by-org';
 import { SERVICE_ACCOUNT_REPOSITORY } from '../../domain/ports/service-account.repository';
 import type { ServiceAccountRepository } from '../../domain/ports/service-account.repository';
 import { API_KEY_REPOSITORY } from '../../domain/ports/api-key.repository';
@@ -109,6 +111,8 @@ export class ApiKeysController {
     private readonly createServiceAccount: CreateServiceAccount,
     private readonly issueApiKey: IssueApiKey,
     private readonly revokeApiKey: RevokeApiKey,
+    private readonly listApiKeysUseCase: ListApiKeys,
+    private readonly listServiceAccountsByOrg: ListServiceAccountsByOrg,
     @Inject(SERVICE_ACCOUNT_REPOSITORY)
     private readonly serviceAccounts: ServiceAccountRepository,
     @Inject(API_KEY_REPOSITORY) private readonly apiKeys: ApiKeyRepository,
@@ -116,7 +120,7 @@ export class ApiKeysController {
 
   @Get('service-accounts')
   @UseGuards(RequireAdminGuard)
-  @ApiOperation({ summary: 'List service accounts (admin)' })
+  @ApiOperation({ summary: 'List all service accounts (platform admin)' })
   @ApiOkResponse({ type: [ServiceAccountListItemDto] })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
   @ApiForbiddenResponse({ description: 'Admin access required' })
@@ -131,31 +135,59 @@ export class ApiKeysController {
     }));
   }
 
-  @Get('service-accounts/:serviceAccountId/api-keys')
-  @UseGuards(RequireAdminGuard)
+  @Get('organizations/:organizationId/service-accounts')
   @ApiOperation({
-    summary: 'List a service account’s keys — metadata only (admin)',
+    summary: 'List a single organization’s service accounts (org admin)',
+  })
+  @ApiOkResponse({ type: [ServiceAccountListItemDto] })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'apikey:create required in the org' })
+  async listOrgServiceAccounts(
+    @Param('organizationId', ParseUUIDPipe) organizationId: string,
+    @Req() req: Request & { user?: AuthenticatedUser },
+  ): Promise<ServiceAccountListItemDto[]> {
+    const user = req.user!;
+    const accounts = await this.listServiceAccountsByOrg.execute({
+      actor: { principalId: user.id, grants: user.grants },
+      organizationId,
+    });
+    return accounts.map((s) => ({
+      id: s.id,
+      name: s.name,
+      ownerOrganizationId: s.ownerOrganizationId,
+      createdByUserId: s.createdByUserId,
+      createdAt: s.createdAt,
+    }));
+  }
+
+  @Get('service-accounts/:serviceAccountId/api-keys')
+  @ApiOperation({
+    summary: 'List a service account’s keys — metadata only (scoped admin)',
   })
   @ApiOkResponse({ type: [ApiKeyListItemDto] })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
-  @ApiForbiddenResponse({ description: 'Admin access required' })
+  @ApiForbiddenResponse({ description: 'apikey:create required in scope' })
   async listApiKeys(
     @Param('serviceAccountId', ParseUUIDPipe) serviceAccountId: string,
+    @Req() req: Request & { user?: AuthenticatedUser },
   ): Promise<ApiKeyListItemDto[]> {
-    const keys = await this.apiKeys.listByServiceAccount(serviceAccountId);
-    const now = new Date();
-    return keys.map((k) => {
-      const s = k.toSnapshot();
-      return {
-        id: s.id,
-        prefix: s.prefix,
-        active: k.isActive(now),
-        expiresAt: s.expiresAt,
-        lastUsedAt: s.lastUsedAt,
-        revokedAt: s.revokedAt,
-        createdAt: s.createdAt,
-      };
+    const user = req.user!;
+    const keys = await this.listApiKeysUseCase.execute({
+      actor: { principalId: user.id, grants: user.grants },
+      serviceAccountId,
     });
+    const now = Date.now();
+    return keys.map((s) => ({
+      id: s.id,
+      prefix: s.prefix,
+      active:
+        s.revokedAt === null &&
+        (s.expiresAt === null || new Date(s.expiresAt).getTime() > now),
+      expiresAt: s.expiresAt,
+      lastUsedAt: s.lastUsedAt,
+      revokedAt: s.revokedAt,
+      createdAt: s.createdAt,
+    }));
   }
 
   @Post('service-accounts')

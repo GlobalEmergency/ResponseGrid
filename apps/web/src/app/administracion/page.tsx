@@ -47,13 +47,11 @@ export default async function AdministracionPage() {
   // Anyone who can't administer anything has no business here.
   if (scopes.length === 0) redirect('/');
 
-  // Resolve emergency ids → slugs for deep links into coordination.
+  // Resolve emergency ids → names for nicer card titles.
   const emergencies = (emergenciesRes.data ?? []) as {
     id: string;
-    slug: string;
     name: string;
   }[];
-  const slugById = new Map(emergencies.map((e) => [e.id, e.slug]));
   const nameById = new Map(emergencies.map((e) => [e.id, e.name]));
 
   return (
@@ -89,9 +87,6 @@ export default async function AdministracionPage() {
                 emergencyName={
                   scope.scopeId ? nameById.get(scope.scopeId) : undefined
                 }
-                emergencySlug={
-                  scope.scopeId ? slugById.get(scope.scopeId) : undefined
-                }
               />
             </li>
           ))}
@@ -104,11 +99,9 @@ export default async function AdministracionPage() {
 function ScopeCard({
   scope,
   emergencyName,
-  emergencySlug,
 }: {
   scope: AdminScope;
   emergencyName?: string;
-  emergencySlug?: string;
 }) {
   const chips = capChips(scope);
 
@@ -127,21 +120,21 @@ function ScopeCard({
       break;
     case 'organization':
       title = 'Organización';
-      subtitle = `ID ${shortId(scope.scopeId ?? '')} · gestiona sus miembros y roles.`;
-      href = `/administracion/organizacion/${scope.scopeId}`;
+      subtitle = `ID ${shortId(scope.scopeId ?? '')} · miembros, roles y cuentas de servicio.`;
+      href = `/administracion/ambito/organization/${scope.scopeId}`;
       cta = 'Gestionar organización';
       break;
     case 'group':
       title = 'Grupo / cuadrilla';
-      subtitle = `ID ${shortId(scope.scopeId ?? '')} · miembros y asignaciones.`;
-      href = `/grupos/${scope.scopeId}`;
+      subtitle = `ID ${shortId(scope.scopeId ?? '')} · miembros y roles.`;
+      href = `/administracion/ambito/group/${scope.scopeId}`;
       cta = 'Gestionar grupo';
       break;
     case 'emergency':
       title = emergencyName ?? 'Emergencia';
-      subtitle = `ID ${shortId(scope.scopeId ?? '')} · coordinación y miembros.`;
-      href = emergencySlug ? `/e/${emergencySlug}/coordinacion` : null;
-      cta = 'Ir a coordinación';
+      subtitle = `ID ${shortId(scope.scopeId ?? '')} · miembros y roles.`;
+      href = `/administracion/ambito/emergency/${scope.scopeId}`;
+      cta = 'Gestionar emergencia';
       break;
     default:
       title = scope.scopeType;

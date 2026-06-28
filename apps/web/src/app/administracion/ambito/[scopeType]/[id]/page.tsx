@@ -1,30 +1,48 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
+import { redirect, notFound } from 'next/navigation';
 import { getToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { PageShell } from '@/components/molecules/page-shell';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { shortId } from '@/lib/permissions';
 import { administrableScopes } from '@/lib/admin-scopes';
-import { fetchRoles, fetchOrgGrants } from './actions';
-import { GrantOrgRoleForm } from './grant-org-role-form';
+import {
+  fetchRoles,
+  fetchScopeGrants,
+  fetchOrgServiceAccounts,
+  type ScopeType,
+} from './actions';
+import { GrantRoleForm } from './grant-role-form';
 import { RevokeGrantButton } from './revoke-grant-button';
+import { ServiceAccountsManager } from './service-accounts-manager';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Administrar organización — ResponseGrid',
-  description: 'Gestiona los usuarios y roles de tu organización.',
+  title: 'Administrar ámbito — ResponseGrid',
+  description: 'Gestiona los usuarios y roles de este ámbito.',
 };
 
-interface PageProps {
-  params: Promise<{ id: string }>;
+const SCOPE_LABELS: Record<ScopeType, string> = {
+  organization: 'Organización',
+  group: 'Grupo / cuadrilla',
+  emergency: 'Emergencia',
+};
+
+function isScopeType(value: string): value is ScopeType {
+  return value === 'organization' || value === 'group' || value === 'emergency';
 }
 
-export default async function OrganizacionAdminPage({ params }: PageProps) {
-  const { id: orgId } = await params;
-  const next = `/administracion/organizacion/${orgId}`;
+interface PageProps {
+  params: Promise<{ scopeType: string; id: string }>;
+}
+
+export default async function ScopeAdminPage({ params }: PageProps) {
+  const { scopeType: rawType, id: scopeId } = await params;
+  if (!isScopeType(rawType)) notFound();
+  const scopeType = rawType;
+  const next = `/administracion/ambito/${scopeType}/${scopeId}`;
 
   const token = await getToken();
   if (!token) redirect(`/login?next=${next}`);
@@ -36,13 +54,17 @@ export default async function OrganizacionAdminPage({ params }: PageProps) {
   const me = meRes.data;
   if (meRes.response.status === 401 || !me) redirect(`/login?next=${next}`);
 
-  // Authorize: the caller must actually administer THIS organization.
-  const administers = administrableScopes(me.grants ?? [], roles).some(
-    (s) => s.scopeType === 'organization' && s.scopeId === orgId,
+  // Authorize: the caller must actually administer THIS scope.
+  const scope = administrableScopes(me.grants ?? [], roles).find(
+    (s) => s.scopeType === scopeType && s.scopeId === scopeId,
   );
-  if (!administers) redirect('/administracion');
+  if (!scope) redirect('/administracion');
 
-  const grants = await fetchOrgGrants(orgId);
+  const grants = await fetchScopeGrants(scopeType, scopeId);
+  const serviceAccounts =
+    scopeType === 'organization' && scope.canManageKeys
+      ? await fetchOrgServiceAccounts(scopeId)
+      : null;
 
   return (
     <PageShell>
@@ -56,12 +78,12 @@ export default async function OrganizacionAdminPage({ params }: PageProps) {
           </Link>
         </div>
         <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-          Organización
+          {SCOPE_LABELS[scopeType]}
         </h1>
-        <p className="font-mono text-xs text-gray-400 break-all">{orgId}</p>
+        <p className="font-mono text-xs text-gray-400 break-all">{scopeId}</p>
         <p className="text-base text-gray-600">
-          Usuarios y roles de esta organización. Asigna o revoca roles del
-          catálogo; los cambios respetan la atenuación de tus propios permisos.
+          Usuarios y roles de este ámbito. Asigna o revoca roles del catálogo;
+          los cambios respetan la atenuación de tus propios permisos.
         </p>
       </header>
 
@@ -72,7 +94,7 @@ export default async function OrganizacionAdminPage({ params }: PageProps) {
         </h2>
         {grants.length === 0 ? (
           <EmptyState
-            title="Aún no hay roles en esta organización."
+            title="Aún no hay roles en este ámbito."
             description="Concede el primero con el formulario de abajo."
           />
         ) : (
@@ -84,14 +106,19 @@ export default async function OrganizacionAdminPage({ params }: PageProps) {
               >
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <span className="text-sm font-bold text-gray-900">
-                    {g.roleId}
-                  </span>
-                  <span className="font-mono text-xs text-gray-500 break-all">
-                    {g.principalType === 'service_account'
-                      ? 'cuenta de servicio · '
-                      : ''}
-                    {shortId(g.principalId)}
+                    {g.principalName ?? shortId(g.principalId)}
                     {g.principalId === me.id ? ' (tú)' : ''}
+                  </span>
+                  {g.principalEmail && (
+                    <span className="text-xs text-gray-600">
+                      {g.principalEmail}
+                    </span>
+                  )}
+                  <span className="text-xs text-gray-500">
+                    Rol: <span className="font-mono">{g.roleId}</span>
+                    {g.principalType === 'service_account'
+                      ? ' · cuenta de servicio'
+                      : ''}
                   </span>
                   {g.expiresAt && (
                     <span className="text-xs text-amber-700">
@@ -102,7 +129,11 @@ export default async function OrganizacionAdminPage({ params }: PageProps) {
                     </span>
                   )}
                 </div>
-                <RevokeGrantButton grantId={g.id} orgId={orgId} />
+                <RevokeGrantButton
+                  grantId={g.id}
+                  scopeType={scopeType}
+                  scopeId={scopeId}
+                />
               </li>
             ))}
           </ul>
@@ -116,8 +147,31 @@ export default async function OrganizacionAdminPage({ params }: PageProps) {
         <h2 id="grant-heading" className="text-xl font-bold text-gray-900">
           Asignar un rol
         </h2>
-        <GrantOrgRoleForm orgId={orgId} roles={roles} />
+        <GrantRoleForm scopeType={scopeType} scopeId={scopeId} roles={roles} />
       </section>
+
+      {/* ── CUENTAS DE SERVICIO (solo organización) ──────────────────────── */}
+      {serviceAccounts !== null && (
+        <>
+          <hr className="border-gray-200" />
+          <section
+            aria-labelledby="sa-heading"
+            className="flex flex-col gap-4"
+          >
+            <h2 id="sa-heading" className="text-xl font-bold text-gray-900">
+              Cuentas de servicio y API keys
+            </h2>
+            <p className="text-sm text-gray-600 -mt-2">
+              Principales máquina de esta organización. Sus API keys autentican
+              llamadas servidor-a-servidor.
+            </p>
+            <ServiceAccountsManager
+              orgId={scopeId}
+              initialAccounts={serviceAccounts}
+            />
+          </section>
+        </>
+      )}
     </PageShell>
   );
 }
