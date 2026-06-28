@@ -2106,6 +2106,13 @@ export const en = {
     emergencies_heading: 'My emergencies',
     emergencies_empty: 'You are not part of any active emergency.',
     enter_coordination: 'Go to coordination',
+    validation_heading: 'Coordination / validation',
+    validation_hint:
+      'As a platform admin you can validate any active emergency.',
+    enter_validation: 'Validate',
+    status_active: 'Active',
+    status_paused: 'Paused',
+    status_closed: 'Closed',
     groups_heading: 'My groups',
     groups_empty: 'You are not a member of any group.',
     group_pending: 'Pending',

@@ -8,6 +8,7 @@ import {
   getMe,
   getRoles,
   getMyEmergencies,
+  getActiveEmergencies,
   getNotificationUnread,
 } from '@/lib/navigation-data';
 import {
@@ -15,6 +16,7 @@ import {
   type MeGrant,
   type RoleCatalogEntry,
 } from '@/lib/admin-scopes';
+import { canCoordinateAtPlatform } from '@/lib/emergency-permissions';
 import { Card } from '@/components/atoms/card';
 import { Badge } from '@/components/atoms/badge';
 import { SectionHeading } from '@/components/atoms/section-heading';
@@ -37,20 +39,32 @@ export default async function PanelPage() {
   const { t } = await getT();
   const tp = t.panel;
 
-  const [roles, myEmergencies, unread, groupsRes, orgsRes] = await Promise.all([
-    getRoles(),
-    getMyEmergencies(),
-    getNotificationUnread(),
-    api.GET('/groups/mine', { headers: authHeaders(token) }),
-    api.GET('/organizations/mine', { headers: authHeaders(token) }),
-  ]);
+  const [roles, myEmergencies, activeEmergencies, unread, groupsRes, orgsRes] =
+    await Promise.all([
+      getRoles(),
+      getMyEmergencies(),
+      getActiveEmergencies(),
+      getNotificationUnread(),
+      api.GET('/groups/mine', { headers: authHeaders(token) }),
+      api.GET('/organizations/mine', { headers: authHeaders(token) }),
+    ]);
 
   const roleDesc = new Map(roles.map((r) => [r.id, r.description ?? r.id]));
   const groups = groupsRes.data ?? [];
   const orgs = orgsRes.data ?? [];
-  const isManager =
-    me.isAdmin === true ||
-    canAdminister((me.grants ?? []) as MeGrant[], roles as RoleCatalogEntry[]);
+  const grants = (me.grants ?? []) as MeGrant[];
+  const roleCatalog = roles as RoleCatalogEntry[];
+  const isManager = me.isAdmin === true || canAdminister(grants, roleCatalog);
+
+  // Platform-level overlay: an admin/operator holds platform-scoped coordination
+  // grants but no emergency-scoped grant, so "Mis emergencias" is empty. Surface
+  // every active emergency they can validate, minus the ones already listed
+  // above (de-dupe by id) to avoid showing the same emergency twice.
+  const myEmergencyIds = new Set(myEmergencies.map((e) => e.id));
+  const validationEmergencies =
+    me.isAdmin === true || canCoordinateAtPlatform(grants, roleCatalog)
+      ? activeEmergencies.filter((e) => !myEmergencyIds.has(e.id))
+      : [];
 
   const sectionGap = 'flex flex-col gap-3';
 
@@ -123,6 +137,41 @@ export default async function PanelPage() {
           )}
         </section>
 
+        {/* Coordination / validation — platform-level overlay. Only rendered
+            for platform coordinators/admins with active emergencies to reach. */}
+        {validationEmergencies.length > 0 && (
+          <section aria-labelledby="val-heading" className={sectionGap}>
+            <div className="flex flex-col gap-1">
+              <SectionHeading id="val-heading" size="sm">
+                {tp.validation_heading}
+              </SectionHeading>
+              <p className="text-sm text-muted">{tp.validation_hint}</p>
+            </div>
+            <ul className="grid gap-3 sm:grid-cols-2" role="list">
+              {validationEmergencies.map((e) => (
+                <li key={e.id}>
+                  <Card as="article" className="flex h-full flex-col gap-3 p-4">
+                    <div className="flex flex-col gap-2">
+                      <span className="font-display text-base font-bold text-navy">
+                        {e.name}
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        <Badge variant="active">{statusLabel(tp, e.status)}</Badge>
+                      </div>
+                    </div>
+                    <Link
+                      href={`/e/${e.slug}/coordinacion`}
+                      className="mt-auto inline-flex w-fit items-center rounded-lg bg-navy px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-navy-700"
+                    >
+                      {tp.enter_validation}
+                    </Link>
+                  </Card>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {/* My groups */}
         <section aria-labelledby="grp-heading" className={sectionGap}>
           <SectionHeading id="grp-heading" size="sm">
@@ -185,6 +234,15 @@ export default async function PanelPage() {
       </div>
     </main>
   );
+}
+
+function statusLabel(
+  tp: { status_active: string; status_paused: string; status_closed: string },
+  status: 'active' | 'paused' | 'closed',
+): string {
+  if (status === 'paused') return tp.status_paused;
+  if (status === 'closed') return tp.status_closed;
+  return tp.status_active;
 }
 
 function QuickAction({ href, label }: { href: string; label: string }) {
