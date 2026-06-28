@@ -113,6 +113,60 @@
         ]
       }
     },
+    "/grants/at-scope": {
+      "get": {
+        "operationId": "GrantsController_listAtScope",
+        "parameters": [
+          {
+            "name": "scopeType",
+            "required": true,
+            "in": "query",
+            "description": "platform | organization | emergency | group",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scopeId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GrantListItemDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not authorized to administer this scope"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the grants made AT a scope (scoped administrator)",
+        "tags": [
+          "grants"
+        ]
+      }
+    },
     "/grants": {
       "get": {
         "operationId": "GrantsController_list",
@@ -1212,6 +1266,31 @@
         ]
       }
     },
+    "/recipient-types": {
+      "get": {
+        "operationId": "RecipientTypesController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Recipient types ordered by sort",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecipientTypeDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "List the recipient-type taxonomy for final recipients (extensible)",
+        "tags": [
+          "public"
+        ]
+      }
+    },
     "/templates": {
       "post": {
         "operationId": "TemplatesController_create",
@@ -1731,6 +1810,16 @@
                 "high",
                 "urgent"
               ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": false,
+            "in": "query",
+            "description": "Filter to needs linked to this resource / final recipient",
+            "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
@@ -5064,6 +5153,16 @@
             "type": "string",
             "example": "Caracas",
             "description": "City name"
+          },
+          "isFinalRecipient": {
+            "type": "boolean",
+            "example": true,
+            "description": "Mark this resource as a final recipient of aid (requires the destination stage)"
+          },
+          "recipientType": {
+            "type": "string",
+            "example": "hospital",
+            "description": "Recipient type slug (see the emergency recipient-type taxonomy)"
           }
         },
         "required": [
@@ -5244,6 +5343,17 @@
             "type": "string",
             "example": "Caracas",
             "nullable": true
+          },
+          "isFinalRecipient": {
+            "type": "boolean",
+            "example": false,
+            "description": "Whether this resource is a final recipient of aid"
+          },
+          "recipientType": {
+            "type": "string",
+            "example": "hospital",
+            "nullable": true,
+            "description": "Recipient type slug (see the emergency recipient-type taxonomy)"
           }
         },
         "required": [
@@ -5263,7 +5373,9 @@
           "sourceName",
           "externalUpdatedAt",
           "country",
-          "city"
+          "city",
+          "isFinalRecipient",
+          "recipientType"
         ]
       },
       "PagedResourcesDto": {
@@ -5409,6 +5521,17 @@
             "example": "Caracas",
             "nullable": true
           },
+          "isFinalRecipient": {
+            "type": "boolean",
+            "example": false,
+            "description": "Whether this resource is a final recipient of aid"
+          },
+          "recipientType": {
+            "type": "string",
+            "example": "hospital",
+            "nullable": true,
+            "description": "Recipient type slug (see the emergency recipient-type taxonomy)"
+          },
           "distanceMeters": {
             "type": "number",
             "example": 1234,
@@ -5433,6 +5556,8 @@
           "externalUpdatedAt",
           "country",
           "city",
+          "isFinalRecipient",
+          "recipientType",
           "distanceMeters"
         ]
       },
@@ -5491,6 +5616,33 @@
           "byCategory",
           "byCountry",
           "total"
+        ]
+      },
+      "RecipientTypeDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "example": "hospital"
+          },
+          "labelEs": {
+            "type": "string",
+            "example": "Hospital"
+          },
+          "labelEn": {
+            "type": "string",
+            "example": "Hospital"
+          },
+          "sort": {
+            "type": "number",
+            "example": 10
+          }
+        },
+        "required": [
+          "slug",
+          "labelEs",
+          "labelEn",
+          "sort"
         ]
       },
       "CreateTemplateDto": {
@@ -5863,6 +6015,13 @@
             "example": 3,
             "description": "How many personnel are needed (>= 1)",
             "nullable": true
+          },
+          "resourceId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "description": "Link this need to a resource / final recipient (#60). Optional.",
+            "nullable": true
           }
         },
         "required": [
@@ -6052,6 +6211,12 @@
             "example": 3,
             "nullable": true,
             "description": "Number of personnel needed"
+          },
+          "resourceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Linked resource / final recipient id (#60), or null if standalone."
           }
         },
         "required": [

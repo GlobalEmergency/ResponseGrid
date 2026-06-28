@@ -36,6 +36,8 @@ export interface CreateNeedProps {
   requiredSkill?: PersonnelSkill | null;
   skillSpecialty?: string | null;
   requestedCount?: number | null;
+  /** Optional link to the resource / final recipient this need belongs to (#60). */
+  resourceId?: string | null;
 }
 
 export interface NeedSnapshot {
@@ -59,6 +61,8 @@ export interface NeedSnapshot {
   requiredSkill?: PersonnelSkill | null;
   skillSpecialty?: string | null;
   requestedCount?: number | null;
+  /** Optional (legacy-safe) link to the resource / final recipient (#60). */
+  resourceId?: string | null;
 }
 
 export class Need {
@@ -84,6 +88,7 @@ export class Need {
     public readonly requiredSkill: PersonnelSkill | null,
     public readonly skillSpecialty: string | null,
     public readonly requestedCount: number | null,
+    public readonly resourceId: string | null,
   ) {}
 
   static create(props: CreateNeedProps): Need {
@@ -117,6 +122,7 @@ export class Need {
       props.requiredSkill ?? null,
       props.skillSpecialty ?? null,
       props.requestedCount ?? null,
+      props.resourceId ?? null,
     );
     need.events.push(
       new NeedCreated(need.id.value, {
@@ -148,6 +154,7 @@ export class Need {
       (s.requiredSkill as PersonnelSkill) ?? null,
       s.skillSpecialty ?? null,
       s.requestedCount ?? null,
+      s.resourceId ?? null,
     );
   }
 
@@ -243,6 +250,7 @@ export class Need {
       requiredSkill: this.requiredSkill,
       skillSpecialty: this.skillSpecialty,
       requestedCount: this.requestedCount,
+      resourceId: this.resourceId,
     };
   }
 

@@ -6,6 +6,11 @@ import { Card } from '@/components/atoms/card';
 import type { Messages } from '@/i18n/messages/es';
 import type { Locale } from '@/i18n';
 import { categoryLabel, categoryColor } from '@/lib/categories';
+import {
+  recipientTypeLabel,
+  recipientTypeColor,
+} from '@/lib/recipient-types';
+import { RecipientTypeBadge } from '@/components/atoms/recipient-type-badge';
 
 type ResourceViewDto = components['schemas']['ResourceViewDto'];
 
@@ -56,6 +61,12 @@ export function PublicResourceCard({
   if (locationParts.length > 0) subtitleParts.push(locationParts.join(', '));
   const subtitle = subtitleParts.join(' · ');
 
+  // Destinatario final (#60): show a type chip when the point is a recipient.
+  const recipientTypeText =
+    resource.recipientType != null
+      ? recipientTypeLabel(resource.recipientType, locale)
+      : null;
+
   return (
     <Card
       as="article"
@@ -66,6 +77,21 @@ export function PublicResourceCard({
       <div className="flex flex-wrap items-center gap-2">
         <VerificationBadge level={resource.verificationLevel} t={tVerification} />
         <StatusLight status={resource.publicStatus} t={tStatusLight} />
+        {resource.isFinalRecipient && (
+          <RecipientTypeBadge
+            label={recipientTypeText ?? t.final_recipient_label}
+            colorClass={
+              resource.recipientType != null
+                ? recipientTypeColor(resource.recipientType)
+                : 'bg-navy text-white'
+            }
+            ariaLabel={
+              recipientTypeText != null
+                ? `${t.final_recipient_label}: ${recipientTypeText}`
+                : t.final_recipient_label
+            }
+          />
+        )}
       </div>
 
       {/* ── Name ────────────────────────────────────────────────────────── */}

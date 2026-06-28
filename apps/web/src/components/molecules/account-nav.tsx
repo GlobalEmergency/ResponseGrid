@@ -10,13 +10,21 @@ interface AccountNavProps {
   t: Messages['home'];
   authed: boolean;
   isAdmin: boolean;
+  /** Can administer at least one scope (platform, org, group, emergency). */
+  canAdminister?: boolean;
   notificationUnreadCount: number;
 }
 
 const linkClass =
   'text-sm font-medium text-muted underline underline-offset-2 transition-colors hover:text-navy focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 rounded';
 
-export function AccountNav({ t, authed, isAdmin, notificationUnreadCount }: AccountNavProps) {
+export function AccountNav({
+  t,
+  authed,
+  isAdmin,
+  canAdminister = false,
+  notificationUnreadCount,
+}: AccountNavProps) {
   return (
     <nav
       aria-label={t.aria_secondary_nav}
@@ -26,6 +34,9 @@ export function AccountNav({ t, authed, isAdmin, notificationUnreadCount }: Acco
         {t.account_heading}
       </span>
       <Link href="/organizaciones" className={linkClass}>{t.my_orgs}</Link>
+      {authed && canAdminister && (
+        <Link href="/administracion" className={linkClass}>{t.administration}</Link>
+      )}
       {authed && (
         <>
           <Link href="/grupos" className={linkClass}>{t.groups}</Link>

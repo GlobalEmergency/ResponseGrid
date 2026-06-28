@@ -129,6 +129,15 @@ export class NeedViewDto {
     description: 'Number of personnel needed',
   })
   requestedCount!: number | null;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    nullable: true,
+    type: String,
+    description:
+      'Linked resource / final recipient id (#60), or null if standalone.',
+  })
+  resourceId!: string | null;
 }
 
 /** Extended DTO for coordinator views — includes the sensitive skillSpecialty field. */

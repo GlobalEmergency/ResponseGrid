@@ -23,6 +23,8 @@ export interface NeedView {
   /** F05: personnel-need fields — skillSpecialty omitted from public view */
   requiredSkill: PersonnelSkill | null;
   requestedCount: number | null;
+  /** Optional link to the resource / final recipient (#60). */
+  resourceId: string | null;
 }
 
 /** F05: Coordinator view includes the sensitive skillSpecialty field */
@@ -77,6 +79,7 @@ export function toPublicNeedView(n: Need): NeedView {
     // skillSpecialty deliberately excluded from public view (sensitive)
     requiredSkill: n.requiredSkill,
     requestedCount: n.requestedCount,
+    resourceId: n.resourceId,
   };
 }
 
@@ -105,6 +108,7 @@ export function toCoordinatorNeedView(n: Need): CoordinatorNeedView {
     requiredSkill: n.requiredSkill,
     skillSpecialty: n.skillSpecialty,
     requestedCount: n.requestedCount,
+    resourceId: n.resourceId,
   };
 }
 

@@ -1,6 +1,5 @@
 import { FindUserByEmail } from './find-user-by-email';
 import { InMemoryUserRepository } from '../infrastructure/in-memory-user.repository';
-import { LocalAccessControl } from '../domain/authorization/local-access-control';
 import { AuthorizationContext } from '../domain/authorization/access-control';
 import { Grant } from '../domain/authorization/grant';
 import { ScopeRef } from '../domain/authorization/scope-ref';
@@ -9,29 +8,22 @@ import { User } from '../domain/user';
 import { UserId } from '../domain/user-id';
 import { Email } from '../domain/email';
 
-const PLATFORM_ADMIN = '11111111-1111-4111-8111-111111111111';
 const ALICE = '33333333-3333-4333-8333-333333333333';
 
-function platformAdmin(): AuthorizationContext {
-  return {
-    principalId: PLATFORM_ADMIN,
-    grants: [
-      Grant.create({
-        id: 'g',
-        principalId: PLATFORM_ADMIN,
-        roleId: 'platform_admin',
-        scope: ScopeRef.platform(),
-      }).toSnapshot(),
-    ],
-  };
+function actorWith(...held: Grant[]): AuthorizationContext {
+  return { principalId: 'actor', grants: held.map((g) => g.toSnapshot()) };
 }
 
-function outsider(): AuthorizationContext {
-  return { principalId: ALICE, grants: [] };
+function grant(roleId: string, scope: ScopeRef): Grant {
+  return Grant.create({
+    id: `g-${roleId}`,
+    principalId: 'actor',
+    roleId,
+    scope,
+  });
 }
 
 describe('FindUserByEmail', () => {
-  const access = new LocalAccessControl();
   let users: InMemoryUserRepository;
 
   beforeEach(async () => {
@@ -47,9 +39,9 @@ describe('FindUserByEmail', () => {
     );
   });
 
-  it('resolves an email to a principal id for a platform admin', async () => {
-    const result = await new FindUserByEmail(users, access).execute({
-      actor: platformAdmin(),
+  it('resolves an email for a platform admin', async () => {
+    const result = await new FindUserByEmail(users).execute({
+      actor: actorWith(grant('platform_admin', ScopeRef.platform())),
       email: 'alice@example.org',
     });
     expect(result).toEqual({
@@ -59,28 +51,38 @@ describe('FindUserByEmail', () => {
     });
   });
 
-  it('is case/space-insensitive (email is normalized)', async () => {
-    const result = await new FindUserByEmail(users, access).execute({
-      actor: platformAdmin(),
+  it('resolves an email for an org admin (scoped manager, not just platform)', async () => {
+    const result = await new FindUserByEmail(users).execute({
+      actor: actorWith(grant('org_admin', ScopeRef.organization('o1'))),
       email: '  ALICE@example.org ',
     });
     expect(result?.id).toBe(ALICE);
   });
 
   it('returns null for an unknown or malformed email', async () => {
-    const uc = new FindUserByEmail(users, access);
+    const uc = new FindUserByEmail(users);
+    const admin = actorWith(grant('platform_admin', ScopeRef.platform()));
     expect(
-      await uc.execute({ actor: platformAdmin(), email: 'nobody@example.org' }),
+      await uc.execute({ actor: admin, email: 'nobody@example.org' }),
     ).toBeNull();
     expect(
-      await uc.execute({ actor: platformAdmin(), email: 'not-an-email' }),
+      await uc.execute({ actor: admin, email: 'not-an-email' }),
     ).toBeNull();
   });
 
-  it('forbids lookup without role:grant or user:read at platform', async () => {
+  it('forbids a non-manager (e.g. a plain org member)', async () => {
     await expect(
-      new FindUserByEmail(users, access).execute({
-        actor: outsider(),
+      new FindUserByEmail(users).execute({
+        actor: actorWith(grant('org_member', ScopeRef.organization('o1'))),
+        email: 'alice@example.org',
+      }),
+    ).rejects.toThrow(NotAuthorizedToReadError);
+  });
+
+  it('forbids a principal with no grants', async () => {
+    await expect(
+      new FindUserByEmail(users).execute({
+        actor: { principalId: 'nobody', grants: [] },
         email: 'alice@example.org',
       }),
     ).rejects.toThrow(NotAuthorizedToReadError);

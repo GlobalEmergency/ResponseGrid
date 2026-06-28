@@ -64,6 +64,7 @@ function rowToSnapshot(row: NeedsRow, items: ItemsRow[]): NeedSnapshot {
     requiredSkill: (row.requiredSkill as PersonnelSkill) ?? null,
     skillSpecialty: row.skillSpecialty ?? null,
     requestedCount: row.requestedCount ?? null,
+    resourceId: row.resourceId ?? null,
   };
 }
 
@@ -96,6 +97,7 @@ export class DrizzleNeedRepository implements NeedRepository {
           requiredSkill: s.requiredSkill ?? null,
           skillSpecialty: s.skillSpecialty ?? null,
           requestedCount: s.requestedCount ?? null,
+          resourceId: s.resourceId ?? null,
         })
         .onConflictDoUpdate({
           target: needsTable.id,
@@ -244,6 +246,10 @@ export class DrizzleNeedRepository implements NeedRepository {
             ),
         ),
       );
+    }
+
+    if (filters?.resourceId !== undefined && filters.resourceId !== null) {
+      conditions.push(eq(needsTable.resourceId, filters.resourceId));
     }
 
     const rows = await this.db

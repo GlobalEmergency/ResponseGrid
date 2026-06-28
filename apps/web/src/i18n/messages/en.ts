@@ -57,6 +57,7 @@ export const en = {
     no_emergencies_description: 'When an emergency is activated it will appear here.',
     emergency_status_active: 'Active',
     my_orgs: 'My organizations',
+    administration: 'Administration',
     notifications: 'Notifications',
     notifications_with_count: 'Notifications ({count})',
     coordination_access: 'Coordination access',
@@ -292,6 +293,8 @@ export const en = {
     meta_source: 'Source:',
     // aria-label for the card article element
     aria_label: 'Active point: {name}',
+    // Final recipient (#60)
+    final_recipient_label: 'Final recipient',
   },
 
   resource_list: {

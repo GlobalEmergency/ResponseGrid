@@ -112,6 +112,7 @@ export class NeedsController {
       requiredSkill: dto.requiredSkill ?? null,
       skillSpecialty: dto.skillSpecialty ?? null,
       requestedCount: dto.requestedCount ?? null,
+      resourceId: dto.resourceId ?? null,
     });
   }
 
@@ -135,6 +136,12 @@ export class NeedsController {
     required: false,
     description: 'Filter by need priority',
   })
+  @ApiQuery({
+    name: 'resourceId',
+    required: false,
+    format: 'uuid',
+    description: 'Filter to needs linked to this resource / final recipient',
+  })
   @ApiOkResponse({
     description: 'List of validated needs',
     type: [NeedViewDto],
@@ -143,6 +150,7 @@ export class NeedsController {
     @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
     @Query('category') category?: string,
     @Query('priority') priority?: string,
+    @Query('resourceId') resourceId?: string,
   ): Promise<NeedView[]> {
     const validCategory = Object.values(NeedCategory).includes(
       category as NeedCategory,
@@ -157,6 +165,7 @@ export class NeedsController {
       emergencyId,
       ...(validCategory !== undefined && { category: validCategory }),
       ...(validPriority !== undefined && { priority: validPriority }),
+      ...(resourceId !== undefined && { resourceId }),
     });
   }
 

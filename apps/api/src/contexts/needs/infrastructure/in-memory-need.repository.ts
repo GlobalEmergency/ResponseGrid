@@ -40,6 +40,12 @@ export class InMemoryNeedRepository implements NeedRepository {
           !s.items.some((i) => i.category === filters.category)
         )
           return false;
+        if (
+          filters?.resourceId !== undefined &&
+          filters.resourceId !== null &&
+          (s.resourceId ?? null) !== filters.resourceId
+        )
+          return false;
         return true;
       })
       .map((s) => Need.fromSnapshot(s));
@@ -64,6 +70,12 @@ export class InMemoryNeedRepository implements NeedRepository {
           !s.items.some((i) => i.category === filters.category)
         )
           return false;
+        if (
+          filters?.resourceId !== undefined &&
+          filters.resourceId !== null &&
+          (s.resourceId ?? null) !== filters.resourceId
+        )
+          return false;
         return true;
       })
       .map((s) => Need.fromSnapshot(s));
@@ -83,6 +95,12 @@ export class InMemoryNeedRepository implements NeedRepository {
         if (
           filters?.category !== undefined &&
           !s.items.some((i) => i.category === filters.category)
+        )
+          return false;
+        if (
+          filters?.resourceId !== undefined &&
+          filters.resourceId !== null &&
+          (s.resourceId ?? null) !== filters.resourceId
         )
           return false;
         return true;

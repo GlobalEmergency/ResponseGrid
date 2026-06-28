@@ -38,6 +38,8 @@ export interface CreateNeedCommand {
   requiredSkill?: PersonnelSkill | null;
   skillSpecialty?: string | null;
   requestedCount?: number | null;
+  /** Optional link to the resource / final recipient (#60). */
+  resourceId?: string | null;
 }
 
 export class CreateNeed {
@@ -93,6 +95,7 @@ export class CreateNeed {
       requiredSkill: cmd.requiredSkill ?? null,
       skillSpecialty: cmd.skillSpecialty ?? null,
       requestedCount: cmd.requestedCount ?? null,
+      resourceId: cmd.resourceId ?? null,
     });
 
     await this.repo.save(need);

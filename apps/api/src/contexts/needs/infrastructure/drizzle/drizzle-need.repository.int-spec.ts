@@ -92,6 +92,59 @@ describe('DrizzleNeedRepository (integration)', () => {
     expect(found!.items[0].category).toBe(NeedCategory.Water);
   });
 
+  it('round-trips the resourceId link to a final recipient (#60)', async () => {
+    const resourceId = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+    const need = Need.create({
+      id: NeedId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      title: 'Linked to recipient',
+      description: null,
+      location: makeLocation(),
+      priority: Priority.High,
+      requesterUserId: USER_ID,
+      requesterOrganizationId: null,
+      items: makeItems(),
+      resourceId,
+    });
+    await repo.save(need);
+    const found = await repo.findById(need.id);
+    expect(found!.resourceId).toBe(resourceId);
+  });
+
+  it('defaults resourceId to null when not provided', async () => {
+    const need = makeNeed();
+    await repo.save(need);
+    const found = await repo.findById(need.id);
+    expect(found!.resourceId).toBeNull();
+  });
+
+  it('filters needs by resourceId (1-a-N per recipient)', async () => {
+    const recipientA = 'aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaaa';
+    const recipientB = 'bbbbbbbb-2222-4bbb-8bbb-bbbbbbbbbbbb';
+    const mk = (resourceId: string, title: string) =>
+      Need.create({
+        id: NeedId.create(),
+        emergencyId: EmergencyId.fromString(EM),
+        title,
+        description: null,
+        location: makeLocation(),
+        priority: Priority.High,
+        requesterUserId: USER_ID,
+        requesterOrganizationId: null,
+        items: makeItems(),
+        resourceId,
+      });
+    await repo.save(mk(recipientA, 'For A'));
+    await repo.save(mk(recipientB, 'For B'));
+
+    const forA = await repo.findPendingByEmergency(EmergencyId.fromString(EM), {
+      resourceId: recipientA,
+    });
+    expect(forA).toHaveLength(1);
+    expect(forA[0].title).toBe('For A');
+    expect(forA[0].resourceId).toBe(recipientA);
+  });
+
   it('round-trips need with multiple items', async () => {
     const need = Need.create({
       id: NeedId.create(),
