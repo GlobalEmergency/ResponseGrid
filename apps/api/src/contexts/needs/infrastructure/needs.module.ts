@@ -7,6 +7,7 @@ import { NeedsController } from './http/needs.controller';
 import { CreateNeed } from '../application/create-need';
 import { ValidateNeed } from '../application/validate-need';
 import { GetPublicNeeds } from '../application/get-public-needs';
+import { GetNearbyNeeds } from '../application/get-nearby-needs';
 import { GetNeedsQueue } from '../application/get-needs-queue';
 import { AssignNeedManager } from '../application/assign-need-manager';
 import { RenewNeed, GetExpiredNeeds } from '../application/renew-need';
@@ -103,6 +104,12 @@ const getPublicNeedsProvider = {
   useFactory: (repo: NeedRepository) => new GetPublicNeeds(repo),
 };
 
+const getNearbyNeedsProvider = {
+  provide: GetNearbyNeeds,
+  inject: [NEED_REPOSITORY],
+  useFactory: (repo: NeedRepository) => new GetNearbyNeeds(repo),
+};
+
 const getNeedsQueueProvider = {
   provide: GetNeedsQueue,
   inject: [NEED_REPOSITORY],
@@ -180,6 +187,7 @@ const createTaskFromNeedProvider = {
     createNeedProvider,
     validateNeedProvider,
     getPublicNeedsProvider,
+    getNearbyNeedsProvider,
     getNeedsQueueProvider,
     assignNeedManagerProvider,
     renewNeedProvider,

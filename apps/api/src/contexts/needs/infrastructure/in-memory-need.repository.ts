@@ -3,6 +3,7 @@ import { Need, NeedSnapshot } from '../domain/need';
 import { NeedId } from '../domain/need-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { NeedStatus } from '../domain/need-enums';
+import { haversineMeters } from '../../../shared/domain/geo-distance';
 
 export class InMemoryNeedRepository implements NeedRepository {
   private store = new Map<string, NeedSnapshot>();
@@ -49,6 +50,42 @@ export class InMemoryNeedRepository implements NeedRepository {
         return true;
       })
       .map((s) => Need.fromSnapshot(s));
+    return Promise.resolve(result);
+  }
+
+  findNearbyValidated(
+    emergencyId: EmergencyId,
+    q: { lat: number; lng: number; radiusMeters: number; limit: number },
+  ): Promise<Array<{ need: Need; distanceMeters: number }>> {
+    const now = new Date();
+    const result = [...this.store.values()]
+      .filter((s) => {
+        if (s.emergencyId !== emergencyId.value) return false;
+        if (s.status !== NeedStatus.Validated) return false;
+        if (
+          s.expiresAt !== null &&
+          s.expiresAt !== undefined &&
+          s.expiresAt <= now
+        )
+          return false;
+        return true;
+      })
+      .map((s) => ({
+        snap: s,
+        dist: haversineMeters(
+          q.lat,
+          q.lng,
+          s.location.latitude,
+          s.location.longitude,
+        ),
+      }))
+      .filter(({ dist }) => dist <= q.radiusMeters)
+      .sort((a, b) => a.dist - b.dist)
+      .slice(0, q.limit)
+      .map(({ snap, dist }) => ({
+        need: Need.fromSnapshot(snap),
+        distanceMeters: Math.round(dist),
+      }));
     return Promise.resolve(result);
   }
 

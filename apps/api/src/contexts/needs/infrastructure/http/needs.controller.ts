@@ -27,6 +27,10 @@ import {
 import { CreateNeed } from '../../application/create-need';
 import { ValidateNeed } from '../../application/validate-need';
 import { GetPublicNeeds } from '../../application/get-public-needs';
+import {
+  GetNearbyNeeds,
+  NearbyNeedView,
+} from '../../application/get-nearby-needs';
 import { GetNeedsQueue } from '../../application/get-needs-queue';
 import { AssignNeedManager } from '../../application/assign-need-manager';
 import { RenewNeed, GetExpiredNeeds } from '../../application/renew-need';
@@ -38,10 +42,12 @@ import {
   CreateNeedDto,
   AssignNeedManagerDto,
   CreateTaskFromNeedDto,
+  NearbyNeedsQueryDto,
 } from './dto';
 import {
   CreateNeedResponseDto,
   NeedViewDto,
+  NearbyNeedsResponseDto,
   VolunteerSuggestionDto,
   CreatedTaskFromNeedDto,
 } from './response.dto';
@@ -60,6 +66,7 @@ export class NeedsController {
     private readonly createNeed: CreateNeed,
     private readonly validateNeed: ValidateNeed,
     private readonly getPublicNeeds: GetPublicNeeds,
+    private readonly getNearbyNeeds: GetNearbyNeeds,
     private readonly getNeedsQueue: GetNeedsQueue,
     private readonly assignNeedManager: AssignNeedManager,
     private readonly renewNeed: RenewNeed,
@@ -167,6 +174,33 @@ export class NeedsController {
       ...(validCategory !== undefined && { category: validCategory }),
       ...(validPriority !== undefined && { priority: validPriority }),
       ...(resourceId !== undefined && { resourceId }),
+    });
+  }
+
+  @Get('emergencies/:emergencyId/public/needs/nearby')
+  @ApiOperation({
+    summary:
+      'List validated needs near a GPS point, ordered by distance (public, #57)',
+  })
+  @ApiParam({
+    name: 'emergencyId',
+    description: 'Emergency UUID',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Validated needs within radius ordered by distance',
+    type: NearbyNeedsResponseDto,
+  })
+  async listNearby(
+    @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
+    @Query() query: NearbyNeedsQueryDto,
+  ): Promise<{ items: NearbyNeedView[] }> {
+    return this.getNearbyNeeds.execute({
+      emergencyId,
+      lat: query.lat,
+      lng: query.lng,
+      radiusMeters: query.radius,
+      limit: query.limit ?? 50,
     });
   }
 

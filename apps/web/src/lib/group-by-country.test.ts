@@ -101,6 +101,30 @@ test('partitions a mixed list while preserving per-group order', () => {
   );
 });
 
+test('keeps the backend "sin contacto last" ordering stable within a group (#58)', () => {
+  // The API returns points WITH contact first, then the contactless ones last.
+  // groupByCountry must not reorder, so within the Venezuela group the
+  // contactless points stay at the end.
+  const withContact = { ...makeResource('a', 'Venezuela'), contact: '+58 1' };
+  const withContact2 = { ...makeResource('b', 'Venezuela'), contact: '+58 2' };
+  const noContact = makeResource('c', 'Venezuela'); // contact: null
+  const noContact2 = makeResource('d', 'Venezuela'); // contact: null
+
+  const { venezuela } = groupByCountry([
+    withContact,
+    withContact2,
+    noContact,
+    noContact2,
+  ]);
+
+  assert.deepEqual(
+    venezuela.map((r) => r.id),
+    ['a', 'b', 'c', 'd'],
+  );
+  assert.equal(venezuela.at(-1)?.contact, null);
+  assert.equal(venezuela.at(-2)?.contact, null);
+});
+
 test('isVenezuela accepts the full name and ISO code, rejects everything else', () => {
   assert.equal(isVenezuela('Venezuela'), true);
   assert.equal(isVenezuela('venezuela'), true);

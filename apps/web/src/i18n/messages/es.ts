@@ -359,6 +359,17 @@ export const es = {
     privacy_note: 'Tu ubicación solo se usa en tu navegador para ordenar por cercanía; no se guarda.',
   },
 
+  // ── NearbyNeeds (#57) ─────────────────────────────────────────────────────
+  nearby_needs: {
+    button_find: 'Ver necesidades cerca de mí',
+    button_clear: 'Volver a la lista',
+    loading: 'Buscando necesidades cercanas…',
+    geo_error: 'No pudimos obtener tu ubicación. Comprueba los permisos del navegador.',
+    geo_error_dismiss: 'Cerrar',
+    showing_nearby: '{n} necesidades cercanas',
+    privacy_note: 'Tu ubicación solo se usa en tu navegador para ordenar por cercanía; no se guarda.',
+  },
+
   // ── VerificationBadge ─────────────────────────────────────────────────────
   verification_badge: {
     official: 'Oficial',

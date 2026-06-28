@@ -11,7 +11,9 @@ import {
   MinLength,
   ValidateNested,
   IsInt,
+  IsNumber,
   Min,
+  Max,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -162,6 +164,46 @@ export class CreateNeedDto {
   @IsOptional()
   @IsUUID()
   resourceId?: string;
+}
+
+export class NearbyNeedsQueryDto {
+  @ApiProperty({ example: 10.4806, description: 'Latitude between -90 and 90' })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  lat!: number;
+
+  @ApiProperty({
+    example: -66.9036,
+    description: 'Longitude between -180 and 180',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  lng!: number;
+
+  @ApiProperty({
+    example: 5000,
+    description: 'Search radius in meters (max 100000)',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(100000)
+  radius!: number;
+
+  @ApiPropertyOptional({
+    example: 50,
+    description: 'Max results (default 50, max 100)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
 }
 
 export class AssignNeedManagerDto {

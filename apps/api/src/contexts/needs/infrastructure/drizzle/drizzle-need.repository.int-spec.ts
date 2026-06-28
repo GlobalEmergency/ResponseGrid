@@ -521,4 +521,95 @@ describe('DrizzleNeedRepository (integration)', () => {
     );
     expect(counts[NeedStatus.Pending]).toBe(1);
   });
+
+  // #57 — needs near me
+  describe('findNearbyValidated', () => {
+    const ORIGIN_LAT = 10.4806;
+    const ORIGIN_LNG = -66.9036;
+
+    const makeAt = (title: string, lat: number, lng: number) =>
+      Need.create({
+        id: NeedId.create(),
+        emergencyId: EmergencyId.fromString(EM),
+        title,
+        description: null,
+        location: Location.create({
+          address: `${title} address`,
+          latitude: lat,
+          longitude: lng,
+        }),
+        priority: Priority.High,
+        requesterUserId: USER_ID,
+        requesterOrganizationId: null,
+        items: makeItems(),
+      });
+
+    it('returns validated needs within radius ordered by distance', async () => {
+      const near = makeAt('Near', ORIGIN_LAT, ORIGIN_LNG); // ~0 m
+      near.validate();
+      const medium = makeAt('Medium', 10.49, -66.903); // ~1.3 km
+      medium.validate();
+      const far = makeAt('Far', 10.8, -66.9); // ~35 km
+      far.validate();
+
+      await repo.save(near);
+      await repo.save(medium);
+      await repo.save(far);
+
+      const result = await repo.findNearbyValidated(
+        EmergencyId.fromString(EM),
+        { lat: ORIGIN_LAT, lng: ORIGIN_LNG, radiusMeters: 10000, limit: 50 },
+      );
+
+      expect(result.map((r) => r.need.title)).toEqual(['Near', 'Medium']);
+      expect(result[0].distanceMeters).toBeLessThanOrEqual(
+        result[1].distanceMeters,
+      );
+      expect(result[0].distanceMeters).toBeGreaterThanOrEqual(0);
+      // items are hydrated for each need
+      expect(result[0].need.items).toHaveLength(1);
+    });
+
+    it('excludes pending needs', async () => {
+      const validated = makeAt('Validated', ORIGIN_LAT, ORIGIN_LNG);
+      validated.validate();
+      const pending = makeAt('Pending', ORIGIN_LAT, ORIGIN_LNG); // not validated
+
+      await repo.save(validated);
+      await repo.save(pending);
+
+      const result = await repo.findNearbyValidated(
+        EmergencyId.fromString(EM),
+        { lat: ORIGIN_LAT, lng: ORIGIN_LNG, radiusMeters: 5000, limit: 50 },
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].need.title).toBe('Validated');
+    });
+
+    it('excludes expired needs', async () => {
+      const fresh = makeAt('Fresh', ORIGIN_LAT, ORIGIN_LNG);
+      fresh.validate();
+      const expired = makeAt('Expired', ORIGIN_LAT, ORIGIN_LNG);
+      expired.validate();
+
+      await repo.save(fresh);
+      await repo.save(expired);
+
+      const pastExpiry = new Date(Date.now() - 1000 * 60 * 60); // 1 h ago
+      await db
+        .update(needsTable)
+        .set({ expiresAt: pastExpiry })
+        .where(eq(needsTable.id, expired.id.value));
+
+      const result = await repo.findNearbyValidated(
+        EmergencyId.fromString(EM),
+        { lat: ORIGIN_LAT, lng: ORIGIN_LNG, radiusMeters: 5000, limit: 50 },
+      );
+
+      const titles = result.map((r) => r.need.title);
+      expect(titles).toContain('Fresh');
+      expect(titles).not.toContain('Expired');
+    });
+  });
 });

@@ -19,6 +19,15 @@ export interface NeedRepository {
     emergencyId: EmergencyId,
     filters?: NeedFilters,
   ): Promise<Need[]>;
+  /**
+   * Returns validated (non-expired) needs within `radiusMeters` of the given
+   * point, ordered by ascending distance, each annotated with its distance in
+   * meters. Powers the "needs near me" view (#57).
+   */
+  findNearbyValidated(
+    emergencyId: EmergencyId,
+    q: { lat: number; lng: number; radiusMeters: number; limit: number },
+  ): Promise<Array<{ need: Need; distanceMeters: number }>>;
   /** Returns validated needs that have expired (expiresAt IS NOT NULL AND expiresAt <= now). */
   findExpiredByEmergency(
     emergencyId: EmergencyId,
