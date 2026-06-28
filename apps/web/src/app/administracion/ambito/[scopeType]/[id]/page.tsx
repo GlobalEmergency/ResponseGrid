@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { PageShell } from '@/components/molecules/page-shell';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { shortId } from '@/lib/permissions';
+import { formatDate } from '@/lib/format-date';
 import { administrableScopes } from '@/lib/admin-scopes';
 import {
   fetchRoles,
@@ -124,7 +125,7 @@ export default async function ScopeAdminPage({ params }: PageProps) {
                     <span className="text-xs text-amber-700">
                       caduca{' '}
                       <time dateTime={g.expiresAt} suppressHydrationWarning>
-                        {new Date(g.expiresAt).toLocaleDateString('es-ES')}
+                        {formatDate(g.expiresAt, 'es')}
                       </time>
                     </span>
                   )}

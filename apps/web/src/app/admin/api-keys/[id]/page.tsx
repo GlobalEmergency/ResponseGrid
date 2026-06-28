@@ -7,6 +7,7 @@ import { fetchServiceAccounts, fetchApiKeys } from '../actions';
 import { IssueKeyButton } from '../issue-key-button';
 import { RevokeKeyButton } from '../revoke-key-button';
 import { shortId } from '@/lib/permissions';
+import { formatDate } from '@/lib/format-date';
 import { EmptyState } from '@/components/molecules/empty-state';
 
 export const dynamic = 'force-dynamic';
@@ -76,9 +77,11 @@ export default async function ServiceAccountDetailPage({ params }: Props) {
                     </span>
                     <span className="text-xs text-gray-500">
                       Creada{' '}
-                      {new Date(k.createdAt).toLocaleDateString('es-ES')}
+                      <time dateTime={k.createdAt} suppressHydrationWarning>
+                        {formatDate(k.createdAt, 'es')}
+                      </time>
                       {k.lastUsedAt &&
-                        ` · uso ${new Date(k.lastUsedAt).toLocaleDateString('es-ES')}`}
+                        ` · uso ${formatDate(k.lastUsedAt, 'es')}`}
                     </span>
                   </div>
                   <div className="flex flex-shrink-0 items-center gap-2">

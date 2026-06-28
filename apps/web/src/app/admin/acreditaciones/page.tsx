@@ -7,6 +7,7 @@ import { GrantAccreditationForm } from './grant-form';
 import { RevokeButton } from './revoke-button';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { formatDate } from '@/lib/format-date';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
@@ -42,7 +43,7 @@ export default async function AcreditacionesPage() {
   // ── Fetch existing accreditations ────────────────────────────────────────
   const accreditations = await fetchAccreditations();
 
-  const { t } = await getT();
+  const { t, locale } = await getT();
   const ta = t.admin;
 
   return (
@@ -99,7 +100,7 @@ export default async function AcreditacionesPage() {
                       <span className="text-xs text-muted-soft">
                         {ta.acc_granted_label}{' '}
                         <time dateTime={acc.grantedAt} suppressHydrationWarning>
-                          {new Date(acc.grantedAt).toLocaleDateString('es-ES')}
+                          {formatDate(acc.grantedAt, locale)}
                         </time>
                       </span>
                     </div>

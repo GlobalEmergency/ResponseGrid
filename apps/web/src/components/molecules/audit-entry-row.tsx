@@ -1,13 +1,18 @@
 import { StatusCodeBadge } from '@/components/atoms/status-code-badge';
 import type { AuditEntryDto } from '@/app/admin/auditoria/actions';
+import { formatDate as formatDateUtc } from '@/lib/format-date';
 import { getT } from '@/i18n/server';
 
 interface AuditEntryRowProps {
   entry: AuditEntryDto;
 }
 
+/**
+ * Audit timestamp: "26 jun 2026, 14:32". Pinned to UTC via the shared helper so
+ * the server (UTC) and browser (local) agree — no #418 mismatch (issue #174).
+ */
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString('es-ES', {
+  return formatDateUtc(iso, 'es', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',

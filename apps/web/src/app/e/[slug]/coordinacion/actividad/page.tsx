@@ -11,6 +11,7 @@ import {
 import type { MeGrant, RoleCatalogEntry } from '@/lib/admin-scopes';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { Badge } from '@/components/atoms/badge';
+import { formatDateTime } from '@/lib/format-date';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
@@ -66,7 +67,7 @@ export default async function CoordinacionActividadPage({ params }: Props) {
     redirect(`/e/${slug}/coordinacion`);
   }
 
-  const { t } = await getT();
+  const { t, locale } = await getT();
   const tc = t.coord;
 
   const entries = await api
@@ -123,7 +124,7 @@ export default async function CoordinacionActividadPage({ params }: Props) {
                   suppressHydrationWarning
                   className="text-xs text-muted"
                 >
-                  {new Date(e.createdAt).toLocaleString()}
+                  {formatDateTime(e.createdAt, locale)}
                 </time>
               </div>
 

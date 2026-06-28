@@ -7,6 +7,7 @@ import { fetchRoles, fetchGrants, resolvePrincipal } from './actions';
 import { GrantRoleForm } from './grant-role-form';
 import { RevokeGrantButton } from './revoke-grant-button';
 import { scopeLabel } from '@/lib/permissions';
+import { formatDate } from '@/lib/format-date';
 import { EmptyState } from '@/components/molecules/empty-state';
 
 export const dynamic = 'force-dynamic';
@@ -114,7 +115,9 @@ export default async function PermisosPage({ searchParams }: Props) {
                       {g.expiresAt && (
                         <span className="text-xs text-amber-700">
                           caduca{' '}
-                          {new Date(g.expiresAt).toLocaleDateString('es-ES')}
+                          <time dateTime={g.expiresAt} suppressHydrationWarning>
+                            {formatDate(g.expiresAt, 'es')}
+                          </time>
                         </span>
                       )}
                     </div>

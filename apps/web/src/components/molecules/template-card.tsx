@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { formatDate } from '@/lib/format-date';
 import { getT } from '@/i18n/server';
 
 interface TemplateCardProps {
@@ -29,7 +30,7 @@ export async function TemplateCard({
         <p className="text-xs text-muted-soft">
           {t.ui.template_dont_bring_items.replace('{count}', String(dontBringCount))} · {t.ui.created}{' '}
           <time dateTime={createdAt} suppressHydrationWarning>
-            {new Date(createdAt).toLocaleDateString(locale === 'en' ? 'en-GB' : 'es-ES')}
+            {formatDate(createdAt, locale)}
           </time>
         </p>
       </div>

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { getToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { scopeLabel } from '@/lib/permissions';
+import { formatDate } from '@/lib/format-date';
 import { EmptyState } from '@/components/molecules/empty-state';
 
 export const dynamic = 'force-dynamic';
@@ -95,7 +96,7 @@ export default async function MisPermisosPage() {
                         <span className="text-xs text-amber-700">
                           · caduca{' '}
                           <time dateTime={g.expiresAt} suppressHydrationWarning>
-                            {new Date(g.expiresAt).toLocaleDateString('es-ES')}
+                            {formatDate(g.expiresAt, 'es')}
                           </time>
                         </span>
                       )}
