@@ -27,6 +27,7 @@
 |---|---------|---------|-----------|--------|
 | [08](08-cercania-y-rutas.md) | **Cercanía y rutas** | Ordenar puntos/necesidades por distancia al usuario (`/nearby` ✅) + enlace a ruta/isócrona ⏳ | 🟡 Media | ⏳ Parcial |
 | [09](09-privacidad-de-ubicacion.md) | **Privacidad de ubicación** | Coordenadas aproximadas en puntos sensibles, "no publicamos tu ubicación", "verifica por teléfono" | 🔴 Alta | ✅ Hecho |
+| [15](15-reporte-validez-de-puntos.md) | **Reporte ciudadano de validez de puntos** | El usuario marca un punto como cerrado/inexistente/mudado/desactualizado; tras N reportes se marca "dudoso" (sigue visible) y coordinación confirma o descarta | 🟡 Media | ⏳ Pendiente |
 
 ## Dominio 5 — Plataforma y acceso
 | # | Feature | Resumen | Prioridad | Estado |
