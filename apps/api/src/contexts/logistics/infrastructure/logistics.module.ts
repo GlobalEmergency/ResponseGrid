@@ -15,6 +15,7 @@ import { ConfirmShipmentDelivery } from '../application/confirm-shipment-deliver
 import { CancelShipment } from '../application/cancel-shipment';
 import { ListShipments } from '../application/list-shipments';
 import { GetMyShipments } from '../application/get-my-shipments';
+import { SuggestCapacitiesForShipment } from '../application/suggest-capacities-for-shipment';
 import {
   TRANSPORT_CAPACITY_REPOSITORY,
   TransportCapacityRepository,
@@ -39,10 +40,15 @@ import {
   CAPACITY_EMERGENCY_LOOKUP,
   CapacityEmergencyLookup,
 } from '../domain/ports/capacity-emergency-lookup';
+import {
+  RESOURCE_LOCATION_LOOKUP,
+  ResourceLocationLookup,
+} from '../domain/ports/resource-location-lookup';
 import { DrizzleTransportCapacityRepository } from './drizzle/drizzle-transport-capacity.repository';
 import { DrizzleShipmentRepository } from './drizzle/drizzle-shipment.repository';
 import { DrizzleShipmentAuthorizationLookup } from './drizzle/drizzle-shipment-authorization-lookup';
 import { DrizzleCapacityEmergencyLookup } from './drizzle/drizzle-capacity-emergency-lookup';
+import { DrizzleResourceLocationLookup } from './drizzle/drizzle-resource-location-lookup';
 import { DrizzleEmergencyStatusReader } from '../../../shared/drizzle-emergency-status-reader';
 import { BullMqShipmentEventBus } from './bullmq-shipment-event-bus';
 import { IdentityModule } from '../../identity/infrastructure/identity.module';
@@ -106,6 +112,13 @@ const capacityEmergencyLookupProvider = {
   inject: [DB],
   useFactory: (db: Db): CapacityEmergencyLookup =>
     new DrizzleCapacityEmergencyLookup(db),
+};
+
+const resourceLocationLookupProvider = {
+  provide: RESOURCE_LOCATION_LOOKUP,
+  inject: [DB],
+  useFactory: (db: Db): ResourceLocationLookup =>
+    new DrizzleResourceLocationLookup(db),
 };
 
 const publishCapacityProvider = {
@@ -175,6 +188,25 @@ const getMyShipmentsProvider = {
   useFactory: (repo: ShipmentRepository) => new GetMyShipments(repo),
 };
 
+const suggestCapacitiesForShipmentProvider = {
+  provide: SuggestCapacitiesForShipment,
+  inject: [
+    SHIPMENT_REPOSITORY,
+    TRANSPORT_CAPACITY_REPOSITORY,
+    RESOURCE_LOCATION_LOOKUP,
+  ],
+  useFactory: (
+    shipmentRepo: ShipmentRepository,
+    capacityRepo: TransportCapacityRepository,
+    resourceLocationLookup: ResourceLocationLookup,
+  ) =>
+    new SuggestCapacitiesForShipment(
+      shipmentRepo,
+      capacityRepo,
+      resourceLocationLookup,
+    ),
+};
+
 @Module({
   imports: [DatabaseModule, IdentityModule],
   controllers: [LogisticsController, ShipmentController],
@@ -186,6 +218,7 @@ const getMyShipmentsProvider = {
     shipmentEventBusProvider,
     emergencyStatusReaderProvider,
     capacityEmergencyLookupProvider,
+    resourceLocationLookupProvider,
     publishCapacityProvider,
     withdrawCapacityProvider,
     listCapacitiesProvider,
@@ -196,6 +229,7 @@ const getMyShipmentsProvider = {
     cancelShipmentProvider,
     listShipmentsProvider,
     getMyShipmentsProvider,
+    suggestCapacitiesForShipmentProvider,
   ],
 })
 export class LogisticsModule implements OnModuleDestroy {

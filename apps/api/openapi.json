@@ -3938,6 +3938,56 @@
         ]
       }
     },
+    "/logistics/shipments/{id}/capacity-suggestions": {
+      "get": {
+        "operationId": "ShipmentController_capacitySuggestions",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipment UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Compatible capacities ranked by proximity/coverage fit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CapacityViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing shipment:read permission"
+          },
+          "404": {
+            "description": "Shipment not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Suggest compatible transport capacities for a shipment, ranked (coordinator)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
     "/emergencies/{emergencyId}/volunteers": {
       "post": {
         "operationId": "VolunteersController_registerVolunteer",
