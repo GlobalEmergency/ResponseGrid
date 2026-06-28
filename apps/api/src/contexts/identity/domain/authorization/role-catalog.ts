@@ -60,6 +60,9 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'apikey:revoke',
       'org:edit',
       'org:read',
+      'group:create',
+      'group:read',
+      'group:manage_members',
     ],
   },
   org_member: {
@@ -99,6 +102,9 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'report:triage',
       'incident:create',
       'incident:resolve',
+      'group:create',
+      'group:read',
+      'group:manage_members',
     ],
   },
   emergency_verifier: {
