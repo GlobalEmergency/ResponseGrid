@@ -9,7 +9,7 @@ import { CoordinationNeedCard } from '@/components/organisms/coordination-need-c
 import { CoordinationOfferCard } from '@/components/organisms/coordination-offer-card';
 import { ExpiredNeedCard } from '@/components/organisms/expired-need-card';
 import { EmergencyControls } from '@/components/organisms/emergency-controls';
-import { NeedsFilter } from '@/components/needs-filter';
+import { NeedsFilter } from '@/components/molecules/needs-filter';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { logout } from './actions';

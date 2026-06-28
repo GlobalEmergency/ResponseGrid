@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useActionState } from 'react';
 import { signupAction, type SignupResult } from '@/app/signup/actions';
-import { SocialLoginButtons } from '@/components/social-login-buttons';
+import { SocialLoginButtons } from '@/components/molecules/social-login-buttons';
 import { Input } from '@/components/atoms/input';
 import { Label } from '@/components/atoms/label';
 import { Button } from '@/components/atoms/button';
