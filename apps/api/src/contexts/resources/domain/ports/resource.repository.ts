@@ -9,6 +9,21 @@ export interface ResourceRepository {
   save(resource: Resource): Promise<void>;
   findById(id: ResourceId): Promise<Resource | null>;
   findPendingByEmergency(emergencyId: EmergencyId): Promise<Resource[]>;
+  /**
+   * Paginated list of resources pending verification (unverified), optionally
+   * filtered by type and a free-text search over name/address/city. Resolves
+   * the coordination "bulk" problem when an emergency has hundreds of imported,
+   * still-unverified points.
+   */
+  findPendingByEmergencyPaged(
+    emergencyId: EmergencyId,
+    q: {
+      page: number;
+      limit: number;
+      type?: string;
+      q?: string;
+    },
+  ): Promise<{ items: Resource[]; total: number }>;
   findActiveByEmergency(emergencyId: EmergencyId): Promise<Resource[]>;
   /** Returns a count map for all PublicStatus values for the given emergency. */
   countByEmergencyGroupedByPublicStatus(

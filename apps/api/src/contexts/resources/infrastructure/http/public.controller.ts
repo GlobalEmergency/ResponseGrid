@@ -18,13 +18,13 @@ import { GetResourceFacets } from '../../application/get-resource-facets';
 import { GetNearbyResources } from '../../application/get-nearby-resources';
 import { GetResourcesInBounds } from '../../application/get-resources-in-bounds';
 import { GetPublicResource } from '../../application/get-public-resource';
-import { ResourceView } from '../../application/resource-view';
+import { ResourceDetailView } from '../../application/resource-view';
 import {
   PagedResourcesDto,
   ResourceFacetsDto,
   NearbyResourcesResponseDto,
   InBoundsResourcesDto,
-  ResourceViewDto,
+  ResourceDetailViewDto,
 } from './response.dto';
 import {
   PublicResourcesQueryDto,
@@ -160,13 +160,13 @@ export class PublicController {
   })
   @ApiOkResponse({
     description: 'The published resource',
-    type: ResourceViewDto,
+    type: ResourceDetailViewDto,
   })
   @ApiNotFoundResponse({ description: 'Resource not found or not public' })
   async getOne(
     @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
     @Param('resourceId', ParseUUIDPipe) resourceId: string,
-  ): Promise<ResourceView> {
+  ): Promise<ResourceDetailView> {
     const resource = await this.getPublicResource.execute({
       emergencyId,
       resourceId,

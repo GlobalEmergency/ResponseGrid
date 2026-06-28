@@ -5,6 +5,8 @@ import {
   matchOffer,
   fulfillOffer,
   cancelOffer,
+  editOffer,
+  discardOffer,
 } from '@/app/e/[slug]/coordinacion/actions';
 import type { components } from '@reliefhub/api-client';
 import type { ActionResult } from '@/app/e/[slug]/coordinacion/actions';
@@ -13,9 +15,14 @@ import { Button } from '@/components/atoms/button';
 import { Select } from '@/components/atoms/select';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { DetailDrawer } from '@/components/organisms/detail-drawer';
+import {
+  ValidationActions,
+  type EditField,
+} from '@/components/organisms/validation-actions';
 import { DetailField, DetailSection } from '@/components/molecules/detail-field';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
+import { categoryLabel } from '@/lib/categories';
 
 type OfferViewDto = components['schemas']['OfferViewDto'];
 type NeedViewDto = components['schemas']['NeedViewDto'];
@@ -53,21 +60,8 @@ export function OfferDetail({
   onClose,
   onActionSuccess,
 }: OfferDetailProps) {
-  const tc = getMessages(useLocale()).coord;
-
-  const CATEGORY_LABELS: Record<OfferViewDto['category'], string> = {
-    hygiene: tc.category_hygiene,
-    water: tc.category_water,
-    food: tc.category_food,
-    medical: tc.category_medical,
-    shelter: tc.category_shelter,
-    tools: tc.category_tools,
-    other: tc.category_other,
-    medicines: tc.category_medicines,
-    medical_equipment: tc.category_medical_equipment,
-    medical_supplies: tc.category_medical_supplies,
-    medical_personnel: tc.category_medical_personnel,
-  };
+  const locale = useLocale();
+  const tc = getMessages(locale).coord;
 
   const STATUS_LABELS: Record<OfferViewDto['status'], string> = {
     open: tc.offer_status_open,
@@ -124,6 +118,33 @@ export function OfferDetail({
     typeof offer.unit === 'string' && offer.unit !== '' ? offer.unit : null;
   const coords = `${offer.location.latitude}, ${offer.location.longitude}`;
   const quantity = `${offer.quantity}${unit !== null ? ` ${unit}` : ''}`;
+
+  const editFields: EditField[] = [
+    {
+      key: 'description',
+      label: tc.detail_field_description,
+      kind: 'textarea',
+      defaultValue: offer.description,
+    },
+    {
+      key: 'quantity',
+      label: tc.edit_field_quantity,
+      kind: 'number',
+      defaultValue: String(offer.quantity),
+    },
+    {
+      key: 'unit',
+      label: tc.edit_field_unit,
+      kind: 'text',
+      defaultValue: offer.unit ?? '',
+    },
+    {
+      key: 'notes',
+      label: tc.edit_field_notes,
+      kind: 'textarea',
+      defaultValue: offer.notes ?? '',
+    },
+  ];
 
   const actions =
     canMatch && offer.status === 'open' ? (
@@ -193,11 +214,34 @@ export function OfferDetail({
       </div>
     ) : null;
 
+  // Edit/discard only make sense while the offer is still live; a fulfilled or
+  // cancelled offer is terminal (the API would reject both with 409).
+  const canEditOrDiscard =
+    canMatch && (offer.status === 'open' || offer.status === 'matched');
+
   const footer =
-    actions != null || errorMessage !== undefined ? (
+    actions != null || errorMessage !== undefined || canEditOrDiscard ? (
       <div className="flex flex-col gap-3">
         {errorMessage !== undefined && <ErrorMessage message={errorMessage} />}
         {actions}
+        <ValidationActions
+          canAct={canEditOrDiscard}
+          editFields={editFields}
+          onEdit={(reason, values) =>
+            editOffer(offer.id, slug, {
+              reason,
+              description: values.description,
+              quantity:
+                values.quantity && values.quantity.trim() !== ''
+                  ? Number(values.quantity)
+                  : undefined,
+              unit: values.unit,
+              notes: values.notes,
+            })
+          }
+          onDiscard={(reason) => discardOffer(offer.id, slug, reason)}
+          onActionSuccess={onActionSuccess}
+        />
       </div>
     ) : undefined;
 
@@ -223,7 +267,7 @@ export function OfferDetail({
       <DetailSection title={tc.detail_section_meta}>
         <DetailField
           label={tc.detail_field_category}
-          value={CATEGORY_LABELS[offer.category]}
+          value={categoryLabel(offer.category, locale)}
         />
         <DetailField label={tc.detail_field_quantity} value={quantity} />
         <DetailField

@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import { setToken } from '@/lib/auth';
+import { safeNextPath } from '@/lib/safe-next';
 import { getT } from '@/i18n/server';
 
 export type LoginResult =
@@ -27,11 +28,6 @@ export async function loginAction(
   }
 
   await setToken(data.accessToken);
-  // Sanitize the redirect target: only allow internal relative paths to prevent
-  // open redirect attacks (e.g. ?next=https://evil.com or ?next=//evil.com).
-  const safe =
-    typeof next === 'string' && next.startsWith('/') && !next.startsWith('//')
-      ? next
-      : '/panel';
-  redirect(safe);
+  // Only allow internal relative paths (prevents open-redirect attacks).
+  redirect(safeNextPath(next) ?? '/panel');
 }

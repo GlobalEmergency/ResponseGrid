@@ -2,6 +2,8 @@
 
 > Caso de uso capturado del análisis de REDH para el roadmap de ReliefHub. Entregable independiente y abordable por separado.
 
+> **Nota (estructura actual):** desde el PR del dominio de insumos, lo que esta ficha llama `NeedItem` es hoy el value object **`SupplyLine`** y `NeedCategory` es **`Category`**, ambos en el bounded context propio **`supplies`** (no en `needs`); la persistencia de la línea de necesidad sigue en la tabla `need_items`. El `BeneficiaryInfo` propuesto se añadiría sobre la línea de la need (no sobre el `SupplyLine` compartido, para no filtrarlo a ofertas/inventario). Los nombres antiguos se conservan abajo tal como se redactó la propuesta.
+
 ---
 
 ## 1. Origen (qué hace REDH)

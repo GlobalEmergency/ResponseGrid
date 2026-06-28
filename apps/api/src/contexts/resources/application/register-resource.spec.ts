@@ -7,6 +7,7 @@ import {
   ResourceStage,
   VerificationLevel,
 } from '../domain/resource-enums';
+import { Category } from '../../supplies/domain/category';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 
@@ -79,6 +80,68 @@ describe('RegisterResource', () => {
     expect(resource?.ownerUserId).toBe('user-test-2');
     expect(resource?.ownerOrganizationId).toBe('org-test-1');
     expect(resource?.description).toBe('Recogida y entrega');
+  });
+
+  it('persists declared inventory items on the aggregate', async () => {
+    const repo = new InMemoryResourceRepository();
+    const bus = new FakeEventBus();
+    const useCase = new RegisterResource(repo, bus, activeReader);
+
+    const { id } = await useCase.execute({
+      emergencyId: EM,
+      type: ResourceType.Warehouse,
+      stage: ResourceStage.Origin,
+      name: 'Almacén con stock',
+      location: baseLocation,
+      ownerUserId: 'user-test-items',
+      items: [
+        {
+          name: 'Agua embotellada',
+          quantity: 200,
+          unit: 'litros',
+          category: Category.Water,
+        },
+        { name: 'Mantas', quantity: 50, category: Category.Shelter },
+      ],
+    });
+
+    const pending = await repo.findPendingByEmergency(
+      EmergencyId.fromString(EM),
+    );
+    const resource = pending.find((r) => r.id.value === id);
+    expect(resource?.items).toHaveLength(2);
+    expect(resource?.items[0]).toMatchObject({
+      name: 'Agua embotellada',
+      quantity: 200,
+      unit: 'litros',
+      category: 'water',
+    });
+    expect(resource?.items[1]).toMatchObject({
+      name: 'Mantas',
+      quantity: 50,
+      unit: null,
+      category: 'shelter',
+    });
+  });
+
+  it('defaults to an empty inventory when no items are provided', async () => {
+    const repo = new InMemoryResourceRepository();
+    const bus = new FakeEventBus();
+    const useCase = new RegisterResource(repo, bus, activeReader);
+
+    const { id } = await useCase.execute({
+      emergencyId: EM,
+      type: ResourceType.Warehouse,
+      stage: ResourceStage.Origin,
+      name: 'Almacén sin stock',
+      location: baseLocation,
+      ownerUserId: 'user-test-noitems',
+    });
+
+    const pending = await repo.findPendingByEmergency(
+      EmergencyId.fromString(EM),
+    );
+    expect(pending.find((r) => r.id.value === id)?.items).toEqual([]);
   });
 
   it('throws EmergencyNotAcceptingIntakeError when emergency is paused', async () => {

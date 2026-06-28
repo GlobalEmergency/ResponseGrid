@@ -2,12 +2,21 @@
 
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
+import { safeNextPath } from '@/lib/safe-next';
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
 
-export function SocialLoginButtons() {
+interface SocialLoginButtonsProps {
+  /** Path to return to after login; forwarded to the API so OAuth lands back there. */
+  next?: string;
+}
+
+export function SocialLoginButtons({ next }: SocialLoginButtonsProps) {
   const t = getMessages(useLocale()).ui;
+  // Carry the return path through the OAuth round-trip; drop unsafe values.
+  const safe = safeNextPath(next);
+  const nextQuery = safe ? `?next=${encodeURIComponent(safe)}` : '';
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
@@ -18,7 +27,7 @@ export function SocialLoginButtons() {
 
       {/* Google */}
       <a
-        href={`${API_URL}/auth/google`}
+        href={`${API_URL}/auth/google${nextQuery}`}
         className="flex items-center justify-center gap-3 w-full rounded-lg border border-line bg-white px-4 py-2.5 text-sm font-medium text-ink-soft hover:bg-surface transition-colors"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
@@ -44,7 +53,7 @@ export function SocialLoginButtons() {
 
       {/* Facebook */}
       <a
-        href={`${API_URL}/auth/facebook`}
+        href={`${API_URL}/auth/facebook${nextQuery}`}
         className="flex items-center justify-center gap-3 w-full rounded-lg border border-line bg-white px-4 py-2.5 text-sm font-medium text-ink-soft hover:bg-surface transition-colors"
       >
         <svg className="w-5 h-5 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">

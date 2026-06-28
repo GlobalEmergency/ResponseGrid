@@ -10,6 +10,7 @@ import {
 import { DrizzleAuditRepository } from './drizzle/drizzle-audit.repository';
 import { AuditInterceptor } from './http/audit.interceptor';
 import { AuditController } from './http/audit.controller';
+import { EmergencyAuditController } from './http/emergency-audit.controller';
 
 const auditRepositoryProvider = {
   provide: AUDIT_REPOSITORY,
@@ -19,7 +20,7 @@ const auditRepositoryProvider = {
 
 @Module({
   imports: [DatabaseModule, IdentityModule],
-  controllers: [AuditController],
+  controllers: [AuditController, EmergencyAuditController],
   providers: [
     auditRepositoryProvider,
     {

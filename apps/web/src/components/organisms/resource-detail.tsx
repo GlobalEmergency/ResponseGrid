@@ -1,13 +1,21 @@
 'use client';
 
 import { useActionState, useEffect } from 'react';
-import { verifyAndPublish } from '@/app/e/[slug]/coordinacion/actions';
+import {
+  verifyAndPublish,
+  editResource,
+  discardResource,
+} from '@/app/e/[slug]/coordinacion/actions';
 import type { components } from '@reliefhub/api-client';
 import type { ActionResult } from '@/app/e/[slug]/coordinacion/actions';
 import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { VerificationBadge } from '@/components/atoms/verification-badge';
 import { DetailDrawer } from '@/components/organisms/detail-drawer';
+import {
+  ValidationActions,
+  type EditField,
+} from '@/components/organisms/validation-actions';
 import { DetailField, DetailSection } from '@/components/molecules/detail-field';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
@@ -73,6 +81,33 @@ export function ResourceDetail({
   const accepts =
     resource.accepts.length > 0 ? resource.accepts.join(', ') : null;
 
+  const editFields: EditField[] = [
+    {
+      key: 'name',
+      label: tc.edit_field_name,
+      kind: 'text',
+      defaultValue: resource.name,
+    },
+    {
+      key: 'description',
+      label: tc.detail_field_description,
+      kind: 'textarea',
+      defaultValue: resource.description ?? '',
+    },
+    {
+      key: 'contact',
+      label: tc.edit_field_contact,
+      kind: 'text',
+      defaultValue: resource.contact ?? '',
+    },
+    {
+      key: 'schedule',
+      label: tc.edit_field_schedule,
+      kind: 'text',
+      defaultValue: resource.schedule ?? '',
+    },
+  ];
+
   const footer = canVerify ? (
     <div className="flex flex-col gap-3">
       {state.status === 'error' && (
@@ -83,6 +118,21 @@ export function ResourceDetail({
           {pending ? tc.processing : tc.resource_verify_publish}
         </Button>
       </form>
+      <ValidationActions
+        canAct={canVerify}
+        editFields={editFields}
+        onEdit={(reason, values) =>
+          editResource(resource.id, slug, {
+            reason,
+            name: values.name,
+            description: values.description,
+            contact: values.contact,
+            schedule: values.schedule,
+          })
+        }
+        onDiscard={(reason) => discardResource(resource.id, slug, reason)}
+        onActionSuccess={onActionSuccess}
+      />
     </div>
   ) : undefined;
 

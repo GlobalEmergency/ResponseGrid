@@ -8,18 +8,34 @@ import { Response } from 'express';
 import {
   ReportAlreadyReviewedError,
   ReportNotFoundError,
+  ReportNoteRequiredError,
+  ReportNotEditableError,
+  ReportAlreadyClosedError,
 } from '../../domain/report-errors';
 
-type ReportDomainError = ReportAlreadyReviewedError | ReportNotFoundError;
+type ReportDomainError =
+  | ReportAlreadyReviewedError
+  | ReportNotFoundError
+  | ReportNoteRequiredError
+  | ReportNotEditableError
+  | ReportAlreadyClosedError;
 
-@Catch(ReportAlreadyReviewedError, ReportNotFoundError)
+@Catch(
+  ReportAlreadyReviewedError,
+  ReportNotFoundError,
+  ReportNoteRequiredError,
+  ReportNotEditableError,
+  ReportAlreadyClosedError,
+)
 export class ReportExceptionFilter implements ExceptionFilter {
   catch(exception: ReportDomainError, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<Response>();
     const statusCode =
       exception instanceof ReportNotFoundError
         ? HttpStatus.NOT_FOUND
-        : HttpStatus.CONFLICT;
+        : exception instanceof ReportNoteRequiredError
+          ? HttpStatus.BAD_REQUEST
+          : HttpStatus.CONFLICT;
 
     response
       .status(statusCode)

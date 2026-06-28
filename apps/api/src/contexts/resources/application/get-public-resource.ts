@@ -1,7 +1,7 @@
 import { ResourceRepository } from '../domain/ports/resource.repository';
 import { ResourceId } from '../domain/resource-id';
 import { PublicStatus, VerificationLevel } from '../domain/resource-enums';
-import { ResourceView, toResourceView } from './resource-view';
+import { ResourceDetailView, toResourceDetailView } from './resource-view';
 
 const VISIBLE = [
   PublicStatus.Active,
@@ -27,7 +27,7 @@ export class GetPublicResource {
   async execute(q: {
     emergencyId: string;
     resourceId: string;
-  }): Promise<ResourceView | null> {
+  }): Promise<ResourceDetailView | null> {
     const resource = await this.repo.findById(
       ResourceId.fromString(q.resourceId),
     );
@@ -36,6 +36,6 @@ export class GetPublicResource {
     if (!VISIBLE.includes(resource.publicStatus)) return null;
     if (!PUBLICLY_VISIBLE_VERIFICATION.includes(resource.verificationLevel))
       return null;
-    return toResourceView(resource);
+    return toResourceDetailView(resource);
   }
 }

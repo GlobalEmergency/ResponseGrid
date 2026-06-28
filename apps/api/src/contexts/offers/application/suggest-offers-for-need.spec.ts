@@ -2,7 +2,7 @@ import { SuggestOffersForNeedWithLocation } from './suggest-offers-for-need';
 import { SubmitOffer } from './submit-offer';
 import { InMemoryOfferRepository } from '../infrastructure/in-memory-offer.repository';
 import { FakeOfferEventBus } from '../infrastructure/fake-event-bus';
-import { NeedCategory } from '../domain/offer-enums';
+import { Category } from '../domain/offer-enums';
 import { NeedForSuggestNotFoundError } from './suggest-offers-for-need';
 import { OfferEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { NeedLookup } from '../domain/ports/need-lookup';
@@ -46,7 +46,7 @@ describe('SuggestOffersForNeed', () => {
   let repo: InMemoryOfferRepository;
   let bus: FakeOfferEventBus;
 
-  async function createOffer(category: NeedCategory, lat: number, lon: number) {
+  async function createOffer(category: Category, lat: number, lon: number) {
     const uc = new SubmitOffer(
       repo,
       bus,
@@ -75,10 +75,10 @@ describe('SuggestOffersForNeed', () => {
   });
 
   it('returns only Open offers of the same category', async () => {
-    await createOffer(NeedCategory.Food, 10.4, -66.9);
-    await createOffer(NeedCategory.Medical, 10.5, -66.8); // different category
+    await createOffer(Category.Food, 10.4, -66.9);
+    await createOffer(Category.Medical, 10.5, -66.8); // different category
 
-    const needLookup = new ConfigurableNeedLookup(EM, NeedCategory.Food);
+    const needLookup = new ConfigurableNeedLookup(EM, Category.Food);
     const uc = new SuggestOffersForNeedWithLocation(repo, needLookup);
     const result = await uc.execute({
       needId: NEED_ID,
@@ -88,14 +88,14 @@ describe('SuggestOffersForNeed', () => {
     });
 
     expect(result.length).toBe(1);
-    expect(result[0].category).toBe(NeedCategory.Food);
+    expect(result[0].category).toBe(Category.Food);
   });
 
   it('sorts results by proximity (closest first)', async () => {
-    const farId = await createOffer(NeedCategory.Water, 15.0, -60.0); // far
-    const closeId = await createOffer(NeedCategory.Water, 10.48, -66.9); // close
+    const farId = await createOffer(Category.Water, 15.0, -60.0); // far
+    const closeId = await createOffer(Category.Water, 10.48, -66.9); // close
 
-    const needLookup = new ConfigurableNeedLookup(EM, NeedCategory.Water);
+    const needLookup = new ConfigurableNeedLookup(EM, Category.Water);
     const uc = new SuggestOffersForNeedWithLocation(repo, needLookup);
     const result = await uc.execute({
       needId: NEED_ID,

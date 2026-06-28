@@ -276,6 +276,12 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
                   title={te.action_submit_petition}
                   subtitle={te.help_petition_subtitle}
                 />
+                <HelpActionRow
+                  href={`/e/${slug}/ofrecer-transporte`}
+                  icon="🚚"
+                  title={te.action_offer_transport}
+                  subtitle={te.help_transport_subtitle}
+                />
               </div>
             ) : (
               <p className="rounded-card border border-line bg-surface-alt px-4 py-4 text-sm text-muted">

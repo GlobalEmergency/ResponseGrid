@@ -8,6 +8,8 @@ import { SubmitOffer } from '../application/submit-offer';
 import { MatchOffer } from '../application/match-offer';
 import { MarkOfferFulfilled } from '../application/mark-offer-fulfilled';
 import { CancelOffer } from '../application/cancel-offer';
+import { EditOffer } from '../application/edit-offer';
+import { DiscardOffer } from '../application/discard-offer';
 import { GetOffersQueue } from '../application/get-offers-queue';
 import { ListOffersForNeed } from '../application/list-offers-for-need';
 import { SuggestOffersForNeedWithLocation } from '../application/suggest-offers-for-need';
@@ -118,6 +120,19 @@ const cancelOfferProvider = {
     new CancelOffer(repo, bus),
 };
 
+const editOfferProvider = {
+  provide: EditOffer,
+  inject: [OFFER_REPOSITORY],
+  useFactory: (repo: OfferRepository) => new EditOffer(repo),
+};
+
+const discardOfferProvider = {
+  provide: DiscardOffer,
+  inject: [OFFER_REPOSITORY, OFFER_EVENT_BUS],
+  useFactory: (repo: OfferRepository, bus: EventBus) =>
+    new DiscardOffer(repo, bus),
+};
+
 const getOffersQueueProvider = {
   provide: GetOffersQueue,
   inject: [OFFER_REPOSITORY],
@@ -156,6 +171,8 @@ const getMyOffersProvider = {
     matchOfferProvider,
     markOfferFulfilledProvider,
     cancelOfferProvider,
+    editOfferProvider,
+    discardOfferProvider,
     getOffersQueueProvider,
     listOffersForNeedProvider,
     suggestOffersForNeedProvider,

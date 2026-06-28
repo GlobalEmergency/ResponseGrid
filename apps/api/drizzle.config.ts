@@ -23,8 +23,8 @@ export default {
     './src/contexts/templates/infrastructure/drizzle/schema.ts',
     './src/contexts/notifications/infrastructure/drizzle/schema.ts',
     './src/contexts/audit/infrastructure/drizzle/schema.ts',
-    // Taxonomy context (categories + aliases)
-    './src/contexts/taxonomy/infrastructure/drizzle/schema.ts',
+    // Supplies context (categories + aliases)
+    './src/contexts/supplies/infrastructure/drizzle/schema.ts',
   ],
   out: './drizzle',
   dialect: 'postgresql',

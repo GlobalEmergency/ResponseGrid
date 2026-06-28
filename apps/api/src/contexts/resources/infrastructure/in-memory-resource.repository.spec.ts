@@ -62,6 +62,7 @@ const makeActiveUnverified = (
     provenance: null,
     isFinalRecipient: false,
     recipientType: null,
+    items: [],
   });
 
 describe('InMemoryResourceRepository', () => {

@@ -18,6 +18,7 @@ export const en = {
     language: 'Language',
     es: 'ES',
     en: 'EN',
+    my_panel: 'My dashboard',
 
     // Global Emergency global footer (shared by every page)
     footer: {
@@ -133,6 +134,7 @@ export const en = {
     help_offer_subtitle: 'Warehouse · transport · space',
     help_volunteer_subtitle: 'Availability and skills',
     help_petition_subtitle: 'Request validated supplies',
+    help_transport_subtitle: 'Road · sea · air',
 
     // What NOT to do
     dont_do_heading: 'What NOT to do right now',
@@ -166,6 +168,7 @@ export const en = {
     action_submit_petition: 'Submit a request',
     action_donate: 'Donate supplies',
     action_volunteer: 'Sign up as a volunteer',
+    action_offer_transport: 'I can offer transport',
     actions_paused:
       'Resource and request registration is paused. Check the available information and come back later.',
 
@@ -199,20 +202,9 @@ export const en = {
 
     footer_my_points: 'My points',
     footer_my_volunteer: 'My volunteering',
+    footer_my_shipments: 'My shipments',
     footer_report: 'Report',
     footer_coordination: 'Coordination access',
-
-    category_hygiene: 'Hygiene',
-    category_water: 'Water',
-    category_food: 'Food',
-    category_medical: 'Medical',
-    category_shelter: 'Shelter',
-    category_tools: 'Tools',
-    category_other: 'Other',
-    category_medicines: '💊 Medicines',
-    category_medical_equipment: '🩺 Medical equipment',
-    category_medical_supplies: '📦 Medical supplies',
-    category_medical_personnel: '🧑‍⚕️ Medical personnel',
 
     priority_low: 'Low',
     priority_medium: 'Medium',
@@ -317,6 +309,8 @@ export const en = {
     back: 'Back to the emergency',
     needs_heading: 'Needs of this recipient',
     needs_empty: 'This recipient has no published needs.',
+    inventory_heading: 'Available materials',
+    inventory_empty: 'This point has not declared available materials.',
   },
 
   resource_list: {
@@ -370,6 +364,7 @@ export const en = {
     official: 'Official',
     verified: 'Verified',
     unverified: 'Unverified',
+    rejected: 'Discarded',
     aria_prefix: 'Trust level:',
   },
 
@@ -420,11 +415,30 @@ export const en = {
     success_register_another: 'Register another resource',
     error_fallback: 'Error registering resource',
 
+    // Inventory / available materials (optional)
+    inventory_heading: 'Available materials',
+    inventory_hint:
+      'Optional · State what materials or products you have to deliver (for the point’s inventory control).',
+    inventory_add: '+ Add material',
+    inventory_empty: 'No materials declared yet.',
+    item_number: 'Material {n}',
+    item_remove: 'Remove material {n}',
+    item_remove_label: 'Remove',
+    item_name_label: 'Material / product',
+    item_name_placeholder: 'e.g. Bottled water',
+    item_quantity_label: 'Quantity',
+    item_unit_label: 'Unit',
+    item_unit_opt: '(opt.)',
+    item_unit_placeholder: 'boxes, liters…',
+    item_category_label: 'Category',
+
     // server-action messages
     err_invalid_type: 'Invalid resource type.',
     err_invalid_stage: 'Invalid stage.',
     err_name_too_short: 'Name must be at least 2 characters.',
     err_location_required: 'Select a location.',
+    err_invalid_items:
+      'Check the materials: each line needs a name, quantity and category.',
     err_register_failed: 'Couldn’t register. Please try again.',
   },
 
@@ -469,18 +483,6 @@ export const en = {
     item_unit_placeholder: 'boxes, litres…',
     item_category_label: 'Category',
 
-    category_hygiene: 'Hygiene',
-    category_water: 'Water',
-    category_food: 'Food',
-    category_medical: 'Medical',
-    category_shelter: 'Shelter',
-    category_tools: 'Tools',
-    category_other: 'Other',
-    category_medicines: '💊 Medicines',
-    category_medical_equipment: '🩺 Medical equipment',
-    category_medical_supplies: '📦 Medical supplies',
-    category_medical_personnel: '🧑‍⚕️ Medical personnel',
-
     // server-action messages
     err_title_too_short: 'Title must be at least 2 characters.',
     err_invalid_priority: 'Invalid priority.',
@@ -510,14 +512,6 @@ export const en = {
 
     select_category_placeholder: 'Select a category…',
 
-    category_food: 'Food',
-    category_water: 'Water',
-    category_hygiene: 'Hygiene',
-    category_medical: 'Medical',
-    category_shelter: 'Shelter',
-    category_tools: 'Tools',
-    category_other: 'Other',
-
     submit: 'Donate supplies',
     submitting: 'Sending…',
     success_message:
@@ -531,6 +525,65 @@ export const en = {
     err_invalid_quantity: 'Quantity must be a positive whole number.',
     err_location_required: 'Select a location.',
     err_submit_failed: 'Couldn’t submit the offer. Please try again.',
+  },
+
+  // ── Offer transport (#105) ────────────────────────────────────────────────
+  ofrecerTransporte: {
+    page_title: 'I can offer transport',
+    page_subtitle: '{emergencyName} · Make your transport capacity available to the operation.',
+    meta_title: 'Offer transport — {emergencyName} · ResponseGrid',
+    meta_description: 'Offer transport capacity to move supplies for {emergencyName}.',
+
+    intro:
+      'Tell us how much cargo you can move and where. Coordination will match your capacity with the shipments that need it.',
+
+    // Transport mode
+    mode_label: 'Transport mode',
+    mode_road: 'Road',
+    mode_sea: 'Sea',
+    mode_air: 'Air',
+
+    // Capacity
+    capacity_legend: 'Cargo capacity',
+    capacity_hint: 'Provide at least weight or volume.',
+    weight_label: 'Weight (kg)',
+    weight_placeholder: 'e.g. 1500',
+    volume_label: 'Volume (m³)',
+    volume_placeholder: 'e.g. 12',
+
+    // Coverage
+    coverage_label: 'Which area or route do you cover?',
+    coverage_placeholder: 'e.g. Caracas → La Guaira, or Vargas State',
+
+    // Availability window
+    window_legend: 'Availability',
+    window_from_label: 'From',
+    window_to_label: 'To',
+
+    // Constraints
+    constraints_legend: 'Cargo conditions',
+    constraint_refrigerated: 'Refrigerated',
+    constraint_hazmat: 'Hazardous materials',
+    constraint_fragile: 'Fragile',
+
+    // Notes
+    notes_label: 'Additional notes',
+    notes_placeholder: 'e.g. Daily departure at 08:00',
+
+    submit: 'Publish capacity',
+    submitting: 'Publishing…',
+    success_message:
+      'Transport capacity published. Coordination will take it into account for this emergency’s shipments.',
+    success_offer_again: 'Publish another capacity',
+    error_fallback: 'Error publishing the capacity',
+
+    // server-action messages
+    err_invalid_mode: 'Select a valid transport mode.',
+    err_capacity_required: 'Provide at least weight (kg) or volume (m³).',
+    err_capacity_invalid: 'Weight and volume must be positive numbers.',
+    err_coverage_required: 'Enter the area or route you cover.',
+    err_window_invalid: 'The end date must be after the start date.',
+    err_submit_failed: 'Couldn’t publish the capacity. Please try again.',
   },
 
   voluntario: {
@@ -1196,6 +1249,16 @@ export const en = {
 
     update_status_forbidden: 'You do not have permission to change the status of this point.',
     update_status_failed: 'Could not update the status. Please try again.',
+
+    // My shipments (carrier) — metadata + header + list
+    ship_meta_title: 'My shipments — {name} · ResponseGrid',
+    ship_meta_description: 'The shipments assigned to you in {name}.',
+    ship_title: 'My shipments',
+    ship_subtitle: 'The shipments assigned to you as a carrier.',
+    ship_list_label: 'My shipments list',
+    ship_empty_title: 'You have no assigned shipments.',
+    ship_empty_description:
+      'When coordination assigns you a shipment it will appear here so you can mark it in transit and confirm delivery.',
   },
 
   admin: {
@@ -1408,18 +1471,6 @@ export const en = {
     priority_label: 'Priority',
     expired_at_label: 'Expired',
 
-    category_hygiene: 'Hygiene',
-    category_water: 'Water',
-    category_food: 'Food',
-    category_medical: 'Medical',
-    category_shelter: 'Shelter',
-    category_tools: 'Tools',
-    category_other: 'Other',
-    category_medicines: '💊 Medicines',
-    category_medical_equipment: '🩺 Medical equipment',
-    category_medical_supplies: '📦 Medical supplies',
-    category_medical_personnel: '🧑‍⚕️ Medical personnel',
-
     priority_low: 'Low',
     priority_medium: 'Medium',
     priority_high: 'High',
@@ -1444,6 +1495,38 @@ export const en = {
 
     need_card_label: 'Request: {title}',
     need_validate: 'Validate',
+
+    // ── Validation: edit / discard (mandatory reason) + activity ──
+    action_edit: 'Edit',
+    action_discard: 'Discard',
+    reason_label: 'Reason',
+    reason_help: 'Required: explain why, for the record.',
+    reason_placeholder: 'Write the reason…',
+    reason_required: 'A reason is required (minimum 3 characters).',
+    edit_field_title: 'Title',
+    edit_field_name: 'Name',
+    edit_field_contact: 'Contact',
+    edit_field_schedule: 'Schedule',
+    edit_field_quantity: 'Quantity',
+    edit_field_unit: 'Unit',
+    edit_field_notes: 'Notes',
+    edit_field_note: 'Note',
+    edit_keep_blank_hint: 'Leave a field empty to clear its value.',
+    edit_save: 'Save changes',
+    discard_confirm: 'Discard',
+    discarding: 'Discarding…',
+    err_edit_failed: 'Could not save the edit.',
+    err_discard_failed: 'Could not discard the item.',
+    err_reason_required: 'A reason is required.',
+    tab_activity: 'Activity',
+    activity_title: 'Activity log',
+    activity_subtitle:
+      'Traceability of validations and changes in this emergency (coordination only).',
+    activity_empty: 'No activity recorded yet.',
+    activity_reason_label: 'Reason',
+    activity_changes_label: 'Changes',
+    activity_target_label: 'New state',
+    activity_actor_unknown: 'System',
 
     expired_card_label: 'Expired request: {title}',
     expired_renew: 'Renew',
@@ -1541,6 +1624,67 @@ export const en = {
     no_actionable_queues_description:
       'Your role does not include validation, verification or matching permissions here.',
     queue_view_detail: 'View detail',
+
+    // ── Sub-navigation / hub / search (#117) ──────────────────────────
+    tab_overview: 'Overview',
+    tab_resources: 'Resources',
+    tab_needs: 'Requests',
+    tab_offers: 'Offers',
+    tab_shipments: 'Shipments',
+    tab_volunteers: 'Volunteers',
+    tab_reports: 'Reports',
+    tabs_aria: 'Coordination sections',
+
+    hub_sections_label: 'Coordination sections',
+    hub_count_aria: 'pending',
+    hub_resources_label: 'Resources to verify',
+    hub_resources_description: 'Review and publish pending points.',
+    hub_needs_label: 'Requests to validate',
+    hub_needs_description: 'Validate incoming citizen requests.',
+    hub_offers_label: 'Material offers',
+    hub_offers_description: 'Match donor offers with validated needs.',
+    hub_volunteers_label: 'Volunteers & tasks',
+    hub_volunteers_description: 'Coordinate the roster and assign tasks.',
+    hub_reports_label: 'Field reports',
+    hub_reports_description: 'Review reports sent from the field.',
+    hub_shipments_label: 'Shipments',
+    hub_shipments_description: 'Plan and track material shipments between points.',
+    hub_shipments_count_aria: 'in progress',
+
+    search_placeholder: 'Search…',
+    search_aria: 'Search',
+    search_clear: 'Clear search',
+
+    pagination_prev: 'Previous',
+    pagination_next: 'Next',
+    pagination_summary: 'Page {page} of {pages} · {total} results',
+
+    resource_type_filter_label: 'Type',
+    resource_type_filter_aria: 'Filter by resource type',
+    resource_type_filter_all: 'All types',
+
+    offers_filter_group_label: 'Offer filters',
+    offers_filter_category_label: 'Category',
+    offers_filter_category_aria: 'Filter by category',
+    offers_filter_category_all: 'All categories',
+    offers_filter_status_label: 'Status',
+    offers_filter_status_aria: 'Filter by status',
+    offers_filter_status_all: 'All statuses',
+
+    resources_section_meta_title: 'Resources — {name} coordination · ResponseGrid',
+    resources_section_meta_description: 'Resource verification queue for {name}.',
+    resources_no_match_title: 'No resources for this search.',
+    resources_no_match_description: 'Try different terms or change the type filter.',
+
+    needs_section_meta_title: 'Requests — {name} coordination · ResponseGrid',
+    needs_section_meta_description: 'Request validation queue for {name}.',
+    needs_no_match_title: 'No requests for this search.',
+    needs_no_match_description: 'Try different terms or adjust the filters.',
+
+    offers_section_meta_title: 'Offers — {name} coordination · ResponseGrid',
+    offers_section_meta_description: 'Material offers queue for {name}.',
+    offers_no_match_title: 'No offers for these filters.',
+    offers_no_match_description: 'Adjust the category or status to see more offers.',
 
     controls_heading: 'Emergency controls',
     controls_intake_heading: 'Intake status',
@@ -1669,6 +1813,104 @@ export const en = {
     personnel_fields_specialty_placeholder: 'e.g. pediatric emergency physician',
     personnel_fields_count_label: 'People needed',
 
+    // ── Shipments / Expediciones (#106) ───────────────────────────────
+    shipments_heading: 'Shipments',
+    shipments_list_label: 'Shipments list',
+    shipments_empty_title: 'No shipments yet.',
+    shipments_empty_description:
+      'Create a shipment to move material between the emergency’s points.',
+    shipments_no_match_title: 'No shipments with this status.',
+    shipments_no_match_description: 'Change the status filter to see more.',
+    shipments_section_meta_title:
+      'Shipments — {name} coordination · ResponseGrid',
+    shipments_section_meta_description:
+      'Planning and tracking of {name} material shipments.',
+
+    shipments_filter_group_label: 'Shipment filters',
+    shipments_filter_status_label: 'Status',
+    shipments_filter_status_aria: 'Filter by status',
+    shipments_filter_status_all: 'All statuses',
+
+    ship_route: '{origin} → {destination}',
+    ship_drawer_open: 'View shipment detail: {route}',
+    ship_section_route: 'Route',
+    ship_section_items: 'Cargo',
+    ship_section_assignment: 'Assignment',
+    ship_field_origin: 'Origin',
+    ship_field_destination: 'Destination',
+    ship_field_items: 'Items',
+    ship_field_manifest: 'Manifest',
+    ship_field_capacity: 'Assigned capacity',
+    ship_field_carrier: 'Carrier',
+
+    ship_status_planned: 'Planned',
+    ship_status_assigned: 'Assigned',
+    ship_status_in_transit: 'In transit',
+    ship_status_delivered: 'Delivered',
+    ship_status_failed: 'Failed',
+    ship_status_cancelled: 'Cancelled',
+
+    ship_carrier_volunteer: 'Volunteer',
+    ship_carrier_organization: 'Organization',
+
+    ship_mode_road: 'Road',
+    ship_mode_sea: 'Sea',
+    ship_mode_air: 'Air',
+
+    // Lifecycle actions
+    ship_assign_select_label: 'Select a capacity to assign',
+    ship_assign_placeholder: 'Select a capacity…',
+    ship_assign_none: 'No capacities available',
+    ship_assign_cta: 'Assign capacity',
+    // Capacity suggestions (#107)
+    ship_suggestions_heading: 'Capacity suggestions',
+    ship_suggestions_loading: 'Finding compatible capacities…',
+    ship_suggestions_error: 'Could not load suggestions. Please try again.',
+    ship_suggestions_empty: 'No compatible capacities',
+    ship_suggestions_show_all: 'Show all available',
+    ship_suggestions_assign: 'Assign',
+    ship_mark_in_transit: 'Mark in transit',
+    ship_confirm_delivery: 'Confirm delivery',
+    ship_cancel: 'Cancel shipment',
+
+    // Create shipment
+    ship_create_cta: '+ Create shipment',
+    ship_create_title: 'New shipment',
+    ship_create_submit: 'Create shipment',
+    ship_creating: 'Creating…',
+    ship_select_resource_placeholder: 'Select a point…',
+    ship_items_legend: 'Cargo',
+    ship_item_description_label: 'Item description',
+    ship_item_description_placeholder: 'e.g. Water boxes',
+    ship_item_quantity_label: 'Quantity',
+    ship_item_quantity_placeholder: 'Quantity',
+    ship_item_unit_label: 'Unit',
+    ship_item_unit_placeholder: 'Unit',
+    ship_item_add: '+ Add item',
+    ship_item_remove: 'Remove',
+    ship_manifest_placeholder: 'Manifest notes: fragile cargo, instructions…',
+
+    // Available capacities (read-only, #105)
+    cap_heading: 'Available capacities',
+    cap_subtitle: 'Transport offered for this emergency. Assign it from a shipment.',
+    cap_list_label: 'Transport capacities list',
+    cap_empty_title: 'No transport capacities.',
+    cap_empty_description:
+      'When someone offers transport for this emergency it will appear here.',
+    cap_field_capacity: 'Capacity:',
+    cap_field_coverage: 'Coverage:',
+    cap_field_window: 'Window:',
+    cap_status_available: 'Available',
+    cap_status_reserved: 'Reserved',
+    cap_status_withdrawn: 'Withdrawn',
+    cap_filter_group_label: 'Capacity filters',
+    cap_filter_mode_label: 'Mode',
+    cap_filter_mode_aria: 'Filter by transport mode',
+    cap_filter_mode_all: 'All modes',
+    cap_filter_status_label: 'Status',
+    cap_filter_status_aria: 'Filter by status',
+    cap_filter_status_all: 'All statuses',
+
     // server-action messages
     err_no_permission_match: 'You don’t have permission to assign this offer.',
     err_offer_not_open: 'The offer isn’t in an open state.',
@@ -1718,6 +1960,27 @@ export const en = {
     vol_err_no_permission_cancel: 'You don’t have permission to cancel this task.',
     vol_err_already_completed: 'The task is already completed.',
     vol_err_cancel_failed: 'Couldn’t cancel the task. Please try again.',
+
+    // Shipments (#106) — server-action messages
+    ship_err_endpoints_required: 'Select an origin and a destination.',
+    ship_err_same_endpoint: 'Origin and destination must be different.',
+    ship_err_items_required: 'Add at least one cargo item.',
+    ship_err_quantity_invalid: 'Quantities must be positive numbers.',
+    ship_err_capacity_required: 'Select a capacity to assign.',
+    ship_err_no_permission_create: 'You don’t have permission to create shipments.',
+    ship_err_create_failed: 'Couldn’t create the shipment. Please try again.',
+    ship_err_no_permission_assign: 'You don’t have permission to assign capacity.',
+    ship_err_no_permission_act: 'You don’t have permission to update this shipment.',
+    ship_err_no_permission_cancel: 'You don’t have permission to cancel this shipment.',
+    ship_err_not_found: 'Shipment not found.',
+    ship_err_not_planned: 'The shipment is no longer in a planned state.',
+    ship_err_not_assigned: 'The shipment isn’t in an assigned state.',
+    ship_err_not_in_transit: 'The shipment isn’t in transit.',
+    ship_err_cannot_cancel: 'The shipment can’t be cancelled in its current state.',
+    ship_err_assign_failed: 'Couldn’t assign the capacity. Please try again.',
+    ship_err_transit_failed: 'Couldn’t mark in transit. Please try again.',
+    ship_err_deliver_failed: 'Couldn’t confirm delivery. Please try again.',
+    ship_err_cancel_failed: 'Couldn’t cancel the shipment. Please try again.',
   },
 
   // Shared leaf-component strings
@@ -1789,4 +2052,4 @@ export const en = {
     qa_notifications: 'Notifications',
     qa_explore: 'View emergencies',
   },
-} as Messages;
+} satisfies Messages;

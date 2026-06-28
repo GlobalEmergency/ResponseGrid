@@ -4,8 +4,8 @@
 import { Need } from './need';
 import { NeedId } from './need-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { NeedItem } from './need-item';
-import { NeedCategory, Priority, PersonnelSkill } from './need-enums';
+import { SupplyLine } from '../../supplies/domain/supply-line';
+import { Category, Priority, PersonnelSkill } from './need-enums';
 import { Location } from '../../../shared/domain/location';
 
 const needId = NeedId.fromString('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
@@ -17,11 +17,11 @@ const location = Location.create({
   latitude: 10.48,
   longitude: -66.9,
 });
-const item = NeedItem.create({
+const item = SupplyLine.create({
   name: 'Medical Personnel',
   quantity: 2,
   unit: null,
-  category: NeedCategory.MedicalPersonnel,
+  category: Category.MedicalPersonnel,
 });
 
 function makeNeed(

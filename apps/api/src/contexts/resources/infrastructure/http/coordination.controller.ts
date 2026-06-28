@@ -3,6 +3,7 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -16,8 +17,8 @@ import {
   ApiForbiddenResponse,
 } from '@nestjs/swagger';
 import { GetCoordinationQueue } from '../../application/get-coordination-queue';
-import { ResourceView } from '../../application/resource-view';
-import { ResourceViewDto } from './response.dto';
+import { PagedResourcesDto } from './response.dto';
+import { CoordinationQueueQueryDto } from './dto';
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
 import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
 import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
@@ -32,7 +33,8 @@ export class CoordinationController {
   @RequirePermission('resource:read')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Get the coordination queue for an emergency (coordinator only)',
+    summary:
+      'Get the verification queue for an emergency (paginated + searchable)',
   })
   @ApiParam({
     name: 'emergencyId',
@@ -40,8 +42,8 @@ export class CoordinationController {
     format: 'uuid',
   })
   @ApiOkResponse({
-    description: 'List of resources in queue',
-    type: [ResourceViewDto],
+    description: 'Paged list of resources pending verification',
+    type: PagedResourcesDto,
   })
   @ApiNotFoundResponse({ description: 'Emergency not found' })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
@@ -50,7 +52,14 @@ export class CoordinationController {
   })
   async list(
     @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
-  ): Promise<ResourceView[]> {
-    return this.queue.execute({ emergencyId });
+    @Query() query: CoordinationQueueQueryDto,
+  ): Promise<PagedResourcesDto> {
+    return this.queue.execute({
+      emergencyId,
+      page: query.page ?? 1,
+      limit: query.limit ?? 50,
+      ...(query.type !== undefined && { type: query.type }),
+      ...(query.q !== undefined && query.q !== '' && { q: query.q }),
+    });
   }
 }

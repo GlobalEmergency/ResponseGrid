@@ -8,6 +8,7 @@ import {
   NotFoundException,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Request,
   UseGuards,
@@ -30,11 +31,19 @@ import { SubmitOffer } from '../../application/submit-offer';
 import { MatchOffer } from '../../application/match-offer';
 import { MarkOfferFulfilled } from '../../application/mark-offer-fulfilled';
 import { CancelOffer } from '../../application/cancel-offer';
+import { EditOffer, EditOfferCommand } from '../../application/edit-offer';
+import { DiscardOffer } from '../../application/discard-offer';
 import { GetOffersQueue } from '../../application/get-offers-queue';
 import { ListOffersForNeed } from '../../application/list-offers-for-need';
 import { SuggestOffersForNeedWithLocation } from '../../application/suggest-offers-for-need';
 import { GetMyOffers } from '../../application/get-my-offers';
-import { SubmitOfferDto, MatchOfferDto } from './dto';
+import {
+  SubmitOfferDto,
+  MatchOfferDto,
+  EditOfferDto,
+  DiscardOfferDto,
+} from './dto';
+import { setAuditContext } from '../../../audit/infrastructure/http/audit-context';
 import { SubmitOfferResponseDto, OfferViewDto } from './response.dto';
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
 import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
@@ -67,6 +76,8 @@ export class OffersController {
     private readonly matchOffer: MatchOffer,
     private readonly markOfferFulfilled: MarkOfferFulfilled,
     private readonly cancelOffer: CancelOffer,
+    private readonly editOffer: EditOffer,
+    private readonly discardOffer: DiscardOffer,
     private readonly getOffersQueue: GetOffersQueue,
     private readonly listOffersForNeed: ListOffersForNeed,
     private readonly suggestOffersForNeed: SuggestOffersForNeedWithLocation,
@@ -267,6 +278,74 @@ export class OffersController {
       offerId,
       needId: dto.needId,
       needEmergencyId,
+    });
+  }
+
+  @Patch('offers/:offerId')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('offer:match')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Edit a donation offer (coordinator). Requires a reason; recorded in the audit trail.',
+  })
+  @ApiParam({ name: 'offerId', description: 'Offer UUID', format: 'uuid' })
+  @ApiNoContentResponse({ description: 'Offer edited' })
+  @ApiNotFoundResponse({ description: 'Offer not found' })
+  @ApiBadRequestResponse({
+    description: 'Missing reason or offer is in a terminal status',
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Coordinator role required' })
+  async edit(
+    @Param('offerId', ParseUUIDPipe) offerId: string,
+    @Body() dto: EditOfferDto,
+    @Request() req: AuthenticatedRequest,
+  ): Promise<void> {
+    const cmd: EditOfferCommand = { offerId };
+    if (dto.description !== undefined) cmd.description = dto.description;
+    if (dto.quantity !== undefined) cmd.quantity = dto.quantity;
+    if (dto.unit !== undefined) cmd.unit = dto.unit;
+    if (dto.notes !== undefined) cmd.notes = dto.notes;
+
+    const result = await this.editOffer.execute(cmd);
+    setAuditContext(req, {
+      reason: dto.reason,
+      changes: result.changes,
+      targetStatus: result.targetStatus,
+      emergencyId: result.emergencyId,
+    });
+  }
+
+  @Post('offers/:offerId/discard')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('offer:match')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Discard a donation offer (coordinator). Requires a reason; recorded in the audit trail.',
+  })
+  @ApiParam({ name: 'offerId', description: 'Offer UUID', format: 'uuid' })
+  @ApiNoContentResponse({ description: 'Offer discarded (cancelled)' })
+  @ApiNotFoundResponse({ description: 'Offer not found' })
+  @ApiBadRequestResponse({
+    description: 'Missing reason or offer cannot be discarded in its status',
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Coordinator role required' })
+  async discard(
+    @Param('offerId', ParseUUIDPipe) offerId: string,
+    @Body() dto: DiscardOfferDto,
+    @Request() req: AuthenticatedRequest,
+  ): Promise<void> {
+    const result = await this.discardOffer.execute({ offerId });
+    setAuditContext(req, {
+      reason: dto.reason,
+      changes: result.changes,
+      targetStatus: result.targetStatus,
+      emergencyId: result.emergencyId,
     });
   }
 

@@ -44,12 +44,36 @@ export class AuditQueryDto {
   offset?: number;
 }
 
+export class AuditChangeDto {
+  @ApiProperty({ description: 'Name of the field that changed' })
+  field!: string;
+
+  @ApiPropertyOptional({
+    description: 'Value before the change (any JSON type)',
+    nullable: true,
+  })
+  before?: unknown;
+
+  @ApiPropertyOptional({
+    description: 'Value after the change (any JSON type)',
+    nullable: true,
+  })
+  after?: unknown;
+}
+
 export class AuditEntryDto {
   @ApiProperty()
   id!: string;
 
   @ApiPropertyOptional({ nullable: true, type: String })
   actorUserId!: string | null;
+
+  @ApiPropertyOptional({
+    nullable: true,
+    type: String,
+    description: 'Actor display name captured at write time',
+  })
+  actorName!: string | null;
 
   @ApiProperty()
   action!: string;
@@ -71,6 +95,27 @@ export class AuditEntryDto {
 
   @ApiProperty()
   statusCode!: number;
+
+  @ApiPropertyOptional({
+    nullable: true,
+    type: String,
+    description: 'Mandatory reason for edit/discard actions',
+  })
+  reason!: string | null;
+
+  @ApiPropertyOptional({
+    nullable: true,
+    type: [AuditChangeDto],
+    description: 'Before/after field changes for edit actions',
+  })
+  changes!: AuditChangeDto[] | null;
+
+  @ApiPropertyOptional({
+    nullable: true,
+    type: String,
+    description: 'State the entity transitioned to (e.g. rejected)',
+  })
+  targetStatus!: string | null;
 
   @ApiProperty()
   createdAt!: Date;

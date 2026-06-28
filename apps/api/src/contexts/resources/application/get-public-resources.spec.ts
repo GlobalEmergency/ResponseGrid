@@ -112,6 +112,7 @@ describe('GetPublicResources', () => {
         provenance: null,
         isFinalRecipient: false,
         recipientType: null,
+        items: [],
       }),
     );
 

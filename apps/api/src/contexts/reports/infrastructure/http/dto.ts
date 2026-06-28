@@ -7,6 +7,8 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  MaxLength,
+  MinLength,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -87,4 +89,46 @@ export class GetReportsQueueQueryDto {
   @IsOptional()
   @IsIn(Object.values(ReportType))
   type?: ReportType;
+}
+
+export class EditReportDto {
+  @ApiProperty({
+    description: 'Motivo de la edición (obligatorio, para trazabilidad)',
+    minLength: 3,
+    maxLength: 1000,
+    example: 'Se corrige la prioridad y se completa la nota',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(1000)
+  reason!: string;
+
+  @ApiPropertyOptional({
+    description: 'Nueva nota (omitir para no cambiarla)',
+    minLength: 2,
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  note?: string;
+
+  @ApiPropertyOptional({ enum: ReportPriority, description: 'Nueva prioridad' })
+  @IsOptional()
+  @IsEnum(ReportPriority)
+  priority?: ReportPriority;
+}
+
+export class DiscardReportDto {
+  @ApiProperty({
+    description: 'Motivo del descarte (obligatorio, para trazabilidad)',
+    minLength: 3,
+    maxLength: 1000,
+    example: 'Reporte duplicado; ya registrado en otra entrada',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(1000)
+  reason!: string;
 }

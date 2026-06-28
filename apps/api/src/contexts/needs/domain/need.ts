@@ -1,13 +1,20 @@
 import { NeedId } from './need-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Priority, NeedStatus, PersonnelSkill } from './need-enums';
-import { NeedNotPendingError } from './need-errors';
+import {
+  NeedNotPendingError,
+  NeedNotEditableError,
+  NeedTitleRequiredError,
+} from './need-errors';
 import { DomainEvent } from './events/domain-event';
 import { NeedCreated } from './events/need-created.event';
 import { NeedValidated } from './events/need-validated.event';
 import { NeedRejected } from './events/need-rejected.event';
 import { Location, LocationProps } from '../../../shared/domain/location';
-import { NeedItem, NeedItemSnapshot } from './need-item';
+import {
+  SupplyLine,
+  SupplyLineSnapshot,
+} from '../../supplies/domain/supply-line';
 import { LocationSensitivity } from '../../../shared/domain/location-sensitivity';
 
 /** Hours a validated need stays visible before it expires. */
@@ -31,13 +38,20 @@ export interface CreateNeedProps {
   requesterOrganizationId: string | null;
   /** Default: 'public'. Use CreateNeed use case to get the correct auto-derived value. */
   locationSensitivity?: LocationSensitivity;
-  items: NeedItem[];
+  items: SupplyLine[];
   /** F05: optional personnel-need fields */
   requiredSkill?: PersonnelSkill | null;
   skillSpecialty?: string | null;
   requestedCount?: number | null;
   /** Optional link to the resource / final recipient this need belongs to (#60). */
   resourceId?: string | null;
+}
+
+/** Fields a coordinator may change while validating. Omit a field to keep it. */
+export interface EditNeedProps {
+  title?: string;
+  description?: string | null;
+  priority?: Priority;
 }
 
 export interface NeedSnapshot {
@@ -52,7 +66,7 @@ export interface NeedSnapshot {
   managingOrganizationId: string | null;
   /** Optional for backwards compatibility with legacy snapshots. Default: 'public'. */
   locationSensitivity?: LocationSensitivity;
-  items: NeedItemSnapshot[];
+  items: SupplyLineSnapshot[];
   status: NeedStatus;
   createdAt: Date;
   expiresAt: Date | null;
@@ -71,15 +85,15 @@ export class Need {
   private constructor(
     public readonly id: NeedId,
     public readonly emergencyId: EmergencyId,
-    public readonly title: string,
-    public readonly description: string | null,
+    private _title: string,
+    private _description: string | null,
     public readonly location: Location,
-    public readonly priority: Priority,
+    private _priority: Priority,
     public readonly requesterUserId: string,
     public readonly requesterOrganizationId: string | null,
     private _managingOrganizationId: string | null,
     public readonly locationSensitivity: LocationSensitivity,
-    public readonly items: NeedItem[],
+    public readonly items: SupplyLine[],
     private _status: NeedStatus,
     public readonly createdAt: Date,
     private _expiresAt: Date | null,
@@ -146,7 +160,7 @@ export class Need {
       s.managingOrganizationId,
       // Fallback for legacy snapshots that pre-date the locationSensitivity field
       s.locationSensitivity ?? LocationSensitivity.Public,
-      s.items.map((i) => NeedItem.fromSnapshot(i)),
+      s.items.map((i) => SupplyLine.fromSnapshot(i)),
       s.status,
       s.createdAt,
       s.expiresAt ?? null,
@@ -156,6 +170,18 @@ export class Need {
       s.requestedCount ?? null,
       s.resourceId ?? null,
     );
+  }
+
+  get title(): string {
+    return this._title;
+  }
+
+  get description(): string | null {
+    return this._description;
+  }
+
+  get priority(): Priority {
+    return this._priority;
   }
 
   get status(): NeedStatus {
@@ -209,6 +235,33 @@ export class Need {
     this.events.push(
       new NeedRejected(this.id.value, { emergencyId: this.emergencyId.value }),
     );
+  }
+
+  /**
+   * Coordinator edit during validation: complete or correct the need's core
+   * fields. Only `undefined` props are left untouched (passing `null` to
+   * `description` clears it). Terminal needs (rejected/fulfilled) are immutable.
+   */
+  edit(props: EditNeedProps): void {
+    if (
+      this._status === NeedStatus.Rejected ||
+      this._status === NeedStatus.Fulfilled
+    ) {
+      throw new NeedNotEditableError();
+    }
+    if (props.title !== undefined) {
+      const trimmed = props.title.trim();
+      if (trimmed.length === 0) throw new NeedTitleRequiredError();
+      this._title = trimmed;
+    }
+    if (props.description !== undefined) {
+      const next =
+        props.description === null ? null : props.description.trim() || null;
+      this._description = next;
+    }
+    if (props.priority !== undefined) {
+      this._priority = props.priority;
+    }
   }
 
   /**

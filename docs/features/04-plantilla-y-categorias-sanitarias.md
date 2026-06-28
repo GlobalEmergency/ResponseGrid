@@ -4,6 +4,22 @@
 
 ---
 
+## 0. Estado de implementación (actualizado)
+
+> **Parcialmente entregado.** El vocabulario de categorías sanitarias y su modelo de datos ya están **en uso**; lo que sigue pendiente es la *configurabilidad por emergencia* (Opción B). El resto de la ficha se conserva como rationale de diseño.
+>
+> **Entregado** — vive en el nuevo bounded context **`supplies` (insumos)**, no en `needs`:
+> - **`Category`** — enum canónico único (`apps/api/src/contexts/supplies/domain/category.ts`) con las 8 genéricas **+ las 4 del vertical sanitario** (`medicines`, `medical_equipment`, `medical_supplies`, `medical_personnel`). Sustituye al antiguo `NeedCategory` y lo reutilizan `needs`, `offers`, `resources` (inventario) y `logistics`.
+> - **`CategoryDefinition`** (tabla `categories`, seed `0020_taxonomy_seed.sql`) — enriquece cada slug con etiqueta localizada (`labelEs`/`labelEn`), **jerarquía** (`parentSlug`), `vertical` y orden; más alias de importación resueltos por `category-resolver`. Es la pieza de datos que pedía la Opción B, pero sobre el enum canónico.
+> - **`GET /categories`** — endpoint público que expone la taxonomía compartida (slug + etiquetas + jerarquía).
+> - La línea de material es ahora el value object **`SupplyLine`** (antes `NeedItem`); su `category` es `Category`.
+>
+> En la práctica se tomó un camino intermedio: **enum canónico global (cercano a la Opción A) enriquecido con una tabla de definición** (etiquetas/jerarquía/alias), todo en el dominio propio `supplies` en vez de en `needs`.
+>
+> **Pendiente (backlog)** — categorías **configurables por emergencia/plantilla** (`EmergencyNeedCategory`, `EmergencyTemplate.customNeedCategories`, `GET /emergencies/:id/need-categories`) y el seed de la plantilla sanitaria. Las §3.2–§3.5 y §8 describen ese trabajo aún no realizado.
+
+---
+
 ## 1. Origen (qué hace REDH)
 
 REDH es una plataforma sanitaria desplegada para el sismo de Venezuela (Caracas / La Guaira / Miranda). Sus categorías de necesidades reflejan el dominio hospitalario:
@@ -187,7 +203,7 @@ El frontend solicita las categorías al montar el formulario de petición. Si la
 ### 3.5 Encaje con lo existente
 
 - **`templates`:** `CreateEmergencyFromTemplate` ya copia `dontBringList` y `defaultAnnouncement`; se extiende para copiar `customNeedCategories`.
-- **`needs`:** `NeedItem.category` ya es `NeedCategory` enum; con Opción B pasa a ser `string` validado; la capa de aplicación convierte. El filtro de coordinación (`category` query param en `GET /emergencies/:id/needs`) sigue funcionando con el slug.
+- **`needs` / `supplies`:** la línea de necesidad es hoy `SupplyLine.category: Category` (en el contexto propio `supplies`; antes `NeedItem`/`NeedCategory`); con la Opción B `category` pasaría a `string` validado por emergencia y la capa de aplicación convertiría. El filtro de coordinación (`category` query param en `GET /emergencies/:id/needs`) sigue funcionando con el slug.
 - **`i18n`:** las etiquetas de categoría se almacenan como texto en BD; el selector las muestra directas sin clave i18n, lo que simplifica la traducción.
 - **`accreditation`:** no afectado.
 - **`volunteers`:** la categoría `medical_personnel` converge con la feature 05 (ver ficha independiente).
@@ -221,7 +237,7 @@ El frontend solicita las categorías al montar el formulario de petición. Si la
 | Dependencia | Estado |
 |---|---|
 | Contexto `templates` (`EmergencyTemplate`, `CreateEmergencyFromTemplate`) | ✅ Hecho (F5a) |
-| Contexto `needs` (estructura `NeedItem.category`) | ✅ Hecho |
+| Contexto `supplies` (`SupplyLine.category: Category`; antes `needs`/`NeedItem`) | ✅ Hecho |
 | `pnpm gen:api` tras añadir endpoint | Obligatorio (GOTCHA recurrente) |
 | Migración Drizzle manual vía psql (drizzle-kit cuelga en Windows) | Aplicar a dev y test |
 | Seed de la plantilla sanitaria | Script nuevo o carga admin |

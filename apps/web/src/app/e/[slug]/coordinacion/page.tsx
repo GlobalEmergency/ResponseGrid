@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -10,21 +9,16 @@ import {
   type EmergencyAccess,
 } from '@/lib/emergency-permissions';
 import type { MeGrant, RoleCatalogEntry } from '@/lib/admin-scopes';
-import { NeedsQueue, ResourcesQueue, OffersQueue } from '@/components/organisms/coordination-queues';
-import { ExpiredNeedCard } from '@/components/organisms/expired-need-card';
 import { EmergencyControls } from '@/components/organisms/emergency-controls';
-import { NeedsFilter } from '@/components/molecules/needs-filter';
+import { CoordinationSectionLink } from '@/components/molecules/coordination-section-link';
 import { EmptyState } from '@/components/molecules/empty-state';
-import { Badge } from '@/components/atoms/badge';
 import { getT } from '@/i18n/server';
-import type { Messages } from '@/i18n/messages/es';
 
 // Always fetch live data — never serve a stale cached page.
 export const dynamic = 'force-dynamic';
 
 type Props = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -38,37 +32,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-/** Friendly per-role label, falling back to the catalog description. */
-function roleLabel(
-  roleId: string,
-  tc: Messages['coord'],
-  roleDesc: Map<string, string>,
-): string {
-  switch (roleId) {
-    case 'emergency_coordinator':
-      return tc.role_emergency_coordinator;
-    case 'emergency_verifier':
-      return tc.role_emergency_verifier;
-    case 'platform_admin':
-      return tc.role_platform_admin;
-    case 'platform_operator':
-      return tc.role_platform_operator;
-    default:
-      return roleDesc.get(roleId) ?? roleId;
-  }
-}
-
-export default async function CoordinacionPage({ params, searchParams }: Props) {
+export default async function CoordinacionPage({ params }: Props) {
   const { slug } = await params;
-  const resolvedSearchParams = await searchParams;
 
-  // --- Auth guard -------------------------------------------------------
+  // --- Auth + emergency (frame is rendered by the layout) ---------------
   const token = await getToken();
   if (token === null) {
     redirect(`/login?next=/e/${slug}/coordinacion`);
   }
 
-  // --- Emergency resolution ---------------------------------------------
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
     notFound();
@@ -77,7 +49,6 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
   const emergencyId = emergency.id;
   const headers = authHeaders(token);
 
-  // --- Effective permissions for THIS emergency -------------------------
   const [me, roles] = await Promise.all([getMe(), getRoles()]);
   if (me == null) {
     await clearToken();
@@ -92,26 +63,7 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
 
   const { t } = await getT();
   const tc = t.coord;
-  const roleDesc = new Map(roles.map((r) => [r.id, r.description ?? r.id]));
 
-  // --- Parse and validate need filter params ----------------------------
-  const rawCategory = typeof resolvedSearchParams.category === 'string' ? resolvedSearchParams.category : undefined;
-  const rawPriority = typeof resolvedSearchParams.priority === 'string' ? resolvedSearchParams.priority : undefined;
-
-  const VALID_CATEGORIES = [
-    'hygiene', 'water', 'food', 'medical', 'shelter', 'tools', 'other',
-    'medicines', 'medical_equipment', 'medical_supplies', 'medical_personnel',
-  ] as const;
-  const VALID_PRIORITIES = ['low', 'medium', 'high', 'urgent'] as const;
-
-  type NeedCategory = typeof VALID_CATEGORIES[number];
-  type Priority = typeof VALID_PRIORITIES[number];
-
-  const category = VALID_CATEGORIES.includes(rawCategory as NeedCategory) ? rawCategory as NeedCategory : undefined;
-  const priority = VALID_PRIORITIES.includes(rawPriority as Priority) ? rawPriority as Priority : undefined;
-
-  // On a mid-flight 401 from any authed call, drop the token and re-login.
-  // `redirect()` throws a NEXT_REDIRECT that propagates out of Promise.all.
   const onUnauthorized = async (status: number): Promise<void> => {
     if (status === 401) {
       await clearToken();
@@ -119,87 +71,128 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
     }
   };
 
-  // --- Conditionally fetch only the queues the user can act on ----------
-  const [resourceQueue, needsQueue, offersQueue, validatedNeeds, expiredNeeds] =
+  // --- Pending counters for each actionable section ---------------------
+  // Resources: ask for one row only — we just need the `total`.
+  const [resourcesPending, needsPending, offersPending, shipmentsActive] =
     await Promise.all([
-      access.canVerifyResources
-        ? api
-            .GET('/emergencies/{emergencyId}/coordination/queue', {
-              params: { path: { emergencyId } },
-              headers,
-            })
-            .then(async (r) => {
-              await onUnauthorized(r.response.status);
-              return r.data ?? [];
-            })
-        : Promise.resolve([]),
-      access.canValidateNeeds
-        ? api
-            .GET('/emergencies/{emergencyId}/needs/queue', {
-              params: {
-                path: { emergencyId },
-                query: {
-                  ...(category !== undefined && { category }),
-                  ...(priority !== undefined && { priority }),
-                },
-              },
-              headers,
-            })
-            .then(async (r) => {
-              await onUnauthorized(r.response.status);
-              return r.data ?? [];
-            })
-        : Promise.resolve([]),
-      access.canMatchOffers
-        ? api
-            .GET('/emergencies/{emergencyId}/offers/queue', {
-              params: { path: { emergencyId } },
-              headers,
-            })
-            .then(async (r) => {
-              await onUnauthorized(r.response.status);
-              return r.data ?? [];
-            })
-        : Promise.resolve([]),
-      access.canMatchOffers
-        ? api
-            .GET('/emergencies/{emergencyId}/public/needs', {
-              params: { path: { emergencyId } },
-            })
-            .then((r) => r.data ?? [])
-        : Promise.resolve([]),
-      access.canCoordinate
-        ? api
-            .GET('/emergencies/{emergencyId}/needs/expired', {
-              params: { path: { emergencyId } },
-              headers,
-            })
-            .then(async (r) => {
-              await onUnauthorized(r.response.status);
-              return r.data ?? [];
-            })
-        : Promise.resolve([]),
-    ]);
+    access.canVerifyResources
+      ? api
+          .GET('/emergencies/{emergencyId}/coordination/queue', {
+            params: { path: { emergencyId }, query: { page: 1, limit: 1 } },
+            headers,
+          })
+          .then(async (r) => {
+            await onUnauthorized(r.response.status);
+            return r.data?.total ?? 0;
+          })
+      : Promise.resolve(null),
+    access.canValidateNeeds
+      ? api
+          .GET('/emergencies/{emergencyId}/needs/queue', {
+            params: { path: { emergencyId }, query: {} },
+            headers,
+          })
+          .then(async (r) => {
+            await onUnauthorized(r.response.status);
+            return r.data?.length ?? 0;
+          })
+      : Promise.resolve(null),
+    access.canMatchOffers
+      ? api
+          .GET('/emergencies/{emergencyId}/offers/queue', {
+            params: { path: { emergencyId } },
+            headers,
+          })
+          .then(async (r) => {
+            await onUnauthorized(r.response.status);
+            return r.data?.length ?? 0;
+          })
+      : Promise.resolve(null),
+    access.canCoordinateLogistics
+      ? api
+          .GET('/emergencies/{emergencyId}/logistics/shipments', {
+            params: { path: { emergencyId } },
+            headers,
+          })
+          .then(async (r) => {
+            await onUnauthorized(r.response.status);
+            // Count only the in-flight shipments (not delivered/cancelled).
+            return (r.data ?? []).filter(
+              (s) => s.status !== 'delivered' && s.status !== 'cancelled',
+            ).length;
+          })
+      : Promise.resolve(null),
+  ]);
+
+  const base = `/e/${slug}/coordinacion`;
 
   return (
-    <main className="flex-1 bg-surface">
-      <div className="mx-auto flex w-full max-w-md flex-col gap-8 px-5 pb-12 pt-6 lg:max-w-5xl lg:px-8">
+    <>
+      {!access.canActOnAnyQueue && !access.canCoordinate && (
+        <EmptyState
+          title={tc.no_actionable_queues_title}
+          description={tc.no_actionable_queues_description}
+        />
+      )}
 
-        <header className="flex flex-col gap-2">
-          <h1 className="font-display text-xl font-bold text-navy lg:text-2xl">{tc.dashboard_title}</h1>
-          <p className="text-sm text-muted">{emergency.name}</p>
-          {access.roleIds.length > 0 && (
-            <div className="mt-1 flex flex-wrap items-center gap-2">
-              <span className="text-sm text-muted">{tc.your_role_heading}</span>
-              {access.roleIds.map((rid) => (
-                <Badge key={rid} variant="role-owner">{roleLabel(rid, tc, roleDesc)}</Badge>
-              ))}
-            </div>
+      {(access.canActOnAnyQueue || access.canCoordinate) && (
+        <section aria-label={tc.hub_sections_label} className="flex flex-col gap-4">
+          {resourcesPending !== null && (
+            <CoordinationSectionLink
+              href={`${base}/recursos`}
+              label={tc.hub_resources_label}
+              description={tc.hub_resources_description}
+              count={resourcesPending}
+              countAria={tc.hub_count_aria}
+            />
           )}
-        </header>
+          {needsPending !== null && (
+            <CoordinationSectionLink
+              href={`${base}/peticiones`}
+              label={tc.hub_needs_label}
+              description={tc.hub_needs_description}
+              count={needsPending}
+              countAria={tc.hub_count_aria}
+            />
+          )}
+          {offersPending !== null && (
+            <CoordinationSectionLink
+              href={`${base}/ofertas`}
+              label={tc.hub_offers_label}
+              description={tc.hub_offers_description}
+              count={offersPending}
+              countAria={tc.hub_count_aria}
+            />
+          )}
+          {shipmentsActive !== null && (
+            <CoordinationSectionLink
+              href={`${base}/expediciones`}
+              label={tc.hub_shipments_label}
+              description={tc.hub_shipments_description}
+              count={shipmentsActive}
+              countAria={tc.hub_shipments_count_aria}
+            />
+          )}
+          {access.canCoordinate && (
+            <>
+              <CoordinationSectionLink
+                href={`${base}/voluntarios`}
+                label={tc.hub_volunteers_label}
+                description={tc.hub_volunteers_description}
+              />
+              <CoordinationSectionLink
+                href={`${base}/reportes`}
+                label={tc.hub_reports_label}
+                description={tc.hub_reports_description}
+              />
+            </>
+          )}
+        </section>
+      )}
 
-        {/* ── CONTROLES (solo coordinación) ───────────────────────────── */}
-        {access.canCoordinate && (
+      {access.canCoordinate && (
+        <>
+          <hr className="border-line" />
           <EmergencyControls
             emergencyId={emergency.id}
             slug={slug}
@@ -210,126 +203,8 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
                 : null
             }
           />
-        )}
-
-        {/* ── ENLACES DE COORDINACIÓN (solo coordinación) ─────────────── */}
-        {access.canCoordinate && (
-          <>
-            <Link
-              href={`/e/${slug}/coordinacion/voluntarios`}
-              className="flex items-center justify-between gap-3 rounded-lg border-2 border-navy bg-white px-5 py-4 font-semibold text-ink transition-colors hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
-            >
-              <span>{tc.link_volunteers}</span>
-              <span aria-hidden="true" className="text-lg">→</span>
-            </Link>
-
-            <Link
-              href={`/e/${slug}/coordinacion/reportes`}
-              className="flex items-center justify-between gap-3 rounded-lg border-2 border-navy bg-white px-5 py-4 font-semibold text-ink transition-colors hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
-            >
-              <span>{tc.link_reports}</span>
-              <span aria-hidden="true" className="text-lg">→</span>
-            </Link>
-          </>
-        )}
-
-        {/* ── SIN COLAS ACCIONABLES ───────────────────────────────────── */}
-        {!access.canActOnAnyQueue && !access.canCoordinate && (
-          <EmptyState
-            title={tc.no_actionable_queues_title}
-            description={tc.no_actionable_queues_description}
-          />
-        )}
-
-        {/* ── RECURSOS PENDIENTES (resource:verify) ───────────────────── */}
-        {access.canVerifyResources && (
-          <>
-            <hr className="border-line" />
-            <section aria-labelledby="resources-heading" className="flex flex-col gap-4">
-              <h2 id="resources-heading" className="text-xl font-bold text-ink">
-                {tc.resources_heading}
-              </h2>
-              <ResourcesQueue
-                resources={resourceQueue}
-                slug={slug}
-                canVerify={access.canVerifyResources}
-                listLabel={tc.resources_list_label}
-                emptyTitle={tc.resources_empty_title}
-                emptyDescription={tc.resources_empty_description}
-              />
-            </section>
-          </>
-        )}
-
-        {/* ── PETICIONES PENDIENTES (need:validate) ───────────────────── */}
-        {access.canValidateNeeds && (
-          <>
-            <hr className="border-line" />
-            <section aria-labelledby="needs-heading" className="flex flex-col gap-4">
-              <h2 id="needs-heading" className="text-xl font-bold text-ink">
-                {tc.needs_heading}
-              </h2>
-              <NeedsFilter />
-              <NeedsQueue
-                needs={needsQueue}
-                slug={slug}
-                canValidate={access.canValidateNeeds}
-                listLabel={tc.needs_list_label}
-                emptyTitle={tc.needs_empty_title}
-                emptyDescription={tc.needs_empty_description}
-              />
-            </section>
-          </>
-        )}
-
-        {/* ── OFERTAS DE MATERIAL (offer:match) ───────────────────────── */}
-        {access.canMatchOffers && (
-          <>
-            <hr className="border-line" />
-            <section aria-labelledby="offers-heading" className="flex flex-col gap-4">
-              <h2 id="offers-heading" className="text-xl font-bold text-ink">
-                {tc.offers_heading}
-              </h2>
-              <OffersQueue
-                offers={offersQueue}
-                validatedNeeds={validatedNeeds}
-                slug={slug}
-                canMatch={access.canMatchOffers}
-                listLabel={tc.offers_list_label}
-                emptyTitle={tc.offers_empty_title}
-                emptyDescription={tc.offers_empty_description}
-              />
-            </section>
-          </>
-        )}
-
-        {/* ── PETICIONES CADUCADAS (solo coordinación / renovar) ──────── */}
-        {access.canCoordinate && (
-          <>
-            <hr className="border-line" />
-            <section aria-labelledby="expired-heading" className="flex flex-col gap-4">
-              <h2 id="expired-heading" className="text-xl font-bold text-ink">
-                {tc.expired_heading}
-              </h2>
-              {expiredNeeds.length === 0 ? (
-                <EmptyState
-                  title={tc.expired_empty_title}
-                  description={tc.expired_empty_description}
-                />
-              ) : (
-                <ul className="flex flex-col gap-4" aria-label={tc.expired_list_label}>
-                  {expiredNeeds.map((need) => (
-                    <li key={need.id}>
-                      <ExpiredNeedCard need={need} slug={slug} />
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          </>
-        )}
-
-      </div>
-    </main>
+        </>
+      )}
+    </>
   );
 }
