@@ -94,6 +94,8 @@ export class ResourcesController {
       accepts: dto.accepts ?? [],
       country: dto.country ?? null,
       city: dto.city ?? null,
+      isFinalRecipient: dto.isFinalRecipient ?? false,
+      recipientType: dto.recipientType ?? null,
     });
   }
 

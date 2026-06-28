@@ -27,6 +27,9 @@ export interface RegisterResourceCommand {
   country?: string | null;
   city?: string | null;
   provenance?: Provenance | null;
+  // destinatario final (#60)
+  isFinalRecipient?: boolean;
+  recipientType?: string | null;
 }
 
 export class RegisterResource {
@@ -62,6 +65,8 @@ export class RegisterResource {
       country: cmd.country ?? null,
       city: cmd.city ?? null,
       provenance: cmd.provenance ?? null,
+      isFinalRecipient: cmd.isFinalRecipient ?? false,
+      recipientType: cmd.recipientType ?? null,
     });
     await this.repo.save(resource);
     await this.bus.publish(resource.pullDomainEvents());

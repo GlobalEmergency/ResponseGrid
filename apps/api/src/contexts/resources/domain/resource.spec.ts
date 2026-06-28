@@ -14,6 +14,7 @@ import {
   InvalidVerificationLevelError,
   InvalidPublicStatusTransitionError,
   ResourceNotPublishedError,
+  FinalRecipientMustBeDestinationError,
 } from './resource-errors';
 
 const makeLocation = () =>
@@ -286,6 +287,59 @@ describe('Resource', () => {
       expect(restored.provenance?.externalId).toBe('snap-ext-1');
       expect(restored.provenance?.externalUpdatedAt).toEqual(externalUpdatedAt);
       expect(restored.provenance?.raw).toEqual({ x: 42 });
+    });
+  });
+
+  describe('destinatario final (#60)', () => {
+    const makeRecipient = (recipientType: string | null = 'hospital') =>
+      Resource.register({
+        id: ResourceId.create(),
+        emergencyId: EmergencyId.fromString(
+          '11111111-1111-4111-8111-111111111111',
+        ),
+        type: ResourceType.Venue,
+        stage: ResourceStage.Destination,
+        name: 'Hospital Central',
+        location: makeLocation(),
+        ownerUserId: 'user-recipient',
+        isFinalRecipient: true,
+        recipientType,
+      });
+
+    it('marks a destination-stage resource as a final recipient with a type', () => {
+      const r = makeRecipient('hospital');
+      expect(r.isFinalRecipient).toBe(true);
+      expect(r.recipientType).toBe('hospital');
+    });
+
+    it('defaults isFinalRecipient to false and recipientType to null', () => {
+      const r = make();
+      expect(r.isFinalRecipient).toBe(false);
+      expect(r.recipientType).toBeNull();
+    });
+
+    it('rejects a final recipient that is not at the destination stage', () => {
+      expect(() =>
+        Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(
+            '11111111-1111-4111-8111-111111111111',
+          ),
+          type: ResourceType.Venue,
+          stage: ResourceStage.Origin,
+          name: 'No-destino',
+          location: makeLocation(),
+          ownerUserId: 'user-bad',
+          isFinalRecipient: true,
+        }),
+      ).toThrow(FinalRecipientMustBeDestinationError);
+    });
+
+    it('toSnapshot / fromSnapshot round-trip preserves the recipient role', () => {
+      const r = makeRecipient('empresa');
+      const restored = Resource.fromSnapshot(r.toSnapshot());
+      expect(restored.isFinalRecipient).toBe(true);
+      expect(restored.recipientType).toBe('empresa');
     });
   });
 });

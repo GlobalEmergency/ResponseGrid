@@ -10,6 +10,7 @@ import {
   MaxLength,
   ValidateNested,
   IsArray,
+  IsBoolean,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -123,6 +124,24 @@ export class RegisterResourceDto {
   @IsOptional()
   @IsString()
   city?: string;
+
+  @ApiPropertyOptional({
+    example: true,
+    description:
+      'Mark this resource as a final recipient of aid (requires the destination stage)',
+  })
+  @IsOptional()
+  @IsBoolean()
+  isFinalRecipient?: boolean;
+
+  @ApiPropertyOptional({
+    example: 'hospital',
+    description:
+      'Recipient type slug (see the emergency recipient-type taxonomy)',
+  })
+  @IsOptional()
+  @IsString()
+  recipientType?: string;
 }
 
 /**

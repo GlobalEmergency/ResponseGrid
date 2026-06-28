@@ -20,6 +20,7 @@
 |---|---------|---------|-----------|
 | [06](06-caducidad-frescura-necesidades.md) | **Caducidad / frescura de necesidades** | Vigencia (p. ej. 48 h), aviso "verifica antes de actuar" y auto-archivado | 🔴 Alta |
 | [07](07-oferta-compromiso-entrega.md) | **Oferta como compromiso de entrega** | La oferta evoluciona a "promesa" con fecha/método de entrega y seguimiento | 🟡 Media |
+| [14](14-destinatarios-finales.md) | **Destinatarios finales (ficha · peticiones 1‑a‑N · recepciones)** | Receptor final genérico con tipo extensible (empresa/organización/particular/hospital…); vertical sanitario como primer caso. EPIC #59 | 🔴 Alta |
 
 ## Dominio 4 — Mapa y geolocalización
 | # | Feature | Resumen | Prioridad |

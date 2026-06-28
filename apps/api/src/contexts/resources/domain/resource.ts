@@ -13,6 +13,7 @@ import {
   ResourceAlreadyPublishedError,
   ResourceNotPublishedError,
   ResourceNotVerifiedError,
+  FinalRecipientMustBeDestinationError,
 } from './resource-errors';
 import { DomainEvent } from './events/domain-event';
 import { ResourceRegistered } from './events/resource-registered';
@@ -44,6 +45,9 @@ export interface RegisterResourceProps {
   country?: string | null;
   city?: string | null;
   provenance?: Provenance | null;
+  // destinatario final (#60)
+  isFinalRecipient?: boolean;
+  recipientType?: string | null;
 }
 
 // Snapshot used by repositories to rehydrate without going through register().
@@ -68,6 +72,8 @@ export interface ResourceSnapshot {
   country: string | null;
   city: string | null;
   provenance: Provenance | null;
+  isFinalRecipient: boolean;
+  recipientType: string | null;
 }
 
 export class Resource {
@@ -93,9 +99,17 @@ export class Resource {
     public readonly country: string | null,
     public readonly city: string | null,
     public readonly provenance: Provenance | null,
+    public readonly isFinalRecipient: boolean,
+    public readonly recipientType: string | null,
   ) {}
 
   static register(props: RegisterResourceProps): Resource {
+    if (
+      (props.isFinalRecipient ?? false) &&
+      props.stage !== ResourceStage.Destination
+    ) {
+      throw new FinalRecipientMustBeDestinationError(props.stage);
+    }
     const r = new Resource(
       props.id,
       props.emergencyId,
@@ -116,6 +130,8 @@ export class Resource {
       props.country ?? null,
       props.city ?? null,
       props.provenance ?? null,
+      props.isFinalRecipient ?? false,
+      props.recipientType ?? null,
     );
     r.events.push(
       new ResourceRegistered(r.id.value, {
@@ -149,6 +165,8 @@ export class Resource {
       s.country ?? null,
       s.city ?? null,
       s.provenance ?? null,
+      s.isFinalRecipient ?? false,
+      s.recipientType ?? null,
     );
   }
 
@@ -227,6 +245,8 @@ export class Resource {
       country: this.country,
       city: this.city,
       provenance: this.provenance,
+      isFinalRecipient: this.isFinalRecipient,
+      recipientType: this.recipientType,
     };
   }
 

@@ -97,6 +97,23 @@ export class ResourceViewDto {
 
   @ApiProperty({ example: 'Caracas', nullable: true, type: String })
   city!: string | null;
+
+  // ── destinatario final (#60) ──────────────────────────────────────────────
+
+  @ApiProperty({
+    example: false,
+    description: 'Whether this resource is a final recipient of aid',
+  })
+  isFinalRecipient!: boolean;
+
+  @ApiProperty({
+    example: 'hospital',
+    nullable: true,
+    type: String,
+    description:
+      'Recipient type slug (see the emergency recipient-type taxonomy)',
+  })
+  recipientType!: string | null;
 }
 
 export class NearbyResourceViewDto extends ResourceViewDto {
