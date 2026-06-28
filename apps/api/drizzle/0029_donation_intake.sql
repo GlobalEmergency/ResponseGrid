@@ -1,5 +1,6 @@
--- Pre-registro de donaciones en acopio (DonationIntake · ficha #15).
+-- Pre-registro de donaciones en acopio (DonationIntake · epic #126).
 -- Tablas nuevas; no altera offers ni users.
+-- Líneas alineadas con SupplyLine (name, quantity, unit, category, presentation).
 
 CREATE TABLE donation_intakes (
   id                  uuid PRIMARY KEY,
@@ -36,14 +37,14 @@ CREATE INDEX donation_intakes_resource_status_idx
   ON donation_intakes (target_resource_id, status);
 
 CREATE TABLE donation_intake_lines (
-  id          uuid PRIMARY KEY,
-  intake_id   uuid NOT NULL REFERENCES donation_intakes(id) ON DELETE CASCADE,
-  category    text NOT NULL,
-  description text NOT NULL,
-  quantity    integer NOT NULL CHECK (quantity > 0),
-  unit        text,
-  notes       text,
-  sort_order  integer NOT NULL DEFAULT 0
+  id           uuid PRIMARY KEY,
+  intake_id    uuid NOT NULL REFERENCES donation_intakes(id) ON DELETE CASCADE,
+  name         text NOT NULL,
+  quantity     integer NOT NULL CHECK (quantity > 0),
+  unit         text,
+  category     text NOT NULL,
+  presentation text,
+  sort_order   integer NOT NULL DEFAULT 0
 );
 
 CREATE INDEX donation_intake_lines_intake_idx ON donation_intake_lines (intake_id);

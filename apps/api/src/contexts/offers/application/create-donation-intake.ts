@@ -1,7 +1,6 @@
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { DonationIntake, generateIntakeCode } from '../domain/donation-intake';
 import { DonationIntakeId } from '../domain/donation-intake-id';
-import { Category } from '../domain/offer-enums';
 import { DonationIntakeRepository } from '../domain/ports/donation-intake.repository';
 import { OfferEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import {
@@ -10,20 +9,13 @@ import {
 } from '../domain/ports/intake-resource-lookup';
 import { InvalidIntakeTargetResourceError } from '../domain/donation-intake-errors';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
+import { SupplyLineProps } from '../../supplies/domain/supply-line';
 
 const ACTIVE_STATUS = 'active';
 const COLLECTION_TYPES = new Set([
   'collection_point',
   'collection_and_delivery',
 ]);
-
-export interface CreateDonationIntakeLineCommand {
-  category: Category;
-  description: string;
-  quantity: number;
-  unit: string | null;
-  notes: string | null;
-}
 
 export interface CreateDonationIntakeCommand {
   emergencyId: string;
@@ -32,7 +24,7 @@ export interface CreateDonationIntakeCommand {
   donorPhone: string | null;
   donorEmail: string | null;
   donorUserId: string | null;
-  items: CreateDonationIntakeLineCommand[];
+  items: SupplyLineProps[];
 }
 
 export class CreateDonationIntake {
@@ -70,12 +62,8 @@ export class CreateDonationIntake {
       },
       donorUserId: cmd.donorUserId,
       lines: cmd.items.map((item, index) => ({
-        category: item.category,
-        description: item.description,
-        quantity: item.quantity,
-        unit: item.unit,
-        notes: item.notes,
         sortOrder: index,
+        line: item,
       })),
     });
 

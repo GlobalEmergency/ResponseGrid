@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Category } from '../../domain/offer-enums';
+import { SupplyLineResponseDto } from '../../../supplies/infrastructure/http/supply-line.dto';
 import { DonationIntakeStatus } from '../../domain/donation-intake-enums';
 
 export class CreateDonationIntakeResponseDto {
@@ -41,24 +41,9 @@ export class LookupDonorByContactResponseDto {
   pendingIntakes!: PendingIntakeSummaryDto[];
 }
 
-export class DonationIntakeLineViewDto {
+export class IntakeLineViewDto extends SupplyLineResponseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
-
-  @ApiProperty({ enum: Category })
-  category!: string;
-
-  @ApiProperty()
-  description!: string;
-
-  @ApiProperty()
-  quantity!: number;
-
-  @ApiPropertyOptional({ nullable: true, type: String })
-  unit!: string | null;
-
-  @ApiPropertyOptional({ nullable: true, type: String })
-  notes!: string | null;
 
   @ApiProperty()
   sortOrder!: number;
@@ -92,8 +77,8 @@ export class DonationIntakeViewDto {
   @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
   donorUserId!: string | null;
 
-  @ApiProperty({ type: [DonationIntakeLineViewDto] })
-  lines!: DonationIntakeLineViewDto[];
+  @ApiProperty({ type: [IntakeLineViewDto] })
+  lines!: IntakeLineViewDto[];
 
   @ApiPropertyOptional({ nullable: true, type: String })
   volunteerNotes!: string | null;

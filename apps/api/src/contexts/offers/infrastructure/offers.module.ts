@@ -243,9 +243,9 @@ const listPendingIntakesByResourceProvider = {
 
 const confirmIntakeReceptionProvider = {
   provide: ConfirmIntakeReception,
-  inject: [DONATION_INTAKE_REPOSITORY],
-  useFactory: (repo: DonationIntakeRepository) =>
-    new ConfirmIntakeReception(repo),
+  inject: [DONATION_INTAKE_REPOSITORY, OFFER_EVENT_BUS],
+  useFactory: (repo: DonationIntakeRepository, bus: EventBus) =>
+    new ConfirmIntakeReception(repo, bus),
 };
 
 const rejectIntakeProvider = {

@@ -8,18 +8,21 @@ import {
   DonationIntakeLineLimitError,
 } from './donation-intake-errors';
 import { InvalidDonationIntakeContactError } from './donation-intake-errors';
+import { SupplyLineValidationError } from '../../supplies/domain/supply-line';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const RESOURCE = '33333333-3333-4333-8333-333333333331';
 
 function makeLine(overrides?: { quantity?: number }) {
   return {
-    category: Category.Food,
-    description: 'Arroz 1kg',
-    quantity: overrides?.quantity ?? 10,
-    unit: 'bolsas',
-    notes: null,
     sortOrder: 0,
+    line: {
+      category: Category.Food,
+      name: 'Arroz 1kg',
+      quantity: overrides?.quantity ?? 10,
+      unit: 'bolsas',
+      presentation: null,
+    },
   };
 }
 
@@ -44,6 +47,7 @@ describe('DonationIntake aggregate', () => {
     const intake = makeIntake();
     expect(intake.status).toBe(DonationIntakeStatus.Pending);
     expect(intake.lines).toHaveLength(1);
+    expect(intake.lines[0]?.supplyLine.name).toBe('Arroz 1kg');
     expect(intake.intakeCode).toBe('ACO-7F3K');
     expect(intake.contactNormalized).toBe('525512345678');
   });
@@ -66,7 +70,7 @@ describe('DonationIntake aggregate', () => {
     ).toThrow('Donation intake requires at least one line');
   });
 
-  it('create() throws when line quantity is 0', () => {
+  it('create() throws when line quantity is invalid', () => {
     expect(() =>
       DonationIntake.create({
         id: DonationIntakeId.create(),
@@ -81,7 +85,7 @@ describe('DonationIntake aggregate', () => {
         donorUserId: null,
         lines: [makeLine({ quantity: 0 })],
       }),
-    ).toThrow('Line quantity must be greater than 0');
+    ).toThrow(SupplyLineValidationError);
   });
 
   it('create() throws when contact is missing', () => {
@@ -113,12 +117,14 @@ describe('DonationIntake aggregate', () => {
       [
         makeLine(),
         {
-          category: Category.Water,
-          description: 'Agua 500ml',
-          quantity: 5,
-          unit: 'cajas',
-          notes: null,
           sortOrder: 1,
+          line: {
+            category: Category.Water,
+            name: 'Agua 500ml',
+            quantity: 5,
+            unit: 'cajas',
+            presentation: null,
+          },
         },
       ],
     );
@@ -127,13 +133,17 @@ describe('DonationIntake aggregate', () => {
     expect(intake.lines).toHaveLength(2);
   });
 
-  it('confirmReception() transitions pending → received', () => {
+  it('confirmReception() transitions pending → received and emits event', () => {
     const intake = makeIntake();
     intake.confirmReception('user-1', 'Todo OK', 'photo.jpg');
     expect(intake.status).toBe(DonationIntakeStatus.Received);
     expect(intake.receivedByUserId).toBe('user-1');
     expect(intake.evidenceFileKey).toBe('photo.jpg');
     expect(intake.receivedAt).toBeInstanceOf(Date);
+
+    const events = intake.pullDomainEvents();
+    expect(events).toHaveLength(1);
+    expect(events[0]?.eventName).toBe('donation_intake.received');
   });
 
   it('reject() transitions pending → rejected', () => {
@@ -167,6 +177,7 @@ describe('DonationIntake aggregate', () => {
   it('round-trips through snapshot', () => {
     const intake = makeIntake();
     intake.confirmReception('user-1', 'ok', null);
+    intake.pullDomainEvents();
     const restored = DonationIntake.fromSnapshot(intake.toSnapshot());
     expect(restored.toSnapshot()).toEqual(intake.toSnapshot());
   });
@@ -182,12 +193,14 @@ describe('generateIntakeCode', () => {
 describe('DonationIntake line limit', () => {
   it('throws when exceeding MAX lines', () => {
     const lines = Array.from({ length: 101 }, (_, i) => ({
-      category: Category.Food,
-      description: `Item ${i}`,
-      quantity: 1,
-      unit: null,
-      notes: null,
       sortOrder: i,
+      line: {
+        category: Category.Food,
+        name: `Item ${i}`,
+        quantity: 1,
+        unit: null,
+        presentation: null,
+      },
     }));
     expect(() =>
       DonationIntake.create({

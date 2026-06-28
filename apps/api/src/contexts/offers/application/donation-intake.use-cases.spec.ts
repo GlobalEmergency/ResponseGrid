@@ -23,6 +23,7 @@ import {
   DonationIntakeContactMismatchError,
   DonationIntakeAlreadyProcessedError,
 } from '../domain/donation-intake-errors';
+import { FakeOfferEventBus } from '../infrastructure/fake-event-bus';
 import { DonationIntakeId } from '../domain/donation-intake-id';
 
 const EM = '11111111-1111-4111-8111-111111111111';
@@ -62,10 +63,10 @@ function makeCmd(
     items: [
       {
         category: Category.Food,
-        description: 'Arroz 1kg',
+        name: 'Arroz 1kg',
         quantity: 10,
         unit: 'bolsas',
-        notes: null,
+        presentation: null,
       },
     ],
     ...overrides,
@@ -153,10 +154,10 @@ describe('DonationIntake use cases', () => {
         items: [
           {
             category: Category.Water,
-            description: 'Agua',
+            name: 'Agua',
             quantity: 3,
             unit: null,
-            notes: null,
+            presentation: null,
           },
         ],
       });
@@ -215,13 +216,16 @@ describe('DonationIntake use cases', () => {
   describe('reception actions', () => {
     it('confirm, reject, and incomplete transition from pending', async () => {
       const created = await create.execute(makeCmd());
-      const confirm = new ConfirmIntakeReception(repo);
+      const bus = new FakeOfferEventBus();
+      const confirm = new ConfirmIntakeReception(repo, bus);
       await confirm.execute({
         intakeId: created.id,
         receivedByUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         volunteerNotes: 'OK',
         evidenceFileKey: 'photo.jpg',
       });
+      expect(bus.published).toHaveLength(1);
+      expect(bus.published[0]?.eventName).toBe('donation_intake.received');
       let saved = await repo.findById(DonationIntakeId.fromString(created.id));
       expect(saved!.status).toBe(DonationIntakeStatus.Received);
 
@@ -250,7 +254,7 @@ describe('DonationIntake use cases', () => {
 
     it('cannot confirm twice', async () => {
       const created = await create.execute(makeCmd());
-      const confirm = new ConfirmIntakeReception(repo);
+      const confirm = new ConfirmIntakeReception(repo, new FakeOfferEventBus());
       await confirm.execute({
         intakeId: created.id,
         receivedByUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',

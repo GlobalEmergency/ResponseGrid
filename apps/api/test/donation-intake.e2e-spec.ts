@@ -28,7 +28,7 @@ const MEMBERSHIP_ID = '99999999-9999-4999-8999-999999999991';
 
 const baseItem = {
   category: 'food',
-  description: 'Arroz 1kg',
+  name: 'Arroz 1kg',
   quantity: 10,
   unit: 'bolsas',
 };
@@ -210,10 +210,10 @@ describe('Donation intake flow (e2e)', () => {
       .expect(200);
     const view = detail.body as {
       intakeCode: string;
-      lines: Array<{ description: string }>;
+      lines: Array<{ name: string }>;
     };
     expect(view.intakeCode).toBe(intakeCode);
-    expect(view.lines).toHaveLength(1);
+    expect(view.lines[0]?.name).toBe('Arroz 1kg');
 
     const pending = await request(server)
       .get(`/resources/${RESOURCE}/donation-intakes/pending`)

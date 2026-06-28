@@ -24,10 +24,10 @@ export const donationIntakeLinesTable = pgTable('donation_intake_lines', {
   intakeId: uuid('intake_id')
     .notNull()
     .references(() => donationIntakesTable.id, { onDelete: 'cascade' }),
-  category: text('category').notNull(),
-  description: text('description').notNull(),
+  name: text('name').notNull(),
   quantity: integer('quantity').notNull(),
   unit: text('unit'),
-  notes: text('notes'),
+  category: text('category').notNull(),
+  presentation: text('presentation'),
   sortOrder: integer('sort_order').notNull().default(0),
 });

@@ -1,5 +1,6 @@
 import { DonationIntakeId } from '../domain/donation-intake-id';
 import { DonationIntakeRepository } from '../domain/ports/donation-intake.repository';
+import { EventBus } from '../domain/ports/event-bus';
 import { DonationIntakeNotFoundError } from './donation-intake-not-found.error';
 
 export interface ConfirmIntakeReceptionCommand {
@@ -10,7 +11,10 @@ export interface ConfirmIntakeReceptionCommand {
 }
 
 export class ConfirmIntakeReception {
-  constructor(private readonly repo: DonationIntakeRepository) {}
+  constructor(
+    private readonly repo: DonationIntakeRepository,
+    private readonly bus: EventBus,
+  ) {}
 
   async execute(cmd: ConfirmIntakeReceptionCommand): Promise<void> {
     const intake = await this.repo.findById(
@@ -24,5 +28,6 @@ export class ConfirmIntakeReception {
       cmd.evidenceFileKey,
     );
     await this.repo.save(intake);
+    await this.bus.publish(intake.pullDomainEvents());
   }
 }

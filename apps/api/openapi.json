@@ -9871,51 +9871,6 @@
           "reason"
         ]
       },
-      "DonationIntakeItemDto": {
-        "type": "object",
-        "properties": {
-          "category": {
-            "type": "string",
-            "enum": [
-              "food",
-              "water",
-              "hygiene",
-              "clothing",
-              "medical",
-              "shelter",
-              "tools",
-              "other",
-              "medicines",
-              "medical_equipment",
-              "medical_supplies",
-              "medical_personnel"
-            ],
-            "example": "food"
-          },
-          "description": {
-            "type": "string",
-            "example": "Arroz 1kg"
-          },
-          "quantity": {
-            "type": "number",
-            "example": 10
-          },
-          "unit": {
-            "type": "string",
-            "example": "bolsas",
-            "nullable": true
-          },
-          "notes": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "category",
-          "description",
-          "quantity"
-        ]
-      },
       "CreateDonationIntakeDto": {
         "type": "object",
         "properties": {
@@ -9941,7 +9896,7 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/DonationIntakeItemDto"
+              "$ref": "#/components/schemas/SupplyLineDto"
             }
           }
         },
@@ -10069,7 +10024,7 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/DonationIntakeItemDto"
+              "$ref": "#/components/schemas/SupplyLineDto"
             }
           }
         },
@@ -10079,12 +10034,21 @@
           "items"
         ]
       },
-      "DonationIntakeLineViewDto": {
+      "IntakeLineViewDto": {
         "type": "object",
         "properties": {
-          "id": {
+          "name": {
             "type": "string",
-            "format": "uuid"
+            "example": "Water bottles"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 100
+          },
+          "unit": {
+            "type": "string",
+            "example": "liters",
+            "nullable": true
           },
           "category": {
             "type": "string",
@@ -10101,31 +10065,28 @@
               "medical_equipment",
               "medical_supplies",
               "medical_personnel"
-            ]
+            ],
+            "example": "water"
           },
-          "description": {
-            "type": "string"
-          },
-          "quantity": {
-            "type": "number"
-          },
-          "unit": {
+          "presentation": {
             "type": "string",
-            "nullable": true
+            "example": "ampolla",
+            "nullable": true,
+            "description": "Presentation / route of administration (ampolla, EV, inhalador…) — #61."
           },
-          "notes": {
+          "id": {
             "type": "string",
-            "nullable": true
+            "format": "uuid"
           },
           "sortOrder": {
             "type": "number"
           }
         },
         "required": [
-          "id",
-          "category",
-          "description",
+          "name",
           "quantity",
+          "category",
+          "id",
           "sortOrder"
         ]
       },
@@ -10176,7 +10137,7 @@
           "lines": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/DonationIntakeLineViewDto"
+              "$ref": "#/components/schemas/IntakeLineViewDto"
             }
           },
           "volunteerNotes": {

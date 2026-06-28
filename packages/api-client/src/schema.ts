@@ -3501,20 +3501,6 @@ export interface components {
              */
             reason: string;
         };
-        DonationIntakeItemDto: {
-            /**
-             * @example food
-             * @enum {string}
-             */
-            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
-            /** @example Arroz 1kg */
-            description: string;
-            /** @example 10 */
-            quantity: number;
-            /** @example bolsas */
-            unit?: string | null;
-            notes?: string | null;
-        };
         CreateDonationIntakeDto: {
             /**
              * Format: uuid
@@ -3527,7 +3513,7 @@ export interface components {
             donorPhone?: Record<string, never> | null;
             /** @example maria@example.com */
             donorEmail?: Record<string, never> | null;
-            items: components["schemas"]["DonationIntakeItemDto"][];
+            items: components["schemas"]["SupplyLineDto"][];
         };
         CreateDonationIntakeResponseDto: {
             /** Format: uuid */
@@ -3572,17 +3558,27 @@ export interface components {
             donorPhone?: Record<string, never> | null;
             /** @example maria@example.com */
             donorEmail?: Record<string, never> | null;
-            items: components["schemas"]["DonationIntakeItemDto"][];
+            items: components["schemas"]["SupplyLineDto"][];
         };
-        DonationIntakeLineViewDto: {
+        IntakeLineViewDto: {
+            /** @example Water bottles */
+            name: string;
+            /** @example 100 */
+            quantity: number;
+            /** @example liters */
+            unit?: string | null;
+            /**
+             * @example water
+             * @enum {string}
+             */
+            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+            /**
+             * @description Presentation / route of administration (ampolla, EV, inhalador…) — #61.
+             * @example ampolla
+             */
+            presentation?: string | null;
             /** Format: uuid */
             id: string;
-            /** @enum {string} */
-            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
-            description: string;
-            quantity: number;
-            unit?: string | null;
-            notes?: string | null;
             sortOrder: number;
         };
         DonationIntakeViewDto: {
@@ -3601,7 +3597,7 @@ export interface components {
             donorEmail?: string | null;
             /** Format: uuid */
             donorUserId?: string | null;
-            lines: components["schemas"]["DonationIntakeLineViewDto"][];
+            lines: components["schemas"]["IntakeLineViewDto"][];
             volunteerNotes?: string | null;
             evidenceFileKey?: string | null;
             /** Format: date-time */

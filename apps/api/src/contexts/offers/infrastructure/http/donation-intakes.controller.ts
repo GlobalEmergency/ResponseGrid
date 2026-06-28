@@ -63,19 +63,15 @@ import { RequirePermission } from '../../../identity/infrastructure/http/require
 type OptionalAuthedRequest = Express.Request & { user?: AuthenticatedUser };
 type AuthedRequest = Express.Request & { user: AuthenticatedUser };
 
-function mapItems(items: CreateDonationIntakeDto['items']): Array<{
-  category: CreateDonationIntakeDto['items'][number]['category'];
-  description: string;
-  quantity: number;
-  unit: string | null;
-  notes: string | null;
-}> {
+import { SupplyLineProps } from '../../../supplies/domain/supply-line';
+
+function mapItems(items: CreateDonationIntakeDto['items']): SupplyLineProps[] {
   return items.map((item) => ({
-    category: item.category,
-    description: item.description,
+    name: item.name,
     quantity: item.quantity,
     unit: item.unit ?? null,
-    notes: item.notes ?? null,
+    category: item.category,
+    presentation: item.presentation ?? null,
   }));
 }
 

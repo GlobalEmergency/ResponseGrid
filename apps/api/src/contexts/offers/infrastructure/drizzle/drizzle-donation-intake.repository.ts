@@ -8,6 +8,7 @@ import { DonationIntakeId } from '../../domain/donation-intake-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import { Category } from '../../domain/offer-enums';
 import { DonationIntakeStatus } from '../../domain/donation-intake-enums';
+import { IntakeLineSnapshot } from '../../domain/intake-line';
 import { DonationIntakeRepository } from '../../domain/ports/donation-intake.repository';
 import {
   donationIntakeLinesTable,
@@ -17,18 +18,18 @@ import {
 type IntakeRow = typeof donationIntakesTable.$inferSelect;
 type LineRow = typeof donationIntakeLinesTable.$inferSelect;
 
-function linesToSnapshot(lines: LineRow[]) {
+function linesToSnapshot(lines: LineRow[]): IntakeLineSnapshot[] {
   return lines
     .slice()
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map((line) => ({
       id: line.id,
-      category: line.category as Category,
-      description: line.description,
+      sortOrder: line.sortOrder,
+      name: line.name,
       quantity: line.quantity,
       unit: line.unit ?? null,
-      notes: line.notes ?? null,
-      sortOrder: line.sortOrder,
+      category: line.category as Category,
+      presentation: line.presentation ?? null,
     }));
 }
 
@@ -109,11 +110,11 @@ export class DrizzleDonationIntakeRepository implements DonationIntakeRepository
           s.lines.map((line) => ({
             id: line.id,
             intakeId: s.id,
-            category: line.category,
-            description: line.description,
+            name: line.name,
             quantity: line.quantity,
             unit: line.unit,
-            notes: line.notes,
+            category: line.category,
+            presentation: line.presentation ?? null,
             sortOrder: line.sortOrder,
           })),
         );

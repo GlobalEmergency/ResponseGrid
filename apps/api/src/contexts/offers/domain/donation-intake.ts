@@ -9,16 +9,14 @@ import {
   DonationIntakeAlreadyProcessedError,
   DonationIntakeLineLimitError,
 } from './donation-intake-errors';
-import {
-  DonationIntakeLine,
-  DonationIntakeLineProps,
-  DonationIntakeLineSnapshot,
-} from './donation-intake-line';
+import { IntakeLine, IntakeLineProps, IntakeLineSnapshot } from './intake-line';
 import {
   buildDonorContact,
   DonorContactInput,
   DonorContactSnapshot,
 } from './donor-contact';
+import { DomainEvent } from './events/domain-event';
+import { DonationIntakeReceived } from './events/donation-intake-received.event';
 
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
@@ -29,7 +27,7 @@ export interface CreateDonationIntakeProps {
   intakeCode: string;
   donor: DonorContactInput;
   donorUserId: string | null;
-  lines: DonationIntakeLineProps[];
+  lines: IntakeLineProps[];
 }
 
 export interface DonationIntakeSnapshot {
@@ -43,7 +41,7 @@ export interface DonationIntakeSnapshot {
   donorEmail: string | null;
   donorUserId: string | null;
   contactNormalized: string;
-  lines: DonationIntakeLineSnapshot[];
+  lines: IntakeLineSnapshot[];
   volunteerNotes: string | null;
   evidenceFileKey: string | null;
   receivedAt: Date | null;
@@ -53,6 +51,8 @@ export interface DonationIntakeSnapshot {
 }
 
 export class DonationIntake {
+  private events: DomainEvent[] = [];
+
   private constructor(
     public readonly id: DonationIntakeId,
     public readonly emergencyId: EmergencyId,
@@ -61,7 +61,7 @@ export class DonationIntake {
     private _status: DonationIntakeStatus,
     private _donor: DonorContactSnapshot,
     public readonly donorUserId: string | null,
-    private _lines: DonationIntakeLine[],
+    private _lines: IntakeLine[],
     private _volunteerNotes: string | null,
     private _evidenceFileKey: string | null,
     private _receivedAt: Date | null,
@@ -107,7 +107,7 @@ export class DonationIntake {
         contactNormalized: s.contactNormalized,
       },
       s.donorUserId,
-      s.lines.map((line) => DonationIntakeLine.fromSnapshot(line)),
+      s.lines.map((line) => IntakeLine.fromSnapshot(line)),
       s.volunteerNotes,
       s.evidenceFileKey,
       s.receivedAt,
@@ -117,9 +117,7 @@ export class DonationIntake {
     );
   }
 
-  private static buildLines(
-    lineProps: DonationIntakeLineProps[],
-  ): DonationIntakeLine[] {
+  private static buildLines(lineProps: IntakeLineProps[]): IntakeLine[] {
     if (lineProps.length === 0) {
       throw new Error('Donation intake requires at least one line');
     }
@@ -127,7 +125,7 @@ export class DonationIntake {
       throw new DonationIntakeLineLimitError(MAX_DONATION_INTAKE_LINES);
     }
     return lineProps.map((props, index) =>
-      DonationIntakeLine.create({ ...props, sortOrder: index }),
+      IntakeLine.create({ ...props, sortOrder: index }),
     );
   }
 
@@ -151,7 +149,7 @@ export class DonationIntake {
     return this._donor.contactNormalized;
   }
 
-  get lines(): readonly DonationIntakeLine[] {
+  get lines(): readonly IntakeLine[] {
     return this._lines;
   }
 
@@ -175,10 +173,7 @@ export class DonationIntake {
     return this._updatedAt;
   }
 
-  updateContent(
-    donor: DonorContactInput,
-    lines: DonationIntakeLineProps[],
-  ): void {
+  updateContent(donor: DonorContactInput, lines: IntakeLineProps[]): void {
     this.assertPending();
     this._donor = buildDonorContact(donor);
     this._lines = DonationIntake.buildLines(lines);
@@ -201,6 +196,14 @@ export class DonationIntake {
       : null;
     this._receivedAt = new Date();
     this.touch();
+    this.events.push(
+      new DonationIntakeReceived(this.id.value, {
+        emergencyId: this.emergencyId.value,
+        targetResourceId: this.targetResourceId,
+        receivedByUserId,
+        lines: this._lines.map((line) => line.supplyLine.toSnapshot()),
+      }),
+    );
   }
 
   reject(volunteerNotes: string | null): void {
@@ -219,6 +222,12 @@ export class DonationIntake {
       ? volunteerNotes.trim()
       : null;
     this.touch();
+  }
+
+  pullDomainEvents(): DomainEvent[] {
+    const drained = this.events;
+    this.events = [];
+    return drained;
   }
 
   private assertPending(): void {

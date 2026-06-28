@@ -1,11 +1,8 @@
 import {
   ArrayMaxSize,
   ArrayMinSize,
-  IsEnum,
-  IsInt,
   IsNotEmpty,
   IsOptional,
-  IsPositive,
   IsString,
   IsUUID,
   MinLength,
@@ -17,7 +14,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Category } from '../../domain/offer-enums';
+import { SupplyLineDto } from '../../../supplies/infrastructure/http/supply-line.dto';
 import { MAX_DONATION_INTAKE_LINES } from '../../domain/donation-intake-enums';
 
 @ValidatorConstraint({ name: 'donorContactRequired', async: false })
@@ -35,32 +32,6 @@ class DonorContactRequiredConstraint implements ValidatorConstraintInterface {
   defaultMessage(): string {
     return 'At least one of donorPhone or donorEmail is required';
   }
-}
-
-export class DonationIntakeItemDto {
-  @ApiProperty({ enum: Category, example: Category.Food })
-  @IsEnum(Category)
-  category!: Category;
-
-  @ApiProperty({ example: 'Arroz 1kg' })
-  @IsString()
-  @IsNotEmpty()
-  description!: string;
-
-  @ApiProperty({ example: 10 })
-  @IsInt()
-  @IsPositive()
-  quantity!: number;
-
-  @ApiPropertyOptional({ example: 'bolsas', nullable: true, type: String })
-  @IsOptional()
-  @IsString()
-  unit?: string | null;
-
-  @ApiPropertyOptional({ nullable: true, type: String })
-  @IsOptional()
-  @IsString()
-  notes?: string | null;
 }
 
 export class CreateDonationIntakeDto {
@@ -84,12 +55,12 @@ export class CreateDonationIntakeDto {
   @IsString()
   donorEmail?: string | null;
 
-  @ApiProperty({ type: [DonationIntakeItemDto] })
+  @ApiProperty({ type: [SupplyLineDto] })
   @ArrayMinSize(1)
   @ArrayMaxSize(MAX_DONATION_INTAKE_LINES)
   @ValidateNested({ each: true })
-  @Type(() => DonationIntakeItemDto)
-  items!: DonationIntakeItemDto[];
+  @Type(() => SupplyLineDto)
+  items!: SupplyLineDto[];
 }
 
 export class LookupDonorByContactDto {
@@ -127,12 +98,12 @@ export class UpdateDonationIntakeDto {
   @IsString()
   donorEmail?: string | null;
 
-  @ApiProperty({ type: [DonationIntakeItemDto] })
+  @ApiProperty({ type: [SupplyLineDto] })
   @ArrayMinSize(1)
   @ArrayMaxSize(MAX_DONATION_INTAKE_LINES)
   @ValidateNested({ each: true })
-  @Type(() => DonationIntakeItemDto)
-  items!: DonationIntakeItemDto[];
+  @Type(() => SupplyLineDto)
+  items!: SupplyLineDto[];
 }
 
 export class ReceiveDonationIntakeDto {

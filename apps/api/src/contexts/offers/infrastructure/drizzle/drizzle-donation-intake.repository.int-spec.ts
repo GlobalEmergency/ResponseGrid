@@ -31,12 +31,14 @@ function makeIntake(code: string) {
     donorUserId: null,
     lines: [
       {
-        category: Category.Food,
-        description: 'Harina',
-        quantity: 4,
-        unit: 'sacos',
-        notes: null,
         sortOrder: 0,
+        line: {
+          category: Category.Food,
+          name: 'Harina',
+          quantity: 4,
+          unit: 'sacos',
+          presentation: null,
+        },
       },
     ],
   });
@@ -70,7 +72,7 @@ describe('DrizzleDonationIntakeRepository (integration)', () => {
     if (!found) return;
     expect(found.intakeCode).toBe('ACO-TEST');
     expect(found.lines).toHaveLength(1);
-    expect(found.lines[0]?.description).toBe('Harina');
+    expect(found.lines[0]?.supplyLine.name).toBe('Harina');
   });
 
   it('updates lines on save (replace)', async () => {
@@ -84,20 +86,24 @@ describe('DrizzleDonationIntakeRepository (integration)', () => {
       },
       [
         {
-          category: Category.Water,
-          description: 'Agua',
-          quantity: 2,
-          unit: null,
-          notes: null,
           sortOrder: 0,
+          line: {
+            category: Category.Water,
+            name: 'Agua',
+            quantity: 2,
+            unit: null,
+            presentation: null,
+          },
         },
         {
-          category: Category.Food,
-          description: 'Arroz',
-          quantity: 1,
-          unit: null,
-          notes: null,
           sortOrder: 1,
+          line: {
+            category: Category.Food,
+            name: 'Arroz',
+            quantity: 1,
+            unit: null,
+            presentation: null,
+          },
         },
       ],
     );

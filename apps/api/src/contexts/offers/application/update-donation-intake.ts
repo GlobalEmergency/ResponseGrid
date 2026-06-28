@@ -3,7 +3,7 @@ import { contactMatchesIntake } from '../domain/donor-contact';
 import { DonationIntakeContactMismatchError } from '../domain/donation-intake-errors';
 import { DonationIntakeRepository } from '../domain/ports/donation-intake.repository';
 import { DonationIntakeNotFoundError } from './donation-intake-not-found.error';
-import { CreateDonationIntakeLineCommand } from './create-donation-intake';
+import { SupplyLineProps } from '../../supplies/domain/supply-line';
 
 export interface UpdateDonationIntakeCommand {
   intakeId: string;
@@ -11,7 +11,7 @@ export interface UpdateDonationIntakeCommand {
   donorName: string;
   donorPhone: string | null;
   donorEmail: string | null;
-  items: CreateDonationIntakeLineCommand[];
+  items: SupplyLineProps[];
 }
 
 export class UpdateDonationIntake {
@@ -40,12 +40,8 @@ export class UpdateDonationIntake {
         donorEmail: cmd.donorEmail,
       },
       cmd.items.map((item, index) => ({
-        category: item.category,
-        description: item.description,
-        quantity: item.quantity,
-        unit: item.unit,
-        notes: item.notes,
         sortOrder: index,
+        line: item,
       })),
     );
 

@@ -1,15 +1,16 @@
 import { DonationIntakeId } from '../domain/donation-intake-id';
 import { DonationIntakeRepository } from '../domain/ports/donation-intake.repository';
 import { DonationIntakeNotFoundError } from './donation-intake-not-found.error';
+import { Category } from '../domain/offer-enums';
 
 export interface DonationIntakeLineView {
   id: string;
-  category: string;
-  description: string;
+  sortOrder: number;
+  name: string;
   quantity: number;
   unit: string | null;
-  notes: string | null;
-  sortOrder: number;
+  category: Category;
+  presentation: string | null;
 }
 
 export interface DonationIntakeView {
@@ -51,7 +52,15 @@ export class GetDonationIntakeById {
       donorPhone: snap.donorPhone,
       donorEmail: snap.donorEmail,
       donorUserId: snap.donorUserId,
-      lines: snap.lines,
+      lines: snap.lines.map((line) => ({
+        id: line.id,
+        sortOrder: line.sortOrder,
+        name: line.name,
+        quantity: line.quantity,
+        unit: line.unit,
+        category: line.category,
+        presentation: line.presentation ?? null,
+      })),
       volunteerNotes: snap.volunteerNotes,
       evidenceFileKey: snap.evidenceFileKey,
       receivedAt: snap.receivedAt,
