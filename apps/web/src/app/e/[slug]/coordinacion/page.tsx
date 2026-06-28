@@ -12,6 +12,7 @@ import { EmergencyControls } from '@/components/organisms/emergency-controls';
 import { NeedsFilter } from '@/components/molecules/needs-filter';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { getT } from '@/i18n/server';
 import { logout } from './actions';
 
 // Always fetch live data — never serve a stale cached page.
@@ -24,11 +25,12 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const { t } = await getT();
   const emergency = await getEmergencyBySlug(slug);
-  if (!emergency) return { title: 'Emergencia no encontrada · ResponseGrid' };
+  if (!emergency) return { title: t.coord.meta_not_found };
   return {
-    title: `Coordinación — ${emergency.name} · ResponseGrid`,
-    description: `Panel de coordinación de ${emergency.name}.`,
+    title: t.coord.dashboard_meta_title.replace('{name}', emergency.name),
+    description: t.coord.dashboard_meta_description.replace('{name}', emergency.name),
   };
 }
 
@@ -113,13 +115,16 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
   const validatedNeeds = validatedNeedsResult.data ?? [];
   const expiredNeeds = expiredNeedsResult.data ?? [];
 
+  const { t } = await getT();
+  const tc = t.coord;
+
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-xl">
         <PageHeaderBand
           backHref={`/e/${slug}`}
           backLabel={emergency.name}
-          title="Panel de coordinación"
+          title={tc.dashboard_title}
           subtitle={emergency.name}
         />
         <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
@@ -130,7 +135,7 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
             type="submit"
             className="rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-surface-alt focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
           >
-            Salir
+            {tc.logout}
           </button>
         </form>
 
@@ -151,7 +156,7 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
           href={`/e/${slug}/coordinacion/voluntarios`}
           className="flex items-center justify-between gap-3 rounded-lg border-2 border-navy bg-white px-5 py-4 font-semibold text-ink transition-colors hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
         >
-          <span>Voluntarios y tareas</span>
+          <span>{tc.link_volunteers}</span>
           <span aria-hidden="true" className="text-lg">→</span>
         </Link>
 
@@ -160,7 +165,7 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
           href={`/e/${slug}/coordinacion/reportes`}
           className="flex items-center justify-between gap-3 rounded-lg border-2 border-navy bg-white px-5 py-4 font-semibold text-ink transition-colors hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
         >
-          <span>Reportes de campo</span>
+          <span>{tc.link_reports}</span>
           <span aria-hidden="true" className="text-lg">→</span>
         </Link>
 
@@ -172,16 +177,16 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
             id="resources-heading"
             className="text-xl font-bold text-ink"
           >
-            Recursos pendientes
+            {tc.resources_heading}
           </h2>
 
           {resourceQueue.length === 0 ? (
             <EmptyState
-              title="No hay recursos pendientes de revisión."
-              description="Cuando alguien registre un recurso aparecerá aquí."
+              title={tc.resources_empty_title}
+              description={tc.resources_empty_description}
             />
           ) : (
-            <ul className="flex flex-col gap-4" aria-label="Cola de recursos">
+            <ul className="flex flex-col gap-4" aria-label={tc.resources_list_label}>
               {resourceQueue.map((resource) => (
                 <li key={resource.id}>
                   <CoordinationResourceCard resource={resource} slug={slug} />
@@ -197,18 +202,18 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
             id="needs-heading"
             className="text-xl font-bold text-ink"
           >
-            Peticiones pendientes
+            {tc.needs_heading}
           </h2>
 
           <NeedsFilter />
 
           {needsQueue.length === 0 ? (
             <EmptyState
-              title="No hay peticiones pendientes de validación."
-              description="Las peticiones ciudadanas aparecerán aquí cuando lleguen."
+              title={tc.needs_empty_title}
+              description={tc.needs_empty_description}
             />
           ) : (
-            <ul className="flex flex-col gap-4" aria-label="Cola de peticiones">
+            <ul className="flex flex-col gap-4" aria-label={tc.needs_list_label}>
               {needsQueue.map((need) => (
                 <li key={need.id}>
                   <CoordinationNeedCard need={need} slug={slug} />
@@ -226,16 +231,16 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
             id="offers-heading"
             className="text-xl font-bold text-ink"
           >
-            Ofertas de material
+            {tc.offers_heading}
           </h2>
 
           {offersQueue.length === 0 ? (
             <EmptyState
-              title="No hay ofertas de material pendientes."
-              description="Las ofertas de donantes aparecerán aquí para que puedas asignarlas a necesidades validadas."
+              title={tc.offers_empty_title}
+              description={tc.offers_empty_description}
             />
           ) : (
-            <ul className="flex flex-col gap-4" aria-label="Cola de ofertas de material">
+            <ul className="flex flex-col gap-4" aria-label={tc.offers_list_label}>
               {offersQueue.map((offer) => (
                 <li key={offer.id}>
                   <CoordinationOfferCard
@@ -257,16 +262,16 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
             id="expired-heading"
             className="text-xl font-bold text-ink"
           >
-            Peticiones caducadas
+            {tc.expired_heading}
           </h2>
 
           {expiredNeeds.length === 0 ? (
             <EmptyState
-              title="No hay peticiones caducadas."
-              description="Las peticiones cuya fecha de validez haya vencido aparecerán aquí para que puedas renovarlas."
+              title={tc.expired_empty_title}
+              description={tc.expired_empty_description}
             />
           ) : (
-            <ul className="flex flex-col gap-4" aria-label="Peticiones caducadas">
+            <ul className="flex flex-col gap-4" aria-label={tc.expired_list_label}>
               {expiredNeeds.map((need) => (
                 <li key={need.id}>
                   <ExpiredNeedCard need={need} slug={slug} />

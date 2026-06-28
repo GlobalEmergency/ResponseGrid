@@ -7,6 +7,7 @@ import { fetchMyResources } from './actions';
 import { StatusForm } from './status-form';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,32 +17,35 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const { t } = await getT();
   const emergency = await getEmergencyBySlug(slug);
-  if (!emergency) return { title: 'Emergencia no encontrada · ResponseGrid' };
+  if (!emergency) return { title: t.account.emergency_not_found };
   return {
-    title: `Mis puntos — ${emergency.name} · ResponseGrid`,
-    description: `Gestiona el estado operativo de tus puntos en ${emergency.name}.`,
+    title: t.account.points_meta_title.replace('{name}', emergency.name),
+    description: t.account.points_meta_description.replace('{name}', emergency.name),
   };
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  collection_point: 'Punto de recogida',
-  delivery_point: 'Punto de entrega',
-  collection_and_delivery: 'Recogida y entrega',
-  warehouse: 'Almacén',
-  transport: 'Transporte',
-  supplier: 'Proveedor',
-  venue: 'Local / Espacio',
-};
-
-const STAGE_LABELS: Record<string, string> = {
-  origin: 'Origen',
-  intermediate: 'Intermedio',
-  destination: 'Destino',
-};
-
 export default async function MisPuntosPage({ params }: Props) {
   const { slug } = await params;
+  const { t } = await getT();
+  const ta = t.account;
+
+  const TYPE_LABELS: Record<string, string> = {
+    collection_point: ta.type_collection_point,
+    delivery_point: ta.type_delivery_point,
+    collection_and_delivery: ta.type_collection_and_delivery,
+    warehouse: ta.type_warehouse,
+    transport: ta.type_transport,
+    supplier: ta.type_supplier,
+    venue: ta.type_venue,
+  };
+
+  const STAGE_LABELS: Record<string, string> = {
+    origin: ta.stage_origin,
+    intermediate: ta.stage_intermediate,
+    destination: ta.stage_destination,
+  };
 
   // --- Auth guard -----------------------------------------------------------
   const token = await getToken();
@@ -64,28 +68,28 @@ export default async function MisPuntosPage({ params }: Props) {
         <PageHeaderBand
           backHref={`/e/${slug}`}
           backLabel={emergency.name}
-          title="Mis puntos"
-          subtitle="Actualiza el estado operativo de los puntos que has registrado."
+          title={ta.points_title}
+          subtitle={ta.points_subtitle}
         />
         <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
 
         {/* ── LISTA DE PUNTOS ───────────────────────────────────────── */}
         <section aria-labelledby="my-points-heading" className="flex flex-col gap-4">
           <h2 id="my-points-heading" className="sr-only">
-            Tus puntos registrados
+            {ta.points_list_heading}
           </h2>
 
           {myResources.length === 0 ? (
             <EmptyState
-              title="Aún no tienes puntos registrados."
-              description="Cuando registres un recurso en esta emergencia aparecerá aquí."
+              title={ta.no_points_title}
+              description={ta.no_points_description}
             />
           ) : (
-            <ul className="flex flex-col gap-4" role="list" aria-label="Tus puntos registrados">
+            <ul className="flex flex-col gap-4" role="list" aria-label={ta.points_list_aria}>
               {myResources.map((resource) => (
                 <li key={resource.id}>
                   <article
-                    aria-label={`Punto: ${resource.name}`}
+                    aria-label={ta.point_card_aria.replace('{name}', resource.name)}
                     className="flex flex-col gap-4 rounded-lg border-2 border-navy bg-white p-5"
                   >
                     <div className="flex flex-col gap-1">
@@ -109,7 +113,7 @@ export default async function MisPuntosPage({ params }: Props) {
                       href={`/e/${slug}/reportar?resourceId=${resource.id}`}
                       className="inline-flex items-center justify-center rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink bg-white hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors w-fit"
                     >
-                      Reportar incidencia
+                      {ta.report_incident_cta}
                     </Link>
                   </article>
                 </li>

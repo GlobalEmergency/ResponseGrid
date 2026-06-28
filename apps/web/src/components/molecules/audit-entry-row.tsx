@@ -1,5 +1,6 @@
 import { StatusCodeBadge } from '@/components/atoms/status-code-badge';
 import type { AuditEntryDto } from '@/app/admin/auditoria/actions';
+import { getT } from '@/i18n/server';
 
 interface AuditEntryRowProps {
   entry: AuditEntryDto;
@@ -25,7 +26,9 @@ function resolveOptional(value: unknown): string | null {
 /**
  * AuditEntryCard — mobile card variant (renders as <li>).
  */
-export function AuditEntryCard({ entry }: AuditEntryRowProps) {
+export async function AuditEntryCard({ entry }: AuditEntryRowProps) {
+  const { t } = await getT();
+  const ta = t.admin;
   const actor = resolveOptional(entry.actorUserId) ?? '—';
   const entityType = resolveOptional(entry.entityType);
   const entityId = resolveOptional(entry.entityId);
@@ -46,11 +49,11 @@ export function AuditEntryCard({ entry }: AuditEntryRowProps) {
       </div>
       <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted">
         <span>
-          Actor:{' '}
+          {ta.audit_card_actor}{' '}
           <span className="font-medium break-all">{actor}</span>
         </span>
         <span>
-          Entidad:{' '}
+          {ta.audit_card_entity}{' '}
           <span className="font-medium break-all">{entityLabel}</span>
         </span>
       </div>

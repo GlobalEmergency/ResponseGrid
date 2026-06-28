@@ -3,12 +3,15 @@
 import { useTransition } from 'react';
 import { revokeAccreditationAction } from './actions';
 import { Button } from '@/components/atoms/button';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 interface RevokeButtonProps {
   accreditationId: string;
 }
 
 export function RevokeButton({ accreditationId }: RevokeButtonProps) {
+  const ta = getMessages(useLocale()).admin;
   const [pending, startTransition] = useTransition();
 
   function handleRevoke() {
@@ -25,7 +28,7 @@ export function RevokeButton({ accreditationId }: RevokeButtonProps) {
       disabled={pending}
       onClick={handleRevoke}
     >
-      {pending ? 'Revocando…' : 'Revocar'}
+      {pending ? ta.acc_revoking : ta.acc_revoke}
     </Button>
   );
 }

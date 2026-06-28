@@ -1,19 +1,8 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-
-const ENTITY_TYPE_OPTIONS = [
-  { value: '', label: 'Todos los tipos' },
-  { value: 'resource', label: 'Recurso' },
-  { value: 'need', label: 'Necesidad' },
-  { value: 'emergency', label: 'Emergencia' },
-  { value: 'offer', label: 'Oferta' },
-  { value: 'report', label: 'Reporte' },
-  { value: 'volunteer', label: 'Voluntario' },
-  { value: 'organization', label: 'Organización' },
-  { value: 'accreditation', label: 'Acreditación' },
-  { value: 'template', label: 'Plantilla' },
-] as const;
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 const selectClass =
   'rounded-lg border-2 border-line bg-white px-3 py-1.5 text-sm text-ink focus:border-navy focus:outline-none';
@@ -25,8 +14,22 @@ const selectClass =
  * updated params without a full navigation.
  */
 export function AuditFilter() {
+  const ta = getMessages(useLocale()).admin;
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const entityTypeOptions = [
+    { value: '', label: ta.audit_type_all },
+    { value: 'resource', label: ta.audit_type_resource },
+    { value: 'need', label: ta.audit_type_need },
+    { value: 'emergency', label: ta.audit_type_emergency },
+    { value: 'offer', label: ta.audit_type_offer },
+    { value: 'report', label: ta.audit_type_report },
+    { value: 'volunteer', label: ta.audit_type_volunteer },
+    { value: 'organization', label: ta.audit_type_organization },
+    { value: 'accreditation', label: ta.audit_type_accreditation },
+    { value: 'template', label: ta.audit_type_template },
+  ] as const;
 
   const currentEntityType = searchParams.get('entityType') ?? '';
   const currentEmergencyId = searchParams.get('emergencyId') ?? '';
@@ -44,16 +47,16 @@ export function AuditFilter() {
   }
 
   return (
-    <div className="flex flex-wrap gap-3" role="group" aria-label="Filtros del registro de auditoría">
+    <div className="flex flex-wrap gap-3" role="group" aria-label={ta.audit_filters_group_aria}>
       <label className="flex flex-col gap-1 text-xs font-medium text-muted">
-        <span>Tipo de entidad</span>
+        <span>{ta.audit_entity_type_label}</span>
         <select
           value={currentEntityType}
           onChange={(e) => updateParam('entityType', e.target.value)}
           className={selectClass}
-          aria-label="Filtrar por tipo de entidad"
+          aria-label={ta.audit_entity_type_aria}
         >
-          {ENTITY_TYPE_OPTIONS.map((opt) => (
+          {entityTypeOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
             </option>
@@ -62,14 +65,14 @@ export function AuditFilter() {
       </label>
 
       <label className="flex flex-col gap-1 text-xs font-medium text-muted">
-        <span>ID de emergencia</span>
+        <span>{ta.audit_emergency_id_label}</span>
         <input
           type="text"
           value={currentEmergencyId}
           onChange={(e) => updateParam('emergencyId', e.target.value)}
           className={`${selectClass} min-w-[14rem]`}
-          placeholder="UUID de emergencia…"
-          aria-label="Filtrar por ID de emergencia"
+          placeholder={ta.audit_emergency_id_ph}
+          aria-label={ta.audit_emergency_id_aria}
         />
       </label>
     </div>

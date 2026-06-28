@@ -8,13 +8,17 @@ import { AuditFilter } from './audit-filter';
 import { AuditEntryCard, AuditEntryRow } from '@/components/molecules/audit-entry-row';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Registro de auditoría — Admin · ResponseGrid',
-  description: 'Registro de actividad del sistema. Solo administradores.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  return {
+    title: t.admin.audit_meta_title,
+    description: t.admin.audit_meta_description,
+  };
+}
 
 interface PageProps {
   searchParams: Promise<{
@@ -75,42 +79,45 @@ export default async function AuditoriaPage({ searchParams }: PageProps) {
     return qs ? `?${qs}` : '?';
   }
 
+  const { t } = await getT();
+  const ta = t.admin;
+
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-5xl">
         <PageHeaderBand
           backHref="/"
-          backLabel="← Inicio"
-          title="Registro de auditoría"
-          subtitle="Actividad registrada en el sistema. Solo administradores."
+          backLabel={ta.back}
+          title={ta.audit_title}
+          subtitle={ta.audit_subtitle}
         />
         <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
 
         {total > 0 && (
           <p className="text-xs text-muted-soft">
-            {total} entrada{total !== 1 ? 's' : ''} en total
-            {hasFilters ? ' (filtrado)' : ''}
+            {(total === 1 ? ta.audit_total_one : ta.audit_total_other).replace('{count}', String(total))}
+            {hasFilters ? ta.audit_total_filtered : ''}
           </p>
         )}
 
         {/* ── FILTROS ─────────────────────────────────────────────────── */}
-        <section aria-label="Filtros">
+        <section aria-label={ta.audit_filters_aria}>
           <AuditFilter />
         </section>
 
         {/* ── LISTADO ─────────────────────────────────────────────────── */}
         <section aria-labelledby="audit-heading" className="flex flex-col gap-4">
           <h2 id="audit-heading" className="text-xl font-bold text-ink">
-            Entradas recientes
+            {ta.audit_recent_heading}
           </h2>
 
           {entries.length === 0 ? (
             <EmptyState
-              title="No hay entradas de auditoría."
+              title={ta.audit_empty_title}
               description={
                 hasFilters
-                  ? 'Prueba a cambiar o eliminar los filtros.'
-                  : 'El registro de auditoría está vacío.'
+                  ? ta.audit_empty_filtered
+                  : ta.audit_empty_description
               }
             />
           ) : (
@@ -128,22 +135,22 @@ export default async function AuditoriaPage({ searchParams }: PageProps) {
                   <thead>
                     <tr className="bg-surface border-b-2 border-navy">
                       <th scope="col" className="py-3 px-4 text-xs font-bold uppercase tracking-wide text-ink-soft">
-                        Acción
+                        {ta.audit_col_action}
                       </th>
                       <th scope="col" className="py-3 px-4 text-xs font-bold uppercase tracking-wide text-ink-soft">
-                        Actor
+                        {ta.audit_col_actor}
                       </th>
                       <th scope="col" className="py-3 px-4 text-xs font-bold uppercase tracking-wide text-ink-soft">
-                        Entidad
+                        {ta.audit_col_entity}
                       </th>
                       <th scope="col" className="py-3 px-4 text-xs font-bold uppercase tracking-wide text-ink-soft">
-                        Petición
+                        {ta.audit_col_request}
                       </th>
                       <th scope="col" className="py-3 px-4 text-xs font-bold uppercase tracking-wide text-ink-soft">
-                        Estado
+                        {ta.audit_col_status}
                       </th>
                       <th scope="col" className="py-3 px-4 text-xs font-bold uppercase tracking-wide text-ink-soft">
-                        Fecha
+                        {ta.audit_col_date}
                       </th>
                     </tr>
                   </thead>
@@ -158,7 +165,7 @@ export default async function AuditoriaPage({ searchParams }: PageProps) {
               {/* ── Pagination ─────────────────────────────────────────── */}
               {(hasPrev || hasNext) && (
                 <nav
-                  aria-label="Paginación del registro"
+                  aria-label={ta.audit_pagination_aria}
                   className="flex items-center justify-between gap-4 pt-2"
                 >
                   {hasPrev ? (
@@ -166,20 +173,23 @@ export default async function AuditoriaPage({ searchParams }: PageProps) {
                       href={paginationHref(prevOffset)}
                       className="text-sm font-medium text-muted hover:text-ink underline underline-offset-2 transition-colors"
                     >
-                      ← Anterior
+                      {ta.audit_prev}
                     </Link>
                   ) : (
                     <span />
                   )}
                   <span className="text-xs text-muted-soft">
-                    {offset + 1}–{Math.min(offset + PAGE_LIMIT, total)} de {total}
+                    {ta.audit_range
+                      .replace('{from}', String(offset + 1))
+                      .replace('{to}', String(Math.min(offset + PAGE_LIMIT, total)))
+                      .replace('{total}', String(total))}
                   </span>
                   {hasNext ? (
                     <Link
                       href={paginationHref(nextOffset)}
                       className="text-sm font-medium text-muted hover:text-ink underline underline-offset-2 transition-colors"
                     >
-                      Siguiente →
+                      {ta.audit_next}
                     </Link>
                   ) : (
                     <span />

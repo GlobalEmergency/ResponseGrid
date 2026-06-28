@@ -8,6 +8,7 @@ import { EmptyState } from '@/components/molecules/empty-state';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { ReportCard } from '@/components/organisms/report-card';
 import type { FieldReport } from '@/components/organisms/report-card';
+import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,11 +19,12 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const { t } = await getT();
   const emergency = await getEmergencyBySlug(slug);
-  if (!emergency) return { title: 'Emergencia no encontrada · ResponseGrid' };
+  if (!emergency) return { title: t.coord.meta_not_found };
   return {
-    title: `Reportes de campo — ${emergency.name} · ResponseGrid`,
-    description: `Cola de partes de campo de ${emergency.name}.`,
+    title: t.coord.reports_meta_title.replace('{name}', emergency.name),
+    description: t.coord.reports_meta_description.replace('{name}', emergency.name),
   };
 }
 
@@ -33,19 +35,6 @@ const VALID_TYPES = ['incident', 'stock', 'status', 'other'] as const;
 type ReportStatus = typeof VALID_STATUSES[number];
 type ReportPriority = typeof VALID_PRIORITIES[number];
 type ReportType = typeof VALID_TYPES[number];
-
-const STATUS_LABELS: Record<ReportStatus, string> = {
-  open: 'Abiertos',
-  reviewed: 'Revisados',
-  closed: 'Cerrados',
-};
-
-const PRIORITY_LABELS: Record<ReportPriority, string> = {
-  low: 'Baja',
-  medium: 'Media',
-  high: 'Alta',
-  urgent: 'Urgente',
-};
 
 export default async function CoordinacionReportesPage({ params, searchParams }: Props) {
   const { slug } = await params;
@@ -127,13 +116,29 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
 
   const baseUrl = `/e/${slug}/coordinacion/reportes`;
 
+  const { t } = await getT();
+  const tc = t.coord;
+
+  const STATUS_LABELS: Record<ReportStatus, string> = {
+    open: tc.reports_status_open,
+    reviewed: tc.reports_status_reviewed,
+    closed: tc.reports_status_closed,
+  };
+
+  const PRIORITY_LABELS: Record<ReportPriority, string> = {
+    low: tc.priority_low,
+    medium: tc.priority_medium,
+    high: tc.priority_high,
+    urgent: tc.priority_urgent,
+  };
+
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-xl">
         <PageHeaderBand
           backHref={`/e/${slug}/coordinacion`}
-          backLabel="Coordinación"
-          title="Reportes de campo"
+          backLabel={tc.back_coordination}
+          title={tc.reports_title}
           subtitle={emergency.name}
         />
         <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
@@ -141,7 +146,7 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
         {/* ── FILTROS ─────────────────────────────────────────────────── */}
         <section aria-labelledby="filters-heading" className="flex flex-col gap-3">
           <h2 id="filters-heading" className="text-sm font-semibold text-ink uppercase tracking-wide">
-            Filtrar
+            {tc.reports_filter_heading}
           </h2>
 
           <div className="flex flex-wrap gap-2">
@@ -156,7 +161,7 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
                     : 'border-line text-muted hover:border-navy hover:text-ink',
                 ].join(' ')}
               >
-                Todos
+                {tc.reports_filter_all}
               </Link>
               {VALID_STATUSES.map((s) => (
                 <Link
@@ -199,7 +204,7 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
               href={baseUrl}
               className="text-xs text-muted-soft underline underline-offset-2 hover:text-ink-soft focus:outline-none focus:ring-1 focus:ring-navy rounded w-fit"
             >
-              Limpiar filtros
+              {tc.reports_filter_clear}
             </Link>
           )}
         </section>
@@ -209,7 +214,7 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
         {/* ── LISTA DE PARTES ─────────────────────────────────────────── */}
         <section aria-labelledby="reports-heading" className="flex flex-col gap-4">
           <h2 id="reports-heading" className="text-xl font-bold text-ink">
-            Partes recibidos
+            {tc.reports_received_heading}
             {reports.length > 0 && (
               <span className="ml-2 text-sm font-normal text-muted">
                 ({reports.length})
@@ -219,11 +224,11 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
 
           {reports.length === 0 ? (
             <EmptyState
-              title="No hay partes con los filtros seleccionados."
-              description="Ajusta los filtros o espera a que los voluntarios envíen partes de campo."
+              title={tc.reports_empty_title}
+              description={tc.reports_empty_description}
             />
           ) : (
-            <ul className="flex flex-col gap-4" aria-label="Lista de partes de campo">
+            <ul className="flex flex-col gap-4" aria-label={tc.reports_list_label}>
               {reports.map((report) => (
                 <li key={report.id}>
                   <ReportCard report={report} slug={slug} />

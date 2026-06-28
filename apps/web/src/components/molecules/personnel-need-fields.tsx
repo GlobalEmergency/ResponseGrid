@@ -11,6 +11,8 @@
  */
 
 import { useState } from 'react';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 type SkillValue =
   | 'driving'
@@ -21,25 +23,26 @@ type SkillValue =
   | 'admin'
   | 'general';
 
-const SKILL_OPTIONS: { value: SkillValue; label: string }[] = [
-  { value: 'medical', label: 'Sanitario / Primeros auxilios' },
-  { value: 'driving', label: 'Conducción' },
-  { value: 'logistics', label: 'Logística' },
-  { value: 'cooking', label: 'Cocina' },
-  { value: 'languages', label: 'Idiomas' },
-  { value: 'admin', label: 'Administración' },
-  { value: 'general', label: 'General / Apoyo' },
-];
-
 export function PersonnelNeedFields() {
   const [skill, setSkill] = useState<SkillValue | ''>('medical');
   const [specialty, setSpecialty] = useState('');
   const [count, setCount] = useState(1);
+  const tc = getMessages(useLocale()).coord;
+
+  const SKILL_OPTIONS: { value: SkillValue; label: string }[] = [
+    { value: 'medical', label: tc.personnel_fields_skill_medical },
+    { value: 'driving', label: tc.skill_driving },
+    { value: 'logistics', label: tc.skill_logistics },
+    { value: 'cooking', label: tc.skill_cooking },
+    { value: 'languages', label: tc.skill_languages },
+    { value: 'admin', label: tc.skill_admin },
+    { value: 'general', label: tc.personnel_fields_skill_general },
+  ];
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border-2 border-blue-300 bg-blue-50 p-4">
       <p className="text-sm font-semibold text-blue-900 uppercase tracking-wide">
-        Personal sanitario — detalle
+        {tc.personnel_fields_heading}
       </p>
 
       {/* Habilidad requerida */}
@@ -48,8 +51,8 @@ export function PersonnelNeedFields() {
           htmlFor="personnel-skill"
           className="text-sm font-medium text-ink-soft"
         >
-          Habilidad requerida{' '}
-          <span className="text-muted-soft font-normal">(opcional)</span>
+          {tc.personnel_fields_skill_label}{' '}
+          <span className="text-muted-soft font-normal">{tc.optional}</span>
         </label>
         <select
           id="personnel-skill"
@@ -58,7 +61,7 @@ export function PersonnelNeedFields() {
           onChange={(e) => setSkill(e.target.value as SkillValue | '')}
           className="w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
         >
-          <option value="">Sin especificar</option>
+          <option value="">{tc.personnel_fields_skill_unspecified}</option>
           {SKILL_OPTIONS.map(({ value, label }) => (
             <option key={value} value={value}>
               {label}
@@ -73,8 +76,8 @@ export function PersonnelNeedFields() {
           htmlFor="personnel-specialty"
           className="text-sm font-medium text-ink-soft"
         >
-          Especialidad{' '}
-          <span className="text-muted-soft font-normal">(opcional)</span>
+          {tc.personnel_fields_specialty_label}{' '}
+          <span className="text-muted-soft font-normal">{tc.optional}</span>
         </label>
         <input
           id="personnel-specialty"
@@ -82,7 +85,7 @@ export function PersonnelNeedFields() {
           type="text"
           value={specialty}
           onChange={(e) => setSpecialty(e.target.value)}
-          placeholder="Ej. médico urgencias pediátricas"
+          placeholder={tc.personnel_fields_specialty_placeholder}
           className="w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink placeholder:text-muted-soft focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
         />
       </div>
@@ -93,8 +96,8 @@ export function PersonnelNeedFields() {
           htmlFor="personnel-count"
           className="text-sm font-medium text-ink-soft"
         >
-          Personas necesarias{' '}
-          <span className="text-muted-soft font-normal">(opcional)</span>
+          {tc.personnel_fields_count_label}{' '}
+          <span className="text-muted-soft font-normal">{tc.optional}</span>
         </label>
         <input
           id="personnel-count"

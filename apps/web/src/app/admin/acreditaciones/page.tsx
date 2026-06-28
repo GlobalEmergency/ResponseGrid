@@ -7,13 +7,17 @@ import { GrantAccreditationForm } from './grant-form';
 import { RevokeButton } from './revoke-button';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Acreditaciones — Admin · ResponseGrid',
-  description: 'Gestión de acreditaciones de organizaciones.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  return {
+    title: t.admin.acc_meta_title,
+    description: t.admin.acc_meta_description,
+  };
+}
 
 export default async function AcreditacionesPage() {
   // ── Auth guard ──────────────────────────────────────────────────────────
@@ -38,39 +42,42 @@ export default async function AcreditacionesPage() {
   // ── Fetch existing accreditations ────────────────────────────────────────
   const accreditations = await fetchAccreditations();
 
+  const { t } = await getT();
+  const ta = t.admin;
+
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-xl">
         <PageHeaderBand
           backHref="/"
-          backLabel="← Inicio"
-          title="Acreditaciones"
-          subtitle="Gestión de acreditaciones de organizaciones. Solo administradores."
+          backLabel={ta.back}
+          title={ta.acc_title}
+          subtitle={ta.acc_subtitle}
         />
         <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
 
         <p className="text-xs text-amber-700 bg-amber-50 border border-amber-300 rounded px-3 py-2">
-          Nota: el ID de organización debe introducirse manualmente (no hay listado global de organizaciones disponible).
+          {ta.acc_manual_note}
         </p>
 
         {/* ── LISTADO DE ACREDITACIONES ────────────────────────────────── */}
         <section aria-labelledby="list-heading" className="flex flex-col gap-4">
           <h2 id="list-heading" className="text-xl font-bold text-ink">
-            Acreditaciones vigentes ({accreditations.length})
+            {ta.acc_list_heading.replace('{count}', String(accreditations.length))}
           </h2>
 
           {accreditations.length === 0 ? (
             <EmptyState
-              title="No hay acreditaciones vigentes."
-              description="Usa el formulario de abajo para conceder la primera."
+              title={ta.acc_empty_title}
+              description={ta.acc_empty_description}
             />
           ) : (
             <ul className="flex flex-col gap-3" role="list">
               {accreditations.map((acc) => {
                 const scopeLabel =
                   acc.scope === 'global'
-                    ? 'Global'
-                    : `Emergencia: ${acc.scope.emergencyId}`;
+                    ? ta.acc_scope_global
+                    : ta.acc_scope_emergency.replace('{id}', acc.scope.emergencyId);
 
                 return (
                   <li
@@ -79,18 +86,18 @@ export default async function AcreditacionesPage() {
                   >
                     <div className="flex flex-col gap-0.5 min-w-0">
                       <span className="text-sm font-bold text-ink break-all">
-                        Org: {acc.organizationId}
+                        {ta.acc_org_label} {acc.organizationId}
                       </span>
                       <span className="text-xs text-muted font-medium">
-                        Alcance: {scopeLabel}
+                        {ta.acc_scope_label} {scopeLabel}
                       </span>
                       {acc.evidence && (
                         <span className="text-xs text-muted break-all">
-                          Evidencia: {acc.evidence}
+                          {ta.acc_evidence_label} {acc.evidence}
                         </span>
                       )}
                       <span className="text-xs text-muted-soft">
-                        Concedida:{' '}
+                        {ta.acc_granted_label}{' '}
                         <time dateTime={acc.grantedAt} suppressHydrationWarning>
                           {new Date(acc.grantedAt).toLocaleDateString('es-ES')}
                         </time>
@@ -111,7 +118,7 @@ export default async function AcreditacionesPage() {
         {/* ── CONCEDER ACREDITACIÓN ────────────────────────────────────── */}
         <section aria-labelledby="grant-heading" className="flex flex-col gap-4">
           <h2 id="grant-heading" className="text-xl font-bold text-ink">
-            Conceder acreditación
+            {ta.acc_grant_heading}
           </h2>
           <GrantAccreditationForm />
         </section>

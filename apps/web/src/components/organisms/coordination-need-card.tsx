@@ -7,30 +7,11 @@ import type { ActionResult } from '@/app/e/[slug]/coordinacion/actions';
 import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { FreshnessIndicator } from '@/components/atoms/freshness-indicator';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 type NeedView = components['schemas']['NeedViewDto'];
 type ItemCategory = components['schemas']['NeedItemResponseDto']['category'];
-
-const CATEGORY_LABELS: Record<ItemCategory, string> = {
-  hygiene: 'Higiene',
-  water: 'Agua',
-  food: 'Alimentos',
-  medical: 'Sanitario',
-  shelter: 'Refugio',
-  tools: 'Herramientas',
-  other: 'Otro',
-  medicines: '💊 Medicamentos',
-  medical_equipment: '🩺 Equipos médicos',
-  medical_supplies: '📦 Insumos médicos',
-  medical_personnel: '🧑‍⚕️ Personal sanitario',
-};
-
-const PRIORITY_LABELS: Record<NeedView['priority'], string> = {
-  low: 'Baja',
-  medium: 'Media',
-  high: 'Alta',
-  urgent: 'Urgente',
-};
 
 const INITIAL_STATE: ActionResult = { status: 'idle' };
 
@@ -43,6 +24,29 @@ export function CoordinationNeedCard({
   need,
   slug,
 }: CoordinationNeedCardProps) {
+  const tc = getMessages(useLocale()).coord;
+
+  const CATEGORY_LABELS: Record<ItemCategory, string> = {
+    hygiene: tc.category_hygiene,
+    water: tc.category_water,
+    food: tc.category_food,
+    medical: tc.category_medical,
+    shelter: tc.category_shelter,
+    tools: tc.category_tools,
+    other: tc.category_other,
+    medicines: tc.category_medicines,
+    medical_equipment: tc.category_medical_equipment,
+    medical_supplies: tc.category_medical_supplies,
+    medical_personnel: tc.category_medical_personnel,
+  };
+
+  const PRIORITY_LABELS: Record<NeedView['priority'], string> = {
+    low: tc.priority_low,
+    medium: tc.priority_medium,
+    high: tc.priority_high,
+    urgent: tc.priority_urgent,
+  };
+
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(
     async (_prev, _formData) => {
       return validateNeed(need.id, slug);
@@ -56,7 +60,7 @@ export function CoordinationNeedCard({
 
   return (
     <article
-      aria-label={`Petición: ${need.title}`}
+      aria-label={tc.need_card_label.replace('{title}', need.title)}
       className="flex flex-col gap-4 rounded-lg border-2 border-navy bg-white p-5"
     >
       {/* Header */}
@@ -75,7 +79,7 @@ export function CoordinationNeedCard({
             </span>
           )}
           <span aria-hidden="true" className="text-muted-soft">·</span>
-          <span>Prioridad: {PRIORITY_LABELS[need.priority]}</span>
+          <span>{tc.priority_label}: {PRIORITY_LABELS[need.priority]}</span>
           {need.items.length > 0 && (
             <>
               <span aria-hidden="true" className="text-muted-soft">·</span>
@@ -92,13 +96,13 @@ export function CoordinationNeedCard({
 
       {/* Error message */}
       {state.status === 'error' && (
-        <ErrorMessage message={state.message ?? 'Error desconocido'} />
+        <ErrorMessage message={state.message ?? tc.error_unknown} />
       )}
 
       {/* Validate form */}
       <form action={formAction}>
         <Button type="submit" disabled={pending} fullWidth>
-          {pending ? 'Procesando…' : 'Validar'}
+          {pending ? tc.processing : tc.need_validate}
         </Button>
       </form>
     </article>

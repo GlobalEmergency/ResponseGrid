@@ -7,10 +7,13 @@ import { Button } from '@/components/atoms/button';
 import { Input } from '@/components/atoms/input';
 import { FormField } from '@/components/molecules/form-field';
 import { ErrorMessage } from '@/components/atoms/error-message';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 const INITIAL_STATE: AccreditationActionResult = { status: 'idle' };
 
 export function GrantAccreditationForm() {
+  const ta = getMessages(useLocale()).admin;
   const [state, formAction, pending] = useActionState(
     grantAccreditationAction,
     INITIAL_STATE,
@@ -29,16 +32,16 @@ export function GrantAccreditationForm() {
           role="status"
           className="rounded-md border border-green-500 bg-green-50 px-4 py-3 text-sm font-medium text-green-800"
         >
-          Acreditación concedida correctamente.
+          {ta.acc_form_success}
         </p>
       )}
 
-      <FormField htmlFor="organizationId" label="ID de organización">
+      <FormField htmlFor="organizationId" label={ta.acc_f_org_label}>
         <Input
           id="organizationId"
           name="organizationId"
           type="text"
-          placeholder="UUID de la organización"
+          placeholder={ta.acc_f_org_ph}
           required
           autoComplete="off"
         />
@@ -47,7 +50,7 @@ export function GrantAccreditationForm() {
       {/* Scope radio group */}
       <fieldset className="flex flex-col gap-2">
         <legend className="text-sm font-semibold text-ink uppercase tracking-wide">
-          Alcance
+          {ta.acc_f_scope_legend}
         </legend>
         <div className="flex flex-col gap-2">
           <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-ink">
@@ -59,7 +62,7 @@ export function GrantAccreditationForm() {
               onChange={() => setScopeType('global')}
               className="accent-navy"
             />
-            Global (válida para todas las emergencias)
+            {ta.acc_f_scope_global}
           </label>
           <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-ink">
             <input
@@ -70,36 +73,36 @@ export function GrantAccreditationForm() {
               onChange={() => setScopeType('emergency')}
               className="accent-navy"
             />
-            Esta emergencia (emergencia específica)
+            {ta.acc_f_scope_emergency}
           </label>
         </div>
       </fieldset>
 
       {scopeType === 'emergency' && (
-        <FormField htmlFor="emergencyId" label="ID de emergencia">
+        <FormField htmlFor="emergencyId" label={ta.acc_f_emergency_label}>
           <Input
             id="emergencyId"
             name="emergencyId"
             type="text"
-            placeholder="UUID de la emergencia"
+            placeholder={ta.acc_f_emergency_ph}
             required={scopeType === 'emergency'}
             autoComplete="off"
           />
         </FormField>
       )}
 
-      <FormField htmlFor="evidence" label="Evidencia (opcional)">
+      <FormField htmlFor="evidence" label={ta.acc_f_evidence_label}>
         <Input
           id="evidence"
           name="evidence"
           type="text"
-          placeholder="URL o referencia documental"
+          placeholder={ta.acc_f_evidence_ph}
           autoComplete="off"
         />
       </FormField>
 
       <Button type="submit" disabled={pending} size="md">
-        {pending ? 'Concediendo…' : 'Conceder acreditación'}
+        {pending ? ta.acc_f_granting : ta.acc_f_submit}
       </Button>
     </form>
   );

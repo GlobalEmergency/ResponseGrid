@@ -7,31 +7,10 @@ import type { CheckActionResult } from './actions';
 import { Button } from '@/components/atoms/button';
 import { Badge } from '@/components/atoms/badge';
 import { ErrorMessage } from '@/components/atoms/error-message';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 type MyTask = components['schemas']['MyTaskViewDto'];
-
-const SKILL_LABELS: Record<string, string> = {
-  driving: 'Conducción',
-  medical: 'Sanitario',
-  logistics: 'Logística',
-  cooking: 'Cocina',
-  languages: 'Idiomas',
-  admin: 'Administración',
-  general: 'General',
-};
-
-const TASK_STATUS_LABELS: Record<string, string> = {
-  open: 'Abierta',
-  in_progress: 'En progreso',
-  completed: 'Completada',
-  cancelled: 'Cancelada',
-};
-
-const ASSIGNMENT_STATUS_LABELS: Record<string, string> = {
-  assigned: 'Asignado',
-  checked_in: 'En curso',
-  checked_out: 'Finalizado',
-};
 
 const INITIAL_STATE: CheckActionResult = { status: 'idle' };
 
@@ -42,6 +21,31 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, volunteerId, slug }: TaskCardProps) {
+  const ta = getMessages(useLocale()).account;
+
+  const SKILL_LABELS: Record<string, string> = {
+    driving: ta.skill_driving,
+    medical: ta.skill_medical,
+    logistics: ta.skill_logistics,
+    cooking: ta.skill_cooking,
+    languages: ta.skill_languages,
+    admin: ta.skill_admin,
+    general: ta.skill_general,
+  };
+
+  const TASK_STATUS_LABELS: Record<string, string> = {
+    open: ta.task_status_open,
+    in_progress: ta.task_status_in_progress,
+    completed: ta.task_status_completed,
+    cancelled: ta.task_status_cancelled,
+  };
+
+  const ASSIGNMENT_STATUS_LABELS: Record<string, string> = {
+    assigned: ta.assignment_status_assigned,
+    checked_in: ta.assignment_status_checked_in,
+    checked_out: ta.assignment_status_checked_out,
+  };
+
   const [checkInState, checkInAction, checkInPending] = useActionState<CheckActionResult, FormData>(
     async (_prev, _formData) => checkInTask(task.id, volunteerId, slug),
     INITIAL_STATE,
@@ -64,7 +68,7 @@ export function TaskCard({ task, volunteerId, slug }: TaskCardProps) {
 
   return (
     <article
-      aria-label={`Tarea: ${task.title}`}
+      aria-label={ta.task_card_aria.replace('{name}', task.title)}
       className="flex flex-col gap-4 rounded-lg border-2 border-navy bg-white p-5"
     >
       {/* Header */}
@@ -73,7 +77,11 @@ export function TaskCard({ task, volunteerId, slug }: TaskCardProps) {
           <h3 className="text-lg font-bold text-ink leading-tight flex-1">
             {task.title}
           </h3>
-          <AssignmentBadge status={myStatus} />
+          <AssignmentBadge
+            status={myStatus}
+            label={ASSIGNMENT_STATUS_LABELS[myStatus] ?? myStatus}
+            ariaLabel={ta.assignment_status_aria}
+          />
         </div>
         {task.description !== '' && (
           <p className="text-sm text-muted">{task.description}</p>
@@ -83,14 +91,14 @@ export function TaskCard({ task, volunteerId, slug }: TaskCardProps) {
       {/* Metadata */}
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
         <span>
-          Estado de la tarea:{' '}
+          {ta.task_status_label}{' '}
           <span className="font-semibold text-ink-soft">
             {TASK_STATUS_LABELS[task.status] ?? task.status}
           </span>
         </span>
         {task.requiredSkill != null && (
           <span>
-            Habilidad requerida:{' '}
+            {ta.required_skill_label}{' '}
             <span className="font-semibold text-ink-soft">
               {SKILL_LABELS[task.requiredSkill] ?? task.requiredSkill}
             </span>
@@ -98,7 +106,7 @@ export function TaskCard({ task, volunteerId, slug }: TaskCardProps) {
         )}
         {task.location != null && (
           <span>
-            Lugar:{' '}
+            {ta.location_label}{' '}
             <span className="font-semibold text-ink-soft">{task.location.address}</span>
           </span>
         )}
@@ -112,7 +120,7 @@ export function TaskCard({ task, volunteerId, slug }: TaskCardProps) {
       {/* Success feedback */}
       {(checkInState.status === 'success' || checkOutState.status === 'success') && (
         <p role="alert" aria-live="polite" className="text-xs text-green-700 font-medium">
-          Actualizado correctamente.
+          {ta.updated_success}
         </p>
       )}
 
@@ -126,7 +134,7 @@ export function TaskCard({ task, volunteerId, slug }: TaskCardProps) {
             disabled={isPending}
             fullWidth
           >
-            {checkInPending ? 'Procesando…' : 'Check-in — Empezar tarea'}
+            {checkInPending ? ta.processing : ta.check_in_cta}
           </Button>
         </form>
       )}
@@ -140,26 +148,34 @@ export function TaskCard({ task, volunteerId, slug }: TaskCardProps) {
             disabled={isPending}
             fullWidth
           >
-            {checkOutPending ? 'Procesando…' : 'Check-out — Marcar como terminada'}
+            {checkOutPending ? ta.processing : ta.check_out_cta}
           </Button>
         </form>
       )}
 
       {myStatus === 'checked_out' && (
         <p className="text-sm font-semibold text-green-800 rounded-lg border border-green-300 bg-green-50 px-4 py-2">
-          Tarea completada. ¡Gracias por tu colaboración!
+          {ta.task_completed_thanks}
         </p>
       )}
     </article>
   );
 }
 
-function AssignmentBadge({ status }: { status: string }) {
-  const label = ASSIGNMENT_STATUS_LABELS[status] ?? status;
+function AssignmentBadge({
+  status,
+  label,
+  ariaLabel,
+}: {
+  status: string;
+  label: string;
+  ariaLabel: string;
+}) {
+  const aria = ariaLabel.replace('{status}', label);
 
   if (status === 'assigned') {
     return (
-      <Badge variant="unverified" aria-label={`Estado de asignación: ${label}`}>
+      <Badge variant="unverified" aria-label={aria}>
         {label}
       </Badge>
     );
@@ -168,7 +184,7 @@ function AssignmentBadge({ status }: { status: string }) {
   if (status === 'checked_in') {
     return (
       <span
-        aria-label={`Estado de asignación: ${label}`}
+        aria-label={aria}
         className="inline-flex items-center rounded-full border border-green-400 bg-green-50 px-3 py-1 text-sm font-semibold text-green-800 flex-shrink-0"
       >
         {label}
@@ -179,7 +195,7 @@ function AssignmentBadge({ status }: { status: string }) {
   if (status === 'checked_out') {
     return (
       <span
-        aria-label={`Estado de asignación: ${label}`}
+        aria-label={aria}
         className="inline-flex items-center rounded-full border border-line bg-surface-alt px-3 py-1 text-sm font-semibold text-muted flex-shrink-0"
       >
         {label}

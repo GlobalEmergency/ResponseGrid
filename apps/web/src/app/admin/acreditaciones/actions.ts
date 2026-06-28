@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { getToken, clearToken, authHeaders } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
+import { getT } from '@/i18n/server';
 
 export type AccreditationActionResult =
   | { status: 'idle' }
@@ -55,13 +56,16 @@ export async function grantAccreditationAction(
     redirect('/login?next=/admin/acreditaciones');
   }
 
+  const { t } = await getT();
+  const ta = t.admin;
+
   const organizationId = String(formData.get('organizationId') ?? '').trim();
   const scopeType = String(formData.get('scopeType') ?? '').trim();
   const emergencyId = String(formData.get('emergencyId') ?? '').trim();
   const evidence = String(formData.get('evidence') ?? '').trim() || undefined;
 
   if (!organizationId) {
-    return { status: 'error', message: 'El ID de organización es obligatorio.' };
+    return { status: 'error', message: ta.acc_err_org_required };
   }
 
   const scope: 'global' | { emergencyId: string } =
@@ -70,7 +74,7 @@ export async function grantAccreditationAction(
       : 'global';
 
   if (scopeType === 'emergency' && !emergencyId) {
-    return { status: 'error', message: 'El ID de emergencia es obligatorio para el alcance "Esta emergencia".' };
+    return { status: 'error', message: ta.acc_err_emergency_required };
   }
 
   const { error, response } = await api.POST('/accreditations', {
@@ -84,12 +88,12 @@ export async function grantAccreditationAction(
       redirect('/login?next=/admin/acreditaciones');
     }
     if (response.status === 403) {
-      return { status: 'error', message: 'No tienes permisos para conceder acreditaciones.' };
+      return { status: 'error', message: ta.acc_err_grant_forbidden };
     }
     if (response.status === 400) {
-      return { status: 'error', message: 'Datos inválidos. Comprueba el ID de organización y el alcance.' };
+      return { status: 'error', message: ta.acc_err_invalid };
     }
-    return { status: 'error', message: 'Error al conceder la acreditación. Inténtalo de nuevo.' };
+    return { status: 'error', message: ta.acc_err_grant_generic };
   }
 
   revalidatePath('/admin/acreditaciones');
@@ -105,6 +109,9 @@ export async function revokeAccreditationAction(
     redirect('/login?next=/admin/acreditaciones');
   }
 
+  const { t } = await getT();
+  const ta = t.admin;
+
   const { error, response } = await api.DELETE('/accreditations/{id}', {
     params: { path: { id } },
     headers: authHeaders(token),
@@ -116,9 +123,9 @@ export async function revokeAccreditationAction(
       redirect('/login?next=/admin/acreditaciones');
     }
     if (response.status === 403) {
-      return { status: 'error', message: 'No tienes permisos para revocar esta acreditación.' };
+      return { status: 'error', message: ta.acc_err_revoke_forbidden };
     }
-    return { status: 'error', message: 'Error al revocar la acreditación. Inténtalo de nuevo.' };
+    return { status: 'error', message: ta.acc_err_revoke_generic };
   }
 
   revalidatePath('/admin/acreditaciones');
