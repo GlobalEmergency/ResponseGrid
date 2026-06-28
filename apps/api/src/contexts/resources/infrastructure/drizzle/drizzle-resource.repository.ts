@@ -316,6 +316,59 @@ export class DrizzleResourceRepository implements ResourceRepository {
     return rows.map((r) => Resource.fromSnapshot(rowToSnapshot(r)));
   }
 
+  async findPendingByEmergencyPaged(
+    emergencyId: EmergencyId,
+    q: {
+      page: number;
+      limit: number;
+      type?: string;
+      q?: string;
+    },
+  ): Promise<{ items: Resource[]; total: number }> {
+    const offset = (q.page - 1) * q.limit;
+
+    const conditions = [
+      eq(resourcesTable.emergencyId, emergencyId.value),
+      eq(resourcesTable.verificationLevel, VerificationLevel.Unverified),
+    ];
+
+    if (q.type) {
+      conditions.push(eq(resourcesTable.type, q.type));
+    }
+    if (q.q) {
+      // Escape SQL LIKE metacharacters so the user string is matched literally
+      // (mirrors findVisiblePaged). Search spans name, address and city.
+      const escaped = q.q.replace(/[%_\\]/g, (c) => `\\${c}`);
+      conditions.push(
+        sql`(${resourcesTable.name} ILIKE ${'%' + escaped + '%'} OR ${resourcesTable.address} ILIKE ${'%' + escaped + '%'} OR ${resourcesTable.city} ILIKE ${'%' + escaped + '%'})`,
+      );
+    }
+
+    const whereClause = and(...conditions);
+
+    const [rows, countRows] = await Promise.all([
+      this.db
+        .select()
+        .from(resourcesTable)
+        .where(whereClause)
+        // Same deterministic order as the public list (#58): points without
+        // contact data sink to the bottom, then by name, then id (stable paging).
+        .orderBy(
+          asc(sql`(${resourcesTable.contact} IS NULL)`),
+          asc(resourcesTable.name),
+          asc(resourcesTable.id),
+        )
+        .limit(q.limit)
+        .offset(offset),
+      this.db.select({ cnt: count() }).from(resourcesTable).where(whereClause),
+    ]);
+
+    return {
+      items: rows.map((r) => Resource.fromSnapshot(rowToSnapshot(r))),
+      total: Number(countRows[0]?.cnt ?? 0),
+    };
+  }
+
   async findActiveByEmergency(emergencyId: EmergencyId): Promise<Resource[]> {
     const rows = await this.db
       .select()

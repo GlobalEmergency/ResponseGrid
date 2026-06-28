@@ -79,7 +79,7 @@ export function SignupForm({ next, t }: SignupFormProps) {
         </Button>
       </form>
 
-      <SocialLoginButtons />
+      <SocialLoginButtons next={next} />
 
       <p className="text-center text-sm text-muted">
         {t.already_account}{' '}

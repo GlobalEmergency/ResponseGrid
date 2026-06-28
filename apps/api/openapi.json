@@ -1000,18 +1000,66 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (1-based)",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page (max 100)",
+            "schema": {
+              "default": 50,
+              "example": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "Filter the queue by resource type",
+            "schema": {
+              "example": "collection_point",
+              "type": "string",
+              "enum": [
+                "collection_point",
+                "delivery_point",
+                "collection_and_delivery",
+                "warehouse",
+                "transport",
+                "supplier",
+                "venue"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Full-text search string matched against name, address, and city (case-insensitive, max 100 chars)",
+            "schema": {
+              "example": "cruz roja",
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "List of resources in queue",
+            "description": "Paged list of resources pending verification",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ResourceViewDto"
-                  }
+                  "$ref": "#/components/schemas/PagedResourcesDto"
                 }
               }
             }
@@ -1031,7 +1079,7 @@
             "bearer": []
           }
         ],
-        "summary": "Get the coordination queue for an emergency (coordinator only)",
+        "summary": "Get the verification queue for an emergency (paginated + searchable)",
         "tags": [
           "resources"
         ]
@@ -3360,6 +3408,585 @@
         "summary": "Cancel an offer (owner or coordinator)",
         "tags": [
           "offers"
+        ]
+      }
+    },
+    "/logistics/capacities": {
+      "post": {
+        "operationId": "LogisticsController_publish",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishCapacityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Capacity published",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishCapacityResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing capacity:publish permission"
+          },
+          "409": {
+            "description": "Emergency is not accepting intake (paused/closed)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Publish a transport-capacity offer (authenticated, citizen-grade)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/capacities/{id}/withdraw": {
+      "post": {
+        "operationId": "LogisticsController_withdraw",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Capacity UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Capacity withdrawn"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Only the provider or a coordinator can withdraw"
+          },
+          "404": {
+            "description": "Capacity not found"
+          },
+          "409": {
+            "description": "Capacity cannot be withdrawn in its current status"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Withdraw a transport-capacity offer (provider or coordinator)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/logistics/capacities": {
+      "get": {
+        "operationId": "LogisticsController_list",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "mode",
+            "required": false,
+            "in": "query",
+            "description": "Filter by mode",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "road",
+                "sea",
+                "air"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "available",
+                "reserved",
+                "withdrawn"
+              ]
+            }
+          },
+          {
+            "name": "availableFrom",
+            "required": false,
+            "in": "query",
+            "description": "Keep capacities available at/after this instant (ISO-8601)",
+            "schema": {
+              "example": "2026-07-05T00:00:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "availableTo",
+            "required": false,
+            "in": "query",
+            "description": "Keep capacities available at/before this instant (ISO-8601)",
+            "schema": {
+              "example": "2026-07-10T00:00:00.000Z",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Capacities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CapacityViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing capacity:read permission"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List transport capacities for an emergency (coordinator/verifier)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments": {
+      "post": {
+        "operationId": "ShipmentController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateShipmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Shipment created (planned)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateShipmentResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing shipment:create permission"
+          },
+          "409": {
+            "description": "Emergency is not accepting intake (paused/closed)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a shipment / expedición (coordinator)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments/{id}/assign-capacity": {
+      "post": {
+        "operationId": "ShipmentController_assignCapacity",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipment UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignCapacityToShipmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Capacity assigned"
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing shipment:assign permission"
+          },
+          "404": {
+            "description": "Shipment not found"
+          },
+          "409": {
+            "description": "Shipment is not in planned status"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assign a transport capacity (and optional carrier) (coordinator)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments/{id}/in-transit": {
+      "post": {
+        "operationId": "ShipmentController_markInTransit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipment UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Shipment marked in transit"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Only the assigned carrier or a coordinator can act"
+          },
+          "404": {
+            "description": "Shipment not found"
+          },
+          "409": {
+            "description": "Shipment is not in assigned status"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark a shipment in transit (assigned carrier or coordinator)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments/{id}/deliver": {
+      "post": {
+        "operationId": "ShipmentController_deliver",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipment UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Shipment delivered"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Only the assigned carrier or a coordinator can act"
+          },
+          "404": {
+            "description": "Shipment not found"
+          },
+          "409": {
+            "description": "Shipment is not in transit"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Confirm a shipment delivery (assigned carrier or coordinator)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments/{id}/cancel": {
+      "post": {
+        "operationId": "ShipmentController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipment UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Shipment cancelled"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing shipment:update permission"
+          },
+          "404": {
+            "description": "Shipment not found"
+          },
+          "409": {
+            "description": "Shipment cannot be cancelled in its current status"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel a shipment (coordinator)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments/mine": {
+      "get": {
+        "operationId": "ShipmentController_listMine",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": false,
+            "in": "query",
+            "description": "Optional emergency scope; omit to list across emergencies",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "My shipments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShipmentViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List my shipments as a carrier (\"mis expediciones\")",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/logistics/shipments": {
+      "get": {
+        "operationId": "ShipmentController_list",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "planned",
+                "assigned",
+                "in_transit",
+                "delivered",
+                "failed",
+                "cancelled"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Shipments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShipmentViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing shipment:read permission"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List shipments for an emergency (coordinator/verifier)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments/{id}/capacity-suggestions": {
+      "get": {
+        "operationId": "ShipmentController_capacitySuggestions",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipment UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Compatible capacities ranked by proximity/coverage fit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CapacityViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing shipment:read permission"
+          },
+          "404": {
+            "description": "Shipment not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Suggest compatible transport capacities for a shipment, ranked (coordinator)",
+        "tags": [
+          "logistics"
         ]
       }
     },
@@ -7711,6 +8338,582 @@
         },
         "required": [
           "needId"
+        ]
+      },
+      "PublishCapacityProviderDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "volunteer",
+              "organization"
+            ],
+            "example": "volunteer"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Volunteer or organization id (polymorphic, no FK)"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ]
+      },
+      "CapacityAmountDto": {
+        "type": "object",
+        "properties": {
+          "weightKg": {
+            "type": "number",
+            "example": 1500,
+            "description": "Carrying weight in kilograms (positive)",
+            "nullable": true
+          },
+          "volumeM3": {
+            "type": "number",
+            "example": 12,
+            "description": "Carrying volume in cubic metres (positive)",
+            "nullable": true
+          }
+        }
+      },
+      "CoverageDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "corridor",
+              "area"
+            ],
+            "example": "corridor"
+          },
+          "originResourceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Corridor: origin collection point (resource) id"
+          },
+          "destinationResourceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Corridor: destination collection point (resource) id"
+          },
+          "originLat": {
+            "type": "number",
+            "example": 10.4806,
+            "description": "Corridor: origin lat"
+          },
+          "originLng": {
+            "type": "number",
+            "example": -66.9036,
+            "description": "Corridor: origin lng"
+          },
+          "destinationLat": {
+            "type": "number",
+            "example": 10.6,
+            "description": "Corridor: destination lat"
+          },
+          "destinationLng": {
+            "type": "number",
+            "example": -67,
+            "description": "Corridor: destination lng"
+          },
+          "area": {
+            "type": "string",
+            "example": "Estado Vargas",
+            "description": "Area: free-text served area (required when kind=area)"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "CapacityWindowDto": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "example": "2026-07-01T00:00:00.000Z",
+            "description": "Availability start (ISO-8601)"
+          },
+          "to": {
+            "type": "string",
+            "example": "2026-07-31T00:00:00.000Z",
+            "description": "Availability end (ISO-8601)"
+          }
+        }
+      },
+      "PublishCapacityDto": {
+        "type": "object",
+        "properties": {
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Emergency this capacity serves"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/PublishCapacityProviderDto"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "road",
+              "sea",
+              "air"
+            ],
+            "example": "road"
+          },
+          "capacity": {
+            "description": "At least one of weightKg / volumeM3 is required",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CapacityAmountDto"
+              }
+            ]
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/CoverageDto"
+          },
+          "window": {
+            "$ref": "#/components/schemas/CapacityWindowDto"
+          },
+          "constraints": {
+            "example": [
+              "refrigerated",
+              "hazmat"
+            ],
+            "description": "Free-form constraints",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "string",
+            "example": "Salida diaria a las 08:00",
+            "description": "Additional notes"
+          }
+        },
+        "required": [
+          "emergencyId",
+          "provider",
+          "mode",
+          "capacity",
+          "coverage"
+        ]
+      },
+      "PublishCapacityResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "CapacityAmountResponseDto": {
+        "type": "object",
+        "properties": {
+          "weightKg": {
+            "type": "number",
+            "example": 1500,
+            "nullable": true
+          },
+          "volumeM3": {
+            "type": "number",
+            "example": 12,
+            "nullable": true
+          }
+        }
+      },
+      "CoverageResponseDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "corridor",
+              "area"
+            ],
+            "example": "corridor"
+          },
+          "originResourceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "destinationResourceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "originLat": {
+            "type": "number",
+            "example": 10.4806,
+            "nullable": true
+          },
+          "originLng": {
+            "type": "number",
+            "example": -66.9036,
+            "nullable": true
+          },
+          "destinationLat": {
+            "type": "number",
+            "example": 10.6,
+            "nullable": true
+          },
+          "destinationLng": {
+            "type": "number",
+            "example": -67,
+            "nullable": true
+          },
+          "area": {
+            "type": "string",
+            "example": "Estado Vargas"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "CapacityWindowResponseDto": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "example": "2026-07-01T00:00:00.000Z",
+            "nullable": true
+          },
+          "to": {
+            "type": "string",
+            "example": "2026-07-31T00:00:00.000Z",
+            "nullable": true
+          }
+        }
+      },
+      "CapacityViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "providerType": {
+            "type": "string",
+            "enum": [
+              "volunteer",
+              "organization"
+            ],
+            "example": "volunteer"
+          },
+          "providerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "road",
+              "sea",
+              "air"
+            ],
+            "example": "road"
+          },
+          "capacity": {
+            "$ref": "#/components/schemas/CapacityAmountResponseDto"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/CoverageResponseDto"
+          },
+          "window": {
+            "$ref": "#/components/schemas/CapacityWindowResponseDto"
+          },
+          "constraints": {
+            "example": [
+              "refrigerated"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "available",
+              "reserved",
+              "withdrawn"
+            ],
+            "example": "available"
+          },
+          "notes": {
+            "type": "string",
+            "example": "Salida diaria a las 08:00",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2026-07-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2026-07-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "emergencyId",
+          "providerType",
+          "providerId",
+          "mode",
+          "capacity",
+          "coverage",
+          "window",
+          "constraints",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "ShipmentItemDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "example": "5 cajas de agua",
+            "description": "What moves"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 5,
+            "description": "How much (positive). Optional — cargo is often loose.",
+            "nullable": true
+          },
+          "unit": {
+            "type": "string",
+            "example": "cajas",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "example": "alimentacion",
+            "nullable": true
+          }
+        },
+        "required": [
+          "description"
+        ]
+      },
+      "CreateShipmentDto": {
+        "type": "object",
+        "properties": {
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Emergency this shipment serves"
+          },
+          "originResourceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Origin resource node (collection point) id"
+          },
+          "destinationResourceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Destination resource node id"
+          },
+          "items": {
+            "description": "Cargo manifest lines (at least one)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentItemDto"
+            }
+          },
+          "manifest": {
+            "type": "string",
+            "example": "Carga frágil, manipular con cuidado",
+            "description": "Free-text cargo manifest note"
+          }
+        },
+        "required": [
+          "emergencyId",
+          "originResourceId",
+          "destinationResourceId",
+          "items"
+        ]
+      },
+      "CreateShipmentResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "AssignShipmentCarrierDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "volunteer",
+              "organization"
+            ],
+            "example": "volunteer"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Volunteer or organization id (polymorphic, no FK)"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ]
+      },
+      "AssignCapacityToShipmentDto": {
+        "type": "object",
+        "properties": {
+          "assignedCapacityId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "TransportCapacity (#105) to earmark for this shipment"
+          },
+          "carrier": {
+            "description": "Optional carrier. Omit for an internal inventory transfer (no carrier).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AssignShipmentCarrierDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "assignedCapacityId"
+        ]
+      },
+      "ShipmentItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "example": "5 cajas de agua"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 5,
+            "nullable": true
+          },
+          "unit": {
+            "type": "string",
+            "example": "cajas",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "example": "alimentacion",
+            "nullable": true
+          }
+        },
+        "required": [
+          "description"
+        ]
+      },
+      "ShipmentViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originResourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationResourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentItemResponseDto"
+            }
+          },
+          "assignedCapacityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "carrierType": {
+            "type": "string",
+            "enum": [
+              "volunteer",
+              "organization"
+            ],
+            "nullable": true,
+            "example": "volunteer"
+          },
+          "carrierId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "manifest": {
+            "type": "string",
+            "example": "Carga frágil",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "assigned",
+              "in_transit",
+              "delivered",
+              "failed",
+              "cancelled"
+            ],
+            "example": "planned"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2026-07-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2026-07-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "emergencyId",
+          "originResourceId",
+          "destinationResourceId",
+          "items",
+          "status",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "RegisterVolunteerDto": {

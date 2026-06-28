@@ -115,77 +115,62 @@ export default async function CoordinacionVoluntariosPage({ params, searchParams
   const tc = t.coord;
 
   return (
-    <main className="flex-1 bg-surface">
-      <div className="mx-auto flex w-full max-w-md flex-col gap-8 px-5 pb-12 pt-6 lg:max-w-5xl lg:px-8">
+    <>
+      {/* ── ROSTER DE VOLUNTARIOS ────────────────────────────────── */}
+      <section aria-labelledby="roster-heading" className="flex flex-col gap-4">
+        <h2 id="roster-heading" className="text-xl font-bold text-ink">
+          {tc.roster_heading}
+        </h2>
 
-        <header className="flex flex-col gap-2">
-          <h1 className="font-display text-xl font-bold text-navy lg:text-2xl">{tc.volunteers_title}</h1>
-          <p className="text-sm text-muted">{emergency.name}</p>
-        </header>
+        <VolunteerRosterFilter />
 
-        {/* ── ROSTER DE VOLUNTARIOS ────────────────────────────────── */}
-        <section aria-labelledby="roster-heading" className="flex flex-col gap-4">
-          <h2
-            id="roster-heading"
-            className="text-xl font-bold text-ink"
-          >
-            {tc.roster_heading}
-          </h2>
+        {volunteers.length === 0 ? (
+          <EmptyState
+            title={tc.roster_empty_title}
+            description={tc.roster_empty_description}
+          />
+        ) : (
+          <ul className="flex flex-col gap-3" aria-label={tc.roster_list_label}>
+            {volunteers.map((volunteer) => (
+              <li key={volunteer.id}>
+                <VolunteerCard volunteer={volunteer} slug={slug} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
-          <VolunteerRosterFilter />
+      <hr className="border-line" />
 
-          {volunteers.length === 0 ? (
-            <EmptyState
-              title={tc.roster_empty_title}
-              description={tc.roster_empty_description}
-            />
-          ) : (
-            <ul className="flex flex-col gap-3" aria-label={tc.roster_list_label}>
-              {volunteers.map((volunteer) => (
-                <li key={volunteer.id}>
-                  <VolunteerCard volunteer={volunteer} slug={slug} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+      {/* ── TAREAS ───────────────────────────────────────────────── */}
+      <section aria-labelledby="tasks-heading" className="flex flex-col gap-6">
+        <h2 id="tasks-heading" className="text-xl font-bold text-ink">
+          {tc.tasks_heading}
+        </h2>
 
-        <hr className="border-line" />
+        {/* Create task form */}
+        <CreateTaskForm emergencyId={emergencyId} slug={slug} />
 
-        {/* ── TAREAS ───────────────────────────────────────────────── */}
-        <section aria-labelledby="tasks-heading" className="flex flex-col gap-6">
-          <h2
-            id="tasks-heading"
-            className="text-xl font-bold text-ink"
-          >
-            {tc.tasks_heading}
-          </h2>
-
-          {/* Create task form */}
-          <CreateTaskForm emergencyId={emergencyId} slug={slug} />
-
-          {/* Task list */}
-          {tasks.length === 0 ? (
-            <EmptyState
-              title={tc.tasks_empty_title}
-              description={tc.tasks_empty_description}
-            />
-          ) : (
-            <ul className="flex flex-col gap-4" aria-label={tc.tasks_list_label}>
-              {tasks.map((task) => (
-                <li key={task.id}>
-                  <TaskCard
-                    task={task}
-                    availableVolunteers={availableVolunteers}
-                    slug={slug}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-      </div>
-    </main>
+        {/* Task list */}
+        {tasks.length === 0 ? (
+          <EmptyState
+            title={tc.tasks_empty_title}
+            description={tc.tasks_empty_description}
+          />
+        ) : (
+          <ul className="flex flex-col gap-4" aria-label={tc.tasks_list_label}>
+            {tasks.map((task) => (
+              <li key={task.id}>
+                <TaskCard
+                  task={task}
+                  availableVolunteers={availableVolunteers}
+                  slug={slug}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </>
   );
 }

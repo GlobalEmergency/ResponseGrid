@@ -16,15 +16,14 @@ const activeReader: ResourceEmergencyStatusReader = {
   getStatus: () => Promise.resolve('active'),
 };
 
+function makeRegister(repo: InMemoryResourceRepository): RegisterResource {
+  return new RegisterResource(repo, new FakeEventBus(), activeReader);
+}
+
 describe('GetCoordinationQueue', () => {
-  it('returns pending resources of the emergency as views', async () => {
+  it('returns pending resources of the emergency as a paged result', async () => {
     const repo = new InMemoryResourceRepository();
-    const register = new RegisterResource(
-      repo,
-      new FakeEventBus(),
-      activeReader,
-    );
-    await register.execute({
+    await makeRegister(repo).execute({
       emergencyId: EM,
       type: ResourceType.CollectionPoint,
       stage: ResourceStage.Origin,
@@ -33,17 +32,106 @@ describe('GetCoordinationQueue', () => {
       ownerUserId: 'user-coord-test',
     });
 
-    const views = await new GetCoordinationQueue(repo).execute({
+    const result = await new GetCoordinationQueue(repo).execute({
       emergencyId: EM,
     });
 
-    expect(views).toEqual([
-      expect.objectContaining({
-        name: 'Punto 1',
+    expect(result).toEqual({
+      items: [
+        expect.objectContaining({
+          name: 'Punto 1',
+          stage: ResourceStage.Origin,
+          verificationLevel: 'unverified',
+          publicStatus: 'hidden',
+        }),
+      ],
+      total: 1,
+      page: 1,
+      limit: 50,
+    });
+  });
+
+  it('paginates the queue and reports the full total', async () => {
+    const repo = new InMemoryResourceRepository();
+    const register = makeRegister(repo);
+    for (let i = 0; i < 5; i++) {
+      await register.execute({
+        emergencyId: EM,
+        type: ResourceType.CollectionPoint,
         stage: ResourceStage.Origin,
-        verificationLevel: 'unverified',
-        publicStatus: 'hidden',
-      }),
-    ]);
+        name: `Punto ${i}`,
+        location: baseLocation,
+        ownerUserId: `user-${i}`,
+      });
+    }
+
+    const page2 = await new GetCoordinationQueue(repo).execute({
+      emergencyId: EM,
+      page: 2,
+      limit: 2,
+    });
+
+    expect(page2.total).toBe(5);
+    expect(page2.page).toBe(2);
+    expect(page2.limit).toBe(2);
+    expect(page2.items).toHaveLength(2);
+  });
+
+  it('filters by free-text search over name/address/city', async () => {
+    const repo = new InMemoryResourceRepository();
+    const register = makeRegister(repo);
+    await register.execute({
+      emergencyId: EM,
+      type: ResourceType.CollectionPoint,
+      stage: ResourceStage.Origin,
+      name: 'Cruz Roja Valencia',
+      location: baseLocation,
+      ownerUserId: 'user-a',
+    });
+    await register.execute({
+      emergencyId: EM,
+      type: ResourceType.CollectionPoint,
+      stage: ResourceStage.Origin,
+      name: 'Cáritas Madrid',
+      location: baseLocation,
+      ownerUserId: 'user-b',
+    });
+
+    const result = await new GetCoordinationQueue(repo).execute({
+      emergencyId: EM,
+      q: 'cruz',
+    });
+
+    expect(result.total).toBe(1);
+    expect(result.items[0]?.name).toBe('Cruz Roja Valencia');
+  });
+
+  it('filters by resource type', async () => {
+    const repo = new InMemoryResourceRepository();
+    const register = makeRegister(repo);
+    await register.execute({
+      emergencyId: EM,
+      type: ResourceType.CollectionPoint,
+      stage: ResourceStage.Origin,
+      name: 'Acopio',
+      location: baseLocation,
+      ownerUserId: 'user-a',
+    });
+    await register.execute({
+      emergencyId: EM,
+      type: ResourceType.Warehouse,
+      stage: ResourceStage.Intermediate,
+      name: 'Almacén central',
+      location: baseLocation,
+      ownerUserId: 'user-b',
+    });
+
+    const result = await new GetCoordinationQueue(repo).execute({
+      emergencyId: EM,
+      type: ResourceType.Warehouse,
+    });
+
+    expect(result.total).toBe(1);
+    expect(result.items[0]?.name).toBe('Almacén central');
   });
 });

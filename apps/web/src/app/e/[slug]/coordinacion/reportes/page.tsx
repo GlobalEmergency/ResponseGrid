@@ -132,110 +132,101 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
   };
 
   return (
-    <main className="flex-1 bg-surface">
-      <div className="mx-auto flex w-full max-w-md flex-col gap-8 px-5 pb-12 pt-6 lg:max-w-5xl lg:px-8">
+    <>
+      {/* ── FILTROS ─────────────────────────────────────────────────── */}
+      <section aria-labelledby="filters-heading" className="flex flex-col gap-3">
+        <h2 id="filters-heading" className="text-sm font-semibold text-ink uppercase tracking-wide">
+          {tc.reports_filter_heading}
+        </h2>
 
-        <header className="flex flex-col gap-2">
-          <h1 className="font-display text-xl font-bold text-navy lg:text-2xl">{tc.reports_title}</h1>
-          <p className="text-sm text-muted">{emergency.name}</p>
-        </header>
-
-        {/* ── FILTROS ─────────────────────────────────────────────────── */}
-        <section aria-labelledby="filters-heading" className="flex flex-col gap-3">
-          <h2 id="filters-heading" className="text-sm font-semibold text-ink uppercase tracking-wide">
-            {tc.reports_filter_heading}
-          </h2>
-
-          <div className="flex flex-wrap gap-2">
-            {/* Status filter */}
-            <div className="flex gap-1">
+        <div className="flex flex-wrap gap-2">
+          {/* Status filter */}
+          <div className="flex gap-1">
+            <Link
+              href={baseUrl}
+              className={[
+                'rounded-lg border-2 px-3 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-1',
+                statusFilter === undefined
+                  ? 'border-navy bg-navy text-white'
+                  : 'border-line text-muted hover:border-navy hover:text-ink',
+              ].join(' ')}
+            >
+              {tc.reports_filter_all}
+            </Link>
+            {VALID_STATUSES.map((s) => (
               <Link
-                href={baseUrl}
+                key={s}
+                href={`${baseUrl}?status=${s}${priorityFilter !== undefined ? `&priority=${priorityFilter}` : ''}`}
                 className={[
                   'rounded-lg border-2 px-3 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-1',
-                  statusFilter === undefined
+                  statusFilter === s
                     ? 'border-navy bg-navy text-white'
                     : 'border-line text-muted hover:border-navy hover:text-ink',
                 ].join(' ')}
               >
-                {tc.reports_filter_all}
+                {STATUS_LABELS[s]}
               </Link>
-              {VALID_STATUSES.map((s) => (
-                <Link
-                  key={s}
-                  href={`${baseUrl}?status=${s}${priorityFilter !== undefined ? `&priority=${priorityFilter}` : ''}`}
-                  className={[
-                    'rounded-lg border-2 px-3 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-1',
-                    statusFilter === s
-                      ? 'border-navy bg-navy text-white'
-                      : 'border-line text-muted hover:border-navy hover:text-ink',
-                  ].join(' ')}
-                >
-                  {STATUS_LABELS[s]}
-                </Link>
-              ))}
-            </div>
-
-            {/* Priority filter */}
-            <div className="flex gap-1">
-              {VALID_PRIORITIES.map((p) => (
-                <Link
-                  key={p}
-                  href={`${baseUrl}?${statusFilter !== undefined ? `status=${statusFilter}&` : ''}priority=${p}`}
-                  className={[
-                    'rounded-lg border-2 px-3 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-1',
-                    priorityFilter === p
-                      ? 'border-navy bg-navy text-white'
-                      : 'border-line text-muted hover:border-navy hover:text-ink',
-                  ].join(' ')}
-                >
-                  {PRIORITY_LABELS[p]}
-                </Link>
-              ))}
-            </div>
+            ))}
           </div>
 
-          {/* Clear filters */}
-          {(statusFilter !== undefined || priorityFilter !== undefined) && (
-            <Link
-              href={baseUrl}
-              className="text-xs text-muted-soft underline underline-offset-2 hover:text-ink-soft focus:outline-none focus:ring-1 focus:ring-navy rounded w-fit"
-            >
-              {tc.reports_filter_clear}
-            </Link>
+          {/* Priority filter */}
+          <div className="flex gap-1">
+            {VALID_PRIORITIES.map((p) => (
+              <Link
+                key={p}
+                href={`${baseUrl}?${statusFilter !== undefined ? `status=${statusFilter}&` : ''}priority=${p}`}
+                className={[
+                  'rounded-lg border-2 px-3 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-1',
+                  priorityFilter === p
+                    ? 'border-navy bg-navy text-white'
+                    : 'border-line text-muted hover:border-navy hover:text-ink',
+                ].join(' ')}
+              >
+                {PRIORITY_LABELS[p]}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Clear filters */}
+        {(statusFilter !== undefined || priorityFilter !== undefined) && (
+          <Link
+            href={baseUrl}
+            className="text-xs text-muted-soft underline underline-offset-2 hover:text-ink-soft focus:outline-none focus:ring-1 focus:ring-navy rounded w-fit"
+          >
+            {tc.reports_filter_clear}
+          </Link>
+        )}
+      </section>
+
+      <hr className="border-line" />
+
+      {/* ── LISTA DE PARTES ─────────────────────────────────────────── */}
+      <section aria-labelledby="reports-heading" className="flex flex-col gap-4">
+        <h2 id="reports-heading" className="text-xl font-bold text-ink">
+          {tc.reports_received_heading}
+          {reports.length > 0 && (
+            <span className="ml-2 text-sm font-normal text-muted">
+              ({reports.length})
+            </span>
           )}
-        </section>
+        </h2>
 
-        <hr className="border-line" />
-
-        {/* ── LISTA DE PARTES ─────────────────────────────────────────── */}
-        <section aria-labelledby="reports-heading" className="flex flex-col gap-4">
-          <h2 id="reports-heading" className="text-xl font-bold text-ink">
-            {tc.reports_received_heading}
-            {reports.length > 0 && (
-              <span className="ml-2 text-sm font-normal text-muted">
-                ({reports.length})
-              </span>
-            )}
-          </h2>
-
-          {reports.length === 0 ? (
-            <EmptyState
-              title={tc.reports_empty_title}
-              description={tc.reports_empty_description}
-            />
-          ) : (
-            <ul className="flex flex-col gap-4" aria-label={tc.reports_list_label}>
-              {reports.map((report) => (
-                <li key={report.id}>
-                  <ReportCard report={report} slug={slug} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-      </div>
-    </main>
+        {reports.length === 0 ? (
+          <EmptyState
+            title={tc.reports_empty_title}
+            description={tc.reports_empty_description}
+          />
+        ) : (
+          <ul className="flex flex-col gap-4" aria-label={tc.reports_list_label}>
+            {reports.map((report) => (
+              <li key={report.id}>
+                <ReportCard report={report} slug={slug} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </>
   );
 }

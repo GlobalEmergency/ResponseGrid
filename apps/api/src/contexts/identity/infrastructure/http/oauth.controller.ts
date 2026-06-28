@@ -1,7 +1,12 @@
 import { Controller, Get, Req, Res, UseGuards, Logger } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
-import { OAuthInitiateGuard, OAuthCallbackGuard } from './oauth-state.guard';
+import {
+  OAuthInitiateGuard,
+  OAuthCallbackGuard,
+  readCookie,
+} from './oauth-state.guard';
+import { OAUTH_NEXT_COOKIE, sanitizeNextPath } from './oauth-next';
 
 /**
  * OAuth 2.0 redirect-based endpoints for Google and Facebook login.
@@ -41,13 +46,7 @@ export class OAuthController {
   @Get('google/callback')
   @UseGuards(OAuthCallbackGuard('google'))
   googleCallback(@Req() req: Request, @Res() res: Response): void {
-    const user = req.user as { accessToken: string } | undefined;
-    if (!user?.accessToken) {
-      this.logger.error('Google callback: no accessToken on request.user');
-      res.redirect(`${this.frontendUrl}/login?error=oauth_failed`);
-      return;
-    }
-    res.redirect(`${this.frontendUrl}/auth/complete#token=${user.accessToken}`);
+    this.finishOAuth(req, res, 'Google');
   }
 
   // ─── Facebook ─────────────────────────────────────────────────────────────
@@ -61,12 +60,30 @@ export class OAuthController {
   @Get('facebook/callback')
   @UseGuards(OAuthCallbackGuard('facebook'))
   facebookCallback(@Req() req: Request, @Res() res: Response): void {
+    this.finishOAuth(req, res, 'Facebook');
+  }
+
+  // ─── Shared ───────────────────────────────────────────────────────────────
+
+  /**
+   * Completes any OAuth callback: consumes the stashed `next` cookie and sends
+   * the browser back to the frontend — to `/auth/complete` with the token on
+   * success, or to `/login` on failure — preserving the return path so the user
+   * lands on the page that started the login.
+   */
+  private finishOAuth(req: Request, res: Response, provider: string): void {
+    const next = sanitizeNextPath(readCookie(req, OAUTH_NEXT_COOKIE));
+    res.clearCookie(OAUTH_NEXT_COOKIE, { path: '/auth' });
+    const nextParam = next ? `&next=${encodeURIComponent(next)}` : '';
+
     const user = req.user as { accessToken: string } | undefined;
     if (!user?.accessToken) {
-      this.logger.error('Facebook callback: no accessToken on request.user');
-      res.redirect(`${this.frontendUrl}/login?error=oauth_failed`);
+      this.logger.error(`${provider} callback: no accessToken on request.user`);
+      res.redirect(`${this.frontendUrl}/login?error=oauth_failed${nextParam}`);
       return;
     }
-    res.redirect(`${this.frontendUrl}/auth/complete#token=${user.accessToken}`);
+    res.redirect(
+      `${this.frontendUrl}/auth/complete#token=${user.accessToken}${nextParam}`,
+    );
   }
 }

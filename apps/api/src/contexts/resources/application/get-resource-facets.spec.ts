@@ -10,6 +10,7 @@ function makeRepo(
     save: jest.fn(),
     findById: jest.fn(),
     findPendingByEmergency: jest.fn(),
+    findPendingByEmergencyPaged: jest.fn(),
     findActiveByEmergency: jest.fn(),
     countByEmergencyGroupedByPublicStatus: jest.fn(),
     findByOwnerAndEmergency: jest.fn(),

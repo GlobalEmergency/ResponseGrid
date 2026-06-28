@@ -371,7 +371,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get the coordination queue for an emergency (coordinator only) */
+        /** Get the verification queue for an emergency (paginated + searchable) */
         get: operations["CoordinationController_list"];
         put?: never;
         post?: never;
@@ -1097,6 +1097,193 @@ export interface paths {
         put?: never;
         /** Cancel an offer (owner or coordinator) */
         post: operations["OffersController_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/capacities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish a transport-capacity offer (authenticated, citizen-grade) */
+        post: operations["LogisticsController_publish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/capacities/{id}/withdraw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Withdraw a transport-capacity offer (provider or coordinator) */
+        post: operations["LogisticsController_withdraw"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/logistics/capacities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List transport capacities for an emergency (coordinator/verifier) */
+        get: operations["LogisticsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a shipment / expedición (coordinator) */
+        post: operations["ShipmentController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments/{id}/assign-capacity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assign a transport capacity (and optional carrier) (coordinator) */
+        post: operations["ShipmentController_assignCapacity"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments/{id}/in-transit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark a shipment in transit (assigned carrier or coordinator) */
+        post: operations["ShipmentController_markInTransit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments/{id}/deliver": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm a shipment delivery (assigned carrier or coordinator) */
+        post: operations["ShipmentController_deliver"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel a shipment (coordinator) */
+        post: operations["ShipmentController_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List my shipments as a carrier ("mis expediciones") */
+        get: operations["ShipmentController_listMine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/logistics/shipments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List shipments for an emergency (coordinator/verifier) */
+        get: operations["ShipmentController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments/{id}/capacity-suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Suggest compatible transport capacities for a shipment, ranked (coordinator) */
+        get: operations["ShipmentController_capacitySuggestions"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2797,6 +2984,301 @@ export interface components {
              */
             needId: string;
         };
+        PublishCapacityProviderDto: {
+            /**
+             * @example volunteer
+             * @enum {string}
+             */
+            type: "volunteer" | "organization";
+            /**
+             * Format: uuid
+             * @description Volunteer or organization id (polymorphic, no FK)
+             */
+            id: string;
+        };
+        CapacityAmountDto: {
+            /**
+             * @description Carrying weight in kilograms (positive)
+             * @example 1500
+             */
+            weightKg?: number | null;
+            /**
+             * @description Carrying volume in cubic metres (positive)
+             * @example 12
+             */
+            volumeM3?: number | null;
+        };
+        CoverageDto: {
+            /**
+             * @example corridor
+             * @enum {string}
+             */
+            kind: "corridor" | "area";
+            /**
+             * Format: uuid
+             * @description Corridor: origin collection point (resource) id
+             */
+            originResourceId?: string;
+            /**
+             * Format: uuid
+             * @description Corridor: destination collection point (resource) id
+             */
+            destinationResourceId?: string;
+            /**
+             * @description Corridor: origin lat
+             * @example 10.4806
+             */
+            originLat?: number;
+            /**
+             * @description Corridor: origin lng
+             * @example -66.9036
+             */
+            originLng?: number;
+            /**
+             * @description Corridor: destination lat
+             * @example 10.6
+             */
+            destinationLat?: number;
+            /**
+             * @description Corridor: destination lng
+             * @example -67
+             */
+            destinationLng?: number;
+            /**
+             * @description Area: free-text served area (required when kind=area)
+             * @example Estado Vargas
+             */
+            area?: string;
+        };
+        CapacityWindowDto: {
+            /**
+             * @description Availability start (ISO-8601)
+             * @example 2026-07-01T00:00:00.000Z
+             */
+            from?: string;
+            /**
+             * @description Availability end (ISO-8601)
+             * @example 2026-07-31T00:00:00.000Z
+             */
+            to?: string;
+        };
+        PublishCapacityDto: {
+            /**
+             * Format: uuid
+             * @description Emergency this capacity serves
+             */
+            emergencyId: string;
+            provider: components["schemas"]["PublishCapacityProviderDto"];
+            /**
+             * @example road
+             * @enum {string}
+             */
+            mode: "road" | "sea" | "air";
+            /** @description At least one of weightKg / volumeM3 is required */
+            capacity: components["schemas"]["CapacityAmountDto"];
+            coverage: components["schemas"]["CoverageDto"];
+            window?: components["schemas"]["CapacityWindowDto"];
+            /**
+             * @description Free-form constraints
+             * @example [
+             *       "refrigerated",
+             *       "hazmat"
+             *     ]
+             */
+            constraints?: string[];
+            /**
+             * @description Additional notes
+             * @example Salida diaria a las 08:00
+             */
+            notes?: string;
+        };
+        PublishCapacityResponseDto: {
+            /**
+             * Format: uuid
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            id: string;
+        };
+        CapacityAmountResponseDto: {
+            /** @example 1500 */
+            weightKg?: number | null;
+            /** @example 12 */
+            volumeM3?: number | null;
+        };
+        CoverageResponseDto: {
+            /**
+             * @example corridor
+             * @enum {string}
+             */
+            kind: "corridor" | "area";
+            /** Format: uuid */
+            originResourceId?: string | null;
+            /** Format: uuid */
+            destinationResourceId?: string | null;
+            /** @example 10.4806 */
+            originLat?: number | null;
+            /** @example -66.9036 */
+            originLng?: number | null;
+            /** @example 10.6 */
+            destinationLat?: number | null;
+            /** @example -67 */
+            destinationLng?: number | null;
+            /** @example Estado Vargas */
+            area?: string;
+        };
+        CapacityWindowResponseDto: {
+            /** @example 2026-07-01T00:00:00.000Z */
+            from?: string | null;
+            /** @example 2026-07-31T00:00:00.000Z */
+            to?: string | null;
+        };
+        CapacityViewDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            emergencyId: string;
+            /**
+             * @example volunteer
+             * @enum {string}
+             */
+            providerType: "volunteer" | "organization";
+            /** Format: uuid */
+            providerId: string;
+            /**
+             * @example road
+             * @enum {string}
+             */
+            mode: "road" | "sea" | "air";
+            capacity: components["schemas"]["CapacityAmountResponseDto"];
+            coverage: components["schemas"]["CoverageResponseDto"];
+            window: components["schemas"]["CapacityWindowResponseDto"];
+            /**
+             * @example [
+             *       "refrigerated"
+             *     ]
+             */
+            constraints: string[];
+            /**
+             * @example available
+             * @enum {string}
+             */
+            status: "available" | "reserved" | "withdrawn";
+            /** @example Salida diaria a las 08:00 */
+            notes?: string | null;
+            /** @example 2026-07-01T00:00:00.000Z */
+            createdAt: string;
+            /** @example 2026-07-01T00:00:00.000Z */
+            updatedAt: string;
+        };
+        ShipmentItemDto: {
+            /**
+             * @description What moves
+             * @example 5 cajas de agua
+             */
+            description: string;
+            /**
+             * @description How much (positive). Optional — cargo is often loose.
+             * @example 5
+             */
+            quantity?: number | null;
+            /** @example cajas */
+            unit?: string | null;
+            /** @example alimentacion */
+            category?: string | null;
+        };
+        CreateShipmentDto: {
+            /**
+             * Format: uuid
+             * @description Emergency this shipment serves
+             */
+            emergencyId: string;
+            /**
+             * Format: uuid
+             * @description Origin resource node (collection point) id
+             */
+            originResourceId: string;
+            /**
+             * Format: uuid
+             * @description Destination resource node id
+             */
+            destinationResourceId: string;
+            /** @description Cargo manifest lines (at least one) */
+            items: components["schemas"]["ShipmentItemDto"][];
+            /**
+             * @description Free-text cargo manifest note
+             * @example Carga frágil, manipular con cuidado
+             */
+            manifest?: string;
+        };
+        CreateShipmentResponseDto: {
+            /**
+             * Format: uuid
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            id: string;
+        };
+        AssignShipmentCarrierDto: {
+            /**
+             * @example volunteer
+             * @enum {string}
+             */
+            type: "volunteer" | "organization";
+            /**
+             * Format: uuid
+             * @description Volunteer or organization id (polymorphic, no FK)
+             */
+            id: string;
+        };
+        AssignCapacityToShipmentDto: {
+            /**
+             * Format: uuid
+             * @description TransportCapacity (#105) to earmark for this shipment
+             */
+            assignedCapacityId: string;
+            /** @description Optional carrier. Omit for an internal inventory transfer (no carrier). */
+            carrier?: components["schemas"]["AssignShipmentCarrierDto"];
+        };
+        ShipmentItemResponseDto: {
+            /** @example 5 cajas de agua */
+            description: string;
+            /** @example 5 */
+            quantity?: number | null;
+            /** @example cajas */
+            unit?: string | null;
+            /** @example alimentacion */
+            category?: string | null;
+        };
+        ShipmentViewDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            emergencyId: string;
+            /** Format: uuid */
+            originResourceId: string;
+            /** Format: uuid */
+            destinationResourceId: string;
+            items: components["schemas"]["ShipmentItemResponseDto"][];
+            /** Format: uuid */
+            assignedCapacityId?: string | null;
+            /**
+             * @example volunteer
+             * @enum {string|null}
+             */
+            carrierType?: "volunteer" | "organization" | null;
+            /** Format: uuid */
+            carrierId?: string | null;
+            /** @example Carga frágil */
+            manifest?: string | null;
+            /**
+             * @example planned
+             * @enum {string}
+             */
+            status: "planned" | "assigned" | "in_transit" | "delivered" | "failed" | "cancelled";
+            /** @example 2026-07-01T00:00:00.000Z */
+            createdAt: string;
+            /** @example 2026-07-01T00:00:00.000Z */
+            updatedAt: string;
+        };
         RegisterVolunteerDto: {
             /** @example Ana García */
             name: string;
@@ -3938,7 +4420,16 @@ export interface operations {
     };
     CoordinationController_list: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Page number (1-based) */
+                page?: number;
+                /** @description Items per page (max 100) */
+                limit?: number;
+                /** @description Filter the queue by resource type */
+                type?: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
+                /** @description Full-text search string matched against name, address, and city (case-insensitive, max 100 chars) */
+                q?: string;
+            };
             header?: never;
             path: {
                 /** @description Emergency UUID */
@@ -3948,13 +4439,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description List of resources in queue */
+            /** @description Paged list of resources pending verification */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ResourceViewDto"][];
+                    "application/json": components["schemas"]["PagedResourcesDto"];
                 };
             };
             /** @description Missing or invalid token */
@@ -5795,6 +6286,526 @@ export interface operations {
             };
             /** @description Offer cannot be cancelled in its current status */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    LogisticsController_publish: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublishCapacityDto"];
+            };
+        };
+        responses: {
+            /** @description Capacity published */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublishCapacityResponseDto"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing capacity:publish permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Emergency is not accepting intake (paused/closed) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    LogisticsController_withdraw: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Capacity UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Capacity withdrawn */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Only the provider or a coordinator can withdraw */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Capacity not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Capacity cannot be withdrawn in its current status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    LogisticsController_list: {
+        parameters: {
+            query?: {
+                /** @description Filter by mode */
+                mode?: "road" | "sea" | "air";
+                /** @description Filter by status */
+                status?: "available" | "reserved" | "withdrawn";
+                /** @description Keep capacities available at/after this instant (ISO-8601) */
+                availableFrom?: string;
+                /** @description Keep capacities available at/before this instant (ISO-8601) */
+                availableTo?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Capacities */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CapacityViewDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing capacity:read permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateShipmentDto"];
+            };
+        };
+        responses: {
+            /** @description Shipment created (planned) */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateShipmentResponseDto"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing shipment:create permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Emergency is not accepting intake (paused/closed) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_assignCapacity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Shipment UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignCapacityToShipmentDto"];
+            };
+        };
+        responses: {
+            /** @description Capacity assigned */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing shipment:assign permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment is not in planned status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_markInTransit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Shipment UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Shipment marked in transit */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Only the assigned carrier or a coordinator can act */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment is not in assigned status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_deliver: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Shipment UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Shipment delivered */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Only the assigned carrier or a coordinator can act */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment is not in transit */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Shipment UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Shipment cancelled */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing shipment:update permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment cannot be cancelled in its current status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_listMine: {
+        parameters: {
+            query?: {
+                /** @description Optional emergency scope; omit to list across emergencies */
+                emergencyId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description My shipments */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentViewDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_list: {
+        parameters: {
+            query?: {
+                /** @description Filter by status */
+                status?: "planned" | "assigned" | "in_transit" | "delivered" | "failed" | "cancelled";
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Shipments */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentViewDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing shipment:read permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_capacitySuggestions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Shipment UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Compatible capacities ranked by proximity/coverage fit */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CapacityViewDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing shipment:read permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

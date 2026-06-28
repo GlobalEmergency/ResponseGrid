@@ -190,6 +190,64 @@ describe('DrizzleResourceRepository (integration)', () => {
     expect(result.map((x) => x.name)).toEqual(['P']);
   });
 
+  it('findPendingByEmergencyPaged filters by type and free text, and paginates', async () => {
+    const acopio = Resource.register({
+      id: ResourceId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      type: ResourceType.CollectionPoint,
+      stage: ResourceStage.Origin,
+      name: 'Cruz Roja Centro',
+      location: baseLocation,
+      ownerUserId: OWNER_ID,
+    });
+    const almacen = Resource.register({
+      id: ResourceId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      type: ResourceType.Warehouse,
+      stage: ResourceStage.Intermediate,
+      name: 'Almacén Cáritas',
+      location: baseLocation,
+      ownerUserId: OWNER_ID,
+    });
+    const verified = Resource.register({
+      id: ResourceId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      type: ResourceType.CollectionPoint,
+      stage: ResourceStage.Origin,
+      name: 'Cruz Roja Verificada',
+      location: baseLocation,
+      ownerUserId: OWNER_ID,
+    });
+    verified.verify(VerificationLevel.Verified, 'c1');
+    await repo.save(acopio);
+    await repo.save(almacen);
+    await repo.save(verified);
+
+    // Type filter narrows to warehouses (and never returns verified rows).
+    const byType = await repo.findPendingByEmergencyPaged(
+      EmergencyId.fromString(EM),
+      { page: 1, limit: 50, type: ResourceType.Warehouse },
+    );
+    expect(byType.total).toBe(1);
+    expect(byType.items.map((x) => x.name)).toEqual(['Almacén Cáritas']);
+
+    // Free-text search matches the still-pending "Cruz Roja Centro" only.
+    const byText = await repo.findPendingByEmergencyPaged(
+      EmergencyId.fromString(EM),
+      { page: 1, limit: 50, q: 'cruz roja' },
+    );
+    expect(byText.total).toBe(1);
+    expect(byText.items.map((x) => x.name)).toEqual(['Cruz Roja Centro']);
+
+    // Pagination reports the full pending total but returns one item per page.
+    const page1 = await repo.findPendingByEmergencyPaged(
+      EmergencyId.fromString(EM),
+      { page: 1, limit: 1 },
+    );
+    expect(page1.total).toBe(2);
+    expect(page1.items).toHaveLength(1);
+  });
+
   it('findActiveByEmergency returns only published resources and excludes them from pending', async () => {
     const active = Resource.register({
       id: ResourceId.create(),

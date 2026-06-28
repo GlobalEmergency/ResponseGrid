@@ -1547,6 +1547,65 @@ export const es = {
       'Tu rol no incluye permisos de validación, verificación o asignación aquí.',
     queue_view_detail: 'Ver detalle',
 
+    // ── Sub-navegación / hub / buscador (#117) ────────────────────────
+    tab_overview: 'Resumen',
+    tab_resources: 'Recursos',
+    tab_needs: 'Peticiones',
+    tab_offers: 'Ofertas',
+    tab_volunteers: 'Voluntarios',
+    tab_reports: 'Reportes',
+    tabs_aria: 'Secciones de coordinación',
+
+    hub_sections_label: 'Secciones de coordinación',
+    hub_count_aria: 'pendientes',
+    hub_resources_label: 'Recursos por verificar',
+    hub_resources_description: 'Revisa y publica los puntos pendientes.',
+    hub_needs_label: 'Peticiones por validar',
+    hub_needs_description: 'Valida las peticiones ciudadanas entrantes.',
+    hub_offers_label: 'Ofertas de material',
+    hub_offers_description: 'Casa ofertas de donantes con necesidades validadas.',
+    hub_volunteers_label: 'Voluntarios y tareas',
+    hub_volunteers_description: 'Coordina el roster y asigna tareas.',
+    hub_reports_label: 'Reportes de campo',
+    hub_reports_description: 'Revisa los partes enviados desde el terreno.',
+
+    search_placeholder: 'Buscar…',
+    search_aria: 'Buscar',
+    search_clear: 'Limpiar búsqueda',
+
+    pagination_prev: 'Anterior',
+    pagination_next: 'Siguiente',
+    pagination_summary: 'Página {page} de {pages} · {total} resultados',
+
+    resource_type_filter_label: 'Tipo',
+    resource_type_filter_aria: 'Filtrar por tipo de recurso',
+    resource_type_filter_all: 'Todos los tipos',
+
+    offers_filter_group_label: 'Filtros de ofertas',
+    offers_filter_category_label: 'Categoría',
+    offers_filter_category_aria: 'Filtrar por categoría',
+    offers_filter_category_all: 'Todas las categorías',
+    offers_filter_status_label: 'Estado',
+    offers_filter_status_aria: 'Filtrar por estado',
+    offers_filter_status_all: 'Todos los estados',
+
+    resources_section_meta_title: 'Recursos — Coordinación de {name} · ResponseGrid',
+    resources_section_meta_description: 'Cola de verificación de recursos de {name}.',
+    resources_no_match_title: 'Sin recursos para esta búsqueda.',
+    resources_no_match_description:
+      'Prueba con otros términos o cambia el filtro de tipo.',
+
+    needs_section_meta_title: 'Peticiones — Coordinación de {name} · ResponseGrid',
+    needs_section_meta_description: 'Cola de validación de peticiones de {name}.',
+    needs_no_match_title: 'Sin peticiones para esta búsqueda.',
+    needs_no_match_description: 'Prueba con otros términos o ajusta los filtros.',
+
+    offers_section_meta_title: 'Ofertas — Coordinación de {name} · ResponseGrid',
+    offers_section_meta_description: 'Cola de ofertas de material de {name}.',
+    offers_no_match_title: 'Sin ofertas para estos filtros.',
+    offers_no_match_description:
+      'Ajusta la categoría o el estado para ver más ofertas.',
+
     controls_heading: 'Controles de la emergencia',
     controls_intake_heading: 'Estado de la recogida',
     controls_intake_paused: 'Recogida pausada.',

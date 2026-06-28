@@ -139,7 +139,9 @@ describe('Resource flow (e2e)', () => {
       .get(`/emergencies/${EM}/coordination/queue`)
       .set('Authorization', `Bearer ${coordToken}`)
       .expect(200);
-    expect(queue.body).toEqual([
+    const queueBody = queue.body as PagedResourcesBody;
+    expect(queueBody.total).toBe(1);
+    expect(queueBody.items).toEqual([
       expect.objectContaining({
         id,
         stage: 'intermediate',
@@ -165,7 +167,9 @@ describe('Resource flow (e2e)', () => {
       .get(`/emergencies/${EM}/coordination/queue`)
       .set('Authorization', `Bearer ${coordToken}`)
       .expect(200);
-    expect(afterPublish.body).toEqual([]); // no longer pending
+    const afterBody = afterPublish.body as PagedResourcesBody;
+    expect(afterBody.total).toBe(0);
+    expect(afterBody.items).toEqual([]); // no longer pending
 
     const publicResources = await request(server)
       .get(`/emergencies/${EM}/public/resources`)
