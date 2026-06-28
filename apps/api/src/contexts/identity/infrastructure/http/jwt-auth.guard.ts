@@ -12,6 +12,8 @@ import type { UserRepository } from '../../domain/ports/user.repository';
 import { USER_REPOSITORY } from '../../domain/ports/user.repository';
 import type { MembershipRepository } from '../../domain/ports/membership.repository';
 import { MEMBERSHIP_REPOSITORY } from '../../domain/ports/membership.repository';
+import type { GrantRepository } from '../../domain/ports/grant.repository';
+import { GRANT_REPOSITORY } from '../../domain/ports/grant.repository';
 import { UserId } from '../../domain/user-id';
 import type { MembershipSnapshot } from '../../domain/membership';
 import type { GrantSnapshot } from '../../domain/authorization/grant';
@@ -34,6 +36,8 @@ export class JwtAuthGuard implements CanActivate {
     @Inject(USER_REPOSITORY) private readonly userRepo: UserRepository,
     @Inject(MEMBERSHIP_REPOSITORY)
     private readonly membershipRepo: MembershipRepository,
+    @Inject(GRANT_REPOSITORY)
+    private readonly grantRepo: GrantRepository,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -56,6 +60,7 @@ export class JwtAuthGuard implements CanActivate {
 
     const memberships = await this.membershipRepo.findByUser(user.id);
     const membershipSnapshots = memberships.map((m) => m.toSnapshot());
+    const persistedGrants = await this.grantRepo.findByPrincipal(user.id.value);
 
     request.user = {
       id: user.id.value,
@@ -63,11 +68,17 @@ export class JwtAuthGuard implements CanActivate {
       name: user.name,
       isAdmin: user.isAdmin,
       memberships: membershipSnapshots,
-      grants: deriveGrantsFromLegacy(
-        user.id.value,
-        user.isAdmin,
-        membershipSnapshots,
-      ),
+      // Legacy-derived grants (live source of truth for coordinator/verifier/
+      // admin) merged with persisted grants (new role types: group_manager,
+      // reunification_officer, delegated and break-glass grants). See §9.
+      grants: [
+        ...deriveGrantsFromLegacy(
+          user.id.value,
+          user.isAdmin,
+          membershipSnapshots,
+        ),
+        ...persistedGrants.map((g) => g.toSnapshot()),
+      ],
     };
 
     return true;

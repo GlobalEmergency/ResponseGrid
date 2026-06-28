@@ -11,6 +11,8 @@ import type { UserRepository } from '../../domain/ports/user.repository';
 import { USER_REPOSITORY } from '../../domain/ports/user.repository';
 import type { MembershipRepository } from '../../domain/ports/membership.repository';
 import { MEMBERSHIP_REPOSITORY } from '../../domain/ports/membership.repository';
+import type { GrantRepository } from '../../domain/ports/grant.repository';
+import { GRANT_REPOSITORY } from '../../domain/ports/grant.repository';
 import { UserId } from '../../domain/user-id';
 import { deriveGrantsFromLegacy } from '../../domain/authorization/legacy-grant-mapping';
 import { AuthenticatedUser } from './jwt-auth.guard';
@@ -28,6 +30,8 @@ export class OptionalJwtAuthGuard implements CanActivate {
     @Inject(USER_REPOSITORY) private readonly userRepo: UserRepository,
     @Inject(MEMBERSHIP_REPOSITORY)
     private readonly membershipRepo: MembershipRepository,
+    @Inject(GRANT_REPOSITORY)
+    private readonly grantRepo: GrantRepository,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -51,17 +55,23 @@ export class OptionalJwtAuthGuard implements CanActivate {
       if (!user) return true;
       const memberships = await this.membershipRepo.findByUser(user.id);
       const membershipSnapshots = memberships.map((m) => m.toSnapshot());
+      const persistedGrants = await this.grantRepo.findByPrincipal(
+        user.id.value,
+      );
       request.user = {
         id: user.id.value,
         email: user.email.value,
         name: user.name,
         isAdmin: user.isAdmin,
         memberships: membershipSnapshots,
-        grants: deriveGrantsFromLegacy(
-          user.id.value,
-          user.isAdmin,
-          membershipSnapshots,
-        ),
+        grants: [
+          ...deriveGrantsFromLegacy(
+            user.id.value,
+            user.isAdmin,
+            membershipSnapshots,
+          ),
+          ...persistedGrants.map((g) => g.toSnapshot()),
+        ],
       };
     } catch {
       // If anything fails, proceed unauthenticated
