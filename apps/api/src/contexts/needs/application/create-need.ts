@@ -17,6 +17,8 @@ export interface CreateNeedItemCommand {
   quantity: number;
   unit: string | null;
   category: NeedCategory;
+  /** Presentation / route of administration (#61). Optional. */
+  presentation?: string | null;
 }
 
 export interface CreateNeedLocationCommand {
@@ -70,6 +72,7 @@ export class CreateNeed {
         quantity: i.quantity,
         unit: i.unit,
         category: i.category,
+        presentation: i.presentation ?? null,
       }),
     );
 

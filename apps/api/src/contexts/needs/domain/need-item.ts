@@ -5,6 +5,8 @@ export interface NeedItemProps {
   quantity: number;
   unit: string | null;
   category: NeedCategory;
+  /** Presentation / route of administration (ampolla, EV, inhalador…). Optional. */
+  presentation?: string | null;
 }
 
 export interface NeedItemSnapshot {
@@ -12,6 +14,8 @@ export interface NeedItemSnapshot {
   quantity: number;
   unit: string | null;
   category: NeedCategory;
+  /** Optional (legacy-safe) presentation / route of administration (#61). */
+  presentation?: string | null;
 }
 
 export class NeedItemValidationError extends Error {
@@ -26,12 +30,14 @@ export class NeedItem {
   readonly quantity: number;
   readonly unit: string | null;
   readonly category: NeedCategory;
+  readonly presentation: string | null;
 
   private constructor(props: NeedItemProps) {
     this.name = props.name;
     this.quantity = props.quantity;
     this.unit = props.unit;
     this.category = props.category;
+    this.presentation = props.presentation ?? null;
   }
 
   static create(props: NeedItemProps): NeedItem {
@@ -48,6 +54,7 @@ export class NeedItem {
       quantity: props.quantity,
       unit: props.unit ?? null,
       category: props.category,
+      presentation: props.presentation ?? null,
     });
   }
 
@@ -61,6 +68,7 @@ export class NeedItem {
       quantity: this.quantity,
       unit: this.unit,
       category: this.category,
+      presentation: this.presentation,
     };
   }
 }

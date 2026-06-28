@@ -145,6 +145,31 @@ describe('DrizzleNeedRepository (integration)', () => {
     expect(forA[0].resourceId).toBe(recipientA);
   });
 
+  it('round-trips a need item presentation, ampolla/EV (#61)', async () => {
+    const need = Need.create({
+      id: NeedId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      title: 'Clindamicina EV',
+      description: null,
+      location: makeLocation(),
+      priority: Priority.High,
+      requesterUserId: USER_ID,
+      requesterOrganizationId: null,
+      items: [
+        NeedItem.create({
+          name: 'Clindamicina',
+          quantity: 20,
+          unit: 'amp',
+          category: NeedCategory.Medicines,
+          presentation: 'EV/ampolla',
+        }),
+      ],
+    });
+    await repo.save(need);
+    const found = await repo.findById(need.id);
+    expect(found!.items[0].presentation).toBe('EV/ampolla');
+  });
+
   it('round-trips need with multiple items', async () => {
     const need = Need.create({
       id: NeedId.create(),

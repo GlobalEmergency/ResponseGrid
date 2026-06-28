@@ -49,6 +49,15 @@ export class NeedItemDto {
   @ApiProperty({ enum: NeedCategory, example: NeedCategory.Water })
   @IsEnum(NeedCategory)
   category!: NeedCategory;
+
+  @ApiPropertyOptional({
+    example: 'ampolla',
+    description:
+      'Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe, oxígeno… Optional, free-form (#61).',
+  })
+  @IsOptional()
+  @IsString()
+  presentation?: string;
 }
 
 export class NeedLocationDto {

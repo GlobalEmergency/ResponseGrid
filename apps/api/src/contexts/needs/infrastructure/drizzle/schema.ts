@@ -41,4 +41,6 @@ export const needItemsTable = pgTable('need_items', {
   quantity: integer('quantity').notNull(),
   unit: text('unit'),
   category: text('category').notNull(),
+  /** Presentation / route of administration of a medical item (#61). */
+  presentation: text('presentation'),
 });
