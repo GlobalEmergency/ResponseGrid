@@ -42,7 +42,8 @@ import {
 import { EmergencyExceptionFilter } from './emergency-exception.filter';
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
 import { RequireAdminGuard } from '../../../identity/infrastructure/http/require-admin.guard';
-import { RequireCoordinatorGuard } from '../../../identity/infrastructure/http/require-coordinator.guard';
+import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
+import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
 
 @ApiTags('emergencies')
 @Controller('emergencies')
@@ -131,7 +132,8 @@ export class EmergenciesController {
 
   @Post(':emergencyId/pause')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RequireCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('emergency:pause')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Pause an active emergency (coordinator only)' })
   @ApiParam({
@@ -154,7 +156,8 @@ export class EmergenciesController {
 
   @Post(':emergencyId/resume')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RequireCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('emergency:resume')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Resume a paused emergency (coordinator only)' })
   @ApiParam({
@@ -177,7 +180,8 @@ export class EmergenciesController {
 
   @Put(':emergencyId/announcement')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RequireCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('emergency:announce')
   @ApiBearerAuth()
   @ApiOperation({
     summary:

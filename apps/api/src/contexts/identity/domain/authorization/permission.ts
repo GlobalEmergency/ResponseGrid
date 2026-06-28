@@ -10,7 +10,15 @@
  * (a public-exportable subset; see docs/features/13 §8.2).
  */
 export const PERMISSION_CATALOG = {
-  emergency: ['create', 'activate', 'pause', 'close', 'read'],
+  emergency: [
+    'create',
+    'activate',
+    'pause',
+    'resume',
+    'close',
+    'announce',
+    'read',
+  ],
   resource: ['register', 'read', 'verify', 'close', 'edit'],
   need: ['create', 'validate', 'prioritize', 'read'],
   offer: ['create', 'match', 'read'],
