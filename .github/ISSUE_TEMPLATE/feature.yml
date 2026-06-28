@@ -1,0 +1,31 @@
+name: Feature
+description: Propón una mejora o funcionalidad nueva.
+title: "[FEAT] "
+labels:
+  - feature
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Problema o necesidad
+      description: Qué necesitas resolver y por qué.
+      placeholder: Explica el problema real.
+    validations:
+      required: true
+
+  - type: textarea
+    id: propuesta
+    attributes:
+      label: Propuesta
+      description: Qué cambio debería hacerse.
+      placeholder: Describe la solución propuesta.
+    validations:
+      required: true
+
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Criterios de aceptación
+      description: Cómo sabremos que está listo.
+      placeholder: Lista verificable de criterios.
+

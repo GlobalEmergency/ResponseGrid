@@ -1,0 +1,31 @@
+name: Bug
+description: Reporta un fallo con contexto suficiente para reproducirlo.
+title: "[BUG] "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Problema
+      description: Qué está pasando y qué esperabas que pasara.
+      placeholder: Describe el fallo con claridad.
+    validations:
+      required: true
+
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para reproducir
+      description: Secuencia mínima que reproduce el problema.
+      placeholder: 1. ... 2. ... 3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto
+      description: Logs, capturas, entorno o datos relevantes.
+      placeholder: Añade aquí el contexto útil.
+
