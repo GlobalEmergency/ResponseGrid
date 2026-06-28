@@ -1,11 +1,19 @@
+'use client';
+
 /**
- * RelativeTime — server-safe last-updated display.
+ * RelativeTime — hydration-safe "last updated" display.
  *
- * Renders an absolute "DD MMM, HH:MM" string (e.g. "26 jun, 14:32") to avoid
- * server/client hydration mismatches that would occur with Date.now()-based
- * relative strings.  The machine-readable ISO string is preserved in the
- * <time dateTime> attribute for programmatic consumers.
+ * Thin wrapper over {@link LocalDate} (issue #174): it renders an absolute
+ * "DD MMM, HH:MM" timestamp (e.g. "26 jun, 14:32") deterministically in UTC for
+ * SSR / first paint, then swaps to the user's local zone after mount — so there
+ * is no server/client hydration mismatch. The machine-readable ISO string is
+ * preserved in the `<time dateTime>` attribute by `LocalDate`.
+ *
+ * Kept as a named component so existing call sites (`isoString` prop) are
+ * unchanged.
  */
+
+import { LocalDate } from '@/components/atoms/local-date';
 
 interface RelativeTimeProps {
   /** ISO 8601 timestamp string */
@@ -14,33 +22,6 @@ interface RelativeTimeProps {
   className?: string;
 }
 
-function formatAbsolute(isoString: string): string {
-  const date = new Date(isoString);
-
-  // Guard against invalid dates
-  if (Number.isNaN(date.getTime())) {
-    return isoString;
-  }
-
-  return date.toLocaleString('es-ES', {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  });
-}
-
 export function RelativeTime({ isoString, className }: RelativeTimeProps) {
-  const formatted = formatAbsolute(isoString);
-
-  return (
-    <time
-      dateTime={isoString}
-      className={className}
-      suppressHydrationWarning
-    >
-      {formatted}
-    </time>
-  );
+  return <LocalDate iso={isoString} withTime className={className} />;
 }
