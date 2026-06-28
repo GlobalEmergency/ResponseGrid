@@ -22,7 +22,7 @@ const CONTAINER: Record<Variant, string> = {
 
 const ARROW: Record<Variant, string> = {
   primary: 'opacity-60',
-  default: 'text-[#b5bcc6]',
+  default: 'text-muted-soft',
   danger: '',
 };
 
