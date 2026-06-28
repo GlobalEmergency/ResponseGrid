@@ -319,7 +319,7 @@
             "bearer": []
           }
         ],
-        "summary": "List service accounts (admin)",
+        "summary": "List all service accounts (platform admin)",
         "tags": [
           "service-accounts"
         ]
@@ -366,6 +366,51 @@
         ]
       }
     },
+    "/organizations/{organizationId}/service-accounts": {
+      "get": {
+        "operationId": "ApiKeysController_listOrgServiceAccounts",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ServiceAccountListItemDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "apikey:create required in the org"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List a single organization’s service accounts (org admin)",
+        "tags": [
+          "service-accounts"
+        ]
+      }
+    },
     "/service-accounts/{serviceAccountId}/api-keys": {
       "get": {
         "operationId": "ApiKeysController_listApiKeys",
@@ -397,7 +442,7 @@
             "description": "Missing or invalid token"
           },
           "403": {
-            "description": "Admin access required"
+            "description": "apikey:create required in scope"
           }
         },
         "security": [
@@ -405,7 +450,7 @@
             "bearer": []
           }
         ],
-        "summary": "List a service account’s keys — metadata only (admin)",
+        "summary": "List a service account’s keys — metadata only (scoped admin)",
         "tags": [
           "service-accounts"
         ]
@@ -4690,6 +4735,16 @@
           "expiresAt": {
             "type": "string",
             "nullable": true
+          },
+          "principalName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Display name of the principal (when resolvable)"
+          },
+          "principalEmail": {
+            "type": "string",
+            "nullable": true,
+            "description": "Email of the principal (users only)"
           }
         },
         "required": [
@@ -4701,7 +4756,9 @@
           "scopeId",
           "grantedByPrincipalId",
           "grantedAt",
-          "expiresAt"
+          "expiresAt",
+          "principalName",
+          "principalEmail"
         ]
       },
       "GrantRoleDto": {

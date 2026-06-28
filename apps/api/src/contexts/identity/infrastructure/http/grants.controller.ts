@@ -71,6 +71,20 @@ class GrantListItemDto {
 
   @ApiProperty({ type: String, nullable: true })
   expiresAt!: string | null;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description: 'Display name of the principal (when resolvable)',
+  })
+  principalName!: string | null;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description: 'Email of the principal (users only)',
+  })
+  principalEmail!: string | null;
 }
 
 function buildScope(dto: GrantRoleDto): ScopeRefProps {
@@ -121,7 +135,11 @@ function buildScopeFromQuery(
   throw new BadRequestException(`unsupported scopeType '${scopeType}'`);
 }
 
-function toGrantListItem(s: GrantSnapshot): GrantListItemDto {
+function toGrantListItem(
+  s: GrantSnapshot,
+  principalName: string | null = null,
+  principalEmail: string | null = null,
+): GrantListItemDto {
   return {
     id: s.id,
     principalId: s.principalId,
@@ -132,6 +150,8 @@ function toGrantListItem(s: GrantSnapshot): GrantListItemDto {
     grantedByPrincipalId: s.grantedByPrincipalId,
     grantedAt: s.grantedAt,
     expiresAt: s.expiresAt,
+    principalName,
+    principalEmail,
   };
 }
 
@@ -169,11 +189,13 @@ export class GrantsController {
     @Query('scopeId') scopeId?: string,
   ): Promise<GrantListItemDto[]> {
     const user = req.user!;
-    const grants = await this.listGrantsAtScope.execute({
+    const views = await this.listGrantsAtScope.execute({
       actor: { principalId: user.id, grants: user.grants },
       scope: buildScopeFromQuery(scopeType, scopeId),
     });
-    return grants.map(toGrantListItem);
+    return views.map((v) =>
+      toGrantListItem(v.grant, v.principalName, v.principalEmail),
+    );
   }
 
   @Get()

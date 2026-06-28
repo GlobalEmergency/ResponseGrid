@@ -20,6 +20,8 @@ import { IssueApiKey } from '../application/issue-api-key';
 import { RevokeApiKey } from '../application/revoke-api-key';
 import { FindUserByEmail } from '../application/find-user-by-email';
 import { ListGrantsAtScope } from '../application/list-grants-at-scope';
+import { ListApiKeys } from '../application/list-api-keys';
+import { ListServiceAccountsByOrg } from '../application/list-service-accounts-by-org';
 import {
   USER_REPOSITORY,
   UserRepository,
@@ -148,9 +150,18 @@ const findUserByEmailProvider = {
 
 const listGrantsAtScopeProvider = {
   provide: ListGrantsAtScope,
-  inject: [GRANT_REPOSITORY, ACCESS_CONTROL],
-  useFactory: (grants: GrantRepository, access: AccessControl) =>
-    new ListGrantsAtScope(grants, access),
+  inject: [
+    GRANT_REPOSITORY,
+    ACCESS_CONTROL,
+    USER_REPOSITORY,
+    SERVICE_ACCOUNT_REPOSITORY,
+  ],
+  useFactory: (
+    grants: GrantRepository,
+    access: AccessControl,
+    users: UserRepository,
+    sas: ServiceAccountRepository,
+  ) => new ListGrantsAtScope(grants, access, users, sas),
 };
 
 const serviceAccountRepositoryProvider = {
@@ -191,6 +202,23 @@ const revokeApiKeyProvider = {
     keys: ApiKeyRepository,
     access: AccessControl,
   ) => new RevokeApiKey(sas, keys, access),
+};
+
+const listApiKeysProvider = {
+  provide: ListApiKeys,
+  inject: [SERVICE_ACCOUNT_REPOSITORY, API_KEY_REPOSITORY, ACCESS_CONTROL],
+  useFactory: (
+    sas: ServiceAccountRepository,
+    keys: ApiKeyRepository,
+    access: AccessControl,
+  ) => new ListApiKeys(sas, keys, access),
+};
+
+const listServiceAccountsByOrgProvider = {
+  provide: ListServiceAccountsByOrg,
+  inject: [SERVICE_ACCOUNT_REPOSITORY, ACCESS_CONTROL],
+  useFactory: (sas: ServiceAccountRepository, access: AccessControl) =>
+    new ListServiceAccountsByOrg(sas, access),
 };
 
 const userIdentityRepositoryProvider = {
@@ -323,6 +351,8 @@ const authenticateWithProviderProvider = {
     createServiceAccountProvider,
     issueApiKeyProvider,
     revokeApiKeyProvider,
+    listApiKeysProvider,
+    listServiceAccountsByOrgProvider,
     resourceEmergencyLookupProvider,
     needEmergencyLookupProvider,
     offerEmergencyLookupProvider,

@@ -1,10 +1,15 @@
 import { ListGrantsAtScope } from './list-grants-at-scope';
 import { InMemoryGrantRepository } from '../infrastructure/in-memory-grant.repository';
+import { InMemoryUserRepository } from '../infrastructure/in-memory-user.repository';
+import { InMemoryServiceAccountRepository } from '../infrastructure/in-memory-service-account.repository';
 import { LocalAccessControl } from '../domain/authorization/local-access-control';
 import { AuthorizationContext } from '../domain/authorization/access-control';
 import { Grant } from '../domain/authorization/grant';
 import { ScopeRef } from '../domain/authorization/scope-ref';
 import { NotAuthorizedToReadError } from '../domain/authorization/errors';
+import { User } from '../domain/user';
+import { UserId } from '../domain/user-id';
+import { Email } from '../domain/email';
 
 const PLATFORM_ADMIN = '11111111-1111-4111-8111-111111111111';
 const ORG_ADMIN = '22222222-2222-4222-8222-222222222222';
@@ -16,14 +21,32 @@ function ctx(principalId: string, ...held: Grant[]): AuthorizationContext {
   return { principalId, grants: held.map((g) => g.toSnapshot()) };
 }
 
+const access = new LocalAccessControl();
+
 describe('ListGrantsAtScope', () => {
-  const access = new LocalAccessControl();
-  let repo: InMemoryGrantRepository;
+  let grants: InMemoryGrantRepository;
+  let users: InMemoryUserRepository;
+  let serviceAccounts: InMemoryServiceAccountRepository;
+
+  function useCase(): ListGrantsAtScope {
+    return new ListGrantsAtScope(grants, access, users, serviceAccounts);
+  }
 
   beforeEach(async () => {
-    repo = new InMemoryGrantRepository();
-    // A member with org_member at ORG, plus the org admin's own grant at ORG.
-    await repo.save(
+    grants = new InMemoryGrantRepository();
+    users = new InMemoryUserRepository();
+    serviceAccounts = new InMemoryServiceAccountRepository();
+
+    await users.save(
+      User.create({
+        id: UserId.fromString(MEMBER),
+        email: Email.fromString('mia@example.org'),
+        passwordHash: null,
+        name: 'Mia',
+        isAdmin: false,
+      }),
+    );
+    await grants.save(
       Grant.create({
         id: 'm1',
         principalId: MEMBER,
@@ -31,7 +54,7 @@ describe('ListGrantsAtScope', () => {
         scope: ScopeRef.organization(ORG),
       }),
     );
-    await repo.save(
+    await grants.save(
       Grant.create({
         id: 'oa',
         principalId: ORG_ADMIN,
@@ -65,18 +88,22 @@ describe('ListGrantsAtScope', () => {
     );
   }
 
-  it('lets an org admin list the grants at their own organization', async () => {
-    const result = await new ListGrantsAtScope(repo, access).execute({
+  it('lists the grants at the org, enriched with the principal name/email', async () => {
+    const result = await useCase().execute({
       actor: orgAdmin(),
       scope: ScopeRef.organization(ORG).toPlain(),
     });
-    expect(result.map((g) => g.principalId).sort()).toEqual(
-      [MEMBER, ORG_ADMIN].sort(),
-    );
+    expect(result).toHaveLength(2);
+    const member = result.find((v) => v.grant.principalId === MEMBER);
+    expect(member?.principalName).toBe('Mia');
+    expect(member?.principalEmail).toBe('mia@example.org');
+    // The org admin user has no User row → name/email resolve to null gracefully.
+    const admin = result.find((v) => v.grant.principalId === ORG_ADMIN);
+    expect(admin?.principalName).toBeNull();
   });
 
   it('lets a platform admin list grants at any organization', async () => {
-    const result = await new ListGrantsAtScope(repo, access).execute({
+    const result = await useCase().execute({
       actor: platformAdmin(),
       scope: ScopeRef.organization(ORG).toPlain(),
     });
@@ -85,7 +112,7 @@ describe('ListGrantsAtScope', () => {
 
   it('forbids an org admin from listing a different organization', async () => {
     await expect(
-      new ListGrantsAtScope(repo, access).execute({
+      useCase().execute({
         actor: orgAdmin(),
         scope: ScopeRef.organization(OTHER_ORG).toPlain(),
       }),
@@ -94,7 +121,7 @@ describe('ListGrantsAtScope', () => {
 
   it('forbids a principal with no admin permission at the scope', async () => {
     await expect(
-      new ListGrantsAtScope(repo, access).execute({
+      useCase().execute({
         actor: ctx(MEMBER),
         scope: ScopeRef.organization(ORG).toPlain(),
       }),

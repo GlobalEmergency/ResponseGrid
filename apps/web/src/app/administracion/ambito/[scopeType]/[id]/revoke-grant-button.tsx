@@ -3,14 +3,16 @@
 import { useState, useTransition } from 'react';
 import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';
-import { revokeOrgGrantAction } from './actions';
+import { revokeGrantAction, type ScopeType } from './actions';
 
 export function RevokeGrantButton({
   grantId,
-  orgId,
+  scopeType,
+  scopeId,
 }: {
   grantId: string;
-  orgId: string;
+  scopeType: ScopeType;
+  scopeId: string;
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +20,7 @@ export function RevokeGrantButton({
   function handleRevoke() {
     setError(null);
     startTransition(async () => {
-      const result = await revokeOrgGrantAction(grantId, orgId);
+      const result = await revokeGrantAction(grantId, scopeType, scopeId);
       if (result.status === 'error') setError(result.message);
     });
   }

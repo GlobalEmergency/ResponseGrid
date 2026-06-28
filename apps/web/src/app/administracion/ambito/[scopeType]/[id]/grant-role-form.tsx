@@ -7,28 +7,29 @@ import { Select } from '@/components/atoms/select';
 import { FormField } from '@/components/molecules/form-field';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import {
-  grantOrgRoleAction,
+  grantRoleAction,
   type ActionResult,
   type RoleView,
+  type ScopeType,
 } from './actions';
 
 const INITIAL: ActionResult = { status: 'idle' };
 
-export function GrantOrgRoleForm({
-  orgId,
+export function GrantRoleForm({
+  scopeType,
+  scopeId,
   roles,
 }: {
-  orgId: string;
+  scopeType: ScopeType;
+  scopeId: string;
   roles: RoleView[];
 }) {
-  const [state, formAction, pending] = useActionState(
-    grantOrgRoleAction,
-    INITIAL,
-  );
+  const [state, formAction, pending] = useActionState(grantRoleAction, INITIAL);
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
-      <input type="hidden" name="orgId" value={orgId} />
+      <input type="hidden" name="scopeType" value={scopeType} />
+      <input type="hidden" name="scopeId" value={scopeId} />
 
       {state.status === 'error' && <ErrorMessage message={state.message} />}
       {state.status === 'success' && (
@@ -65,8 +66,8 @@ export function GrantOrgRoleForm({
       </FormField>
 
       <p className="text-xs text-amber-700 bg-amber-50 border border-amber-300 rounded px-3 py-2">
-        Solo puedes conceder roles cuyos permisos tú ya tengas en esta
-        organización (atenuación). El servidor lo verifica.
+        Solo puedes conceder roles cuyos permisos tú ya tengas en este ámbito
+        (atenuación). El servidor lo verifica.
       </p>
 
       <Button type="submit" size="md" disabled={pending}>

@@ -114,11 +114,28 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List service accounts (admin) */
+        /** List all service accounts (platform admin) */
         get: operations["ApiKeysController_listServiceAccounts"];
         put?: never;
         /** Create a service account (machine principal) */
         post: operations["ApiKeysController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/organizations/{organizationId}/service-accounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List a single organization’s service accounts (org admin) */
+        get: operations["ApiKeysController_listOrgServiceAccounts"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -132,7 +149,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List a service account’s keys — metadata only (admin) */
+        /** List a service account’s keys — metadata only (scoped admin) */
         get: operations["ApiKeysController_listApiKeys"];
         put?: never;
         /** Issue an API key for a service account (secret shown once) */
@@ -1494,6 +1511,10 @@ export interface components {
             grantedByPrincipalId: string | null;
             grantedAt: string;
             expiresAt: string | null;
+            /** @description Display name of the principal (when resolvable) */
+            principalName: string | null;
+            /** @description Email of the principal (users only) */
+            principalEmail: string | null;
         };
         GrantRoleDto: {
             /**
@@ -3074,6 +3095,41 @@ export interface operations {
             };
         };
     };
+    ApiKeysController_listOrgServiceAccounts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                organizationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceAccountListItemDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description apikey:create required in the org */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ApiKeysController_listApiKeys: {
         parameters: {
             query?: never;
@@ -3100,7 +3156,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Admin access required */
+            /** @description apikey:create required in scope */
             403: {
                 headers: {
                     [name: string]: unknown;
