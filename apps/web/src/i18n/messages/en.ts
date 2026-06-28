@@ -801,13 +801,19 @@ export const en = {
 
     // Authentication
     auth_heading: 'Authentication',
-    auth_intro: 'There are two planes. Tell them apart before integrating.',
+    auth_intro:
+      'There are three schemes. Work out which one each endpoint accepts before integrating.',
     auth_read_t: 'Reads — no token',
     auth_read_b:
       'The read endpoints (emergencies, public points, public needs) need no credentials. If all you want is to display data, you do not need to authenticate.',
     auth_write_t: 'Writes — Bearer token',
     auth_write_b:
-      'To create needs, offers or points you need an account. Register or log in and you get an accessToken (JWT) that you send in the Authorization: Bearer <token> header.',
+      'To create needs, offers or points you need a user account. Register or log in and you get an accessToken (JWT) that you send in the Authorization: Bearer <token> header.',
+    auth_sa_t: 'Service accounts — x-api-key header',
+    auth_sa_b:
+      'For machine-to-machine integrations there are service accounts. An admin creates the account and issues a key (rh_live_…) that travels in the x-api-key header (not as Bearer). With it, the caller can introspect its own identity and permissions: GET /service-accounts/me.',
+    auth_note:
+      'An x-api-key authenticates the service-account principal, but it does not replace the Bearer token on the documented write endpoints (needs, offers and points): those expect a user-account JWT and return 401 for an API key. A service account can only act within its grants (none by default), so without explicit permissions its key does not enable writes.',
 
     // Quickstart
     qs_heading: 'Quickstart: a map of points',

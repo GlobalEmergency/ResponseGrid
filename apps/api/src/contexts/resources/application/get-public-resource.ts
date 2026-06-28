@@ -1,6 +1,6 @@
 import { ResourceRepository } from '../domain/ports/resource.repository';
 import { ResourceId } from '../domain/resource-id';
-import { PublicStatus } from '../domain/resource-enums';
+import { PublicStatus, VerificationLevel } from '../domain/resource-enums';
 import { ResourceView, toResourceView } from './resource-view';
 
 const VISIBLE = [
@@ -9,11 +9,17 @@ const VISIBLE = [
   PublicStatus.Paused,
 ];
 
+const PUBLICLY_VISIBLE_VERIFICATION = [
+  VerificationLevel.Verified,
+  VerificationLevel.Official,
+];
+
 /**
  * Fetch a single published resource by id, scoped to an emergency.
  * Returns null when the resource does not exist, belongs to another emergency,
- * or is not publicly visible (Hidden/Closed). Powers the public resource
- * detail page (#59 — "necesidades de este destinatario").
+ * is not publicly visible (Hidden/Closed), or is still `unverified` — the
+ * public API only exposes verified/official points (#94). Powers the public
+ * resource detail page (#59 — "necesidades de este destinatario").
  */
 export class GetPublicResource {
   constructor(private readonly repo: ResourceRepository) {}
@@ -28,6 +34,8 @@ export class GetPublicResource {
     if (resource === null) return null;
     if (resource.emergencyId.value !== q.emergencyId) return null;
     if (!VISIBLE.includes(resource.publicStatus)) return null;
+    if (!PUBLICLY_VISIBLE_VERIFICATION.includes(resource.verificationLevel))
+      return null;
     return toResourceView(resource);
   }
 }

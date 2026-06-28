@@ -86,4 +86,19 @@ describe('GetPublicResource', () => {
     const view = await useCase.execute({ emergencyId: EM, resourceId: ID });
     expect(view).toBeNull();
   });
+
+  it('returns null when the resource is active but unverified — #94', async () => {
+    // An ingested point can be Active yet Unverified; the public API must not
+    // expose it as if it were validated.
+    const unverified = Resource.fromSnapshot(
+      snapshot({
+        id: ID,
+        publicStatus: PublicStatus.Active,
+        verificationLevel: VerificationLevel.Unverified,
+      }),
+    );
+    const useCase = new GetPublicResource(repoWith(unverified));
+    const view = await useCase.execute({ emergencyId: EM, resourceId: ID });
+    expect(view).toBeNull();
+  });
 });

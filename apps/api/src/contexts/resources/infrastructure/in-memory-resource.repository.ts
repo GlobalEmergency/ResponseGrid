@@ -21,6 +21,15 @@ function haversineMeters(
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+/**
+ * Trust levels the public read API may expose — never `unverified` (issue #94).
+ * Mirrors `PUBLICLY_VISIBLE_VERIFICATION` in the Drizzle repository.
+ */
+const PUBLICLY_VISIBLE_VERIFICATION = new Set<VerificationLevel>([
+  VerificationLevel.Verified,
+  VerificationLevel.Official,
+]);
+
 export class InMemoryResourceRepository implements ResourceRepository {
   private store = new Map<string, ReturnType<Resource['toSnapshot']>>();
 
@@ -133,7 +142,10 @@ export class InMemoryResourceRepository implements ResourceRepository {
       PublicStatus.Paused,
     ]);
     let all = [...this.store.values()].filter(
-      (s) => s.emergencyId === emergencyId.value && visible.has(s.publicStatus),
+      (s) =>
+        s.emergencyId === emergencyId.value &&
+        visible.has(s.publicStatus) &&
+        PUBLICLY_VISIBLE_VERIFICATION.has(s.verificationLevel),
     );
     if (q.category) {
       all = all.filter((s) => s.accepts.includes(q.category!));
@@ -179,7 +191,9 @@ export class InMemoryResourceRepository implements ResourceRepository {
     const withDist = [...this.store.values()]
       .filter(
         (s) =>
-          s.emergencyId === emergencyId.value && visible.has(s.publicStatus),
+          s.emergencyId === emergencyId.value &&
+          visible.has(s.publicStatus) &&
+          PUBLICLY_VISIBLE_VERIFICATION.has(s.verificationLevel),
       )
       .map((s) => {
         const dist = haversineMeters(
@@ -222,6 +236,7 @@ export class InMemoryResourceRepository implements ResourceRepository {
         (s) =>
           s.emergencyId === emergencyId.value &&
           visible.has(s.publicStatus) &&
+          PUBLICLY_VISIBLE_VERIFICATION.has(s.verificationLevel) &&
           s.location.latitude >= q.minLat &&
           s.location.latitude <= q.maxLat &&
           s.location.longitude >= q.minLng &&
@@ -243,7 +258,10 @@ export class InMemoryResourceRepository implements ResourceRepository {
       PublicStatus.Paused,
     ]);
     const all = [...this.store.values()].filter(
-      (s) => s.emergencyId === emergencyId.value && visible.has(s.publicStatus),
+      (s) =>
+        s.emergencyId === emergencyId.value &&
+        visible.has(s.publicStatus) &&
+        PUBLICLY_VISIBLE_VERIFICATION.has(s.verificationLevel),
     );
     const byCategory: Record<string, number> = {};
     const byCountry: Record<string, number> = {};

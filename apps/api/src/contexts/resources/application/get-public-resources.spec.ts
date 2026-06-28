@@ -4,10 +4,12 @@ import { VerifyResource } from './verify-resource';
 import { PublishResource } from './publish-resource';
 import { InMemoryResourceRepository } from '../infrastructure/in-memory-resource.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
+import { Resource } from '../domain/resource';
 import {
   ResourceType,
   ResourceStage,
   PublicStatus,
+  VerificationLevel,
 } from '../domain/resource-enums';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 
@@ -74,6 +76,44 @@ describe('GetPublicResources', () => {
       location: baseLocation,
       ownerUserId: 'user-unverified-test',
     });
+
+    const result = await new GetPublicResources(repo).execute({
+      emergencyId: EM,
+    });
+
+    expect(result.items).toHaveLength(0);
+    expect(result.total).toBe(0);
+  });
+
+  it('excludes active-but-unverified (ingested) points — #94', async () => {
+    const repo = new InMemoryResourceRepository();
+
+    // Active yet Unverified, as written by the external ingest path.
+    await repo.save(
+      Resource.fromSnapshot({
+        id: '44444444-4444-4444-8444-444444444444',
+        emergencyId: EM,
+        type: ResourceType.CollectionPoint,
+        stage: ResourceStage.Destination,
+        name: 'Ingested Unverified',
+        description: null,
+        location: baseLocation,
+        ownerUserId: 'ingest',
+        ownerOrganizationId: null,
+        verificationLevel: VerificationLevel.Unverified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date('2026-06-01T00:00:00Z'),
+        contact: null,
+        schedule: null,
+        manager: null,
+        accepts: [],
+        country: null,
+        city: null,
+        provenance: null,
+        isFinalRecipient: false,
+        recipientType: null,
+      }),
+    );
 
     const result = await new GetPublicResources(repo).execute({
       emergencyId: EM,
