@@ -122,5 +122,6 @@ Flujo de trabajo:
 
 ## 📚 Documentación
 
+- [`ARCHITECTURE.md`](ARCHITECTURE.md) — guía corta de arquitectura para nuevos colaboradores.
 - [`docs/features/`](docs/features) — fichas de feature (origen, propuesta DDD+API+Atomic, alcance, privacidad).
 - [`01-especificacion-producto-y-arquitectura.md`](01-especificacion-producto-y-arquitectura.md) y [`especificacion_plataforma_ayuda_solidaria.md`](especificacion_plataforma_ayuda_solidaria.md) — especificación de producto y arquitectura.
