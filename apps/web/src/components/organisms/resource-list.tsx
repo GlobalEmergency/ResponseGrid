@@ -314,7 +314,7 @@ export function ResourceList({
             type="button"
             onClick={() => setGeoError(false)}
             className="ml-1 underline hover:no-underline focus:outline-none"
-            aria-label="Cerrar"
+            aria-label={tNearby.geo_error_dismiss}
           >
             ✕
           </button>
