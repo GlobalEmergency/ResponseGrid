@@ -889,4 +889,50 @@ export const en = {
     copy: 'Copy',
     copied: 'Copied',
   },
+
+  // ── Utility + account pages ────────────────────────────────────────────────
+  offline: {
+    title: 'No connection',
+    body: 'No internet connection. Check your network and try again. Any drafts you started are kept for when you are back online.',
+    retry: 'Retry',
+  },
+
+  auth_complete: {
+    connecting: 'Connecting…',
+  },
+
+  organizaciones: {
+    meta_title: 'My organizations — ResponseGrid',
+    meta_description: 'Manage organizations in ResponseGrid.',
+    back: '← Home',
+    title: 'My organizations',
+    subtitle: 'Organizations you belong to.',
+    list_heading: 'Organizations',
+    empty_title: "You don't belong to any organization yet.",
+    empty_description: 'Create one below or ask to be added to an existing one.',
+    create_heading: 'Create organization',
+  },
+
+  org_detail: {
+    meta_title: 'Organization — ResponseGrid',
+    back: '← My organizations',
+    fallback_title: 'Organization',
+    members_heading: 'Members',
+    role_owner: 'Owner',
+    role_member: 'Member',
+    add_heading: 'Add member',
+    only_owner: 'Only the owner can add or remove members.',
+  },
+
+  notificaciones: {
+    meta_title: 'Notifications — ResponseGrid',
+    meta_description: 'Your notifications in ResponseGrid.',
+    back: '← Home',
+    title: 'Notifications',
+    title_unread: 'Notifications ({count} unread)',
+    heading_sr: 'Your notifications',
+    aria_list: 'Notifications list',
+    empty_title: "You don't have any notifications yet.",
+    empty_description: 'When there are updates on your emergencies or resources they will appear here.',
+  },
 } as Messages;

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 import { completeOAuthAction } from './actions';
 
 /**
@@ -14,6 +16,7 @@ import { completeOAuthAction } from './actions';
  * pass it to a Server Action that stores it in an httpOnly cookie.
  */
 export default function AuthCompletePage() {
+  const t = getMessages(useLocale()).auth_complete;
   const done = useRef(false);
 
   useEffect(() => {
@@ -38,7 +41,7 @@ export default function AuthCompletePage() {
       <div className="mx-auto w-full max-w-sm">
         <PageHeaderBand />
         <div className="flex flex-col items-center text-center gap-6 px-4 pb-12 pt-6">
-          <p className="text-base text-muted">Conectando…</p>
+          <p className="text-base text-muted">{t.connecting}</p>
         </div>
       </div>
     </main>

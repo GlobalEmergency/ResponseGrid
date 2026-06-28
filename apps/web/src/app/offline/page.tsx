@@ -1,8 +1,11 @@
 'use client';
 
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 export default function OfflinePage() {
+  const t = getMessages(useLocale()).offline;
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-sm">
@@ -14,18 +17,14 @@ export default function OfflinePage() {
           >
             ⚠
           </div>
-          <h1 className="text-2xl font-bold text-ink">Sin conexión</h1>
-          <p className="max-w-sm text-base text-muted leading-relaxed">
-            No hay conexión a internet. Revisa tu red e inténtalo de nuevo.
-            Los borradores que hayas iniciado se conservan para cuando vuelvas a
-            estar en línea.
-          </p>
+          <h1 className="text-2xl font-bold text-ink">{t.title}</h1>
+          <p className="max-w-sm text-base text-muted leading-relaxed">{t.body}</p>
           <button
             type="button"
             onClick={() => window.location.reload()}
             className="rounded-lg border-2 border-navy bg-navy px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-700 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
           >
-            Reintentar
+            {t.retry}
           </button>
         </div>
       </div>

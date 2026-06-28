@@ -6,12 +6,14 @@ import { AddMemberForm } from './add-member-form';
 import { RemoveMemberButton } from './remove-member-button';
 import { Badge } from '@/components/atoms/badge';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Organización — ResponseGrid',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  return { title: t.org_detail.meta_title };
+}
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -56,14 +58,16 @@ export default async function OrganizationDetailPage({ params }: Props) {
   const isOwner = memberList.some(
     (m) => m.userId === currentUserId && m.role === 'owner',
   );
+  const { t } = await getT();
+  const td = t.org_detail;
 
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-xl">
         <PageHeaderBand
           backHref="/organizaciones"
-          backLabel="← Mis organizaciones"
-          title={org?.name ?? 'Organización'}
+          backLabel={td.back}
+          title={org?.name ?? td.fallback_title}
           subtitle={org ? `${org.type} · ${org.verificationLevel}` : undefined}
         />
         <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
@@ -71,7 +75,7 @@ export default async function OrganizationDetailPage({ params }: Props) {
         {/* Members list */}
         <section aria-labelledby="members-heading" className="flex flex-col gap-4">
           <h2 id="members-heading" className="text-xl font-bold text-ink">
-            Miembros ({memberList.length})
+            {td.members_heading} ({memberList.length})
           </h2>
 
           <ul className="flex flex-col gap-2" role="list">
@@ -88,7 +92,7 @@ export default async function OrganizationDetailPage({ params }: Props) {
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <Badge variant={member.role === 'owner' ? 'role-owner' : 'role-member'}>
-                    {member.role === 'owner' ? 'Propietario' : 'Miembro'}
+                    {member.role === 'owner' ? td.role_owner : td.role_member}
                   </Badge>
                   {isOwner && member.userId !== currentUserId && (
                     <RemoveMemberButton orgId={id} userId={member.userId} />
@@ -102,11 +106,11 @@ export default async function OrganizationDetailPage({ params }: Props) {
         {/* Add member form */}
         <section aria-labelledby="add-member-heading" className="flex flex-col gap-4">
           <h2 id="add-member-heading" className="text-xl font-bold text-ink">
-            Añadir miembro
+            {td.add_heading}
           </h2>
           {!isOwner && (
             <p className="text-sm text-muted">
-              Solo el propietario puede añadir o eliminar miembros.
+              {td.only_owner}
             </p>
           )}
           <AddMemberForm orgId={id} />

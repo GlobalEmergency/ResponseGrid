@@ -6,14 +6,18 @@ import { EmptyState } from '@/components/molecules/empty-state';
 import { NotificationItem } from '@/components/molecules/notification-item';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { MarkAllReadButton } from './mark-all-read-button';
+import { getT } from '@/i18n/server';
 
 // Always reflect the latest notifications state.
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Notificaciones — ResponseGrid',
-  description: 'Tus notificaciones en ResponseGrid.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  return {
+    title: t.notificaciones.meta_title,
+    description: t.notificaciones.meta_description,
+  };
+}
 
 export default async function NotificacionesPage() {
   const token = await getToken();
@@ -28,23 +32,23 @@ export default async function NotificacionesPage() {
   const notifications = data != null ? data.notifications : [];
   const unreadCount = data != null ? data.unreadCount : 0;
   const hasUnread = unreadCount > 0;
+  const { t } = await getT();
+  const tn = t.notificaciones;
 
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-xl">
         <PageHeaderBand
           backHref="/"
-          backLabel="← Inicio"
-          title={
-            hasUnread ? `Notificaciones (${unreadCount} sin leer)` : 'Notificaciones'
-          }
+          backLabel={tn.back}
+          title={hasUnread ? tn.title_unread.replace('{count}', String(unreadCount)) : tn.title}
         />
         <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
 
           {/* ── LISTA DE NOTIFICACIONES ───────────────────────────────── */}
           <section aria-labelledby="notifications-heading" className="flex flex-col gap-4">
             <h2 id="notifications-heading" className="sr-only">
-              Tus notificaciones
+              {tn.heading_sr}
             </h2>
 
             {hasUnread && (
@@ -54,15 +58,12 @@ export default async function NotificacionesPage() {
             )}
 
             {notifications.length === 0 ? (
-              <EmptyState
-                title="No tienes notificaciones todavía."
-                description="Cuando haya novedades en tus emergencias o recursos aparecerán aquí."
-              />
+              <EmptyState title={tn.empty_title} description={tn.empty_description} />
             ) : (
               <ul
                 className="flex flex-col gap-3"
                 role="list"
-                aria-label="Lista de notificaciones"
+                aria-label={tn.aria_list}
               >
                 {notifications.map((notification) => (
                   <NotificationItem

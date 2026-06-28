@@ -918,6 +918,52 @@ export const es = {
     copy: 'Copiar',
     copied: 'Copiado',
   },
+
+  // ── Utility + account pages ────────────────────────────────────────────────
+  offline: {
+    title: 'Sin conexión',
+    body: 'No hay conexión a internet. Revisa tu red e inténtalo de nuevo. Los borradores que hayas iniciado se conservan para cuando vuelvas a estar en línea.',
+    retry: 'Reintentar',
+  },
+
+  auth_complete: {
+    connecting: 'Conectando…',
+  },
+
+  organizaciones: {
+    meta_title: 'Mis organizaciones — ResponseGrid',
+    meta_description: 'Gestión de organizaciones en ResponseGrid.',
+    back: '← Inicio',
+    title: 'Mis organizaciones',
+    subtitle: 'Organizaciones a las que perteneces.',
+    list_heading: 'Organizaciones',
+    empty_title: 'Aún no perteneces a ninguna organización.',
+    empty_description: 'Crea una a continuación o pide que te añadan a una existente.',
+    create_heading: 'Crear organización',
+  },
+
+  org_detail: {
+    meta_title: 'Organización — ResponseGrid',
+    back: '← Mis organizaciones',
+    fallback_title: 'Organización',
+    members_heading: 'Miembros',
+    role_owner: 'Propietario',
+    role_member: 'Miembro',
+    add_heading: 'Añadir miembro',
+    only_owner: 'Solo el propietario puede añadir o eliminar miembros.',
+  },
+
+  notificaciones: {
+    meta_title: 'Notificaciones — ResponseGrid',
+    meta_description: 'Tus notificaciones en ResponseGrid.',
+    back: '← Inicio',
+    title: 'Notificaciones',
+    title_unread: 'Notificaciones ({count} sin leer)',
+    heading_sr: 'Tus notificaciones',
+    aria_list: 'Lista de notificaciones',
+    empty_title: 'No tienes notificaciones todavía.',
+    empty_description: 'Cuando haya novedades en tus emergencias o recursos aparecerán aquí.',
+  },
 };
 
 export type Messages = typeof es;
