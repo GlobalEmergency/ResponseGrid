@@ -4,6 +4,7 @@ import type { Server } from 'node:http';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { DomainExceptionFilter } from '../src/contexts/resources/infrastructure/http/domain-exception.filter';
+import { OrganizationExceptionFilter } from '../src/contexts/organizations/infrastructure/http/organization-exception.filter';
 import { createDb } from '../src/shared/db';
 import {
   usersTable,
@@ -13,6 +14,8 @@ import {
   organizationMembersTable,
   organizationsTable,
 } from '../src/contexts/organizations/infrastructure/drizzle/schema';
+import { accreditationsTable } from '../src/contexts/accreditation/infrastructure/drizzle/schema';
+import * as bcrypt from 'bcryptjs';
 
 const DB_URL =
   process.env.DATABASE_URL ??
@@ -34,12 +37,16 @@ describe('Organization flow (e2e)', () => {
         transform: true,
       }),
     );
-    app.useGlobalFilters(new DomainExceptionFilter());
+    app.useGlobalFilters(
+      new DomainExceptionFilter(),
+      new OrganizationExceptionFilter(),
+    );
     await app.init();
 
     // clean slate for this test file
     const { db, pool } = createDb(DB_URL);
     try {
+      await db.delete(accreditationsTable);
       await db.delete(organizationMembersTable);
       await db.delete(organizationsTable);
       await db.delete(membershipsTable);
@@ -371,6 +378,127 @@ describe('Organization flow (e2e)', () => {
         .delete(`/organizations/${orgId}/members/${ownerId}`)
         .set('Authorization', `Bearer ${memberToken}`)
         .expect(403);
+    });
+  });
+
+  describe('Admin global organizations: list + detail (org:read)', () => {
+    const ADMIN_ID = 'a0000000-0000-4000-8000-0000000000a1';
+    let adminToken: string;
+    let citizenToken: string;
+    let orgId: string;
+
+    beforeAll(async () => {
+      // Seed a platform admin (isAdmin → platform_admin grant → holds org:read)
+      const { db, pool } = createDb(DB_URL);
+      try {
+        await db.insert(usersTable).values({
+          id: ADMIN_ID,
+          email: 'orgadmin@reliefhub.org',
+          passwordHash: await bcrypt.hash('admin1234', 10),
+          name: 'Org Admin',
+          isAdmin: true,
+        });
+      } finally {
+        await pool.end();
+      }
+
+      const adminLogin = await request(server)
+        .post('/auth/login')
+        .send({ email: 'orgadmin@reliefhub.org', password: 'admin1234' })
+        .expect(200);
+      adminToken = (adminLogin.body as { accessToken: string }).accessToken;
+
+      // A plain citizen (no org:read at platform)
+      const citizenReg = await request(server)
+        .post('/auth/register')
+        .send({
+          email: 'plaincitizen@reliefhub.org',
+          password: 'password123',
+          name: 'Plain Citizen',
+        })
+        .expect(201);
+      citizenToken = (citizenReg.body as { accessToken: string }).accessToken;
+
+      // Admin creates an org → becomes its owner
+      const orgRes = await request(server)
+        .post('/organizations')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          name: 'Global List Org',
+          type: 'ngo',
+          taxId: 'ES-GLOBAL-1',
+          contactEmail: 'global@org.example',
+        })
+        .expect(201);
+      orgId = (orgRes.body as { id: string }).id;
+    });
+
+    it('GET /organizations/admin requires auth (401)', async () => {
+      await request(server).get('/organizations/admin').expect(401);
+    });
+
+    it('GET /organizations/admin returns 403 for a non-privileged user', async () => {
+      await request(server)
+        .get('/organizations/admin')
+        .set('Authorization', `Bearer ${citizenToken}`)
+        .expect(403);
+    });
+
+    it('GET /organizations/admin returns the enriched global list for an admin', async () => {
+      const res = await request(server)
+        .get('/organizations/admin')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      const items = res.body as Array<{
+        id: string;
+        name: string;
+        taxId: string | null;
+        memberCount: number;
+        accreditationStatus: string;
+      }>;
+      const org = items.find((o) => o.id === orgId);
+      expect(org).toBeDefined();
+      expect(org?.taxId).toBe('ES-GLOBAL-1');
+      expect(org?.memberCount).toBe(1);
+      expect(org?.accreditationStatus).toBe('none');
+    });
+
+    it('GET /organizations/:id returns full detail for an admin', async () => {
+      const res = await request(server)
+        .get(`/organizations/${orgId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      const detail = res.body as {
+        id: string;
+        contactEmail: string | null;
+        members: unknown[];
+        serviceAccounts: unknown[];
+        accreditations: unknown[];
+        emergencyIds: unknown[];
+      };
+      expect(detail.id).toBe(orgId);
+      expect(detail.contactEmail).toBe('global@org.example');
+      expect(Array.isArray(detail.members)).toBe(true);
+      expect(detail.members).toHaveLength(1);
+      expect(Array.isArray(detail.serviceAccounts)).toBe(true);
+      expect(Array.isArray(detail.accreditations)).toBe(true);
+      expect(Array.isArray(detail.emergencyIds)).toBe(true);
+    });
+
+    it('GET /organizations/:id returns 403 for a non-privileged user', async () => {
+      await request(server)
+        .get(`/organizations/${orgId}`)
+        .set('Authorization', `Bearer ${citizenToken}`)
+        .expect(403);
+    });
+
+    it('GET /organizations/:id returns 404 for an unknown organization', async () => {
+      await request(server)
+        .get('/organizations/00000000-0000-4000-8000-0000000000ff')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(404);
     });
   });
 });

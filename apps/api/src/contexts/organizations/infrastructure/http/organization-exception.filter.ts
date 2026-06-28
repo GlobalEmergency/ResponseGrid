@@ -11,6 +11,7 @@ import {
   AlreadyMemberError,
   NotMemberError,
   CannotRemoveSelfError,
+  OrganizationNotFoundError,
 } from '../../domain/errors';
 
 type OrgDomainError =
@@ -18,7 +19,8 @@ type OrgDomainError =
   | UserNotFoundError
   | AlreadyMemberError
   | NotMemberError
-  | CannotRemoveSelfError;
+  | CannotRemoveSelfError
+  | OrganizationNotFoundError;
 
 @Catch(
   NotOrganizationOwnerError,
@@ -26,6 +28,7 @@ type OrgDomainError =
   AlreadyMemberError,
   NotMemberError,
   CannotRemoveSelfError,
+  OrganizationNotFoundError,
 )
 export class OrganizationExceptionFilter implements ExceptionFilter {
   catch(exception: OrgDomainError, host: ArgumentsHost): void {
@@ -35,6 +38,8 @@ export class OrganizationExceptionFilter implements ExceptionFilter {
     if (exception instanceof NotOrganizationOwnerError) {
       status = HttpStatus.FORBIDDEN;
     } else if (exception instanceof UserNotFoundError) {
+      status = HttpStatus.NOT_FOUND;
+    } else if (exception instanceof OrganizationNotFoundError) {
       status = HttpStatus.NOT_FOUND;
     } else if (exception instanceof AlreadyMemberError) {
       status = HttpStatus.CONFLICT;

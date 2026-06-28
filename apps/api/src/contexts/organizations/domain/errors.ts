@@ -32,3 +32,10 @@ export class CannotRemoveSelfError extends Error {
     this.name = 'CannotRemoveSelfError';
   }
 }
+
+export class OrganizationNotFoundError extends Error {
+  constructor(id: string) {
+    super(`No organization found with id: ${id}`);
+    this.name = 'OrganizationNotFoundError';
+  }
+}

@@ -983,6 +983,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/organizations/admin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin global list of ALL organizations, enriched with member count and accreditation status (org:read) */
+        get: operations["OrganizationsController_listAdmin"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/organizations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin detail of one organization: members, service accounts/API keys, accreditations and emergencies (org:read) */
+        get: operations["OrganizationsController_detail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/organizations/{id}/members": {
         parameters: {
             query?: never;
@@ -3266,6 +3300,26 @@ export interface components {
             type: "ngo" | "company" | "public_admin" | "association" | "transport_operator" | "other";
             verificationLevel: string;
         };
+        OrganizationAdminListItemDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** @enum {string} */
+            type: "ngo" | "company" | "public_admin" | "association" | "transport_operator" | "other";
+            /** @example ES-12345678 */
+            taxId: Record<string, never> | null;
+            /** @example contact@org.example */
+            contactEmail: Record<string, never> | null;
+            /** @example unverified */
+            verificationLevel: string;
+            /** @example 3 */
+            memberCount: number;
+            /**
+             * @example none
+             * @enum {string}
+             */
+            accreditationStatus: "global" | "emergency" | "none";
+        };
         OrganizationMemberDto: {
             /** @description User UUID */
             userId: string;
@@ -3278,6 +3332,54 @@ export interface components {
              * @enum {string}
              */
             role: "owner" | "member";
+        };
+        OrganizationServiceAccountDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** @description ISO 8601 timestamp */
+            createdAt: string;
+            /** @example 2 */
+            keyCount: number;
+            /** @example 1 */
+            activeKeyCount: number;
+        };
+        OrganizationAccreditationDto: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description "global" or an object with the emergency UUID
+             * @example global
+             */
+            scope: Record<string, never>;
+            /** Format: uuid */
+            grantedByUserId: string;
+            /** @description ISO 8601 timestamp */
+            grantedAt: string;
+            evidence: Record<string, never> | null;
+        };
+        OrganizationAdminDetailDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** @enum {string} */
+            type: "ngo" | "company" | "public_admin" | "association" | "transport_operator" | "other";
+            taxId: Record<string, never> | null;
+            contactEmail: Record<string, never> | null;
+            /** @example unverified */
+            verificationLevel: string;
+            /** @description ISO 8601 timestamp */
+            createdAt: string;
+            /**
+             * @example none
+             * @enum {string}
+             */
+            accreditationStatus: "global" | "emergency" | "none";
+            members: components["schemas"]["OrganizationMemberDto"][];
+            serviceAccounts: components["schemas"]["OrganizationServiceAccountDto"][];
+            accreditations: components["schemas"]["OrganizationAccreditationDto"][];
+            /** @description UUIDs of emergencies the organization participates in */
+            emergencyIds: string[];
         };
         AddMemberDto: {
             /** @example member@example.com */
@@ -6751,6 +6853,83 @@ export interface operations {
             };
             /** @description Missing or invalid token */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrganizationsController_listAdmin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description All organizations (admin view) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganizationAdminListItemDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing org:read permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrganizationsController_detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Organization detail (admin view) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganizationAdminDetailDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing org:read permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Organization not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

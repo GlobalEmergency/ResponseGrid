@@ -28,9 +28,13 @@ import {
   JwtAuthGuard,
   AuthenticatedUser,
 } from '../../../identity/infrastructure/http/jwt-auth.guard';
+import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
+import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
 import { CreateOrganization } from '../../application/create-organization';
 import { ListMyOrganizations } from '../../application/list-my-organizations';
 import { ListOrganizations } from '../../application/list-organizations';
+import { ListOrganizationsAdmin } from '../../application/list-organizations-admin';
+import { GetOrganizationAdminDetail } from '../../application/get-organization-admin-detail';
 import { AddOrganizationMember } from '../../application/add-organization-member';
 import { RemoveOrganizationMember } from '../../application/remove-organization-member';
 import { ListOrganizationMembers } from '../../application/list-organization-members';
@@ -40,6 +44,8 @@ import {
   OrganizationViewDto,
   AddMemberDto,
   OrganizationMemberDto,
+  OrganizationAdminListItemDto,
+  OrganizationAdminDetailDto,
 } from './dto';
 import { OrganizationExceptionFilter } from './organization-exception.filter';
 
@@ -53,6 +59,8 @@ export class OrganizationsController {
     private readonly createOrganization: CreateOrganization,
     private readonly listMyOrganizations: ListMyOrganizations,
     private readonly listOrganizations: ListOrganizations,
+    private readonly listOrganizationsAdmin: ListOrganizationsAdmin,
+    private readonly getOrganizationAdminDetail: GetOrganizationAdminDetail,
     private readonly addOrganizationMember: AddOrganizationMember,
     private readonly removeOrganizationMember: RemoveOrganizationMember,
     private readonly listOrganizationMembers: ListOrganizationMembers,
@@ -104,6 +112,45 @@ export class OrganizationsController {
   })
   async list(): Promise<OrganizationViewDto[]> {
     return this.listOrganizations.execute();
+  }
+
+  @Get('admin')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('org:read')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Admin global list of ALL organizations, enriched with member count ' +
+      'and accreditation status (org:read)',
+  })
+  @ApiOkResponse({
+    description: 'All organizations (admin view)',
+    type: [OrganizationAdminListItemDto],
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Missing org:read permission' })
+  async listAdmin(): Promise<OrganizationAdminListItemDto[]> {
+    return this.listOrganizationsAdmin.execute();
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('org:read')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Admin detail of one organization: members, service accounts/API ' +
+      'keys, accreditations and emergencies (org:read)',
+  })
+  @ApiOkResponse({
+    description: 'Organization detail (admin view)',
+    type: OrganizationAdminDetailDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Missing org:read permission' })
+  @ApiNotFoundResponse({ description: 'Organization not found' })
+  async detail(@Param('id') id: string): Promise<OrganizationAdminDetailDto> {
+    return this.getOrganizationAdminDetail.execute({ organizationId: id });
   }
 
   @Get(':id/members')

@@ -46,5 +46,6 @@ const listProvider = {
     revokeProvider,
     listProvider,
   ],
+  exports: [ACCREDITATION_REPOSITORY],
 })
 export class AccreditationModule {}

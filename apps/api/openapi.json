@@ -3100,6 +3100,87 @@
         ]
       }
     },
+    "/organizations/admin": {
+      "get": {
+        "operationId": "OrganizationsController_listAdmin",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "All organizations (admin view)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrganizationAdminListItemDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing org:read permission"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Admin global list of ALL organizations, enriched with member count and accreditation status (org:read)",
+        "tags": [
+          "organizations"
+        ]
+      }
+    },
+    "/organizations/{id}": {
+      "get": {
+        "operationId": "OrganizationsController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organization detail (admin view)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationAdminDetailDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing org:read permission"
+          },
+          "404": {
+            "description": "Organization not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Admin detail of one organization: members, service accounts/API keys, accreditations and emergencies (org:read)",
+        "tags": [
+          "organizations"
+        ]
+      }
+    },
     "/organizations/{id}/members": {
       "get": {
         "operationId": "OrganizationsController_listMembers",
@@ -9366,6 +9447,66 @@
           "verificationLevel"
         ]
       },
+      "OrganizationAdminListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ngo",
+              "company",
+              "public_admin",
+              "association",
+              "transport_operator",
+              "other"
+            ]
+          },
+          "taxId": {
+            "type": "object",
+            "nullable": true,
+            "example": "ES-12345678"
+          },
+          "contactEmail": {
+            "type": "object",
+            "nullable": true,
+            "example": "contact@org.example"
+          },
+          "verificationLevel": {
+            "type": "string",
+            "example": "unverified"
+          },
+          "memberCount": {
+            "type": "number",
+            "example": 3
+          },
+          "accreditationStatus": {
+            "type": "string",
+            "enum": [
+              "global",
+              "emergency",
+              "none"
+            ],
+            "example": "none"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "taxId",
+          "contactEmail",
+          "verificationLevel",
+          "memberCount",
+          "accreditationStatus"
+        ]
+      },
       "OrganizationMemberDto": {
         "type": "object",
         "properties": {
@@ -9395,6 +9536,157 @@
           "email",
           "name",
           "role"
+        ]
+      },
+      "OrganizationServiceAccountDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO 8601 timestamp"
+          },
+          "keyCount": {
+            "type": "number",
+            "example": 2
+          },
+          "activeKeyCount": {
+            "type": "number",
+            "example": 1
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "createdAt",
+          "keyCount",
+          "activeKeyCount"
+        ]
+      },
+      "OrganizationAccreditationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scope": {
+            "type": "object",
+            "description": "\"global\" or an object with the emergency UUID",
+            "example": "global"
+          },
+          "grantedByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "grantedAt": {
+            "type": "string",
+            "description": "ISO 8601 timestamp"
+          },
+          "evidence": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "scope",
+          "grantedByUserId",
+          "grantedAt",
+          "evidence"
+        ]
+      },
+      "OrganizationAdminDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ngo",
+              "company",
+              "public_admin",
+              "association",
+              "transport_operator",
+              "other"
+            ]
+          },
+          "taxId": {
+            "type": "object",
+            "nullable": true
+          },
+          "contactEmail": {
+            "type": "object",
+            "nullable": true
+          },
+          "verificationLevel": {
+            "type": "string",
+            "example": "unverified"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO 8601 timestamp"
+          },
+          "accreditationStatus": {
+            "type": "string",
+            "enum": [
+              "global",
+              "emergency",
+              "none"
+            ],
+            "example": "none"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrganizationMemberDto"
+            }
+          },
+          "serviceAccounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrganizationServiceAccountDto"
+            }
+          },
+          "accreditations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrganizationAccreditationDto"
+            }
+          },
+          "emergencyIds": {
+            "description": "UUIDs of emergencies the organization participates in",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "taxId",
+          "contactEmail",
+          "verificationLevel",
+          "createdAt",
+          "accreditationStatus",
+          "members",
+          "serviceAccounts",
+          "accreditations",
+          "emergencyIds"
         ]
       },
       "AddMemberDto": {
