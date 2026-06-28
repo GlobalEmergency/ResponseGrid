@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
 import { grantsTable } from './schema';
 import { GrantRepository } from '../../domain/ports/grant.repository';
@@ -101,6 +101,24 @@ export class DrizzleGrantRepository implements GrantRepository {
       .select()
       .from(grantsTable)
       .where(eq(grantsTable.principalId, principalId));
+    return rows.map(rowToGrant);
+  }
+
+  async findByScope(
+    scopeType: string,
+    scopeId: string | null,
+  ): Promise<Grant[]> {
+    const rows = await this.db
+      .select()
+      .from(grantsTable)
+      .where(
+        and(
+          eq(grantsTable.scopeType, scopeType),
+          scopeId === null
+            ? isNull(grantsTable.scopeId)
+            : eq(grantsTable.scopeId, scopeId),
+        ),
+      );
     return rows.map(rowToGrant);
   }
 

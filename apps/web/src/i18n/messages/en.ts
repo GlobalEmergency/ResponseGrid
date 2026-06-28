@@ -57,6 +57,7 @@ export const en = {
     no_emergencies_description: 'When an emergency is activated it will appear here.',
     emergency_status_active: 'Active',
     my_orgs: 'My organizations',
+    administration: 'Administration',
     notifications: 'Notifications',
     notifications_with_count: 'Notifications ({count})',
     coordination_access: 'Coordination access',

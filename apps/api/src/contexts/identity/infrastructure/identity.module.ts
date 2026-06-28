@@ -19,6 +19,7 @@ import { CreateServiceAccount } from '../application/create-service-account';
 import { IssueApiKey } from '../application/issue-api-key';
 import { RevokeApiKey } from '../application/revoke-api-key';
 import { FindUserByEmail } from '../application/find-user-by-email';
+import { ListGrantsAtScope } from '../application/list-grants-at-scope';
 import {
   USER_REPOSITORY,
   UserRepository,
@@ -141,9 +142,15 @@ const revokeGrantProvider = {
 
 const findUserByEmailProvider = {
   provide: FindUserByEmail,
-  inject: [USER_REPOSITORY, ACCESS_CONTROL],
-  useFactory: (users: UserRepository, access: AccessControl) =>
-    new FindUserByEmail(users, access),
+  inject: [USER_REPOSITORY],
+  useFactory: (users: UserRepository) => new FindUserByEmail(users),
+};
+
+const listGrantsAtScopeProvider = {
+  provide: ListGrantsAtScope,
+  inject: [GRANT_REPOSITORY, ACCESS_CONTROL],
+  useFactory: (grants: GrantRepository, access: AccessControl) =>
+    new ListGrantsAtScope(grants, access),
 };
 
 const serviceAccountRepositoryProvider = {
@@ -310,6 +317,7 @@ const authenticateWithProviderProvider = {
     grantRoleProvider,
     revokeGrantProvider,
     findUserByEmailProvider,
+    listGrantsAtScopeProvider,
     serviceAccountRepositoryProvider,
     apiKeyRepositoryProvider,
     createServiceAccountProvider,

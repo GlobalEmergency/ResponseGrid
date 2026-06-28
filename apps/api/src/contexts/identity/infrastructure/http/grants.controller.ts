@@ -29,7 +29,9 @@ import {
 import { Request } from 'express';
 import { GrantRole } from '../../application/grant-role';
 import { RevokeGrant } from '../../application/revoke-grant';
+import { ListGrantsAtScope } from '../../application/list-grants-at-scope';
 import { ScopeRefProps } from '../../domain/authorization/scope-ref';
+import { GrantSnapshot } from '../../domain/authorization/grant';
 import { GRANT_REPOSITORY } from '../../domain/ports/grant.repository';
 import type { GrantRepository } from '../../domain/ports/grant.repository';
 import { GrantRoleDto } from './grants-dto';
@@ -98,6 +100,41 @@ function buildScope(dto: GrantRoleDto): ScopeRefProps {
   }
 }
 
+/** Build a scope from `?scopeType=&scopeId=` for the scoped-listing endpoint. */
+function buildScopeFromQuery(
+  scopeType: string,
+  scopeId?: string,
+): ScopeRefProps {
+  if (scopeType === 'platform') return { type: 'platform' };
+  if (
+    scopeType === 'organization' ||
+    scopeType === 'emergency' ||
+    scopeType === 'group'
+  ) {
+    if (!scopeId) {
+      throw new BadRequestException(
+        `scopeId is required for scope '${scopeType}'`,
+      );
+    }
+    return { type: scopeType, id: scopeId };
+  }
+  throw new BadRequestException(`unsupported scopeType '${scopeType}'`);
+}
+
+function toGrantListItem(s: GrantSnapshot): GrantListItemDto {
+  return {
+    id: s.id,
+    principalId: s.principalId,
+    principalType: s.principalType,
+    roleId: s.roleId,
+    scopeType: s.scope.type,
+    scopeId: 'id' in s.scope ? s.scope.id : null,
+    grantedByPrincipalId: s.grantedByPrincipalId,
+    grantedAt: s.grantedAt,
+    expiresAt: s.expiresAt,
+  };
+}
+
 @ApiTags('grants')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -107,8 +144,37 @@ export class GrantsController {
   constructor(
     private readonly grantRole: GrantRole,
     private readonly revokeGrant: RevokeGrant,
+    private readonly listGrantsAtScope: ListGrantsAtScope,
     @Inject(GRANT_REPOSITORY) private readonly grants: GrantRepository,
   ) {}
+
+  @Get('at-scope')
+  @ApiOperation({
+    summary: 'List the grants made AT a scope (scoped administrator)',
+  })
+  @ApiQuery({
+    name: 'scopeType',
+    required: true,
+    description: 'platform | organization | emergency | group',
+  })
+  @ApiQuery({ name: 'scopeId', required: false })
+  @ApiOkResponse({ type: [GrantListItemDto] })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({
+    description: 'Not authorized to administer this scope',
+  })
+  async listAtScope(
+    @Query('scopeType') scopeType: string,
+    @Req() req: Request & { user?: AuthenticatedUser },
+    @Query('scopeId') scopeId?: string,
+  ): Promise<GrantListItemDto[]> {
+    const user = req.user!;
+    const grants = await this.listGrantsAtScope.execute({
+      actor: { principalId: user.id, grants: user.grants },
+      scope: buildScopeFromQuery(scopeType, scopeId),
+    });
+    return grants.map(toGrantListItem);
+  }
 
   @Get()
   @UseGuards(RequireAdminGuard)
@@ -128,20 +194,7 @@ export class GrantsController {
       throw new BadRequestException('principalId query param is required');
     }
     const grants = await this.grants.findByPrincipal(principalId);
-    return grants.map((g) => {
-      const s = g.toSnapshot();
-      return {
-        id: s.id,
-        principalId: s.principalId,
-        principalType: s.principalType,
-        roleId: s.roleId,
-        scopeType: s.scope.type,
-        scopeId: 'id' in s.scope ? s.scope.id : null,
-        grantedByPrincipalId: s.grantedByPrincipalId,
-        grantedAt: s.grantedAt,
-        expiresAt: s.expiresAt,
-      };
-    });
+    return grants.map((g) => toGrantListItem(g.toSnapshot()));
   }
 
   @Post()
