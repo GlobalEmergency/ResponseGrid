@@ -24,6 +24,7 @@ import { OfferDetail } from '@/components/organisms/offer-detail';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
 import { categoryLabel } from '@/lib/categories';
+import { offerTitle } from '@/lib/offers';
 
 type NeedView = components['schemas']['NeedViewDto'];
 type ResourceView = components['schemas']['ResourceViewDto'];
@@ -314,40 +315,44 @@ export function OffersQueue({
     <>
       <ul className="flex flex-col gap-4" aria-label={listLabel}>
         {visible.map((offer) => {
-          const unit =
-            typeof offer.unit === 'string' && offer.unit !== ''
-              ? offer.unit
-              : null;
+          const title = offerTitle(offer.items);
+          const first = offer.items[0];
+          const extra =
+            offer.items.length > 1 ? ` +${offer.items.length - 1}` : '';
           return (
             <li key={offer.id}>
               <button
                 type="button"
                 onClick={() => setOpenId(offer.id)}
                 className={SUMMARY_CARD_CLASS}
-                aria-label={tc.drawer_open_offer.replace(
-                  '{description}',
-                  offer.description,
-                )}
+                aria-label={tc.drawer_open_offer.replace('{description}', title)}
               >
                 <div className="flex w-full items-start justify-between gap-3">
                   <span className="text-base font-bold leading-tight text-ink break-words">
-                    {offer.description}
+                    {title}
                   </span>
                   <Badge variant={OFFER_STATUS_BADGE[offer.status]}>
                     {STATUS_LABELS[offer.status]}
                   </Badge>
                 </div>
                 <div className={META_ROW_CLASS}>
-                  <span className="font-medium">
-                    {categoryLabel(offer.category, locale)}
-                  </span>
-                  <span aria-hidden="true" className="text-muted-soft">
-                    ·
-                  </span>
-                  <span>
-                    {offer.quantity}
-                    {unit !== null ? ` ${unit}` : ''}
-                  </span>
+                  {first !== undefined && (
+                    <>
+                      <span className="font-medium">
+                        {categoryLabel(first.category, locale)}
+                      </span>
+                      <span aria-hidden="true" className="text-muted-soft">
+                        ·
+                      </span>
+                      <span>
+                        {first.quantity}
+                        {typeof first.unit === 'string' && first.unit !== ''
+                          ? ` ${first.unit}`
+                          : ''}
+                        {extra}
+                      </span>
+                    </>
+                  )}
                   <span aria-hidden="true" className="text-muted-soft">
                     →
                   </span>

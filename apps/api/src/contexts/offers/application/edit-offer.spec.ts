@@ -57,10 +57,15 @@ describe('EditOffer', () => {
       emergencyId: EM,
       donorUserId: DONOR_ID,
       donorOrganizationId: null,
-      category: Category.Food,
-      description: 'Arroz 25kg',
-      quantity: 10,
-      unit: 'sacos',
+      items: [
+        {
+          name: 'Arroz 25kg',
+          quantity: 10,
+          unit: 'sacos',
+          category: Category.Food,
+          presentation: null,
+        },
+      ],
       location: { address: 'Caracas', latitude: 10.48, longitude: -66.9 },
       targetNeedId: null,
       notes: 'Disponible lunes a viernes',
@@ -74,80 +79,74 @@ describe('EditOffer', () => {
 
     const result = await editOffer.execute({
       offerId: id,
-      description: 'Arroz blanco 25kg',
-      quantity: 20,
-      unit: 'bultos',
+      items: [
+        {
+          name: 'Arroz blanco 25kg',
+          quantity: 20,
+          unit: 'bultos',
+          category: Category.Food,
+          presentation: null,
+        },
+      ],
       notes: 'Solo fines de semana',
     });
 
     const offer = await repo.findById(OfferId.fromString(id));
-    expect(offer!.description).toBe('Arroz blanco 25kg');
-    expect(offer!.quantity).toBe(20);
-    expect(offer!.unit).toBe('bultos');
+    expect(offer!.items).toHaveLength(1);
+    expect(offer!.items[0].name).toBe('Arroz blanco 25kg');
+    expect(offer!.items[0].quantity).toBe(20);
+    expect(offer!.items[0].unit).toBe('bultos');
     expect(offer!.notes).toBe('Solo fines de semana');
 
     expect(result.emergencyId).toBe(EM);
     expect(result.targetStatus).toBeNull();
-    expect(result.changes).toEqual(
-      expect.arrayContaining([
-        {
-          field: 'description',
-          before: 'Arroz 25kg',
-          after: 'Arroz blanco 25kg',
-        },
-        { field: 'quantity', before: 10, after: 20 },
-        { field: 'unit', before: 'sacos', after: 'bultos' },
-        {
-          field: 'notes',
-          before: 'Disponible lunes a viernes',
-          after: 'Solo fines de semana',
-        },
-      ]),
-    );
-    expect(result.changes).toHaveLength(4);
+    expect(result.changes).toHaveLength(2);
+    expect(result.changes).toContainEqual({
+      field: 'notes',
+      before: 'Disponible lunes a viernes',
+      after: 'Solo fines de semana',
+    });
+    const itemsChange = result.changes.find((c) => c.field === 'items');
+    expect(itemsChange).toBeDefined();
+    expect(String(itemsChange!.after)).toContain('Arroz blanco 25kg');
   });
 
-  it('leaves omitted fields untouched and reports no change for them', async () => {
+  it('leaves omitted fields untouched and reports only what changed', async () => {
     const id = await seed();
 
     const result = await editOffer.execute({
       offerId: id,
-      description: 'Arroz blanco 25kg',
+      notes: 'Solo fines de semana',
     });
 
     expect(result.changes).toEqual([
       {
-        field: 'description',
-        before: 'Arroz 25kg',
-        after: 'Arroz blanco 25kg',
+        field: 'notes',
+        before: 'Disponible lunes a viernes',
+        after: 'Solo fines de semana',
       },
     ]);
   });
 
-  it('clears notes and unit when an empty string is given', async () => {
+  it('clears notes when an empty string is given', async () => {
     const id = await seed();
 
-    const result = await editOffer.execute({
-      offerId: id,
-      notes: '',
-      unit: '',
-    });
+    const result = await editOffer.execute({ offerId: id, notes: '' });
 
     const offer = await repo.findById(OfferId.fromString(id));
     expect(offer!.notes).toBeNull();
-    expect(offer!.unit).toBeNull();
-    expect(result.changes).toEqual(
-      expect.arrayContaining([
-        { field: 'unit', before: 'sacos', after: null },
-        { field: 'notes', before: 'Disponible lunes a viernes', after: null },
-      ]),
-    );
-    expect(result.changes).toHaveLength(2);
+    expect(result.changes).toEqual([
+      {
+        field: 'notes',
+        before: 'Disponible lunes a viernes',
+        after: null,
+      },
+    ]);
   });
 
   it('throws OfferNotFoundError for an unknown id', async () => {
     await expect(
-      editOffer.execute({ offerId: UNKNOWN_ID, description: 'x' }),
+      editOffer.execute({ offerId: UNKNOWN_ID, notes: 'x' }),
     ).rejects.toThrow(OfferNotFoundError);
   });
 
@@ -158,7 +157,7 @@ describe('EditOffer', () => {
     await repo.save(offer!);
 
     await expect(
-      editOffer.execute({ offerId: id, description: 'x' }),
+      editOffer.execute({ offerId: id, notes: 'x' }),
     ).rejects.toThrow(OfferNotEditableError);
   });
 
@@ -167,7 +166,15 @@ describe('EditOffer', () => {
 
     const result = await editOffer.execute({
       offerId: id,
-      description: 'Arroz 25kg',
+      items: [
+        {
+          name: 'Arroz 25kg',
+          quantity: 10,
+          unit: 'sacos',
+          category: Category.Food,
+          presentation: null,
+        },
+      ],
     });
 
     expect(result.changes).toEqual([]);

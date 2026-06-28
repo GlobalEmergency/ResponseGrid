@@ -3380,26 +3380,8 @@ export interface components {
             longitude: number;
         };
         SubmitOfferDto: {
-            /**
-             * @example food
-             * @enum {string}
-             */
-            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
-            /**
-             * @description Description of the item being offered
-             * @example Rice bags 25kg
-             */
-            description: string;
-            /**
-             * @description Quantity offered (positive integer)
-             * @example 50
-             */
-            quantity: number;
-            /**
-             * @description Unit of measurement
-             * @example bags
-             */
-            unit?: string;
+            /** @description Supply lines offered (at least one) */
+            items: components["schemas"]["SupplyLineDto"][];
             location: components["schemas"]["OfferLocationDto"];
             /**
              * Format: uuid
@@ -3441,17 +3423,7 @@ export interface components {
             donorUserId: string;
             /** Format: uuid */
             donorOrganizationId?: string | null;
-            /**
-             * @example food
-             * @enum {string}
-             */
-            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
-            /** @example Rice bags 25kg */
-            description: string;
-            /** @example 50 */
-            quantity: number;
-            /** @example bags */
-            unit?: string | null;
+            items: components["schemas"]["SupplyLineResponseDto"][];
             location: components["schemas"]["OfferLocationResponseDto"];
             /** Format: uuid */
             targetNeedId?: string | null;
@@ -3479,18 +3451,11 @@ export interface components {
         EditOfferDto: {
             /**
              * @description Motivo de la edición (obligatorio, para trazabilidad)
-             * @example Se corrige la cantidad y se completa la descripción
+             * @example Se corrigen las líneas de la oferta
              */
             reason: string;
-            /** @description Nueva descripción (omitir para no cambiarla) */
-            description?: string;
-            /**
-             * @description Nueva cantidad (entero positivo). Omitir para no cambiarla.
-             * @example 20
-             */
-            quantity?: number;
-            /** @description Nueva unidad. Cadena vacía la borra. Omitir para no cambiarla. */
-            unit?: string | null;
+            /** @description Nuevas líneas de la oferta (reemplazan la lista). Omitir para no cambiarlas. */
+            items?: components["schemas"]["SupplyLineDto"][];
             /** @description Nuevas notas. Cadena vacía las borra. Omitir para no cambiarlas. */
             notes?: string | null;
         };

@@ -1,6 +1,7 @@
-import { and, eq } from 'drizzle-orm';
+import { randomUUID } from 'node:crypto';
+import { and, eq, inArray } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
-import { offersTable } from './schema';
+import { offersTable, offerItemsTable } from './schema';
 import { OfferRepository } from '../../domain/ports/offer.repository';
 import {
   DonationOffer,
@@ -11,17 +12,24 @@ import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import { Category, OfferStatus } from '../../domain/offer-enums';
 
 type OfferRow = typeof offersTable.$inferSelect;
+type OfferItemRow = typeof offerItemsTable.$inferSelect;
 
-function rowToSnapshot(row: OfferRow): DonationOfferSnapshot {
+function rowToSnapshot(
+  row: OfferRow,
+  items: OfferItemRow[],
+): DonationOfferSnapshot {
   return {
     id: row.id,
     emergencyId: row.emergencyId,
     donorUserId: row.donorUserId,
     donorOrganizationId: row.donorOrganizationId ?? null,
-    category: row.category as Category,
-    description: row.description,
-    quantity: row.quantity,
-    unit: row.unit ?? null,
+    items: items.map((i) => ({
+      name: i.name,
+      quantity: i.quantity,
+      unit: i.unit ?? null,
+      category: i.category as Category,
+      presentation: i.presentation ?? null,
+    })),
     location: {
       address: row.address,
       latitude: row.latitude,
@@ -39,37 +47,80 @@ function rowToSnapshot(row: OfferRow): DonationOfferSnapshot {
 export class DrizzleOfferRepository implements OfferRepository {
   constructor(private readonly db: Db) {}
 
+  /** Group every offer's lines by offer id in a single query (avoids N+1). */
+  private async loadItemsByOffer(
+    offerIds: string[],
+  ): Promise<Map<string, OfferItemRow[]>> {
+    const byOffer = new Map<string, OfferItemRow[]>();
+    if (offerIds.length === 0) return byOffer;
+    const rows = await this.db
+      .select()
+      .from(offerItemsTable)
+      .where(inArray(offerItemsTable.offerId, offerIds));
+    for (const row of rows) {
+      const list = byOffer.get(row.offerId) ?? [];
+      list.push(row);
+      byOffer.set(row.offerId, list);
+    }
+    return byOffer;
+  }
+
+  private async hydrate(rows: OfferRow[]): Promise<DonationOffer[]> {
+    const itemsByOffer = await this.loadItemsByOffer(rows.map((r) => r.id));
+    return rows.map((r) =>
+      DonationOffer.fromSnapshot(
+        rowToSnapshot(r, itemsByOffer.get(r.id) ?? []),
+      ),
+    );
+  }
+
   async save(offer: DonationOffer): Promise<void> {
     const s = offer.toSnapshot();
-    await this.db
-      .insert(offersTable)
-      .values({
-        id: s.id,
-        emergencyId: s.emergencyId,
-        donorUserId: s.donorUserId,
-        donorOrganizationId: s.donorOrganizationId,
-        category: s.category,
-        description: s.description,
-        quantity: s.quantity,
-        unit: s.unit,
-        address: s.location.address,
-        latitude: s.location.latitude,
-        longitude: s.location.longitude,
-        targetNeedId: s.targetNeedId,
-        matchedNeedId: s.matchedNeedId,
-        status: s.status,
-        notes: s.notes,
-        createdAt: s.createdAt,
-        updatedAt: s.updatedAt,
-      })
-      .onConflictDoUpdate({
-        target: offersTable.id,
-        set: {
-          status: s.status,
+    await this.db.transaction(async (tx) => {
+      await tx
+        .insert(offersTable)
+        .values({
+          id: s.id,
+          emergencyId: s.emergencyId,
+          donorUserId: s.donorUserId,
+          donorOrganizationId: s.donorOrganizationId,
+          address: s.location.address,
+          latitude: s.location.latitude,
+          longitude: s.location.longitude,
+          targetNeedId: s.targetNeedId,
           matchedNeedId: s.matchedNeedId,
+          status: s.status,
+          notes: s.notes,
+          createdAt: s.createdAt,
           updatedAt: s.updatedAt,
-        },
-      });
+        })
+        .onConflictDoUpdate({
+          target: offersTable.id,
+          set: {
+            status: s.status,
+            matchedNeedId: s.matchedNeedId,
+            notes: s.notes,
+            updatedAt: s.updatedAt,
+          },
+        });
+
+      // Sync supply lines: delete then re-insert (clean replace), mirroring the
+      // need_items / resource_items strategy.
+      await tx.delete(offerItemsTable).where(eq(offerItemsTable.offerId, s.id));
+      if (s.items.length > 0) {
+        await tx.insert(offerItemsTable).values(
+          s.items.map((item) => ({
+            id: randomUUID(),
+            offerId: s.id,
+            name: item.name,
+            quantity: item.quantity,
+            unit: item.unit,
+            category: item.category,
+            presentation: item.presentation ?? null,
+          })),
+        );
+      }
+    });
   }
 
   async findById(id: OfferId): Promise<DonationOffer | null> {
@@ -79,7 +130,7 @@ export class DrizzleOfferRepository implements OfferRepository {
       .where(eq(offersTable.id, id.value))
       .limit(1);
     if (!rows[0]) return null;
-    return DonationOffer.fromSnapshot(rowToSnapshot(rows[0]));
+    return (await this.hydrate(rows))[0] ?? null;
   }
 
   async findByEmergencyAndStatus(
@@ -95,7 +146,7 @@ export class DrizzleOfferRepository implements OfferRepository {
           eq(offersTable.status, status),
         ),
       );
-    return rows.map((r) => DonationOffer.fromSnapshot(rowToSnapshot(r)));
+    return this.hydrate(rows);
   }
 
   async findByMatchedNeedId(needId: string): Promise<DonationOffer[]> {
@@ -103,7 +154,7 @@ export class DrizzleOfferRepository implements OfferRepository {
       .select()
       .from(offersTable)
       .where(eq(offersTable.matchedNeedId, needId));
-    return rows.map((r) => DonationOffer.fromSnapshot(rowToSnapshot(r)));
+    return this.hydrate(rows);
   }
 
   async findByDonorAndEmergency(
@@ -119,23 +170,35 @@ export class DrizzleOfferRepository implements OfferRepository {
           eq(offersTable.emergencyId, emergencyId.value),
         ),
       );
-    return rows.map((r) => DonationOffer.fromSnapshot(rowToSnapshot(r)));
+    return this.hydrate(rows);
   }
 
+  /**
+   * Open offers in the emergency that have at least one line in `category`.
+   * Resolves the matching offer ids first, then hydrates each with its full
+   * set of lines.
+   */
   async findOpenByEmergencyAndCategory(
     emergencyId: EmergencyId,
     category: string,
   ): Promise<DonationOffer[]> {
-    const rows = await this.db
-      .select()
-      .from(offersTable)
+    const idRows = await this.db
+      .selectDistinct({ offerId: offerItemsTable.offerId })
+      .from(offerItemsTable)
+      .innerJoin(offersTable, eq(offersTable.id, offerItemsTable.offerId))
       .where(
         and(
           eq(offersTable.emergencyId, emergencyId.value),
           eq(offersTable.status, OfferStatus.Open),
-          eq(offersTable.category, category),
+          eq(offerItemsTable.category, category),
         ),
       );
-    return rows.map((r) => DonationOffer.fromSnapshot(rowToSnapshot(r)));
+    const ids = idRows.map((r) => r.offerId);
+    if (ids.length === 0) return [];
+    const rows = await this.db
+      .select()
+      .from(offersTable)
+      .where(inArray(offersTable.id, ids));
+    return this.hydrate(rows);
   }
 }

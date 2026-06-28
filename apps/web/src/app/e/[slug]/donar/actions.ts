@@ -6,7 +6,8 @@ import type { components } from '@reliefhub/api-client';
 import { getToken, authHeaders, clearToken } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
-type OfferCategory = components['schemas']['SubmitOfferDto']['category'];
+type OfferCategory =
+  components['schemas']['SubmitOfferDto']['items'][number]['category'];
 
 export type OfferState =
   | { status: 'idle' }
@@ -109,10 +110,16 @@ export async function submitOffer(
       params: { path: { emergencyId } },
       headers: authHeaders(token),
       body: {
-        category: rawCategory,
-        description,
-        quantity: quantityRaw,
-        ...(unit !== undefined ? { unit } : {}),
+        // The donor form captures a single line; the offer model is multi-line
+        // (SupplyLine[]) like needs/resources, so we send it as a one-item list.
+        items: [
+          {
+            name: description,
+            quantity: quantityRaw,
+            category: rawCategory,
+            ...(unit !== undefined ? { unit } : {}),
+          },
+        ],
         location: { address, latitude, longitude },
         ...(targetNeedId !== undefined ? { targetNeedId } : {}),
         ...(donorOrganizationId !== undefined ? { donorOrganizationId } : {}),

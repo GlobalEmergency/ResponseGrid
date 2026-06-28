@@ -16,7 +16,8 @@ import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
 
-type OfferCategory = components['schemas']['OfferViewDto']['category'];
+type OfferCategory =
+  components['schemas']['OfferViewDto']['items'][number]['category'];
 type OfferStatus = components['schemas']['OfferViewDto']['status'];
 
 const VALID_CATEGORIES: OfferCategory[] = [
@@ -123,7 +124,8 @@ export default async function CoordinacionOfertasPage({
   // filters): the offers queue is small relative to the resources queue.
   const visibleOffers = offersQueue.filter(
     (o) =>
-      (category === undefined || o.category === category) &&
+      (category === undefined ||
+        o.items.some((i) => i.category === category)) &&
       (status === undefined || o.status === status),
   );
 

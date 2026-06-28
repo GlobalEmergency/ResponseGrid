@@ -5,6 +5,7 @@ import { DonationOffer } from '../../domain/donation-offer';
 import { OfferId } from '../../domain/offer-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import { Category, OfferStatus } from '../../domain/offer-enums';
+import { SupplyLine } from '../../../supplies/domain/supply-line';
 import { Location } from '../../../../shared/domain/location';
 import type { Pool } from 'pg';
 
@@ -23,16 +24,21 @@ function makeLocation() {
   });
 }
 
-function makeOffer(overrides?: { category?: Category; description?: string }) {
+function makeOffer(overrides?: { category?: Category; name?: string }) {
   return DonationOffer.create({
     id: OfferId.create(),
     emergencyId: EmergencyId.fromString(EM),
     donorUserId: USER_ID,
     donorOrganizationId: null,
-    category: overrides?.category ?? Category.Food,
-    description: overrides?.description ?? 'Rice bags',
-    quantity: 25,
-    unit: 'bags',
+    items: [
+      SupplyLine.create({
+        name: overrides?.name ?? 'Rice bags',
+        quantity: 25,
+        unit: 'bags',
+        category: overrides?.category ?? Category.Food,
+        presentation: null,
+      }),
+    ],
     location: makeLocation(),
     targetNeedId: null,
     notes: null,
@@ -54,10 +60,11 @@ describe('DrizzleOfferRepository (integration)', () => {
   });
 
   beforeEach(async () => {
+    // FK cascade removes offer_items with their offers.
     await db.delete(offersTable);
   });
 
-  it('round-trips an offer through Postgres', async () => {
+  it('round-trips an offer (with its lines) through Postgres', async () => {
     const offer = makeOffer();
     await repo.save(offer);
     const found = await repo.findById(offer.id);
@@ -66,15 +73,50 @@ describe('DrizzleOfferRepository (integration)', () => {
     expect(found!.id.value).toBe(offer.id.value);
     expect(found!.status).toBe(OfferStatus.Open);
     expect(found!.donorUserId).toBe(USER_ID);
-    expect(found!.category).toBe(Category.Food);
-    expect(found!.description).toBe('Rice bags');
-    expect(found!.quantity).toBe(25);
-    expect(found!.unit).toBe('bags');
+    expect(found!.items).toHaveLength(1);
+    expect(found!.items[0].category).toBe(Category.Food);
+    expect(found!.items[0].name).toBe('Rice bags');
+    expect(found!.items[0].quantity).toBe(25);
+    expect(found!.items[0].unit).toBe('bags');
     expect(found!.location.address).toBe('Test St, Caracas');
     expect(found!.location.latitude).toBe(10.4806);
     expect(found!.targetNeedId).toBeNull();
     expect(found!.matchedNeedId).toBeNull();
     expect(found!.notes).toBeNull();
+  });
+
+  it('round-trips a multi-line offer', async () => {
+    const offer = DonationOffer.create({
+      id: OfferId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      donorUserId: USER_ID,
+      donorOrganizationId: null,
+      items: [
+        SupplyLine.create({
+          name: 'Rice',
+          quantity: 10,
+          unit: 'kg',
+          category: Category.Food,
+          presentation: null,
+        }),
+        SupplyLine.create({
+          name: 'Water',
+          quantity: 30,
+          unit: 'liters',
+          category: Category.Water,
+          presentation: null,
+        }),
+      ],
+      location: makeLocation(),
+      targetNeedId: null,
+      notes: null,
+    });
+    await repo.save(offer);
+
+    const found = await repo.findById(offer.id);
+    expect(found!.items).toHaveLength(2);
+    const names = found!.items.map((i) => i.name).sort();
+    expect(names).toEqual(['Rice', 'Water']);
   });
 
   it('round-trips null optionals correctly', async () => {
@@ -83,23 +125,28 @@ describe('DrizzleOfferRepository (integration)', () => {
       emergencyId: EmergencyId.fromString(EM),
       donorUserId: USER_ID,
       donorOrganizationId: null,
-      category: Category.Water,
-      description: 'Water',
-      quantity: 10,
-      unit: null,
+      items: [
+        SupplyLine.create({
+          name: 'Water',
+          quantity: 10,
+          unit: null,
+          category: Category.Water,
+          presentation: null,
+        }),
+      ],
       location: makeLocation(),
       targetNeedId: null,
       notes: null,
     });
     await repo.save(offer);
     const found = await repo.findById(offer.id);
-    expect(found!.unit).toBeNull();
+    expect(found!.items[0].unit).toBeNull();
     expect(found!.donorOrganizationId).toBeNull();
     expect(found!.targetNeedId).toBeNull();
     expect(found!.notes).toBeNull();
   });
 
-  it('save() updates status and matchedNeedId on upsert', async () => {
+  it('save() updates status and matchedNeedId on upsert (and keeps lines)', async () => {
     const offer = makeOffer();
     await repo.save(offer);
 
@@ -109,11 +156,12 @@ describe('DrizzleOfferRepository (integration)', () => {
     const found = await repo.findById(offer.id);
     expect(found!.status).toBe(OfferStatus.Matched);
     expect(found!.matchedNeedId).toBe(NEED_ID);
+    expect(found!.items).toHaveLength(1);
   });
 
   it('findByEmergencyAndStatus returns only Open offers', async () => {
-    const open = makeOffer({ description: 'Open offer' });
-    const matched = makeOffer({ description: 'Matched offer' });
+    const open = makeOffer({ name: 'Open offer' });
+    const matched = makeOffer({ name: 'Matched offer' });
     matched.matchTo(NEED_ID);
 
     await repo.save(open);
@@ -124,34 +172,39 @@ describe('DrizzleOfferRepository (integration)', () => {
       OfferStatus.Open,
     );
     expect(result).toHaveLength(1);
-    expect(result[0].description).toBe('Open offer');
+    expect(result[0].items[0].name).toBe('Open offer');
   });
 
   it('findByMatchedNeedId returns offers matched to the need', async () => {
-    const matched = makeOffer({ description: 'Will be matched' });
+    const matched = makeOffer({ name: 'Will be matched' });
     matched.matchTo(NEED_ID);
-    const unmatched = makeOffer({ description: 'Still open' });
+    const unmatched = makeOffer({ name: 'Still open' });
 
     await repo.save(matched);
     await repo.save(unmatched);
 
     const result = await repo.findByMatchedNeedId(NEED_ID);
     expect(result).toHaveLength(1);
-    expect(result[0].description).toBe('Will be matched');
+    expect(result[0].items[0].name).toBe('Will be matched');
   });
 
   it('findByDonorAndEmergency returns only offers from that donor', async () => {
     const OTHER_USER = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
-    const mine = makeOffer({ description: 'My offer' });
+    const mine = makeOffer({ name: 'My offer' });
     const theirs = DonationOffer.create({
       id: OfferId.create(),
       emergencyId: EmergencyId.fromString(EM),
       donorUserId: OTHER_USER,
       donorOrganizationId: null,
-      category: Category.Food,
-      description: 'Their offer',
-      quantity: 5,
-      unit: null,
+      items: [
+        SupplyLine.create({
+          name: 'Their offer',
+          quantity: 5,
+          unit: null,
+          category: Category.Food,
+          presentation: null,
+        }),
+      ],
       location: makeLocation(),
       targetNeedId: null,
       notes: null,
@@ -165,14 +218,14 @@ describe('DrizzleOfferRepository (integration)', () => {
       EmergencyId.fromString(EM),
     );
     expect(result).toHaveLength(1);
-    expect(result[0].description).toBe('My offer');
+    expect(result[0].items[0].name).toBe('My offer');
   });
 
-  it('findOpenByEmergencyAndCategory filters by category', async () => {
+  it('findOpenByEmergencyAndCategory matches offers with a line in that category', async () => {
     const foodOffer = makeOffer({ category: Category.Food });
     const medOffer = makeOffer({
       category: Category.Medical,
-      description: 'Med',
+      name: 'Med',
     });
 
     await repo.save(foodOffer);
@@ -183,6 +236,6 @@ describe('DrizzleOfferRepository (integration)', () => {
       Category.Food,
     );
     expect(result).toHaveLength(1);
-    expect(result[0].category).toBe(Category.Food);
+    expect(result[0].items[0].category).toBe(Category.Food);
   });
 });
