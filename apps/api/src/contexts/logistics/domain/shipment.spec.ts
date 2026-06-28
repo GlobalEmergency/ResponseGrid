@@ -3,6 +3,7 @@ import { ShipmentId } from './shipment-id';
 import { ShipmentItem } from './shipment-item';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { CarrierType, ShipmentStatus } from './shipment-enums';
+import { Category } from '../../supplies/domain/category';
 import {
   InvalidShipmentRouteError,
   InvalidShipmentTransitionError,
@@ -59,11 +60,11 @@ describe('ShipmentItem value object', () => {
       description: 'agua',
       quantity: 10,
       unit: 'cajas',
-      category: 'alimentacion',
+      category: Category.Food,
     });
     expect(item.quantity).toBe(10);
     expect(item.unit).toBe('cajas');
-    expect(item.category).toBe('alimentacion');
+    expect(item.category).toBe(Category.Food);
   });
 
   it('trims the description', () => {
@@ -261,7 +262,7 @@ describe('Shipment aggregate — snapshot round-trip', () => {
           description: 'mantas',
           quantity: 20,
           unit: 'uds',
-          category: 'abrigo',
+          category: Category.Clothing,
         }),
         ShipmentItem.create({ description: 'varios' }),
       ],

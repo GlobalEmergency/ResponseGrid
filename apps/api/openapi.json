@@ -8706,8 +8706,22 @@
           },
           "category": {
             "type": "string",
-            "example": "alimentacion",
-            "nullable": true
+            "enum": [
+              "food",
+              "water",
+              "hygiene",
+              "clothing",
+              "medical",
+              "shelter",
+              "tools",
+              "other",
+              "medicines",
+              "medical_equipment",
+              "medical_supplies",
+              "medical_personnel"
+            ],
+            "example": "food",
+            "description": "Shared category taxonomy (optional — cargo may be loose)"
           }
         },
         "required": [

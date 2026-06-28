@@ -3183,8 +3183,12 @@ export interface components {
             quantity?: number | null;
             /** @example cajas */
             unit?: string | null;
-            /** @example alimentacion */
-            category?: string | null;
+            /**
+             * @description Shared category taxonomy (optional — cargo may be loose)
+             * @example food
+             * @enum {string}
+             */
+            category?: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
         };
         CreateShipmentDto: {
             /**

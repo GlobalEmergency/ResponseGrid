@@ -1,30 +1,32 @@
 import { ShipmentItemValidationError } from './shipment-errors';
+import { Category } from '../../supplies/domain/category';
 
 /**
- * A line in a shipment's cargo: what moves and how much. Mirrors {@link NeedItem}
- * in the needs context, but every field except `description` is optional —
- * cargo is often described loosely ("5 cajas de agua", "ropa surtida") and the
- * quantity/unit/category may be unknown at planning time.
+ * A line in a shipment's cargo: what moves and how much. Like {@link SupplyLine}
+ * (the supplies/insumos line) it carries a quantity in a shared {@link Category},
+ * but every field except `description` is optional — cargo is often described
+ * loosely ("5 cajas de agua", "ropa surtida") and the quantity/unit/category may
+ * be unknown at planning time, so it stays a distinct, looser value object.
  */
 export interface ShipmentItemProps {
   description: string;
   quantity?: number | null;
   unit?: string | null;
-  category?: string | null;
+  category?: Category | null;
 }
 
 export interface ShipmentItemSnapshot {
   description: string;
   quantity: number | null;
   unit: string | null;
-  category: string | null;
+  category: Category | null;
 }
 
 export class ShipmentItem {
   readonly description: string;
   readonly quantity: number | null;
   readonly unit: string | null;
-  readonly category: string | null;
+  readonly category: Category | null;
 
   private constructor(s: ShipmentItemSnapshot) {
     this.description = s.description;

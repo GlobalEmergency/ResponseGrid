@@ -12,6 +12,7 @@ import {
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CarrierType, ShipmentStatus } from '../../domain/shipment-enums';
+import { Category } from '../../../supplies/domain/category';
 
 export class ShipmentItemDto {
   @ApiProperty({ example: '5 cajas de agua', description: 'What moves' })
@@ -35,13 +36,13 @@ export class ShipmentItemDto {
   unit?: string;
 
   @ApiPropertyOptional({
-    example: 'alimentacion',
-    nullable: true,
-    type: String,
+    enum: Category,
+    example: Category.Food,
+    description: 'Shared category taxonomy (optional — cargo may be loose)',
   })
   @IsOptional()
-  @IsString()
-  category?: string;
+  @IsEnum(Category)
+  category?: Category;
 }
 
 export class CreateShipmentDto {

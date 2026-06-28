@@ -7,6 +7,7 @@ import { ShipmentId } from '../../domain/shipment-id';
 import { ShipmentItem } from '../../domain/shipment-item';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import { CarrierType, ShipmentStatus } from '../../domain/shipment-enums';
+import { Category } from '../../../supplies/domain/category';
 import type { Pool } from 'pg';
 
 const URL =
@@ -34,7 +35,7 @@ function makeShipment(opts?: {
         description: 'agua',
         quantity: 5,
         unit: 'cajas',
-        category: 'alimentacion',
+        category: Category.Food,
       }),
     ],
     manifest: opts?.manifest ?? 'Manifiesto',
