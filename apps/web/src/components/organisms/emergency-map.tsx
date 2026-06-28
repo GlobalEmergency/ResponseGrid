@@ -87,6 +87,12 @@ interface EmergencyMapProps {
    * Returns an optional cleanup function that is invoked on unmount.
    */
   onMapReady?: (map: LeafletMap) => (() => void) | void;
+  /**
+   * Tailwind classes for the map's outer container (height, border, radius).
+   * Defaults to the standalone card look; the emergency landing overrides it
+   * to make the map a full-height hero (mobile) / sticky panel (desktop).
+   */
+  containerClassName?: string;
 }
 
 // ── Inner component that draws uncertainty circles for approximate needs ──────
@@ -263,14 +269,18 @@ function BoundsFitter({ points }: { points: MapPoint[] }) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function EmergencyMap({ points, onMapReady }: EmergencyMapProps) {
+export default function EmergencyMap({
+  points,
+  onMapReady,
+  containerClassName = 'h-80 rounded-lg border-2 border-line',
+}: EmergencyMapProps) {
   const t = getMessages(useLocale()).ui;
   // Default centre (Spain) used only when there are no points
   const defaultCenter: [number, number] = [40.4168, -3.7038];
   const defaultZoom = 5;
 
   return (
-    <div className="relative w-full h-80 rounded-lg overflow-hidden border-2 border-line">
+    <div className={`relative w-full overflow-hidden ${containerClassName}`}>
       <MapContainer
         center={defaultCenter}
         zoom={defaultZoom}

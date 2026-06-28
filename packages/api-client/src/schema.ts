@@ -689,6 +689,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/emergencies/{emergencyId}/public/needs/in-bounds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List validated needs within a geographic bounding box (public) */
+        get: operations["NeedsController_needsInBounds"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/emergencies/{emergencyId}/needs/queue": {
         parameters: {
             query?: never;
@@ -1943,6 +1960,9 @@ export interface components {
         };
         InBoundsResourcesDto: {
             items: components["schemas"]["ResourceViewDto"][];
+        };
+        InBoundsNeedsDto: {
+            items: components["schemas"]["NeedViewDto"][];
         };
         ResourceFacetsDto: {
             /**
@@ -3952,6 +3972,40 @@ export interface operations {
             };
         };
     };
+    NeedsController_needsInBounds: {
+        parameters: {
+            query: {
+                /** @description South latitude bound (-90 to 90) */
+                minLat: number;
+                /** @description West longitude bound (-180 to 180) */
+                minLng: number;
+                /** @description North latitude bound (-90 to 90) */
+                maxLat: number;
+                /** @description East longitude bound (-180 to 180) */
+                maxLng: number;
+                /** @description Max results (default 500, max 1000) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Validated needs within the bounding box */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InBoundsNeedsDto"];
+                };
+            };
+        };
+    };
     PublicController_facets: {
         parameters: {
             query?: never;
@@ -4536,6 +4590,10 @@ export interface operations {
                 priority?: "low" | "medium" | "high" | "urgent";
                 /** @description Filter to needs linked to this resource / final recipient */
                 resourceId?: string;
+                /** @description Page size for pagination (1-100). Omit to return all. */
+                limit?: string;
+                /** @description Number of items to skip (pagination). Defaults to 0. */
+                offset?: string;
             };
             header?: never;
             path: {

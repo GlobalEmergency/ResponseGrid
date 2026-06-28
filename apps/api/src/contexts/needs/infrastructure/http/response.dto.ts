@@ -165,6 +165,12 @@ export class NearbyNeedsResponseDto {
   items!: NearbyNeedViewDto[];
 }
 
+/** Response wrapper for the "needs within a bounding box" map endpoint. */
+export class InBoundsNeedsDto {
+  @ApiProperty({ type: [NeedViewDto] })
+  items!: NeedViewDto[];
+}
+
 /** Extended DTO for coordinator views — includes the sensitive skillSpecialty field. */
 export class CoordinatorNeedViewDto extends NeedViewDto {
   @ApiPropertyOptional({

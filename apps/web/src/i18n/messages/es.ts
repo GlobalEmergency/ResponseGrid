@@ -118,6 +118,12 @@ export const es = {
     header_status_paused: 'En pausa',
     header_status_closed: 'Cerrada',
 
+    // Menú de opciones (cabecera compacta en móvil)
+    menu_options: 'Opciones',
+    menu_language: 'Idioma',
+    menu_how_it_works: 'Cómo funciona',
+    menu_verify: 'Verificar una campaña',
+
     // Tarjetas de métricas
     metric_tile_open: 'Necesidades abiertas',
     metric_tile_points: 'Puntos activos',
@@ -138,7 +144,8 @@ export const es = {
     footer_verify: '🛡 ¿Es de fiar esta campaña? Verifícala',
 
     // Metrics
-    metrics_heading: 'Resumen',
+    metrics_heading: 'Resumen del operativo',
+    metrics_caption: 'Cifras globales de la emergencia',
     metric_needs_open: 'Peticiones abiertas',
     metric_needs_closed: 'Peticiones cerradas',
     metric_resources_active: 'Puntos logísticos activos',
@@ -179,6 +186,12 @@ export const es = {
     needs_priority_label: 'Prioridad:',
     needs_offer_button: 'Ofrecer para esta necesidad',
     needs_aria_label: 'Necesidades validadas',
+
+    // Explorador segmentado (Puntos | Necesidades)
+    tab_points: 'Puntos',
+    tab_needs: 'Necesidades',
+    explore_heading: 'En el mapa',
+    explore_aria: 'Puntos activos y necesidades validadas',
 
     // Map
     map_heading: 'Mapa de la emergencia',

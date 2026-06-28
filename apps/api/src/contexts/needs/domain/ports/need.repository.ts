@@ -18,6 +18,12 @@ export interface NeedRepository {
   findValidatedByEmergency(
     emergencyId: EmergencyId,
     filters?: NeedFilters,
+    /**
+     * Optional server-side pagination. When omitted the full validated set is
+     * returned (back-compat); when provided, results are deterministically
+     * ordered (newest first, id as tiebreaker) and windowed.
+     */
+    pagination?: { limit: number; offset: number },
   ): Promise<Need[]>;
   /**
    * Returns validated (non-expired) needs within `radiusMeters` of the given
@@ -28,6 +34,21 @@ export interface NeedRepository {
     emergencyId: EmergencyId,
     q: { lat: number; lng: number; radiusMeters: number; limit: number },
   ): Promise<Array<{ need: Need; distanceMeters: number }>>;
+  /**
+   * Returns validated (non-expired) needs whose location falls inside the given
+   * lat/lng bounding box, capped at `limit`. Powers the map: needs are loaded
+   * for the visible viewport only, mirroring resources' findInBounds (#68).
+   */
+  findValidatedInBounds(
+    emergencyId: EmergencyId,
+    q: {
+      minLat: number;
+      minLng: number;
+      maxLat: number;
+      maxLng: number;
+      limit: number;
+    },
+  ): Promise<Need[]>;
   /** Returns validated needs that have expired (expiresAt IS NOT NULL AND expiresAt <= now). */
   findExpiredByEmergency(
     emergencyId: EmergencyId,

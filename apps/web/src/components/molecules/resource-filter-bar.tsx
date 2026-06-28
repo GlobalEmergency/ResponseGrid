@@ -9,6 +9,9 @@
  *  - Text search input (client-side, does not trigger re-fetch).
  *  - Active-filter chips with "×" dismiss buttons.
  *
+ * Every control is a full-width field of identical height (Select / Input atoms
+ * wrapped in FilterField) so the whole bar reads as one tidy form.
+ *
  * Filter changes for category/country bubble up via callbacks so the parent
  * can reset the list and re-fetch page 1 with the new params.
  * Search text bubbles up via onSearchChange for client-side filtering.
@@ -17,6 +20,9 @@
 import type { Messages } from '@/i18n/messages/es';
 import type { Locale } from '@/i18n';
 import { categoryLabel } from '@/lib/categories';
+import { Select } from '@/components/atoms/select';
+import { Input } from '@/components/atoms/input';
+import { FilterField } from '@/components/molecules/filter-field';
 
 interface ResourceFilterBarProps {
   /** Facet counts keyed by category slug, e.g. { water: 5, food: 3 } */
@@ -38,6 +44,21 @@ interface ResourceFilterBarProps {
   locale: Locale;
 }
 
+function SearchIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px]">
+      <path
+        d="M21 21l-4.35-4.35M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function ResourceFilterBar({
   byCategory,
   byCountry,
@@ -50,12 +71,8 @@ export function ResourceFilterBar({
   t,
   locale,
 }: ResourceFilterBarProps) {
-  const categoryOptions = Object.entries(byCategory).sort(
-    ([, a], [, b]) => b - a,
-  );
-  const countryOptions = Object.entries(byCountry).sort(
-    ([, a], [, b]) => b - a,
-  );
+  const categoryOptions = Object.entries(byCategory).sort(([, a], [, b]) => b - a);
+  const countryOptions = Object.entries(byCountry).sort(([, a], [, b]) => b - a);
 
   const activeFilters: { key: 'category' | 'country'; label: string }[] = [];
   if (activeCategory !== '') {
@@ -78,66 +95,46 @@ export function ResourceFilterBar({
 
   return (
     <div className="flex flex-col gap-3" role="group" aria-label={t.aria_label}>
-      {/* ── Selects row ───────────────────────────────────────────────── */}
-      <div className="flex flex-wrap gap-3">
-        {/* Category */}
-        <label className="flex flex-col gap-1 text-xs font-medium text-muted">
-          <span>{t.category_label}</span>
-          <select
-            value={activeCategory}
-            onChange={(e) => onCategoryChange(e.target.value)}
-            className="rounded-lg border-2 border-line bg-white px-3 py-1.5 text-sm text-ink focus:border-navy focus:outline-none"
+      <FilterField label={t.category_label}>
+        <Select
+          value={activeCategory}
+          onChange={(e) => onCategoryChange(e.target.value)}
+        >
+          <option value="">{t.all_categories}</option>
+          {categoryOptions.map(([slug, count]) => (
+            <option key={slug} value={slug}>
+              {categoryLabel(slug, locale)} ({count})
+            </option>
+          ))}
+        </Select>
+      </FilterField>
+
+      {countryOptions.length > 0 && (
+        <FilterField label={t.country_label}>
+          <Select
+            value={activeCountry}
+            onChange={(e) => onCountryChange(e.target.value)}
           >
-            <option value="">{t.all_categories}</option>
-            {categoryOptions.map(([slug, count]) => (
-              <option key={slug} value={slug}>
-                {categoryLabel(slug, locale)} ({count})
+            <option value="">{t.all_countries}</option>
+            {countryOptions.map(([country, count]) => (
+              <option key={country} value={country}>
+                {country} ({count})
               </option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </FilterField>
+      )}
 
-        {/* Country */}
-        {countryOptions.length > 0 && (
-          <label className="flex flex-col gap-1 text-xs font-medium text-muted">
-            <span>{t.country_label}</span>
-            <select
-              value={activeCountry}
-              onChange={(e) => onCountryChange(e.target.value)}
-              className="rounded-lg border-2 border-line bg-white px-3 py-1.5 text-sm text-ink focus:border-navy focus:outline-none"
-            >
-              <option value="">{t.all_countries}</option>
-              {countryOptions.map(([country, count]) => (
-                <option key={country} value={country}>
-                  {country} ({count})
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
+      <FilterField label={t.search_label}>
+        <Input
+          type="search"
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder={t.search_placeholder}
+          icon={<SearchIcon />}
+        />
+      </FilterField>
 
-        {/* Search */}
-        <label className="flex flex-col gap-1 text-xs font-medium text-muted">
-          <span>{t.search_label}</span>
-          <div className="relative">
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-soft text-sm"
-            >
-              🔍
-            </span>
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder={t.search_placeholder}
-              className="rounded-lg border-2 border-line bg-white pl-8 pr-3 py-1.5 text-sm text-ink placeholder-gray-400 focus:border-navy focus:outline-none"
-            />
-          </div>
-        </label>
-      </div>
-
-      {/* ── Active filter chips ───────────────────────────────────────── */}
       {activeFilters.length > 0 && (
         <div
           className="flex flex-wrap gap-2"

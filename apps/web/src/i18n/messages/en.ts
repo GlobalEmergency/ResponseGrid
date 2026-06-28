@@ -117,6 +117,12 @@ export const en = {
     header_status_paused: 'Paused',
     header_status_closed: 'Closed',
 
+    // Options menu (compact header on mobile)
+    menu_options: 'Options',
+    menu_language: 'Language',
+    menu_how_it_works: 'How it works',
+    menu_verify: 'Verify a campaign',
+
     // Metric tiles
     metric_tile_open: 'Open needs',
     metric_tile_points: 'Active points',
@@ -136,7 +142,8 @@ export const en = {
     points_count: '{count} verified',
     footer_verify: '🛡 Is this campaign trustworthy? Verify it',
 
-    metrics_heading: 'Summary',
+    metrics_heading: 'Operation summary',
+    metrics_caption: 'Emergency-wide figures',
     metric_needs_open: 'Open requests',
     metric_needs_closed: 'Closed requests',
     metric_resources_active: 'Active logistics points',
@@ -173,6 +180,12 @@ export const en = {
     needs_priority_label: 'Priority:',
     needs_offer_button: 'Offer for this need',
     needs_aria_label: 'Validated needs',
+
+    // Segmented explorer (Points | Needs)
+    tab_points: 'Points',
+    tab_needs: 'Needs',
+    explore_heading: 'On the map',
+    explore_aria: 'Active points and validated needs',
 
     map_heading: 'Emergency map',
     map_legend_active: 'Operational',
