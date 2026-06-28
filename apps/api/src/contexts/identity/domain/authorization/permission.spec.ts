@@ -33,6 +33,13 @@ describe('permission catalog', () => {
     expect(READ_ONLY_PERMISSIONS).toContain('shipment:read');
   });
 
+  it('includes the shipment expedition permissions (#106)', () => {
+    expect(ALL_PERMISSIONS).toContain('shipment:assign');
+    expect(ALL_PERMISSIONS).toContain('shipment:update');
+    expect(isPermission('shipment:assign')).toBe(true);
+    expect(isPermission('shipment:update')).toBe(true);
+  });
+
   it('includes the transport-capacity permissions (#105)', () => {
     expect(ALL_PERMISSIONS).toContain('capacity:publish');
     expect(ALL_PERMISSIONS).toContain('capacity:read');

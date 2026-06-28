@@ -36,6 +36,14 @@ describe('ROLE_CATALOG', () => {
     expect(hubManager.has('shipment:track')).toBe(true);
   });
 
+  it('grants the coordinator the shipment expedition permissions (#106)', () => {
+    const coordinator = new Set(permissionsForRole('emergency_coordinator'));
+    expect(coordinator.has('shipment:create')).toBe(true);
+    expect(coordinator.has('shipment:assign')).toBe(true);
+    expect(coordinator.has('shipment:update')).toBe(true);
+    expect(coordinator.has('shipment:read')).toBe(true);
+  });
+
   it('wires the transport-capacity permissions (#105)', () => {
     // citizen publishes (grado ciudadano, como offer:create)
     expect(permissionsForRole('citizen')).toContain('capacity:publish');
