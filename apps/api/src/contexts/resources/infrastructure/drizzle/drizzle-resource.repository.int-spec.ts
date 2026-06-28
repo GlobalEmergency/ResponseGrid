@@ -544,6 +544,141 @@ describe('DrizzleResourceRepository (integration)', () => {
       expect(items[0].name).toBe('Water Resource');
     });
 
+    describe('q text search', () => {
+      const makeSearchResource = (
+        name: string,
+        city: string | null,
+        accepts: string[] = [],
+      ) =>
+        Resource.fromSnapshot({
+          ...Resource.register({
+            id: ResourceId.create(),
+            emergencyId: EmergencyId.fromString(EM),
+            type: ResourceType.CollectionPoint,
+            stage: ResourceStage.Origin,
+            name,
+            location: Location.create({
+              address: `${name} street`,
+              latitude: 37.3886,
+              longitude: -5.9823,
+            }),
+            ownerUserId: OWNER_ID,
+            accepts,
+            city: city ?? undefined,
+          }).toSnapshot(),
+          verificationLevel: VerificationLevel.Verified,
+          publicStatus: PublicStatus.Active,
+          createdAt: new Date(),
+        });
+
+      it('filters by name (case-insensitive)', async () => {
+        await repo.save(makeSearchResource('Caritas Madrid', 'Madrid'));
+        await repo.save(makeSearchResource('Cruz Roja', 'Sevilla'));
+        await repo.save(makeSearchResource('Banco de Alimentos', 'Barcelona'));
+
+        const { items, total } = await repo.findVisiblePaged(
+          EmergencyId.fromString(EM),
+          { page: 1, limit: 10, q: 'caritas' },
+        );
+        expect(total).toBe(1);
+        expect(items[0].name).toBe('Caritas Madrid');
+      });
+
+      it('filters by city (case-insensitive, uppercase query)', async () => {
+        await repo.save(makeSearchResource('Caritas Madrid', 'Madrid'));
+        await repo.save(makeSearchResource('Cruz Roja', 'Sevilla'));
+        await repo.save(makeSearchResource('Banco de Alimentos', 'Barcelona'));
+
+        const { items, total } = await repo.findVisiblePaged(
+          EmergencyId.fromString(EM),
+          { page: 1, limit: 10, q: 'MADRID' },
+        );
+        expect(total).toBe(1);
+        expect(items[0].name).toBe('Caritas Madrid');
+      });
+
+      it('is combinable with category filter', async () => {
+        await repo.save(
+          makeSearchResource('Caritas Madrid', 'Madrid', ['food']),
+        );
+        await repo.save(makeSearchResource('Cruz Roja', 'Sevilla', ['water']));
+
+        const { items, total } = await repo.findVisiblePaged(
+          EmergencyId.fromString(EM),
+          { page: 1, limit: 10, q: 'caritas', category: 'food' },
+        );
+        expect(total).toBe(1);
+        expect(items[0].name).toBe('Caritas Madrid');
+      });
+
+      it('returns empty when no match', async () => {
+        await repo.save(makeSearchResource('Caritas Madrid', 'Madrid'));
+
+        const { items, total } = await repo.findVisiblePaged(
+          EmergencyId.fromString(EM),
+          { page: 1, limit: 10, q: 'xyz_notexist' },
+        );
+        expect(items).toHaveLength(0);
+        expect(total).toBe(0);
+      });
+
+      it('hidden resource with matching name is NOT returned', async () => {
+        // visible caritas
+        await repo.save(makeSearchResource('Caritas Madrid', 'Madrid'));
+        // hidden caritas
+        const hidden = Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'Caritas Hidden',
+          location: Location.create({
+            address: 'Hidden street',
+            latitude: 37.3886,
+            longitude: -5.9823,
+          }),
+          ownerUserId: OWNER_ID,
+        });
+        await repo.save(hidden);
+
+        const { items, total } = await repo.findVisiblePaged(
+          EmergencyId.fromString(EM),
+          { page: 1, limit: 10, q: 'caritas' },
+        );
+        expect(total).toBe(1);
+        expect(items.map((r) => r.name)).toEqual(['Caritas Madrid']);
+      });
+
+      it('total reflects the count of matching items', async () => {
+        await repo.save(makeSearchResource('Caritas Madrid', 'Madrid'));
+        await repo.save(makeSearchResource('Caritas Sevilla', 'Sevilla'));
+        await repo.save(makeSearchResource('Cruz Roja', 'Barcelona'));
+
+        const { items, total } = await repo.findVisiblePaged(
+          EmergencyId.fromString(EM),
+          { page: 1, limit: 1, q: 'caritas' },
+        );
+        // Only one item returned due to limit=1, but total is the full count
+        expect(items).toHaveLength(1);
+        expect(total).toBe(2);
+      });
+
+      it('filters by address (case-insensitive)', async () => {
+        await repo.save(makeSearchResource('Caritas Madrid', 'Madrid'));
+        await repo.save(makeSearchResource('Cruz Roja', 'Sevilla'));
+        await repo.save(makeSearchResource('Banco de Alimentos', 'Barcelona'));
+
+        // "Banco de Alimentos" has address "Banco de Alimentos street"
+        // "alimentos street" appears only in the address column, not in name or city
+        const { items, total } = await repo.findVisiblePaged(
+          EmergencyId.fromString(EM),
+          { page: 1, limit: 10, q: 'alimentos street' },
+        );
+        expect(total).toBe(1);
+        expect(items[0].name).toBe('Banco de Alimentos');
+      });
+    });
+
     it('filters by country', async () => {
       const ve = Resource.fromSnapshot({
         ...Resource.register({

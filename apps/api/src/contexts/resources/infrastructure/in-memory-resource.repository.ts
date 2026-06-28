@@ -119,7 +119,13 @@ export class InMemoryResourceRepository implements ResourceRepository {
 
   findVisiblePaged(
     emergencyId: EmergencyId,
-    q: { page: number; limit: number; category?: string; country?: string },
+    q: {
+      page: number;
+      limit: number;
+      category?: string;
+      country?: string;
+      q?: string;
+    },
   ): Promise<{ items: Resource[]; total: number }> {
     const visible = new Set<PublicStatus>([
       PublicStatus.Active,
@@ -134,6 +140,15 @@ export class InMemoryResourceRepository implements ResourceRepository {
     }
     if (q.country) {
       all = all.filter((s) => s.country === q.country);
+    }
+    if (q.q) {
+      const term = q.q.toLowerCase();
+      all = all.filter(
+        (s) =>
+          s.name.toLowerCase().includes(term) ||
+          s.location.address.toLowerCase().includes(term) ||
+          (s.city != null && s.city.toLowerCase().includes(term)),
+      );
     }
     const total = all.length;
     const offset = (q.page - 1) * q.limit;

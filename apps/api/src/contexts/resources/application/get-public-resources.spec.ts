@@ -120,6 +120,55 @@ describe('GetPublicResources', () => {
     expect(result.limit).toBe(2);
   });
 
+  it('execute with q="caritas" calls repo.findVisiblePaged with q and returns only matching resources', async () => {
+    const repo = new InMemoryResourceRepository();
+    const bus = new FakeEventBus();
+    const register = new RegisterResource(repo, bus, activeReader);
+    const verify = new VerifyResource(repo, bus);
+    const publish = new PublishResource(repo, bus);
+
+    // Seed "Caritas" resource
+    const { id: caritasId } = await register.execute({
+      emergencyId: EM,
+      type: ResourceType.Warehouse,
+      stage: ResourceStage.Origin,
+      name: 'Caritas',
+      location: baseLocation,
+      ownerUserId: 'user-caritas',
+    });
+    await verify.execute({
+      resourceId: caritasId,
+      level: 'verified' as const,
+      coordinatorId: 'c1',
+    });
+    await publish.execute({ resourceId: caritasId });
+
+    // Seed "Cruz Roja" resource
+    const { id: cruzId } = await register.execute({
+      emergencyId: EM,
+      type: ResourceType.Warehouse,
+      stage: ResourceStage.Origin,
+      name: 'Cruz Roja',
+      location: baseLocation,
+      ownerUserId: 'user-cruz',
+    });
+    await verify.execute({
+      resourceId: cruzId,
+      level: 'verified' as const,
+      coordinatorId: 'c1',
+    });
+    await publish.execute({ resourceId: cruzId });
+
+    const result = await new GetPublicResources(repo).execute({
+      emergencyId: EM,
+      q: 'caritas',
+    });
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].name).toBe('Caritas');
+    expect(result.total).toBe(1);
+  });
+
   it('clamps limit to 100 max', async () => {
     const repo = new InMemoryResourceRepository();
 

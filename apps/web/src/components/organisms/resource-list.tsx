@@ -10,7 +10,7 @@
  * Supports:
  *  - Category + country filter props: re-fetches page 1 and resets
  *    accumulated items whenever they change.
- *  - Client-side text search over the already-loaded items.
+ *  - Server-side full-text search via `q` query param (debounced ~300 ms).
  *  - Geographic grouping: Venezuela first, diaspora/others after.
  *  - Nearby mode: citizen geolocates and sees nearest points, ordered by
  *    distance. Filter bar, load-more and geographic grouping are hidden in
@@ -79,8 +79,9 @@ export function ResourceList({
   const [activeCategory, setActiveCategory] = useState('');
   const [activeCountry, setActiveCountry] = useState('');
 
-  // ── Search state (client-side only, no re-fetch) ──────────────────────────
+  // ── Search state — raw (controlled input) + debounced (triggers re-fetch) ──
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQ, setDebouncedQ] = useState('');
 
   // ── Accumulated list state ────────────────────────────────────────────────
   const [items, setItems] = useState<ResourceViewDto[]>(initialItems);
@@ -93,7 +94,15 @@ export function ResourceList({
   const [nearbyItems, setNearbyItems] = useState<NearbyResourceViewDto[] | null>(null);
   const [geoError, setGeoError] = useState(false);
 
-  // ── Re-fetch page 1 whenever category or country changes ──────────────────
+  // ── Debounce searchQuery → debouncedQ (~300 ms) ──────────────────────────
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQ(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // ── Re-fetch page 1 whenever category, country, or debouncedQ changes ─────
   const firstRun = useRef(true);
 
   useEffect(() => {
@@ -103,6 +112,8 @@ export function ResourceList({
       return;
     }
 
+    setItems([]);
+    setPage(1);
     setLoadMoreError(false);
     startTransition(async () => {
       const client = createResponseGridClient(API_URL);
@@ -116,6 +127,7 @@ export function ResourceList({
               limit: LIMIT,
               ...(activeCategory !== '' && { category: activeCategory }),
               ...(activeCountry !== '' && { country: activeCountry }),
+              ...(debouncedQ !== '' && { q: debouncedQ }),
             },
           },
         },
@@ -123,22 +135,19 @@ export function ResourceList({
       if (data != null) {
         setItems(data.items);
         setTotal(data.total);
-        setPage(1);
       } else {
         setLoadMoreError(true);
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeCategory, activeCountry]);
+  }, [activeCategory, activeCountry, debouncedQ]);
 
   function handleCategoryChange(category: string) {
     setActiveCategory(category);
-    setSearchQuery('');
   }
 
   function handleCountryChange(country: string) {
     setActiveCountry(country);
-    setSearchQuery('');
   }
 
   function handleLoadMore() {
@@ -156,6 +165,7 @@ export function ResourceList({
               limit: LIMIT,
               ...(activeCategory !== '' && { category: activeCategory }),
               ...(activeCountry !== '' && { country: activeCountry }),
+              ...(debouncedQ !== '' && { q: debouncedQ }),
             },
           },
         },
@@ -179,26 +189,14 @@ export function ResourceList({
     setGeoError(false);
   }
 
-  // ── Client-side search filter ─────────────────────────────────────────────
-  const filteredItems = useMemo(() => {
-    if (searchQuery.trim() === '') return items;
-    const q = searchQuery.toLowerCase();
-    return items.filter(
-      (r) =>
-        r.name.toLowerCase().includes(q) ||
-        (r.city != null && r.city.toLowerCase().includes(q)) ||
-        (r.location.address?.toLowerCase().includes(q) ?? false),
-    );
-  }, [items, searchQuery]);
-
   // ── Geographic grouping ───────────────────────────────────────────────────
   const { venezuela, diaspora, other } = useMemo(
-    () => groupByCountry(filteredItems),
-    [filteredItems],
+    () => groupByCountry(items),
+    [items],
   );
 
-  const isSearching = searchQuery.trim() !== '';
-  const hasMore = !isSearching && items.length < total;
+  const isSearching = debouncedQ !== '';
+  const hasMore = items.length < total && !isPending;
 
   // ── Nearby mode rendering ─────────────────────────────────────────────────
   if (nearbyItems !== null) {
@@ -338,13 +336,13 @@ export function ResourceList({
       {/* ── Summary line ────────────────────────────────────────────────── */}
       <p className="text-xs text-gray-500">
         {isSearching
-          ? tList.search_results.replace('{n}', String(filteredItems.length))
+          ? tList.search_results.replace('{n}', String(total))
           : tList.showing
-              .replace('{shown}', String(filteredItems.length))
+              .replace('{shown}', String(items.length))
               .replace('{total}', String(total))}
       </p>
 
-      {filteredItems.length === 0 ? (
+      {items.length === 0 && !isPending ? (
         <EmptyState title={tEmpty.title} description={tEmpty.description} />
       ) : (
         <div className="flex flex-col gap-6">

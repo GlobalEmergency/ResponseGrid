@@ -18,6 +18,7 @@ export class GetPublicResources {
     limit?: number;
     category?: string;
     country?: string;
+    q?: string;
   }): Promise<PagedResourcesResult> {
     const page = q.page ?? 1;
     const limit = Math.min(q.limit ?? 50, 100);
@@ -29,6 +30,7 @@ export class GetPublicResources {
         limit,
         ...(q.category !== undefined && { category: q.category }),
         ...(q.country !== undefined && { country: q.country }),
+        ...(q.q !== undefined && q.q !== '' && { q: q.q }),
       },
     );
 

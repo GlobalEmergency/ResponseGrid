@@ -7,10 +7,11 @@ import {
   IsInt,
   Min,
   Max,
+  MaxLength,
   ValidateNested,
   IsArray,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ResourceType, ResourceStage } from '../../domain/resource-enums';
 
@@ -221,4 +222,17 @@ export class PublicResourcesQueryDto {
   @IsOptional()
   @IsString()
   country?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Full-text search string matched against name, address, and city (case-insensitive, max 100 chars)',
+    example: 'caritas',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  q?: string;
 }

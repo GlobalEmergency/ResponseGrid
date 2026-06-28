@@ -298,7 +298,13 @@ export class DrizzleResourceRepository implements ResourceRepository {
 
   async findVisiblePaged(
     emergencyId: EmergencyId,
-    q: { page: number; limit: number; category?: string; country?: string },
+    q: {
+      page: number;
+      limit: number;
+      category?: string;
+      country?: string;
+      q?: string;
+    },
   ): Promise<{ items: Resource[]; total: number }> {
     const VISIBLE = [
       PublicStatus.Active,
@@ -319,6 +325,15 @@ export class DrizzleResourceRepository implements ResourceRepository {
     }
     if (q.country) {
       conditions.push(eq(resourcesTable.country, q.country));
+    }
+    if (q.q) {
+      // Escape SQL LIKE metacharacters in the user-supplied string so they are
+      // treated as literals and not wildcards. Facets are NOT filtered by q —
+      // they remain emergency-wide aggregates (simpler and intentional).
+      const escaped = q.q.replace(/[%_\\]/g, (c) => `\\${c}`);
+      conditions.push(
+        sql`(${resourcesTable.name} ILIKE ${'%' + escaped + '%'} OR ${resourcesTable.address} ILIKE ${'%' + escaped + '%'} OR ${resourcesTable.city} ILIKE ${'%' + escaped + '%'})`,
+      );
     }
 
     const whereClause = and(...conditions);
