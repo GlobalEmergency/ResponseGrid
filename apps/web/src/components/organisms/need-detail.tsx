@@ -1,0 +1,221 @@
+'use client';
+
+import { useActionState, useEffect } from 'react';
+import { validateNeed } from '@/app/e/[slug]/coordinacion/actions';
+import type { components } from '@reliefhub/api-client';
+import type { ActionResult } from '@/app/e/[slug]/coordinacion/actions';
+import { Badge } from '@/components/atoms/badge';
+import { Button } from '@/components/atoms/button';
+import { ErrorMessage } from '@/components/atoms/error-message';
+import { FreshnessIndicator } from '@/components/atoms/freshness-indicator';
+import { DetailDrawer } from '@/components/organisms/detail-drawer';
+import { DetailField, DetailSection } from '@/components/molecules/detail-field';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
+
+type NeedView = components['schemas']['NeedViewDto'];
+type ItemCategory = components['schemas']['NeedItemResponseDto']['category'];
+
+const INITIAL_STATE: ActionResult = { status: 'idle' };
+
+const PRIORITY_BADGE: Record<
+  NeedView['priority'],
+  'priority-urgent' | 'priority-high' | 'priority-medium' | 'priority-low'
+> = {
+  urgent: 'priority-urgent',
+  high: 'priority-high',
+  medium: 'priority-medium',
+  low: 'priority-low',
+};
+
+interface NeedDetailProps {
+  need: NeedView;
+  slug: string;
+  /** Whether the user may validate (gates the action button). */
+  canValidate: boolean;
+  open: boolean;
+  onClose: () => void;
+  /** Called after a successful validate so the parent drops the item. */
+  onActionSuccess: () => void;
+}
+
+export function NeedDetail({
+  need,
+  slug,
+  canValidate,
+  open,
+  onClose,
+  onActionSuccess,
+}: NeedDetailProps) {
+  const tc = getMessages(useLocale()).coord;
+
+  const CATEGORY_LABELS: Record<ItemCategory, string> = {
+    hygiene: tc.category_hygiene,
+    water: tc.category_water,
+    food: tc.category_food,
+    medical: tc.category_medical,
+    shelter: tc.category_shelter,
+    tools: tc.category_tools,
+    other: tc.category_other,
+    medicines: tc.category_medicines,
+    medical_equipment: tc.category_medical_equipment,
+    medical_supplies: tc.category_medical_supplies,
+    medical_personnel: tc.category_medical_personnel,
+  };
+
+  const PRIORITY_LABELS: Record<NeedView['priority'], string> = {
+    low: tc.priority_low,
+    medium: tc.priority_medium,
+    high: tc.priority_high,
+    urgent: tc.priority_urgent,
+  };
+
+  const STATUS_LABELS: Record<NeedView['status'], string> = {
+    pending: tc.detail_status_pending,
+    validated: tc.detail_status_validated,
+    rejected: tc.detail_status_rejected,
+    fulfilled: tc.detail_status_fulfilled,
+  };
+
+  const SKILL_LABELS: Record<string, string> = {
+    driving: tc.skill_driving,
+    medical: tc.skill_medical,
+    logistics: tc.skill_logistics,
+    cooking: tc.skill_cooking,
+    languages: tc.skill_languages,
+    admin: tc.skill_admin,
+    general: tc.skill_general,
+  };
+
+  const [state, formAction, pending] = useActionState<ActionResult, FormData>(
+    async () => validateNeed(need.id, slug),
+    INITIAL_STATE,
+  );
+
+  // Notify the parent once the action succeeds (parent closes + drops the item).
+  useEffect(() => {
+    if (state.status === 'success') onActionSuccess();
+  }, [state.status, onActionSuccess]);
+
+  const coords = `${need.location.latitude}, ${need.location.longitude}`;
+  const skill =
+    need.requiredSkill != null
+      ? (SKILL_LABELS[need.requiredSkill] ?? need.requiredSkill)
+      : null;
+
+  const footer = canValidate ? (
+    <div className="flex flex-col gap-3">
+      {state.status === 'error' && (
+        <ErrorMessage message={state.message ?? tc.error_unknown} />
+      )}
+      <form action={formAction}>
+        <Button type="submit" disabled={pending} fullWidth size="lg">
+          {pending ? tc.processing : tc.need_validate}
+        </Button>
+      </form>
+    </div>
+  ) : undefined;
+
+  return (
+    <DetailDrawer
+      open={open}
+      onClose={onClose}
+      title={need.title}
+      ariaLabel={tc.drawer_open_need.replace('{title}', need.title)}
+      titleAdornment={
+        <>
+          <Badge variant={PRIORITY_BADGE[need.priority]}>
+            {PRIORITY_LABELS[need.priority]}
+          </Badge>
+          <FreshnessIndicator
+            expiresAt={need.expiresAt}
+            lastVerifiedAt={need.lastVerifiedAt}
+          />
+        </>
+      }
+      footer={footer}
+    >
+      <DetailSection title={tc.detail_section_meta}>
+        <DetailField label={tc.detail_field_description} value={need.description} />
+        <DetailField
+          label={tc.detail_field_priority}
+          value={PRIORITY_LABELS[need.priority]}
+        />
+        <DetailField
+          label={tc.detail_field_status}
+          value={STATUS_LABELS[need.status]}
+        />
+        <DetailField
+          label={tc.detail_field_requester_org}
+          value={need.requesterOrganizationId}
+        />
+        <DetailField
+          label={tc.detail_field_managing_org}
+          value={need.managingOrganizationId}
+        />
+        <DetailField label={tc.detail_field_required_skill} value={skill} />
+        <DetailField
+          label={tc.detail_field_requested_count}
+          value={need.requestedCount != null ? String(need.requestedCount) : null}
+        />
+        <DetailField
+          label={tc.detail_field_linked_resource}
+          value={need.resourceId}
+        />
+        <DetailField
+          label={tc.detail_field_created}
+          value={
+            <time dateTime={need.createdAt} suppressHydrationWarning>
+              {new Date(need.createdAt).toLocaleString()}
+            </time>
+          }
+        />
+        <DetailField
+          label={tc.detail_field_expiry}
+          value={
+            need.expiresAt != null ? (
+              <time dateTime={need.expiresAt} suppressHydrationWarning>
+                {new Date(need.expiresAt).toLocaleString()}
+              </time>
+            ) : null
+          }
+        />
+      </DetailSection>
+
+      <DetailSection title={tc.detail_section_items}>
+        {need.items.length === 0 ? (
+          <p className="py-2 text-sm text-muted">{tc.detail_value_none}</p>
+        ) : (
+          <ul className="flex flex-col gap-2 py-2">
+            {need.items.map((item, i) => (
+              <li
+                key={`${item.name}-${i}`}
+                className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink"
+              >
+                <span className="font-semibold">{item.name}</span>
+                <span className="text-muted">
+                  {' · '}
+                  {CATEGORY_LABELS[item.category]}
+                  {' · '}
+                  {item.quantity}
+                  {item.unit != null && item.unit !== '' ? ` ${item.unit}` : ''}
+                  {item.presentation != null && item.presentation !== ''
+                    ? ` · ${item.presentation}`
+                    : ''}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </DetailSection>
+
+      <DetailSection title={tc.detail_section_location}>
+        <DetailField
+          label={tc.detail_field_address}
+          value={need.location.address}
+        />
+        <DetailField label={tc.detail_field_coords} value={coords} />
+      </DetailSection>
+    </DetailDrawer>
+  );
+}
