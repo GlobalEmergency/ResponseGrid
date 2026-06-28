@@ -60,7 +60,7 @@ export function CreateTaskForm({ emergencyId, slug }: CreateTaskFormProps) {
         <p
           role="status"
           aria-live="polite"
-          className="rounded-md border border-green-500 bg-green-50 px-4 py-3 text-sm font-medium text-green-800"
+          className="rounded-md border border-success bg-success-soft px-4 py-3 text-sm font-medium text-success"
         >
           {tc.task_created}
         </p>

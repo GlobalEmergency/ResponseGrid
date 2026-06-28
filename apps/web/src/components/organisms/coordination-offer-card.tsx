@@ -137,7 +137,7 @@ export function CoordinationOfferCard({
 
         {/* Directed need indicator */}
         {isDirected && (
-          <p className="text-xs text-amber-700 font-medium">
+          <p className="text-xs text-warning font-medium">
             {tc.offer_directed_indicator}
           </p>
         )}
