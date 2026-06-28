@@ -170,17 +170,13 @@ export function ResourceList({
   }
 
   /**
-   * Callback for NearbyButton:
-   * - items.length > 0 → activate nearby mode with the results.
-   * - items.length === 0 (clearNearby signal) → exit nearby mode.
+   * Callback for NearbyButton: activates nearby mode with the API results.
+   * An empty array means 0 results within range — still shows nearby mode.
+   * Clearing nearby mode is handled by onClear → setNearbyItems(null).
    */
-  function handleNearbyResults(nearbyResults: NearbyResourceViewDto[], _clear: () => void) {
-    if (nearbyResults.length === 0) {
-      setNearbyItems(null);
-    } else {
-      setNearbyItems(nearbyResults);
-      setGeoError(false);
-    }
+  function handleNearbyResults(nearbyResults: NearbyResourceViewDto[]) {
+    setNearbyItems(nearbyResults);
+    setGeoError(false);
   }
 
   // ── Client-side search filter ─────────────────────────────────────────────
@@ -213,6 +209,7 @@ export function ResourceList({
           emergencyId={emergencyId}
           tNearby={tNearby}
           onNearbyResults={handleNearbyResults}
+          onClear={() => setNearbyItems(null)}
           onGeoError={() => setGeoError(true)}
           active
         />
@@ -258,6 +255,7 @@ export function ResourceList({
           emergencyId={emergencyId}
           tNearby={tNearby}
           onNearbyResults={handleNearbyResults}
+          onClear={() => setNearbyItems(null)}
           onGeoError={() => setGeoError(true)}
           active={false}
         />
@@ -271,7 +269,7 @@ export function ResourceList({
               type="button"
               onClick={() => setGeoError(false)}
               className="ml-1 underline hover:no-underline focus:outline-none"
-              aria-label="Cerrar"
+              aria-label={tNearby.geo_error_dismiss}
             >
               ✕
             </button>
@@ -302,6 +300,7 @@ export function ResourceList({
         emergencyId={emergencyId}
         tNearby={tNearby}
         onNearbyResults={handleNearbyResults}
+        onClear={() => setNearbyItems(null)}
         onGeoError={() => setGeoError(true)}
         active={nearbyItems !== null}
       />

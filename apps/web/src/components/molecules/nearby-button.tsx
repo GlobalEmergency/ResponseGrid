@@ -22,7 +22,8 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 interface NearbyButtonProps {
   emergencyId: string;
   tNearby: Messages['nearby_points'];
-  onNearbyResults: (items: NearbyResourceViewDto[], clear: () => void) => void;
+  onNearbyResults: (items: NearbyResourceViewDto[]) => void;
+  onClear: () => void;
   onGeoError: () => void;
   active: boolean;
 }
@@ -31,19 +32,11 @@ export function NearbyButton({
   emergencyId,
   tNearby,
   onNearbyResults,
+  onClear,
   onGeoError,
   active,
 }: NearbyButtonProps) {
   const [loading, setLoading] = useState(false);
-
-  /**
-   * Clears nearby mode by signalling the parent with an empty items array.
-   * The parent's onNearbyResults handler detects the empty array and sets
-   * nearbyItems to null.
-   */
-  function clearNearby() {
-    onNearbyResults([], clearNearby);
-  }
 
   function handleFind() {
     if (!navigator.geolocation) {
@@ -72,7 +65,7 @@ export function NearbyButton({
           );
 
           if (data != null) {
-            onNearbyResults(data.items, clearNearby);
+            onNearbyResults(data.items);
           } else {
             onGeoError();
           }
@@ -95,7 +88,7 @@ export function NearbyButton({
     return (
       <button
         type="button"
-        onClick={clearNearby}
+        onClick={onClear}
         className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
       >
         {tNearby.button_clear}

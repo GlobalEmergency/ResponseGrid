@@ -327,6 +327,7 @@ export const en = {
     button_clear: 'Back to list',
     loading: 'Looking for nearby points…',
     geo_error: 'Could not get your location. Check your browser permissions.',
+    geo_error_dismiss: 'Dismiss',
     showing_nearby: '{n} nearby points',
     privacy_note: 'Your location is only used in your browser to sort by proximity; it is never stored.',
   },
