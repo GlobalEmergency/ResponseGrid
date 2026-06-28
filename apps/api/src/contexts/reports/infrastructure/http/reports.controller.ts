@@ -19,8 +19,8 @@ import {
 } from '@nestjs/swagger';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
-import { RequireCoordinatorGuard } from '../../../identity/infrastructure/http/require-coordinator.guard';
-import { RequireReportCoordinatorGuard } from '../../../identity/infrastructure/http/require-report-coordinator.guard';
+import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
+import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
 import type { AuthenticatedUser } from '../../../identity/infrastructure/http/jwt-auth.guard';
 import { SubmitReport } from '../../application/submit-report';
 import { GetReportsQueue } from '../../application/get-reports-queue';
@@ -66,7 +66,8 @@ export class ReportsController {
 
   /** Get all reports for an emergency (coordinator queue). */
   @Get('emergencies/:emergencyId/reports')
-  @UseGuards(JwtAuthGuard, RequireCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('report:read')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get coordination queue of reports' })
   @ApiParam({ name: 'emergencyId', type: String })
@@ -87,7 +88,8 @@ export class ReportsController {
   /** Mark a report as reviewed. */
   @Post('reports/:reportId/review')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RequireReportCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('report:triage')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Mark a report as reviewed' })
   @ApiParam({ name: 'reportId', type: String })

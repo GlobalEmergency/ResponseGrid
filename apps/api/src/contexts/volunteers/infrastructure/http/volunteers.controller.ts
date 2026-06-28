@@ -36,8 +36,8 @@ import {
   JwtAuthGuard,
   AuthenticatedUser,
 } from '../../../identity/infrastructure/http/jwt-auth.guard';
-import { RequireCoordinatorGuard } from '../../../identity/infrastructure/http/require-coordinator.guard';
-import { RequireVolunteerCoordinatorGuard } from '../../../identity/infrastructure/http/require-volunteer-coordinator.guard';
+import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
+import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
 import {
   RegisterVolunteerDto,
   UpdateVolunteerStatusDto,
@@ -104,7 +104,8 @@ export class VolunteersController {
   }
 
   @Get('emergencies/:emergencyId/volunteers')
-  @UseGuards(JwtAuthGuard, RequireCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('volunteer:read')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get volunteer roster for an emergency (coordinator only)',
@@ -149,7 +150,8 @@ export class VolunteersController {
 
   @Post('volunteers/:volunteerId/status')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RequireVolunteerCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('volunteer:assign')
   @ApiBearerAuth()
   @ApiOperation({
     summary:

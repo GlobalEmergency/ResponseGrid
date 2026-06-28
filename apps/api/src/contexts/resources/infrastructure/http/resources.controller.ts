@@ -40,7 +40,8 @@ import {
   JwtAuthGuard,
   AuthenticatedUser,
 } from '../../../identity/infrastructure/http/jwt-auth.guard';
-import { RequireResourceCoordinatorGuard } from '../../../identity/infrastructure/http/require-resource-coordinator.guard';
+import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
+import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
 import { ResourceView } from '../../application/resource-view';
 
 @ApiTags('resources')
@@ -98,7 +99,8 @@ export class ResourcesController {
 
   @Post('resources/:resourceId/verify')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RequireResourceCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('resource:verify')
   @ApiBearerAuth()
   @ApiOperation({
     summary: "Verify a resource (coordinator of the resource's emergency only)",
@@ -124,7 +126,8 @@ export class ResourcesController {
 
   @Post('resources/:resourceId/publish')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RequireResourceCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('resource:edit')
   @ApiBearerAuth()
   @ApiOperation({
     summary:

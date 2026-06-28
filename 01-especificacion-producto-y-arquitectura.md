@@ -39,7 +39,7 @@ El v0.1 saltaba a "Día 1/2/3". Aquí se modela el ciclo completo, porque las fa
 |------|---------|----------|------------------------|
 | **0. Latente** | entre crisis | Coste ~0, lista para disparar | Plantillas pre-cargadas (catálogo de material, mensajes, categorías, roles), entidades pre-acreditadas. Dormida. |
 | **1. Activación** | minutos | Encender rápido | Declarar emergencia desde plantilla → espacio aislado → landing oficial publicada. **La velocidad aquí ES "las primeras horas".** |
-| **2. Primeras horas** | 0–24 h | **Contención** | Canalizar el impulso, frenar el caos, captar ofrecimientos sin prometer, empujar donación económica, registrar y verificar recursos. ← *foco de este documento* |
+| **2. Primeras horas** | 0–24 h | **Contención** | Canalizar el impulso, frenar el caos, captar ofrecimientos sin prometer, registrar y verificar recursos. ← *foco de este documento* |
 | **3. Primeros días** | 1–7 d | Operación | Activar puntos verificados, semáforo, fotos de campo, recogidas, voluntariado con turnos, cola de revisión. |
 | **4. Sostenimiento** | semanas | Logística | Lotes, QR, expediciones, manifiestos, trazabilidad, matching oferta↔necesidad. |
 | **5. Cierre** | post | Apagar ordenado | Pausar recogidas, cerrar puntos, informe, export, lecciones aprendidas → vuelve a Latente. |
@@ -74,10 +74,9 @@ La plataforma modela ambos lados desde el día 1: recursos y ofertas en **origen
 
 ### A. Cara pública — "Quiero ayudar"
 - **Landing oficial** del evento: qué pasó, estado, fuente oficial + **timestamp de última actualización** visible (antídoto contra bulos).
-- **"La forma más eficaz AHORA"**: donación económica a entidades/campañas verificadas (enlace a pasarela externa o cuenta de la ONG; **la plataforma no procesa pagos**).
 - **"Qué NO hacer ahora"**: no ropa, no medicamentos, no ir por tu cuenta, no material sin destino.
 - **"Quiero ofrecer…"**: entrada a los formularios de auto-registro (bloque B).
-- **Lista/mapa de puntos**: solo verificados/oficiales, con semáforo. Si está vacío → "aún no hay puntos activos, dona dinero".
+- **Lista/mapa de puntos**: solo verificados/oficiales, con semáforo. Si está vacío → "aún no hay puntos activos".
 - **Verificador de campañas**: "¿Es de fiar esta cuenta/campaña?".
 - **Reportar sospecha**: campaña/punto/perfil falso.
 
@@ -92,7 +91,7 @@ Comunes a todos: identidad, contacto, ubicación, qué ofrece, capacidad aprox.,
 - Antifraude de campañas: entidad, CIF, responsable, cuenta, destino, estado; **alertas de riesgo** (cuentas personales, Bizum, "sale un avión mañana", urgencia extrema sin datos).
 
 ### D. Coordinación desde el minuto 1
-Cola de revisión (tarjetas) · panel de situación (ofrecimientos por tipo, pendientes/verificados, campañas sospechosas, cobertura geográfica) · publicar/editar mensajes oficiales y estado · **botón "Pausar todo / solo donación económica"**.
+Cola de revisión (tarjetas) · panel de situación (ofrecimientos por tipo, pendientes/verificados, campañas sospechosas, cobertura geográfica) · publicar/editar mensajes oficiales y estado · **botón "Pausar todo"**.
 
 ### E. Transversales no negociables
 Confianza visible (timestamp, badges, fuente oficial) · GDPR (consentimiento, minimización, no exponer ubicaciones sensibles hasta asignación) · móvil + mala conexión (PWA, formularios mínimos, fotos comprimidas, autoguardado, 3G) · escala súbita (landing cacheada en CDN, formularios escriben a cola; la home no toca la BD) · i18n-ready (arranca en ES) · compartible (OpenGraph).
@@ -214,4 +213,3 @@ App nativa, blockchain, pagos propios, marketplace, inventario unitario, red soc
 - **Capacidad operativa humana:** la verificación y la cola de coordinación exigen personas en pico. Diseño asume **coordinación escasa** (filtros automáticos de triage, nunca de decisión). Validar con el equipo real.
 - **Identidad/acreditación de coordinadores:** cómo se prueba que alguien es coordinador legítimo (invitación + verificación de entidad). Cimiento del antifraude.
 - **Integración WhatsApp:** arranca manual/supervisado; la Business API (plantillas, aprobación Meta) es trabajo de Fase 3+.
-- **Donación económica:** definir el conector exacto (enlace a pasarela de la ONG / Stripe de la entidad) sin que la plataforma custodie fondos.

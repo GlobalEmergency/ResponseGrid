@@ -37,8 +37,8 @@ import { GetMyOffers } from '../../application/get-my-offers';
 import { SubmitOfferDto, MatchOfferDto } from './dto';
 import { SubmitOfferResponseDto, OfferViewDto } from './response.dto';
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
-import { RequireCoordinatorGuard } from '../../../identity/infrastructure/http/require-coordinator.guard';
-import { RequireOfferCoordinatorGuard } from '../../../identity/infrastructure/http/require-offer-coordinator.guard';
+import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
+import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
 import {
   OFFER_NEED_LOOKUP,
   type NeedLookup,
@@ -124,7 +124,8 @@ export class OffersController {
   }
 
   @Get('emergencies/:emergencyId/offers/queue')
-  @UseGuards(JwtAuthGuard, RequireCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('offer:read')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get open offers queue for an emergency (coordinator only)',
@@ -241,7 +242,8 @@ export class OffersController {
 
   @Post('offers/:offerId/match')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RequireOfferCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('offer:match')
   @ApiBearerAuth()
   @ApiOperation({
     summary:
@@ -270,7 +272,8 @@ export class OffersController {
 
   @Post('offers/:offerId/fulfill')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RequireOfferCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('offer:match')
   @ApiBearerAuth()
   @ApiOperation({
     summary:

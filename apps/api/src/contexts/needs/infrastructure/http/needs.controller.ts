@@ -46,8 +46,8 @@ import {
   CreatedTaskFromNeedDto,
 } from './response.dto';
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
-import { RequireCoordinatorGuard } from '../../../identity/infrastructure/http/require-coordinator.guard';
-import { RequireNeedCoordinatorGuard } from '../../../identity/infrastructure/http/require-need-coordinator.guard';
+import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
+import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
 
 interface AuthenticatedRequest extends Express.Request {
   user: { id: string; email: string; isAdmin: boolean };
@@ -161,7 +161,8 @@ export class NeedsController {
   }
 
   @Get('emergencies/:emergencyId/needs/queue')
-  @UseGuards(JwtAuthGuard, RequireCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('need:read')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get pending needs queue for an emergency (coordinator only)',
@@ -212,7 +213,8 @@ export class NeedsController {
 
   @Post('needs/:needId/validate')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RequireNeedCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('need:validate')
   @ApiBearerAuth()
   @ApiOperation({
     summary: "Validate a need (coordinator of the need's emergency only)",
@@ -231,7 +233,8 @@ export class NeedsController {
 
   @Post('needs/:needId/assign-manager')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RequireNeedCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('need:prioritize')
   @ApiBearerAuth()
   @ApiOperation({
     summary:
@@ -254,7 +257,8 @@ export class NeedsController {
 
   @Post('needs/:needId/renew')
   @HttpCode(200)
-  @UseGuards(JwtAuthGuard, RequireNeedCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('need:prioritize')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Renew a need (reset expiresAt to now+48h) — coordinator only',
@@ -271,7 +275,8 @@ export class NeedsController {
   }
 
   @Get('emergencies/:emergencyId/needs/expired')
-  @UseGuards(JwtAuthGuard, RequireCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('need:read')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'List expired needs for an emergency (coordinator only)',
@@ -296,7 +301,8 @@ export class NeedsController {
   // ── F05: GET /needs/:needId/volunteer-suggestions ─────────────────────────
 
   @Get('needs/:needId/volunteer-suggestions')
-  @UseGuards(JwtAuthGuard, RequireNeedCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('volunteer:read')
   @ApiBearerAuth()
   @ApiOperation({
     summary:
@@ -331,7 +337,8 @@ export class NeedsController {
 
   @Post('needs/:needId/create-task')
   @HttpCode(201)
-  @UseGuards(JwtAuthGuard, RequireNeedCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('task:create')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Create a task from a personnel need (coordinator only)',

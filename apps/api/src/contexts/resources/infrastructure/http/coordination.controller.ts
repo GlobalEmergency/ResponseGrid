@@ -19,7 +19,8 @@ import { GetCoordinationQueue } from '../../application/get-coordination-queue';
 import { ResourceView } from '../../application/resource-view';
 import { ResourceViewDto } from './response.dto';
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
-import { RequireCoordinatorGuard } from '../../../identity/infrastructure/http/require-coordinator.guard';
+import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
+import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
 
 @ApiTags('resources')
 @Controller()
@@ -27,7 +28,8 @@ export class CoordinationController {
   constructor(private readonly queue: GetCoordinationQueue) {}
 
   @Get('emergencies/:emergencyId/coordination/queue')
-  @UseGuards(JwtAuthGuard, RequireCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('resource:read')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get the coordination queue for an emergency (coordinator only)',
