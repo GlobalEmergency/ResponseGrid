@@ -212,7 +212,7 @@ export function ReportCard({ report, slug }: ReportCardProps) {
       )}
 
       <ValidationActions
-        canAct
+        canAct={report.status !== 'closed'}
         editFields={editFields}
         onEdit={(reason, values) =>
           editReport(report.id, slug, {

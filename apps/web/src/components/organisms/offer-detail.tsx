@@ -214,13 +214,18 @@ export function OfferDetail({
       </div>
     ) : null;
 
+  // Edit/discard only make sense while the offer is still live; a fulfilled or
+  // cancelled offer is terminal (the API would reject both with 409).
+  const canEditOrDiscard =
+    canMatch && (offer.status === 'open' || offer.status === 'matched');
+
   const footer =
-    actions != null || errorMessage !== undefined || canMatch ? (
+    actions != null || errorMessage !== undefined || canEditOrDiscard ? (
       <div className="flex flex-col gap-3">
         {errorMessage !== undefined && <ErrorMessage message={errorMessage} />}
         {actions}
         <ValidationActions
-          canAct={canMatch}
+          canAct={canEditOrDiscard}
           editFields={editFields}
           onEdit={(reason, values) =>
             editOffer(offer.id, slug, {
