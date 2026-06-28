@@ -84,6 +84,9 @@ export class IngestExternalResources {
           verificationLevel: existingSnap.verificationLevel,
           publicStatus: existingSnap.publicStatus,
           createdAt: existingSnap.createdAt,
+          // Preserved (local-owned recipient role — #60):
+          isFinalRecipient: existingSnap.isFinalRecipient,
+          recipientType: existingSnap.recipientType,
           // Preserved (structural — not changed by source):
           emergencyId: existingSnap.emergencyId,
           // Source-owned (updated):
@@ -131,6 +134,8 @@ export class IngestExternalResources {
           verificationLevel: VerificationLevel.Unverified,
           publicStatus: PublicStatus.Active,
           createdAt: new Date(),
+          isFinalRecipient: false,
+          recipientType: null,
           contact: mapped.contact,
           schedule: mapped.schedule,
           manager: mapped.manager,

@@ -347,6 +347,27 @@ describe('DrizzleResourceRepository (integration)', () => {
     expect(found!.provenance?.raw).toEqual({ x: 1 });
   });
 
+  it('round-trips the final-recipient role through Postgres (#60)', async () => {
+    const r = Resource.register({
+      id: ResourceId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      type: ResourceType.Venue,
+      stage: ResourceStage.Destination,
+      name: 'Hospital Central',
+      location: baseLocation,
+      ownerUserId: OWNER_ID,
+      isFinalRecipient: true,
+      recipientType: 'hospital',
+    });
+
+    await repo.save(r);
+    const found = await repo.findById(r.id);
+
+    expect(found).not.toBeNull();
+    expect(found!.isFinalRecipient).toBe(true);
+    expect(found!.recipientType).toBe('hospital');
+  });
+
   it('round-trips resource with no enriched fields (defaults)', async () => {
     const r = Resource.register({
       id: ResourceId.create(),

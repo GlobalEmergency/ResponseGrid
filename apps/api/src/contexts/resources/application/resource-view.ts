@@ -27,6 +27,9 @@ export interface ResourceView {
   /** Country string from the source's `pais` field — often a full Spanish name (e.g. "Venezuela"), NOT an ISO code. */
   country: string | null;
   city: string | null;
+  // destinatario final (#60)
+  isFinalRecipient: boolean;
+  recipientType: string | null;
 }
 
 export function toResourceView(r: Resource): ResourceView {
@@ -48,5 +51,7 @@ export function toResourceView(r: Resource): ResourceView {
     externalUpdatedAt: r.provenance?.externalUpdatedAt?.toISOString() ?? null,
     country: r.country,
     city: r.city,
+    isFinalRecipient: r.isFinalRecipient,
+    recipientType: r.recipientType,
   };
 }
