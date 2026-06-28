@@ -13,6 +13,13 @@ interface HeaderBandShellProps {
   /** Brand glyph size in px. */
   brandSize?: number;
   showLanguageSwitcher?: boolean;
+  /**
+   * Optional top-row slot rendered before the language switch. Public landing
+   * headers pass the "Mi panel" bridge here; it stays a ReactNode so this shared
+   * shell never imports server-only code (it is also used by client pages, e.g.
+   * the offline fallback). Dashboard sections carry their own sidebar/drawer.
+   */
+  accountSlot?: ReactNode;
 }
 
 /**
@@ -26,6 +33,7 @@ export function HeaderBandShell({
   pb = 'md',
   brandSize = 24,
   showLanguageSwitcher = true,
+  accountSlot,
 }: HeaderBandShellProps) {
   return (
     <header className={`rounded-b-[28px] bg-navy px-5 pt-6 ${PB_CLASS[pb]} text-white lg:px-8`}>
@@ -37,7 +45,10 @@ export function HeaderBandShell({
         >
           <BrandLogo size={brandSize} wordmarkClassName="text-base" />
         </Link>
-        {showLanguageSwitcher && <LanguageSwitcher tone="dark" />}
+        <div className="flex items-center gap-2.5">
+          {accountSlot}
+          {showLanguageSwitcher && <LanguageSwitcher tone="dark" />}
+        </div>
       </div>
       {children}
     </header>

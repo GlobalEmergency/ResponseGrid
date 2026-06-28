@@ -18,6 +18,7 @@ export const en = {
     language: 'Language',
     es: 'ES',
     en: 'EN',
+    my_panel: 'My dashboard',
 
     // Global Emergency global footer (shared by every page)
     footer: {
