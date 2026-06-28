@@ -6,9 +6,11 @@ import { useState, useTransition } from 'react';
 import type { components } from '@reliefhub/api-client';
 import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';
+import { LocalDate } from '@/components/atoms/local-date';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
+import { formatDate } from '@/lib/format-date';
 import type { Messages } from '@/i18n/messages/es';
 import {
   getValidityReports,
@@ -70,6 +72,7 @@ function DisputedCard({
   tc: Messages['coord'];
 }) {
   const router = useRouter();
+  const locale = useLocale();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [active, setActive] = useState<DisputeResolution | null>(null);
@@ -161,7 +164,7 @@ function DisputedCard({
           ' · ' +
             tc.disputes_last_reported_label.replace(
               '{date}',
-              new Date(item.lastReportedAt).toLocaleDateString(),
+              formatDate(item.lastReportedAt, locale),
             )}
       </p>
 
@@ -197,9 +200,7 @@ function DisputedCard({
                   <span className="font-semibold text-warning">
                     {reasonLabels[report.reason] ?? report.reason}
                   </span>
-                  <span className="text-muted">
-                    {new Date(report.createdAt).toLocaleDateString()}
-                  </span>
+                  <LocalDate iso={report.createdAt} className="text-muted" />
                 </div>
                 {report.note != null && report.note.trim() !== '' ? (
                   <p className="mt-1 text-ink">{report.note}</p>

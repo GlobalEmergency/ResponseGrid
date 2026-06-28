@@ -6,6 +6,7 @@ import { Input } from '@/components/atoms/input';
 import { Badge } from '@/components/atoms/badge';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { formatDate } from '@/lib/format-date';
 import {
   fetchOrgServiceAccounts,
   fetchApiKeys,
@@ -181,7 +182,7 @@ function ServiceAccountKeys({ saId, name }: { saId: string; name: string }) {
                     {k.prefix}…
                     <span className="ml-1 text-gray-400">
                       {k.lastUsedAt
-                        ? `· último uso ${new Date(k.lastUsedAt).toLocaleDateString('es-ES')}`
+                        ? `· último uso ${formatDate(k.lastUsedAt, 'es')}`
                         : '· sin uso'}
                     </span>
                   </span>

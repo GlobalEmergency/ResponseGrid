@@ -13,10 +13,19 @@ import {
   ValidationActions,
   type EditField,
 } from '@/components/organisms/validation-actions';
+import { LocalDate } from '@/components/atoms/local-date';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/$/, '');
+
+/** Report timestamp format: "05 jun, 14:32" — preserved from the original. */
+const REPORT_DATE_OPTS: Intl.DateTimeFormatOptions = {
+  day: '2-digit',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+};
 
 type ReportPriority = 'low' | 'medium' | 'high' | 'urgent';
 type ReportStatus = 'open' | 'reviewed' | 'closed';
@@ -179,14 +188,7 @@ export function ReportCard({ report, slug }: ReportCardProps) {
           <span>{tc.report_author_label}: {report.authorName}</span>
         )}
         {report.createdAt != null && (
-          <time dateTime={report.createdAt} suppressHydrationWarning>
-            {new Date(report.createdAt).toLocaleString(locale === 'en' ? 'en-GB' : 'es-ES', {
-              day: '2-digit',
-              month: 'short',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-          </time>
+          <LocalDate iso={report.createdAt} opts={REPORT_DATE_OPTS} />
         )}
       </div>
 

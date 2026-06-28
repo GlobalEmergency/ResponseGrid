@@ -18,6 +18,7 @@ import { DetailDrawer } from '@/components/organisms/detail-drawer';
 import { DetailField, DetailSection } from '@/components/molecules/detail-field';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
+import { formatDate as formatDateUtc } from '@/lib/format-date';
 
 type ShipmentViewDto = components['schemas']['ShipmentViewDto'];
 type CapacityViewDto = components['schemas']['CapacityViewDto'];
@@ -545,10 +546,14 @@ function formatWindow(
   return from ?? to;
 }
 
+/**
+ * Transport-window boundary date. Pinned to UTC via the shared helper so the
+ * server (UTC) and the browser (local) render the same calendar day — no #418
+ * hydration mismatch (issue #174). Window edges are absolute dates, so showing
+ * them in UTC (not local) is acceptable and avoids any drift.
+ */
 function formatDate(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString(undefined, {
+  return formatDateUtc(iso, 'es', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

@@ -5,6 +5,7 @@ import { useTransition } from 'react';
 import { markNotificationReadAction } from '@/app/notificaciones/actions';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
+import { LocalDate } from '@/components/atoms/local-date';
 
 export interface NotificationItemProps {
   id: string;
@@ -40,17 +41,6 @@ export function NotificationItem({
     });
   };
 
-  const formattedDate = new Date(createdAt).toLocaleString(
-    locale === 'en' ? 'en-GB' : 'es-ES',
-    {
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    },
-  );
-
   const innerContent = (
     <div className="flex flex-col gap-1 flex-1 min-w-0">
       <p
@@ -58,13 +48,11 @@ export function NotificationItem({
       >
         {message}
       </p>
-      <time
-        dateTime={createdAt}
-        suppressHydrationWarning
+      <LocalDate
+        iso={createdAt}
+        withTime
         className="text-xs text-muted-soft"
-      >
-        {formattedDate}
-      </time>
+      />
     </div>
   );
 

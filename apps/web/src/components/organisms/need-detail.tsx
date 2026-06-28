@@ -12,6 +12,7 @@ import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { FreshnessIndicator } from '@/components/atoms/freshness-indicator';
+import { LocalDate } from '@/components/atoms/local-date';
 import { DetailDrawer } from '@/components/organisms/detail-drawer';
 import {
   ValidationActions,
@@ -192,19 +193,13 @@ export function NeedDetail({
         />
         <DetailField
           label={tc.detail_field_created}
-          value={
-            <time dateTime={need.createdAt} suppressHydrationWarning>
-              {new Date(need.createdAt).toLocaleString()}
-            </time>
-          }
+          value={<LocalDate iso={need.createdAt} withTime />}
         />
         <DetailField
           label={tc.detail_field_expiry}
           value={
             need.expiresAt != null ? (
-              <time dateTime={need.expiresAt} suppressHydrationWarning>
-                {new Date(need.expiresAt).toLocaleString()}
-              </time>
+              <LocalDate iso={need.expiresAt} withTime />
             ) : null
           }
         />

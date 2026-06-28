@@ -9,6 +9,7 @@ import { ErrorMessage } from '@/components/atoms/error-message';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
 import { categoryLabel } from '@/lib/categories';
+import { LocalDate } from '@/components/atoms/local-date';
 
 type NeedView = components['schemas']['NeedViewDto'];
 
@@ -64,9 +65,7 @@ export function ExpiredNeedCard({ need, slug }: ExpiredNeedCardProps) {
               <span aria-hidden="true" className="text-muted-soft">·</span>
               <span>
                 {tc.expired_at_label}:{' '}
-                <time dateTime={need.expiresAt} suppressHydrationWarning>
-                  {new Date(need.expiresAt).toLocaleString()}
-                </time>
+                <LocalDate iso={need.expiresAt} withTime />
               </span>
             </>
           )}
