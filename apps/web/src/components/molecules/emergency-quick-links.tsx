@@ -31,6 +31,7 @@ export function EmergencyQuickLinks({ slug, te, authed }: EmergencyQuickLinksPro
         <div className="flex flex-wrap gap-x-4 gap-y-1.5">
           <Link href={`/e/${slug}/mis-puntos`} className={linkClass}>{te.footer_my_points}</Link>
           <Link href={`/e/${slug}/mi-voluntariado`} className={linkClass}>{te.footer_my_volunteer}</Link>
+          <Link href={`/e/${slug}/mis-expediciones`} className={linkClass}>{te.footer_my_shipments}</Link>
           <Link href={`/e/${slug}/reportar`} className={linkClass}>{te.footer_report}</Link>
         </div>
       )}
