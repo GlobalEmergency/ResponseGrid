@@ -322,7 +322,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Publish a resource (coordinator of the resource's emergency only) */
+        /** Publish a resource (verifier or coordinator of the resource's emergency) */
         post: operations["ResourcesController_publishResource"];
         delete?: never;
         options?: never;
@@ -7068,7 +7068,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Missing shipment:create permission */
+            /** @description Not a coordinator of the emergency */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7121,7 +7121,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Missing shipment:assign permission */
+            /** @description Not a coordinator of the shipment emergency */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7268,7 +7268,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Missing shipment:update permission */
+            /** @description Not a coordinator of the shipment emergency */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7389,7 +7389,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Missing shipment:read permission */
+            /** @description Not a coordinator of the shipment emergency */
             403: {
                 headers: {
                     [name: string]: unknown;

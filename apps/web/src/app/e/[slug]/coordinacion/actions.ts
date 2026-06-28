@@ -221,6 +221,10 @@ export async function verifyAndPublish(
       await clearToken();
       redirect(`/login?next=/e/${slug}/coordinacion`);
     }
+    // The verify step already persisted; refresh so the queue/badge reflect the
+    // now-verified state even though publishing failed (avoids a stale "Sin
+    // verificar" and a misleading retry).
+    revalidatePath(`/e/${slug}/coordinacion`);
     return {
       status: 'error',
       message: t.coord.err_publish_resource_failed,

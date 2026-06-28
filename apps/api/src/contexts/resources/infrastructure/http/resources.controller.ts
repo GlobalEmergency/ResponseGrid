@@ -147,11 +147,11 @@ export class ResourcesController {
   @Post('resources/:resourceId/publish')
   @HttpCode(204)
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @RequirePermission('resource:edit')
+  @RequirePermission('resource:verify')
   @ApiBearerAuth()
   @ApiOperation({
     summary:
-      "Publish a resource (coordinator of the resource's emergency only)",
+      "Publish a resource (verifier or coordinator of the resource's emergency)",
   })
   @ApiParam({
     name: 'resourceId',
