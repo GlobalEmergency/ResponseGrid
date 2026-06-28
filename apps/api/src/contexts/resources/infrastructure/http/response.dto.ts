@@ -126,6 +126,11 @@ export class PagedResourcesDto {
   limit!: number;
 }
 
+export class InBoundsResourcesDto {
+  @ApiProperty({ type: [ResourceViewDto] })
+  items!: ResourceViewDto[];
+}
+
 export class ResourceFacetsDto {
   @ApiProperty({ example: { water: 5, food: 3 } })
   byCategory!: Record<string, number>;

@@ -7,6 +7,7 @@ import L from 'leaflet';
 import 'leaflet.markercluster';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import { useEffect, useRef } from 'react';
+import type { Map as LeafletMap } from 'leaflet';
 
 // ── Icon helpers ───────────────────────────────────────────────────────────────
 // Uses the pointhi/leaflet-color-markers CDN so bundlers never break icon URLs.
@@ -78,6 +79,12 @@ function resourceIcon(status: ResourcePublicStatus | undefined): L.Icon {
 
 interface EmergencyMapProps {
   points: MapPoint[];
+  /**
+   * Called once the Leaflet map instance is ready (after initial render).
+   * Also called on every moveend/zoomend if the caller sets it up that way.
+   * Returns an optional cleanup function that is invoked on unmount.
+   */
+  onMapReady?: (map: LeafletMap) => (() => void) | void;
 }
 
 // ── Inner component that draws uncertainty circles for approximate needs ──────
@@ -204,6 +211,31 @@ function ClusteredMarkersLayer({ points }: { points: MapPoint[] }) {
   return null;
 }
 
+// ── Inner component that fires onMapReady once the Leaflet map is available ───
+function MapReadyEmitter({
+  onMapReady,
+}: {
+  onMapReady?: (map: LeafletMap) => (() => void) | void;
+}) {
+  const map = useMap();
+  const cleanupRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    if (onMapReady) {
+      const cleanup = onMapReady(map);
+      if (cleanup) cleanupRef.current = cleanup;
+    }
+    return () => {
+      if (cleanupRef.current) {
+        cleanupRef.current();
+        cleanupRef.current = null;
+      }
+    };
+  }, [map, onMapReady]);
+
+  return null;
+}
+
 // ── Inner component that fits the bounds once the map is ready ────────────────
 function BoundsFitter({ points }: { points: MapPoint[] }) {
   const map = useMap();
@@ -227,7 +259,7 @@ function BoundsFitter({ points }: { points: MapPoint[] }) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function EmergencyMap({ points }: EmergencyMapProps) {
+export default function EmergencyMap({ points, onMapReady }: EmergencyMapProps) {
   // Default centre (Spain) used only when there are no points
   const defaultCenter: [number, number] = [40.4168, -3.7038];
   const defaultZoom = 5;
@@ -245,6 +277,7 @@ export default function EmergencyMap({ points }: EmergencyMapProps) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
 
+        {onMapReady && <MapReadyEmitter onMapReady={onMapReady} />}
         <BoundsFitter points={points} />
         <ApproximateCirclesLayer points={points} />
         <ClusteredMarkersLayer points={points} />

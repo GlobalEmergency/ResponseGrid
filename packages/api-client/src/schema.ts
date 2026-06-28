@@ -55,6 +55,108 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/grants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Grant a role to a principal in a scope (delegated, attenuated) */
+        post: operations["GrantsController_grant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/grants/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Revoke a grant */
+        delete: operations["GrantsController_revoke"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/service-accounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a service account (machine principal) */
+        post: operations["ApiKeysController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/service-accounts/{serviceAccountId}/api-keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Issue an API key for a service account (secret shown once) */
+        post: operations["ApiKeysController_issue"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api-keys/{keyId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Revoke an API key */
+        delete: operations["ApiKeysController_revoke"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/service-accounts/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Introspect the calling service account (authenticated by X-API-Key) */
+        get: operations["ServiceAccountIntrospectionController_me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/notifications/mine": {
         parameters: {
             query?: never;
@@ -234,6 +336,23 @@ export interface paths {
         };
         /** Find visible resources near a GPS point, ordered by distance */
         get: operations["PublicController_nearby"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/public/resources/in-bounds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Find visible resources within a geographic bounding box */
+        get: operations["PublicController_inBounds"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1155,6 +1274,66 @@ export interface components {
             name: string;
             isAdmin: boolean;
         };
+        GrantRoleDto: {
+            /**
+             * Format: uuid
+             * @description Principal receiving the role
+             */
+            principalId: string;
+            /** @description Role id from the fixed catalog (e.g. emergency_coordinator) */
+            roleId: string;
+            /**
+             * @description Scope the role applies to
+             * @enum {string}
+             */
+            scopeType: "platform" | "organization" | "emergency" | "group" | "entity";
+            /** @description Scope id (required for every scope except platform) */
+            scopeId?: string;
+            /** @description Entity type (required for entity scope) */
+            scopeEntityType?: string;
+            /** @description ISO 8601 expiry — for temporary / break-glass grants */
+            expiresAt?: string;
+        };
+        GrantResponseDto: {
+            /** Format: uuid */
+            id: string;
+        };
+        CreateServiceAccountDto: {
+            /** @description Human-readable name for the service account */
+            name: string;
+            /**
+             * Format: uuid
+             * @description Owning organization; omit for a platform-level account
+             */
+            ownerOrganizationId?: string;
+        };
+        ServiceAccountResponseDto: {
+            /** Format: uuid */
+            id: string;
+        };
+        IssueApiKeyDto: {
+            /** @description ISO 8601 expiry for the key */
+            expiresAt?: string;
+        };
+        IssuedApiKeyResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** @description The full secret key — shown once; store it now */
+            apiKey: string;
+            prefix: string;
+        };
+        IntrospectedGrantDto: {
+            roleId: string;
+            scopeType: string;
+            scopeId: Record<string, never> | null;
+        };
+        ServiceAccountIdentityDto: {
+            /** Format: uuid */
+            principalId: string;
+            /** @enum {string} */
+            principalType: "service_account";
+            grants: components["schemas"]["IntrospectedGrantDto"][];
+        };
         NotificationDto: {
             id: string;
             userId: string;
@@ -1405,6 +1584,9 @@ export interface components {
         };
         NearbyResourcesResponseDto: {
             items: components["schemas"]["NearbyResourceViewDto"][];
+        };
+        InBoundsResourcesDto: {
+            items: components["schemas"]["ResourceViewDto"][];
         };
         ResourceFacetsDto: {
             /**
@@ -2288,6 +2470,214 @@ export interface operations {
             };
         };
     };
+    GrantsController_grant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GrantRoleDto"];
+            };
+        };
+        responses: {
+            /** @description Role granted */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GrantResponseDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authorized to grant, or privilege escalation */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GrantsController_revoke: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Grant revoked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authorized to revoke */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ApiKeysController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateServiceAccountDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceAccountResponseDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description apikey:create required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ApiKeysController_issue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                serviceAccountId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IssueApiKeyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IssuedApiKeyResponseDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description apikey:create required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ApiKeysController_revoke: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                keyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Key revoked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description apikey:revoke required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ServiceAccountIntrospectionController_me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceAccountIdentityDto"];
+                };
+            };
+            /** @description Missing, malformed, invalid or revoked API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     NotificationsController_getMyNotifications: {
         parameters: {
             query?: never;
@@ -2717,6 +3107,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NearbyResourcesResponseDto"];
+                };
+            };
+        };
+    };
+    PublicController_inBounds: {
+        parameters: {
+            query: {
+                /** @description South latitude bound (-90 to 90) */
+                minLat: number;
+                /** @description West longitude bound (-180 to 180) */
+                minLng: number;
+                /** @description North latitude bound (-90 to 90) */
+                maxLat: number;
+                /** @description East longitude bound (-180 to 180) */
+                maxLng: number;
+                /** @description Max results (default 500, max 1000) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Resources within the bounding box */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InBoundsResourcesDto"];
                 };
             };
         };

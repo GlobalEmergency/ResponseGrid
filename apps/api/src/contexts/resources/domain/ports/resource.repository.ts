@@ -48,4 +48,15 @@ export interface ResourceRepository {
     emergencyId: EmergencyId,
     q: { lat: number; lng: number; radiusMeters: number; limit: number },
   ): Promise<Array<{ resource: Resource; distanceMeters: number }>>;
+  /** Visible resources whose coordinates fall inside a bounding box. */
+  findInBounds(
+    emergencyId: EmergencyId,
+    q: {
+      minLat: number;
+      minLng: number;
+      maxLat: number;
+      maxLng: number;
+      limit: number;
+    },
+  ): Promise<Resource[]>;
 }

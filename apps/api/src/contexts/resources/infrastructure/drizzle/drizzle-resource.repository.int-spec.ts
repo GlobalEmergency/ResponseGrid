@@ -976,6 +976,200 @@ describe('DrizzleResourceRepository (integration)', () => {
     });
   });
 
+  // ─── Issue #68: findInBounds ───────────────────────────────────────────────
+
+  describe('findInBounds', () => {
+    // Bounding box centered around Caracas, Venezuela
+    const BBOX_EM = '68680000-0000-4000-8000-000000000068';
+    // Origin: 10.4806, -66.9036
+    const MIN_LAT = 10.3;
+    const MAX_LAT = 10.7;
+    const MIN_LNG = -67.2;
+    const MAX_LNG = -66.6;
+
+    const makeBboxResource = (
+      name: string,
+      lat: number,
+      lng: number,
+      status: PublicStatus,
+    ) => {
+      const base = Resource.register({
+        id: ResourceId.create(),
+        emergencyId: EmergencyId.fromString(BBOX_EM),
+        type: ResourceType.CollectionPoint,
+        stage: ResourceStage.Origin,
+        name,
+        location: Location.create({
+          address: `${name} addr`,
+          latitude: lat,
+          longitude: lng,
+        }),
+        ownerUserId: OWNER_ID,
+      });
+      return Resource.fromSnapshot({
+        ...base.toSnapshot(),
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: status,
+        createdAt: new Date(),
+      });
+    };
+
+    beforeEach(async () => {
+      await db
+        .delete(resourcesTable)
+        .where(eq(resourcesTable.emergencyId, BBOX_EM));
+    });
+
+    it('returns only resources inside the bounding box with visible status', async () => {
+      // Inside + Active
+      const r1 = makeBboxResource(
+        'R1 inside',
+        10.48,
+        -66.9,
+        PublicStatus.Active,
+      );
+      // Inside + Saturated
+      const r2 = makeBboxResource(
+        'R2 saturated',
+        10.5,
+        -67.1,
+        PublicStatus.Saturated,
+      );
+      // Inside + Paused
+      const r3 = makeBboxResource(
+        'R3 paused',
+        10.55,
+        -66.7,
+        PublicStatus.Paused,
+      );
+      // Outside lat (too far north)
+      const rOutLat = makeBboxResource(
+        'R_out_lat',
+        10.8,
+        -66.9,
+        PublicStatus.Active,
+      );
+      // Outside lng (too far east)
+      const rOutLng = makeBboxResource(
+        'R_out_lng',
+        10.48,
+        -66.5,
+        PublicStatus.Active,
+      );
+      // Hidden (excluded by status)
+      const rHidden = makeBboxResource(
+        'R_hidden',
+        10.48,
+        -66.9,
+        PublicStatus.Hidden,
+      );
+      // Closed (excluded by status)
+      const rClosed = makeBboxResource(
+        'R_closed',
+        10.48,
+        -66.9,
+        PublicStatus.Closed,
+      );
+
+      await repo.save(r1);
+      await repo.save(r2);
+      await repo.save(r3);
+      await repo.save(rOutLat);
+      await repo.save(rOutLng);
+      await repo.save(rHidden);
+      await repo.save(rClosed);
+
+      const results = await repo.findInBounds(EmergencyId.fromString(BBOX_EM), {
+        minLat: MIN_LAT,
+        minLng: MIN_LNG,
+        maxLat: MAX_LAT,
+        maxLng: MAX_LNG,
+        limit: 50,
+      });
+
+      const names = results.map((r) => r.name).sort();
+      expect(names).toEqual(['R1 inside', 'R2 saturated', 'R3 paused']);
+      expect(names).not.toContain('R_out_lat');
+      expect(names).not.toContain('R_out_lng');
+      expect(names).not.toContain('R_hidden');
+      expect(names).not.toContain('R_closed');
+    });
+
+    it('respects limit parameter', async () => {
+      for (let i = 0; i < 5; i++) {
+        await repo.save(
+          makeBboxResource(
+            `Resource ${i}`,
+            10.48 + i * 0.01,
+            -66.9,
+            PublicStatus.Active,
+          ),
+        );
+      }
+
+      const results = await repo.findInBounds(EmergencyId.fromString(BBOX_EM), {
+        minLat: MIN_LAT,
+        minLng: MIN_LNG,
+        maxLat: MAX_LAT,
+        maxLng: MAX_LNG,
+        limit: 3,
+      });
+
+      expect(results).toHaveLength(3);
+    });
+
+    it('returns empty array when no resources in box', async () => {
+      await repo.save(
+        makeBboxResource('Far away', 50.0, 10.0, PublicStatus.Active),
+      );
+
+      const results = await repo.findInBounds(EmergencyId.fromString(BBOX_EM), {
+        minLat: MIN_LAT,
+        minLng: MIN_LNG,
+        maxLat: MAX_LAT,
+        maxLng: MAX_LNG,
+        limit: 50,
+      });
+
+      expect(results).toHaveLength(0);
+    });
+
+    it('does not include resources from other emergencies', async () => {
+      const OTHER_EM = '99990000-0000-4000-8000-000000000099';
+      const other = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(OTHER_EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'Other Emergency',
+          location: Location.create({
+            address: 'addr',
+            latitude: 10.48,
+            longitude: -66.9,
+          }),
+          ownerUserId: OWNER_ID,
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+      const mine = makeBboxResource('Mine', 10.48, -66.9, PublicStatus.Active);
+      await repo.save(other);
+      await repo.save(mine);
+
+      const results = await repo.findInBounds(EmergencyId.fromString(BBOX_EM), {
+        minLat: MIN_LAT,
+        minLng: MIN_LNG,
+        maxLat: MAX_LAT,
+        maxLng: MAX_LNG,
+        limit: 50,
+      });
+
+      expect(results.map((r) => r.name)).toEqual(['Mine']);
+    });
+  });
+
   it('DB constraint rejects source_name without external_id (Fix wave 1)', async () => {
     const id = ResourceId.create().value;
     let threw = false;

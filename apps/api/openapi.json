@@ -1,0 +1,6547 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_loginRoute",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          },
+          "429": {
+            "description": "Rate limit exceeded — try again later"
+          }
+        },
+        "summary": "Authenticate and obtain a JWT access token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "AuthController_registerRoute",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "409": {
+            "description": "Email already registered"
+          },
+          "429": {
+            "description": "Rate limit exceeded — try again later"
+          }
+        },
+        "summary": "Register a new user account (auto-login returns JWT)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "AuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Authenticated user info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the authenticated user profile",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/grants": {
+      "post": {
+        "operationId": "GrantsController_grant",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Role granted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrantResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not authorized to grant, or privilege escalation"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Grant a role to a principal in a scope (delegated, attenuated)",
+        "tags": [
+          "grants"
+        ]
+      }
+    },
+    "/grants/{id}": {
+      "delete": {
+        "operationId": "GrantsController_revoke",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Grant revoked"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not authorized to revoke"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revoke a grant",
+        "tags": [
+          "grants"
+        ]
+      }
+    },
+    "/service-accounts": {
+      "post": {
+        "operationId": "ApiKeysController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateServiceAccountDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceAccountResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "apikey:create required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a service account (machine principal)",
+        "tags": [
+          "service-accounts"
+        ]
+      }
+    },
+    "/service-accounts/{serviceAccountId}/api-keys": {
+      "post": {
+        "operationId": "ApiKeysController_issue",
+        "parameters": [
+          {
+            "name": "serviceAccountId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IssueApiKeyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssuedApiKeyResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "apikey:create required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Issue an API key for a service account (secret shown once)",
+        "tags": [
+          "service-accounts"
+        ]
+      }
+    },
+    "/api-keys/{keyId}": {
+      "delete": {
+        "operationId": "ApiKeysController_revoke",
+        "parameters": [
+          {
+            "name": "keyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Key revoked"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "apikey:revoke required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revoke an API key",
+        "tags": [
+          "service-accounts"
+        ]
+      }
+    },
+    "/service-accounts/me": {
+      "get": {
+        "operationId": "ServiceAccountIntrospectionController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceAccountIdentityDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, invalid or revoked API key"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Introspect the calling service account (authenticated by X-API-Key)",
+        "tags": [
+          "service-accounts"
+        ]
+      }
+    },
+    "/notifications/mine": {
+      "get": {
+        "operationId": "NotificationsController_getMyNotifications",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMyNotificationsResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get my in-app notifications",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/notifications/{id}/read": {
+      "post": {
+        "operationId": "NotificationsController_markRead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Not the owner of this notification"
+          },
+          "404": {
+            "description": "Notification not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark a notification as read (owner only)",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/notifications/read-all": {
+      "post": {
+        "operationId": "NotificationsController_markAllRead",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark all my notifications as read",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/resources": {
+      "post": {
+        "operationId": "ResourcesController_create",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterResourceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Resource registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResourceResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body or UUID"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Register a resource for an emergency (requires authentication)",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
+    "/resources/{resourceId}/verify": {
+      "post": {
+        "operationId": "ResourcesController_verifyResource",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "Resource UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyResourceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Resource verified"
+          },
+          "400": {
+            "description": "Invalid verification level or UUID"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Resource not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Verify a resource (coordinator of the resource's emergency only)",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
+    "/resources/{resourceId}/publish": {
+      "post": {
+        "operationId": "ResourcesController_publishResource",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "Resource UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Resource published"
+          },
+          "400": {
+            "description": "Invalid UUID"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "409": {
+            "description": "Resource not verified yet"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Publish a resource (coordinator of the resource's emergency only)",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
+    "/resources/{resourceId}/status": {
+      "post": {
+        "operationId": "ResourcesController_updateResourceStatus",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "Resource UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateResourcePublicStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Status updated"
+          },
+          "400": {
+            "description": "Invalid status transition or UUID"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not authorized to update this resource status"
+          },
+          "404": {
+            "description": "Resource not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update the operational public status of a resource (owner or coordinator)",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/resources/mine": {
+      "get": {
+        "operationId": "ResourcesController_listMyResources",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of own resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResourceViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List resources owned by the authenticated user in an emergency",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/coordination/queue": {
+      "get": {
+        "operationId": "CoordinationController_list",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of resources in queue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResourceViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required for this emergency"
+          },
+          "404": {
+            "description": "Emergency not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the coordination queue for an emergency (coordinator only)",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/public/resources": {
+      "get": {
+        "operationId": "PublicController_list",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (1-based)",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page (max 100)",
+            "schema": {
+              "default": 50,
+              "example": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "Filter by category slug",
+            "schema": {
+              "example": "water",
+              "type": "string"
+            }
+          },
+          {
+            "name": "country",
+            "required": false,
+            "in": "query",
+            "description": "Filter by ISO 3166-1 alpha-2 country code",
+            "schema": {
+              "example": "VE",
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Full-text search string matched against name, address, and city (case-insensitive, max 100 chars)",
+            "schema": {
+              "example": "caritas",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paged list of published resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResourcesDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List published resources for an emergency (paginated + filterable)",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/public/resources/nearby": {
+      "get": {
+        "operationId": "PublicController_nearby",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "lat",
+            "required": true,
+            "in": "query",
+            "description": "Latitude between -90 and 90",
+            "schema": {
+              "example": 10.4806,
+              "type": "number"
+            }
+          },
+          {
+            "name": "lng",
+            "required": true,
+            "in": "query",
+            "description": "Longitude between -180 and 180",
+            "schema": {
+              "example": -66.9036,
+              "type": "number"
+            }
+          },
+          {
+            "name": "radius",
+            "required": true,
+            "in": "query",
+            "description": "Search radius in meters (max 100000)",
+            "schema": {
+              "example": 5000,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max results (default 50, max 100)",
+            "schema": {
+              "example": 50,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resources within radius ordered by distance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NearbyResourcesResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Find visible resources near a GPS point, ordered by distance",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/public/resources/in-bounds": {
+      "get": {
+        "operationId": "PublicController_inBounds",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "minLat",
+            "required": true,
+            "in": "query",
+            "description": "South latitude bound (-90 to 90)",
+            "schema": {
+              "example": 10.3,
+              "type": "number"
+            }
+          },
+          {
+            "name": "minLng",
+            "required": true,
+            "in": "query",
+            "description": "West longitude bound (-180 to 180)",
+            "schema": {
+              "example": -67.2,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxLat",
+            "required": true,
+            "in": "query",
+            "description": "North latitude bound (-90 to 90)",
+            "schema": {
+              "example": 10.7,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxLng",
+            "required": true,
+            "in": "query",
+            "description": "East longitude bound (-180 to 180)",
+            "schema": {
+              "example": -66.6,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max results (default 500, max 1000)",
+            "schema": {
+              "example": 500,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resources within the bounding box",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InBoundsResourcesDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Find visible resources within a geographic bounding box",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/public/resources/facets": {
+      "get": {
+        "operationId": "PublicController_facets",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Facets for filtering visible resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceFacetsDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get facets (counts by category and country) for visible resources",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/templates": {
+      "post": {
+        "operationId": "TemplatesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTemplateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Template created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTemplateResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Admin access required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create an emergency template (admin only)",
+        "tags": [
+          "templates"
+        ]
+      },
+      "get": {
+        "operationId": "TemplatesController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of templates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TemplateViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Admin access required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all emergency templates (admin only)",
+        "tags": [
+          "templates"
+        ]
+      }
+    },
+    "/templates/{id}": {
+      "delete": {
+        "operationId": "TemplatesController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Template UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Template deleted"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Admin access required"
+          },
+          "404": {
+            "description": "Template not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete an emergency template (admin only)",
+        "tags": [
+          "templates"
+        ]
+      }
+    },
+    "/emergencies": {
+      "post": {
+        "operationId": "EmergenciesController_createEmergency",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEmergencyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Emergency created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateEmergencyResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Admin access required"
+          },
+          "409": {
+            "description": "Slug already exists"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create an emergency (admin only)",
+        "tags": [
+          "emergencies"
+        ]
+      },
+      "get": {
+        "operationId": "EmergenciesController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of active emergencies",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EmergencyViewDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "List active emergencies",
+        "tags": [
+          "emergencies"
+        ]
+      }
+    },
+    "/emergencies/by-slug/{slug}": {
+      "get": {
+        "operationId": "EmergenciesController_getBySlugRoute",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Emergency found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmergencyViewDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Emergency not found"
+          }
+        },
+        "summary": "Get emergency by slug",
+        "tags": [
+          "emergencies"
+        ]
+      }
+    },
+    "/emergencies/from-template": {
+      "post": {
+        "operationId": "EmergenciesController_createFromTemplateRoute",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEmergencyFromTemplateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Emergency created from template",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateEmergencyResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Admin access required"
+          },
+          "404": {
+            "description": "Template not found"
+          },
+          "409": {
+            "description": "Slug already exists"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create an emergency from a template (admin only)",
+        "tags": [
+          "emergencies"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/pause": {
+      "post": {
+        "operationId": "EmergenciesController_pauseEmergency",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Emergency paused"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Emergency not found"
+          },
+          "409": {
+            "description": "Invalid transition (emergency is not active)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Pause an active emergency (coordinator only)",
+        "tags": [
+          "emergencies"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/resume": {
+      "post": {
+        "operationId": "EmergenciesController_resumeEmergency",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Emergency resumed"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Emergency not found"
+          },
+          "409": {
+            "description": "Invalid transition (emergency is not paused)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Resume a paused emergency (coordinator only)",
+        "tags": [
+          "emergencies"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/announcement": {
+      "put": {
+        "operationId": "EmergenciesController_publishEmergencyAnnouncement",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishAnnouncementDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Announcement published"
+          },
+          "400": {
+            "description": "Invalid body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Emergency not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Publish official announcement for an emergency (coordinator only)",
+        "tags": [
+          "emergencies"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/needs": {
+      "post": {
+        "operationId": "NeedsController_create",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNeedDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Need created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateNeedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body or UUID"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a need for an emergency (authenticated requester)",
+        "tags": [
+          "needs"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/public/needs": {
+      "get": {
+        "operationId": "NeedsController_listPublic",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "Filter by item category (needs with at least one item of this category)",
+            "schema": {
+              "enum": [
+                "hygiene",
+                "water",
+                "food",
+                "medical",
+                "shelter",
+                "tools",
+                "other",
+                "medicines",
+                "medical_equipment",
+                "medical_supplies",
+                "medical_personnel"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "priority",
+            "required": false,
+            "in": "query",
+            "description": "Filter by need priority",
+            "schema": {
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "urgent"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of validated needs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NeedViewDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "List validated needs for an emergency (public)",
+        "tags": [
+          "needs"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/needs/queue": {
+      "get": {
+        "operationId": "NeedsController_listQueue",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "Filter by item category (needs with at least one item of this category)",
+            "schema": {
+              "enum": [
+                "hygiene",
+                "water",
+                "food",
+                "medical",
+                "shelter",
+                "tools",
+                "other",
+                "medicines",
+                "medical_equipment",
+                "medical_supplies",
+                "medical_personnel"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "priority",
+            "required": false,
+            "in": "query",
+            "description": "Filter by need priority",
+            "schema": {
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "urgent"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of pending needs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NeedViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required for this emergency"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get pending needs queue for an emergency (coordinator only)",
+        "tags": [
+          "needs"
+        ]
+      }
+    },
+    "/needs/{needId}/validate": {
+      "post": {
+        "operationId": "NeedsController_validate",
+        "parameters": [
+          {
+            "name": "needId",
+            "required": true,
+            "in": "path",
+            "description": "Need UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Need validated"
+          },
+          "400": {
+            "description": "Need is not in pending status"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Need not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Validate a need (coordinator of the need's emergency only)",
+        "tags": [
+          "needs"
+        ]
+      }
+    },
+    "/needs/{needId}/assign-manager": {
+      "post": {
+        "operationId": "NeedsController_assignManager",
+        "parameters": [
+          {
+            "name": "needId",
+            "required": true,
+            "in": "path",
+            "description": "Need UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignNeedManagerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Manager assigned"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Need not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assign a managing organization to a need (coordinator of the need's emergency only)",
+        "tags": [
+          "needs"
+        ]
+      }
+    },
+    "/needs/{needId}/renew": {
+      "post": {
+        "operationId": "NeedsController_renew",
+        "parameters": [
+          {
+            "name": "needId",
+            "required": true,
+            "in": "path",
+            "description": "Need UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Need renewed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NeedViewDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Need not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Renew a need (reset expiresAt to now+48h) — coordinator only",
+        "tags": [
+          "needs"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/needs/expired": {
+      "get": {
+        "operationId": "NeedsController_listExpired",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of expired validated needs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NeedViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List expired needs for an emergency (coordinator only)",
+        "tags": [
+          "needs"
+        ]
+      }
+    },
+    "/needs/{needId}/volunteer-suggestions": {
+      "get": {
+        "operationId": "NeedsController_getVolunteerSuggestions",
+        "parameters": [
+          {
+            "name": "needId",
+            "required": true,
+            "in": "path",
+            "description": "Need UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Maximum number of suggestions (default 20)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of suggested volunteers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VolunteerSuggestionDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Need not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Suggest available volunteers for a personnel need (coordinator only)",
+        "tags": [
+          "needs"
+        ]
+      }
+    },
+    "/needs/{needId}/create-task": {
+      "post": {
+        "description": "Creates one Task linked to the need and optionally assigns volunteers. Reuses existing CreateTask / AssignVolunteerToTask logic.",
+        "operationId": "NeedsController_createTask",
+        "parameters": [
+          {
+            "name": "needId",
+            "required": true,
+            "in": "path",
+            "description": "Need UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskFromNeedDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Task created and volunteers assigned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedTaskFromNeedDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Need not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a task from a personnel need (coordinator only)",
+        "tags": [
+          "needs"
+        ]
+      }
+    },
+    "/organizations": {
+      "post": {
+        "operationId": "OrganizationsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrganizationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Organization created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateOrganizationResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new organization (authenticated users)",
+        "tags": [
+          "organizations"
+        ]
+      },
+      "get": {
+        "operationId": "OrganizationsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "All organizations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrganizationViewDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "List all organizations (public)",
+        "tags": [
+          "organizations"
+        ]
+      }
+    },
+    "/organizations/mine": {
+      "get": {
+        "operationId": "OrganizationsController_mine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User organizations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrganizationViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List organizations the authenticated user belongs to",
+        "tags": [
+          "organizations"
+        ]
+      }
+    },
+    "/organizations/{id}/members": {
+      "get": {
+        "operationId": "OrganizationsController_listMembers",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organization members",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrganizationMemberDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not a member of this organization"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List members of an organization (must be a member)",
+        "tags": [
+          "organizations"
+        ]
+      },
+      "post": {
+        "operationId": "OrganizationsController_addMember",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddMemberDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Member added"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Only the owner can add members"
+          },
+          "404": {
+            "description": "User not found by email"
+          },
+          "409": {
+            "description": "User is already a member"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a member to an organization (owner only)",
+        "tags": [
+          "organizations"
+        ]
+      }
+    },
+    "/organizations/{id}/members/{userId}": {
+      "delete": {
+        "operationId": "OrganizationsController_removeMember",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Member removed"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Only the owner can remove members"
+          },
+          "404": {
+            "description": "Member not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a member from an organization (owner only)",
+        "tags": [
+          "organizations"
+        ]
+      }
+    },
+    "/accreditations": {
+      "post": {
+        "operationId": "AccreditationsController_grantAccreditation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantAccreditationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Accreditation granted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccreditationResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Admin access required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Grant accreditation to an organization (admin only)",
+        "tags": [
+          "accreditations"
+        ]
+      },
+      "get": {
+        "operationId": "AccreditationsController_listAccreditations",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by organization UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "emergencyId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by emergency UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of accreditations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccreditationViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Admin access required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List accreditations (admin only)",
+        "tags": [
+          "accreditations"
+        ]
+      }
+    },
+    "/accreditations/{id}": {
+      "delete": {
+        "operationId": "AccreditationsController_revokeAccreditation",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Accreditation UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Accreditation revoked"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Admin access required"
+          },
+          "404": {
+            "description": "Accreditation not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revoke an accreditation (admin only)",
+        "tags": [
+          "accreditations"
+        ]
+      }
+    },
+    "/geocode": {
+      "get": {
+        "operationId": "GeocodingController_search",
+        "parameters": [
+          {
+            "name": "q",
+            "required": true,
+            "in": "query",
+            "description": "Address or place name to search",
+            "schema": {
+              "example": "Madrid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Geocoding results (empty array when query is shorter than 3 characters)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GeocodeResultDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Geocode a free-text address query (Nominatim / OpenStreetMap)",
+        "tags": [
+          "geocoding"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/metrics": {
+      "get": {
+        "operationId": "MetricsController_metrics",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Emergency metrics summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmergencyMetricsDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get aggregated metrics for an emergency (public)",
+        "tags": [
+          "metrics"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/offers": {
+      "post": {
+        "operationId": "OffersController_submit",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitOfferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Offer created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmitOfferResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body or UUID"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "409": {
+            "description": "Emergency is not accepting intake (paused/closed)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Submit a donation offer for an emergency (authenticated donor)",
+        "tags": [
+          "offers"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/offers/queue": {
+      "get": {
+        "operationId": "OffersController_listQueue",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of open offers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OfferViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get open offers queue for an emergency (coordinator only)",
+        "tags": [
+          "offers"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/offers/mine": {
+      "get": {
+        "operationId": "OffersController_listMine",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "My offers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OfferViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List my offers for an emergency (authenticated donor)",
+        "tags": [
+          "offers"
+        ]
+      }
+    },
+    "/needs/{needId}/offers": {
+      "get": {
+        "operationId": "OffersController_listForNeed",
+        "parameters": [
+          {
+            "name": "needId",
+            "required": true,
+            "in": "path",
+            "description": "Need UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offers matched to the need",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OfferViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Need not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List matched offers for a need (coordinator only)",
+        "tags": [
+          "offers"
+        ]
+      }
+    },
+    "/needs/{needId}/offer-suggestions": {
+      "get": {
+        "operationId": "OffersController_suggestForNeed",
+        "parameters": [
+          {
+            "name": "needId",
+            "required": true,
+            "in": "path",
+            "description": "Need UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Suggested offers sorted by proximity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OfferViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Need not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Suggest open offers for a need (coordinator only), sorted by proximity",
+        "tags": [
+          "offers"
+        ]
+      }
+    },
+    "/offers/{offerId}/match": {
+      "post": {
+        "operationId": "OffersController_match",
+        "parameters": [
+          {
+            "name": "offerId",
+            "required": true,
+            "in": "path",
+            "description": "Offer UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchOfferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Offer matched to need"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Offer or need not found"
+          },
+          "409": {
+            "description": "Offer is not in Open status"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Match an offer to a need (coordinator of the offer's emergency only)",
+        "tags": [
+          "offers"
+        ]
+      }
+    },
+    "/offers/{offerId}/fulfill": {
+      "post": {
+        "operationId": "OffersController_fulfill",
+        "parameters": [
+          {
+            "name": "offerId",
+            "required": true,
+            "in": "path",
+            "description": "Offer UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Offer fulfilled"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Offer not found"
+          },
+          "409": {
+            "description": "Offer is not in Matched status"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark an offer as fulfilled (coordinator of the offer's emergency only)",
+        "tags": [
+          "offers"
+        ]
+      }
+    },
+    "/offers/{offerId}/cancel": {
+      "post": {
+        "operationId": "OffersController_cancel",
+        "parameters": [
+          {
+            "name": "offerId",
+            "required": true,
+            "in": "path",
+            "description": "Offer UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Offer cancelled"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Only the offer owner or a coordinator can cancel"
+          },
+          "404": {
+            "description": "Offer not found"
+          },
+          "409": {
+            "description": "Offer cannot be cancelled in its current status"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel an offer (owner or coordinator)",
+        "tags": [
+          "offers"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/volunteers": {
+      "post": {
+        "operationId": "VolunteersController_registerVolunteer",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterVolunteerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Volunteer registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterVolunteerResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body or UUID"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "409": {
+            "description": "Emergency not accepting volunteers (paused/closed)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Register as a volunteer for an emergency (requires authentication)",
+        "tags": [
+          "volunteers"
+        ]
+      },
+      "get": {
+        "operationId": "VolunteersController_getRosterForEmergency",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "skill",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "driving",
+                "medical",
+                "logistics",
+                "cooking",
+                "languages",
+                "admin",
+                "general"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "availability",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "immediate",
+                "this_week",
+                "flexible"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "vehicle",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "none",
+                "car",
+                "van",
+                "truck"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "available",
+                "assigned",
+                "inactive"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of volunteers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VolunteerViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get volunteer roster for an emergency (coordinator only)",
+        "tags": [
+          "volunteers"
+        ]
+      }
+    },
+    "/volunteers/{volunteerId}/status": {
+      "post": {
+        "operationId": "VolunteersController_updateVolunteerStatus",
+        "parameters": [
+          {
+            "name": "volunteerId",
+            "required": true,
+            "in": "path",
+            "description": "Volunteer UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVolunteerStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Status updated"
+          },
+          "400": {
+            "description": "Invalid status or UUID"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Volunteer not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update volunteer status (coordinator of the volunteer's emergency only)",
+        "tags": [
+          "volunteers"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/volunteers/me": {
+      "get": {
+        "operationId": "VolunteersController_fetchMyProfile",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "My volunteer profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolunteerViewDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "404": {
+            "description": "Not registered as volunteer in this emergency"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get my volunteer profile for an emergency",
+        "tags": [
+          "volunteers"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/tasks": {
+      "post": {
+        "operationId": "TasksController_createTask",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Task created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTaskResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body or UUID"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a task for an emergency (coordinator only)",
+        "tags": [
+          "tasks"
+        ]
+      },
+      "get": {
+        "operationId": "TasksController_getTasks",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "open",
+                "in_progress",
+                "completed",
+                "cancelled"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TaskViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List tasks for an emergency (coordinator only)",
+        "tags": [
+          "tasks"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/tasks/mine": {
+      "get": {
+        "operationId": "TasksController_getMyTasks",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tasks assigned to me",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MyTaskViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get tasks assigned to the authenticated volunteer",
+        "tags": [
+          "tasks"
+        ]
+      }
+    },
+    "/tasks/{taskId}/assign": {
+      "post": {
+        "operationId": "TasksController_assignVolunteer",
+        "parameters": [
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignVolunteerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Volunteer assigned"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Task or volunteer not found"
+          },
+          "422": {
+            "description": "Volunteer already assigned, wrong emergency, or task closed"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assign a volunteer to a task (coordinator only)",
+        "tags": [
+          "tasks"
+        ]
+      }
+    },
+    "/tasks/{taskId}/unassign": {
+      "post": {
+        "operationId": "TasksController_unassignVolunteer",
+        "parameters": [
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignVolunteerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Volunteer unassigned"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Task not found"
+          },
+          "422": {
+            "description": "Volunteer not assigned"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Unassign a volunteer from a task (coordinator only)",
+        "tags": [
+          "tasks"
+        ]
+      }
+    },
+    "/tasks/{taskId}/check-in": {
+      "post": {
+        "operationId": "TasksController_checkIn",
+        "parameters": [
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignVolunteerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Checked in"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Only the assigned volunteer or a coordinator"
+          },
+          "404": {
+            "description": "Task not found"
+          },
+          "422": {
+            "description": "Not assigned or already checked in"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Check in a volunteer to a task (volunteer themselves or coordinator)",
+        "tags": [
+          "tasks"
+        ]
+      }
+    },
+    "/tasks/{taskId}/check-out": {
+      "post": {
+        "operationId": "TasksController_checkOut",
+        "parameters": [
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignVolunteerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Checked out"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Only the assigned volunteer or a coordinator"
+          },
+          "404": {
+            "description": "Task not found"
+          },
+          "422": {
+            "description": "Not checked in"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Check out a volunteer from a task (volunteer themselves or coordinator)",
+        "tags": [
+          "tasks"
+        ]
+      }
+    },
+    "/tasks/{taskId}/complete": {
+      "post": {
+        "operationId": "TasksController_completeTask",
+        "parameters": [
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Task completed"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Task not found"
+          },
+          "422": {
+            "description": "Task already cancelled"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark a task as completed (coordinator only)",
+        "tags": [
+          "tasks"
+        ]
+      }
+    },
+    "/tasks/{taskId}/cancel": {
+      "post": {
+        "operationId": "TasksController_cancelTask",
+        "parameters": [
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Task cancelled"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Task not found"
+          },
+          "422": {
+            "description": "Task already completed"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel a task (coordinator only)",
+        "tags": [
+          "tasks"
+        ]
+      }
+    },
+    "/files": {
+      "post": {
+        "operationId": "FilesController_upload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "File stored successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload an image file (max 5 MB)",
+        "tags": [
+          "files"
+        ]
+      }
+    },
+    "/files/{key}": {
+      "get": {
+        "operationId": "FilesController_serve",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "description": "Storage key returned by POST /files",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File content streamed"
+          }
+        },
+        "summary": "Download a stored file by key",
+        "tags": [
+          "files"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/reports": {
+      "post": {
+        "operationId": "ReportsController_submit",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Report submitted"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Submit a field report",
+        "tags": [
+          "reports"
+        ]
+      },
+      "get": {
+        "operationId": "ReportsController_getQueue",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "open",
+                "reviewed",
+                "closed"
+              ]
+            }
+          },
+          {
+            "name": "priority",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "urgent"
+              ]
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by resource ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "Filter by type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "incident",
+                "stock",
+                "status",
+                "other"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of reports"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get coordination queue of reports",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/reports/{reportId}/review": {
+      "post": {
+        "operationId": "ReportsController_review",
+        "parameters": [
+          {
+            "name": "reportId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Report marked as reviewed"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark a report as reviewed",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/reports/mine": {
+      "get": {
+        "operationId": "ReportsController_mine",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of my reports"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get my field reports for an emergency",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/audit": {
+      "get": {
+        "operationId": "AuditController_list",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by emergency ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "actorUserId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by actor user ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityType",
+            "required": false,
+            "in": "query",
+            "description": "Filter by entity type (e.g. resource, need)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max results to return (default 100, max 500)",
+            "schema": {
+              "default": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset for pagination (default 0)",
+            "schema": {
+              "default": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Admin access required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List audit log entries (admin only)",
+        "tags": [
+          "audit"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "ResponseGrid API",
+    "description": "API for humanitarian emergency resource coordination",
+    "version": "0.1",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "resources",
+      "description": ""
+    },
+    {
+      "name": "emergencies",
+      "description": ""
+    }
+  ],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "admin@reliefhub.org"
+          },
+          "password": {
+            "type": "string",
+            "example": "admin1234",
+            "minLength": 6
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "LoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "JWT access token"
+          }
+        },
+        "required": [
+          "accessToken"
+        ]
+      },
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "user@reliefhub.org"
+          },
+          "password": {
+            "type": "string",
+            "example": "password123",
+            "minLength": 8
+          },
+          "name": {
+            "type": "string",
+            "example": "Jane Doe"
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "name"
+        ]
+      },
+      "RegisterResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "JWT access token (auto-login after registration)"
+          }
+        },
+        "required": [
+          "accessToken"
+        ]
+      },
+      "MeResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "User UUID"
+          },
+          "email": {
+            "type": "string",
+            "example": "user@example.com"
+          },
+          "name": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "isAdmin": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "isAdmin"
+        ]
+      },
+      "GrantRoleDto": {
+        "type": "object",
+        "properties": {
+          "principalId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Principal receiving the role"
+          },
+          "roleId": {
+            "type": "string",
+            "description": "Role id from the fixed catalog (e.g. emergency_coordinator)"
+          },
+          "scopeType": {
+            "type": "string",
+            "enum": [
+              "platform",
+              "organization",
+              "emergency",
+              "group",
+              "entity"
+            ],
+            "description": "Scope the role applies to"
+          },
+          "scopeId": {
+            "type": "string",
+            "description": "Scope id (required for every scope except platform)"
+          },
+          "scopeEntityType": {
+            "type": "string",
+            "description": "Entity type (required for entity scope)"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "ISO 8601 expiry — for temporary / break-glass grants"
+          }
+        },
+        "required": [
+          "principalId",
+          "roleId",
+          "scopeType"
+        ]
+      },
+      "GrantResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "CreateServiceAccountDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Human-readable name for the service account"
+          },
+          "ownerOrganizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Owning organization; omit for a platform-level account"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "ServiceAccountResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "IssueApiKeyDto": {
+        "type": "object",
+        "properties": {
+          "expiresAt": {
+            "type": "string",
+            "description": "ISO 8601 expiry for the key"
+          }
+        }
+      },
+      "IssuedApiKeyResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "The full secret key — shown once; store it now"
+          },
+          "prefix": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "apiKey",
+          "prefix"
+        ]
+      },
+      "IntrospectedGrantDto": {
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "scopeId": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "roleId",
+          "scopeType",
+          "scopeId"
+        ]
+      },
+      "ServiceAccountIdentityDto": {
+        "type": "object",
+        "properties": {
+          "principalId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "principalType": {
+            "type": "string",
+            "enum": [
+              "service_account"
+            ]
+          },
+          "grants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IntrospectedGrantDto"
+            }
+          }
+        },
+        "required": [
+          "principalId",
+          "principalType",
+          "grants"
+        ]
+      },
+      "NotificationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "emergencyId": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "resource_verified",
+              "offer_matched",
+              "task_assigned"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string",
+            "nullable": true
+          },
+          "read": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "emergencyId",
+          "type",
+          "message",
+          "link",
+          "read",
+          "createdAt"
+        ]
+      },
+      "GetMyNotificationsResponseDto": {
+        "type": "object",
+        "properties": {
+          "notifications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationDto"
+            }
+          },
+          "unreadCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "notifications",
+          "unreadCount"
+        ]
+      },
+      "LocationDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "example": "Calle Mayor 1, Valencia"
+          },
+          "latitude": {
+            "type": "number",
+            "example": 39.4699,
+            "description": "Latitude between -90 and 90"
+          },
+          "longitude": {
+            "type": "number",
+            "example": -0.3763,
+            "description": "Longitude between -180 and 180"
+          }
+        },
+        "required": [
+          "address",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "RegisterResourceDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "collection_point",
+              "delivery_point",
+              "collection_and_delivery",
+              "warehouse",
+              "transport",
+              "supplier",
+              "venue"
+            ],
+            "example": "collection_point"
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "origin",
+              "intermediate",
+              "destination"
+            ],
+            "example": "origin",
+            "description": "Stage of the resource in the emergency supply chain"
+          },
+          "name": {
+            "type": "string",
+            "example": "Cruz Roja Madrid",
+            "minLength": 2
+          },
+          "description": {
+            "type": "string",
+            "example": "Centro de acopio principal"
+          },
+          "location": {
+            "description": "Physical location of the resource",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocationDto"
+              }
+            ]
+          },
+          "ownerOrganizationId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "description": "Organization offering this resource (optional)"
+          },
+          "contact": {
+            "type": "string",
+            "example": "+58 212 555 0000",
+            "description": "Contact info for this resource point"
+          },
+          "schedule": {
+            "type": "string",
+            "example": "Lun-Vie 08-18",
+            "description": "Operating schedule"
+          },
+          "manager": {
+            "type": "string",
+            "example": "Juan Pérez",
+            "description": "Responsible manager name"
+          },
+          "accepts": {
+            "example": [
+              "water",
+              "food"
+            ],
+            "description": "Category slugs this resource accepts",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "country": {
+            "type": "string",
+            "example": "VE",
+            "description": "ISO 3166-1 alpha-2 country code"
+          },
+          "city": {
+            "type": "string",
+            "example": "Caracas",
+            "description": "City name"
+          }
+        },
+        "required": [
+          "type",
+          "stage",
+          "name",
+          "location"
+        ]
+      },
+      "RegisterResourceResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "VerifyResourceDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateResourcePublicStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "saturated",
+              "paused",
+              "closed"
+            ],
+            "example": "saturated",
+            "description": "Target operational status. Hidden is not allowed; use close() to deactivate."
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "LocationViewDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "example": "Calle Mayor 1, Valencia"
+          },
+          "latitude": {
+            "type": "number",
+            "example": 39.4699
+          },
+          "longitude": {
+            "type": "number",
+            "example": -0.3763
+          }
+        },
+        "required": [
+          "address",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "ResourceViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "collection_point",
+              "delivery_point",
+              "collection_and_delivery",
+              "warehouse",
+              "transport",
+              "supplier",
+              "venue"
+            ],
+            "example": "collection_point"
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "origin",
+              "intermediate",
+              "destination"
+            ],
+            "example": "origin"
+          },
+          "name": {
+            "type": "string",
+            "example": "Cruz Roja Madrid"
+          },
+          "description": {
+            "type": "string",
+            "example": "Centro de acopio principal",
+            "nullable": true
+          },
+          "location": {
+            "$ref": "#/components/schemas/LocationViewDto"
+          },
+          "verificationLevel": {
+            "type": "string",
+            "enum": [
+              "unverified",
+              "verified",
+              "official"
+            ],
+            "example": "verified"
+          },
+          "publicStatus": {
+            "type": "string",
+            "enum": [
+              "hidden",
+              "active",
+              "saturated",
+              "paused",
+              "closed"
+            ],
+            "example": "active"
+          },
+          "ownerOrganizationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "accepts": {
+            "example": [
+              "water",
+              "food"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contact": {
+            "type": "string",
+            "example": "+58 212 555 0000",
+            "nullable": true
+          },
+          "schedule": {
+            "type": "string",
+            "example": "Lun-Vie 08-18",
+            "nullable": true
+          },
+          "manager": {
+            "type": "string",
+            "example": "Juan Pérez",
+            "nullable": true
+          },
+          "sourceName": {
+            "type": "string",
+            "example": "acopiove.org",
+            "nullable": true
+          },
+          "externalUpdatedAt": {
+            "type": "string",
+            "example": "2026-06-27T00:00:00.000Z",
+            "description": "ISO 8601 date string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "example": "Venezuela",
+            "description": "Country string as stored by the ingestion source (e.g. full Spanish name \"Venezuela\"). NOT guaranteed to be an ISO 3166-1 alpha-2 code — value depends on the source `pais` field.",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "example": "Caracas",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "stage",
+          "name",
+          "description",
+          "location",
+          "verificationLevel",
+          "publicStatus",
+          "ownerOrganizationId",
+          "accepts",
+          "contact",
+          "schedule",
+          "manager",
+          "sourceName",
+          "externalUpdatedAt",
+          "country",
+          "city"
+        ]
+      },
+      "PagedResourcesDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResourceViewDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "example": 123
+          },
+          "page": {
+            "type": "number",
+            "example": 1
+          },
+          "limit": {
+            "type": "number",
+            "example": 50
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "limit"
+        ]
+      },
+      "NearbyResourceViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "collection_point",
+              "delivery_point",
+              "collection_and_delivery",
+              "warehouse",
+              "transport",
+              "supplier",
+              "venue"
+            ],
+            "example": "collection_point"
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "origin",
+              "intermediate",
+              "destination"
+            ],
+            "example": "origin"
+          },
+          "name": {
+            "type": "string",
+            "example": "Cruz Roja Madrid"
+          },
+          "description": {
+            "type": "string",
+            "example": "Centro de acopio principal",
+            "nullable": true
+          },
+          "location": {
+            "$ref": "#/components/schemas/LocationViewDto"
+          },
+          "verificationLevel": {
+            "type": "string",
+            "enum": [
+              "unverified",
+              "verified",
+              "official"
+            ],
+            "example": "verified"
+          },
+          "publicStatus": {
+            "type": "string",
+            "enum": [
+              "hidden",
+              "active",
+              "saturated",
+              "paused",
+              "closed"
+            ],
+            "example": "active"
+          },
+          "ownerOrganizationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "accepts": {
+            "example": [
+              "water",
+              "food"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contact": {
+            "type": "string",
+            "example": "+58 212 555 0000",
+            "nullable": true
+          },
+          "schedule": {
+            "type": "string",
+            "example": "Lun-Vie 08-18",
+            "nullable": true
+          },
+          "manager": {
+            "type": "string",
+            "example": "Juan Pérez",
+            "nullable": true
+          },
+          "sourceName": {
+            "type": "string",
+            "example": "acopiove.org",
+            "nullable": true
+          },
+          "externalUpdatedAt": {
+            "type": "string",
+            "example": "2026-06-27T00:00:00.000Z",
+            "description": "ISO 8601 date string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "example": "Venezuela",
+            "description": "Country string as stored by the ingestion source (e.g. full Spanish name \"Venezuela\"). NOT guaranteed to be an ISO 3166-1 alpha-2 code — value depends on the source `pais` field.",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "example": "Caracas",
+            "nullable": true
+          },
+          "distanceMeters": {
+            "type": "number",
+            "example": 1234,
+            "description": "Distance from query point in meters (rounded)"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "stage",
+          "name",
+          "description",
+          "location",
+          "verificationLevel",
+          "publicStatus",
+          "ownerOrganizationId",
+          "accepts",
+          "contact",
+          "schedule",
+          "manager",
+          "sourceName",
+          "externalUpdatedAt",
+          "country",
+          "city",
+          "distanceMeters"
+        ]
+      },
+      "NearbyResourcesResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NearbyResourceViewDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "InBoundsResourcesDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResourceViewDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "ResourceFacetsDto": {
+        "type": "object",
+        "properties": {
+          "byCategory": {
+            "type": "object",
+            "example": {
+              "water": 5,
+              "food": 3
+            }
+          },
+          "byCountry": {
+            "type": "object",
+            "example": {
+              "Venezuela": 3,
+              "Colombia": 2
+            },
+            "description": "Counts keyed by the stored `country` string. Values mirror the ingestion source `pais` field (full Spanish names, NOT ISO 3166-1 alpha-2 codes)."
+          },
+          "total": {
+            "type": "number",
+            "example": 8
+          }
+        },
+        "required": [
+          "byCategory",
+          "byCountry",
+          "total"
+        ]
+      },
+      "CreateTemplateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Terremoto básico",
+            "minLength": 2
+          },
+          "description": {
+            "type": "string",
+            "example": "Template para emergencias sísmicas de nivel moderado"
+          },
+          "dontBringList": {
+            "example": [
+              "mascotas",
+              "joyas",
+              "vehículos grandes"
+            ],
+            "description": "Items that volunteers should NOT bring",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "defaultAnnouncement": {
+            "type": "string",
+            "example": "No se aceptan mascotas en el centro de acopio.",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "dontBringList"
+        ]
+      },
+      "CreateTemplateResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "TemplateViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+          },
+          "name": {
+            "type": "string",
+            "example": "Terremoto básico"
+          },
+          "description": {
+            "type": "string",
+            "example": "Template para emergencias sísmicas"
+          },
+          "dontBringList": {
+            "example": [
+              "mascotas",
+              "joyas"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "defaultAnnouncement": {
+            "type": "string",
+            "example": "No se aceptan mascotas.",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2026-06-27T10:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "dontBringList",
+          "defaultAnnouncement",
+          "createdAt"
+        ]
+      },
+      "CreateEmergencyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Emergencia sísmica — Venezuela",
+            "minLength": 2
+          },
+          "slug": {
+            "type": "string",
+            "example": "venezuela",
+            "description": "URL-safe slug (lowercase letters, digits, hyphens). Auto-generated from name if omitted.",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "country": {
+            "type": "string",
+            "example": "VE",
+            "minLength": 2,
+            "description": "ISO 3166-1 alpha-2 country code"
+          }
+        },
+        "required": [
+          "name",
+          "country"
+        ]
+      },
+      "CreateEmergencyResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "11111111-1111-4111-8111-111111111111"
+          },
+          "slug": {
+            "type": "string",
+            "example": "venezuela"
+          }
+        },
+        "required": [
+          "id",
+          "slug"
+        ]
+      },
+      "EmergencyViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "11111111-1111-4111-8111-111111111111"
+          },
+          "name": {
+            "type": "string",
+            "example": "Emergencia sísmica — Venezuela"
+          },
+          "slug": {
+            "type": "string",
+            "example": "venezuela"
+          },
+          "country": {
+            "type": "string",
+            "example": "VE"
+          },
+          "status": {
+            "type": "string",
+            "example": "active",
+            "enum": [
+              "active",
+              "paused",
+              "closed"
+            ]
+          },
+          "announcement": {
+            "type": "string",
+            "example": "El puente de acceso norte está cortado.",
+            "nullable": true
+          },
+          "dontBringList": {
+            "example": [
+              "mascotas",
+              "joyas",
+              "vehículos grandes"
+            ],
+            "description": "Items volunteers should NOT bring to the emergency",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2026-06-25T10:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "country",
+          "status",
+          "announcement",
+          "dontBringList",
+          "updatedAt"
+        ]
+      },
+      "CreateEmergencyFromTemplateDto": {
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "type": "string",
+            "example": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+          },
+          "name": {
+            "type": "string",
+            "example": "Terremoto Valencia 2026",
+            "minLength": 2
+          },
+          "slug": {
+            "type": "string",
+            "example": "terremoto-valencia-2026",
+            "description": "URL-safe slug (lowercase letters, digits, hyphens)",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "country": {
+            "type": "string",
+            "example": "ES",
+            "minLength": 2
+          }
+        },
+        "required": [
+          "templateId",
+          "name",
+          "slug",
+          "country"
+        ]
+      },
+      "PublishAnnouncementDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Se suspenden las operaciones de rescate hasta nuevo aviso."
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "NeedLocationDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "example": "123 Main Street, Caracas, Venezuela"
+          },
+          "latitude": {
+            "type": "number",
+            "example": 10.4806,
+            "description": "Latitude (-90 to 90)"
+          },
+          "longitude": {
+            "type": "number",
+            "example": -66.9036,
+            "description": "Longitude (-180 to 180)"
+          }
+        },
+        "required": [
+          "address",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "NeedItemDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Water bottles",
+            "description": "Name of the item needed"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 100,
+            "description": "Quantity needed (positive integer)"
+          },
+          "unit": {
+            "type": "string",
+            "example": "liters",
+            "description": "Unit of measurement (optional)"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "hygiene",
+              "water",
+              "food",
+              "medical",
+              "shelter",
+              "tools",
+              "other",
+              "medicines",
+              "medical_equipment",
+              "medical_supplies",
+              "medical_personnel"
+            ],
+            "example": "water"
+          }
+        },
+        "required": [
+          "name",
+          "quantity",
+          "category"
+        ]
+      },
+      "CreateNeedDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Alimentos para 50 familias",
+            "minLength": 2
+          },
+          "description": {
+            "type": "string",
+            "example": "Descripción detallada de la necesidad"
+          },
+          "location": {
+            "$ref": "#/components/schemas/NeedLocationDto"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "urgent"
+            ],
+            "example": "high"
+          },
+          "requesterOrganizationId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "description": "Organization on whose behalf the request is made (optional)"
+          },
+          "items": {
+            "description": "List of items needed (minimum 1)",
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NeedItemDto"
+            }
+          },
+          "requiredSkill": {
+            "type": "string",
+            "enum": [
+              "driving",
+              "medical",
+              "logistics",
+              "cooking",
+              "languages",
+              "admin",
+              "general"
+            ],
+            "example": "medical",
+            "description": "Required volunteer skill for personnel needs",
+            "nullable": true
+          },
+          "skillSpecialty": {
+            "type": "string",
+            "example": "Médico urgencias pediátricas",
+            "description": "Free-text specialty detail (coordinator-only, not exposed publicly)",
+            "nullable": true
+          },
+          "requestedCount": {
+            "type": "number",
+            "example": 3,
+            "description": "How many personnel are needed (>= 1)",
+            "nullable": true
+          }
+        },
+        "required": [
+          "title",
+          "location",
+          "priority",
+          "items"
+        ]
+      },
+      "CreateNeedResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "NeedLocationResponseDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "example": "123 Main Street, Caracas"
+          },
+          "latitude": {
+            "type": "number",
+            "example": 10.4806
+          },
+          "longitude": {
+            "type": "number",
+            "example": -66.9036
+          }
+        },
+        "required": [
+          "address",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "NeedItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Water bottles"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 100
+          },
+          "unit": {
+            "type": "string",
+            "example": "liters",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "hygiene",
+              "water",
+              "food",
+              "medical",
+              "shelter",
+              "tools",
+              "other",
+              "medicines",
+              "medical_equipment",
+              "medical_supplies",
+              "medical_personnel"
+            ],
+            "example": "water"
+          }
+        },
+        "required": [
+          "name",
+          "quantity",
+          "category"
+        ]
+      },
+      "NeedViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "11111111-1111-4111-8111-111111111111"
+          },
+          "title": {
+            "type": "string",
+            "example": "Alimentos para 50 familias"
+          },
+          "description": {
+            "type": "string",
+            "example": "Descripción detallada",
+            "nullable": true
+          },
+          "location": {
+            "$ref": "#/components/schemas/NeedLocationResponseDto"
+          },
+          "locationSensitivity": {
+            "type": "string",
+            "enum": [
+              "public",
+              "approximate"
+            ],
+            "example": "approximate",
+            "description": "When \"approximate\", the coordinates in location are jittered for privacy. Coordinators always receive exact coordinates regardless of this value."
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "urgent"
+            ],
+            "example": "high"
+          },
+          "requesterOrganizationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "managingOrganizationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NeedItemResponseDto"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "validated",
+              "rejected",
+              "fulfilled"
+            ],
+            "example": "pending"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-01-01T00:00:00.000Z"
+          },
+          "expiresAt": {
+            "type": "string",
+            "example": "2024-01-03T00:00:00.000Z",
+            "nullable": true,
+            "description": "Timestamp when the need expires (48 h after validation). Null for legacy needs."
+          },
+          "lastVerifiedAt": {
+            "type": "string",
+            "example": "2024-01-01T12:00:00.000Z",
+            "nullable": true,
+            "description": "Timestamp when the need was last verified by a coordinator."
+          },
+          "requiredSkill": {
+            "type": "string",
+            "enum": [
+              "driving",
+              "medical",
+              "logistics",
+              "cooking",
+              "languages",
+              "admin",
+              "general"
+            ],
+            "nullable": true,
+            "description": "Required volunteer skill (personnel needs only)"
+          },
+          "requestedCount": {
+            "type": "number",
+            "example": 3,
+            "nullable": true,
+            "description": "Number of personnel needed"
+          }
+        },
+        "required": [
+          "id",
+          "emergencyId",
+          "title",
+          "location",
+          "locationSensitivity",
+          "priority",
+          "items",
+          "status",
+          "createdAt"
+        ]
+      },
+      "AssignNeedManagerDto": {
+        "type": "object",
+        "properties": {
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "description": "ID of the organization that will manage this need"
+          }
+        },
+        "required": [
+          "organizationId"
+        ]
+      },
+      "VolunteerSuggestionDto": {
+        "type": "object",
+        "properties": {
+          "volunteerId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Volunteer record ID"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User account ID"
+          },
+          "name": {
+            "type": "string",
+            "example": "Ana García"
+          },
+          "skills": {
+            "description": "All volunteer skills",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hasVehicle": {
+            "type": "boolean",
+            "description": "Whether the volunteer has any vehicle"
+          },
+          "availability": {
+            "type": "string",
+            "description": "Volunteer availability level"
+          }
+        },
+        "required": [
+          "volunteerId",
+          "userId",
+          "name",
+          "skills",
+          "hasVehicle",
+          "availability"
+        ]
+      },
+      "CreateTaskFromNeedDto": {
+        "type": "object",
+        "properties": {
+          "volunteerIds": {
+            "description": "IDs of volunteers to assign to the task (optional)",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "dueDate": {
+            "type": "string",
+            "example": "2025-12-31",
+            "description": "ISO date string for task due date (optional, informational)",
+            "nullable": true
+          }
+        }
+      },
+      "CreatedTaskFromNeedDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "requiredSkill": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "driving",
+              "medical",
+              "logistics",
+              "cooking",
+              "languages",
+              "admin",
+              "general"
+            ]
+          },
+          "linkedNeedId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "volunteerId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "assignedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "checkedInAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "nullable": true
+                },
+                "checkedOutAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "nullable": true
+                },
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "id",
+          "emergencyId",
+          "title",
+          "description",
+          "status",
+          "createdByUserId",
+          "createdAt",
+          "updatedAt",
+          "assignments"
+        ]
+      },
+      "CreateOrganizationDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Red Cross Spain"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ngo",
+              "company",
+              "public_admin",
+              "association",
+              "other"
+            ],
+            "example": "ngo"
+          },
+          "taxId": {
+            "type": "string",
+            "example": "ES-12345678"
+          },
+          "contactEmail": {
+            "type": "string",
+            "example": "contact@org.example"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ]
+      },
+      "CreateOrganizationResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "New organization UUID"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "OrganizationViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ngo",
+              "company",
+              "public_admin",
+              "association",
+              "other"
+            ]
+          },
+          "verificationLevel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "verificationLevel"
+        ]
+      },
+      "OrganizationMemberDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "User UUID"
+          },
+          "email": {
+            "type": "string",
+            "example": "member@example.com"
+          },
+          "name": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "member"
+            ],
+            "example": "member"
+          }
+        },
+        "required": [
+          "userId",
+          "email",
+          "name",
+          "role"
+        ]
+      },
+      "AddMemberDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "member@example.com"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "GrantAccreditationDto": {
+        "type": "object",
+        "properties": {
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Organization to accredit"
+          },
+          "scope": {
+            "description": "Scope: \"global\" or { emergencyId: \"<uuid>\" }",
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "global"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "emergencyId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "emergencyId"
+                ]
+              }
+            ]
+          },
+          "evidence": {
+            "type": "string",
+            "description": "Free-text evidence / justification"
+          }
+        },
+        "required": [
+          "organizationId",
+          "scope"
+        ]
+      },
+      "AccreditationResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "AccreditationViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scope": {
+            "type": "object"
+          },
+          "grantedByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "grantedAt": {
+            "type": "string",
+            "description": "ISO 8601 timestamp"
+          },
+          "evidence": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "organizationId",
+          "scope",
+          "grantedByUserId",
+          "grantedAt"
+        ]
+      },
+      "GeocodeResultDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "example": "Madrid, Community of Madrid, Spain"
+          },
+          "latitude": {
+            "type": "number",
+            "example": 40.4165,
+            "description": "Decimal degrees latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "example": -3.70256,
+            "description": "Decimal degrees longitude"
+          }
+        },
+        "required": [
+          "address",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "NeedsMetricsDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number",
+            "description": "Total needs registered for this emergency",
+            "example": 10
+          },
+          "open": {
+            "type": "number",
+            "description": "Open needs: pending + validated",
+            "example": 7
+          },
+          "closed": {
+            "type": "number",
+            "description": "Closed needs: fulfilled",
+            "example": 2
+          }
+        },
+        "required": [
+          "total",
+          "open",
+          "closed"
+        ]
+      },
+      "ResourcesMetricsDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number",
+            "description": "Total resources registered for this emergency",
+            "example": 5
+          },
+          "active": {
+            "type": "number",
+            "description": "Active logistic points (publicStatus = Active)",
+            "example": 3
+          },
+          "pending": {
+            "type": "number",
+            "description": "Resources pending publication (publicStatus = Hidden)",
+            "example": 2
+          }
+        },
+        "required": [
+          "total",
+          "active",
+          "pending"
+        ]
+      },
+      "EmergencyMetricsDto": {
+        "type": "object",
+        "properties": {
+          "needs": {
+            "$ref": "#/components/schemas/NeedsMetricsDto"
+          },
+          "resources": {
+            "$ref": "#/components/schemas/ResourcesMetricsDto"
+          }
+        },
+        "required": [
+          "needs",
+          "resources"
+        ]
+      },
+      "OfferLocationDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "example": "123 Main Street, Caracas, Venezuela"
+          },
+          "latitude": {
+            "type": "number",
+            "example": 10.4806,
+            "description": "Latitude (-90 to 90)"
+          },
+          "longitude": {
+            "type": "number",
+            "example": -66.9036,
+            "description": "Longitude (-180 to 180)"
+          }
+        },
+        "required": [
+          "address",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "SubmitOfferDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "hygiene",
+              "water",
+              "food",
+              "medical",
+              "shelter",
+              "tools",
+              "other",
+              "medicines",
+              "medical_equipment",
+              "medical_supplies",
+              "medical_personnel"
+            ],
+            "example": "food"
+          },
+          "description": {
+            "type": "string",
+            "example": "Rice bags 25kg",
+            "description": "Description of the item being offered"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 50,
+            "description": "Quantity offered (positive integer)"
+          },
+          "unit": {
+            "type": "string",
+            "example": "bags",
+            "description": "Unit of measurement"
+          },
+          "location": {
+            "$ref": "#/components/schemas/OfferLocationDto"
+          },
+          "targetNeedId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Target need this offer is directed at (optional)"
+          },
+          "donorOrganizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Organization on whose behalf the offer is made (optional)"
+          },
+          "notes": {
+            "type": "string",
+            "example": "Available for pickup Mon-Fri",
+            "description": "Additional notes (optional)"
+          }
+        },
+        "required": [
+          "category",
+          "description",
+          "quantity",
+          "location"
+        ]
+      },
+      "SubmitOfferResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "OfferLocationResponseDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "example": "123 Main Street, Caracas"
+          },
+          "latitude": {
+            "type": "number",
+            "example": 10.4806
+          },
+          "longitude": {
+            "type": "number",
+            "example": -66.9036
+          }
+        },
+        "required": [
+          "address",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "OfferViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "donorUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "donorOrganizationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "hygiene",
+              "water",
+              "food",
+              "medical",
+              "shelter",
+              "tools",
+              "other",
+              "medicines",
+              "medical_equipment",
+              "medical_supplies",
+              "medical_personnel"
+            ],
+            "example": "food"
+          },
+          "description": {
+            "type": "string",
+            "example": "Rice bags 25kg"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 50
+          },
+          "unit": {
+            "type": "string",
+            "example": "bags",
+            "nullable": true
+          },
+          "location": {
+            "$ref": "#/components/schemas/OfferLocationResponseDto"
+          },
+          "targetNeedId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "matchedNeedId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "matched",
+              "fulfilled",
+              "cancelled"
+            ],
+            "example": "open"
+          },
+          "notes": {
+            "type": "string",
+            "example": "Available Mon-Fri",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2024-01-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "emergencyId",
+          "donorUserId",
+          "category",
+          "description",
+          "quantity",
+          "location",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "MatchOfferDto": {
+        "type": "object",
+        "properties": {
+          "needId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The need to match this offer against"
+          }
+        },
+        "required": [
+          "needId"
+        ]
+      },
+      "RegisterVolunteerDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Ana García",
+            "minLength": 2
+          },
+          "contact": {
+            "type": "string",
+            "example": "ana@example.com"
+          },
+          "municipality": {
+            "type": "string",
+            "example": "Valencia"
+          },
+          "skills": {
+            "type": "array",
+            "example": [
+              "medical",
+              "driving"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "driving",
+                "medical",
+                "logistics",
+                "cooking",
+                "languages",
+                "admin",
+                "general"
+              ]
+            }
+          },
+          "availability": {
+            "type": "string",
+            "enum": [
+              "immediate",
+              "this_week",
+              "flexible"
+            ],
+            "example": "immediate"
+          },
+          "vehicle": {
+            "type": "string",
+            "enum": [
+              "none",
+              "car",
+              "van",
+              "truck"
+            ],
+            "example": "car"
+          },
+          "consentAccepted": {
+            "type": "boolean",
+            "example": true,
+            "description": "Must be true to register as a volunteer"
+          }
+        },
+        "required": [
+          "name",
+          "contact",
+          "municipality",
+          "skills",
+          "availability",
+          "vehicle",
+          "consentAccepted"
+        ]
+      },
+      "RegisterVolunteerResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "VolunteerViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "contact": {
+            "type": "string"
+          },
+          "municipality": {
+            "type": "string"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "driving",
+                "medical",
+                "logistics",
+                "cooking",
+                "languages",
+                "admin",
+                "general"
+              ]
+            }
+          },
+          "availability": {
+            "type": "string",
+            "enum": [
+              "immediate",
+              "this_week",
+              "flexible"
+            ]
+          },
+          "vehicle": {
+            "type": "string",
+            "enum": [
+              "none",
+              "car",
+              "van",
+              "truck"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "available",
+              "assigned",
+              "inactive"
+            ]
+          },
+          "consentAccepted": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "emergencyId",
+          "userId",
+          "name",
+          "contact",
+          "municipality",
+          "skills",
+          "availability",
+          "vehicle",
+          "status",
+          "consentAccepted",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateVolunteerStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "available",
+              "assigned",
+              "inactive"
+            ],
+            "example": "assigned"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "CreateTaskDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Deliver supplies to zone 3"
+          },
+          "description": {
+            "type": "string",
+            "example": "Transport 200 water bottles to the distribution point"
+          },
+          "location": {
+            "$ref": "#/components/schemas/LocationDto"
+          },
+          "requiredSkill": {
+            "type": "string",
+            "enum": [
+              "driving",
+              "medical",
+              "logistics",
+              "cooking",
+              "languages",
+              "admin",
+              "general"
+            ]
+          }
+        },
+        "required": [
+          "title",
+          "description"
+        ]
+      },
+      "CreateTaskResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "TaskLocationDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "address",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "TaskAssignmentViewDto": {
+        "type": "object",
+        "properties": {
+          "volunteerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "volunteerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "assignedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "checkedInAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "checkedOutAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "assigned",
+              "checked_in",
+              "checked_out"
+            ]
+          }
+        },
+        "required": [
+          "volunteerId",
+          "assignedAt",
+          "status"
+        ]
+      },
+      "TaskViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "location": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TaskLocationDto"
+              }
+            ]
+          },
+          "requiredSkill": {
+            "type": "string",
+            "enum": [
+              "driving",
+              "medical",
+              "logistics",
+              "cooking",
+              "languages",
+              "admin",
+              "general"
+            ],
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "in_progress",
+              "completed",
+              "cancelled"
+            ]
+          },
+          "createdByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskAssignmentViewDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "emergencyId",
+          "title",
+          "description",
+          "status",
+          "createdByUserId",
+          "createdAt",
+          "updatedAt",
+          "assignments"
+        ]
+      },
+      "MyTaskViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "location": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TaskLocationDto"
+              }
+            ]
+          },
+          "requiredSkill": {
+            "type": "string",
+            "enum": [
+              "driving",
+              "medical",
+              "logistics",
+              "cooking",
+              "languages",
+              "admin",
+              "general"
+            ],
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "in_progress",
+              "completed",
+              "cancelled"
+            ]
+          },
+          "createdByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskAssignmentViewDto"
+            }
+          },
+          "myAssignmentStatus": {
+            "type": "string",
+            "enum": [
+              "assigned",
+              "checked_in",
+              "checked_out"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "emergencyId",
+          "title",
+          "description",
+          "status",
+          "createdByUserId",
+          "createdAt",
+          "updatedAt",
+          "assignments",
+          "myAssignmentStatus"
+        ]
+      },
+      "AssignVolunteerDto": {
+        "type": "object",
+        "properties": {
+          "volunteerId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "volunteerId"
+        ]
+      },
+      "SubmitReportDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "incident",
+              "stock",
+              "status",
+              "other"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "example": "Road blocked near bridge"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "urgent"
+            ]
+          },
+          "photoUrls": {
+            "description": "URLs from POST /files (e.g. /files/key.png)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "resourceId": {
+            "type": "string",
+            "description": "Resource ID this report refers to"
+          },
+          "location": {
+            "$ref": "#/components/schemas/LocationDto"
+          }
+        },
+        "required": [
+          "type",
+          "note",
+          "priority"
+        ]
+      },
+      "AuditEntryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "actorUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "action": {
+            "type": "string"
+          },
+          "entityType": {
+            "type": "string",
+            "nullable": true
+          },
+          "entityId": {
+            "type": "string",
+            "nullable": true
+          },
+          "emergencyId": {
+            "type": "string",
+            "nullable": true
+          },
+          "method": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "statusCode": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "action",
+          "method",
+          "path",
+          "statusCode",
+          "createdAt"
+        ]
+      },
+      "AuditListResponseDto": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditEntryDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "entries",
+          "total"
+        ]
+      }
+    }
+  }
+}

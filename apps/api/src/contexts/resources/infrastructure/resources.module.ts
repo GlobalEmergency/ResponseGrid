@@ -11,6 +11,7 @@ import { GetCoordinationQueue } from '../application/get-coordination-queue';
 import { GetPublicResources } from '../application/get-public-resources';
 import { GetResourceFacets } from '../application/get-resource-facets';
 import { GetNearbyResources } from '../application/get-nearby-resources';
+import { GetResourcesInBounds } from '../application/get-resources-in-bounds';
 import { GetMyResources } from '../application/get-my-resources';
 import { VerifyResource } from '../application/verify-resource';
 import { PublishResource } from '../application/publish-resource';
@@ -164,6 +165,12 @@ const getMyResourcesProvider = {
   useFactory: (repo: ResourceRepository) => new GetMyResources(repo),
 };
 
+const getResourcesInBoundsProvider = {
+  provide: GetResourcesInBounds,
+  inject: [RESOURCE_REPOSITORY],
+  useFactory: (repo: ResourceRepository) => new GetResourcesInBounds(repo),
+};
+
 @Module({
   imports: [DatabaseModule, IdentityModule, NotificationsModule],
   controllers: [ResourcesController, CoordinationController, PublicController],
@@ -183,6 +190,7 @@ const getMyResourcesProvider = {
     getNearbyResourcesProvider,
     updateStatusProvider,
     getMyResourcesProvider,
+    getResourcesInBoundsProvider,
   ],
 })
 export class ResourcesModule implements OnModuleDestroy {

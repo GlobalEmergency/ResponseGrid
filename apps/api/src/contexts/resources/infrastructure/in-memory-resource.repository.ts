@@ -193,6 +193,36 @@ export class InMemoryResourceRepository implements ResourceRepository {
     );
   }
 
+  findInBounds(
+    emergencyId: EmergencyId,
+    q: {
+      minLat: number;
+      minLng: number;
+      maxLat: number;
+      maxLng: number;
+      limit: number;
+    },
+  ): Promise<Resource[]> {
+    const visible = new Set<PublicStatus>([
+      PublicStatus.Active,
+      PublicStatus.Saturated,
+      PublicStatus.Paused,
+    ]);
+    const result = [...this.store.values()]
+      .filter(
+        (s) =>
+          s.emergencyId === emergencyId.value &&
+          visible.has(s.publicStatus) &&
+          s.location.latitude >= q.minLat &&
+          s.location.latitude <= q.maxLat &&
+          s.location.longitude >= q.minLng &&
+          s.location.longitude <= q.maxLng,
+      )
+      .slice(0, q.limit)
+      .map((s) => Resource.fromSnapshot(s));
+    return Promise.resolve(result);
+  }
+
   facets(emergencyId: EmergencyId): Promise<{
     byCategory: Record<string, number>;
     byCountry: Record<string, number>;
