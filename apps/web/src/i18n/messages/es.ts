@@ -321,6 +321,17 @@ export const es = {
     group_other: 'Otros',
   },
 
+  // ── Nearby points ("Puntos cerca de ti") ─────────────────────────────────
+  nearby_points: {
+    button_find: 'Ver puntos cerca de mí',
+    button_clear: 'Volver a la lista',
+    loading: 'Buscando puntos cercanos…',
+    geo_error: 'No pudimos obtener tu ubicación. Comprueba los permisos del navegador.',
+    geo_error_dismiss: 'Cerrar',
+    showing_nearby: '{n} puntos cercanos',
+    privacy_note: 'Tu ubicación solo se usa en tu navegador para ordenar por cercanía; no se guarda.',
+  },
+
   // ── VerificationBadge ─────────────────────────────────────────────────────
   verification_badge: {
     official: 'Oficial',

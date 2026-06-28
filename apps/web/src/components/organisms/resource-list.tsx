@@ -12,16 +12,25 @@
  *    accumulated items whenever they change.
  *  - Client-side text search over the already-loaded items.
  *  - Geographic grouping: Venezuela first, diaspora/others after.
+ *  - Nearby mode: citizen geolocates and sees nearest points, ordered by
+ *    distance. Filter bar, load-more and geographic grouping are hidden in
+ *    this mode.
  */
 
 import { useState, useTransition, useEffect, useMemo, useRef } from 'react';
 import { createResponseGridClient } from '@reliefhub/api-client';
+import type { components } from '@reliefhub/api-client';
 import { groupByCountry, type ResourceViewDto } from '@/lib/group-by-country';
 import { PublicResourceCard } from '@/components/organisms/public-resource-card';
 import { ResourceFilterBar } from '@/components/molecules/resource-filter-bar';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { NearbyButton } from '@/components/molecules/nearby-button';
+import { DistanceBadge } from '@/components/atoms/distance-badge';
+import { PrivacyLocationNotice } from '@/components/atoms/privacy-location-notice';
 import type { Messages } from '@/i18n/messages/es';
 import type { Locale } from '@/i18n';
+
+type NearbyResourceViewDto = components['schemas']['NearbyResourceViewDto'];
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 if (!API_URL) {
@@ -46,6 +55,7 @@ interface ResourceListProps {
   tStatusLight: Messages['status_light'];
   tList: Messages['resource_list'];
   tFilter: Messages['resource_filter'];
+  tNearby: Messages['nearby_points'];
   tEmpty: { title: string; description?: string };
   locale: Locale;
 }
@@ -61,6 +71,7 @@ export function ResourceList({
   tStatusLight,
   tList,
   tFilter,
+  tNearby,
   tEmpty,
   locale,
 }: ResourceListProps) {
@@ -77,6 +88,10 @@ export function ResourceList({
   const [page, setPage] = useState(1);
   const [isPending, startTransition] = useTransition();
   const [loadMoreError, setLoadMoreError] = useState(false);
+
+  // ── Nearby mode state ─────────────────────────────────────────────────────
+  const [nearbyItems, setNearbyItems] = useState<NearbyResourceViewDto[] | null>(null);
+  const [geoError, setGeoError] = useState(false);
 
   // ── Re-fetch page 1 whenever category or country changes ──────────────────
   const firstRun = useRef(true);
@@ -154,6 +169,16 @@ export function ResourceList({
     });
   }
 
+  /**
+   * Callback for NearbyButton: activates nearby mode with the API results.
+   * An empty array means 0 results within range — still shows nearby mode.
+   * Clearing nearby mode is handled by onClear → setNearbyItems(null).
+   */
+  function handleNearbyResults(nearbyResults: NearbyResourceViewDto[]) {
+    setNearbyItems(nearbyResults);
+    setGeoError(false);
+  }
+
   // ── Client-side search filter ─────────────────────────────────────────────
   const filteredItems = useMemo(() => {
     if (searchQuery.trim() === '') return items;
@@ -175,9 +200,82 @@ export function ResourceList({
   const isSearching = searchQuery.trim() !== '';
   const hasMore = !isSearching && items.length < total;
 
+  // ── Nearby mode rendering ─────────────────────────────────────────────────
+  if (nearbyItems !== null) {
+    return (
+      <div className="flex flex-col gap-4">
+        {/* NearbyButton in active state (shows "Volver a la lista") */}
+        <NearbyButton
+          emergencyId={emergencyId}
+          tNearby={tNearby}
+          onNearbyResults={handleNearbyResults}
+          onClear={() => setNearbyItems(null)}
+          onGeoError={() => setGeoError(true)}
+          active
+        />
+
+        {/* Summary */}
+        <p className="text-xs text-gray-500">
+          {tNearby.showing_nearby.replace('{n}', String(nearbyItems.length))}
+        </p>
+
+        {/* Privacy notice */}
+        <PrivacyLocationNotice text={tNearby.privacy_note} />
+
+        {/* Nearby items list */}
+        <ul className="flex flex-col gap-3" role="list">
+          {nearbyItems.map((item) => (
+            <li key={item.id}>
+              <div className="relative">
+                <PublicResourceCard
+                  resource={item as unknown as ResourceViewDto}
+                  t={t}
+                  tVerification={tVerification}
+                  tStatusLight={tStatusLight}
+                  locale={locale}
+                />
+                <div className="mt-1 flex justify-end px-1">
+                  <DistanceBadge distanceMeters={item.distanceMeters} locale={locale} />
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
+  // ── Normal mode rendering ─────────────────────────────────────────────────
+
   if (items.length === 0 && !isPending) {
     return (
       <div className="flex flex-col gap-4">
+        {/* NearbyButton above filter bar */}
+        <NearbyButton
+          emergencyId={emergencyId}
+          tNearby={tNearby}
+          onNearbyResults={handleNearbyResults}
+          onClear={() => setNearbyItems(null)}
+          onGeoError={() => setGeoError(true)}
+          active={nearbyItems !== null}
+        />
+
+        {/* Geo error alert */}
+        {geoError && (
+          <p role="alert" className="rounded-card border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            {tNearby.geo_error}
+            {' '}
+            <button
+              type="button"
+              onClick={() => setGeoError(false)}
+              className="ml-1 underline hover:no-underline focus:outline-none"
+              aria-label={tNearby.geo_error_dismiss}
+            >
+              ✕
+            </button>
+          </p>
+        )}
+
         <ResourceFilterBar
           byCategory={facetsByCategory}
           byCountry={facetsByCountry}
@@ -197,6 +295,32 @@ export function ResourceList({
 
   return (
     <div className="flex flex-col gap-4">
+      {/* ── NearbyButton above filter bar ───────────────────────────────── */}
+      <NearbyButton
+        emergencyId={emergencyId}
+        tNearby={tNearby}
+        onNearbyResults={handleNearbyResults}
+        onClear={() => setNearbyItems(null)}
+        onGeoError={() => setGeoError(true)}
+        active={nearbyItems !== null}
+      />
+
+      {/* ── Geo error alert ──────────────────────────────────────────────── */}
+      {geoError && nearbyItems === null && (
+        <p role="alert" className="rounded-card border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          {tNearby.geo_error}
+          {' '}
+          <button
+            type="button"
+            onClick={() => setGeoError(false)}
+            className="ml-1 underline hover:no-underline focus:outline-none"
+            aria-label={tNearby.geo_error_dismiss}
+          >
+            ✕
+          </button>
+        </p>
+      )}
+
       {/* ── Filter bar ──────────────────────────────────────────────────── */}
       <ResourceFilterBar
         byCategory={facetsByCategory}
