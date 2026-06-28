@@ -36,7 +36,8 @@ import { ACCESS_CONTROL } from '../domain/authorization/access-control';
 import type { AccessControl } from '../domain/authorization/access-control';
 import { LocalAccessControl } from '../domain/authorization/local-access-control';
 import { PermissionGuard } from './http/permission.guard';
-import { SCOPE_RESOLVER, RequestScopeResolver } from './http/scope-resolver';
+import { SCOPE_RESOLVER } from './http/scope-resolver';
+import { EntityAwareScopeResolver } from './http/entity-aware-scope-resolver';
 import { DrizzleUserIdentityRepository } from './drizzle/drizzle-user-identity.repository';
 import { BcryptPasswordHasher } from './bcrypt-password-hasher';
 import { JwtTokenService } from './jwt-token.service';
@@ -109,7 +110,7 @@ const accessControlProvider = {
 
 const scopeResolverProvider = {
   provide: SCOPE_RESOLVER,
-  useClass: RequestScopeResolver,
+  useClass: EntityAwareScopeResolver,
 };
 
 const grantRoleProvider = {
