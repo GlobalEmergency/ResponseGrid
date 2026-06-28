@@ -1311,6 +1311,52 @@
         ]
       }
     },
+    "/emergencies/{emergencyId}/public/resources/{resourceId}": {
+      "get": {
+        "operationId": "PublicController_getOne",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "Resource UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The published resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceViewDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found or not public"
+          }
+        },
+        "summary": "Get a single published resource by id",
+        "tags": [
+          "public"
+        ]
+      }
+    },
     "/recipient-types": {
       "get": {
         "operationId": "RecipientTypesController_list",

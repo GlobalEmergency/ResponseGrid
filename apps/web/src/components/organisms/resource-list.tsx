@@ -58,6 +58,8 @@ interface ResourceListProps {
   tNearby: Messages['nearby_points'];
   tEmpty: { title: string; description?: string };
   locale: Locale;
+  /** Emergency slug — enables linking each card to its resource detail page. */
+  slug?: string;
 }
 
 export function ResourceList({
@@ -74,6 +76,7 @@ export function ResourceList({
   tNearby,
   tEmpty,
   locale,
+  slug,
 }: ResourceListProps) {
   // ── Filter state (category/country) → triggers re-fetch ──────────────────
   const [activeCategory, setActiveCategory] = useState('');
@@ -231,6 +234,7 @@ export function ResourceList({
                   tVerification={tVerification}
                   tStatusLight={tStatusLight}
                   locale={locale}
+                  slug={slug}
                 />
                 <div className="mt-1 flex justify-end px-1">
                   <DistanceBadge distanceMeters={item.distanceMeters} locale={locale} />
@@ -364,6 +368,7 @@ export function ResourceList({
                       tVerification={tVerification}
                       tStatusLight={tStatusLight}
                       locale={locale}
+                      slug={slug}
                     />
                   </li>
                 ))}
@@ -389,6 +394,7 @@ export function ResourceList({
                       tVerification={tVerification}
                       tStatusLight={tStatusLight}
                       locale={locale}
+                      slug={slug}
                     />
                   </li>
                 ))}
@@ -414,6 +420,7 @@ export function ResourceList({
                       tVerification={tVerification}
                       tStatusLight={tStatusLight}
                       locale={locale}
+                      slug={slug}
                     />
                   </li>
                 ))}

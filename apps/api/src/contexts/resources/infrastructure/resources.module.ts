@@ -12,6 +12,7 @@ import { GetPublicResources } from '../application/get-public-resources';
 import { GetResourceFacets } from '../application/get-resource-facets';
 import { GetNearbyResources } from '../application/get-nearby-resources';
 import { GetResourcesInBounds } from '../application/get-resources-in-bounds';
+import { GetPublicResource } from '../application/get-public-resource';
 import { GetMyResources } from '../application/get-my-resources';
 import { VerifyResource } from '../application/verify-resource';
 import { PublishResource } from '../application/publish-resource';
@@ -178,6 +179,12 @@ const getResourcesInBoundsProvider = {
   useFactory: (repo: ResourceRepository) => new GetResourcesInBounds(repo),
 };
 
+const getPublicResourceProvider = {
+  provide: GetPublicResource,
+  inject: [RESOURCE_REPOSITORY],
+  useFactory: (repo: ResourceRepository) => new GetPublicResource(repo),
+};
+
 const recipientTypeRepositoryProvider = {
   provide: RECIPIENT_TYPE_REPOSITORY,
   inject: [DB],
@@ -216,6 +223,7 @@ const listRecipientTypesProvider = {
     updateStatusProvider,
     getMyResourcesProvider,
     getResourcesInBoundsProvider,
+    getPublicResourceProvider,
     recipientTypeRepositoryProvider,
     listRecipientTypesProvider,
   ],

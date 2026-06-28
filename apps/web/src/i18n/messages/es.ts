@@ -316,6 +316,12 @@ export const es = {
     no_official_contact: 'Sin contacto oficial',
   },
 
+  resource_detail: {
+    back: 'Volver a la emergencia',
+    needs_heading: 'Necesidades de este destinatario',
+    needs_empty: 'Este destinatario no tiene necesidades publicadas.',
+  },
+
   // ── ResourceList ──────────────────────────────────────────────────────────
   resource_list: {
     aria_label: 'Puntos activos verificados',

@@ -300,6 +300,12 @@ export const en = {
     no_official_contact: 'No official contact',
   },
 
+  resource_detail: {
+    back: 'Back to the emergency',
+    needs_heading: 'Needs of this recipient',
+    needs_empty: 'This recipient has no published needs.',
+  },
+
   resource_list: {
     aria_label: 'Verified active points',
     showing: 'Showing {shown} of {total}',

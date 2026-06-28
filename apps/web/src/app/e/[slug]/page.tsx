@@ -238,6 +238,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
             <h2 id="points-heading" className={sectionTitle}>{te.points_heading}</h2>
             <ResourceList
               emergencyId={emergencyId}
+              slug={slug}
               initialItems={activeResources}
               total={resourcesTotal}
               facetsByCategory={facetsByCategory}
