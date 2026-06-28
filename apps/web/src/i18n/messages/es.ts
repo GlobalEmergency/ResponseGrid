@@ -818,13 +818,18 @@ export const es = {
     // Autenticación
     auth_heading: 'Autenticación',
     auth_intro:
-      'Hay dos planos. Distínguelos antes de integrar.',
+      'Hay tres esquemas. Identifica cuál acepta cada endpoint antes de integrar.',
     auth_read_t: 'Lectura — sin token',
     auth_read_b:
       'Los endpoints de consulta (emergencias, puntos públicos, necesidades públicas) no requieren credenciales. Si solo quieres mostrar datos, no necesitas autenticarte.',
     auth_write_t: 'Escritura — token Bearer',
     auth_write_b:
-      'Para crear necesidades, ofertas o puntos necesitas una cuenta. Regístrate o haz login y recibirás un accessToken (JWT) que envías en la cabecera Authorization: Bearer <token>.',
+      'Para crear necesidades, ofertas o puntos necesitas una cuenta de usuario. Regístrate o haz login y recibirás un accessToken (JWT) que envías en la cabecera Authorization: Bearer <token>.',
+    auth_sa_t: 'Cuentas de servicio — cabecera x-api-key',
+    auth_sa_b:
+      'Para integraciones máquina-a-máquina existen las cuentas de servicio. Un administrador crea la cuenta y emite una clave (rh_live_…) que viaja en la cabecera x-api-key (no como Bearer). Con ella el llamante puede introspeccionar su identidad y permisos: GET /service-accounts/me.',
+    auth_note:
+      'Una clave x-api-key autentica al principal de la cuenta de servicio, pero no sustituye al Bearer en los endpoints de escritura documentados (necesidades, ofertas y puntos): estos esperan un JWT de cuenta de usuario y responden 401 ante una API key. Una cuenta de servicio solo puede actuar dentro de sus grants (por defecto, ninguno), así que sin permisos explícitos su clave no habilita escritura.',
 
     // Inicio rápido
     qs_heading: 'Inicio rápido: un mapa de puntos',
