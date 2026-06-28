@@ -39,3 +39,12 @@ export class GroupAccessDeniedError extends Error {
     this.name = 'GroupAccessDeniedError';
   }
 }
+
+export class GroupPrivilegeEscalationError extends Error {
+  constructor(missing: string[]) {
+    super(
+      `Cannot appoint a manager: it would confer permissions you lack here (${missing.join(', ')})`,
+    );
+    this.name = 'GroupPrivilegeEscalationError';
+  }
+}
