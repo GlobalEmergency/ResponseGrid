@@ -136,7 +136,8 @@ export const en = {
     points_count: '{count} verified',
     footer_verify: '🛡 Is this campaign trustworthy? Verify it',
 
-    metrics_heading: 'Summary',
+    metrics_heading: 'Operation summary',
+    metrics_caption: 'Emergency-wide figures',
     metric_needs_open: 'Open requests',
     metric_needs_closed: 'Closed requests',
     metric_resources_active: 'Active logistics points',
@@ -177,6 +178,7 @@ export const en = {
     // Segmented explorer (Points | Needs)
     tab_points: 'Points',
     tab_needs: 'Needs',
+    explore_heading: 'On the map',
     explore_aria: 'Active points and validated needs',
 
     map_heading: 'Emergency map',

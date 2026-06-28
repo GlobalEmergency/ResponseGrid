@@ -282,10 +282,14 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
             )}
           </section>
 
-          {/* Métricas (fila de KPIs) */}
+          {/* Métricas (fila de KPIs) — cifras GLOBALES del operativo, distintas
+              de lo realmente visible en el mapa (que se muestra en las pestañas). */}
           {metrics !== undefined && (
-            <section aria-labelledby="metrics-heading">
-              <h2 id="metrics-heading" className="sr-only">{te.metrics_heading}</h2>
+            <section aria-labelledby="metrics-heading" className="flex flex-col gap-2.5">
+              <div>
+                <h2 id="metrics-heading" className={sectionTitle}>{te.metrics_heading}</h2>
+                <p className="mt-0.5 text-[12.5px] text-muted">{te.metrics_caption}</p>
+              </div>
               <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
                 <MetricCard value={metrics.needs.open} label={te.metric_tile_open} tone="navy" />
                 <MetricCard value={metrics.resources.active} label={te.metric_tile_points} tone="navy" />
@@ -295,9 +299,10 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
             </section>
           )}
 
-          {/* Explorador segmentado: Puntos | Necesidades (una lista a la vez) */}
+          {/* Explorador segmentado: Puntos | Necesidades — lo que se ve en el
+              mapa (una lista a la vez). Sus contadores reflejan lo visible. */}
           <section aria-labelledby="explore-heading" className="flex flex-col gap-3">
-            <h2 id="explore-heading" className="sr-only">{te.explore_aria}</h2>
+            <h2 id="explore-heading" className={sectionTitle}>{te.explore_heading}</h2>
             <EmergencyExplorer
               ariaLabel={te.explore_aria}
               pointsLabel={te.tab_points}

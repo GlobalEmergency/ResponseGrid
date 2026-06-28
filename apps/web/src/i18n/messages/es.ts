@@ -138,7 +138,8 @@ export const es = {
     footer_verify: '🛡 ¿Es de fiar esta campaña? Verifícala',
 
     // Metrics
-    metrics_heading: 'Resumen',
+    metrics_heading: 'Resumen del operativo',
+    metrics_caption: 'Cifras globales de la emergencia',
     metric_needs_open: 'Peticiones abiertas',
     metric_needs_closed: 'Peticiones cerradas',
     metric_resources_active: 'Puntos logísticos activos',
@@ -183,6 +184,7 @@ export const es = {
     // Explorador segmentado (Puntos | Necesidades)
     tab_points: 'Puntos',
     tab_needs: 'Necesidades',
+    explore_heading: 'En el mapa',
     explore_aria: 'Puntos activos y necesidades validadas',
 
     // Map
