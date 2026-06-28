@@ -3,6 +3,8 @@
 import { useTransition } from 'react';
 import { removeMemberAction } from '../actions';
 import { Button } from '@/components/atoms/button';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 interface RemoveMemberButtonProps {
   orgId: string;
@@ -10,6 +12,7 @@ interface RemoveMemberButtonProps {
 }
 
 export function RemoveMemberButton({ orgId, userId }: RemoveMemberButtonProps) {
+  const td = getMessages(useLocale()).org_detail;
   const [pending, startTransition] = useTransition();
 
   function handleRemove() {
@@ -29,9 +32,9 @@ export function RemoveMemberButton({ orgId, userId }: RemoveMemberButtonProps) {
       size="sm"
       onClick={handleRemove}
       disabled={pending}
-      aria-label="Quitar miembro"
+      aria-label={td.remove_label}
     >
-      {pending ? 'Quitando…' : 'Quitar'}
+      {pending ? td.removing : td.remove_submit}
     </Button>
   );
 }

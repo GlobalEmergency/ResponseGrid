@@ -11,11 +11,11 @@ interface StatusLightProps {
 }
 
 const COLOR_MAP: Record<PublicStatus, string> = {
-  active: 'bg-green-500',
-  saturated: 'bg-yellow-400',
-  paused: 'bg-orange-500',
-  closed: 'bg-red-500',
-  hidden: 'bg-gray-400',
+  active: 'bg-success-dot',
+  saturated: 'bg-warning-dot',
+  paused: 'bg-accent',
+  closed: 'bg-danger',
+  hidden: 'bg-muted',
 };
 
 const LABEL_KEY: Record<PublicStatus, keyof Messages['status_light']> = {
@@ -42,7 +42,7 @@ export function StatusLight({
   const label = t[LABEL_KEY[status]] as string;
   return (
     <span
-      className={`inline-flex items-center gap-1.5 text-sm font-medium text-gray-700 ${className}`.trim()}
+      className={`inline-flex items-center gap-1.5 text-sm font-medium text-ink-soft ${className}`.trim()}
       aria-label={`${t.aria_prefix} ${label}`}
     >
       <span

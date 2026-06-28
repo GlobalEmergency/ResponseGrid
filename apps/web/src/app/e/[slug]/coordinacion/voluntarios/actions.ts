@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { getT } from '@/i18n/server';
 
 export type ActionResult =
   | { status: 'idle' }
@@ -23,6 +24,8 @@ export async function updateVolunteerStatus(
     redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
   }
 
+  const { t } = await getT();
+
   const { error, response } = await api.POST('/volunteers/{volunteerId}/status', {
     params: { path: { volunteerId } },
     body: { status },
@@ -35,12 +38,12 @@ export async function updateVolunteerStatus(
       redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
     }
     if (response.status === 403) {
-      return { status: 'error', message: 'No tienes permisos para cambiar el estado de este voluntario.' };
+      return { status: 'error', message: t.coord.vol_err_no_permission_status };
     }
     if (response.status === 404) {
-      return { status: 'error', message: 'Voluntario no encontrado.' };
+      return { status: 'error', message: t.coord.vol_err_not_found };
     }
-    return { status: 'error', message: 'No se pudo actualizar el estado. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.coord.vol_err_update_status_failed };
   }
 
   revalidatePath(`/e/${slug}/coordinacion/voluntarios`);
@@ -60,6 +63,8 @@ export async function createTask(
     redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
   }
 
+  const { t } = await getT();
+
   const title = (formData.get('title') as string | null)?.trim() ?? '';
   const description = (formData.get('description') as string | null)?.trim() ?? '';
   const requiredSkill = (formData.get('requiredSkill') as string | null)?.trim() ?? '';
@@ -68,10 +73,10 @@ export async function createTask(
   const longitudeRaw = (formData.get('longitude') as string | null)?.trim() ?? '';
 
   if (title === '') {
-    return { status: 'error', message: 'El título es obligatorio.' };
+    return { status: 'error', message: t.coord.vol_err_title_required };
   }
   if (description === '') {
-    return { status: 'error', message: 'La descripción es obligatoria.' };
+    return { status: 'error', message: t.coord.vol_err_description_required };
   }
 
   type Skill = 'driving' | 'medical' | 'logistics' | 'cooking' | 'languages' | 'admin' | 'general';
@@ -106,9 +111,9 @@ export async function createTask(
       redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
     }
     if (response.status === 403) {
-      return { status: 'error', message: 'No tienes permisos para crear tareas en esta emergencia.' };
+      return { status: 'error', message: t.coord.vol_err_no_permission_create };
     }
-    return { status: 'error', message: 'No se pudo crear la tarea. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.coord.vol_err_create_failed };
   }
 
   revalidatePath(`/e/${slug}/coordinacion/voluntarios`);
@@ -128,6 +133,8 @@ export async function assignVolunteer(
     redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
   }
 
+  const { t } = await getT();
+
   const { error, response } = await api.POST('/tasks/{taskId}/assign', {
     params: { path: { taskId } },
     body: { volunteerId },
@@ -140,15 +147,15 @@ export async function assignVolunteer(
       redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
     }
     if (response.status === 403) {
-      return { status: 'error', message: 'No tienes permisos para asignar voluntarios.' };
+      return { status: 'error', message: t.coord.vol_err_no_permission_assign };
     }
     if (response.status === 404) {
-      return { status: 'error', message: 'Tarea o voluntario no encontrado.' };
+      return { status: 'error', message: t.coord.vol_err_task_or_volunteer_not_found };
     }
     if (response.status === 422) {
-      return { status: 'error', message: 'El voluntario ya está asignado o la tarea no admite más asignaciones.' };
+      return { status: 'error', message: t.coord.vol_err_already_assigned };
     }
-    return { status: 'error', message: 'No se pudo asignar el voluntario. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.coord.vol_err_assign_failed };
   }
 
   revalidatePath(`/e/${slug}/coordinacion/voluntarios`);
@@ -168,6 +175,8 @@ export async function unassignVolunteer(
     redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
   }
 
+  const { t } = await getT();
+
   const { error, response } = await api.POST('/tasks/{taskId}/unassign', {
     params: { path: { taskId } },
     body: { volunteerId },
@@ -180,15 +189,15 @@ export async function unassignVolunteer(
       redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
     }
     if (response.status === 403) {
-      return { status: 'error', message: 'No tienes permisos para quitar voluntarios.' };
+      return { status: 'error', message: t.coord.vol_err_no_permission_unassign };
     }
     if (response.status === 404) {
-      return { status: 'error', message: 'Tarea no encontrada.' };
+      return { status: 'error', message: t.coord.vol_err_task_not_found };
     }
     if (response.status === 422) {
-      return { status: 'error', message: 'El voluntario no estaba asignado a esta tarea.' };
+      return { status: 'error', message: t.coord.vol_err_not_assigned };
     }
-    return { status: 'error', message: 'No se pudo quitar el voluntario. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.coord.vol_err_unassign_failed };
   }
 
   revalidatePath(`/e/${slug}/coordinacion/voluntarios`);
@@ -207,6 +216,8 @@ export async function completeTask(
     redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
   }
 
+  const { t } = await getT();
+
   const { error, response } = await api.POST('/tasks/{taskId}/complete', {
     params: { path: { taskId } },
     headers: authHeaders(token),
@@ -218,12 +229,12 @@ export async function completeTask(
       redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
     }
     if (response.status === 403) {
-      return { status: 'error', message: 'No tienes permisos para completar esta tarea.' };
+      return { status: 'error', message: t.coord.vol_err_no_permission_complete };
     }
     if (response.status === 409) {
-      return { status: 'error', message: 'La tarea ya está cancelada.' };
+      return { status: 'error', message: t.coord.vol_err_already_cancelled };
     }
-    return { status: 'error', message: 'No se pudo completar la tarea. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.coord.vol_err_complete_failed };
   }
 
   revalidatePath(`/e/${slug}/coordinacion/voluntarios`);
@@ -242,6 +253,8 @@ export async function cancelTask(
     redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
   }
 
+  const { t } = await getT();
+
   const { error, response } = await api.POST('/tasks/{taskId}/cancel', {
     params: { path: { taskId } },
     headers: authHeaders(token),
@@ -253,12 +266,12 @@ export async function cancelTask(
       redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
     }
     if (response.status === 403) {
-      return { status: 'error', message: 'No tienes permisos para cancelar esta tarea.' };
+      return { status: 'error', message: t.coord.vol_err_no_permission_cancel };
     }
     if (response.status === 409) {
-      return { status: 'error', message: 'La tarea ya está completada.' };
+      return { status: 'error', message: t.coord.vol_err_already_completed };
     }
-    return { status: 'error', message: 'No se pudo cancelar la tarea. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.coord.vol_err_cancel_failed };
   }
 
   revalidatePath(`/e/${slug}/coordinacion/voluntarios`);

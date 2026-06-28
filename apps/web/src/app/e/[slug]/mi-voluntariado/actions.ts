@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getToken, authHeaders, clearToken } from '@/lib/auth';
 import { api } from '@/lib/api';
+import { getT } from '@/i18n/server';
 import type { components } from '@reliefhub/api-client';
 
 export type VolunteerProfile = components['schemas']['VolunteerViewDto'];
@@ -100,11 +101,13 @@ export async function checkInTask(
   }
 
   if (response.status === 403) {
-    return { status: 'error', message: 'No tienes permisos para hacer check-in en esta tarea.' };
+    const { t } = await getT();
+    return { status: 'error', message: t.account.check_in_forbidden };
   }
 
   if (!response.ok) {
-    return { status: 'error', message: 'No se pudo hacer check-in. Inténtalo de nuevo.' };
+    const { t } = await getT();
+    return { status: 'error', message: t.account.check_in_failed };
   }
 
   revalidatePath(`/e/${slug}/mi-voluntariado`);
@@ -136,11 +139,13 @@ export async function checkOutTask(
   }
 
   if (response.status === 403) {
-    return { status: 'error', message: 'No tienes permisos para hacer check-out en esta tarea.' };
+    const { t } = await getT();
+    return { status: 'error', message: t.account.check_out_forbidden };
   }
 
   if (!response.ok) {
-    return { status: 'error', message: 'No se pudo hacer check-out. Inténtalo de nuevo.' };
+    const { t } = await getT();
+    return { status: 'error', message: t.account.check_out_failed };
   }
 
   revalidatePath(`/e/${slug}/mi-voluntariado`);

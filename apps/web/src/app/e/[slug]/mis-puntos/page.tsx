@@ -6,6 +6,8 @@ import { getEmergencyBySlug } from '@/lib/emergencies';
 import { fetchMyResources } from './actions';
 import { StatusForm } from './status-form';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,32 +17,35 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const { t } = await getT();
   const emergency = await getEmergencyBySlug(slug);
-  if (!emergency) return { title: 'Emergencia no encontrada · ResponseGrid' };
+  if (!emergency) return { title: t.account.emergency_not_found };
   return {
-    title: `Mis puntos — ${emergency.name} · ResponseGrid`,
-    description: `Gestiona el estado operativo de tus puntos en ${emergency.name}.`,
+    title: t.account.points_meta_title.replace('{name}', emergency.name),
+    description: t.account.points_meta_description.replace('{name}', emergency.name),
   };
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  collection_point: 'Punto de recogida',
-  delivery_point: 'Punto de entrega',
-  collection_and_delivery: 'Recogida y entrega',
-  warehouse: 'Almacén',
-  transport: 'Transporte',
-  supplier: 'Proveedor',
-  venue: 'Local / Espacio',
-};
-
-const STAGE_LABELS: Record<string, string> = {
-  origin: 'Origen',
-  intermediate: 'Intermedio',
-  destination: 'Destino',
-};
-
 export default async function MisPuntosPage({ params }: Props) {
   const { slug } = await params;
+  const { t } = await getT();
+  const ta = t.account;
+
+  const TYPE_LABELS: Record<string, string> = {
+    collection_point: ta.type_collection_point,
+    delivery_point: ta.type_delivery_point,
+    collection_and_delivery: ta.type_collection_and_delivery,
+    warehouse: ta.type_warehouse,
+    transport: ta.type_transport,
+    supplier: ta.type_supplier,
+    venue: ta.type_venue,
+  };
+
+  const STAGE_LABELS: Record<string, string> = {
+    origin: ta.stage_origin,
+    intermediate: ta.stage_intermediate,
+    destination: ta.stage_destination,
+  };
 
   // --- Auth guard -----------------------------------------------------------
   const token = await getToken();
@@ -58,49 +63,40 @@ export default async function MisPuntosPage({ params }: Props) {
   const myResources = await fetchMyResources(emergency.id, slug);
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-start bg-white px-4 py-10">
-      <div className="w-full max-w-xl flex flex-col gap-8">
-
-        {/* ── CABECERA ──────────────────────────────────────────────── */}
-        <header className="flex flex-col gap-2">
-          <Link
-            href={`/e/${slug}`}
-            className="text-sm text-gray-400 underline underline-offset-2 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded w-fit"
-          >
-            ← {emergency.name}
-          </Link>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Mis puntos
-          </h1>
-          <p className="text-base text-gray-600">
-            Actualiza el estado operativo de los puntos que has registrado.
-          </p>
-        </header>
+    <main className="flex-1 bg-surface">
+      <div className="mx-auto w-full max-w-xl">
+        <PageHeaderBand
+          backHref={`/e/${slug}`}
+          backLabel={emergency.name}
+          title={ta.points_title}
+          subtitle={ta.points_subtitle}
+        />
+        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
 
         {/* ── LISTA DE PUNTOS ───────────────────────────────────────── */}
         <section aria-labelledby="my-points-heading" className="flex flex-col gap-4">
           <h2 id="my-points-heading" className="sr-only">
-            Tus puntos registrados
+            {ta.points_list_heading}
           </h2>
 
           {myResources.length === 0 ? (
             <EmptyState
-              title="Aún no tienes puntos registrados."
-              description="Cuando registres un recurso en esta emergencia aparecerá aquí."
+              title={ta.no_points_title}
+              description={ta.no_points_description}
             />
           ) : (
-            <ul className="flex flex-col gap-4" role="list" aria-label="Tus puntos registrados">
+            <ul className="flex flex-col gap-4" role="list" aria-label={ta.points_list_aria}>
               {myResources.map((resource) => (
                 <li key={resource.id}>
                   <article
-                    aria-label={`Punto: ${resource.name}`}
-                    className="flex flex-col gap-4 rounded-lg border-2 border-gray-900 bg-white p-5"
+                    aria-label={ta.point_card_aria.replace('{name}', resource.name)}
+                    className="flex flex-col gap-4 rounded-lg border-2 border-navy bg-white p-5"
                   >
                     <div className="flex flex-col gap-1">
-                      <h3 className="text-lg font-bold text-gray-900 leading-tight">
+                      <h3 className="text-lg font-bold text-ink leading-tight">
                         {resource.name}
                       </h3>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted">
                         {TYPE_LABELS[resource.type] ?? resource.type}
                         {' · '}
                         {STAGE_LABELS[resource.stage] ?? resource.stage}
@@ -115,9 +111,9 @@ export default async function MisPuntosPage({ params }: Props) {
 
                     <Link
                       href={`/e/${slug}/reportar?resourceId=${resource.id}`}
-                      className="inline-flex items-center justify-center rounded-lg border-2 border-gray-900 px-4 py-2 text-sm font-semibold text-gray-900 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors w-fit"
+                      className="inline-flex items-center justify-center rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink bg-white hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors w-fit"
                     >
-                      Reportar incidencia
+                      {ta.report_incident_cta}
                     </Link>
                   </article>
                 </li>
@@ -126,6 +122,7 @@ export default async function MisPuntosPage({ params }: Props) {
           )}
         </section>
 
+        </div>
       </div>
     </main>
   );

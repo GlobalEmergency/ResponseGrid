@@ -51,12 +51,12 @@ export function NeedsFilter({ t = es.needs_filter, te = es.emergency }: NeedsFil
 
   return (
     <div className="flex flex-wrap gap-3" role="group" aria-label={t.aria_label}>
-      <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+      <label className="flex flex-col gap-1 text-xs font-medium text-muted">
         <span>{t.category_label}</span>
         <select
           value={currentCategory}
           onChange={(e) => updateParam('category', e.target.value)}
-          className="rounded-lg border-2 border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-gray-900 focus:outline-none"
+          className="rounded-lg border-2 border-line bg-white px-3 py-1.5 text-sm text-ink focus:border-navy focus:outline-none"
           aria-label={t.aria_filter_category}
         >
           {categoryOptions.map((opt) => (
@@ -67,12 +67,12 @@ export function NeedsFilter({ t = es.needs_filter, te = es.emergency }: NeedsFil
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
+      <label className="flex flex-col gap-1 text-xs font-medium text-muted">
         <span>{t.priority_label}</span>
         <select
           value={currentPriority}
           onChange={(e) => updateParam('priority', e.target.value)}
-          className="rounded-lg border-2 border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-gray-900 focus:outline-none"
+          className="rounded-lg border-2 border-line bg-white px-3 py-1.5 text-sm text-ink focus:border-navy focus:outline-none"
           aria-label={t.aria_filter_priority}
         >
           {priorityOptions.map((opt) => (

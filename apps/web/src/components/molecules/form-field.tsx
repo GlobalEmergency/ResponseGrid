@@ -31,18 +31,18 @@ export function FormField({
       {labelAs === 'label' ? (
         <Label
           htmlFor={htmlFor}
-          className="text-sm font-semibold text-gray-900 uppercase tracking-wide"
+          className="text-sm font-semibold text-ink uppercase tracking-wide"
         >
           {label}
         </Label>
       ) : (
-        <p className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+        <p className="text-sm font-semibold text-ink uppercase tracking-wide">
           {label}
         </p>
       )}
       {children}
       {error !== undefined && error !== '' && (
-        <p className="text-xs text-red-600">{error}</p>
+        <p className="text-xs text-danger">{error}</p>
       )}
     </div>
   );

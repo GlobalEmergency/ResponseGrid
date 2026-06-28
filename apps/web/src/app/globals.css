@@ -37,10 +37,24 @@
   --color-danger: #c23a1e;
   --color-danger-soft: #fbe3dc;
   --color-danger-tint: #fceee6;
+  /* Informational / neutral status (harmonized with navy; blue is not a brand
+   * accent, so info stays muted and deferential to navy + accent) */
+  --color-info: #1b5288;
+  --color-info-soft: #eaf1f9;
+  --color-info-line: #c3d7ec;
+  --color-info-dot: #2f80d8;
   --color-official-soft: #e7eef7;
   --color-family-soft: #fbf2dd;
   --color-family-line: #e4c97a;
   --color-family-ink: #7a5a12;
+
+  /* Text over the navy header band */
+  --color-on-navy: #b7c6da;
+  --color-on-navy-soft: #a8bbd2;
+  /* Stronger neutral line + danger accents */
+  --color-line-strong: #d8d2c8;
+  --color-danger-strong: #9a3b12;
+  --color-danger-line: #e9b79a;
 
   /* Radius */
   --radius-card: 16px;

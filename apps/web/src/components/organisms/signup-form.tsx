@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useActionState } from 'react';
 import { signupAction, type SignupResult } from '@/app/signup/actions';
-import { SocialLoginButtons } from '@/components/social-login-buttons';
+import { SocialLoginButtons } from '@/components/molecules/social-login-buttons';
 import { Input } from '@/components/atoms/input';
 import { Label } from '@/components/atoms/label';
 import { Button } from '@/components/atoms/button';
@@ -61,7 +61,7 @@ export function SignupForm({ next, t }: SignupFormProps) {
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="password">
             {t.password_label}{' '}
-            <span className="font-normal text-gray-500">{t.password_hint}</span>
+            <span className="font-normal text-muted">{t.password_hint}</span>
           </Label>
           <Input
             id="password"
@@ -81,11 +81,11 @@ export function SignupForm({ next, t }: SignupFormProps) {
 
       <SocialLoginButtons />
 
-      <p className="text-center text-sm text-gray-600">
+      <p className="text-center text-sm text-muted">
         {t.already_account}{' '}
         <Link
           href="/login"
-          className="font-semibold text-gray-900 underline underline-offset-2 hover:text-gray-700"
+          className="font-semibold text-ink underline underline-offset-2 hover:text-ink-soft"
         >
           {t.login_link}
         </Link>

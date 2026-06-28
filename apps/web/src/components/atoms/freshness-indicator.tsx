@@ -1,6 +1,8 @@
+'use client';
+
 /**
- * FreshnessIndicator — shows an amber "Verifica antes de actuar" badge when a
- * need is considered stale but not yet expired.
+ * FreshnessIndicator — shows an amber "verify before acting" badge when a need
+ * is considered stale but not yet expired.
  *
  * Staleness criteria (either condition triggers the badge):
  *   • lastVerifiedAt is more than 6 hours ago, OR
@@ -8,10 +10,10 @@
  *
  * Expired needs are excluded from public listings by the backend, so this
  * component only needs to handle the stale-but-active case.
- *
- * The component performs time calculations client-side, so any date rendered
- * inside carries `suppressHydrationWarning` to avoid SSR/client mismatches.
  */
+
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
 const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
@@ -42,6 +44,8 @@ function isStale(expiresAt: string | null | undefined, lastVerifiedAt: string | 
 }
 
 export function FreshnessIndicator({ expiresAt, lastVerifiedAt }: FreshnessIndicatorProps) {
+  const label = getMessages(useLocale()).ui.freshness_verify;
+
   if (!isStale(expiresAt, lastVerifiedAt)) {
     return null;
   }
@@ -50,11 +54,11 @@ export function FreshnessIndicator({ expiresAt, lastVerifiedAt }: FreshnessIndic
     <span
       role="status"
       aria-live="polite"
-      className="inline-flex items-center gap-1.5 rounded-full border border-amber-400 bg-amber-50 px-3 py-0.5 text-xs font-semibold text-amber-800"
+      className="inline-flex items-center gap-1.5 rounded-full border border-warning bg-warning-soft px-3 py-0.5 text-xs font-semibold text-warning"
       suppressHydrationWarning
     >
       <span aria-hidden="true">⚠️</span>
-      Verifica antes de actuar
+      {label}
     </span>
   );
 }

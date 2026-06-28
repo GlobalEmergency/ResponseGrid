@@ -1,11 +1,9 @@
 /**
  * OfficialHeaderBand — the navy "Banda oficial" header for an emergency landing.
- * Brand row + language switch, accent overline, emergency name (H1), and an
- * operational-status pill with the last-updated time.
+ * Accent overline, emergency name (H1), and an operational-status pill with the
+ * last-updated time. Built on the shared HeaderBandShell.
  */
-import Link from 'next/link';
-import { BrandLogo } from '@/components/molecules/brand-logo';
-import { LanguageSwitcher } from '@/components/molecules/language-switcher';
+import { HeaderBandShell } from '@/components/molecules/header-band-shell';
 import { RelativeTime } from '@/components/atoms/relative-time';
 import type { Messages } from '@/i18n/messages/es';
 
@@ -33,18 +31,7 @@ export function OfficialHeaderBand({ name, status, updatedAt, te }: OfficialHead
         : te.header_status_closed;
 
   return (
-    <header className="rounded-b-[28px] bg-navy px-5 pb-7 pt-6 text-white lg:px-8">
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <Link
-          href="/"
-          aria-label="ResponseGrid"
-          className="rounded focus:outline-none focus:ring-2 focus:ring-white/60"
-        >
-          <BrandLogo size={24} wordmarkClassName="text-base" />
-        </Link>
-        <LanguageSwitcher tone="dark" />
-      </div>
-
+    <HeaderBandShell pb="lg">
       <div className="lg:flex lg:items-end lg:justify-between lg:gap-6">
         <div>
           <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-accent">
@@ -60,12 +47,12 @@ export function OfficialHeaderBand({ name, status, updatedAt, te }: OfficialHead
             <span className={`h-2 w-2 rounded-full ${DOT_CLASS[status]}`} aria-hidden="true" />
             {statusLabel}
           </span>
-          <span className="flex items-center gap-1.5 text-xs text-[#b7c6da]">
+          <span className="flex items-center gap-1.5 text-xs text-on-navy">
             <span aria-hidden="true">🕑</span>
             <RelativeTime isoString={updatedAt} />
           </span>
         </div>
       </div>
-    </header>
+    </HeaderBandShell>
   );
 }

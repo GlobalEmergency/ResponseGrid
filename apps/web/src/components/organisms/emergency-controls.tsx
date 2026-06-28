@@ -10,6 +10,8 @@ import type { ActionResult } from '@/app/e/[slug]/coordinacion/actions';
 import { Button } from '@/components/atoms/button';
 import { Textarea } from '@/components/atoms/textarea';
 import { ErrorMessage } from '@/components/atoms/error-message';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 interface EmergencyControlsProps {
   emergencyId: string;
@@ -27,6 +29,8 @@ export function EmergencyControls({
   status,
   currentAnnouncement,
 }: EmergencyControlsProps) {
+  const tc = getMessages(useLocale()).coord;
+
   // --- Pause / Resume state ------------------------------------------------
   const [lifecycleState, lifecycleAction, lifecyclePending] = useActionState<
     ActionResult,
@@ -40,7 +44,7 @@ export function EmergencyControls({
       if (intent === 'resume') {
         return resumeEmergency(emergencyId, slug);
       }
-      return { status: 'error', message: 'Acción no reconocida.' };
+      return { status: 'error', message: tc.controls_unknown_action };
     },
     IDLE,
   );
@@ -51,7 +55,7 @@ export function EmergencyControls({
       async (_prev, formData) => {
         const message = formData.get('message');
         if (typeof message !== 'string' || message.trim() === '') {
-          return { status: 'error', message: 'El comunicado no puede estar vacío.' };
+          return { status: 'error', message: tc.controls_announcement_empty };
         }
         return publishAnnouncement(emergencyId, slug, message.trim());
       },
@@ -64,16 +68,16 @@ export function EmergencyControls({
     <section aria-labelledby="controls-heading" className="flex flex-col gap-6">
       <h2
         id="controls-heading"
-        className="text-xl font-bold text-gray-900"
+        className="text-xl font-bold text-ink"
       >
-        Controles de la emergencia
+        {tc.controls_heading}
       </h2>
 
       {/* ── Kill-switch ─────────────────────────────────────────────────── */}
       {!isClosed && (
         <div className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-            Estado de la recogida
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-muted">
+            {tc.controls_intake_heading}
           </h3>
 
           {lifecycleState.status === 'error' && (
@@ -82,9 +86,9 @@ export function EmergencyControls({
           {lifecycleState.status === 'success' && (
             <p
               role="status"
-              className="rounded-md border border-green-600 bg-green-50 px-4 py-3 text-sm font-medium text-green-800"
+              className="rounded-md border border-success bg-success-soft px-4 py-3 text-sm font-medium text-success"
             >
-              {status === 'paused' ? 'Recogida pausada.' : 'Recogida reanudada.'}
+              {status === 'paused' ? tc.controls_intake_paused : tc.controls_intake_resumed}
             </p>
           )}
 
@@ -101,10 +105,10 @@ export function EmergencyControls({
               fullWidth
             >
               {lifecyclePending
-                ? 'Procesando…'
+                ? tc.processing
                 : status === 'active'
-                  ? '⏸ Pausar recogida'
-                  : '▶ Reanudar recogida'}
+                  ? tc.controls_pause
+                  : tc.controls_resume}
             </Button>
           </form>
         </div>
@@ -112,8 +116,8 @@ export function EmergencyControls({
 
       {/* ── Official announcement ───────────────────────────────────────── */}
       <div className="flex flex-col gap-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-          Comunicado oficial
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted">
+          {tc.controls_announcement_heading}
         </h3>
 
         {announcementState.status === 'error' && (
@@ -122,9 +126,9 @@ export function EmergencyControls({
         {announcementState.status === 'success' && (
           <p
             role="status"
-            className="rounded-md border border-green-600 bg-green-50 px-4 py-3 text-sm font-medium text-green-800"
+            className="rounded-md border border-success bg-success-soft px-4 py-3 text-sm font-medium text-success"
           >
-            Comunicado publicado.
+            {tc.controls_announcement_published}
           </p>
         )}
 
@@ -133,13 +137,13 @@ export function EmergencyControls({
             htmlFor="announcement-message"
             className="sr-only"
           >
-            Texto del comunicado oficial
+            {tc.controls_announcement_label}
           </label>
           <Textarea
             id="announcement-message"
             name="message"
             rows={4}
-            placeholder="Escribe aquí el comunicado oficial para los ciudadanos…"
+            placeholder={tc.controls_announcement_placeholder}
             defaultValue={currentAnnouncement ?? ''}
             aria-describedby={
               announcementState.status === 'error'
@@ -153,7 +157,7 @@ export function EmergencyControls({
             disabled={announcementPending}
             fullWidth
           >
-            {announcementPending ? 'Publicando…' : 'Publicar comunicado'}
+            {announcementPending ? tc.controls_announcement_publishing : tc.controls_announcement_publish}
           </Button>
         </form>
       </div>

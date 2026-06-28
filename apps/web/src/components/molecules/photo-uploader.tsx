@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 const MAX_SIDE_PX = 1280;
 const JPEG_QUALITY = 0.7;
@@ -69,6 +71,7 @@ interface PhotoUploaderProps {
 }
 
 export function PhotoUploader({ onUrlsChange }: PhotoUploaderProps) {
+  const t = getMessages(useLocale()).ui;
   const [photos, setPhotos] = useState<PhotoEntry[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -145,7 +148,7 @@ export function PhotoUploader({ onUrlsChange }: PhotoUploaderProps) {
             updatePhotos((prev) =>
               prev.map((p) =>
                 p.id === id
-                  ? { ...p, uploading: false, error: 'Error al subir la foto.' }
+                  ? { ...p, uploading: false, error: t.photo_upload_error }
                   : p,
               ),
             );
@@ -164,7 +167,7 @@ export function PhotoUploader({ onUrlsChange }: PhotoUploaderProps) {
             updatePhotos((prev) =>
               prev.map((p) =>
                 p.id === id
-                  ? { ...p, uploading: false, error: 'No se recibió URL de la foto.' }
+                  ? { ...p, uploading: false, error: t.photo_no_url }
                   : p,
               ),
             );
@@ -182,7 +185,7 @@ export function PhotoUploader({ onUrlsChange }: PhotoUploaderProps) {
           updatePhotos((prev) =>
             prev.map((p) =>
               p.id === id
-                ? { ...p, uploading: false, error: 'Error de red al subir la foto.' }
+                ? { ...p, uploading: false, error: t.photo_network_error }
                 : p,
             ),
           );
@@ -194,7 +197,7 @@ export function PhotoUploader({ onUrlsChange }: PhotoUploaderProps) {
         inputRef.current.value = '';
       }
     },
-    [updatePhotos],
+    [updatePhotos, t],
   );
 
   const removePhoto = useCallback(
@@ -212,15 +215,15 @@ export function PhotoUploader({ onUrlsChange }: PhotoUploaderProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
-        Fotos (opcional)
+      <p className="text-sm font-semibold text-ink uppercase tracking-wide">
+        {t.photos_optional}
       </p>
 
       <label
         htmlFor="photo-input"
-        className="flex items-center justify-center w-full rounded-lg border-2 border-dashed border-gray-400 bg-gray-50 px-4 py-6 text-sm text-gray-600 cursor-pointer hover:border-gray-900 hover:bg-gray-100 transition-colors focus-within:ring-2 focus-within:ring-gray-900 focus-within:ring-offset-2"
+        className="flex items-center justify-center w-full rounded-lg border-2 border-dashed border-line bg-surface px-4 py-6 text-sm text-muted cursor-pointer hover:border-navy hover:bg-surface-alt transition-colors focus-within:ring-2 focus-within:ring-navy focus-within:ring-offset-2"
       >
-        <span>Seleccionar imágenes</span>
+        <span>{t.select_images}</span>
         <input
           ref={inputRef}
           id="photo-input"
@@ -235,13 +238,13 @@ export function PhotoUploader({ onUrlsChange }: PhotoUploaderProps) {
       </label>
 
       {photos.length > 0 && (
-        <ul className="flex flex-wrap gap-3" aria-label="Fotos adjuntas">
+        <ul className="flex flex-wrap gap-3" aria-label={t.attached_photos}>
           {photos.map((photo) => (
             <li
               key={photo.id}
               className="relative flex flex-col items-center gap-1"
             >
-              <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-100">
+              <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-line bg-surface-alt">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={photo.previewUrl}
@@ -250,17 +253,17 @@ export function PhotoUploader({ onUrlsChange }: PhotoUploaderProps) {
                 />
                 {photo.uploading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-white/70">
-                    <span className="text-xs text-gray-600 font-medium">Subiendo…</span>
+                    <span className="text-xs text-muted font-medium">{t.uploading}</span>
                   </div>
                 )}
                 {photo.uploadedUrl != null && !photo.uploading && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-green-600/90 px-1 py-0.5">
+                  <div className="absolute bottom-0 left-0 right-0 bg-success/90 px-1 py-0.5">
                     <span className="text-xs text-white font-medium">OK</span>
                   </div>
                 )}
                 {photo.error != null && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-red-100/90 p-1">
-                    <span className="text-xs text-red-700 font-medium text-center leading-tight">Error</span>
+                  <div className="absolute inset-0 flex items-center justify-center bg-danger-soft/90 p-1">
+                    <span className="text-xs text-danger font-medium text-center leading-tight">Error</span>
                   </div>
                 )}
               </div>
@@ -268,10 +271,10 @@ export function PhotoUploader({ onUrlsChange }: PhotoUploaderProps) {
               <button
                 type="button"
                 onClick={() => removePhoto(photo.id)}
-                className="text-xs text-red-600 underline hover:text-red-800 focus:outline-none focus:ring-1 focus:ring-red-600 rounded"
-                aria-label={`Eliminar foto ${photo.name}`}
+                className="text-xs text-danger underline hover:text-danger focus:outline-none focus:ring-1 focus:ring-danger rounded"
+                aria-label={t.remove_photo.replace('{name}', photo.name)}
               >
-                Eliminar
+                {t.remove}
               </button>
             </li>
           ))}

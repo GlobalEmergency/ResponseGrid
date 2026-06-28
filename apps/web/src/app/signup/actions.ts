@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import { setToken } from '@/lib/auth';
+import { getT } from '@/i18n/server';
 
 export type SignupResult =
   | { status: 'idle' }
@@ -17,14 +18,16 @@ export async function signupAction(
   const email = String(formData.get('email') ?? '').trim();
   const password = String(formData.get('password') ?? '');
 
+  const { t } = await getT();
+
   if (!name || !email || !password) {
-    return { status: 'error', message: 'Todos los campos son obligatorios.' };
+    return { status: 'error', message: t.signup.err_all_fields_required };
   }
 
   if (password.length < 8) {
     return {
       status: 'error',
-      message: 'La contraseña debe tener al menos 8 caracteres.',
+      message: t.signup.err_password_too_short,
     };
   }
 
@@ -33,13 +36,13 @@ export async function signupAction(
   });
 
   if (response.status === 409) {
-    return { status: 'error', message: 'Ese email ya está registrado.' };
+    return { status: 'error', message: t.signup.err_email_exists };
   }
 
   if (error !== undefined || data === undefined) {
     return {
       status: 'error',
-      message: 'Error al crear la cuenta. Inténtalo de nuevo.',
+      message: t.signup.err_signup_failed,
     };
   }
 

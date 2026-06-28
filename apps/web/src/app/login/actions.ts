@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import { setToken } from '@/lib/auth';
+import { getT } from '@/i18n/server';
 
 export type LoginResult =
   | { status: 'idle' }
@@ -21,7 +22,8 @@ export async function loginAction(
   });
 
   if (error !== undefined || data === undefined) {
-    return { status: 'error', message: 'Credenciales incorrectas.' };
+    const { t } = await getT();
+    return { status: 'error', message: t.login.err_invalid_credentials };
   }
 
   await setToken(data.accessToken);

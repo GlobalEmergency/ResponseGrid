@@ -113,7 +113,7 @@ export function PeticionForm({
         label={
           <>
             {t.description_label}{' '}
-            <span className="text-gray-400 font-normal normal-case">(opcional)</span>
+            <span className="text-muted-soft font-normal normal-case">(opcional)</span>
           </>
         }
       >

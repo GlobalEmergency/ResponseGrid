@@ -106,7 +106,7 @@ export function DonarForm({
       {targetNeedTitle !== undefined && targetNeedId !== undefined && (
         <>
           <div
-            className="rounded-lg border-2 border-amber-400 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+            className="rounded-lg border-2 border-warning bg-warning-soft px-4 py-3 text-sm text-warning"
             role="note"
           >
             <span className="font-semibold">{t.directed_offer_label}</span>{' '}
@@ -182,7 +182,7 @@ export function DonarForm({
             label={
               <>
                 {t.unit_label}{' '}
-                <span className="text-gray-400 font-normal normal-case">(opcional)</span>
+                <span className="text-muted-soft font-normal normal-case">(opcional)</span>
               </>
             }
           >
@@ -216,7 +216,7 @@ export function DonarForm({
         label={
           <>
             {t.notes_label}{' '}
-            <span className="text-gray-400 font-normal normal-case">(opcional)</span>
+            <span className="text-muted-soft font-normal normal-case">(opcional)</span>
           </>
         }
       >

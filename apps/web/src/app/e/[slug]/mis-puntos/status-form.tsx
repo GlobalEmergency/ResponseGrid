@@ -8,13 +8,8 @@ import { Select } from '@/components/atoms/select';
 import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { FormField } from '@/components/molecules/form-field';
-
-const STATUS_OPTIONS: { value: PublicStatus; label: string }[] = [
-  { value: 'active', label: 'Operativo' },
-  { value: 'saturated', label: 'Saturado' },
-  { value: 'paused', label: 'En pausa' },
-  { value: 'closed', label: 'Cerrado' },
-];
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 interface StatusFormProps {
   resourceId: string;
@@ -25,11 +20,20 @@ interface StatusFormProps {
 const INITIAL_STATE: ActionResult = { status: 'idle' };
 
 export function StatusForm({ resourceId, currentStatus, slug }: StatusFormProps) {
+  const ta = getMessages(useLocale()).account;
+
+  const STATUS_OPTIONS: { value: PublicStatus; label: string }[] = [
+    { value: 'active', label: ta.public_status_active },
+    { value: 'saturated', label: ta.public_status_saturated },
+    { value: 'paused', label: ta.public_status_paused },
+    { value: 'closed', label: ta.public_status_closed },
+  ];
+
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(
     async (_prev, formData) => {
       const rawStatus = formData.get('status');
       if (typeof rawStatus !== 'string') {
-        return { status: 'error', message: 'Estado no válido.' };
+        return { status: 'error', message: ta.status_invalid };
       }
       return updateResourceStatus(resourceId, rawStatus as PublicStatus, slug);
     },
@@ -39,11 +43,11 @@ export function StatusForm({ resourceId, currentStatus, slug }: StatusFormProps)
   return (
     <form action={formAction} className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-500 font-medium">Actual:</span>
+        <span className="text-xs text-muted font-medium">{ta.current_label}</span>
         <StatusLight status={currentStatus} />
       </div>
 
-      <FormField htmlFor={`status-${resourceId}`} label="Cambiar estado">
+      <FormField htmlFor={`status-${resourceId}`} label={ta.change_status_label}>
         <Select
           id={`status-${resourceId}`}
           name="status"
@@ -58,15 +62,15 @@ export function StatusForm({ resourceId, currentStatus, slug }: StatusFormProps)
       </FormField>
 
       {state.status === 'error' && (
-        <ErrorMessage message={state.message ?? 'Error desconocido'} />
+        <ErrorMessage message={state.message ?? ta.error_unknown} />
       )}
 
       {state.status === 'success' && (
-        <p className="text-xs text-green-700 font-medium">Estado actualizado correctamente.</p>
+        <p className="text-xs text-success font-medium">{ta.status_updated_success}</p>
       )}
 
       <Button type="submit" variant="secondary" size="sm" disabled={pending}>
-        {pending ? 'Guardando…' : 'Guardar estado'}
+        {pending ? ta.saving : ta.save_status_cta}
       </Button>
     </form>
   );

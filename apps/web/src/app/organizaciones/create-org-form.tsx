@@ -6,50 +6,48 @@ import { Input } from '@/components/atoms/input';
 import { Select } from '@/components/atoms/select';
 import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 const INITIAL_STATE: OrgActionResult = { status: 'idle' };
 
-const ORG_TYPES = [
-  { value: 'ngo', label: 'ONG' },
-  { value: 'company', label: 'Empresa' },
-  { value: 'public_admin', label: 'Administración pública' },
-  { value: 'association', label: 'Asociación' },
-  { value: 'other', label: 'Otra' },
-] as const;
-
 export function CreateOrgForm() {
+  const m = getMessages(useLocale());
+  const to = m.organizaciones;
+  const ORG_TYPES = [
+    { value: 'ngo', label: to.f_type_ngo },
+    { value: 'company', label: to.f_type_company },
+    { value: 'public_admin', label: to.f_type_public },
+    { value: 'association', label: to.f_type_association },
+    { value: 'other', label: to.f_type_other },
+  ];
+
   const [state, formAction, pending] = useActionState<OrgActionResult, FormData>(
     createOrganizationAction,
     INITIAL_STATE,
   );
 
   return (
-    <form action={formAction} className="flex flex-col gap-5 rounded-lg border-2 border-gray-200 p-6">
+    <form action={formAction} className="flex flex-col gap-5 rounded-lg border-2 border-line p-6">
       {state.status === 'error' && (
-        <ErrorMessage message={state.message ?? 'Error al crear la organización'} />
+        <ErrorMessage message={state.message ?? to.form_error} />
       )}
 
       {/* Name */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="org-name" className="text-sm font-semibold text-gray-900">
-          Nombre <span aria-hidden="true">*</span>
+        <label htmlFor="org-name" className="text-sm font-semibold text-ink">
+          {to.f_name} <span aria-hidden="true">*</span>
         </label>
-        <Input
-          id="org-name"
-          name="name"
-          type="text"
-          required
-          placeholder="Cruz Roja España"
-        />
+        <Input id="org-name" name="name" type="text" required placeholder={to.f_name_ph} />
       </div>
 
       {/* Type */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="org-type" className="text-sm font-semibold text-gray-900">
-          Tipo <span aria-hidden="true">*</span>
+        <label htmlFor="org-type" className="text-sm font-semibold text-ink">
+          {to.f_type} <span aria-hidden="true">*</span>
         </label>
         <Select id="org-type" name="type" required defaultValue="">
-          <option value="" disabled>Selecciona un tipo…</option>
+          <option value="" disabled>{to.f_type_ph}</option>
           {ORG_TYPES.map((t) => (
             <option key={t.value} value={t.value}>{t.label}</option>
           ))}
@@ -58,34 +56,24 @@ export function CreateOrgForm() {
 
       {/* Tax ID */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="org-taxid" className="text-sm font-semibold text-gray-900">
-          NIF / CIF
-          <span className="ml-1 text-xs font-normal text-gray-500">(opcional)</span>
+        <label htmlFor="org-taxid" className="text-sm font-semibold text-ink">
+          {to.f_taxid}
+          <span className="ml-1 text-xs font-normal text-muted">{m.common.optional}</span>
         </label>
-        <Input
-          id="org-taxid"
-          name="taxId"
-          type="text"
-          placeholder="ES-12345678"
-        />
+        <Input id="org-taxid" name="taxId" type="text" placeholder="ES-12345678" />
       </div>
 
       {/* Contact email */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="org-email" className="text-sm font-semibold text-gray-900">
-          Email de contacto
-          <span className="ml-1 text-xs font-normal text-gray-500">(opcional)</span>
+        <label htmlFor="org-email" className="text-sm font-semibold text-ink">
+          {to.f_email}
+          <span className="ml-1 text-xs font-normal text-muted">{m.common.optional}</span>
         </label>
-        <Input
-          id="org-email"
-          name="contactEmail"
-          type="email"
-          placeholder="contacto@org.es"
-        />
+        <Input id="org-email" name="contactEmail" type="email" placeholder={to.f_email_ph} />
       </div>
 
       <Button type="submit" disabled={pending} fullWidth>
-        {pending ? 'Creando…' : 'Crear organización'}
+        {pending ? to.creating : to.create_heading}
       </Button>
     </form>
   );

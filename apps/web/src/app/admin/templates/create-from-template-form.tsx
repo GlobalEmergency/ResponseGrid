@@ -10,6 +10,8 @@ import { Input } from '@/components/atoms/input';
 import { Select } from '@/components/atoms/select';
 import { FormField } from '@/components/molecules/form-field';
 import { ErrorMessage } from '@/components/atoms/error-message';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 const INITIAL_STATE: CreateFromTemplateResult = { status: 'idle' };
 
@@ -18,6 +20,7 @@ interface CreateFromTemplateFormProps {
 }
 
 export function CreateFromTemplateForm({ templates }: CreateFromTemplateFormProps) {
+  const t = getMessages(useLocale()).templates;
   const [state, formAction, pending] = useActionState(
     createFromTemplateAction,
     INITIAL_STATE,
@@ -40,55 +43,55 @@ export function CreateFromTemplateForm({ templates }: CreateFromTemplateFormProp
       {state.status === 'success' && (
         <p
           role="status"
-          className="rounded-md border border-green-500 bg-green-50 px-4 py-3 text-sm font-medium text-green-800"
+          className="rounded-md border border-success bg-success-soft px-4 py-3 text-sm font-medium text-success"
         >
-          Emergencia creada. Redirigiendo…
+          {t.cf_success}
         </p>
       )}
 
-      <FormField htmlFor="templateId" label="Plantilla">
+      <FormField htmlFor="templateId" label={t.cf_template_label}>
         <Select id="templateId" name="templateId" required defaultValue="">
           <option value="" disabled>
-            Selecciona una plantilla
+            {t.cf_template_ph}
           </option>
-          {templates.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.name}
+          {templates.map((tpl) => (
+            <option key={tpl.id} value={tpl.id}>
+              {tpl.name}
             </option>
           ))}
         </Select>
       </FormField>
 
-      <FormField htmlFor="name" label="Nombre de la emergencia">
+      <FormField htmlFor="name" label={t.cf_name_label}>
         <Input
           id="name"
           name="name"
           type="text"
-          placeholder="Ej: Terremoto Valencia 2026"
+          placeholder={t.cf_name_ph}
           required
           autoComplete="off"
         />
       </FormField>
 
-      <FormField htmlFor="slug" label="Slug (URL)">
+      <FormField htmlFor="slug" label={t.cf_slug_label}>
         <Input
           id="slug"
           name="slug"
           type="text"
-          placeholder="Ej: terremoto-valencia-2026"
+          placeholder={t.cf_slug_ph}
           pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-          title="Solo letras minúsculas, números y guiones"
+          title={t.cf_slug_title}
           required
           autoComplete="off"
         />
       </FormField>
 
-      <FormField htmlFor="country" label="Código de país (ISO 3166-1 alpha-2)">
+      <FormField htmlFor="country" label={t.cf_country_label}>
         <Input
           id="country"
           name="country"
           type="text"
-          placeholder="Ej: ES"
+          placeholder={t.cf_country_ph}
           maxLength={2}
           required
           autoComplete="off"
@@ -101,12 +104,12 @@ export function CreateFromTemplateForm({ templates }: CreateFromTemplateFormProp
         disabled={pending || templates.length === 0}
         size="md"
       >
-        {pending ? 'Creando emergencia…' : 'Crear emergencia desde plantilla'}
+        {pending ? t.cf_submitting : t.cf_submit}
       </Button>
 
       {templates.length === 0 && (
-        <p className="text-xs text-gray-500">
-          Crea al menos una plantilla antes de usarla aquí.
+        <p className="text-xs text-muted">
+          {t.cf_no_templates}
         </p>
       )}
     </form>

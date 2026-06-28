@@ -1,7 +1,7 @@
 import type { SelectHTMLAttributes } from 'react';
 
 const SELECT_CLASS =
-  'w-full rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2';
+  'w-full rounded-lg border border-line bg-white px-4 py-3 text-base text-ink focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30';
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   className?: string;

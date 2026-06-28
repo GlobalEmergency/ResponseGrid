@@ -37,7 +37,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} className={`h-full ${archivo.variable} ${publicSans.variable}`}>
-      <body className="min-h-full flex flex-col bg-white text-ink antialiased font-sans">
+      <body className="min-h-full flex flex-col bg-surface text-ink antialiased font-sans">
         <LocaleProvider locale={locale}>
           {children}
           <GlobalFooter tf={t.common.footer} />

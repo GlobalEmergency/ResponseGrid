@@ -89,7 +89,7 @@ export function NearbyButton({
       <button
         type="button"
         onClick={onClear}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-info-line bg-info-soft px-3 py-1.5 text-sm font-medium text-info hover:bg-info-soft focus:outline-none focus:ring-2 focus:ring-info-dot focus:ring-offset-2 transition-colors"
       >
         {tNearby.button_clear}
       </button>
@@ -101,7 +101,7 @@ export function NearbyButton({
       type="button"
       onClick={handleFind}
       disabled={loading}
-      className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
+      className="inline-flex items-center gap-1.5 rounded-lg border border-info-line bg-info-soft px-3 py-1.5 text-sm font-medium text-info hover:bg-info-soft focus:outline-none focus:ring-2 focus:ring-info-dot focus:ring-offset-2 disabled:opacity-50 transition-colors"
     >
       <svg
         viewBox="0 0 24 24"

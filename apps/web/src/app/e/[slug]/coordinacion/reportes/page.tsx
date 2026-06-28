@@ -5,8 +5,10 @@ import { getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { ReportCard } from '@/components/organisms/report-card';
 import type { FieldReport } from '@/components/organisms/report-card';
+import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,11 +19,12 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const { t } = await getT();
   const emergency = await getEmergencyBySlug(slug);
-  if (!emergency) return { title: 'Emergencia no encontrada · ResponseGrid' };
+  if (!emergency) return { title: t.coord.meta_not_found };
   return {
-    title: `Reportes de campo — ${emergency.name} · ResponseGrid`,
-    description: `Cola de partes de campo de ${emergency.name}.`,
+    title: t.coord.reports_meta_title.replace('{name}', emergency.name),
+    description: t.coord.reports_meta_description.replace('{name}', emergency.name),
   };
 }
 
@@ -32,19 +35,6 @@ const VALID_TYPES = ['incident', 'stock', 'status', 'other'] as const;
 type ReportStatus = typeof VALID_STATUSES[number];
 type ReportPriority = typeof VALID_PRIORITIES[number];
 type ReportType = typeof VALID_TYPES[number];
-
-const STATUS_LABELS: Record<ReportStatus, string> = {
-  open: 'Abiertos',
-  reviewed: 'Revisados',
-  closed: 'Cerrados',
-};
-
-const PRIORITY_LABELS: Record<ReportPriority, string> = {
-  low: 'Baja',
-  medium: 'Media',
-  high: 'Alta',
-  urgent: 'Urgente',
-};
 
 export default async function CoordinacionReportesPage({ params, searchParams }: Props) {
   const { slug } = await params;
@@ -126,37 +116,37 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
 
   const baseUrl = `/e/${slug}/coordinacion/reportes`;
 
+  const { t } = await getT();
+  const tc = t.coord;
+
+  const STATUS_LABELS: Record<ReportStatus, string> = {
+    open: tc.reports_status_open,
+    reviewed: tc.reports_status_reviewed,
+    closed: tc.reports_status_closed,
+  };
+
+  const PRIORITY_LABELS: Record<ReportPriority, string> = {
+    low: tc.priority_low,
+    medium: tc.priority_medium,
+    high: tc.priority_high,
+    urgent: tc.priority_urgent,
+  };
+
   return (
-    <main className="flex-1 flex flex-col items-center justify-start px-4 py-10 bg-white">
-      <div className="w-full max-w-xl flex flex-col gap-8">
-
-        {/* ── CABECERA ────────────────────────────────────────────────── */}
-        <header className="flex flex-col gap-2">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex flex-col gap-0.5">
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                Reportes de campo
-              </h1>
-              <p className="text-base text-gray-600 font-medium">
-                {emergency.name}
-              </p>
-            </div>
-
-            <Link
-              href={`/e/${slug}/coordinacion`}
-              className="flex-shrink-0 rounded-lg border-2 border-gray-900 px-4 py-2 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
-            >
-              ← Coordinación
-            </Link>
-          </div>
-        </header>
-
-        <hr className="border-gray-200" />
+    <main className="flex-1 bg-surface">
+      <div className="mx-auto w-full max-w-xl">
+        <PageHeaderBand
+          backHref={`/e/${slug}/coordinacion`}
+          backLabel={tc.back_coordination}
+          title={tc.reports_title}
+          subtitle={emergency.name}
+        />
+        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
 
         {/* ── FILTROS ─────────────────────────────────────────────────── */}
         <section aria-labelledby="filters-heading" className="flex flex-col gap-3">
-          <h2 id="filters-heading" className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
-            Filtrar
+          <h2 id="filters-heading" className="text-sm font-semibold text-ink uppercase tracking-wide">
+            {tc.reports_filter_heading}
           </h2>
 
           <div className="flex flex-wrap gap-2">
@@ -165,23 +155,23 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
               <Link
                 href={baseUrl}
                 className={[
-                  'rounded-lg border-2 px-3 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1',
+                  'rounded-lg border-2 px-3 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-1',
                   statusFilter === undefined
-                    ? 'border-gray-900 bg-gray-900 text-white'
-                    : 'border-gray-300 text-gray-600 hover:border-gray-900 hover:text-gray-900',
+                    ? 'border-navy bg-navy text-white'
+                    : 'border-line text-muted hover:border-navy hover:text-ink',
                 ].join(' ')}
               >
-                Todos
+                {tc.reports_filter_all}
               </Link>
               {VALID_STATUSES.map((s) => (
                 <Link
                   key={s}
                   href={`${baseUrl}?status=${s}${priorityFilter !== undefined ? `&priority=${priorityFilter}` : ''}`}
                   className={[
-                    'rounded-lg border-2 px-3 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1',
+                    'rounded-lg border-2 px-3 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-1',
                     statusFilter === s
-                      ? 'border-gray-900 bg-gray-900 text-white'
-                      : 'border-gray-300 text-gray-600 hover:border-gray-900 hover:text-gray-900',
+                      ? 'border-navy bg-navy text-white'
+                      : 'border-line text-muted hover:border-navy hover:text-ink',
                   ].join(' ')}
                 >
                   {STATUS_LABELS[s]}
@@ -196,10 +186,10 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
                   key={p}
                   href={`${baseUrl}?${statusFilter !== undefined ? `status=${statusFilter}&` : ''}priority=${p}`}
                   className={[
-                    'rounded-lg border-2 px-3 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1',
+                    'rounded-lg border-2 px-3 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-1',
                     priorityFilter === p
-                      ? 'border-gray-900 bg-gray-900 text-white'
-                      : 'border-gray-300 text-gray-600 hover:border-gray-900 hover:text-gray-900',
+                      ? 'border-navy bg-navy text-white'
+                      : 'border-line text-muted hover:border-navy hover:text-ink',
                   ].join(' ')}
                 >
                   {PRIORITY_LABELS[p]}
@@ -212,21 +202,21 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
           {(statusFilter !== undefined || priorityFilter !== undefined) && (
             <Link
               href={baseUrl}
-              className="text-xs text-gray-400 underline underline-offset-2 hover:text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-900 rounded w-fit"
+              className="text-xs text-muted-soft underline underline-offset-2 hover:text-ink-soft focus:outline-none focus:ring-1 focus:ring-navy rounded w-fit"
             >
-              Limpiar filtros
+              {tc.reports_filter_clear}
             </Link>
           )}
         </section>
 
-        <hr className="border-gray-200" />
+        <hr className="border-line" />
 
         {/* ── LISTA DE PARTES ─────────────────────────────────────────── */}
         <section aria-labelledby="reports-heading" className="flex flex-col gap-4">
-          <h2 id="reports-heading" className="text-xl font-bold text-gray-900">
-            Partes recibidos
+          <h2 id="reports-heading" className="text-xl font-bold text-ink">
+            {tc.reports_received_heading}
             {reports.length > 0 && (
-              <span className="ml-2 text-sm font-normal text-gray-500">
+              <span className="ml-2 text-sm font-normal text-muted">
                 ({reports.length})
               </span>
             )}
@@ -234,11 +224,11 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
 
           {reports.length === 0 ? (
             <EmptyState
-              title="No hay partes con los filtros seleccionados."
-              description="Ajusta los filtros o espera a que los voluntarios envíen partes de campo."
+              title={tc.reports_empty_title}
+              description={tc.reports_empty_description}
             />
           ) : (
-            <ul className="flex flex-col gap-4" aria-label="Lista de partes de campo">
+            <ul className="flex flex-col gap-4" aria-label={tc.reports_list_label}>
               {reports.map((report) => (
                 <li key={report.id}>
                   <ReportCard report={report} slug={slug} />
@@ -248,6 +238,7 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
           )}
         </section>
 
+        </div>
       </div>
     </main>
   );

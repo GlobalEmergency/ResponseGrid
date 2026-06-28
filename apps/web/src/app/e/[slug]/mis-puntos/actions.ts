@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
+import { getT } from '@/i18n/server';
 import type { components } from '@reliefhub/api-client';
 
 export type PublicStatus = components['schemas']['ResourceViewDto']['publicStatus'];
@@ -72,11 +73,13 @@ export async function updateResourceStatus(
   }
 
   if (response.status === 403) {
-    return { status: 'error', message: 'No tienes permisos para cambiar el estado de este punto.' };
+    const { t } = await getT();
+    return { status: 'error', message: t.account.update_status_forbidden };
   }
 
   if (!response.ok) {
-    return { status: 'error', message: 'No se pudo actualizar el estado. Inténtalo de nuevo.' };
+    const { t } = await getT();
+    return { status: 'error', message: t.account.update_status_failed };
   }
 
   revalidatePath(`/e/${slug}/mis-puntos`);

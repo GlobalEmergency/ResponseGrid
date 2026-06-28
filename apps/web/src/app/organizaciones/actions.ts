@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import { getToken, authHeaders } from '@/lib/auth';
+import { getT } from '@/i18n/server';
 
 export type OrgActionResult =
   | { status: 'idle' }
@@ -19,13 +20,15 @@ export async function createOrganizationAction(
     redirect('/login?next=/organizaciones');
   }
 
+  const { t } = await getT();
+
   const name = String(formData.get('name') ?? '').trim();
   const type = String(formData.get('type') ?? '').trim();
   const taxId = String(formData.get('taxId') ?? '').trim() || undefined;
   const contactEmail = String(formData.get('contactEmail') ?? '').trim() || undefined;
 
   if (!name || !type) {
-    return { status: 'error', message: 'El nombre y el tipo son obligatorios.' };
+    return { status: 'error', message: t.organizaciones.err_name_type_required };
   }
 
   const { data, error, response } = await api.POST('/organizations', {
@@ -35,7 +38,7 @@ export async function createOrganizationAction(
 
   if (error !== undefined || data === undefined) {
     if (response.status === 401) redirect('/login?next=/organizaciones');
-    return { status: 'error', message: 'Error al crear la organización. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.organizaciones.err_create_failed };
   }
 
   revalidatePath('/organizaciones');
@@ -52,9 +55,11 @@ export async function addMemberAction(
     redirect(`/login?next=/organizaciones/${orgId}`);
   }
 
+  const { t } = await getT();
+
   const email = String(formData.get('email') ?? '').trim();
   if (!email) {
-    return { status: 'error', message: 'El email es obligatorio.' };
+    return { status: 'error', message: t.organizaciones.err_email_required };
   }
 
   const { error, response } = await api.POST('/organizations/{id}/members', {
@@ -66,15 +71,15 @@ export async function addMemberAction(
   if (error !== undefined) {
     if (response.status === 401) redirect(`/login?next=/organizaciones/${orgId}`);
     if (response.status === 403) {
-      return { status: 'error', message: 'Solo el propietario puede gestionar miembros.' };
+      return { status: 'error', message: t.organizaciones.err_owner_only };
     }
     if (response.status === 404) {
-      return { status: 'error', message: 'No existe un usuario con ese email.' };
+      return { status: 'error', message: t.organizaciones.err_user_not_found };
     }
     if (response.status === 409) {
-      return { status: 'error', message: 'Este usuario ya es miembro de la organización.' };
+      return { status: 'error', message: t.organizaciones.err_already_member };
     }
-    return { status: 'error', message: 'Error al añadir el miembro. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.organizaciones.err_add_member_failed };
   }
 
   revalidatePath(`/organizaciones/${orgId}`);
@@ -90,6 +95,8 @@ export async function removeMemberAction(
     redirect(`/login?next=/organizaciones/${orgId}`);
   }
 
+  const { t } = await getT();
+
   const { error, response } = await api.DELETE('/organizations/{id}/members/{userId}', {
     params: { path: { id: orgId, userId } },
     headers: authHeaders(token),
@@ -98,12 +105,12 @@ export async function removeMemberAction(
   if (error !== undefined) {
     if (response.status === 401) redirect(`/login?next=/organizaciones/${orgId}`);
     if (response.status === 403) {
-      return { status: 'error', message: 'Solo el propietario puede gestionar miembros.' };
+      return { status: 'error', message: t.organizaciones.err_owner_only };
     }
     if (response.status === 422) {
-      return { status: 'error', message: 'El propietario no puede eliminarse a sí mismo.' };
+      return { status: 'error', message: t.organizaciones.err_owner_cannot_remove_self };
     }
-    return { status: 'error', message: 'Error al eliminar el miembro. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.organizaciones.err_remove_member_failed };
   }
 
   revalidatePath(`/organizaciones/${orgId}`);

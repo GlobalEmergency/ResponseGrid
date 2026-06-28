@@ -106,21 +106,21 @@ export function VoluntarioForm({ action, slug, existingProfile, t, backToEmergen
       <section
         role="alert"
         aria-live="polite"
-        className="flex flex-col gap-6 rounded-lg border-2 border-gray-900 bg-white p-6"
+        className="flex flex-col gap-6 rounded-lg border-2 border-navy bg-white p-6"
       >
-        <p className="text-lg font-semibold text-gray-900 leading-snug">
+        <p className="text-lg font-semibold text-ink leading-snug">
           {existingProfile !== null ? t.success_update : t.success_new}
         </p>
         <div className="flex flex-col gap-3">
           <Link
             href={`/e/${slug}/mi-voluntariado`}
-            className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors"
+            className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-white bg-navy rounded-lg hover:bg-navy-700 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors"
           >
             {t.view_volunteering}
           </Link>
           <Link
             href={`/e/${slug}`}
-            className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-gray-900 bg-white border-2 border-gray-900 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors"
+            className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-ink bg-white border-2 border-navy rounded-lg hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors"
           >
             {backToEmergencyLabel}
           </Link>
@@ -135,7 +135,7 @@ export function VoluntarioForm({ action, slug, existingProfile, t, backToEmergen
 
       {existingProfile !== null && (
         <div
-          className="rounded-lg border-2 border-amber-400 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+          className="rounded-lg border-2 border-warning bg-warning-soft px-4 py-3 text-sm text-warning"
           role="note"
         >
           <span className="font-semibold">{t.already_registered}</span>
@@ -199,7 +199,7 @@ export function VoluntarioForm({ action, slug, existingProfile, t, backToEmergen
 
       {/* Habilidades */}
       <fieldset className="flex flex-col gap-3">
-        <legend className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+        <legend className="text-sm font-semibold text-ink uppercase tracking-wide">
           {t.skills_legend}
         </legend>
         <div className="flex flex-wrap gap-2">
@@ -211,8 +211,8 @@ export function VoluntarioForm({ action, slug, existingProfile, t, backToEmergen
                 className={[
                   'inline-flex cursor-pointer select-none items-center rounded-full border-2 px-3 py-1 text-sm font-semibold transition-colors',
                   active
-                    ? 'border-gray-900 bg-gray-900 text-white'
-                    : 'border-gray-300 bg-white text-gray-700 hover:border-gray-500',
+                    ? 'border-navy bg-navy text-white'
+                    : 'border-line bg-white text-ink-soft hover:border-line-strong',
                 ].join(' ')}
               >
                 <input
@@ -285,14 +285,14 @@ export function VoluntarioForm({ action, slug, existingProfile, t, backToEmergen
             type="checkbox"
             required
             defaultChecked={existingProfile?.consentAccepted ?? false}
-            className="mt-1 h-4 w-4 flex-shrink-0 cursor-pointer rounded border-2 border-gray-900 accent-gray-900"
+            className="mt-1 h-4 w-4 flex-shrink-0 cursor-pointer rounded border-2 border-navy accent-navy"
           />
           <label
             htmlFor="consentAccepted"
-            className="text-sm text-gray-700 leading-snug cursor-pointer"
+            className="text-sm text-ink-soft leading-snug cursor-pointer"
           >
             {t.consent_text}{' '}
-            <span aria-hidden="true" className="text-red-600 font-bold">*</span>
+            <span aria-hidden="true" className="text-danger font-bold">*</span>
           </label>
         </div>
       </div>

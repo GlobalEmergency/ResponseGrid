@@ -8,23 +8,11 @@ import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Select } from '@/components/atoms/select';
 import { ErrorMessage } from '@/components/atoms/error-message';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 type OfferViewDto = components['schemas']['OfferViewDto'];
 type NeedViewDto = components['schemas']['NeedViewDto'];
-
-const CATEGORY_LABELS: Record<OfferViewDto['category'], string> = {
-  hygiene: 'Higiene',
-  water: 'Agua',
-  food: 'Alimentos',
-  medical: 'Sanitario',
-  shelter: 'Refugio',
-  tools: 'Herramientas',
-  other: 'Otro',
-  medicines: '💊 Medicamentos',
-  medical_equipment: '🩺 Equipos médicos',
-  medical_supplies: '📦 Insumos médicos',
-  medical_personnel: '🧑‍⚕️ Personal sanitario',
-};
 
 const STATUS_BADGE: Record<
   OfferViewDto['status'],
@@ -34,13 +22,6 @@ const STATUS_BADGE: Record<
   matched: 'offer-matched',
   fulfilled: 'offer-fulfilled',
   cancelled: 'offer-cancelled',
-};
-
-const STATUS_LABELS: Record<OfferViewDto['status'], string> = {
-  open: 'Abierta',
-  matched: 'Asignada',
-  fulfilled: 'Entregada',
-  cancelled: 'Cancelada',
 };
 
 const INITIAL_STATE: ActionResult = { status: 'idle' };
@@ -57,6 +38,29 @@ export function CoordinationOfferCard({
   validatedNeeds,
   slug,
 }: CoordinationOfferCardProps) {
+  const tc = getMessages(useLocale()).coord;
+
+  const CATEGORY_LABELS: Record<OfferViewDto['category'], string> = {
+    hygiene: tc.category_hygiene,
+    water: tc.category_water,
+    food: tc.category_food,
+    medical: tc.category_medical,
+    shelter: tc.category_shelter,
+    tools: tc.category_tools,
+    other: tc.category_other,
+    medicines: tc.category_medicines,
+    medical_equipment: tc.category_medical_equipment,
+    medical_supplies: tc.category_medical_supplies,
+    medical_personnel: tc.category_medical_personnel,
+  };
+
+  const STATUS_LABELS: Record<OfferViewDto['status'], string> = {
+    open: tc.offer_status_open,
+    matched: tc.offer_status_matched,
+    fulfilled: tc.offer_status_fulfilled,
+    cancelled: tc.offer_status_cancelled,
+  };
+
   const [selectedNeedId, setSelectedNeedId] = useState('');
 
   // Single action state — we switch which server action to call based on form submission
@@ -67,7 +71,7 @@ export function CoordinationOfferCard({
           ? offer.targetNeedId
           : selectedNeedId;
       if (needId === '') {
-        return { status: 'error', message: 'Selecciona una necesidad para asignar.' };
+        return { status: 'error', message: tc.offer_select_need_error };
       }
       return matchOffer(offer.id, needId, slug);
     },
@@ -106,13 +110,13 @@ export function CoordinationOfferCard({
 
   return (
     <article
-      aria-label={`Oferta: ${offer.description}`}
-      className="flex flex-col gap-4 rounded-lg border-2 border-gray-900 bg-white p-5"
+      aria-label={tc.offer_card_label.replace('{description}', offer.description)}
+      className="flex flex-col gap-4 rounded-lg border-2 border-navy bg-white p-5"
     >
       {/* Header */}
       <div className="flex flex-col gap-2">
         <div className="flex items-start justify-between gap-3 flex-wrap">
-          <h3 className="text-lg font-bold text-gray-900 leading-tight break-words">
+          <h3 className="text-lg font-bold text-ink leading-tight break-words">
             {offer.description}
           </h3>
           <Badge variant={STATUS_BADGE[offer.status]}>
@@ -120,21 +124,21 @@ export function CoordinationOfferCard({
           </Badge>
         </div>
 
-        <div className="flex flex-wrap gap-3 text-sm text-gray-600">
+        <div className="flex flex-wrap gap-3 text-sm text-muted">
           <span className="font-medium">{CATEGORY_LABELS[offer.category]}</span>
-          <span aria-hidden="true" className="text-gray-300">·</span>
+          <span aria-hidden="true" className="text-muted-soft">·</span>
           <span>
             {offer.quantity}
             {unit !== null ? ` ${unit}` : ''}
           </span>
-          <span aria-hidden="true" className="text-gray-300">·</span>
+          <span aria-hidden="true" className="text-muted-soft">·</span>
           <span className="truncate max-w-[200px]">{offer.location.address}</span>
         </div>
 
         {/* Directed need indicator */}
         {isDirected && (
-          <p className="text-xs text-amber-700 font-medium">
-            Oferta dirigida a una necesidad específica
+          <p className="text-xs text-warning font-medium">
+            {tc.offer_directed_indicator}
           </p>
         )}
       </div>
@@ -153,12 +157,12 @@ export function CoordinationOfferCard({
               <Select
                 id={`need-select-${offer.id}`}
                 name="needId"
-                aria-label="Seleccionar necesidad para asignar"
+                aria-label={tc.offer_select_need_label}
                 value={selectedNeedId}
                 onChange={(e) => setSelectedNeedId(e.target.value)}
               >
                 <option value="" disabled>
-                  Selecciona una necesidad…
+                  {tc.offer_select_need_placeholder}
                 </option>
                 {validatedNeeds.map((need) => (
                   <option key={need.id} value={need.id}>
@@ -174,10 +178,10 @@ export function CoordinationOfferCard({
               size="md"
             >
               {matchPending
-                ? 'Procesando…'
+                ? tc.processing
                 : isDirected
-                  ? 'Confirmar asignación a la necesidad dirigida'
-                  : 'Asignar a necesidad'}
+                  ? tc.offer_confirm_directed
+                  : tc.offer_assign}
             </Button>
           </form>
 
@@ -190,7 +194,7 @@ export function CoordinationOfferCard({
               size="md"
               variant="danger-outline"
             >
-              {cancelPending ? 'Cancelando…' : 'Cancelar oferta'}
+              {cancelPending ? tc.cancelling : tc.offer_cancel}
             </Button>
           </form>
         </div>
@@ -205,7 +209,7 @@ export function CoordinationOfferCard({
               fullWidth
               size="md"
             >
-              {fulfillPending ? 'Procesando…' : 'Marcar como entregada'}
+              {fulfillPending ? tc.processing : tc.offer_mark_delivered}
             </Button>
           </form>
           <form action={cancelFormAction}>
@@ -216,7 +220,7 @@ export function CoordinationOfferCard({
               size="md"
               variant="danger-outline"
             >
-              {cancelPending ? 'Cancelando…' : 'Cancelar oferta'}
+              {cancelPending ? tc.cancelling : tc.offer_cancel}
             </Button>
           </form>
         </div>

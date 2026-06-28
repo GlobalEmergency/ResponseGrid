@@ -70,7 +70,7 @@ export default async function HomePage() {
               </a>
               <a
                 href="#emergencias"
-                className="rounded-xl border-[1.5px] border-[#d8d2c8] bg-white px-5 py-3.5 text-center text-[15px] font-bold text-navy transition-colors hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
+                className="rounded-xl border-[1.5px] border-line-strong bg-white px-5 py-3.5 text-center text-[15px] font-bold text-navy transition-colors hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
               >
                 {th.hero_cta_donate}
               </a>

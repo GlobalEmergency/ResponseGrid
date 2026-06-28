@@ -40,11 +40,11 @@ export function LanguageSwitcher({ tone = 'light' }: LanguageSwitcherProps) {
         const activeClass =
           tone === 'dark'
             ? 'border-white bg-white text-navy cursor-default'
-            : 'border-gray-900 bg-gray-900 text-white cursor-default';
+            : 'border-navy bg-navy text-white cursor-default';
         const idleClass =
           tone === 'dark'
             ? 'border-white/30 bg-transparent text-white/80 hover:border-white hover:text-white'
-            : 'border-gray-300 bg-white text-gray-600 hover:border-gray-600 hover:text-gray-900';
+            : 'border-line bg-white text-muted hover:border-line-strong hover:text-ink';
         return (
           <button
             key={loc}
@@ -54,7 +54,7 @@ export function LanguageSwitcher({ tone = 'light' }: LanguageSwitcherProps) {
             aria-pressed={isActive}
             className={[
               'text-xs font-semibold px-2 py-1 rounded border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1',
-              tone === 'dark' ? 'focus:ring-white' : 'focus:ring-gray-900',
+              tone === 'dark' ? 'focus:ring-white' : 'focus:ring-navy',
               isActive ? activeClass : idleClass,
             ].join(' ')}
           >

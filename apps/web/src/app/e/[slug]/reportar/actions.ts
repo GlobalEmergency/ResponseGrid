@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
+import { getT } from '@/i18n/server';
 
 export type ReportType = 'incident' | 'stock' | 'status' | 'other';
 export type ReportPriority = 'low' | 'medium' | 'high' | 'urgent';
@@ -34,6 +35,8 @@ export async function submitReport(
     redirect(`/login`);
   }
 
+  const { t } = await getT();
+
   const type = formData.get('type');
   const priority = formData.get('priority');
   const note = formData.get('note');
@@ -41,13 +44,13 @@ export async function submitReport(
   const photoUrlsRaw = formData.get('photoUrls');
 
   if (!isReportType(type)) {
-    return { status: 'error', message: 'Selecciona un tipo de parte válido.' };
+    return { status: 'error', message: t.reportar.err_invalid_type };
   }
   if (!isReportPriority(priority)) {
-    return { status: 'error', message: 'Selecciona una prioridad válida.' };
+    return { status: 'error', message: t.reportar.err_invalid_priority };
   }
   if (typeof note !== 'string' || note.trim().length === 0) {
-    return { status: 'error', message: 'La nota no puede estar vacía.' };
+    return { status: 'error', message: t.reportar.err_note_required };
   }
 
   let photoUrls: string[] = [];
@@ -85,11 +88,11 @@ export async function submitReport(
   }
 
   if (response.status === 403) {
-    return { status: 'error', message: 'No tienes permisos para enviar partes en esta emergencia.' };
+    return { status: 'error', message: t.reportar.err_no_permission };
   }
 
   if (!response.ok) {
-    return { status: 'error', message: 'No se pudo enviar el parte. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.reportar.err_submit_failed };
   }
 
   return { status: 'success' };
@@ -109,6 +112,8 @@ export async function reviewReport(
     redirect(`/login?next=/e/${slug}/coordinacion/reportes`);
   }
 
+  const { t } = await getT();
+
   const { response } = await api.POST('/reports/{reportId}/review', {
     params: { path: { reportId } },
     headers: authHeaders(token),
@@ -120,11 +125,11 @@ export async function reviewReport(
   }
 
   if (response.status === 403) {
-    return { status: 'error', message: 'No tienes permisos para revisar este parte.' };
+    return { status: 'error', message: t.reportar.err_no_permission_review };
   }
 
   if (!response.ok) {
-    return { status: 'error', message: 'No se pudo marcar como revisado. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.reportar.err_mark_reviewed_failed };
   }
 
   return { status: 'success' };

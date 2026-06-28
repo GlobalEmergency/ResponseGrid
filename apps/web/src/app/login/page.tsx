@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { LoginForm } from '@/components/organisms/login-form';
+import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { getT } from '@/i18n/server';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -21,36 +22,29 @@ export default async function LoginPage({ searchParams }: Props) {
   const { t } = await getT();
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-center px-4 py-10 bg-white">
-      <div className="w-full max-w-sm flex flex-col gap-8">
-        {/* Header */}
-        <header className="flex flex-col gap-1">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            {t.login.title}
-          </h1>
-          <p className="text-base text-gray-600">
-            {t.login.subtitle}
-          </p>
-        </header>
+    <main className="flex-1 bg-surface">
+      <div className="mx-auto w-full max-w-sm">
+        <PageHeaderBand title={t.login.title} subtitle={t.login.subtitle} />
+        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
+          {/* Demo credentials note — opt-in via DEMO_MODE=true; hidden by default
+              so real production deployments never expose demo credentials. */}
+          {process.env.DEMO_MODE === 'true' && (
+            <div className="rounded-lg border-2 border-line bg-surface px-4 py-3 flex flex-col gap-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+                {t.login.demo_label}
+              </p>
+              <p className="text-sm text-ink-soft">
+                <span className="font-medium">{t.login.demo_email_label}</span> {t.login.demo_email}
+              </p>
+              <p className="text-sm text-ink-soft">
+                <span className="font-medium">{t.login.demo_password_label}</span> {t.login.demo_password}
+              </p>
+            </div>
+          )}
 
-        {/* Demo credentials note — opt-in via DEMO_MODE=true; hidden by default
-            so real production deployments never expose demo credentials. */}
-        {process.env.DEMO_MODE === 'true' && (
-          <div className="rounded-lg border-2 border-gray-200 bg-gray-50 px-4 py-3 flex flex-col gap-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-              {t.login.demo_label}
-            </p>
-            <p className="text-sm text-gray-700">
-              <span className="font-medium">{t.login.demo_email_label}</span> {t.login.demo_email}
-            </p>
-            <p className="text-sm text-gray-700">
-              <span className="font-medium">{t.login.demo_password_label}</span> {t.login.demo_password}
-            </p>
-          </div>
-        )}
-
-        {/* Login form */}
-        <LoginForm next={next} t={t.login} />
+          {/* Login form */}
+          <LoginForm next={next} t={t.login} />
+        </div>
       </div>
     </main>
   );

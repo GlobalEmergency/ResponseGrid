@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { SignupForm } from '@/components/organisms/signup-form';
+import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { getT } from '@/i18n/server';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -20,20 +21,13 @@ export default async function SignupPage({ searchParams }: Props) {
   const { t } = await getT();
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-center px-4 py-10 bg-white">
-      <div className="w-full max-w-sm flex flex-col gap-8">
-        {/* Header */}
-        <header className="flex flex-col gap-1">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            {t.signup.title}
-          </h1>
-          <p className="text-base text-gray-600">
-            {t.signup.subtitle}
-          </p>
-        </header>
-
-        {/* Signup form */}
-        <SignupForm next={next} t={t.signup} />
+    <main className="flex-1 bg-surface">
+      <div className="mx-auto w-full max-w-sm">
+        <PageHeaderBand title={t.signup.title} subtitle={t.signup.subtitle} />
+        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
+          {/* Signup form */}
+          <SignupForm next={next} t={t.signup} />
+        </div>
       </div>
     </main>
   );

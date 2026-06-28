@@ -9,7 +9,7 @@ export function DraftRestoredBanner() {
     <div
       role="status"
       aria-live="polite"
-      className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-500"
+      className="rounded-md border border-line bg-surface px-3 py-2 text-xs text-muted"
     >
       Borrador restaurado
     </div>

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import { getToken, authHeaders } from '@/lib/auth';
+import { getT } from '@/i18n/server';
 
 export type NotificationActionResult =
   | { status: 'idle' }
@@ -22,6 +23,8 @@ export async function markNotificationReadAction(
     redirect('/login?next=/notificaciones');
   }
 
+  const { t } = await getT();
+
   const { error, response } = await api.POST('/notifications/{id}/read', {
     params: { path: { id } },
     headers: authHeaders(token),
@@ -30,12 +33,12 @@ export async function markNotificationReadAction(
   if (error !== undefined) {
     if (response.status === 401) redirect('/login?next=/notificaciones');
     if (response.status === 403) {
-      return { status: 'error', message: 'No puedes marcar esta notificación como leída.' };
+      return { status: 'error', message: t.notificaciones.err_mark_read_forbidden };
     }
     if (response.status === 404) {
-      return { status: 'error', message: 'Notificación no encontrada.' };
+      return { status: 'error', message: t.notificaciones.err_not_found };
     }
-    return { status: 'error', message: 'No se pudo marcar la notificación. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.notificaciones.err_mark_read_failed };
   }
 
   revalidatePath('/notificaciones');
@@ -52,13 +55,15 @@ export async function markAllNotificationsReadAction(): Promise<NotificationActi
     redirect('/login?next=/notificaciones');
   }
 
+  const { t } = await getT();
+
   const { error, response } = await api.POST('/notifications/read-all', {
     headers: authHeaders(token),
   });
 
   if (error !== undefined) {
     if (response.status === 401) redirect('/login?next=/notificaciones');
-    return { status: 'error', message: 'No se pudieron marcar todas las notificaciones. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.notificaciones.err_mark_all_read_failed };
   }
 
   revalidatePath('/notificaciones');

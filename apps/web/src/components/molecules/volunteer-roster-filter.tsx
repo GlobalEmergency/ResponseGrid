@@ -1,43 +1,46 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-
-const SKILL_OPTIONS = [
-  { value: '', label: 'Todas las habilidades' },
-  { value: 'driving', label: 'Conducción' },
-  { value: 'medical', label: 'Sanitario' },
-  { value: 'logistics', label: 'Logística' },
-  { value: 'cooking', label: 'Cocina' },
-  { value: 'languages', label: 'Idiomas' },
-  { value: 'admin', label: 'Administración' },
-  { value: 'general', label: 'General' },
-] as const;
-
-const AVAILABILITY_OPTIONS = [
-  { value: '', label: 'Cualquier disponibilidad' },
-  { value: 'immediate', label: 'Inmediata' },
-  { value: 'this_week', label: 'Esta semana' },
-  { value: 'flexible', label: 'Flexible' },
-] as const;
-
-const VEHICLE_OPTIONS = [
-  { value: '', label: 'Cualquier vehículo' },
-  { value: 'none', label: 'Sin vehículo' },
-  { value: 'car', label: 'Coche' },
-  { value: 'van', label: 'Furgoneta' },
-  { value: 'truck', label: 'Camión' },
-] as const;
-
-const STATUS_OPTIONS = [
-  { value: '', label: 'Todos los estados' },
-  { value: 'available', label: 'Disponible' },
-  { value: 'assigned', label: 'Asignado' },
-  { value: 'inactive', label: 'Inactivo' },
-] as const;
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 export function VolunteerRosterFilter() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const tc = getMessages(useLocale()).coord;
+
+  const SKILL_OPTIONS = [
+    { value: '', label: tc.roster_filter_skill_all },
+    { value: 'driving', label: tc.skill_driving },
+    { value: 'medical', label: tc.skill_medical },
+    { value: 'logistics', label: tc.skill_logistics },
+    { value: 'cooking', label: tc.skill_cooking },
+    { value: 'languages', label: tc.skill_languages },
+    { value: 'admin', label: tc.skill_admin },
+    { value: 'general', label: tc.skill_general },
+  ] as const;
+
+  const AVAILABILITY_OPTIONS = [
+    { value: '', label: tc.roster_filter_availability_all },
+    { value: 'immediate', label: tc.availability_immediate },
+    { value: 'this_week', label: tc.availability_this_week },
+    { value: 'flexible', label: tc.availability_flexible },
+  ] as const;
+
+  const VEHICLE_OPTIONS = [
+    { value: '', label: tc.roster_filter_vehicle_all },
+    { value: 'none', label: tc.vehicle_none },
+    { value: 'car', label: tc.vehicle_car },
+    { value: 'van', label: tc.vehicle_van },
+    { value: 'truck', label: tc.vehicle_truck },
+  ] as const;
+
+  const STATUS_OPTIONS = [
+    { value: '', label: tc.roster_filter_status_all },
+    { value: 'available', label: tc.volunteer_status_available },
+    { value: 'assigned', label: tc.volunteer_status_assigned },
+    { value: 'inactive', label: tc.volunteer_status_inactive },
+  ] as const;
 
   const currentSkill = searchParams.get('skill') ?? '';
   const currentAvailability = searchParams.get('availability') ?? '';
@@ -55,17 +58,17 @@ export function VolunteerRosterFilter() {
   }
 
   const selectClass =
-    'rounded-lg border-2 border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-gray-900 focus:outline-none';
+    'rounded-lg border-2 border-line bg-white px-3 py-1.5 text-sm text-ink focus:border-navy focus:outline-none';
 
   return (
-    <div className="flex flex-wrap gap-3" role="group" aria-label="Filtros del roster">
-      <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
-        <span>Habilidad</span>
+    <div className="flex flex-wrap gap-3" role="group" aria-label={tc.roster_filter_group_label}>
+      <label className="flex flex-col gap-1 text-xs font-medium text-muted">
+        <span>{tc.roster_filter_skill_field}</span>
         <select
           value={currentSkill}
           onChange={(e) => updateParam('skill', e.target.value)}
           className={selectClass}
-          aria-label="Filtrar por habilidad"
+          aria-label={tc.roster_filter_skill_aria}
         >
           {SKILL_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -75,13 +78,13 @@ export function VolunteerRosterFilter() {
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
-        <span>Disponibilidad</span>
+      <label className="flex flex-col gap-1 text-xs font-medium text-muted">
+        <span>{tc.roster_filter_availability_field}</span>
         <select
           value={currentAvailability}
           onChange={(e) => updateParam('availability', e.target.value)}
           className={selectClass}
-          aria-label="Filtrar por disponibilidad"
+          aria-label={tc.roster_filter_availability_aria}
         >
           {AVAILABILITY_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -91,13 +94,13 @@ export function VolunteerRosterFilter() {
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
-        <span>Vehículo</span>
+      <label className="flex flex-col gap-1 text-xs font-medium text-muted">
+        <span>{tc.roster_filter_vehicle_field}</span>
         <select
           value={currentVehicle}
           onChange={(e) => updateParam('vehicle', e.target.value)}
           className={selectClass}
-          aria-label="Filtrar por vehículo"
+          aria-label={tc.roster_filter_vehicle_aria}
         >
           {VEHICLE_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -107,13 +110,13 @@ export function VolunteerRosterFilter() {
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-xs font-medium text-gray-600">
-        <span>Estado</span>
+      <label className="flex flex-col gap-1 text-xs font-medium text-muted">
+        <span>{tc.roster_filter_status_field}</span>
         <select
           value={currentStatus}
           onChange={(e) => updateParam('vstatus', e.target.value)}
           className={selectClass}
-          aria-label="Filtrar por estado"
+          aria-label={tc.roster_filter_status_aria}
         >
           {STATUS_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>

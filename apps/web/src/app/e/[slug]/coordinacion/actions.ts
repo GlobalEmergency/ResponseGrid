@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { getT } from '@/i18n/server';
 
 /**
  * Matches an open offer to a need (coordinator only).
@@ -18,6 +19,8 @@ export async function matchOffer(
     redirect(`/login?next=/e/${slug}/coordinacion`);
   }
 
+  const { t } = await getT();
+
   const { error, response } = await api.POST('/offers/{offerId}/match', {
     params: { path: { offerId } },
     body: { needId },
@@ -30,15 +33,15 @@ export async function matchOffer(
       redirect(`/login?next=/e/${slug}/coordinacion`);
     }
     if (response.status === 403) {
-      return { status: 'error', message: 'No tienes permisos para asignar esta oferta.' };
+      return { status: 'error', message: t.coord.err_no_permission_match };
     }
     if (response.status === 409) {
-      return { status: 'error', message: 'La oferta no está en estado abierto.' };
+      return { status: 'error', message: t.coord.err_offer_not_open };
     }
     if (response.status === 404) {
-      return { status: 'error', message: 'Oferta o necesidad no encontrada.' };
+      return { status: 'error', message: t.coord.err_not_found_offer_need };
     }
-    return { status: 'error', message: 'No se pudo asignar la oferta. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.coord.err_match_failed };
   }
 
   revalidatePath(`/e/${slug}/coordinacion`);
@@ -57,6 +60,8 @@ export async function fulfillOffer(
     redirect(`/login?next=/e/${slug}/coordinacion`);
   }
 
+  const { t } = await getT();
+
   const { error, response } = await api.POST('/offers/{offerId}/fulfill', {
     params: { path: { offerId } },
     headers: authHeaders(token),
@@ -68,12 +73,12 @@ export async function fulfillOffer(
       redirect(`/login?next=/e/${slug}/coordinacion`);
     }
     if (response.status === 403) {
-      return { status: 'error', message: 'No tienes permisos para marcar esta oferta como entregada.' };
+      return { status: 'error', message: t.coord.err_no_permission_fulfill };
     }
     if (response.status === 409) {
-      return { status: 'error', message: 'La oferta no está en estado asignado.' };
+      return { status: 'error', message: t.coord.err_offer_not_assigned };
     }
-    return { status: 'error', message: 'No se pudo marcar la oferta como entregada.' };
+    return { status: 'error', message: t.coord.err_fulfill_failed };
   }
 
   revalidatePath(`/e/${slug}/coordinacion`);
@@ -92,6 +97,8 @@ export async function cancelOffer(
     redirect(`/login?next=/e/${slug}/coordinacion`);
   }
 
+  const { t } = await getT();
+
   const { error, response } = await api.POST('/offers/{offerId}/cancel', {
     params: { path: { offerId } },
     headers: authHeaders(token),
@@ -103,12 +110,12 @@ export async function cancelOffer(
       redirect(`/login?next=/e/${slug}/coordinacion`);
     }
     if (response.status === 403) {
-      return { status: 'error', message: 'No tienes permisos para cancelar esta oferta.' };
+      return { status: 'error', message: t.coord.err_no_permission_cancel };
     }
     if (response.status === 409) {
-      return { status: 'error', message: 'La oferta no puede cancelarse en su estado actual.' };
+      return { status: 'error', message: t.coord.err_offer_cannot_cancel };
     }
-    return { status: 'error', message: 'No se pudo cancelar la oferta.' };
+    return { status: 'error', message: t.coord.err_cancel_failed };
   }
 
   revalidatePath(`/e/${slug}/coordinacion`);
@@ -136,6 +143,8 @@ export async function verifyAndPublish(
     redirect(`/login?next=/e/${slug}/coordinacion`);
   }
 
+  const { t } = await getT();
+
   const headers = authHeaders(token);
 
   // The schema still carries VerifyResourceDto but the backend now accepts
@@ -158,7 +167,7 @@ export async function verifyAndPublish(
     }
     return {
       status: 'error',
-      message: 'No se pudo verificar el recurso. Inténtalo de nuevo.',
+      message: t.coord.err_verify_failed,
     };
   }
 
@@ -177,8 +186,7 @@ export async function verifyAndPublish(
     }
     return {
       status: 'error',
-      message:
-        'Recurso verificado pero no se pudo publicar. Contacta al administrador.',
+      message: t.coord.err_publish_resource_failed,
     };
   }
 
@@ -198,6 +206,8 @@ export async function validateNeed(
     redirect(`/login?next=/e/${slug}/coordinacion`);
   }
 
+  const { t } = await getT();
+
   const headers = authHeaders(token);
 
   const { error, response } = await api.POST('/needs/{needId}/validate', {
@@ -212,7 +222,7 @@ export async function validateNeed(
     }
     return {
       status: 'error',
-      message: 'No se pudo validar la petición. Inténtalo de nuevo.',
+      message: t.coord.err_validate_failed,
     };
   }
 
@@ -232,6 +242,8 @@ export async function renewNeed(
     redirect(`/login?next=/e/${slug}/coordinacion`);
   }
 
+  const { t } = await getT();
+
   const { error, response } = await api.POST('/needs/{needId}/renew', {
     params: { path: { needId } },
     headers: authHeaders(token),
@@ -243,12 +255,12 @@ export async function renewNeed(
       redirect(`/login?next=/e/${slug}/coordinacion`);
     }
     if (response.status === 403) {
-      return { status: 'error', message: 'No tienes permisos para renovar esta petición.' };
+      return { status: 'error', message: t.coord.err_no_permission_renew };
     }
     if (response.status === 404) {
-      return { status: 'error', message: 'Petición no encontrada.' };
+      return { status: 'error', message: t.coord.err_request_not_found };
     }
-    return { status: 'error', message: 'No se pudo renovar la petición. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.coord.err_renew_failed };
   }
 
   revalidatePath(`/e/${slug}/coordinacion`);
@@ -277,6 +289,8 @@ export async function pauseEmergency(
     redirect(`/login?next=/e/${slug}/coordinacion`);
   }
 
+  const { t } = await getT();
+
   const { error, response } = await api.POST('/emergencies/{emergencyId}/pause', {
     params: { path: { emergencyId } },
     headers: authHeaders(token),
@@ -288,12 +302,12 @@ export async function pauseEmergency(
       redirect(`/login?next=/e/${slug}/coordinacion`);
     }
     if (response.status === 403) {
-      return { status: 'error', message: 'No tienes permisos para pausar esta emergencia.' };
+      return { status: 'error', message: t.coord.err_no_permission_pause };
     }
     if (response.status === 409) {
-      return { status: 'error', message: 'La emergencia ya está en pausa.' };
+      return { status: 'error', message: t.coord.err_already_paused };
     }
-    return { status: 'error', message: 'No se pudo pausar la emergencia. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.coord.err_pause_failed };
   }
 
   revalidatePath(`/e/${slug}/coordinacion`);
@@ -313,6 +327,8 @@ export async function resumeEmergency(
     redirect(`/login?next=/e/${slug}/coordinacion`);
   }
 
+  const { t } = await getT();
+
   const { error, response } = await api.POST('/emergencies/{emergencyId}/resume', {
     params: { path: { emergencyId } },
     headers: authHeaders(token),
@@ -324,12 +340,12 @@ export async function resumeEmergency(
       redirect(`/login?next=/e/${slug}/coordinacion`);
     }
     if (response.status === 403) {
-      return { status: 'error', message: 'No tienes permisos para reanudar esta emergencia.' };
+      return { status: 'error', message: t.coord.err_no_permission_resume };
     }
     if (response.status === 409) {
-      return { status: 'error', message: 'La emergencia no está en pausa.' };
+      return { status: 'error', message: t.coord.err_not_paused };
     }
-    return { status: 'error', message: 'No se pudo reanudar la emergencia. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.coord.err_resume_failed };
   }
 
   revalidatePath(`/e/${slug}/coordinacion`);
@@ -350,6 +366,8 @@ export async function publishAnnouncement(
     redirect(`/login?next=/e/${slug}/coordinacion`);
   }
 
+  const { t } = await getT();
+
   const { error, response } = await api.PUT('/emergencies/{emergencyId}/announcement', {
     params: { path: { emergencyId } },
     body: { message },
@@ -362,9 +380,9 @@ export async function publishAnnouncement(
       redirect(`/login?next=/e/${slug}/coordinacion`);
     }
     if (response.status === 403) {
-      return { status: 'error', message: 'No tienes permisos para publicar comunicados en esta emergencia.' };
+      return { status: 'error', message: t.coord.err_no_permission_announce };
     }
-    return { status: 'error', message: 'No se pudo publicar el comunicado. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.coord.err_announce_failed };
   }
 
   revalidatePath(`/e/${slug}/coordinacion`);

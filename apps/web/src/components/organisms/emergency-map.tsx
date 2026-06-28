@@ -7,6 +7,8 @@ import L from 'leaflet';
 import 'leaflet.markercluster';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import { useEffect, useRef } from 'react';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 import type { Map as LeafletMap } from 'leaflet';
 
 // ── Icon helpers ───────────────────────────────────────────────────────────────
@@ -141,9 +143,11 @@ function escapeHtml(s: string): string {
 // ── Inner component that renders clustered resource/need markers ──────────────
 function ClusteredMarkersLayer({ points }: { points: MapPoint[] }) {
   const map = useMap();
+  const locale = useLocale();
   const clusterRef = useRef<L.MarkerClusterGroup | null>(null);
 
   useEffect(() => {
+    const tc = getMessages(locale).ui;
     // Create the cluster group once and keep it alive.
     // L.markerClusterGroup is injected by the 'leaflet.markercluster' side-effect import.
     if (clusterRef.current === null) {
@@ -162,7 +166,7 @@ function ClusteredMarkersLayer({ points }: { points: MapPoint[] }) {
         point.kind === 'resource' ? resourceIcon(point.status) : ICONS.red;
 
       // Build rich popup HTML — all free-text values are escaped to prevent XSS
-      const kindLabel = point.kind === 'resource' ? 'Recurso' : 'Petición';
+      const kindLabel = point.kind === 'resource' ? tc.map_kind_resource : tc.map_kind_need;
       const typeLabel =
         point.resourceType != null && point.resourceType !== ''
           ? `<br/><span style="font-size:11px;color:#555;">${escapeHtml(point.resourceType)}</span>`
@@ -176,11 +180,11 @@ function ClusteredMarkersLayer({ points }: { points: MapPoint[] }) {
           : '';
       const acceptsLabel =
         point.accepts != null && point.accepts.length > 0
-          ? `<br/><span style="font-size:11px;color:#555;">Acepta: ${point.accepts.map(escapeHtml).join(', ')}</span>`
+          ? `<br/><span style="font-size:11px;color:#555;">${escapeHtml(tc.map_accepts)} ${point.accepts.map(escapeHtml).join(', ')}</span>`
           : '';
       const approximateLabel =
         point.kind === 'need' && point.approximate === true
-          ? '<br/><span style="font-size:11px;color:#b45309;">📍 Ubicación aproximada</span>'
+          ? `<br/><span style="font-size:11px;color:#b45309;">📍 ${escapeHtml(tc.map_approx_location)}</span>`
           : '';
 
       const popupHtml = `<strong>${escapeHtml(point.label)}</strong><br/><span style="font-size:11px;color:#6b7280;">${kindLabel}</span>${typeLabel}${locationLabel}${acceptsLabel}${approximateLabel}`;
@@ -193,7 +197,7 @@ function ClusteredMarkersLayer({ points }: { points: MapPoint[] }) {
     return () => {
       group.clearLayers();
     };
-  }, [map, points]);
+  }, [map, points, locale]);
 
   // Remove the cluster group when the component unmounts.
   // Read clusterRef.current INSIDE the cleanup so we always get the value
@@ -260,12 +264,13 @@ function BoundsFitter({ points }: { points: MapPoint[] }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function EmergencyMap({ points, onMapReady }: EmergencyMapProps) {
+  const t = getMessages(useLocale()).ui;
   // Default centre (Spain) used only when there are no points
   const defaultCenter: [number, number] = [40.4168, -3.7038];
   const defaultZoom = 5;
 
   return (
-    <div className="relative w-full h-80 rounded-lg overflow-hidden border-2 border-gray-200">
+    <div className="relative w-full h-80 rounded-lg overflow-hidden border-2 border-line">
       <MapContainer
         center={defaultCenter}
         zoom={defaultZoom}
@@ -286,8 +291,8 @@ export default function EmergencyMap({ points, onMapReady }: EmergencyMapProps) 
       {/* Empty-state overlay rendered on top of the map */}
       {points.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-[1000] pointer-events-none">
-          <p className="text-sm font-medium text-gray-500">
-            Aún no hay ubicaciones en el mapa.
+          <p className="text-sm font-medium text-muted">
+            {t.map_no_locations}
           </p>
         </div>
       )}

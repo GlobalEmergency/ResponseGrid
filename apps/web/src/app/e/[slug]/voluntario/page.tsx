@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { registerVolunteer } from './actions';
 import { VoluntarioForm } from './voluntario-form';
+import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
@@ -61,30 +62,23 @@ export default async function VoluntarioPage({ params }: Props) {
   const boundAction = registerVolunteer.bind(null, emergency.id);
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-start bg-white px-4 py-10">
-      <div className="w-full max-w-md flex flex-col gap-8">
-        <header className="flex flex-col gap-2">
-          <a
-            href={`/e/${slug}`}
-            className="text-sm text-gray-400 underline underline-offset-2 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded w-fit"
-          >
-            ← {emergency.name}
-          </a>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            {t.voluntario.page_title}
-          </h1>
-          <p className="text-base text-gray-600">
-            {t.voluntario.page_subtitle.replace('{emergencyName}', emergency.name)}
-          </p>
-        </header>
-
-        <VoluntarioForm
-          action={boundAction}
-          slug={slug}
-          existingProfile={existingProfile}
-          t={t.voluntario}
-          backToEmergencyLabel={t.common.back_to_emergency}
+    <main className="flex-1 bg-surface">
+      <div className="mx-auto w-full max-w-md">
+        <PageHeaderBand
+          backHref={`/e/${slug}`}
+          backLabel={t.common.back_to_emergency}
+          title={t.voluntario.page_title}
+          subtitle={t.voluntario.page_subtitle.replace('{emergencyName}', emergency.name)}
         />
+        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
+          <VoluntarioForm
+            action={boundAction}
+            slug={slug}
+            existingProfile={existingProfile}
+            t={t.voluntario}
+            backToEmergencyLabel={t.common.back_to_emergency}
+          />
+        </div>
       </div>
     </main>
   );

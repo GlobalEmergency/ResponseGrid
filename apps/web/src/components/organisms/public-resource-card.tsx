@@ -2,6 +2,7 @@ import type { components } from '@reliefhub/api-client';
 import { VerificationBadge } from '@/components/atoms/verification-badge';
 import { StatusLight } from '@/components/atoms/status-light';
 import { FreshnessIndicator } from '@/components/atoms/freshness-indicator';
+import { Card } from '@/components/atoms/card';
 import type { Messages } from '@/i18n/messages/es';
 import type { Locale } from '@/i18n';
 import { categoryLabel, categoryColor } from '@/lib/categories';
@@ -56,9 +57,10 @@ export function PublicResourceCard({
   const subtitle = subtitleParts.join(' · ');
 
   return (
-    <article
+    <Card
+      as="article"
       aria-label={t.aria_label.replace('{name}', resource.name)}
-      className="flex flex-col gap-1.5 rounded-card border border-line bg-white p-4"
+      className="flex flex-col gap-1.5 p-4"
     >
       {/* ── Trust + operational pills ───────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-2">
@@ -121,6 +123,6 @@ export function PublicResourceCard({
       {resource.externalUpdatedAt != null && (
         <FreshnessIndicator lastVerifiedAt={resource.externalUpdatedAt} />
       )}
-    </article>
+    </Card>
   );
 }
