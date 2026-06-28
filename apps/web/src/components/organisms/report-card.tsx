@@ -15,14 +15,14 @@ type ReportType = 'incident' | 'stock' | 'status' | 'other';
 
 const PRIORITY_CLASSES: Record<ReportPriority, string> = {
   low: 'inline-flex items-center rounded-full border border-line bg-surface px-2.5 py-0.5 text-xs font-semibold text-muted',
-  medium: 'inline-flex items-center rounded-full border border-blue-300 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-800',
-  high: 'inline-flex items-center rounded-full border border-amber-400 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800',
-  urgent: 'inline-flex items-center rounded-full border border-red-600 bg-red-50 px-2.5 py-0.5 text-xs font-bold text-red-700',
+  medium: 'inline-flex items-center rounded-full border border-info-line bg-info-soft px-2.5 py-0.5 text-xs font-semibold text-info',
+  high: 'inline-flex items-center rounded-full border border-warning bg-warning-soft px-2.5 py-0.5 text-xs font-semibold text-warning',
+  urgent: 'inline-flex items-center rounded-full border border-danger bg-danger-soft px-2.5 py-0.5 text-xs font-bold text-danger',
 };
 
 const STATUS_CLASSES: Record<ReportStatus, string> = {
-  open: 'inline-flex items-center rounded-full border border-blue-400 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-800',
-  reviewed: 'inline-flex items-center rounded-full border border-green-400 bg-green-50 px-2.5 py-0.5 text-xs font-semibold text-green-800',
+  open: 'inline-flex items-center rounded-full border border-info-line bg-info-soft px-2.5 py-0.5 text-xs font-semibold text-info',
+  reviewed: 'inline-flex items-center rounded-full border border-success bg-success-soft px-2.5 py-0.5 text-xs font-semibold text-success',
   closed: 'inline-flex items-center rounded-full border border-line bg-surface-alt px-2.5 py-0.5 text-xs font-semibold text-muted',
 };
 
@@ -166,7 +166,7 @@ export function ReportCard({ report, slug }: ReportCardProps) {
       {!isReviewed && (
         <form action={reviewFormAction}>
           {reviewState.status === 'error' && (
-            <p className="text-xs text-red-600 mb-2">{reviewState.message}</p>
+            <p className="text-xs text-danger mb-2">{reviewState.message}</p>
           )}
           <Button
             type="submit"
@@ -180,7 +180,7 @@ export function ReportCard({ report, slug }: ReportCardProps) {
       )}
 
       {(reviewState.status === 'success' || isReviewed) && (
-        <p className="text-xs text-green-700 font-medium">{tc.report_reviewed}</p>
+        <p className="text-xs text-success font-medium">{tc.report_reviewed}</p>
       )}
     </article>
   );

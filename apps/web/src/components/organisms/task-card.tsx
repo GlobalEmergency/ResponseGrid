@@ -21,15 +21,15 @@ type AssignmentStatus = components['schemas']['TaskAssignmentViewDto']['status']
 type VolunteerViewDto = components['schemas']['VolunteerViewDto'];
 
 const TASK_STATUS_BADGE_CLASSES: Record<TaskStatus, string> = {
-  open: 'inline-flex items-center rounded-full border border-blue-400 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-800',
-  in_progress: 'inline-flex items-center rounded-full border border-amber-400 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800',
-  completed: 'inline-flex items-center rounded-full border border-green-400 bg-green-50 px-2.5 py-0.5 text-xs font-semibold text-green-800',
+  open: 'inline-flex items-center rounded-full border border-info-line bg-info-soft px-2.5 py-0.5 text-xs font-semibold text-info',
+  in_progress: 'inline-flex items-center rounded-full border border-warning bg-warning-soft px-2.5 py-0.5 text-xs font-semibold text-warning',
+  completed: 'inline-flex items-center rounded-full border border-success bg-success-soft px-2.5 py-0.5 text-xs font-semibold text-success',
   cancelled: 'inline-flex items-center rounded-full border border-line bg-surface-alt px-2.5 py-0.5 text-xs font-semibold text-muted',
 };
 
 const ASSIGNMENT_STATUS_BADGE_CLASSES: Record<AssignmentStatus, string> = {
-  assigned: 'inline-flex items-center rounded-full border border-blue-300 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700',
-  checked_in: 'inline-flex items-center rounded-full border border-green-400 bg-green-50 px-2 py-0.5 text-xs font-medium text-green-800',
+  assigned: 'inline-flex items-center rounded-full border border-info-line bg-info-soft px-2 py-0.5 text-xs font-medium text-info',
+  checked_in: 'inline-flex items-center rounded-full border border-success bg-success-soft px-2 py-0.5 text-xs font-medium text-success',
   checked_out: 'inline-flex items-center rounded-full border border-line bg-surface-alt px-2 py-0.5 text-xs font-medium text-muted',
 };
 
@@ -258,7 +258,7 @@ function UnassignButton({ taskId, volunteerId, slug, tc }: UnassignButtonProps) 
       <button
         type="submit"
         disabled={pending}
-        className="rounded border border-red-300 bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="rounded border border-danger bg-danger-soft px-2 py-0.5 text-xs font-medium text-danger transition-colors hover:bg-danger-soft/90 focus:outline-none focus:ring-2 focus:ring-danger focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed"
         aria-label={tc.task_unassign_label}
       >
         {pending ? '…' : tc.task_unassign}

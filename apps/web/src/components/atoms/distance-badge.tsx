@@ -28,7 +28,7 @@ export function DistanceBadge({ distanceMeters, locale, label = 'a' }: DistanceB
   }
 
   return (
-    <span className="text-xs font-semibold text-blue-700 bg-blue-50 rounded-full px-2 py-0.5">
+    <span className="text-xs font-semibold text-info bg-info-soft rounded-full px-2 py-0.5">
       {text}
     </span>
   );

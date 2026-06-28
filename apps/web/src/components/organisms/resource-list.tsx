@@ -260,7 +260,7 @@ export function ResourceList({
 
         {/* Geo error alert */}
         {geoError && (
-          <p role="alert" className="rounded-card border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          <p role="alert" className="rounded-card border border-warning bg-warning-soft px-3 py-2 text-xs text-warning">
             {tNearby.geo_error}
             {' '}
             <button
@@ -305,7 +305,7 @@ export function ResourceList({
 
       {/* ── Geo error alert ──────────────────────────────────────────────── */}
       {geoError && nearbyItems === null && (
-        <p role="alert" className="rounded-card border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+        <p role="alert" className="rounded-card border border-warning bg-warning-soft px-3 py-2 text-xs text-warning">
           {tNearby.geo_error}
           {' '}
           <button
@@ -425,7 +425,7 @@ export function ResourceList({
 
       {/* ── Load more / errors ──────────────────────────────────────────── */}
       {loadMoreError && (
-        <p role="alert" className="text-center text-sm text-red-600">
+        <p role="alert" className="text-center text-sm text-danger">
           <button
             type="button"
             onClick={handleLoadMore}

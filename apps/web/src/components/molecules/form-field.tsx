@@ -42,7 +42,7 @@ export function FormField({
       )}
       {children}
       {error !== undefined && error !== '' && (
-        <p className="text-xs text-red-600">{error}</p>
+        <p className="text-xs text-danger">{error}</p>
       )}
     </div>
   );

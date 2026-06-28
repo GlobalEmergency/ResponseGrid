@@ -56,7 +56,7 @@ export default async function AcreditacionesPage() {
         />
         <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
 
-        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-300 rounded px-3 py-2">
+        <p className="text-xs text-warning bg-warning-soft border border-warning rounded px-3 py-2">
           {ta.acc_manual_note}
         </p>
 

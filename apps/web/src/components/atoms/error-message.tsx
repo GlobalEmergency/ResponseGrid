@@ -11,7 +11,7 @@ export function ErrorMessage({ message }: ErrorMessageProps) {
     <p
       role="alert"
       aria-live="assertive"
-      className="rounded-md border border-red-600 bg-red-50 px-4 py-3 text-sm font-medium text-red-800"
+      className="rounded-md border border-danger bg-danger-soft px-4 py-3 text-sm font-medium text-danger"
     >
       {message}
     </p>

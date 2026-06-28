@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { getToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
+import { getT } from '@/i18n/server';
 import { fetchTemplates } from './actions';
 import { CreateTemplateForm } from './create-template-form';
 import { DeleteTemplateButton } from './delete-template-button';
@@ -12,10 +13,13 @@ import { PageHeaderBand } from '@/components/molecules/page-header-band';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Plantillas de emergencia — Admin · ResponseGrid',
-  description: 'Gestión de plantillas de emergencia.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  return {
+    title: t.templates.meta_title,
+    description: t.templates.meta_description,
+  };
+}
 
 export default async function TemplatesPage() {
   // ── Auth guard ──────────────────────────────────────────────────────────
@@ -40,27 +44,29 @@ export default async function TemplatesPage() {
   // ── Fetch templates ──────────────────────────────────────────────────────
   const templates = await fetchTemplates();
 
+  const { t } = await getT();
+
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-xl">
         <PageHeaderBand
           backHref="/"
-          backLabel="← Inicio"
-          title="Plantillas de emergencia"
-          subtitle="Crea plantillas reutilizables para nuevas emergencias. Solo administradores."
+          backLabel={t.admin.back}
+          title={t.templates.title}
+          subtitle={t.templates.subtitle}
         />
         <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
 
         {/* ── LISTADO ─────────────────────────────────────────────────── */}
         <section aria-labelledby="list-heading" className="flex flex-col gap-4">
           <h2 id="list-heading" className="text-xl font-bold text-ink">
-            Plantillas disponibles ({templates.length})
+            {t.templates.list_heading.replace('{count}', String(templates.length))}
           </h2>
 
           {templates.length === 0 ? (
             <EmptyState
-              title="No hay plantillas todavía."
-              description="Usa el formulario de abajo para crear la primera plantilla."
+              title={t.templates.empty_title}
+              description={t.templates.empty_description}
             />
           ) : (
             <ul className="flex flex-col gap-3" role="list">
@@ -84,7 +90,7 @@ export default async function TemplatesPage() {
         {/* ── CREAR PLANTILLA ─────────────────────────────────────────── */}
         <section aria-labelledby="create-template-heading" className="flex flex-col gap-4">
           <h2 id="create-template-heading" className="text-xl font-bold text-ink">
-            Nueva plantilla
+            {t.templates.new_heading}
           </h2>
           <CreateTemplateForm />
         </section>
@@ -94,10 +100,10 @@ export default async function TemplatesPage() {
         {/* ── CREAR EMERGENCIA DESDE PLANTILLA ────────────────────────── */}
         <section aria-labelledby="create-emergency-heading" className="flex flex-col gap-4">
           <h2 id="create-emergency-heading" className="text-xl font-bold text-ink">
-            Crear emergencia desde plantilla
+            {t.templates.create_from_heading}
           </h2>
           <p className="text-sm text-muted">
-            La nueva emergencia heredará la lista «qué no llevar» y el comunicado por defecto de la plantilla.
+            {t.templates.inheritance_note}
           </p>
           <CreateFromTemplateForm templates={templates} />
         </section>

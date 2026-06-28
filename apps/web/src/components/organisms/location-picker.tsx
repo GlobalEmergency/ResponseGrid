@@ -2,6 +2,8 @@
 
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 interface GeocodeResult {
   address: string;
@@ -26,6 +28,7 @@ interface LocationPickerProps {
 }
 
 export function LocationPicker({ defaultValue }: LocationPickerProps) {
+  const t = getMessages(useLocale()).ui;
   const [query, setQuery] = useState(defaultValue?.address ?? '');
   const [results, setResults] = useState<GeocodeResult[]>([]);
   const [selected, setSelected] = useState<SelectedLocation | null>(
@@ -105,7 +108,7 @@ export function LocationPicker({ defaultValue }: LocationPickerProps) {
           htmlFor="location-search"
           className="text-sm font-semibold text-ink"
         >
-          Buscar dirección
+          {t.search_address}
         </label>
         <div className="relative">
           <input
@@ -115,11 +118,11 @@ export function LocationPicker({ defaultValue }: LocationPickerProps) {
             aria-expanded={isOpen}
             aria-autocomplete="list"
             aria-controls="location-results"
-            aria-label="Buscar dirección"
+            aria-label={t.search_address}
             autoComplete="off"
             value={query}
             onChange={(e) => handleInputChange(e.target.value)}
-            placeholder="Calle Mayor 1, Madrid…"
+            placeholder={t.address_placeholder}
             className="w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink placeholder:text-muted-soft focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
           />
           {loading && (
@@ -127,7 +130,7 @@ export function LocationPicker({ defaultValue }: LocationPickerProps) {
               aria-live="polite"
               className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-soft"
             >
-              Buscando…
+              {t.searching}
             </span>
           )}
         </div>
@@ -137,7 +140,7 @@ export function LocationPicker({ defaultValue }: LocationPickerProps) {
           <ul
             id="location-results"
             role="listbox"
-            aria-label="Resultados de geocodificación"
+            aria-label={t.geocode_results}
             className="mt-1 max-h-52 overflow-auto rounded-lg border-2 border-line bg-white shadow-lg"
           >
             {results.map((result) => (
@@ -174,7 +177,7 @@ export function LocationPicker({ defaultValue }: LocationPickerProps) {
 
       {/* Mini map — rendered only when a location is selected */}
       {selected !== null && (
-        <div aria-label={`Mapa mostrando: ${selected.address}`}>
+        <div aria-label={t.map_showing.replace('{address}', selected.address)}>
           <LeafletMap
             latitude={selected.latitude}
             longitude={selected.longitude}

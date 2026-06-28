@@ -135,7 +135,7 @@ export function VoluntarioForm({ action, slug, existingProfile, t, backToEmergen
 
       {existingProfile !== null && (
         <div
-          className="rounded-lg border-2 border-amber-400 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+          className="rounded-lg border-2 border-warning bg-warning-soft px-4 py-3 text-sm text-warning"
           role="note"
         >
           <span className="font-semibold">{t.already_registered}</span>
@@ -212,7 +212,7 @@ export function VoluntarioForm({ action, slug, existingProfile, t, backToEmergen
                   'inline-flex cursor-pointer select-none items-center rounded-full border-2 px-3 py-1 text-sm font-semibold transition-colors',
                   active
                     ? 'border-navy bg-navy text-white'
-                    : 'border-line bg-white text-ink-soft hover:border-gray-500',
+                    : 'border-line bg-white text-ink-soft hover:border-line-strong',
                 ].join(' ')}
               >
                 <input
@@ -292,7 +292,7 @@ export function VoluntarioForm({ action, slug, existingProfile, t, backToEmergen
             className="text-sm text-ink-soft leading-snug cursor-pointer"
           >
             {t.consent_text}{' '}
-            <span aria-hidden="true" className="text-red-600 font-bold">*</span>
+            <span aria-hidden="true" className="text-danger font-bold">*</span>
           </label>
         </div>
       </div>

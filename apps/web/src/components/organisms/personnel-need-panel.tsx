@@ -76,11 +76,11 @@ export function PersonnelNeedPanel({
 
   if (successTaskId !== null) {
     return (
-      <div className="rounded-lg border-2 border-green-400 bg-green-50 p-4 flex flex-col gap-2">
-        <p className="text-sm font-semibold text-green-800">
+      <div className="rounded-lg border-2 border-success bg-success-soft p-4 flex flex-col gap-2">
+        <p className="text-sm font-semibold text-success">
           {tc.personnel_success_title}
         </p>
-        <p className="text-xs text-green-700">
+        <p className="text-xs text-success">
           {selectedIds.size === 0
             ? tc.personnel_success_body_unassigned
             : tc.personnel_success_body_assigned}{' '}
@@ -93,11 +93,11 @@ export function PersonnelNeedPanel({
   return (
     <section
       aria-label={tc.personnel_panel_label.replace('{title}', need.title)}
-      className="flex flex-col gap-4 rounded-lg border-2 border-blue-300 bg-blue-50 p-4"
+      className="flex flex-col gap-4 rounded-lg border-2 border-info-line bg-info-soft p-4"
     >
       {/* Need summary */}
       <div className="flex flex-col gap-1">
-        <p className="text-xs font-semibold text-blue-900 uppercase tracking-wide">
+        <p className="text-xs font-semibold text-info uppercase tracking-wide">
           {tc.personnel_need_heading}
         </p>
         <div className="flex flex-wrap gap-2 items-center">

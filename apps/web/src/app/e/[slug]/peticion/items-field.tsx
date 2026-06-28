@@ -112,7 +112,7 @@ export function ItemsField({ t }: ItemsFieldProps) {
                 type="button"
                 onClick={() => removeItem(item.id)}
                 aria-label={t.item_remove.replace('{n}', String(index + 1))}
-                className="text-sm text-red-600 hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-1 rounded"
+                className="text-sm text-danger hover:text-danger focus:outline-none focus:ring-2 focus:ring-danger focus:ring-offset-1 rounded"
               >
                 {t.item_remove_label}
               </button>

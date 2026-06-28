@@ -40,8 +40,8 @@ export function PersonnelNeedFields() {
   ];
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border-2 border-blue-300 bg-blue-50 p-4">
-      <p className="text-sm font-semibold text-blue-900 uppercase tracking-wide">
+    <div className="flex flex-col gap-4 rounded-lg border-2 border-info-line bg-info-soft p-4">
+      <p className="text-sm font-semibold text-info uppercase tracking-wide">
         {tc.personnel_fields_heading}
       </p>
 

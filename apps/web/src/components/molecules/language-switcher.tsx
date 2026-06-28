@@ -44,7 +44,7 @@ export function LanguageSwitcher({ tone = 'light' }: LanguageSwitcherProps) {
         const idleClass =
           tone === 'dark'
             ? 'border-white/30 bg-transparent text-white/80 hover:border-white hover:text-white'
-            : 'border-line bg-white text-muted hover:border-gray-600 hover:text-ink';
+            : 'border-line bg-white text-muted hover:border-line-strong hover:text-ink';
         return (
           <button
             key={loc}

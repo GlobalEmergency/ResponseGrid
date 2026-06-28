@@ -37,7 +37,7 @@ export function ConsentCheckbox({
         className="text-sm text-ink-soft leading-snug cursor-pointer"
       >
         {label}{' '}
-        <span aria-hidden="true" className="text-red-600 font-bold">
+        <span aria-hidden="true" className="text-danger font-bold">
           *
         </span>
       </label>

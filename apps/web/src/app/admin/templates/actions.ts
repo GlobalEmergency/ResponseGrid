@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { getToken, clearToken, authHeaders } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
+import { getT } from '@/i18n/server';
 import type { components } from '@reliefhub/api-client';
 
 export type TemplateActionResult =
@@ -39,6 +40,8 @@ export async function createTemplateAction(
     redirect('/login?next=/admin/templates');
   }
 
+  const { t } = await getT();
+
   const name = String(formData.get('name') ?? '').trim();
   const description = String(formData.get('description') ?? '').trim();
   const dontBringRaw = String(formData.get('dontBringList') ?? '');
@@ -46,10 +49,10 @@ export async function createTemplateAction(
     String(formData.get('defaultAnnouncement') ?? '').trim() || null;
 
   if (!name) {
-    return { status: 'error', message: 'El nombre es obligatorio.' };
+    return { status: 'error', message: t.templates.err_name_required };
   }
   if (!description) {
-    return { status: 'error', message: 'La descripción es obligatoria.' };
+    return { status: 'error', message: t.templates.err_description_required };
   }
 
   const dontBringList = dontBringRaw
@@ -60,7 +63,7 @@ export async function createTemplateAction(
   if (dontBringList.length === 0) {
     return {
       status: 'error',
-      message: 'La lista "qué no llevar" debe tener al menos un ítem.',
+      message: t.templates.err_dont_bring_empty,
     };
   }
 
@@ -75,16 +78,16 @@ export async function createTemplateAction(
       redirect('/login?next=/admin/templates');
     }
     if (response.status === 403) {
-      return { status: 'error', message: 'No tienes permisos para crear plantillas.' };
+      return { status: 'error', message: t.templates.err_no_permission_create };
     }
     if (response.status === 400) {
-      return { status: 'error', message: 'Datos inválidos. Revisa los campos.' };
+      return { status: 'error', message: t.templates.err_invalid_data };
     }
-    return { status: 'error', message: 'Error al crear la plantilla. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.templates.err_create_failed };
   }
 
   revalidatePath('/admin/templates');
-  return { status: 'success', message: 'Plantilla creada correctamente.' };
+  return { status: 'success', message: t.templates.ok_created };
 }
 
 // ── Delete ──────────────────────────────────────────────────────────────────
@@ -94,6 +97,8 @@ export async function deleteTemplateAction(id: string): Promise<TemplateActionRe
   if (!token) {
     redirect('/login?next=/admin/templates');
   }
+
+  const { t } = await getT();
 
   const { error, response } = await api.DELETE('/templates/{id}', {
     params: { path: { id } },
@@ -106,12 +111,12 @@ export async function deleteTemplateAction(id: string): Promise<TemplateActionRe
       redirect('/login?next=/admin/templates');
     }
     if (response.status === 403) {
-      return { status: 'error', message: 'No tienes permisos para eliminar esta plantilla.' };
+      return { status: 'error', message: t.templates.err_no_permission_delete };
     }
     if (response.status === 404) {
-      return { status: 'error', message: 'Plantilla no encontrada.' };
+      return { status: 'error', message: t.templates.err_not_found };
     }
-    return { status: 'error', message: 'Error al eliminar la plantilla. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.templates.err_delete_failed };
   }
 
   revalidatePath('/admin/templates');
@@ -134,22 +139,24 @@ export async function createFromTemplateAction(
     redirect('/login?next=/admin/templates');
   }
 
+  const { t } = await getT();
+
   const templateId = String(formData.get('templateId') ?? '').trim();
   const name = String(formData.get('name') ?? '').trim();
   const slug = String(formData.get('slug') ?? '').trim();
   const country = String(formData.get('country') ?? '').trim();
 
   if (!templateId) {
-    return { status: 'error', message: 'Debes seleccionar una plantilla.' };
+    return { status: 'error', message: t.templates.err_template_required };
   }
   if (!name) {
-    return { status: 'error', message: 'El nombre de la emergencia es obligatorio.' };
+    return { status: 'error', message: t.templates.err_emergency_name_required };
   }
   if (!slug) {
-    return { status: 'error', message: 'El slug es obligatorio.' };
+    return { status: 'error', message: t.templates.err_slug_required };
   }
   if (!country) {
-    return { status: 'error', message: 'El código de país es obligatorio.' };
+    return { status: 'error', message: t.templates.err_country_required };
   }
 
   const { data, error, response } = await api.POST('/emergencies/from-template', {
@@ -163,15 +170,15 @@ export async function createFromTemplateAction(
       redirect('/login?next=/admin/templates');
     }
     if (response.status === 403) {
-      return { status: 'error', message: 'No tienes permisos para crear emergencias.' };
+      return { status: 'error', message: t.templates.err_no_permission_create_emergency };
     }
     if (response.status === 404) {
-      return { status: 'error', message: 'Plantilla no encontrada.' };
+      return { status: 'error', message: t.templates.err_not_found };
     }
     if (response.status === 400) {
-      return { status: 'error', message: 'Datos inválidos. Verifica el slug y el código de país.' };
+      return { status: 'error', message: t.templates.err_invalid_slug_country };
     }
-    return { status: 'error', message: 'Error al crear la emergencia. Inténtalo de nuevo.' };
+    return { status: 'error', message: t.templates.err_create_emergency_failed };
   }
 
   const createdSlug = data?.slug ?? slug;

@@ -8,10 +8,13 @@ import { Input } from '@/components/atoms/input';
 import { Textarea } from '@/components/atoms/textarea';
 import { FormField } from '@/components/molecules/form-field';
 import { ErrorMessage } from '@/components/atoms/error-message';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 const INITIAL_STATE: TemplateActionResult = { status: 'idle' };
 
 export function CreateTemplateForm() {
+  const t = getMessages(useLocale()).templates;
   const [state, formAction, pending] = useActionState(
     createTemplateAction,
     INITIAL_STATE,
@@ -24,60 +27,60 @@ export function CreateTemplateForm() {
       {state.status === 'success' && state.message != null && (
         <p
           role="status"
-          className="rounded-md border border-green-500 bg-green-50 px-4 py-3 text-sm font-medium text-green-800"
+          className="rounded-md border border-success bg-success-soft px-4 py-3 text-sm font-medium text-success"
         >
           {state.message}
         </p>
       )}
 
-      <FormField htmlFor="name" label="Nombre de la plantilla">
+      <FormField htmlFor="name" label={t.f_name_label}>
         <Input
           id="name"
           name="name"
           type="text"
-          placeholder="Ej: Terremoto básico"
+          placeholder={t.f_name_ph}
           required
           autoComplete="off"
         />
       </FormField>
 
-      <FormField htmlFor="description" label="Descripción">
+      <FormField htmlFor="description" label={t.f_description_label}>
         <Textarea
           id="description"
           name="description"
           rows={3}
-          placeholder="Describe cuándo usar esta plantilla"
+          placeholder={t.f_description_ph}
           required
         />
       </FormField>
 
       <FormField
         htmlFor="dontBringList"
-        label="Qué NO llevar (una línea por ítem)"
+        label={t.f_dont_bring_label}
       >
         <Textarea
           id="dontBringList"
           name="dontBringList"
           rows={5}
-          placeholder={'Ropa usada sin clasificar\nMedicamentos sin validación\nAlimentos caseros'}
+          placeholder={t.f_dont_bring_ph}
           required
         />
       </FormField>
 
       <FormField
         htmlFor="defaultAnnouncement"
-        label="Comunicado por defecto (opcional)"
+        label={t.f_announcement_label}
       >
         <Textarea
           id="defaultAnnouncement"
           name="defaultAnnouncement"
           rows={3}
-          placeholder="Texto que aparecerá como comunicado inicial de la emergencia"
+          placeholder={t.f_announcement_ph}
         />
       </FormField>
 
       <Button type="submit" disabled={pending} size="md">
-        {pending ? 'Creando…' : 'Crear plantilla'}
+        {pending ? t.f_submitting : t.f_submit}
       </Button>
     </form>
   );

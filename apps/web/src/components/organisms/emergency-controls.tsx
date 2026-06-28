@@ -86,7 +86,7 @@ export function EmergencyControls({
           {lifecycleState.status === 'success' && (
             <p
               role="status"
-              className="rounded-md border border-green-600 bg-green-50 px-4 py-3 text-sm font-medium text-green-800"
+              className="rounded-md border border-success bg-success-soft px-4 py-3 text-sm font-medium text-success"
             >
               {status === 'paused' ? tc.controls_intake_paused : tc.controls_intake_resumed}
             </p>
@@ -126,7 +126,7 @@ export function EmergencyControls({
         {announcementState.status === 'success' && (
           <p
             role="status"
-            className="rounded-md border border-green-600 bg-green-50 px-4 py-3 text-sm font-medium text-green-800"
+            className="rounded-md border border-success bg-success-soft px-4 py-3 text-sm font-medium text-success"
           >
             {tc.controls_announcement_published}
           </p>

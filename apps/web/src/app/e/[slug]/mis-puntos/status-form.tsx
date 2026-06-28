@@ -66,7 +66,7 @@ export function StatusForm({ resourceId, currentStatus, slug }: StatusFormProps)
       )}
 
       {state.status === 'success' && (
-        <p className="text-xs text-green-700 font-medium">{ta.status_updated_success}</p>
+        <p className="text-xs text-success font-medium">{ta.status_updated_success}</p>
       )}
 
       <Button type="submit" variant="secondary" size="sm" disabled={pending}>

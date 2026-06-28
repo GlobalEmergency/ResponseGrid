@@ -128,9 +128,9 @@ export default async function MiVoluntariadoPage({ params }: Props) {
                   className={[
                     'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold',
                     profile.status === 'available'
-                      ? 'border border-green-400 bg-green-50 text-green-800'
+                      ? 'border border-success bg-success-soft text-success'
                       : profile.status === 'assigned'
-                        ? 'border border-blue-400 bg-blue-50 text-blue-800'
+                        ? 'border border-info-line bg-info-soft text-info'
                         : 'border border-line bg-surface-alt text-muted',
                   ].join(' ')}
                   aria-label={ta.status_aria.replace('{status}', VOLUNTEER_STATUS_LABELS[profile.status] ?? profile.status)}

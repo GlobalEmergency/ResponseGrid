@@ -119,7 +119,7 @@ export function TaskCard({ task, volunteerId, slug }: TaskCardProps) {
 
       {/* Success feedback */}
       {(checkInState.status === 'success' || checkOutState.status === 'success') && (
-        <p role="alert" aria-live="polite" className="text-xs text-green-700 font-medium">
+        <p role="alert" aria-live="polite" className="text-xs text-success font-medium">
           {ta.updated_success}
         </p>
       )}
@@ -154,7 +154,7 @@ export function TaskCard({ task, volunteerId, slug }: TaskCardProps) {
       )}
 
       {myStatus === 'checked_out' && (
-        <p className="text-sm font-semibold text-green-800 rounded-lg border border-green-300 bg-green-50 px-4 py-2">
+        <p className="text-sm font-semibold text-success rounded-lg border border-success bg-success-soft px-4 py-2">
           {ta.task_completed_thanks}
         </p>
       )}
@@ -185,7 +185,7 @@ function AssignmentBadge({
     return (
       <span
         aria-label={aria}
-        className="inline-flex items-center rounded-full border border-green-400 bg-green-50 px-3 py-1 text-sm font-semibold text-green-800 flex-shrink-0"
+        className="inline-flex items-center rounded-full border border-success bg-success-soft px-3 py-1 text-sm font-semibold text-success flex-shrink-0"
       >
         {label}
       </span>

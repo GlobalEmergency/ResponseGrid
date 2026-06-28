@@ -11,11 +11,11 @@ interface StatusLightProps {
 }
 
 const COLOR_MAP: Record<PublicStatus, string> = {
-  active: 'bg-green-500',
-  saturated: 'bg-yellow-400',
-  paused: 'bg-orange-500',
-  closed: 'bg-red-500',
-  hidden: 'bg-gray-400',
+  active: 'bg-success-dot',
+  saturated: 'bg-warning-dot',
+  paused: 'bg-accent',
+  closed: 'bg-danger',
+  hidden: 'bg-muted',
 };
 
 const LABEL_KEY: Record<PublicStatus, keyof Messages['status_light']> = {
