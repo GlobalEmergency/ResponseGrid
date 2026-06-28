@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Backlog de features
+    url: https://github.com/GlobalEmergency/ResponseGrid/issues
+    about: Revisa primero los issues abiertos antes de abrir uno nuevo.

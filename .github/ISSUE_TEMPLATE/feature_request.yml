@@ -1,0 +1,38 @@
+name: Propuesta de feature
+description: Propón una mejora o capacidad nueva
+title: "[FEATURE] "
+labels: []
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Problema o valor
+      description: Qué falta hoy y por qué importa
+    validations:
+      required: true
+  - type: textarea
+    id: propuesta
+    attributes:
+      label: Propuesta
+      description: Qué te gustaría implementar
+    validations:
+      required: true
+  - type: textarea
+    id: alcance
+    attributes:
+      label: Alcance mínimo
+      description: Qué entra en el MVP y qué queda fuera
+    validations:
+      required: true
+  - type: textarea
+    id: aceptacion
+    attributes:
+      label: Criterios de aceptación
+      description: Cómo sabremos que está listo
+    validations:
+      required: true
+  - type: textarea
+    id: dependencias
+    attributes:
+      label: Dependencias o riesgos
+      description: Otros issues, módulos o datos implicados

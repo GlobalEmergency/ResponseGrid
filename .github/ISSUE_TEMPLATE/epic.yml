@@ -1,0 +1,29 @@
+name: Épica
+description: Agrupa varias issues relacionadas
+title: "[EPIC] "
+labels: []
+body:
+  - type: textarea
+    id: objetivo
+    attributes:
+      label: Objetivo
+      description: Qué problema grande resuelve esta épica
+    validations:
+      required: true
+  - type: textarea
+    id: historias
+    attributes:
+      label: Issues hijas
+      description: Lista de issues que cuelgan de esta épica
+      placeholder: |
+        - Closes #123
+        - Closes #124
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Definición de Done
+      description: Qué tiene que pasar para cerrarla
+    validations:
+      required: true
