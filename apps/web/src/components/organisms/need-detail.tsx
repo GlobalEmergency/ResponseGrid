@@ -12,9 +12,9 @@ import { DetailDrawer } from '@/components/organisms/detail-drawer';
 import { DetailField, DetailSection } from '@/components/molecules/detail-field';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
+import { categoryLabel } from '@/lib/categories';
 
 type NeedView = components['schemas']['NeedViewDto'];
-type ItemCategory = components['schemas']['NeedItemResponseDto']['category'];
 
 const INITIAL_STATE: ActionResult = { status: 'idle' };
 
@@ -47,21 +47,8 @@ export function NeedDetail({
   onClose,
   onActionSuccess,
 }: NeedDetailProps) {
-  const tc = getMessages(useLocale()).coord;
-
-  const CATEGORY_LABELS: Record<ItemCategory, string> = {
-    hygiene: tc.category_hygiene,
-    water: tc.category_water,
-    food: tc.category_food,
-    medical: tc.category_medical,
-    shelter: tc.category_shelter,
-    tools: tc.category_tools,
-    other: tc.category_other,
-    medicines: tc.category_medicines,
-    medical_equipment: tc.category_medical_equipment,
-    medical_supplies: tc.category_medical_supplies,
-    medical_personnel: tc.category_medical_personnel,
-  };
+  const locale = useLocale();
+  const tc = getMessages(locale).coord;
 
   const PRIORITY_LABELS: Record<NeedView['priority'], string> = {
     low: tc.priority_low,
@@ -195,7 +182,7 @@ export function NeedDetail({
                 <span className="font-semibold">{item.name}</span>
                 <span className="text-muted">
                   {' · '}
-                  {CATEGORY_LABELS[item.category]}
+                  {categoryLabel(item.category, locale)}
                   {' · '}
                   {item.quantity}
                   {item.unit != null && item.unit !== '' ? ` ${item.unit}` : ''}

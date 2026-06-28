@@ -4,19 +4,27 @@ import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { getToken, authHeaders, clearToken } from '@/lib/auth';
+import { MATERIAL_CATEGORIES } from '@/lib/categories';
 import { getT } from '@/i18n/server';
 
 type ResourceType = components['schemas']['RegisterResourceDto']['type'];
 type Stage = components['schemas']['RegisterResourceDto']['stage'];
-type ResourceItem = components['schemas']['ResourceItemDto'];
+type SupplyLine = components['schemas']['SupplyLineDto'];
+
+/** Narrow a free string to a known material category slug (single source). */
+function isMaterialCategory(
+  v: string,
+): v is (typeof MATERIAL_CATEGORIES)[number] {
+  return (MATERIAL_CATEGORIES as readonly string[]).includes(v);
+}
 
 /**
- * Parse the inventory items serialized by InventoryField (a JSON array in the
- * hidden `items` input). Returns the typed list, or `null` when the payload is
- * malformed (tampered) so the action can surface a validation error. An absent
- * or empty list yields `[]` (inventory is optional).
+ * Parse the inventory supply lines serialized by InventoryField (a JSON array
+ * in the hidden `items` input). Returns the typed list, or `null` when the
+ * payload is malformed (tampered) so the action can surface a validation error.
+ * An absent or empty list yields `[]` (inventory is optional).
  */
-function parseItems(raw: FormDataEntryValue | null): ResourceItem[] | null {
+function parseItems(raw: FormDataEntryValue | null): SupplyLine[] | null {
   if (typeof raw !== 'string' || raw.trim() === '') return [];
   let parsed: unknown;
   try {
@@ -26,7 +34,7 @@ function parseItems(raw: FormDataEntryValue | null): ResourceItem[] | null {
   }
   if (!Array.isArray(parsed)) return null;
 
-  const items: ResourceItem[] = [];
+  const items: SupplyLine[] = [];
   for (const entry of parsed) {
     if (typeof entry !== 'object' || entry === null) return null;
     const { name, quantity, unit, category } = entry as Record<string, unknown>;
@@ -38,11 +46,13 @@ function parseItems(raw: FormDataEntryValue | null): ResourceItem[] | null {
     ) {
       return null;
     }
-    if (typeof category !== 'string' || category.trim() === '') return null;
+    if (typeof category !== 'string' || !isMaterialCategory(category)) {
+      return null;
+    }
     items.push({
       name: name.trim(),
       quantity,
-      category: category.trim(),
+      category,
       ...(typeof unit === 'string' && unit.trim() !== ''
         ? { unit: unit.trim() }
         : {}),

@@ -1907,9 +1907,10 @@
             "description": "Filter by item category (needs with at least one item of this category)",
             "schema": {
               "enum": [
-                "hygiene",
-                "water",
                 "food",
+                "water",
+                "hygiene",
+                "clothing",
                 "medical",
                 "shelter",
                 "tools",
@@ -2164,9 +2165,10 @@
             "description": "Filter by item category (needs with at least one item of this category)",
             "schema": {
               "enum": [
-                "hygiene",
-                "water",
                 "food",
+                "water",
+                "hygiene",
+                "clothing",
                 "medical",
                 "shelter",
                 "tools",
@@ -5391,13 +5393,13 @@
           "longitude"
         ]
       },
-      "ResourceItemDto": {
+      "SupplyLineDto": {
         "type": "object",
         "properties": {
           "name": {
             "type": "string",
             "example": "Agua embotellada",
-            "description": "Name of the material/product held at this place"
+            "description": "Name of the supply / material held at this place"
           },
           "quantity": {
             "type": "number",
@@ -5411,8 +5413,26 @@
           },
           "category": {
             "type": "string",
-            "example": "water",
-            "description": "Category slug (same taxonomy as `accepts`)"
+            "enum": [
+              "food",
+              "water",
+              "hygiene",
+              "clothing",
+              "medical",
+              "shelter",
+              "tools",
+              "other",
+              "medicines",
+              "medical_equipment",
+              "medical_supplies",
+              "medical_personnel"
+            ],
+            "example": "water"
+          },
+          "presentation": {
+            "type": "string",
+            "example": "ampolla",
+            "description": "Presentation / route of administration (health vertical): ampolla, EV, inhalador… Optional, free-form."
           }
         },
         "required": [
@@ -5517,10 +5537,10 @@
             "description": "Recipient type slug (see the emergency recipient-type taxonomy)"
           },
           "items": {
-            "description": "Declared inventory: what material/products this place holds for delivery (optional)",
+            "description": "Declared inventory: the supply lines this place holds for delivery (optional)",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ResourceItemDto"
+              "$ref": "#/components/schemas/SupplyLineDto"
             }
           }
         },
@@ -5977,7 +5997,7 @@
           "total"
         ]
       },
-      "ResourceItemViewDto": {
+      "SupplyLineViewDto": {
         "type": "object",
         "properties": {
           "name": {
@@ -5996,13 +6016,19 @@
           "category": {
             "type": "string",
             "example": "water"
+          },
+          "presentation": {
+            "type": "string",
+            "example": "ampolla",
+            "nullable": true
           }
         },
         "required": [
           "name",
           "quantity",
           "unit",
-          "category"
+          "category",
+          "presentation"
         ]
       },
       "ResourceDetailViewDto": {
@@ -6133,7 +6159,7 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ResourceItemViewDto"
+              "$ref": "#/components/schemas/SupplyLineViewDto"
             }
           }
         },
@@ -6544,9 +6570,10 @@
           "category": {
             "type": "string",
             "enum": [
-              "hygiene",
-              "water",
               "food",
+              "water",
+              "hygiene",
+              "clothing",
               "medical",
               "shelter",
               "tools",
@@ -6705,9 +6732,10 @@
           "category": {
             "type": "string",
             "enum": [
-              "hygiene",
-              "water",
               "food",
+              "water",
+              "hygiene",
+              "clothing",
               "medical",
               "shelter",
               "tools",
@@ -7509,9 +7537,10 @@
           "category": {
             "type": "string",
             "enum": [
-              "hygiene",
-              "water",
               "food",
+              "water",
+              "hygiene",
+              "clothing",
               "medical",
               "shelter",
               "tools",
@@ -7622,9 +7651,10 @@
           "category": {
             "type": "string",
             "enum": [
-              "hygiene",
-              "water",
               "food",
+              "water",
+              "hygiene",
+              "clothing",
               "medical",
               "shelter",
               "tools",

@@ -1,4 +1,8 @@
 export { Priority } from '../../../shared/domain/priority';
+// NeedCategory is the Category taxonomy owned by the supplies context — kept
+// under its local name so the needs context keeps reading `NeedCategory`, but
+// there is a single definition (supplies/domain/category) reused everywhere.
+export { Category as NeedCategory } from '../../supplies/domain/category';
 
 /**
  * PersonnelSkill mirrors VolunteerSkill values WITHOUT importing from the
@@ -13,21 +17,6 @@ export enum PersonnelSkill {
   Languages = 'languages',
   Admin = 'admin',
   General = 'general',
-}
-
-export enum NeedCategory {
-  Hygiene = 'hygiene',
-  Water = 'water',
-  Food = 'food',
-  Medical = 'medical',
-  Shelter = 'shelter',
-  Tools = 'tools',
-  Other = 'other',
-  // Health vertical (F04)
-  Medicines = 'medicines',
-  MedicalEquipment = 'medical_equipment',
-  MedicalSupplies = 'medical_supplies',
-  MedicalPersonnel = 'medical_personnel',
 }
 
 export enum NeedStatus {

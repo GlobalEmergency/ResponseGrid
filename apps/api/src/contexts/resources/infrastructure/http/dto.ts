@@ -17,6 +17,7 @@ import {
 import { Type, Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ResourceType, ResourceStage } from '../../domain/resource-enums';
+import { Category } from '../../../supplies/domain/category';
 
 export class LocationDto {
   @ApiProperty({ example: 'Calle Mayor 1, Valencia' })
@@ -40,10 +41,14 @@ export class LocationDto {
   longitude!: number;
 }
 
-export class ResourceItemDto {
+/**
+ * A SupplyLine (línea de insumo): a quantity of a material in a category/unit.
+ * Same shape used across the platform (needs, offers, inventory).
+ */
+export class SupplyLineDto {
   @ApiProperty({
     example: 'Agua embotellada',
-    description: 'Name of the material/product held at this place',
+    description: 'Name of the supply / material held at this place',
   })
   @IsString()
   @IsNotEmpty()
@@ -65,13 +70,18 @@ export class ResourceItemDto {
   @IsString()
   unit?: string;
 
-  @ApiProperty({
-    example: 'water',
-    description: 'Category slug (same taxonomy as `accepts`)',
+  @ApiProperty({ enum: Category, example: Category.Water })
+  @IsEnum(Category)
+  category!: Category;
+
+  @ApiPropertyOptional({
+    example: 'ampolla',
+    description:
+      'Presentation / route of administration (health vertical): ampolla, EV, inhalador… Optional, free-form.',
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  category!: string;
+  presentation?: string;
 }
 
 export class RegisterResourceDto {
@@ -180,15 +190,15 @@ export class RegisterResourceDto {
   recipientType?: string;
 
   @ApiPropertyOptional({
-    type: [ResourceItemDto],
+    type: [SupplyLineDto],
     description:
-      'Declared inventory: what material/products this place holds for delivery (optional)',
+      'Declared inventory: the supply lines this place holds for delivery (optional)',
   })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => ResourceItemDto)
-  items?: ResourceItemDto[];
+  @Type(() => SupplyLineDto)
+  items?: SupplyLineDto[];
 }
 
 /**

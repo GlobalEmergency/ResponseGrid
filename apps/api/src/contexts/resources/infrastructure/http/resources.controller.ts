@@ -101,6 +101,7 @@ export class ResourcesController {
         quantity: i.quantity,
         unit: i.unit ?? null,
         category: i.category,
+        presentation: i.presentation ?? null,
       })),
     });
   }

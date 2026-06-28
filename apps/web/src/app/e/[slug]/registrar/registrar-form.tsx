@@ -26,6 +26,7 @@ interface RegistrarFormProps {
   orgSelector: ReactNode;
   t: Messages['registrar'];
   backToEmergencyLabel: string;
+  locale: 'es' | 'en';
 }
 
 export function RegistrarForm({
@@ -35,6 +36,7 @@ export function RegistrarForm({
   orgSelector,
   t,
   backToEmergencyLabel,
+  locale,
 }: RegistrarFormProps) {
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     action,
@@ -195,7 +197,7 @@ export function RegistrarForm({
       {orgSelector}
 
       {/* Inventario / material disponible (opcional) */}
-      <InventoryField t={t} />
+      <InventoryField t={t} locale={locale} />
 
       {/* Submit */}
       <Button type="submit" disabled={pending} fullWidth>

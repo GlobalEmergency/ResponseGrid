@@ -8,6 +8,7 @@ import {
   PublicStatus,
   VerificationLevel,
 } from '../domain/resource-enums';
+import { Category } from '../../supplies/domain/category';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const OTHER_EM = '22222222-2222-4222-8222-222222222222';
@@ -69,7 +70,12 @@ describe('GetPublicResource', () => {
       snapshot({
         id: ID,
         items: [
-          { name: 'Agua', quantity: 100, unit: 'litros', category: 'water' },
+          {
+            name: 'Agua',
+            quantity: 100,
+            unit: 'litros',
+            category: Category.Water,
+          },
         ],
       }),
     );
@@ -78,7 +84,13 @@ describe('GetPublicResource', () => {
     const view = await useCase.execute({ emergencyId: EM, resourceId: ID });
 
     expect(view!.items).toEqual([
-      { name: 'Agua', quantity: 100, unit: 'litros', category: 'water' },
+      {
+        name: 'Agua',
+        quantity: 100,
+        unit: 'litros',
+        category: Category.Water,
+        presentation: null,
+      },
     ]);
   });
 

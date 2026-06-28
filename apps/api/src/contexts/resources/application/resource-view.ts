@@ -6,6 +6,7 @@ import {
   PublicStatus,
 } from '../domain/resource-enums';
 import { LocationProps } from '../../../shared/domain/location';
+import { Category } from '../../supplies/domain/category';
 
 export interface ResourceView {
   id: string;
@@ -32,20 +33,21 @@ export interface ResourceView {
   recipientType: string | null;
 }
 
-export interface ResourceItemView {
+export interface SupplyLineView {
   name: string;
   quantity: number;
   unit: string | null;
-  category: string;
+  category: Category;
+  presentation: string | null;
 }
 
 /**
- * Detail view: the base view plus the declared inventory of the place. Only the
- * single-resource endpoint returns this — list/map views use the lighter
- * ResourceView (they do not render inventory).
+ * Detail view: the base view plus the declared inventory (supply lines) of the
+ * place. Only the single-resource endpoint returns this — list/map views use
+ * the lighter ResourceView (they do not render inventory).
  */
 export interface ResourceDetailView extends ResourceView {
-  items: ResourceItemView[];
+  items: SupplyLineView[];
 }
 
 export function toResourceView(r: Resource): ResourceView {
@@ -80,6 +82,7 @@ export function toResourceDetailView(r: Resource): ResourceDetailView {
       quantity: i.quantity,
       unit: i.unit,
       category: i.category,
+      presentation: i.presentation,
     })),
   };
 }

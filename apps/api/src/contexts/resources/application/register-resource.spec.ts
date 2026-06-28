@@ -7,6 +7,7 @@ import {
   ResourceStage,
   VerificationLevel,
 } from '../domain/resource-enums';
+import { Category } from '../../supplies/domain/category';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 
@@ -98,9 +99,9 @@ describe('RegisterResource', () => {
           name: 'Agua embotellada',
           quantity: 200,
           unit: 'litros',
-          category: 'water',
+          category: Category.Water,
         },
-        { name: 'Mantas', quantity: 50, category: 'shelter' },
+        { name: 'Mantas', quantity: 50, category: Category.Shelter },
       ],
     });
 

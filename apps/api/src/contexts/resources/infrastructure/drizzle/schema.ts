@@ -41,8 +41,9 @@ export const resourcesTable = pgTable('resources', {
 });
 
 // Inventario declarado de un recurso/lugar (0028_resource_inventory):
-// qué material/productos tiene para entregar, con cantidad/unidad/categoría.
-// Mismo patrón que need_items — permite el control de inventario por punto.
+// líneas de insumo (SupplyLine) — qué material/productos tiene para entregar,
+// con cantidad/unidad/categoría/presentación. Misma forma que need_items —
+// permite el control de inventario por punto.
 export const resourceItemsTable = pgTable('resource_items', {
   id: uuid('id').primaryKey(),
   resourceId: uuid('resource_id')
@@ -52,4 +53,5 @@ export const resourceItemsTable = pgTable('resource_items', {
   quantity: integer('quantity').notNull(),
   unit: text('unit'),
   category: text('category').notNull(),
+  presentation: text('presentation'),
 });

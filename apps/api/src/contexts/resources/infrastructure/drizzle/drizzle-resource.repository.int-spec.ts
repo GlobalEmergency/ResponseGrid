@@ -3,7 +3,8 @@ import { createDb, Db } from '../../../../shared/db';
 import { resourcesTable } from './schema';
 import { DrizzleResourceRepository } from './drizzle-resource.repository';
 import { Resource } from '../../domain/resource';
-import { ResourceItem } from '../../domain/resource-item';
+import { SupplyLine } from '../../../supplies/domain/supply-line';
+import { Category } from '../../../supplies/domain/category';
 import { ResourceId } from '../../domain/resource-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import {
@@ -74,17 +75,18 @@ describe('DrizzleResourceRepository (integration)', () => {
       location: baseLocation,
       ownerUserId: OWNER_ID,
       items: [
-        ResourceItem.create({
+        SupplyLine.create({
           name: 'Agua',
           quantity: 200,
           unit: 'litros',
-          category: 'water',
+          category: Category.Water,
         }),
-        ResourceItem.create({
+        SupplyLine.create({
           name: 'Mantas',
           quantity: 50,
           unit: null,
-          category: 'shelter',
+          category: Category.Shelter,
+          presentation: null,
         }),
       ],
     });
@@ -94,8 +96,20 @@ describe('DrizzleResourceRepository (integration)', () => {
     expect(found?.items).toHaveLength(2);
     expect(found?.items.map((i) => i.toSnapshot())).toEqual(
       expect.arrayContaining([
-        { name: 'Agua', quantity: 200, unit: 'litros', category: 'water' },
-        { name: 'Mantas', quantity: 50, unit: null, category: 'shelter' },
+        {
+          name: 'Agua',
+          quantity: 200,
+          unit: 'litros',
+          category: Category.Water,
+          presentation: null,
+        },
+        {
+          name: 'Mantas',
+          quantity: 50,
+          unit: null,
+          category: Category.Shelter,
+          presentation: null,
+        },
       ]),
     );
 
@@ -103,13 +117,27 @@ describe('DrizzleResourceRepository (integration)', () => {
     // not accumulated.
     const reSaved = Resource.fromSnapshot({
       ...found!.toSnapshot(),
-      items: [{ name: 'Arroz', quantity: 30, unit: 'kg', category: 'food' }],
+      items: [
+        {
+          name: 'Arroz',
+          quantity: 30,
+          unit: 'kg',
+          category: Category.Food,
+          presentation: null,
+        },
+      ],
     });
     await repo.save(reSaved);
 
     const reFound = await repo.findById(id);
     expect(reFound?.items.map((i) => i.toSnapshot())).toEqual([
-      { name: 'Arroz', quantity: 30, unit: 'kg', category: 'food' },
+      {
+        name: 'Arroz',
+        quantity: 30,
+        unit: 'kg',
+        category: Category.Food,
+        presentation: null,
+      },
     ]);
   });
 

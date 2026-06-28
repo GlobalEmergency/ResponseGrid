@@ -1,5 +1,6 @@
 import { Resource } from './resource';
-import { ResourceItem } from './resource-item';
+import { SupplyLine } from '../../supplies/domain/supply-line';
+import { Category } from '../../supplies/domain/category';
 import { ResourceId } from './resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import {
@@ -60,11 +61,11 @@ describe('Resource', () => {
       location: makeLocation(),
       ownerUserId: 'user-abc-123',
       items: [
-        ResourceItem.create({
+        SupplyLine.create({
           name: 'Agua',
           quantity: 100,
           unit: 'litros',
-          category: 'water',
+          category: Category.Water,
         }),
       ],
     });
@@ -75,7 +76,8 @@ describe('Resource', () => {
       name: 'Agua',
       quantity: 100,
       unit: 'litros',
-      category: 'water',
+      category: Category.Water,
+      presentation: null,
     });
   });
 

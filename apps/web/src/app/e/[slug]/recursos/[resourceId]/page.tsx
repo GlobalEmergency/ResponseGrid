@@ -93,6 +93,7 @@ export default async function RecipientResourcePage({ params }: Props) {
                       <span className="text-xs text-muted">
                         {item.quantity}
                         {item.unit ? ` ${item.unit}` : ''}
+                        {item.presentation ? ` · ${item.presentation}` : ''}
                       </span>
                     </div>
                     <span

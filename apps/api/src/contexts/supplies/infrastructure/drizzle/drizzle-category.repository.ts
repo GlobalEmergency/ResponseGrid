@@ -3,6 +3,7 @@ import { Db } from '../../../../shared/db';
 import { categoriesTable, categoryAliasesTable } from './schema';
 import { CategoryRepository } from '../../domain/ports/category.repository';
 import { Category } from '../../domain/category';
+import { CategoryDefinition } from '../../domain/category-definition';
 
 export class DrizzleCategoryRepository implements CategoryRepository {
   constructor(private readonly db: Db) {}
@@ -12,16 +13,16 @@ export class DrizzleCategoryRepository implements CategoryRepository {
     return new Map(rows.map((r) => [r.aliasNorm, r.categorySlug]));
   }
 
-  async listCategories(): Promise<Category[]> {
+  async listCategories(): Promise<CategoryDefinition[]> {
     const rows = await this.db
       .select()
       .from(categoriesTable)
       .orderBy(asc(categoriesTable.sort));
     return rows.map((r) => ({
-      slug: r.slug,
+      slug: r.slug as Category,
       labelEs: r.labelEs,
       labelEn: r.labelEn,
-      parentSlug: r.parentSlug ?? null,
+      parentSlug: (r.parentSlug ?? null) as Category | null,
       vertical: r.vertical,
       sort: r.sort,
     }));

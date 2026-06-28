@@ -439,14 +439,6 @@ export const en = {
     item_unit_placeholder: 'boxes, liters…',
     item_category_label: 'Category',
 
-    category_food: 'Food',
-    category_water: 'Water',
-    category_hygiene: 'Hygiene',
-    category_medical: 'Medical',
-    category_shelter: 'Shelter',
-    category_tools: 'Tools',
-    category_other: 'Other',
-
     // server-action messages
     err_invalid_type: 'Invalid resource type.',
     err_invalid_stage: 'Invalid stage.',

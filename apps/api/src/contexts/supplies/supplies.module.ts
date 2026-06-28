@@ -13,9 +13,14 @@ const categoryRepositoryProvider = {
   useFactory: (db: Db): CategoryRepository => new DrizzleCategoryRepository(db),
 };
 
+/**
+ * Supplies — the supplies/insumos domain. Owns the category taxonomy and the
+ * supply catalog; provides the SupplyLine value object reused by needs, offers
+ * and resources (inventory). Absorbs the former taxonomy context.
+ */
 @Module({
   imports: [DatabaseModule],
   providers: [categoryRepositoryProvider],
   exports: [CATEGORY_REPOSITORY],
 })
-export class TaxonomyModule {}
+export class SuppliesModule {}

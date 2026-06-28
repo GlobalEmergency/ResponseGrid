@@ -4,7 +4,8 @@ import { Db } from '../../../../shared/db';
 import { resourcesTable, resourceItemsTable } from './schema';
 import { ResourceRepository } from '../../domain/ports/resource.repository';
 import { Resource, ResourceSnapshot, Provenance } from '../../domain/resource';
-import { ResourceItemSnapshot } from '../../domain/resource-item';
+import { SupplyLineSnapshot } from '../../../supplies/domain/supply-line';
+import { Category } from '../../../supplies/domain/category';
 import { ResourceId } from '../../domain/resource-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import {
@@ -17,12 +18,13 @@ import {
 type Row = typeof resourcesTable.$inferSelect;
 type ItemsRow = typeof resourceItemsTable.$inferSelect;
 
-function itemsToSnapshots(items: ItemsRow[]): ResourceItemSnapshot[] {
+function itemsToSnapshots(items: ItemsRow[]): SupplyLineSnapshot[] {
   return items.map((i) => ({
     name: i.name,
     quantity: i.quantity,
     unit: i.unit ?? null,
-    category: i.category,
+    category: i.category as Category,
+    presentation: i.presentation ?? null,
   }));
 }
 
@@ -283,6 +285,7 @@ export class DrizzleResourceRepository implements ResourceRepository {
             quantity: item.quantity,
             unit: item.unit,
             category: item.category,
+            presentation: item.presentation ?? null,
           })),
         );
       }

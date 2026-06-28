@@ -1707,9 +1707,9 @@ export interface components {
              */
             longitude: number;
         };
-        ResourceItemDto: {
+        SupplyLineDto: {
             /**
-             * @description Name of the material/product held at this place
+             * @description Name of the supply / material held at this place
              * @example Agua embotellada
              */
             name: string;
@@ -1724,10 +1724,15 @@ export interface components {
              */
             unit?: string;
             /**
-             * @description Category slug (same taxonomy as `accepts`)
              * @example water
+             * @enum {string}
              */
-            category: string;
+            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+            /**
+             * @description Presentation / route of administration (health vertical): ampolla, EV, inhalador… Optional, free-form.
+             * @example ampolla
+             */
+            presentation?: string;
         };
         RegisterResourceDto: {
             /**
@@ -1796,8 +1801,8 @@ export interface components {
              * @example hospital
              */
             recipientType?: string;
-            /** @description Declared inventory: what material/products this place holds for delivery (optional) */
-            items?: components["schemas"]["ResourceItemDto"][];
+            /** @description Declared inventory: the supply lines this place holds for delivery (optional) */
+            items?: components["schemas"]["SupplyLineDto"][];
         };
         RegisterResourceResponseDto: {
             /**
@@ -2004,7 +2009,7 @@ export interface components {
             /** @example 8 */
             total: number;
         };
-        ResourceItemViewDto: {
+        SupplyLineViewDto: {
             /** @example Agua embotellada */
             name: string;
             /** @example 100 */
@@ -2013,6 +2018,8 @@ export interface components {
             unit: string | null;
             /** @example water */
             category: string;
+            /** @example ampolla */
+            presentation: string | null;
         };
         ResourceDetailViewDto: {
             /**
@@ -2084,7 +2091,7 @@ export interface components {
              * @example hospital
              */
             recipientType: string | null;
-            items: components["schemas"]["ResourceItemViewDto"][];
+            items: components["schemas"]["SupplyLineViewDto"][];
         };
         RecipientTypeDto: {
             /** @example hospital */
@@ -2271,7 +2278,7 @@ export interface components {
              * @example water
              * @enum {string}
              */
-            category: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
             /**
              * @description Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe, oxígeno… Optional, free-form (#61).
              * @example ampolla
@@ -2346,7 +2353,7 @@ export interface components {
              * @example water
              * @enum {string}
              */
-            category: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
             /**
              * @description Presentation / route of administration (ampolla, EV, inhalador…) — #61.
              * @example ampolla
@@ -2703,7 +2710,7 @@ export interface components {
              * @example food
              * @enum {string}
              */
-            category: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
             /**
              * @description Description of the item being offered
              * @example Rice bags 25kg
@@ -2764,7 +2771,7 @@ export interface components {
              * @example food
              * @enum {string}
              */
-            category: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
             /** @example Rice bags 25kg */
             description: string;
             /** @example 50 */
@@ -4657,7 +4664,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filter by item category (needs with at least one item of this category) */
-                category?: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+                category?: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
                 /** @description Filter by need priority */
                 priority?: "low" | "medium" | "high" | "urgent";
                 /** @description Filter to needs linked to this resource / final recipient */
@@ -4757,7 +4764,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filter by item category (needs with at least one item of this category) */
-                category?: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+                category?: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
                 /** @description Filter by need priority */
                 priority?: "low" | "medium" | "high" | "urgent";
             };

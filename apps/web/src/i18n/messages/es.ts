@@ -460,14 +460,6 @@ export const es = {
     item_unit_placeholder: 'cajas, litros…',
     item_category_label: 'Categoría',
 
-    category_food: 'Alimentos',
-    category_water: 'Agua',
-    category_hygiene: 'Higiene',
-    category_medical: 'Sanitario',
-    category_shelter: 'Refugio',
-    category_tools: 'Herramientas',
-    category_other: 'Otro',
-
     // server-action messages
     err_invalid_type: 'Tipo de recurso no válido.',
     err_invalid_stage: 'Etapa no válida.',

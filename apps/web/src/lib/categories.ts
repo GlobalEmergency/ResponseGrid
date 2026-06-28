@@ -79,6 +79,26 @@ const CATEGORY_MAP: Record<string, CategoryMeta> = {
 const FALLBACK: CategoryMeta = CATEGORY_MAP['other']!;
 
 /**
+ * Ordered list of material category slugs, the single source for supply
+ * pickers (needs, offers, inventory). Mirrors the canonical `Category`
+ * taxonomy of the API's supplies context; excludes `medical_personnel`
+ * (personnel, not material).
+ */
+export const MATERIAL_CATEGORIES = [
+  'food',
+  'water',
+  'hygiene',
+  'clothing',
+  'shelter',
+  'medical',
+  'medicines',
+  'medical_equipment',
+  'medical_supplies',
+  'tools',
+  'other',
+] as const;
+
+/**
  * Returns the human-readable label for a category slug in the given locale.
  * Falls back to the slug itself if the slug is unknown.
  */

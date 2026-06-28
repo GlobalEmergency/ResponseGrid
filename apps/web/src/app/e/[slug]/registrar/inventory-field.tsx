@@ -2,52 +2,48 @@
 
 import { useState } from 'react';
 import type { Messages } from '@/i18n/messages/es';
-
-type Category =
-  | 'food'
-  | 'water'
-  | 'hygiene'
-  | 'medical'
-  | 'shelter'
-  | 'tools'
-  | 'other';
+import { MATERIAL_CATEGORIES, categoryLabel } from '@/lib/categories';
 
 interface Item {
   id: number;
   name: string;
   quantity: number;
   unit: string;
-  category: Category;
+  category: string;
 }
 
 let nextId = 1;
 
 function makeItem(): Item {
-  return { id: nextId++, name: '', quantity: 1, unit: '', category: 'food' };
+  return {
+    id: nextId++,
+    name: '',
+    quantity: 1,
+    unit: '',
+    category: MATERIAL_CATEGORIES[0],
+  };
 }
 
 interface InventoryFieldProps {
   t: Messages['registrar'];
+  locale: 'es' | 'en';
 }
 
 /**
- * Optional declared inventory for the place being registered (qué material
- * tiene para entregar). Mirrors the petición ItemsField but the list starts
- * empty — a point can be registered with no declared stock. Serializes the
- * filled rows (non-empty name) to a hidden `items` input as JSON.
+ * Optional declared inventory (supply lines) for the place being registered:
+ * qué material/insumos tiene para entregar. Mirrors the petición items field
+ * but the list starts empty — a point can be registered with no declared stock.
+ * Category options come from the single canonical source (lib/categories), so
+ * needs, offers and inventory stay consistent. Serializes the filled rows
+ * (non-empty name) to a hidden `items` input as JSON.
  */
-export function InventoryField({ t }: InventoryFieldProps) {
+export function InventoryField({ t, locale }: InventoryFieldProps) {
   const [items, setItems] = useState<Item[]>([]);
 
-  const categories = [
-    { value: 'food' as Category, label: t.category_food },
-    { value: 'water' as Category, label: t.category_water },
-    { value: 'hygiene' as Category, label: t.category_hygiene },
-    { value: 'medical' as Category, label: t.category_medical },
-    { value: 'shelter' as Category, label: t.category_shelter },
-    { value: 'tools' as Category, label: t.category_tools },
-    { value: 'other' as Category, label: t.category_other },
-  ];
+  const categories = MATERIAL_CATEGORIES.map((slug) => ({
+    value: slug,
+    label: categoryLabel(slug, locale),
+  }));
 
   // Serialize only rows that have a name — empty rows are ignored so the field
   // stays optional and never blocks the submit.
@@ -118,7 +114,7 @@ export function InventoryField({ t }: InventoryFieldProps) {
               </button>
             </div>
 
-            {/* Nombre del material */}
+            {/* Nombre del material / insumo */}
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor={`inv-name-${item.id}`}
@@ -194,7 +190,7 @@ export function InventoryField({ t }: InventoryFieldProps) {
                 id={`inv-cat-${item.id}`}
                 value={item.category}
                 onChange={(e) =>
-                  updateItem(item.id, { category: e.target.value as Category })
+                  updateItem(item.id, { category: e.target.value })
                 }
                 className="w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
               >
