@@ -521,6 +521,47 @@ describe('DrizzleResourceRepository (integration)', () => {
       expect(total).toBe(5);
     });
 
+    it('excludes active-but-unverified (ingested) points — #94', async () => {
+      const verified = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'Verified',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+      // Active yet Unverified, exactly as the external ingest writes it.
+      const unverified = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'Ingested Unverified',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Unverified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+      await repo.save(verified);
+      await repo.save(unverified);
+
+      const { items, total } = await repo.findVisiblePaged(
+        EmergencyId.fromString(EM),
+        { page: 1, limit: 10 },
+      );
+      expect(total).toBe(1);
+      expect(items.map((r) => r.name)).toEqual(['Verified']);
+    });
+
     it('filters by category (accepts @> ARRAY[category])', async () => {
       const withWater = Resource.fromSnapshot({
         ...Resource.register({
@@ -789,6 +830,53 @@ describe('DrizzleResourceRepository (integration)', () => {
       expect(byCategory['water']).not.toBe(3); // R3 excluded
       expect(byCountry['VE']).toBe(1); // R1
       expect(byCountry['CO']).toBe(1); // R2
+    });
+
+    it('does not count active-but-unverified (ingested) points — #94', async () => {
+      const verified = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'Verified',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+          accepts: ['water'],
+          country: 'VE',
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+      const unverified = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'Ingested Unverified',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+          accepts: ['clothing'],
+          country: 'CO',
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Unverified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+      await repo.save(verified);
+      await repo.save(unverified);
+
+      const { byCategory, byCountry, total } = await repo.facets(
+        EmergencyId.fromString(EM),
+      );
+
+      expect(total).toBe(1);
+      expect(byCategory['water']).toBe(1);
+      expect(byCategory['clothing']).toBeUndefined();
+      expect(byCountry['VE']).toBe(1);
+      expect(byCountry['CO']).toBeUndefined();
     });
   });
 

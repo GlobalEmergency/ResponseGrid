@@ -14,6 +14,24 @@ import {
 
 type Row = typeof resourcesTable.$inferSelect;
 
+/** Operational statuses a resource must be in to appear in any public read. */
+const PUBLICLY_VISIBLE_STATUSES = [
+  PublicStatus.Active,
+  PublicStatus.Saturated,
+  PublicStatus.Paused,
+];
+
+/**
+ * Trust levels the public API is allowed to expose. The public read API is the
+ * product's "source of truth", so it must never surface `unverified` points —
+ * only `verified`/`official` ones (issue #94). Applied to every public read
+ * path (paged list, facets, nearby, in-bounds and single-resource lookup).
+ */
+const PUBLICLY_VISIBLE_VERIFICATION = [
+  VerificationLevel.Verified,
+  VerificationLevel.Official,
+];
+
 /**
  * Raw snake_case row returned by db.execute() (no Drizzle camelCase mapping).
  * NOTE: the `pg` driver returns timestamptz columns as strings and
@@ -316,16 +334,12 @@ export class DrizzleResourceRepository implements ResourceRepository {
       q?: string;
     },
   ): Promise<{ items: Resource[]; total: number }> {
-    const VISIBLE = [
-      PublicStatus.Active,
-      PublicStatus.Saturated,
-      PublicStatus.Paused,
-    ];
     const offset = (q.page - 1) * q.limit;
 
     const conditions = [
       eq(resourcesTable.emergencyId, emergencyId.value),
-      inArray(resourcesTable.publicStatus, VISIBLE),
+      inArray(resourcesTable.publicStatus, PUBLICLY_VISIBLE_STATUSES),
+      inArray(resourcesTable.verificationLevel, PUBLICLY_VISIBLE_VERIFICATION),
     ];
 
     if (q.category) {
@@ -369,18 +383,18 @@ export class DrizzleResourceRepository implements ResourceRepository {
     byCountry: Record<string, number>;
     total: number;
   }> {
-    const VISIBLE = [
-      PublicStatus.Active,
-      PublicStatus.Saturated,
-      PublicStatus.Paused,
-    ];
     const visibleWhere = and(
       eq(resourcesTable.emergencyId, emergencyId.value),
-      inArray(resourcesTable.publicStatus, VISIBLE),
+      inArray(resourcesTable.publicStatus, PUBLICLY_VISIBLE_STATUSES),
+      inArray(resourcesTable.verificationLevel, PUBLICLY_VISIBLE_VERIFICATION),
     );
 
     const visibleArr = sql.join(
-      VISIBLE.map((v) => sql`${v}`),
+      PUBLICLY_VISIBLE_STATUSES.map((v) => sql`${v}`),
+      sql`, `,
+    );
+    const verifiedArr = sql.join(
+      PUBLICLY_VISIBLE_VERIFICATION.map((v) => sql`${v}`),
       sql`, `,
     );
     const [totalRows, categoryRows, countryRows] = await Promise.all([
@@ -390,6 +404,7 @@ export class DrizzleResourceRepository implements ResourceRepository {
         FROM resources
         WHERE emergency_id = ${emergencyId.value}
           AND public_status = ANY(ARRAY[${visibleArr}])
+          AND verification_level = ANY(ARRAY[${verifiedArr}])
         GROUP BY cat
       `),
       this.db.execute<{ country: string; cnt: string }>(sql`
@@ -397,6 +412,7 @@ export class DrizzleResourceRepository implements ResourceRepository {
         FROM resources
         WHERE emergency_id = ${emergencyId.value}
           AND public_status = ANY(ARRAY[${visibleArr}])
+          AND verification_level = ANY(ARRAY[${verifiedArr}])
           AND country IS NOT NULL
         GROUP BY country
       `),
@@ -423,13 +439,12 @@ export class DrizzleResourceRepository implements ResourceRepository {
     emergencyId: EmergencyId,
     q: { lat: number; lng: number; radiusMeters: number; limit: number },
   ): Promise<Array<{ resource: Resource; distanceMeters: number }>> {
-    const VISIBLE = [
-      PublicStatus.Active,
-      PublicStatus.Saturated,
-      PublicStatus.Paused,
-    ];
     const visibleArr = sql.join(
-      VISIBLE.map((v) => sql`${v}`),
+      PUBLICLY_VISIBLE_STATUSES.map((v) => sql`${v}`),
+      sql`, `,
+    );
+    const verifiedArr = sql.join(
+      PUBLICLY_VISIBLE_VERIFICATION.map((v) => sql`${v}`),
       sql`, `,
     );
 
@@ -440,6 +455,7 @@ export class DrizzleResourceRepository implements ResourceRepository {
       FROM resources
       WHERE emergency_id = ${emergencyId.value}
         AND public_status = ANY(ARRAY[${visibleArr}])
+        AND verification_level = ANY(ARRAY[${verifiedArr}])
         AND earth_box(ll_to_earth(${q.lat}, ${q.lng}), ${q.radiusMeters}) @> ll_to_earth(latitude, longitude)
         AND earth_distance(ll_to_earth(${q.lat}, ${q.lng}), ll_to_earth(latitude, longitude)) <= ${q.radiusMeters}
       ORDER BY dist ASC
@@ -462,18 +478,17 @@ export class DrizzleResourceRepository implements ResourceRepository {
       limit: number;
     },
   ): Promise<Resource[]> {
-    const VISIBLE = [
-      PublicStatus.Active,
-      PublicStatus.Saturated,
-      PublicStatus.Paused,
-    ];
     const rows = await this.db
       .select()
       .from(resourcesTable)
       .where(
         and(
           eq(resourcesTable.emergencyId, emergencyId.value),
-          inArray(resourcesTable.publicStatus, VISIBLE),
+          inArray(resourcesTable.publicStatus, PUBLICLY_VISIBLE_STATUSES),
+          inArray(
+            resourcesTable.verificationLevel,
+            PUBLICLY_VISIBLE_VERIFICATION,
+          ),
           between(resourcesTable.latitude, q.minLat, q.maxLat),
           between(resourcesTable.longitude, q.minLng, q.maxLng),
         ),
