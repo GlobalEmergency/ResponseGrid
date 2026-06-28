@@ -415,6 +415,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/recipient-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the recipient-type taxonomy for final recipients (extensible) */
+        get: operations["RecipientTypesController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/templates": {
         parameters: {
             query?: never;
@@ -1641,6 +1658,16 @@ export interface components {
              * @example Caracas
              */
             city?: string;
+            /**
+             * @description Mark this resource as a final recipient of aid (requires the destination stage)
+             * @example true
+             */
+            isFinalRecipient?: boolean;
+            /**
+             * @description Recipient type slug (see the emergency recipient-type taxonomy)
+             * @example hospital
+             */
+            recipientType?: string;
         };
         RegisterResourceResponseDto: {
             /**
@@ -1726,6 +1753,16 @@ export interface components {
             country: string | null;
             /** @example Caracas */
             city: string | null;
+            /**
+             * @description Whether this resource is a final recipient of aid
+             * @example false
+             */
+            isFinalRecipient: boolean;
+            /**
+             * @description Recipient type slug (see the emergency recipient-type taxonomy)
+             * @example hospital
+             */
+            recipientType: string | null;
         };
         PagedResourcesDto: {
             items: components["schemas"]["ResourceViewDto"][];
@@ -1797,6 +1834,16 @@ export interface components {
             /** @example Caracas */
             city: string | null;
             /**
+             * @description Whether this resource is a final recipient of aid
+             * @example false
+             */
+            isFinalRecipient: boolean;
+            /**
+             * @description Recipient type slug (see the emergency recipient-type taxonomy)
+             * @example hospital
+             */
+            recipientType: string | null;
+            /**
              * @description Distance from query point in meters (rounded)
              * @example 1234
              */
@@ -1826,6 +1873,16 @@ export interface components {
             byCountry: Record<string, never>;
             /** @example 8 */
             total: number;
+        };
+        RecipientTypeDto: {
+            /** @example hospital */
+            slug: string;
+            /** @example Hospital */
+            labelEs: string;
+            /** @example Hospital */
+            labelEn: string;
+            /** @example 10 */
+            sort: number;
         };
         CreateTemplateDto: {
             /** @example Terremoto básico */
@@ -2003,6 +2060,12 @@ export interface components {
              * @example 3
              */
             requestedCount?: number | null;
+            /**
+             * Format: uuid
+             * @description Link this need to a resource / final recipient (#60). Optional.
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            resourceId?: string | null;
         };
         CreateNeedResponseDto: {
             /**
@@ -2091,6 +2154,11 @@ export interface components {
              * @example 3
              */
             requestedCount?: number | null;
+            /**
+             * Format: uuid
+             * @description Linked resource / final recipient id (#60), or null if standalone.
+             */
+            resourceId?: string | null;
         };
         AssignNeedManagerDto: {
             /**
@@ -3627,6 +3695,26 @@ export interface operations {
             };
         };
     };
+    RecipientTypesController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Recipient types ordered by sort */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecipientTypeDto"][];
+                };
+            };
+        };
+    };
     TemplatesController_list: {
         parameters: {
             query?: never;
@@ -4107,6 +4195,8 @@ export interface operations {
                 category?: "hygiene" | "water" | "food" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
                 /** @description Filter by need priority */
                 priority?: "low" | "medium" | "high" | "urgent";
+                /** @description Filter to needs linked to this resource / final recipient */
+                resourceId?: string;
             };
             header?: never;
             path: {

@@ -292,6 +292,8 @@ export const en = {
     meta_source: 'Source:',
     // aria-label for the card article element
     aria_label: 'Active point: {name}',
+    // Final recipient (#60)
+    final_recipient_label: 'Final recipient',
   },
 
   resource_list: {
