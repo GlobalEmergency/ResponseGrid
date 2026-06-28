@@ -210,19 +210,6 @@ export const es = {
     footer_report: 'Reportar',
     footer_coordination: 'Acceso de coordinación',
 
-    // Category labels
-    category_hygiene: 'Higiene',
-    category_water: 'Agua',
-    category_food: 'Alimentos',
-    category_medical: 'Sanitario',
-    category_shelter: 'Refugio',
-    category_tools: 'Herramientas',
-    category_other: 'Otro',
-    category_medicines: '💊 Medicamentos',
-    category_medical_equipment: '🩺 Equipos médicos',
-    category_medical_supplies: '📦 Insumos médicos',
-    category_medical_personnel: '🧑‍⚕️ Personal sanitario',
-
     // Priority labels
     priority_low: 'Baja',
     priority_medium: 'Media',
@@ -513,18 +500,6 @@ export const es = {
     item_unit_placeholder: 'cajas, litros…',
     item_category_label: 'Categoría',
 
-    category_hygiene: 'Higiene',
-    category_water: 'Agua',
-    category_food: 'Alimentos',
-    category_medical: 'Sanitario',
-    category_shelter: 'Refugio',
-    category_tools: 'Herramientas',
-    category_other: 'Otro',
-    category_medicines: '💊 Medicamentos',
-    category_medical_equipment: '🩺 Equipos médicos',
-    category_medical_supplies: '📦 Insumos médicos',
-    category_medical_personnel: '🧑‍⚕️ Personal sanitario',
-
     // server-action messages
     err_title_too_short: 'El título debe tener al menos 2 caracteres.',
     err_invalid_priority: 'Prioridad no válida.',
@@ -554,14 +529,6 @@ export const es = {
     notes_placeholder: 'Ej. Disponible de lunes a viernes por la mañana',
 
     select_category_placeholder: 'Selecciona una categoría…',
-
-    category_food: 'Alimentos',
-    category_water: 'Agua',
-    category_hygiene: 'Higiene',
-    category_medical: 'Sanitario',
-    category_shelter: 'Refugio',
-    category_tools: 'Herramientas',
-    category_other: 'Otro',
 
     submit: 'Donar material',
     submitting: 'Enviando…',
@@ -1456,18 +1423,6 @@ export const es = {
     optional: '(opcional)',
     priority_label: 'Prioridad',
     expired_at_label: 'Caducó',
-
-    category_hygiene: 'Higiene',
-    category_water: 'Agua',
-    category_food: 'Alimentos',
-    category_medical: 'Sanitario',
-    category_shelter: 'Refugio',
-    category_tools: 'Herramientas',
-    category_other: 'Otro',
-    category_medicines: '💊 Medicamentos',
-    category_medical_equipment: '🩺 Equipos médicos',
-    category_medical_supplies: '📦 Insumos médicos',
-    category_medical_personnel: '🧑‍⚕️ Personal sanitario',
 
     priority_low: 'Baja',
     priority_medium: 'Media',

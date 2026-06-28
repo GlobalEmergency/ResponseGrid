@@ -116,31 +116,19 @@ export class ResourceViewDto {
   recipientType!: string | null;
 }
 
-export class SupplyLineViewDto {
-  @ApiProperty({ example: 'Agua embotellada' })
-  name!: string;
-
-  @ApiProperty({ example: 100 })
-  quantity!: number;
-
-  @ApiProperty({ example: 'litros', nullable: true, type: String })
-  unit!: string | null;
-
-  @ApiProperty({ example: 'water' })
-  category!: string;
-
-  @ApiProperty({ example: 'ampolla', nullable: true, type: String })
-  presentation!: string | null;
-}
-
 /**
- * Detail view returned by the single-resource endpoint: the base view plus the
- * declared inventory (supply lines) of the place. List/map endpoints return
- * ResourceViewDto (no inventory).
+ * Detail view returned by the single-resource endpoint: the base view plus an
+ * AGGREGATED inventory — only the distinct categories the place holds, never
+ * names or quantities (privacy: the endpoint is public/anonymous; see
+ * ResourceDetailView). List/map endpoints return ResourceViewDto.
  */
 export class ResourceDetailViewDto extends ResourceViewDto {
-  @ApiProperty({ type: [SupplyLineViewDto] })
-  items!: SupplyLineViewDto[];
+  @ApiProperty({
+    type: [String],
+    example: ['water', 'hygiene'],
+    description: 'Distinct categories of material this place has declared',
+  })
+  inventoryCategories!: string[];
 }
 
 export class NearbyResourceViewDto extends ResourceViewDto {

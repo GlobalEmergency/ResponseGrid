@@ -65,7 +65,7 @@ describe('GetPublicResource', () => {
     expect(view!.recipientType).toBe('hospital');
   });
 
-  it('exposes the declared inventory items in the detail view', async () => {
+  it('aggregates the declared inventory to distinct categories (no names/quantities)', async () => {
     const resource = Resource.fromSnapshot(
       snapshot({
         id: ID,
@@ -76,6 +76,19 @@ describe('GetPublicResource', () => {
             unit: 'litros',
             category: Category.Water,
           },
+          // Same category as above → must be deduplicated.
+          {
+            name: 'Botellas',
+            quantity: 50,
+            unit: null,
+            category: Category.Water,
+          },
+          {
+            name: 'Mantas',
+            quantity: 5,
+            unit: null,
+            category: Category.Shelter,
+          },
         ],
       }),
     );
@@ -83,15 +96,13 @@ describe('GetPublicResource', () => {
 
     const view = await useCase.execute({ emergencyId: EM, resourceId: ID });
 
-    expect(view!.items).toEqual([
-      {
-        name: 'Agua',
-        quantity: 100,
-        unit: 'litros',
-        category: Category.Water,
-        presentation: null,
-      },
+    // Privacy: only the distinct categories are exposed — never names/quantities.
+    expect(view!.inventoryCategories).toEqual([
+      Category.Water,
+      Category.Shelter,
     ]);
+    expect(JSON.stringify(view)).not.toContain('Botellas');
+    expect(JSON.stringify(view)).not.toContain('100');
   });
 
   it('returns null when the resource does not exist', async () => {

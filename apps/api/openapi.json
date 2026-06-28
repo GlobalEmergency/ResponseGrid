@@ -5997,40 +5997,6 @@
           "total"
         ]
       },
-      "SupplyLineViewDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "example": "Agua embotellada"
-          },
-          "quantity": {
-            "type": "number",
-            "example": 100
-          },
-          "unit": {
-            "type": "string",
-            "example": "litros",
-            "nullable": true
-          },
-          "category": {
-            "type": "string",
-            "example": "water"
-          },
-          "presentation": {
-            "type": "string",
-            "example": "ampolla",
-            "nullable": true
-          }
-        },
-        "required": [
-          "name",
-          "quantity",
-          "unit",
-          "category",
-          "presentation"
-        ]
-      },
       "ResourceDetailViewDto": {
         "type": "object",
         "properties": {
@@ -6156,10 +6122,15 @@
             "nullable": true,
             "description": "Recipient type slug (see the emergency recipient-type taxonomy)"
           },
-          "items": {
+          "inventoryCategories": {
+            "example": [
+              "water",
+              "hygiene"
+            ],
+            "description": "Distinct categories of material this place has declared",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/SupplyLineViewDto"
+              "type": "string"
             }
           }
         },
@@ -6183,7 +6154,7 @@
           "city",
           "isFinalRecipient",
           "recipientType",
-          "items"
+          "inventoryCategories"
         ]
       },
       "RecipientTypeDto": {

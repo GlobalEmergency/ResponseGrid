@@ -33,21 +33,19 @@ export interface ResourceView {
   recipientType: string | null;
 }
 
-export interface SupplyLineView {
-  name: string;
-  quantity: number;
-  unit: string | null;
-  category: Category;
-  presentation: string | null;
-}
-
 /**
- * Detail view: the base view plus the declared inventory (supply lines) of the
- * place. Only the single-resource endpoint returns this — list/map views use
- * the lighter ResourceView (they do not render inventory).
+ * Detail view: the base view plus an AGGREGATED view of the place's declared
+ * inventory — only the distinct categories present, never names/quantities.
+ *
+ * Privacy: the public detail endpoint is anonymous, so it must not broadcast a
+ * place's exact stock (quantities + product names) next to its exact address —
+ * that turns a warehouse/recipient into a theft/looting target in an emergency
+ * (cf. F09 location privacy). Coordination tooling can surface the full
+ * SupplyLine detail later, behind permissions. Only the single-resource
+ * endpoint returns this; list/map views use the lighter ResourceView.
  */
 export interface ResourceDetailView extends ResourceView {
-  items: SupplyLineView[];
+  inventoryCategories: Category[];
 }
 
 export function toResourceView(r: Resource): ResourceView {
@@ -75,14 +73,10 @@ export function toResourceView(r: Resource): ResourceView {
 }
 
 export function toResourceDetailView(r: Resource): ResourceDetailView {
+  // Aggregate to the distinct categories present (deduplicated), dropping
+  // names/quantities/presentation — see ResourceDetailView for the rationale.
   return {
     ...toResourceView(r),
-    items: r.items.map((i) => ({
-      name: i.name,
-      quantity: i.quantity,
-      unit: i.unit,
-      category: i.category,
-      presentation: i.presentation,
-    })),
+    inventoryCategories: [...new Set(r.items.map((i) => i.category))],
   };
 }

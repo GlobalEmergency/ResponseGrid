@@ -46,7 +46,7 @@ export default async function RecipientResourcePage({ params }: Props) {
   const te = t.emergency;
   const td = t.resource_detail;
   const recipientNeeds = needs ?? [];
-  const inventoryItems = resource.items ?? [];
+  const inventoryCategories = resource.inventoryCategories ?? [];
 
   return (
     <main className="flex-1 bg-surface">
@@ -77,33 +77,20 @@ export default async function RecipientResourcePage({ params }: Props) {
             >
               {td.inventory_heading}
             </h2>
-            {inventoryItems.length === 0 ? (
+            {inventoryCategories.length === 0 ? (
               <EmptyState title={td.inventory_empty} />
             ) : (
-              <ul className="flex flex-col gap-2" role="list">
-                {inventoryItems.map((item, i) => (
-                  <li
-                    key={i}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-line bg-white px-4 py-3"
+              <div className="flex flex-wrap gap-2" role="list">
+                {inventoryCategories.map((slug) => (
+                  <span
+                    key={slug}
+                    role="listitem"
+                    className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${categoryColor(slug)}`}
                   >
-                    <div className="flex flex-col">
-                      <span className="text-sm font-semibold text-ink">
-                        {item.name}
-                      </span>
-                      <span className="text-xs text-muted">
-                        {item.quantity}
-                        {item.unit ? ` ${item.unit}` : ''}
-                        {item.presentation ? ` · ${item.presentation}` : ''}
-                      </span>
-                    </div>
-                    <span
-                      className={`inline-block shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${categoryColor(item.category)}`}
-                    >
-                      {categoryLabel(item.category, locale)}
-                    </span>
-                  </li>
+                    {categoryLabel(slug, locale)}
+                  </span>
                 ))}
-              </ul>
+              </div>
             )}
           </section>
 
@@ -128,6 +115,7 @@ export default async function RecipientResourcePage({ params }: Props) {
                       te={te}
                       slug={slug}
                       active={isActive}
+                      locale={locale}
                     />
                   </li>
                 ))}

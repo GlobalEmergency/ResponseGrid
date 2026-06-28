@@ -149,7 +149,7 @@ export function InventoryField({ t, locale }: InventoryFieldProps) {
                   value={item.quantity}
                   onChange={(e) =>
                     updateItem(item.id, {
-                      quantity: Math.max(1, Number(e.target.value)),
+                      quantity: Math.max(1, Math.floor(Number(e.target.value) || 1)),
                     })
                   }
                   className="w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"

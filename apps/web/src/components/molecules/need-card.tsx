@@ -8,6 +8,7 @@ import { Card } from '@/components/atoms/card';
 import { PriorityBadge, type Priority } from '@/components/atoms/priority-badge';
 import { FreshnessIndicator } from '@/components/atoms/freshness-indicator';
 import { PrivacyLocationNotice } from '@/components/atoms/privacy-location-notice';
+import { categoryLabel } from '@/lib/categories';
 import type { Messages } from '@/i18n/messages/es';
 
 type NeedViewDto = components['schemas']['NeedViewDto'];
@@ -17,20 +18,19 @@ interface NeedCardProps {
   te: Messages['emergency'];
   slug: string;
   active: boolean;
+  locale: 'es' | 'en';
 }
 
-export function NeedCard({ need, te, slug, active }: NeedCardProps) {
+export function NeedCard({ need, te, slug, active, locale }: NeedCardProps) {
   const priority = need.priority as Priority;
   const item = need.items[0];
-  const categoryLabel =
-    item !== undefined
-      ? (te[`category_${item.category}` as keyof typeof te] as string | undefined) ?? item.category
-      : undefined;
+  const categoryText =
+    item !== undefined ? categoryLabel(item.category, locale) : undefined;
   const quantity =
     item !== undefined
       ? `${String(item.quantity)}${item.unit != null ? ` ${String(item.unit)}` : ''}`
       : undefined;
-  const detail = [quantity, categoryLabel].filter(Boolean).join(' · ');
+  const detail = [quantity, categoryText].filter(Boolean).join(' · ');
   const approximate = need.locationSensitivity === 'approximate';
 
   return (

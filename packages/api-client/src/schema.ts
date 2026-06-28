@@ -2009,18 +2009,6 @@ export interface components {
             /** @example 8 */
             total: number;
         };
-        SupplyLineViewDto: {
-            /** @example Agua embotellada */
-            name: string;
-            /** @example 100 */
-            quantity: number;
-            /** @example litros */
-            unit: string | null;
-            /** @example water */
-            category: string;
-            /** @example ampolla */
-            presentation: string | null;
-        };
         ResourceDetailViewDto: {
             /**
              * Format: uuid
@@ -2091,7 +2079,14 @@ export interface components {
              * @example hospital
              */
             recipientType: string | null;
-            items: components["schemas"]["SupplyLineViewDto"][];
+            /**
+             * @description Distinct categories of material this place has declared
+             * @example [
+             *       "water",
+             *       "hygiene"
+             *     ]
+             */
+            inventoryCategories: string[];
         };
         RecipientTypeDto: {
             /** @example hospital */

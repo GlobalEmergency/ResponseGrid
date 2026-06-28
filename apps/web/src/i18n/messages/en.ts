@@ -202,18 +202,6 @@ export const en = {
     footer_report: 'Report',
     footer_coordination: 'Coordination access',
 
-    category_hygiene: 'Hygiene',
-    category_water: 'Water',
-    category_food: 'Food',
-    category_medical: 'Medical',
-    category_shelter: 'Shelter',
-    category_tools: 'Tools',
-    category_other: 'Other',
-    category_medicines: '💊 Medicines',
-    category_medical_equipment: '🩺 Medical equipment',
-    category_medical_supplies: '📦 Medical supplies',
-    category_medical_personnel: '🧑‍⚕️ Medical personnel',
-
     priority_low: 'Low',
     priority_medium: 'Medium',
     priority_high: 'High',
@@ -490,18 +478,6 @@ export const en = {
     item_unit_placeholder: 'boxes, litres…',
     item_category_label: 'Category',
 
-    category_hygiene: 'Hygiene',
-    category_water: 'Water',
-    category_food: 'Food',
-    category_medical: 'Medical',
-    category_shelter: 'Shelter',
-    category_tools: 'Tools',
-    category_other: 'Other',
-    category_medicines: '💊 Medicines',
-    category_medical_equipment: '🩺 Medical equipment',
-    category_medical_supplies: '📦 Medical supplies',
-    category_medical_personnel: '🧑‍⚕️ Medical personnel',
-
     // server-action messages
     err_title_too_short: 'Title must be at least 2 characters.',
     err_invalid_priority: 'Invalid priority.',
@@ -530,14 +506,6 @@ export const en = {
     notes_placeholder: 'e.g. Available Monday to Friday in the morning',
 
     select_category_placeholder: 'Select a category…',
-
-    category_food: 'Food',
-    category_water: 'Water',
-    category_hygiene: 'Hygiene',
-    category_medical: 'Medical',
-    category_shelter: 'Shelter',
-    category_tools: 'Tools',
-    category_other: 'Other',
 
     submit: 'Donate supplies',
     submitting: 'Sending…',
@@ -1429,18 +1397,6 @@ export const en = {
     priority_label: 'Priority',
     expired_at_label: 'Expired',
 
-    category_hygiene: 'Hygiene',
-    category_water: 'Water',
-    category_food: 'Food',
-    category_medical: 'Medical',
-    category_shelter: 'Shelter',
-    category_tools: 'Tools',
-    category_other: 'Other',
-    category_medicines: '💊 Medicines',
-    category_medical_equipment: '🩺 Medical equipment',
-    category_medical_supplies: '📦 Medical supplies',
-    category_medical_personnel: '🧑‍⚕️ Medical personnel',
-
     priority_low: 'Low',
     priority_medium: 'Medium',
     priority_high: 'High',
@@ -1810,4 +1766,4 @@ export const en = {
     qa_notifications: 'Notifications',
     qa_explore: 'View emergencies',
   },
-} as Messages;
+} satisfies Messages;
