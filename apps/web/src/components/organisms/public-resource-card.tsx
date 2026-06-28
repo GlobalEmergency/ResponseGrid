@@ -126,7 +126,11 @@ export function PublicResourceCard({
         <dl className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted">
           {resource.contact != null && (
             <div className="flex items-center gap-1">
-              <dt className="font-medium text-muted-soft">{t.meta_contact}</dt>
+              <dt className="font-medium text-muted-soft">
+                {resource.verificationLevel === 'official'
+                  ? t.meta_contact_official
+                  : t.meta_contact}
+              </dt>
               <dd>{resource.contact}</dd>
             </div>
           )}
@@ -143,6 +147,13 @@ export function PublicResourceCard({
             </div>
           )}
         </dl>
+      )}
+
+      {/* ── Sin contacto oficial (#64) ──────────────────────────────────── */}
+      {resource.contact == null && (
+        <p className="text-xs italic text-muted-soft">
+          {t.no_official_contact}
+        </p>
       )}
 
       {/* ── Freshness indicator ─────────────────────────────────────────── */}
