@@ -133,6 +133,7 @@ export const en = {
     help_offer_subtitle: 'Warehouse · transport · space',
     help_volunteer_subtitle: 'Availability and skills',
     help_petition_subtitle: 'Request validated supplies',
+    help_transport_subtitle: 'Road · sea · air',
 
     // What NOT to do
     dont_do_heading: 'What NOT to do right now',
@@ -166,6 +167,7 @@ export const en = {
     action_submit_petition: 'Submit a request',
     action_donate: 'Donate supplies',
     action_volunteer: 'Sign up as a volunteer',
+    action_offer_transport: 'I can offer transport',
     actions_paused:
       'Resource and request registration is paused. Check the available information and come back later.',
 
@@ -531,6 +533,65 @@ export const en = {
     err_invalid_quantity: 'Quantity must be a positive whole number.',
     err_location_required: 'Select a location.',
     err_submit_failed: 'Couldn’t submit the offer. Please try again.',
+  },
+
+  // ── Offer transport (#105) ────────────────────────────────────────────────
+  ofrecerTransporte: {
+    page_title: 'I can offer transport',
+    page_subtitle: '{emergencyName} · Make your transport capacity available to the operation.',
+    meta_title: 'Offer transport — {emergencyName} · ResponseGrid',
+    meta_description: 'Offer transport capacity to move supplies for {emergencyName}.',
+
+    intro:
+      'Tell us how much cargo you can move and where. Coordination will match your capacity with the shipments that need it.',
+
+    // Transport mode
+    mode_label: 'Transport mode',
+    mode_road: 'Road',
+    mode_sea: 'Sea',
+    mode_air: 'Air',
+
+    // Capacity
+    capacity_legend: 'Cargo capacity',
+    capacity_hint: 'Provide at least weight or volume.',
+    weight_label: 'Weight (kg)',
+    weight_placeholder: 'e.g. 1500',
+    volume_label: 'Volume (m³)',
+    volume_placeholder: 'e.g. 12',
+
+    // Coverage
+    coverage_label: 'Which area or route do you cover?',
+    coverage_placeholder: 'e.g. Caracas → La Guaira, or Vargas State',
+
+    // Availability window
+    window_legend: 'Availability',
+    window_from_label: 'From',
+    window_to_label: 'To',
+
+    // Constraints
+    constraints_legend: 'Cargo conditions',
+    constraint_refrigerated: 'Refrigerated',
+    constraint_hazmat: 'Hazardous materials',
+    constraint_fragile: 'Fragile',
+
+    // Notes
+    notes_label: 'Additional notes',
+    notes_placeholder: 'e.g. Daily departure at 08:00',
+
+    submit: 'Publish capacity',
+    submitting: 'Publishing…',
+    success_message:
+      'Transport capacity published. Coordination will take it into account for this emergency’s shipments.',
+    success_offer_again: 'Publish another capacity',
+    error_fallback: 'Error publishing the capacity',
+
+    // server-action messages
+    err_invalid_mode: 'Select a valid transport mode.',
+    err_capacity_required: 'Provide at least weight (kg) or volume (m³).',
+    err_capacity_invalid: 'Weight and volume must be positive numbers.',
+    err_coverage_required: 'Enter the area or route you cover.',
+    err_window_invalid: 'The end date must be after the start date.',
+    err_submit_failed: 'Couldn’t publish the capacity. Please try again.',
   },
 
   voluntario: {

@@ -134,6 +134,7 @@ export const es = {
     help_offer_subtitle: 'Almacén · transporte · espacio',
     help_volunteer_subtitle: 'Disponibilidad y habilidades',
     help_petition_subtitle: 'Solicitar material validado',
+    help_transport_subtitle: 'Carretera · marítimo · aéreo',
 
     // Qué NO hacer ahora
     dont_do_heading: 'Qué NO hacer ahora',
@@ -170,6 +171,7 @@ export const es = {
     action_submit_petition: 'Poner una petición',
     action_donate: 'Donar material',
     action_volunteer: 'Apuntarme como voluntario',
+    action_offer_transport: 'Ofrezco transporte',
     actions_paused:
       'El alta de recursos y peticiones está en pausa. Consulta la información disponible y vuelve más tarde.',
 
@@ -555,6 +557,65 @@ export const es = {
     err_invalid_quantity: 'La cantidad debe ser un número entero positivo.',
     err_location_required: 'Selecciona una ubicación.',
     err_submit_failed: 'Error al enviar la oferta. Inténtalo de nuevo.',
+  },
+
+  // ── Ofrecer transporte (#105) ─────────────────────────────────────────────
+  ofrecerTransporte: {
+    page_title: 'Ofrezco transporte',
+    page_subtitle: '{emergencyName} · Pon tu capacidad de transporte a disposición del operativo.',
+    meta_title: 'Ofrezco transporte — {emergencyName} · ResponseGrid',
+    meta_description: 'Ofrece capacidad de transporte para mover material en {emergencyName}.',
+
+    intro:
+      'Indica cuánta carga puedes mover y por qué zona. Coordinación casará tu capacidad con los envíos que la necesiten.',
+
+    // Modo de transporte
+    mode_label: 'Modo de transporte',
+    mode_road: 'Carretera',
+    mode_sea: 'Marítimo',
+    mode_air: 'Aéreo',
+
+    // Capacidad
+    capacity_legend: 'Capacidad de carga',
+    capacity_hint: 'Indica al menos peso o volumen.',
+    weight_label: 'Peso (kg)',
+    weight_placeholder: 'Ej. 1500',
+    volume_label: 'Volumen (m³)',
+    volume_placeholder: 'Ej. 12',
+
+    // Cobertura
+    coverage_label: '¿Qué zona o ruta cubres?',
+    coverage_placeholder: 'Ej. Caracas → La Guaira, o Estado Vargas',
+
+    // Ventana de disponibilidad
+    window_legend: 'Disponibilidad',
+    window_from_label: 'Desde',
+    window_to_label: 'Hasta',
+
+    // Restricciones
+    constraints_legend: 'Condiciones de la carga',
+    constraint_refrigerated: 'Refrigerado',
+    constraint_hazmat: 'Mercancías peligrosas',
+    constraint_fragile: 'Frágil',
+
+    // Notas
+    notes_label: 'Notas adicionales',
+    notes_placeholder: 'Ej. Salida diaria a las 08:00',
+
+    submit: 'Publicar capacidad',
+    submitting: 'Publicando…',
+    success_message:
+      'Capacidad de transporte publicada. Coordinación la tendrá en cuenta para los envíos de esta emergencia.',
+    success_offer_again: 'Publicar otra capacidad',
+    error_fallback: 'Error al publicar la capacidad',
+
+    // server-action messages
+    err_invalid_mode: 'Selecciona un modo de transporte válido.',
+    err_capacity_required: 'Indica al menos peso (kg) o volumen (m³).',
+    err_capacity_invalid: 'El peso y el volumen deben ser números positivos.',
+    err_coverage_required: 'Indica la zona o ruta que cubres.',
+    err_window_invalid: 'La fecha de fin debe ser posterior a la de inicio.',
+    err_submit_failed: 'Error al publicar la capacidad. Inténtalo de nuevo.',
   },
 
   // ── Voluntario form ───────────────────────────────────────────────────────
