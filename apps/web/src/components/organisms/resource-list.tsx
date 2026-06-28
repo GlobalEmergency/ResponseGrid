@@ -257,7 +257,7 @@ export function ResourceList({
           onNearbyResults={handleNearbyResults}
           onClear={() => setNearbyItems(null)}
           onGeoError={() => setGeoError(true)}
-          active={false}
+          active={nearbyItems !== null}
         />
 
         {/* Geo error alert */}
