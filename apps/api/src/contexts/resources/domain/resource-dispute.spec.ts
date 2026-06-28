@@ -52,6 +52,24 @@ describe('Resource dispute', () => {
     expect(() => make().flagDisputed()).toThrow(ResourceNotDisputableError);
   });
 
+  it('flagDisputed is idempotent: a second flag emits no event and keeps disputedAt', () => {
+    const r = published();
+    r.flagDisputed();
+    const firstAt = r.disputedAt;
+    r.pullDomainEvents(); // drain the first resource.disputed
+
+    r.flagDisputed(); // already disputed → no-op
+
+    expect(r.disputed).toBe(true);
+    expect(r.disputedAt).toBe(firstAt); // same instant, not reset
+    expect(r.pullDomainEvents()).toEqual([]); // no duplicate event
+  });
+
+  it('isPubliclyVisible reflects the public status', () => {
+    expect(make().isPubliclyVisible()).toBe(false); // hidden
+    expect(published().isPubliclyVisible()).toBe(true); // active
+  });
+
   it('clears the dispute, emitting resource.dispute_resolved', () => {
     const r = published();
     r.flagDisputed();

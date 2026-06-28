@@ -265,6 +265,8 @@ export class DisputedResourceDto {
   distinctReporters!: number;
 
   @ApiProperty({
+    type: 'object',
+    additionalProperties: { type: 'number' },
     example: { closed: 2, moved: 1 },
     description: 'Open-report counts keyed by reason',
   })

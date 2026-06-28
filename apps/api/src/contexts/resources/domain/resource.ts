@@ -319,17 +319,27 @@ export class Resource {
   }
 
   /**
-   * Flag the resource as disputed: enough distinct citizens reported it as
-   * invalid. It stays visible (still Active/Saturated/Paused) with a warning
-   * until a coordinator resolves the dispute. Only a published resource can be
-   * disputed.
+   * Whether the resource is shown to citizens on the public map/list:
+   * Active, Saturated or Paused (i.e. published and not Closed/Hidden).
    */
-  flagDisputed(): void {
-    const visible =
+  isPubliclyVisible(): boolean {
+    return (
       this._publicStatus === PublicStatus.Active ||
       this._publicStatus === PublicStatus.Saturated ||
-      this._publicStatus === PublicStatus.Paused;
-    if (!visible) {
+      this._publicStatus === PublicStatus.Paused
+    );
+  }
+
+  /**
+   * Flag the resource as disputed: enough distinct citizens reported it as
+   * invalid. It stays visible (still Active/Saturated/Paused) with a warning
+   * until a coordinator resolves the dispute. Only a visible (published) point
+   * can be disputed. Idempotent: flagging an already-disputed resource is a
+   * no-op (no duplicate event, the original disputedAt is kept).
+   */
+  flagDisputed(): void {
+    if (this._disputed) return;
+    if (!this.isPubliclyVisible()) {
       throw new ResourceNotDisputableError();
     }
     this._disputed = true;

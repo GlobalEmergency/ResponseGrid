@@ -89,6 +89,11 @@ export class IngestExternalResources {
           recipientType: existingSnap.recipientType,
           // Preserved (local-owned inventory — operators may have declared stock):
           items: existingSnap.items,
+          // Preserved (citizen-validity dispute state — ficha 15): a re-ingest of
+          // the source must not silently un-dispute a point and orphan its
+          // open reports. Read the live getters (clean boolean / Date | null).
+          disputed: existing.disputed,
+          disputedAt: existing.disputedAt,
           // Preserved (structural — not changed by source):
           emergencyId: existingSnap.emergencyId,
           // Source-owned (updated):

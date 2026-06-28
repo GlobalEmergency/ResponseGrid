@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
@@ -88,6 +89,11 @@ export async function reportValidity(
   if (!response.ok) {
     return { status: 'error', message: t.reportar_validez.err_submit_failed };
   }
+
+  // Refresh cached server renders so a freshly-crossed dispute threshold (the
+  // "En verificación" badge on the map/detail) shows on the next view.
+  revalidatePath(`/e/${slug}`);
+  revalidatePath(`/e/${slug}/recursos/${resourceId}`);
 
   return { status: 'success' };
 }

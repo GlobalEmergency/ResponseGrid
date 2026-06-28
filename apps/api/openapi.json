@@ -7378,6 +7378,9 @@
           },
           "byReason": {
             "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
             "example": {
               "closed": 2,
               "moved": 1

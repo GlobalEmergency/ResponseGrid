@@ -426,6 +426,9 @@ export class DrizzleResourceRepository implements ResourceRepository {
   }
 
   async findDisputedByEmergency(emergencyId: EmergencyId): Promise<Resource[]> {
+    // Only visible points (Active/Saturated/Paused) belong in the coordination
+    // queue: a disputed point later closed or hidden is no longer actionable as
+    // a dispute, even if its flag lingers.
     const rows = await this.db
       .select()
       .from(resourcesTable)
@@ -433,6 +436,11 @@ export class DrizzleResourceRepository implements ResourceRepository {
         and(
           eq(resourcesTable.emergencyId, emergencyId.value),
           eq(resourcesTable.disputed, true),
+          inArray(resourcesTable.publicStatus, [
+            PublicStatus.Active,
+            PublicStatus.Saturated,
+            PublicStatus.Paused,
+          ]),
         ),
       );
     return rows.map((r) => Resource.fromSnapshot(rowToSnapshot(r)));

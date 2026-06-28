@@ -50,19 +50,29 @@ export class ResolveResourceDispute {
 
     const openReports = await this.reports.findOpenByResource(cmd.resourceId);
 
-    if (cmd.resolution === 'confirm_closed') {
-      resource.changePublicStatus(PublicStatus.Closed);
-      for (const r of openReports) r.accept(cmd.coordinatorId);
-    } else if (cmd.resolution === 'mark_invalid') {
-      resource.markInvalid();
-      for (const r of openReports) r.accept(cmd.coordinatorId);
-    } else {
-      for (const r of openReports) r.dismiss(cmd.coordinatorId);
+    // Apply the resolution and record which status field (if any) it changed —
+    // that becomes the audit "target". Each branch sets it from the post-change
+    // state, so there is no second switch to keep in sync.
+    let targetStatus: string | null = null;
+    switch (cmd.resolution) {
+      case 'confirm_closed':
+        resource.changePublicStatus(PublicStatus.Closed);
+        openReports.forEach((r) => r.accept(cmd.coordinatorId));
+        targetStatus = resource.publicStatus;
+        break;
+      case 'mark_invalid':
+        resource.markInvalid();
+        openReports.forEach((r) => r.accept(cmd.coordinatorId));
+        targetStatus = resource.verificationLevel;
+        break;
+      case 'dismiss':
+        openReports.forEach((r) => r.dismiss(cmd.coordinatorId));
+        break;
     }
     resource.clearDispute(cmd.resolution);
 
     await this.resources.save(resource);
-    for (const r of openReports) await this.reports.save(r);
+    await Promise.all(openReports.map((r) => this.reports.save(r)));
     await this.bus.publish(resource.pullDomainEvents());
 
     const after = {
@@ -70,13 +80,6 @@ export class ResolveResourceDispute {
       publicStatus: resource.publicStatus,
       verificationLevel: resource.verificationLevel,
     };
-
-    const targetStatus =
-      cmd.resolution === 'confirm_closed'
-        ? resource.publicStatus
-        : cmd.resolution === 'mark_invalid'
-          ? resource.verificationLevel
-          : null;
 
     return {
       emergencyId: resource.emergencyId.value,

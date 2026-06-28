@@ -29,22 +29,24 @@ export class GetDisputedResources {
       EmergencyId.fromString(q.emergencyId),
     );
 
-    const out: DisputedResourceView[] = [];
-    for (const resource of disputed) {
-      const open = await this.reports.findOpenByResource(resource.id.value);
-      const byReason: Record<string, number> = {};
-      let last: Date | null = null;
-      for (const r of open) {
-        byReason[r.reason] = (byReason[r.reason] ?? 0) + 1;
-        if (!last || r.createdAt > last) last = r.createdAt;
-      }
-      out.push({
-        resource: toResourceView(resource),
-        distinctReporters: open.length,
-        byReason,
-        lastReportedAt: last ? last.toISOString() : null,
-      });
-    }
-    return out;
+    // Each disputed resource needs its own open-report breakdown; fetch them
+    // concurrently (Promise.all preserves the queue order from the repository).
+    return Promise.all(
+      disputed.map(async (resource) => {
+        const open = await this.reports.findOpenByResource(resource.id.value);
+        const byReason: Record<string, number> = {};
+        let last: Date | null = null;
+        for (const r of open) {
+          byReason[r.reason] = (byReason[r.reason] ?? 0) + 1;
+          if (!last || r.createdAt > last) last = r.createdAt;
+        }
+        return {
+          resource: toResourceView(resource),
+          distinctReporters: open.length,
+          byReason,
+          lastReportedAt: last ? last.toISOString() : null,
+        };
+      }),
+    );
   }
 }

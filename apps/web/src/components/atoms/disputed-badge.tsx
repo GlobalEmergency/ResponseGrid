@@ -12,8 +12,10 @@ interface DisputedBadgeProps {
  * "in review" without asserting it is closed (a coordinator confirms first).
  */
 export function DisputedBadge({ label, className }: DisputedBadgeProps) {
+  // The visible label is the accessible name; the emoji is decorative. No
+  // aria-label — it would just duplicate the text node.
   return (
-    <Badge variant="disputed" aria-label={label} className={className}>
+    <Badge variant="disputed" className={className}>
       <span aria-hidden="true">⚠️</span>
       {label}
     </Badge>

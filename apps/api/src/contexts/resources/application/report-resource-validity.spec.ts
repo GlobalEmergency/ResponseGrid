@@ -100,6 +100,50 @@ describe('ReportResourceValidity', () => {
     expect(await reports.countOpenByResource(id)).toBe(2);
   });
 
+  it('re-reporting with only a new reason keeps the previous note and photos', async () => {
+    const id = await seedPublished();
+    const rep = useCase(3);
+    await rep.execute({
+      resourceId: id,
+      reporterUserId: 'user-1',
+      reason: ValidityReason.Closed,
+      note: 'Lleva semanas cerrado',
+      photoUrls: ['https://img/1.jpg'],
+    });
+    // Re-report changing ONLY the reason — note/photos omitted must not be wiped.
+    await rep.execute({
+      resourceId: id,
+      reporterUserId: 'user-1',
+      reason: ValidityReason.Moved,
+    });
+
+    const open = await reports.findOpenByResource(id);
+    expect(open).toHaveLength(1);
+    expect(open[0].reason).toBe(ValidityReason.Moved);
+    expect(open[0].note).toBe('Lleva semanas cerrado');
+    expect(open[0].photoUrls).toEqual(['https://img/1.jpg']);
+  });
+
+  it('re-reporting can still clear the note by passing it explicitly as null', async () => {
+    const id = await seedPublished();
+    const rep = useCase(3);
+    await rep.execute({
+      resourceId: id,
+      reporterUserId: 'user-1',
+      reason: ValidityReason.Closed,
+      note: 'Nota inicial',
+    });
+    await rep.execute({
+      resourceId: id,
+      reporterUserId: 'user-1',
+      reason: ValidityReason.Closed,
+      note: null,
+    });
+
+    const open = await reports.findOpenByResource(id);
+    expect(open[0].note).toBeNull();
+  });
+
   it('blocks the owner from reporting their own resource', async () => {
     const id = await seedPublished();
     await expect(useCase().execute(cmd(id, OWNER))).rejects.toThrow(

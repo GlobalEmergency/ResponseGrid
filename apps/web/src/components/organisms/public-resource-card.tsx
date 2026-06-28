@@ -176,15 +176,8 @@ export function PublicResourceCard({
         <FreshnessIndicator lastVerifiedAt={resource.externalUpdatedAt} />
       )}
 
-      {/* ── CTA: avisar de un problema con este punto (ficha 15) ────────── */}
-      {slug != null && (
-        <Link
-          href={`/e/${slug}/recursos/${resource.id}/reportar-estado`}
-          className="mt-0.5 w-fit text-xs font-semibold text-warning hover:underline"
-        >
-          {t.report_cta}
-        </Link>
-      )}
+      {/* The "report a problem" CTA (ficha 15) lives on the resource detail
+          page, not on every list card — the card name links there. */}
     </Card>
   );
 }

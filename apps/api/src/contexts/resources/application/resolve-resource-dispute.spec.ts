@@ -139,4 +139,63 @@ describe('ResolveResourceDispute', () => {
       }),
     ).rejects.toThrow(ResourceNotDisputedError);
   });
+
+  it('a second resolve throws (the dispute is already cleared)', async () => {
+    const id = await seedDisputed();
+    const uc = resolve();
+    await uc.execute({
+      resourceId: id,
+      coordinatorId: 'coord-1',
+      resolution: 'dismiss',
+    });
+    await expect(
+      uc.execute({
+        resourceId: id,
+        coordinatorId: 'coord-1',
+        resolution: 'dismiss',
+      }),
+    ).rejects.toThrow(ResourceNotDisputedError);
+  });
+
+  it('dismiss records only the disputed→false change in the audit diff', async () => {
+    const id = await seedDisputed();
+    const result = await resolve().execute({
+      resourceId: id,
+      coordinatorId: 'coord-1',
+      resolution: 'dismiss',
+    });
+
+    const disputedChange = result.changes.find((c) => c.field === 'disputed');
+    expect(disputedChange).toEqual({
+      field: 'disputed',
+      before: true,
+      after: false,
+    });
+    // status/level unchanged on a dismiss, so they are not in the diff
+    expect(result.changes.map((c) => c.field)).toEqual(['disputed']);
+  });
+
+  it('can be disputed again after a previous dispute was dismissed', async () => {
+    const id = await seedDisputed();
+    await resolve().execute({
+      resourceId: id,
+      coordinatorId: 'coord-1',
+      resolution: 'dismiss',
+    });
+
+    // A re-report by an original reporter opens a fresh report (their old one
+    // is now Dismissed, not Open); a new round of 3 distinct users re-flags it.
+    const rep = new ReportResourceValidity(resources, reports, bus, 3);
+    for (const user of ['user-1', 'user-2', 'user-3']) {
+      await rep.execute({
+        resourceId: id,
+        reporterUserId: user,
+        reason: ValidityReason.Closed,
+      });
+    }
+
+    const r = await resources.findById(ResourceId.fromString(id));
+    expect(r!.disputed).toBe(true);
+    expect(await reports.countOpenByResource(id)).toBe(3);
+  });
 });

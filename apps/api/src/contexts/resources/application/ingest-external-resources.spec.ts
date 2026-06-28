@@ -283,6 +283,59 @@ describe('IngestExternalResources', () => {
       // Source-owned fields UPDATED
       expect(found!.name).toBe('Nombre Nuevo desde Fuente');
     });
+
+    it('preserves the disputed flag and disputedAt on re-ingest (does not un-dispute)', async () => {
+      const repo = new InMemoryResourceRepository();
+      const resolver = makeResolver();
+      const useCase = new IngestExternalResources(repo, resolver);
+
+      const disputedAt = new Date('2024-02-01T00:00:00.000Z');
+      const preExisting = Resource.fromSnapshot({
+        id: ResourceId.create().value,
+        emergencyId: EMERGENCY_ID,
+        type: ResourceType.CollectionPoint,
+        stage: ResourceStage.Origin,
+        name: 'Punto Disputado',
+        description: null,
+        location: { address: 'Calle 1', latitude: 39.46, longitude: -0.37 },
+        ownerUserId: 'owner',
+        ownerOrganizationId: null,
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date('2023-01-01'),
+        contact: null,
+        schedule: null,
+        manager: null,
+        accepts: [],
+        country: null,
+        city: null,
+        provenance: {
+          sourceName: SOURCE_NAME,
+          externalId: EXT_ID_1,
+          externalUpdatedAt: null,
+          raw: null,
+        },
+        isFinalRecipient: false,
+        recipientType: null,
+        items: [],
+        disputed: true,
+        disputedAt,
+      });
+      await repo.save(preExisting);
+
+      await useCase.execute({
+        emergencyId: EMERGENCY_ID,
+        sourceName: SOURCE_NAME,
+        ownerUserId: OWNER_USER_ID,
+        records: ['rec'],
+        mapper: makeMapper(makeMappedInput({ name: 'Nombre desde Fuente' })),
+      });
+
+      const found = await repo.findByExternal(SOURCE_NAME, EXT_ID_1);
+      expect(found!.disputed).toBe(true); // NOT reset to false
+      expect(found!.disputedAt).toEqual(disputedAt);
+      expect(found!.name).toBe('Nombre desde Fuente'); // source field still updated
+    });
   });
 
   describe('skip path — mapper returns null', () => {

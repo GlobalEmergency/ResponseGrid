@@ -2428,7 +2428,9 @@ export interface components {
              *       "moved": 1
              *     }
              */
-            byReason: Record<string, never>;
+            byReason: {
+                [key: string]: number;
+            };
             /** Format: date-time */
             lastReportedAt: string | null;
         };

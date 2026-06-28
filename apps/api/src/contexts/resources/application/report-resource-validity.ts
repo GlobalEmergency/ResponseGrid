@@ -3,7 +3,6 @@ import { ResourceRepository } from '../domain/ports/resource.repository';
 import { ResourceValidityReportRepository } from '../domain/ports/resource-validity-report.repository';
 import { EventBus } from '../domain/ports/event-bus';
 import { ResourceId } from '../domain/resource-id';
-import { PublicStatus } from '../domain/resource-enums';
 import {
   ResourceValidityReport,
   ValidityReason,
@@ -48,11 +47,7 @@ export class ReportResourceValidity {
     if (!resource) {
       throw new ResourceNotFoundError(cmd.resourceId);
     }
-    const visible =
-      resource.publicStatus === PublicStatus.Active ||
-      resource.publicStatus === PublicStatus.Saturated ||
-      resource.publicStatus === PublicStatus.Paused;
-    if (!visible) throw new ResourceNotReportableError();
+    if (!resource.isPubliclyVisible()) throw new ResourceNotReportableError();
     if (resource.ownerUserId === cmd.reporterUserId) {
       throw new OwnerCannotReportValidityError();
     }
@@ -63,10 +58,13 @@ export class ReportResourceValidity {
     );
     let report: ResourceValidityReport;
     if (existing) {
+      // Re-report by the same user: refresh their open report. Forward note /
+      // photos only when the caller actually supplied them — collapsing an
+      // omitted field to null/[] would wipe what they reported before.
       existing.update({
         reason: cmd.reason,
-        note: cmd.note ?? null,
-        photoUrls: cmd.photoUrls ?? [],
+        ...(cmd.note !== undefined && { note: cmd.note }),
+        ...(cmd.photoUrls !== undefined && { photoUrls: cmd.photoUrls }),
       });
       report = existing;
     } else {
@@ -83,12 +81,24 @@ export class ReportResourceValidity {
     await this.reports.save(report);
 
     const distinct = await this.reports.countOpenByResource(cmd.resourceId);
-    if (distinct >= this.threshold && !resource.disputed) {
-      resource.flagDisputed();
-      await this.resources.save(resource);
-      await this.bus.publish(resource.pullDomainEvents());
+    let disputed = resource.disputed;
+    if (distinct >= this.threshold && !disputed) {
+      // Re-read so the flag decision uses the current persisted state, not the
+      // snapshot loaded before this report was saved — two citizens crossing
+      // the threshold at once must not each emit a ResourceDisputed event.
+      const current = await this.resources.findById(
+        ResourceId.fromString(cmd.resourceId),
+      );
+      if (current && !current.disputed) {
+        current.flagDisputed();
+        await this.resources.save(current);
+        await this.bus.publish(current.pullDomainEvents());
+        disputed = true;
+      } else if (current) {
+        disputed = current.disputed;
+      }
     }
 
-    return { id: report.id, disputed: resource.disputed };
+    return { id: report.id, disputed };
   }
 }
