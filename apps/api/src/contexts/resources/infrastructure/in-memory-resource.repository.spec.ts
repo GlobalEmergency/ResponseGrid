@@ -29,6 +29,42 @@ const make = (emergencyId: string, name: string) =>
     ownerUserId: 'user-test-inmem',
   });
 
+/**
+ * Mimics an ingested point (e.g. acopiove.org import): Active + Unverified.
+ * Built via fromSnapshot because the domain `publish()` guard forbids
+ * publishing an unverified resource — yet ingest writes this state directly,
+ * which is exactly how unverified points leaked into the public API (#94).
+ */
+const makeActiveUnverified = (
+  emergencyId: string,
+  name: string,
+  opts: { accepts?: string[]; country?: string | null } = {},
+) =>
+  Resource.fromSnapshot({
+    id: ResourceId.create().value,
+    emergencyId,
+    type: ResourceType.CollectionPoint,
+    stage: ResourceStage.Origin,
+    name,
+    description: null,
+    location: baseLocation.toPlain(),
+    ownerUserId: 'ingest',
+    ownerOrganizationId: null,
+    verificationLevel: VerificationLevel.Unverified,
+    publicStatus: PublicStatus.Active,
+    createdAt: new Date('2026-06-01T00:00:00Z'),
+    contact: null,
+    schedule: null,
+    manager: null,
+    accepts: opts.accepts ?? [],
+    country: opts.country ?? null,
+    city: null,
+    provenance: null,
+    isFinalRecipient: false,
+    recipientType: null,
+    items: [],
+  });
+
 describe('InMemoryResourceRepository', () => {
   it('saves and finds by id', async () => {
     const repo = new InMemoryResourceRepository();
@@ -144,6 +180,19 @@ describe('InMemoryResourceRepository', () => {
       expect(total).toBe(1);
       expect(items[0].name).toBe('VE Resource');
     });
+
+    it('excludes active-but-unverified (ingested) points — #94', async () => {
+      const repo = new InMemoryResourceRepository();
+      await repo.save(makeVisible(EM_A, 'Verified'));
+      await repo.save(makeActiveUnverified(EM_A, 'Unverified'));
+
+      const { items, total } = await repo.findVisiblePaged(
+        EmergencyId.fromString(EM_A),
+        { page: 1, limit: 10 },
+      );
+      expect(total).toBe(1);
+      expect(items.map((r) => r.name)).toEqual(['Verified']);
+    });
   });
 
   describe('facets', () => {
@@ -183,6 +232,39 @@ describe('InMemoryResourceRepository', () => {
       expect(byCategory['food']).toBe(1);
       expect(byCountry['VE']).toBe(1);
       expect(byCountry['CO']).toBe(1);
+    });
+
+    it('does not count active-but-unverified (ingested) points — #94', async () => {
+      const repo = new InMemoryResourceRepository();
+      const verified = Resource.register({
+        id: ResourceId.create(),
+        emergencyId: EmergencyId.fromString(EM_A),
+        type: ResourceType.CollectionPoint,
+        stage: ResourceStage.Origin,
+        name: 'Verified',
+        location: baseLocation,
+        ownerUserId: 'u1',
+        accepts: ['water'],
+        country: 'VE',
+      });
+      verified.verify(VerificationLevel.Verified, 'c1');
+      verified.publish();
+      await repo.save(verified);
+      // Unverified but Active (ingested) — must be invisible to facets.
+      await repo.save(
+        makeActiveUnverified(EM_A, 'Unverified', {
+          accepts: ['clothing'],
+          country: 'CO',
+        }),
+      );
+
+      const { byCategory, byCountry, total } = await repo.facets(
+        EmergencyId.fromString(EM_A),
+      );
+      expect(total).toBe(1);
+      expect(byCategory).toEqual({ water: 1 });
+      expect(byCategory['clothing']).toBeUndefined();
+      expect(byCountry).toEqual({ VE: 1 });
     });
   });
 });

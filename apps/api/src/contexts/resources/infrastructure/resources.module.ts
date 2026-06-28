@@ -12,9 +12,12 @@ import { GetPublicResources } from '../application/get-public-resources';
 import { GetResourceFacets } from '../application/get-resource-facets';
 import { GetNearbyResources } from '../application/get-nearby-resources';
 import { GetResourcesInBounds } from '../application/get-resources-in-bounds';
+import { GetPublicResource } from '../application/get-public-resource';
 import { GetMyResources } from '../application/get-my-resources';
 import { VerifyResource } from '../application/verify-resource';
 import { PublishResource } from '../application/publish-resource';
+import { EditResource } from '../application/edit-resource';
+import { DiscardResource } from '../application/discard-resource';
 import { UpdateResourcePublicStatus } from '../application/update-resource-public-status';
 import {
   RESOURCE_REPOSITORY,
@@ -132,6 +135,16 @@ const publishProvider = {
   useFactory: (repo: ResourceRepository, bus: EventBus) =>
     new PublishResource(repo, bus),
 };
+const editResourceProvider = {
+  provide: EditResource,
+  inject: [RESOURCE_REPOSITORY],
+  useFactory: (repo: ResourceRepository) => new EditResource(repo),
+};
+const discardResourceProvider = {
+  provide: DiscardResource,
+  inject: [RESOURCE_REPOSITORY],
+  useFactory: (repo: ResourceRepository) => new DiscardResource(repo),
+};
 const publicResourcesProvider = {
   provide: GetPublicResources,
   inject: [RESOURCE_REPOSITORY],
@@ -178,6 +191,12 @@ const getResourcesInBoundsProvider = {
   useFactory: (repo: ResourceRepository) => new GetResourcesInBounds(repo),
 };
 
+const getPublicResourceProvider = {
+  provide: GetPublicResource,
+  inject: [RESOURCE_REPOSITORY],
+  useFactory: (repo: ResourceRepository) => new GetPublicResource(repo),
+};
+
 const recipientTypeRepositoryProvider = {
   provide: RECIPIENT_TYPE_REPOSITORY,
   inject: [DB],
@@ -210,12 +229,15 @@ const listRecipientTypesProvider = {
     queueProvider,
     verifyProvider,
     publishProvider,
+    editResourceProvider,
+    discardResourceProvider,
     publicResourcesProvider,
     getResourceFacetsProvider,
     getNearbyResourcesProvider,
     updateStatusProvider,
     getMyResourcesProvider,
     getResourcesInBoundsProvider,
+    getPublicResourceProvider,
     recipientTypeRepositoryProvider,
     listRecipientTypesProvider,
   ],

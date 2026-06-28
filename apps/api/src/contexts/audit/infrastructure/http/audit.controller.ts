@@ -15,11 +15,8 @@ import {
   type AuditRepository,
   type AuditQueryFilters,
 } from '../../domain/ports/audit.repository';
-import {
-  AuditEntryDto,
-  AuditListResponseDto,
-  AuditQueryDto,
-} from './audit.dto';
+import { AuditListResponseDto, AuditQueryDto } from './audit.dto';
+import { toAuditEntryDto } from './audit.mapper';
 
 @ApiTags('audit')
 @Controller('audit')
@@ -48,19 +45,7 @@ export class AuditController {
     if (query.entityType !== undefined) filters.entityType = query.entityType;
 
     const entries = await this.auditRepo.findAll(filters);
-
-    const mapped: AuditEntryDto[] = entries.map((e) => ({
-      id: e.id,
-      actorUserId: e.actorUserId,
-      action: e.action,
-      entityType: e.entityType,
-      entityId: e.entityId,
-      emergencyId: e.emergencyId,
-      method: e.method,
-      path: e.path,
-      statusCode: e.statusCode,
-      createdAt: e.createdAt,
-    }));
+    const mapped = entries.map(toAuditEntryDto);
 
     return { entries: mapped, total: mapped.length };
   }

@@ -1,7 +1,7 @@
 import { CreateNeed, CreateNeedCommand } from './create-need';
 import { InMemoryNeedRepository } from '../infrastructure/in-memory-need.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
-import { NeedCategory, Priority, NeedStatus } from '../domain/need-enums';
+import { Category, Priority, NeedStatus } from '../domain/need-enums';
 import { NeedEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 import { LocationSensitivity } from '../../../shared/domain/location-sensitivity';
@@ -20,7 +20,7 @@ const defaultItems = [
     name: 'Water bottles',
     quantity: 100,
     unit: 'units',
-    category: NeedCategory.Water,
+    category: Category.Water,
   },
 ];
 
@@ -76,13 +76,13 @@ describe('CreateNeed', () => {
             name: 'Food boxes',
             quantity: 50,
             unit: 'boxes',
-            category: NeedCategory.Food,
+            category: Category.Food,
           },
           {
             name: 'Blankets',
             quantity: 20,
             unit: null,
-            category: NeedCategory.Shelter,
+            category: Category.Shelter,
           },
         ],
       }),

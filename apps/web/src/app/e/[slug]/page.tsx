@@ -7,12 +7,12 @@ import { OfficialHeaderBand } from '@/components/organisms/official-header-band'
 import { ResourceList } from '@/components/organisms/resource-list';
 import { EmergencyMapWrapper } from '@/components/organisms/emergency-map-wrapper';
 import { NeedsFilter } from '@/components/molecules/needs-filter';
-import { EmptyState } from '@/components/molecules/empty-state';
 import { MetricCard } from '@/components/molecules/metric-card';
 import { StatusBanner } from '@/components/molecules/status-banner';
 import { AnnouncementCard } from '@/components/molecules/announcement-card';
 import { HelpActionRow } from '@/components/molecules/help-action-row';
-import { NeedCard } from '@/components/molecules/need-card';
+import { NeedsList } from '@/components/organisms/needs-list';
+import { EmergencyExplorer } from '@/components/organisms/emergency-explorer';
 import { EmergencyQuickLinks } from '@/components/molecules/emergency-quick-links';
 import type { MapPoint } from '@/components/organisms/emergency-map';
 import { getT } from '@/i18n/server';
@@ -89,6 +89,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
       params: {
         path: { emergencyId },
         query: {
+          limit: '50',
           ...(category !== undefined && { category }),
           ...(priority !== undefined && { priority }),
         },
@@ -142,46 +143,119 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
   const te = t.emergency;
   const dontList = emergency.dontBringList.length > 0 ? emergency.dontBringList : te.dont_bring_items;
   const sectionTitle = 'font-display text-base font-bold text-navy';
+  const announcement = typeof emergency.announcement === 'string' ? emergency.announcement : null;
+
+  // The explorer opens on whichever list the citizen is most likely acting on:
+  // if they arrived with a needs filter applied, start on the needs tab.
+  const initialTab: 'points' | 'needs' =
+    category !== undefined || priority !== undefined ? 'needs' : 'points';
+
+  const legendItems = [
+    { color: 'bg-green-500', label: te.map_legend_active },
+    { color: 'bg-yellow-400', label: te.map_legend_saturated },
+    { color: 'bg-orange-500', label: te.map_legend_paused },
+    { color: 'bg-red-500', label: te.map_legend_need },
+  ];
+
+  // ── Slots handed to the segmented explorer ──────────────────────────────────
+  const pointsSlot = (
+    <ResourceList
+      emergencyId={emergencyId}
+      slug={slug}
+      initialItems={activeResources}
+      total={resourcesTotal}
+      facetsByCategory={facetsByCategory}
+      facetsByCountry={facetsByCountry}
+      t={t.resource_card}
+      tVerification={t.verification_badge}
+      tStatusLight={t.status_light}
+      tList={t.resource_list}
+      tFilter={t.resource_filter}
+      tNearby={t.nearby_points}
+      tEmpty={{
+        title: te.points_empty_title,
+        description: te.points_empty_description,
+      }}
+      locale={locale}
+    />
+  );
+
+  const needsSlot = (
+    <NeedsList
+      emergencyId={emergencyId}
+      slug={slug}
+      initialItems={validatedNeeds}
+      te={te}
+      tNearby={t.nearby_needs}
+      tList={t.resource_list}
+      emptyTitle={te.needs_empty_title}
+      active={isActive}
+      locale={locale}
+      {...(category !== undefined && { category })}
+      {...(priority !== undefined && { priority })}
+      filterSlot={<NeedsFilter t={t.needs_filter} te={t.emergency} />}
+    />
+  );
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-md bg-surface lg:max-w-6xl">
-        <OfficialHeaderBand
-          name={emergency.name}
-          status={emergency.status}
-          updatedAt={emergency.updatedAt}
-          te={te}
-        />
+      <OfficialHeaderBand
+        name={emergency.name}
+        status={emergency.status}
+        updatedAt={emergency.updatedAt}
+        te={te}
+      />
 
-        <div className="flex flex-col gap-5 px-4 pb-12 pt-5 lg:gap-6 lg:px-8">
+      {/* Aviso de estado (sólo en pausa/cerrada) — ancho completo, prominente */}
+      {!isActive && (
+        <div className="px-4 pt-4 lg:px-8">
           <StatusBanner status={emergency.status} t={t.status_banner} />
+        </div>
+      )}
 
-          {/* Comunicado oficial */}
-          <AnnouncementCard
-            announcement={typeof emergency.announcement === 'string' ? emergency.announcement : null}
-            updatedAt={emergency.updatedAt}
-            t={t.announcement}
+      {/*
+        Layout dashboard: en escritorio el mapa es protagonista — columna izquierda
+        fija (sticky, alto de viewport) — y el panel de acciones/listas hace scroll
+        a la derecha. En móvil el mapa es un "hero" arriba y el panel va debajo.
+      */}
+      <div className="lg:flex lg:items-start">
+        {/* ── Mapa: hero en móvil, panel fijo en escritorio ──────────────────── */}
+        <section
+          aria-labelledby="map-heading"
+          className="relative lg:sticky lg:top-0 lg:h-screen lg:w-[58%] lg:shrink-0"
+        >
+          <h2 id="map-heading" className="sr-only">{te.map_heading}</h2>
+          <EmergencyMapWrapper
+            points={mapPoints}
+            emergencyId={emergencyId}
+            containerClassName="h-[44vh] min-h-[300px] max-h-[480px] border-y border-line lg:h-full lg:min-h-0 lg:max-h-none lg:border-y-0 lg:border-r"
           />
+          {/* Leyenda flotante sobre el mapa */}
+          <div className="pointer-events-none absolute bottom-3 left-3 z-[500] flex max-w-[calc(100%-1.5rem)] flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-line bg-white/95 px-3 py-2 text-[11px] font-medium text-muted shadow-md backdrop-blur-sm">
+            {legendItems.map((item) => (
+              <span key={item.label} className="flex items-center gap-1.5">
+                <span className={`inline-block h-2.5 w-2.5 rounded-full ${item.color}`} aria-hidden="true" />
+                {item.label}
+              </span>
+            ))}
+          </div>
+        </section>
 
-          {/* Métricas (fila de KPIs) */}
-          {metrics !== undefined && (
-            <section aria-labelledby="metrics-heading">
-              <h2 id="metrics-heading" className="sr-only">{te.metrics_heading}</h2>
-              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-                <MetricCard value={metrics.needs.open} label={te.metric_tile_open} tone="navy" />
-                <MetricCard value={metrics.resources.active} label={te.metric_tile_points} tone="navy" />
-                <MetricCard value={metrics.needs.closed} label={te.metric_tile_covered} tone="success" />
-                <MetricCard value={metrics.resources.pending} label={te.metric_tile_queue} tone="accent" />
-              </div>
-            </section>
+        {/* ── Panel: acciones, métricas, listas ──────────────────────────────── */}
+        <div className="flex min-w-0 flex-1 flex-col gap-6 px-4 pb-12 pt-5 lg:px-8 lg:pt-7">
+          {/* Comunicado oficial (sólo si existe) */}
+          {announcement !== null && (
+            <AnnouncementCard
+              announcement={announcement}
+              updatedAt={emergency.updatedAt}
+              t={t.announcement}
+            />
           )}
 
-          {/* Paneles — columna única en móvil, dashboard multi-columna en escritorio */}
-          <div className="columns-1 gap-5 lg:columns-2 [&>*]:mb-5 [&>*]:break-inside-avoid">
-          {/* ¿Cómo quieres ayudar? */}
+          {/* ¿Cómo quieres colaborar? — acción primaria, arriba del todo */}
           <section aria-labelledby="actions-heading" className="flex flex-col gap-3">
             <h2 id="actions-heading" className={sectionTitle}>{te.actions_heading}</h2>
-            {isActive && (
+            {isActive ? (
               <div className="flex flex-col gap-2.5">
                 <HelpActionRow
                   href={`/e/${slug}/registrar`}
@@ -202,23 +276,68 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
                   title={te.action_submit_petition}
                   subtitle={te.help_petition_subtitle}
                 />
+                <HelpActionRow
+                  href={`/e/${slug}/ofrecer-transporte`}
+                  icon="🚚"
+                  title={te.action_offer_transport}
+                  subtitle={te.help_transport_subtitle}
+                />
               </div>
-            )}
-
-            {!isActive && (
+            ) : (
               <p className="rounded-card border border-line bg-surface-alt px-4 py-4 text-sm text-muted">
                 {te.actions_paused}
               </p>
             )}
           </section>
 
-          {/* Qué NO hacer ahora */}
-          <section aria-labelledby="dont-do-heading" className="flex flex-col gap-3">
-            <div>
-              <h2 id="dont-do-heading" className={sectionTitle}>{te.dont_do_heading}</h2>
-              <p className="mt-0.5 text-[12.5px] text-muted">{te.dont_do_intro}</p>
-            </div>
-            <ul className="flex flex-col gap-2.5" role="list">
+          {/* Métricas (fila de KPIs) — cifras GLOBALES del operativo, distintas
+              de lo realmente visible en el mapa (que se muestra en las pestañas). */}
+          {metrics !== undefined && (
+            <section aria-labelledby="metrics-heading" className="flex flex-col gap-2.5">
+              <div>
+                <h2 id="metrics-heading" className={sectionTitle}>{te.metrics_heading}</h2>
+                <p className="mt-0.5 text-[12.5px] text-muted">{te.metrics_caption}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                <MetricCard value={metrics.needs.open} label={te.metric_tile_open} tone="navy" />
+                <MetricCard value={metrics.resources.active} label={te.metric_tile_points} tone="navy" />
+                <MetricCard value={metrics.needs.closed} label={te.metric_tile_covered} tone="success" />
+                <MetricCard value={metrics.resources.pending} label={te.metric_tile_queue} tone="accent" />
+              </div>
+            </section>
+          )}
+
+          {/* Explorador segmentado: Puntos | Necesidades — lo que se ve en el
+              mapa (una lista a la vez). Sus contadores reflejan lo visible. */}
+          <section aria-labelledby="explore-heading" className="flex flex-col gap-3">
+            <h2 id="explore-heading" className={sectionTitle}>{te.explore_heading}</h2>
+            <EmergencyExplorer
+              ariaLabel={te.explore_aria}
+              pointsLabel={te.tab_points}
+              needsLabel={te.tab_needs}
+              pointsCount={resourcesTotal}
+              needsCount={validatedNeeds.length}
+              pointsSlot={pointsSlot}
+              needsSlot={needsSlot}
+              initialTab={initialTab}
+            />
+          </section>
+
+          {/* Qué NO hacer ahora — colapsable para no robar protagonismo */}
+          <details className="group rounded-card border border-line bg-surface-alt px-4 py-3.5 open:pb-4">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
+              <span className="flex flex-col">
+                <span className={sectionTitle}>{te.dont_do_heading}</span>
+                <span className="mt-0.5 text-[12.5px] text-muted">{te.dont_do_intro}</span>
+              </span>
+              <span
+                aria-hidden="true"
+                className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-line bg-white text-muted transition-transform group-open:rotate-180"
+              >
+                ⌄
+              </span>
+            </summary>
+            <ul className="mt-3 flex flex-col gap-2.5" role="list">
               {dontList.map((item) => (
                 <li key={item} className="flex items-center gap-2.5 text-sm text-ink">
                   <span
@@ -231,76 +350,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
                 </li>
               ))}
             </ul>
-          </section>
-
-          {/* Puntos activos — lista paginada con filtros, búsqueda y agrupación geográfica */}
-          <section aria-labelledby="points-heading" className="flex flex-col gap-3">
-            <h2 id="points-heading" className={sectionTitle}>{te.points_heading}</h2>
-            <ResourceList
-              emergencyId={emergencyId}
-              initialItems={activeResources}
-              total={resourcesTotal}
-              facetsByCategory={facetsByCategory}
-              facetsByCountry={facetsByCountry}
-              t={t.resource_card}
-              tVerification={t.verification_badge}
-              tStatusLight={t.status_light}
-              tList={t.resource_list}
-              tFilter={t.resource_filter}
-              tNearby={t.nearby_points}
-              tEmpty={{
-                title: te.points_empty_title,
-                description: te.points_empty_description,
-              }}
-              locale={locale}
-            />
-          </section>
-
-          {/* Necesidades validadas */}
-          <section aria-labelledby="needs-heading" className="flex flex-col gap-3">
-            <h2 id="needs-heading" className={sectionTitle}>{te.needs_heading}</h2>
-            <NeedsFilter t={t.needs_filter} te={t.emergency} />
-            {validatedNeeds.length === 0 ? (
-              <EmptyState title={te.needs_empty_title} />
-            ) : (
-              <ul className="flex flex-col gap-2.5" role="list" aria-label={te.needs_aria_label}>
-                {validatedNeeds.map((need) => (
-                  <li key={need.id}>
-                    <NeedCard need={need} te={te} slug={slug} active={isActive} />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-          </div>
-
-          {/* Mapa de la emergencia (ancho completo) */}
-          <section aria-labelledby="map-heading" className="flex flex-col gap-3">
-            <h2 id="map-heading" className={sectionTitle}>{te.map_heading}</h2>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
-              <span className="flex items-center gap-1.5">
-                <span className="inline-block h-3 w-3 rounded-full bg-green-500" aria-hidden="true" />
-                {te.map_legend_active}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="inline-block h-3 w-3 rounded-full bg-yellow-400" aria-hidden="true" />
-                {te.map_legend_saturated}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="inline-block h-3 w-3 rounded-full bg-orange-500" aria-hidden="true" />
-                {te.map_legend_paused}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="inline-block h-3 w-3 rounded-full bg-red-500" aria-hidden="true" />
-                {te.map_legend_need}
-              </span>
-            </div>
-            <p className="flex items-center gap-1 text-xs text-muted-soft">
-              <span aria-hidden="true">🔒</span>
-              {te.map_user_location_notice}
-            </p>
-            <EmergencyMapWrapper points={mapPoints} emergencyId={emergencyId} />
-          </section>
+          </details>
 
           <EmergencyQuickLinks slug={slug} te={te} authed={token !== null} />
         </div>

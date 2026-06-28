@@ -1,6 +1,9 @@
 import {
   and,
+  asc,
+  between,
   count,
+  desc,
   eq,
   exists,
   gt,
@@ -8,6 +11,7 @@ import {
   isNull,
   lt,
   or,
+  sql,
   SQL,
 } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
@@ -22,11 +26,11 @@ import { NeedId } from '../../domain/need-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import {
   Priority,
-  NeedCategory,
+  Category,
   NeedStatus,
   PersonnelSkill,
 } from '../../domain/need-enums';
-import { NeedItemSnapshot } from '../../domain/need-item';
+import { SupplyLineSnapshot } from '../../../supplies/domain/supply-line';
 import { LocationSensitivity } from '../../../../shared/domain/location-sensitivity';
 
 type NeedsRow = typeof needsTable.$inferSelect;
@@ -50,11 +54,11 @@ function rowToSnapshot(row: NeedsRow, items: ItemsRow[]): NeedSnapshot {
     locationSensitivity: (row.locationSensitivity ??
       LocationSensitivity.Public) as LocationSensitivity,
     items: items.map(
-      (i): NeedItemSnapshot => ({
+      (i): SupplyLineSnapshot => ({
         name: i.name,
         quantity: i.quantity,
         unit: i.unit ?? null,
-        category: i.category as NeedCategory,
+        category: i.category as Category,
         presentation: i.presentation ?? null,
       }),
     ),
@@ -149,6 +153,7 @@ export class DrizzleNeedRepository implements NeedRepository {
   async findValidatedByEmergency(
     emergencyId: EmergencyId,
     filters?: NeedFilters,
+    pagination?: { limit: number; offset: number },
   ): Promise<Need[]> {
     // Exclude expired needs: rows with expires_at NOT NULL AND expires_at < now.
     // Rows with expires_at = NULL (legacy/retrocompat) are always included.
@@ -163,6 +168,115 @@ export class DrizzleNeedRepository implements NeedRepository {
       NeedStatus.Validated,
       filters,
       [notExpired],
+      pagination,
+    );
+  }
+
+  async findNearbyValidated(
+    emergencyId: EmergencyId,
+    q: { lat: number; lng: number; radiusMeters: number; limit: number },
+  ): Promise<Array<{ need: Need; distanceMeters: number }>> {
+    const now = new Date();
+    // Geo filter + ordering via the cube/earthdistance index (migration 0019),
+    // mirroring findNearbyVisible for resources. Only the id + distance are
+    // selected here; the full aggregates (with items) are loaded below.
+    const result = await this.db.execute<{ id: string; dist: number }>(sql`
+      SELECT id,
+        earth_distance(ll_to_earth(${q.lat}, ${q.lng}), ll_to_earth(latitude, longitude)) AS dist
+      FROM needs
+      WHERE emergency_id = ${emergencyId.value}
+        AND status = ${NeedStatus.Validated}
+        AND (expires_at IS NULL OR expires_at > ${now})
+        AND earth_box(ll_to_earth(${q.lat}, ${q.lng}), ${q.radiusMeters}) @> ll_to_earth(latitude, longitude)
+        AND earth_distance(ll_to_earth(${q.lat}, ${q.lng}), ll_to_earth(latitude, longitude)) <= ${q.radiusMeters}
+      ORDER BY dist ASC
+      LIMIT ${q.limit}
+    `);
+
+    const ranked = result.rows;
+    if (ranked.length === 0) return [];
+
+    const ids = ranked.map((r) => r.id);
+    const distById = new Map(ranked.map((r) => [r.id, Number(r.dist)]));
+
+    const [needRows, allItems] = await Promise.all([
+      this.db.select().from(needsTable).where(inArray(needsTable.id, ids)),
+      this.db
+        .select()
+        .from(needItemsTable)
+        .where(inArray(needItemsTable.needId, ids)),
+    ]);
+
+    const itemsByNeedId = new Map<string, ItemsRow[]>();
+    for (const item of allItems) {
+      const bucket = itemsByNeedId.get(item.needId) ?? [];
+      bucket.push(item);
+      itemsByNeedId.set(item.needId, bucket);
+    }
+    const needRowById = new Map(needRows.map((r) => [r.id, r]));
+
+    // Preserve the distance ordering from the ranked query.
+    return ids
+      .map((id) => {
+        const row = needRowById.get(id);
+        if (row === undefined) return null;
+        return {
+          need: Need.fromSnapshot(
+            rowToSnapshot(row, itemsByNeedId.get(id) ?? []),
+          ),
+          distanceMeters: Math.round(distById.get(id) ?? 0),
+        };
+      })
+      .filter((x): x is { need: Need; distanceMeters: number } => x !== null);
+  }
+
+  async findValidatedInBounds(
+    emergencyId: EmergencyId,
+    q: {
+      minLat: number;
+      minLng: number;
+      maxLat: number;
+      maxLng: number;
+      limit: number;
+    },
+  ): Promise<Need[]> {
+    const now = new Date();
+    const notExpired = or(
+      isNull(needsTable.expiresAt),
+      gt(needsTable.expiresAt, now),
+    ) as SQL;
+
+    const rows = await this.db
+      .select()
+      .from(needsTable)
+      .where(
+        and(
+          eq(needsTable.emergencyId, emergencyId.value),
+          eq(needsTable.status, NeedStatus.Validated),
+          notExpired,
+          between(needsTable.latitude, q.minLat, q.maxLat),
+          between(needsTable.longitude, q.minLng, q.maxLng),
+        ),
+      )
+      .limit(q.limit);
+
+    if (rows.length === 0) return [];
+
+    const ids = rows.map((r) => r.id);
+    const allItems = await this.db
+      .select()
+      .from(needItemsTable)
+      .where(inArray(needItemsTable.needId, ids));
+
+    const itemsByNeedId = new Map<string, ItemsRow[]>();
+    for (const item of allItems) {
+      const bucket = itemsByNeedId.get(item.needId) ?? [];
+      bucket.push(item);
+      itemsByNeedId.set(item.needId, bucket);
+    }
+
+    return rows.map((r) =>
+      Need.fromSnapshot(rowToSnapshot(r, itemsByNeedId.get(r.id) ?? [])),
     );
   }
 
@@ -222,6 +336,7 @@ export class DrizzleNeedRepository implements NeedRepository {
     status: NeedStatus,
     filters?: NeedFilters,
     extraConditions: SQL[] = [],
+    pagination?: { limit: number; offset: number },
   ): Promise<Need[]> {
     const conditions: SQL[] = [
       eq(needsTable.emergencyId, emergencyId.value),
@@ -254,10 +369,18 @@ export class DrizzleNeedRepository implements NeedRepository {
       conditions.push(eq(needsTable.resourceId, filters.resourceId));
     }
 
-    const rows = await this.db
+    const base = this.db
       .select()
       .from(needsTable)
       .where(and(...conditions));
+    // Deterministic order (newest first, id as tiebreaker) only when paginating,
+    // so non-paginated callers keep their existing (unordered) behaviour.
+    const rows = pagination
+      ? await base
+          .orderBy(desc(needsTable.createdAt), asc(needsTable.id))
+          .limit(pagination.limit)
+          .offset(pagination.offset)
+      : await base;
 
     if (rows.length === 0) return [];
 

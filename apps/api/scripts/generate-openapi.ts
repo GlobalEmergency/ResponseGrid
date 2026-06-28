@@ -24,6 +24,11 @@ async function generate(): Promise<void> {
     .setTitle('ResponseGrid API')
     .setDescription('API for humanitarian emergency resource coordination')
     .setVersion('0.1')
+    // Bearer JWT (user accounts) — matches @ApiBearerAuth() on write endpoints.
+    .addBearerAuth()
+    // Service-account API keys — matches @ApiSecurity('api-key'); sent as the
+    // `X-API-Key: rh_live_…` header (issue #96).
+    .addApiKey({ type: 'apiKey', name: 'X-API-Key', in: 'header' }, 'api-key')
     .addTag('resources')
     .addTag('emergencies')
     .build();

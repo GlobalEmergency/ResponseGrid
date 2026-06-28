@@ -1,11 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  Priority,
-  NeedCategory,
-  NeedStatus,
-  PersonnelSkill,
-} from '../../domain/need-enums';
+import { Priority, NeedStatus, PersonnelSkill } from '../../domain/need-enums';
 import { LocationSensitivity } from '../../../../shared/domain/location-sensitivity';
+import { SupplyLineResponseDto } from '../../../supplies/infrastructure/http/supply-line.dto';
 
 export class CreateNeedResponseDto {
   @ApiProperty({
@@ -24,29 +20,6 @@ export class NeedLocationResponseDto {
 
   @ApiProperty({ example: -66.9036 })
   longitude!: number;
-}
-
-export class NeedItemResponseDto {
-  @ApiProperty({ example: 'Water bottles' })
-  name!: string;
-
-  @ApiProperty({ example: 100 })
-  quantity!: number;
-
-  @ApiPropertyOptional({ example: 'liters', nullable: true, type: String })
-  unit!: string | null;
-
-  @ApiProperty({ enum: NeedCategory, example: NeedCategory.Water })
-  category!: NeedCategory;
-
-  @ApiPropertyOptional({
-    example: 'ampolla',
-    nullable: true,
-    type: String,
-    description:
-      'Presentation / route of administration (ampolla, EV, inhalador…) — #61.',
-  })
-  presentation!: string | null;
 }
 
 export class NeedViewDto {
@@ -93,8 +66,8 @@ export class NeedViewDto {
   @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
   managingOrganizationId!: string | null;
 
-  @ApiProperty({ type: [NeedItemResponseDto] })
-  items!: NeedItemResponseDto[];
+  @ApiProperty({ type: [SupplyLineResponseDto] })
+  items!: SupplyLineResponseDto[];
 
   @ApiProperty({ enum: NeedStatus, example: NeedStatus.Pending })
   status!: NeedStatus;
@@ -147,6 +120,28 @@ export class NeedViewDto {
       'Linked resource / final recipient id (#60), or null if standalone.',
   })
   resourceId!: string | null;
+}
+
+/** A validated need annotated with its distance from the queried point (#57). */
+export class NearbyNeedViewDto extends NeedViewDto {
+  @ApiProperty({
+    example: 1850,
+    description:
+      'Distance in meters from the queried location to the (public) need location.',
+  })
+  distanceMeters!: number;
+}
+
+/** Response wrapper for the "needs near me" endpoint (#57). */
+export class NearbyNeedsResponseDto {
+  @ApiProperty({ type: [NearbyNeedViewDto] })
+  items!: NearbyNeedViewDto[];
+}
+
+/** Response wrapper for the "needs within a bounding box" map endpoint. */
+export class InBoundsNeedsDto {
+  @ApiProperty({ type: [NeedViewDto] })
+  items!: NeedViewDto[];
 }
 
 /** Extended DTO for coordinator views — includes the sensitive skillSpecialty field. */

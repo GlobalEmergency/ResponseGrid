@@ -1,4 +1,5 @@
 import type { components } from '@reliefhub/api-client';
+import Link from 'next/link';
 import { VerificationBadge } from '@/components/atoms/verification-badge';
 import { StatusLight } from '@/components/atoms/status-light';
 import { FreshnessIndicator } from '@/components/atoms/freshness-indicator';
@@ -20,6 +21,8 @@ interface PublicResourceCardProps {
   tVerification: Messages['verification_badge'];
   tStatusLight: Messages['status_light'];
   locale?: Locale;
+  /** When set, the card name links to the resource detail page (#59). */
+  slug?: string;
 }
 
 /**
@@ -36,6 +39,7 @@ export function PublicResourceCard({
   tVerification,
   tStatusLight,
   locale = 'es',
+  slug,
 }: PublicResourceCardProps) {
   const typeLabels: Record<ResourceViewDto['type'], string> = {
     collection_point: t.type_collection_point,
@@ -96,7 +100,16 @@ export function PublicResourceCard({
 
       {/* ── Name ────────────────────────────────────────────────────────── */}
       <h3 className="text-[15px] font-bold leading-tight text-ink">
-        {resource.name}
+        {slug != null ? (
+          <Link
+            href={`/e/${slug}/recursos/${resource.id}`}
+            className="hover:underline"
+          >
+            {resource.name}
+          </Link>
+        ) : (
+          resource.name
+        )}
       </h3>
 
       {/* ── Subtitle: type · stage · city, country ──────────────────────── */}

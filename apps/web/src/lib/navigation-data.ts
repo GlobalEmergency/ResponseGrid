@@ -35,31 +35,26 @@ export const getNotificationUnread = cache(async (): Promise<number> => {
 });
 
 /**
- * The active emergencies the principal holds a (non-expired) grant in, resolved
- * to {id, slug, name, roleIds}. Joins the user's emergency-scoped grants against
- * the active `/emergencies` list (paused/closed emergencies have no slug here and
- * are skipped — a known v1 limitation).
+ * The emergencies the principal holds a (non-expired) grant in, resolved to
+ * {id, slug, name, roleIds}. Backed by `/emergencies/mine`, which resolves the
+ * principal's emergency-scoped grants server-side and — unlike the public
+ * `/emergencies` list — includes paused/closed emergencies, so a verifier or
+ * coordinator keeps reaching the coordination panel after the emergency is
+ * paused.
  */
 export const getMyEmergencies = cache(async (): Promise<MyEmergencyNav[]> => {
-  const me = await getMe();
-  if (me == null) return [];
-  const { data: emergencies } = await api.GET('/emergencies');
-  const byId = new Map((emergencies ?? []).map((e) => [e.id, e]));
-  const acc = new Map<string, MyEmergencyNav>();
-  const now = Date.now();
-
-  for (const g of me.grants ?? []) {
-    if (g.scopeType !== 'emergency' || g.scopeId == null) continue;
-    if (g.expiresAt != null && new Date(g.expiresAt).getTime() <= now) continue;
-    const e = byId.get(g.scopeId);
-    if (e?.slug == null) continue;
-    const entry =
-      acc.get(g.scopeId) ?? { id: e.id, slug: e.slug, name: e.name, roleIds: [] };
-    if (!entry.roleIds.includes(g.roleId)) entry.roleIds.push(g.roleId);
-    acc.set(g.scopeId, entry);
-  }
-
-  return [...acc.values()];
+  const token = await getToken();
+  if (token == null) return [];
+  const { data, response } = await api.GET('/emergencies/mine', {
+    headers: authHeaders(token),
+  });
+  if (response.status === 401) return [];
+  return (data ?? []).map((e) => ({
+    id: e.id,
+    slug: e.slug,
+    name: e.name,
+    roleIds: e.roleIds,
+  }));
 });
 
 /** Everything the dashboard shell needs in one cached call. */

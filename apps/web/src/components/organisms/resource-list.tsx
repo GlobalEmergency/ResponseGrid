@@ -58,6 +58,8 @@ interface ResourceListProps {
   tNearby: Messages['nearby_points'];
   tEmpty: { title: string; description?: string };
   locale: Locale;
+  /** Emergency slug — enables linking each card to its resource detail page. */
+  slug?: string;
 }
 
 export function ResourceList({
@@ -74,6 +76,7 @@ export function ResourceList({
   tNearby,
   tEmpty,
   locale,
+  slug,
 }: ResourceListProps) {
   // ── Filter state (category/country) → triggers re-fetch ──────────────────
   const [activeCategory, setActiveCategory] = useState('');
@@ -189,6 +192,31 @@ export function ResourceList({
     setGeoError(false);
   }
 
+  /**
+   * Fetches nearby resources for the ephemeral coordinates provided by
+   * NearbyButton. Throws on failure so the button surfaces the geo error.
+   */
+  async function handleNearbyLocate({
+    lat,
+    lng,
+  }: {
+    lat: number;
+    lng: number;
+  }) {
+    const client = createResponseGridClient(API_URL);
+    const { data } = await client.GET(
+      '/emergencies/{emergencyId}/public/resources/nearby',
+      {
+        params: {
+          path: { emergencyId },
+          query: { lat, lng, radius: 50000, limit: 50 },
+        },
+      },
+    );
+    if (data == null) throw new Error('nearby request failed');
+    handleNearbyResults(data.items);
+  }
+
   // ── Geographic grouping ───────────────────────────────────────────────────
   const { venezuela, diaspora, other } = useMemo(
     () => groupByCountry(items),
@@ -204,9 +232,8 @@ export function ResourceList({
       <div className="flex flex-col gap-4">
         {/* NearbyButton in active state (shows "Volver a la lista") */}
         <NearbyButton
-          emergencyId={emergencyId}
           tNearby={tNearby}
-          onNearbyResults={handleNearbyResults}
+          onLocate={handleNearbyLocate}
           onClear={() => setNearbyItems(null)}
           onGeoError={() => setGeoError(true)}
           active
@@ -231,6 +258,7 @@ export function ResourceList({
                   tVerification={tVerification}
                   tStatusLight={tStatusLight}
                   locale={locale}
+                  slug={slug}
                 />
                 <div className="mt-1 flex justify-end px-1">
                   <DistanceBadge distanceMeters={item.distanceMeters} locale={locale} />
@@ -250,9 +278,8 @@ export function ResourceList({
       <div className="flex flex-col gap-4">
         {/* NearbyButton above filter bar */}
         <NearbyButton
-          emergencyId={emergencyId}
           tNearby={tNearby}
-          onNearbyResults={handleNearbyResults}
+          onLocate={handleNearbyLocate}
           onClear={() => setNearbyItems(null)}
           onGeoError={() => setGeoError(true)}
           active={nearbyItems !== null}
@@ -295,9 +322,8 @@ export function ResourceList({
     <div className="flex flex-col gap-4">
       {/* ── NearbyButton above filter bar ───────────────────────────────── */}
       <NearbyButton
-        emergencyId={emergencyId}
         tNearby={tNearby}
-        onNearbyResults={handleNearbyResults}
+        onLocate={handleNearbyLocate}
         onClear={() => setNearbyItems(null)}
         onGeoError={() => setGeoError(true)}
         active={nearbyItems !== null}
@@ -364,6 +390,7 @@ export function ResourceList({
                       tVerification={tVerification}
                       tStatusLight={tStatusLight}
                       locale={locale}
+                      slug={slug}
                     />
                   </li>
                 ))}
@@ -389,6 +416,7 @@ export function ResourceList({
                       tVerification={tVerification}
                       tStatusLight={tStatusLight}
                       locale={locale}
+                      slug={slug}
                     />
                   </li>
                 ))}
@@ -414,6 +442,7 @@ export function ResourceList({
                       tVerification={tVerification}
                       tStatusLight={tStatusLight}
                       locale={locale}
+                      slug={slug}
                     />
                   </li>
                 ))}

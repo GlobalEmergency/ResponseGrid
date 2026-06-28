@@ -36,3 +36,21 @@ export class FinalRecipientMustBeDestinationError extends Error {
     this.name = 'FinalRecipientMustBeDestinationError';
   }
 }
+export class ResourceNotPendingError extends Error {
+  constructor() {
+    super('Only a resource pending verification can be discarded');
+    this.name = 'ResourceNotPendingError';
+  }
+}
+export class ResourceNotEditableError extends Error {
+  constructor() {
+    super('A discarded resource can no longer be edited');
+    this.name = 'ResourceNotEditableError';
+  }
+}
+export class ResourceNameRequiredError extends Error {
+  constructor() {
+    super('A resource must keep a non-empty name');
+    this.name = 'ResourceNameRequiredError';
+  }
+}

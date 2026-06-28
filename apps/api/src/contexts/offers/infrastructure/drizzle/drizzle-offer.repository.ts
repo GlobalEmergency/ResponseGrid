@@ -8,7 +8,7 @@ import {
 } from '../../domain/donation-offer';
 import { OfferId } from '../../domain/offer-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
-import { NeedCategory, OfferStatus } from '../../domain/offer-enums';
+import { Category, OfferStatus } from '../../domain/offer-enums';
 
 type OfferRow = typeof offersTable.$inferSelect;
 
@@ -18,7 +18,7 @@ function rowToSnapshot(row: OfferRow): DonationOfferSnapshot {
     emergencyId: row.emergencyId,
     donorUserId: row.donorUserId,
     donorOrganizationId: row.donorOrganizationId ?? null,
-    category: row.category as NeedCategory,
+    category: row.category as Category,
     description: row.description,
     quantity: row.quantity,
     unit: row.unit ?? null,

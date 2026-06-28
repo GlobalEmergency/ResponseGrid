@@ -18,6 +18,8 @@ export enum VerificationLevel {
   Unverified = 'unverified',
   Verified = 'verified',
   Official = 'official',
+  /** Discarded during validation: leaves the verification queue, never public. */
+  Rejected = 'rejected',
 }
 
 export enum PublicStatus {

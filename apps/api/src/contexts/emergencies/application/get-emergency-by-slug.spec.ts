@@ -34,12 +34,16 @@ describe('GetEmergencyBySlug', () => {
     expect(view).toBeNull();
   });
 
-  it('throws when slug format is invalid', async () => {
+  it('returns null when slug format is non-canonical (→ 404, not 500)', async () => {
     const repo = new InMemoryEmergencyRepository();
     const useCase = new GetEmergencyBySlug(repo);
 
-    await expect(useCase.execute({ slug: 'INVALID SLUG!' })).rejects.toThrow(
-      'Invalid slug',
-    );
+    // Uppercase, underscores and spaces are not canonical slugs; none can match
+    // a stored (canonical) slug, so the lookup resolves to "not found" (#93).
+    await expect(useCase.execute({ slug: 'Terremoto' })).resolves.toBeNull();
+    await expect(useCase.execute({ slug: 'abc_def' })).resolves.toBeNull();
+    await expect(
+      useCase.execute({ slug: 'INVALID SLUG!' }),
+    ).resolves.toBeNull();
   });
 });

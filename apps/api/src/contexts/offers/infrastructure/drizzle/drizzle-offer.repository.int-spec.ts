@@ -4,7 +4,7 @@ import { DrizzleOfferRepository } from './drizzle-offer.repository';
 import { DonationOffer } from '../../domain/donation-offer';
 import { OfferId } from '../../domain/offer-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
-import { NeedCategory, OfferStatus } from '../../domain/offer-enums';
+import { Category, OfferStatus } from '../../domain/offer-enums';
 import { Location } from '../../../../shared/domain/location';
 import type { Pool } from 'pg';
 
@@ -23,16 +23,13 @@ function makeLocation() {
   });
 }
 
-function makeOffer(overrides?: {
-  category?: NeedCategory;
-  description?: string;
-}) {
+function makeOffer(overrides?: { category?: Category; description?: string }) {
   return DonationOffer.create({
     id: OfferId.create(),
     emergencyId: EmergencyId.fromString(EM),
     donorUserId: USER_ID,
     donorOrganizationId: null,
-    category: overrides?.category ?? NeedCategory.Food,
+    category: overrides?.category ?? Category.Food,
     description: overrides?.description ?? 'Rice bags',
     quantity: 25,
     unit: 'bags',
@@ -69,7 +66,7 @@ describe('DrizzleOfferRepository (integration)', () => {
     expect(found!.id.value).toBe(offer.id.value);
     expect(found!.status).toBe(OfferStatus.Open);
     expect(found!.donorUserId).toBe(USER_ID);
-    expect(found!.category).toBe(NeedCategory.Food);
+    expect(found!.category).toBe(Category.Food);
     expect(found!.description).toBe('Rice bags');
     expect(found!.quantity).toBe(25);
     expect(found!.unit).toBe('bags');
@@ -86,7 +83,7 @@ describe('DrizzleOfferRepository (integration)', () => {
       emergencyId: EmergencyId.fromString(EM),
       donorUserId: USER_ID,
       donorOrganizationId: null,
-      category: NeedCategory.Water,
+      category: Category.Water,
       description: 'Water',
       quantity: 10,
       unit: null,
@@ -151,7 +148,7 @@ describe('DrizzleOfferRepository (integration)', () => {
       emergencyId: EmergencyId.fromString(EM),
       donorUserId: OTHER_USER,
       donorOrganizationId: null,
-      category: NeedCategory.Food,
+      category: Category.Food,
       description: 'Their offer',
       quantity: 5,
       unit: null,
@@ -172,9 +169,9 @@ describe('DrizzleOfferRepository (integration)', () => {
   });
 
   it('findOpenByEmergencyAndCategory filters by category', async () => {
-    const foodOffer = makeOffer({ category: NeedCategory.Food });
+    const foodOffer = makeOffer({ category: Category.Food });
     const medOffer = makeOffer({
-      category: NeedCategory.Medical,
+      category: Category.Medical,
       description: 'Med',
     });
 
@@ -183,9 +180,9 @@ describe('DrizzleOfferRepository (integration)', () => {
 
     const result = await repo.findOpenByEmergencyAndCategory(
       EmergencyId.fromString(EM),
-      NeedCategory.Food,
+      Category.Food,
     );
     expect(result).toHaveLength(1);
-    expect(result[0].category).toBe(NeedCategory.Food);
+    expect(result[0].category).toBe(Category.Food);
   });
 });

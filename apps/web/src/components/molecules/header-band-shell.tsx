@@ -20,6 +20,10 @@ interface HeaderBandShellProps {
    * the offline fallback). Dashboard sections carry their own sidebar/drawer.
    */
   accountSlot?: ReactNode;
+  /** Replaces the top-right language switcher (e.g. a compact options menu). */
+  topRight?: ReactNode;
+  /** Tighter top padding + logo-row spacing for compact (mobile-first) headers. */
+  tight?: boolean;
 }
 
 /**
@@ -34,10 +38,14 @@ export function HeaderBandShell({
   brandSize = 24,
   showLanguageSwitcher = true,
   accountSlot,
+  topRight,
+  tight = false,
 }: HeaderBandShellProps) {
+  const ptClass = tight ? 'pt-4 lg:pt-6' : 'pt-6';
+  const rowMb = children != null ? (tight ? ' mb-3 lg:mb-5' : ' mb-5') : '';
   return (
-    <header className={`rounded-b-[28px] bg-navy px-5 pt-6 ${PB_CLASS[pb]} text-white lg:px-8`}>
-      <div className={`flex items-center justify-between gap-3${children != null ? ' mb-5' : ''}`}>
+    <header className={`relative z-30 rounded-b-[28px] bg-navy px-5 ${ptClass} ${PB_CLASS[pb]} text-white lg:px-8`}>
+      <div className={`flex items-center justify-between gap-3${rowMb}`}>
         <Link
           href="/"
           aria-label="ResponseGrid"
@@ -47,7 +55,7 @@ export function HeaderBandShell({
         </Link>
         <div className="flex items-center gap-2.5">
           {accountSlot}
-          {showLanguageSwitcher && <LanguageSwitcher tone="dark" />}
+          {topRight ?? (showLanguageSwitcher && <LanguageSwitcher tone="dark" />)}
         </div>
       </div>
       {children}

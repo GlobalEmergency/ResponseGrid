@@ -21,6 +21,48 @@ describe('ROLE_CATALOG', () => {
     }
   });
 
+  it('defines the logistics roles transportista and hub_manager (EPIC #103)', () => {
+    expect(roleExists('transportista')).toBe(true);
+    expect(roleExists('hub_manager')).toBe(true);
+
+    const transportista = new Set(permissionsForRole('transportista'));
+    expect(transportista.has('shipment:track')).toBe(true);
+    expect(transportista.has('manifest:sign')).toBe(true);
+    // a carrier executes shipments; coordination/hub creates them
+    expect(transportista.has('shipment:create')).toBe(false);
+
+    const hubManager = new Set(permissionsForRole('hub_manager'));
+    expect(hubManager.has('shipment:create')).toBe(true);
+    expect(hubManager.has('shipment:track')).toBe(true);
+  });
+
+  it('emergency_coordinator can read the audit trail but emergency_verifier cannot', () => {
+    expect(
+      new Set(permissionsForRole('emergency_coordinator')).has('audit:read'),
+    ).toBe(true);
+    expect(
+      new Set(permissionsForRole('emergency_verifier')).has('audit:read'),
+    ).toBe(false);
+  });
+
+  it('grants the coordinator the shipment expedition permissions (#106)', () => {
+    const coordinator = new Set(permissionsForRole('emergency_coordinator'));
+    expect(coordinator.has('shipment:create')).toBe(true);
+    expect(coordinator.has('shipment:assign')).toBe(true);
+    expect(coordinator.has('shipment:update')).toBe(true);
+    expect(coordinator.has('shipment:read')).toBe(true);
+  });
+
+  it('wires the transport-capacity permissions (#105)', () => {
+    // citizen publishes (grado ciudadano, como offer:create)
+    expect(permissionsForRole('citizen')).toContain('capacity:publish');
+    // coordination and verification read capacities (como offer:read)
+    expect(permissionsForRole('emergency_coordinator')).toContain(
+      'capacity:read',
+    );
+    expect(permissionsForRole('emergency_verifier')).toContain('capacity:read');
+  });
+
   it('every role only references permissions that exist in the catalog', () => {
     const valid = new Set<string>(ALL_PERMISSIONS);
     for (const role of Object.values(ROLE_CATALOG)) {

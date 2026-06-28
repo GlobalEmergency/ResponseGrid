@@ -11,7 +11,9 @@ export type ScopeRefProps =
   | { type: 'organization'; id: string }
   | { type: 'emergency'; id: string }
   | { type: 'group'; id: string }
-  | { type: 'entity'; entityType: string; id: string };
+  | { type: 'entity'; entityType: string; id: string }
+  | { type: 'hub'; id: string }
+  | { type: 'corridor'; id: string };
 
 export type ScopeType = ScopeRefProps['type'];
 
@@ -49,6 +51,16 @@ export class ScopeRef {
     });
   }
 
+  /** Logistics hub (e.g. a port/airport) — a cross-emergency scope (§16). */
+  static hub(id: string): ScopeRef {
+    return new ScopeRef({ type: 'hub', id: requireId(id) });
+  }
+
+  /** Logistics corridor between nodes — a cross-emergency scope (§16). */
+  static corridor(id: string): ScopeRef {
+    return new ScopeRef({ type: 'corridor', id: requireId(id) });
+  }
+
   static fromProps(props: ScopeRefProps): ScopeRef {
     switch (props.type) {
       case 'platform':
@@ -61,6 +73,10 @@ export class ScopeRef {
         return ScopeRef.group(props.id);
       case 'entity':
         return ScopeRef.entity(props.entityType, props.id);
+      case 'hub':
+        return ScopeRef.hub(props.id);
+      case 'corridor':
+        return ScopeRef.corridor(props.id);
       default: {
         // Unknown scope type. The compiler proves this is unreachable for valid
         // input, but grant snapshots arrive from JWTs and are not re-validated
@@ -94,10 +110,14 @@ export class ScopeRef {
     if (
       (a.type === 'organization' ||
         a.type === 'emergency' ||
-        a.type === 'group') &&
+        a.type === 'group' ||
+        a.type === 'hub' ||
+        a.type === 'corridor') &&
       (b.type === 'organization' ||
         b.type === 'emergency' ||
-        b.type === 'group')
+        b.type === 'group' ||
+        b.type === 'hub' ||
+        b.type === 'corridor')
     ) {
       return a.id === b.id;
     }
@@ -121,9 +141,10 @@ export class ScopeRef {
 
 /**
  * The ancestor chain of a scope (the scope itself → platform). Simplified for
- * the current model, where emergencies and organizations sit directly under
- * platform; group/org nesting resolution is a later addition (docs/features/13
- * §16, §18.3-b). Platform is always the root.
+ * the current model, where emergencies, organizations and logistics
+ * hubs/corridors sit directly under platform (hubs/corridors are
+ * cross-emergency, docs/features/13 §16); group/org nesting resolution is a
+ * later addition (§18.3-b). Platform is always the root.
  */
 export function ancestorChain(scope: ScopeRefProps): ScopeRefProps[] {
   if (scope.type === 'platform') return [{ type: 'platform' }];

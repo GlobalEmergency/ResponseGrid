@@ -438,7 +438,9 @@ for (const p of items) {
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Card title={d.auth_read_t}>{d.auth_read_b}</Card>
                   <Card title={d.auth_write_t}>{d.auth_write_b}</Card>
+                  <Card title={d.auth_sa_t}>{d.auth_sa_b}</Card>
                 </div>
+                <Callout tone="warn">{d.auth_note}</Callout>
               </Section>
 
               {/* Quickstart */}
@@ -565,8 +567,9 @@ for (const p of items) {
                     'hygiene',
                     'water',
                     'food',
-                    'medical',
+                    'clothing',
                     'shelter',
+                    'medical',
                     'tools',
                     'other',
                     'medicines',

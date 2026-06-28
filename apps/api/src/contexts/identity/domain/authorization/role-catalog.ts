@@ -90,6 +90,11 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'need:prioritize',
       'offer:read',
       'offer:match',
+      'capacity:read',
+      'shipment:create',
+      'shipment:assign',
+      'shipment:update',
+      'shipment:read',
       'campaign:read',
       'campaign:verify',
       'campaign:block',
@@ -105,6 +110,10 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'group:create',
       'group:read',
       'group:manage_members',
+      // Trazabilidad: el coordinador (no el verificador) ve el registro de
+      // actividad de SU emergencia. El scope emergency del grant limita la
+      // lectura a su propia emergencia (ver EmergencyAuditController).
+      'audit:read',
     ],
   },
   emergency_verifier: {
@@ -120,6 +129,7 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'campaign:read',
       'campaign:verify',
       'offer:read',
+      'capacity:read',
     ],
   },
   group_manager: {
@@ -154,6 +164,27 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'volunteer:read',
     ],
   },
+  transportista: {
+    id: 'transportista',
+    description:
+      'Transportista: ejecuta las expediciones asignadas, actualiza su estado ' +
+      'en tránsito y firma manifiestos (ciudadano con vehículo u operador).',
+    defaultScopeType: 'emergency',
+    permissions: ['shipment:read', 'shipment:track', 'manifest:sign'],
+  },
+  hub_manager: {
+    id: 'hub_manager',
+    description:
+      'Gestor de hub logístico: crea y opera las expediciones que transitan su ' +
+      'hub. Autoridad transversal a emergencias vía scope hub/entity (§16).',
+    defaultScopeType: 'entity',
+    permissions: [
+      'shipment:create',
+      'shipment:read',
+      'shipment:track',
+      'manifest:sign',
+    ],
+  },
   viewer: {
     id: 'viewer',
     description: 'Solo lectura.',
@@ -168,6 +199,7 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
     permissions: [
       'offer:create',
       'offer:read',
+      'capacity:publish',
       'resource:register',
       'resource:read',
       'need:read',

@@ -3,6 +3,7 @@ import { Need, NeedSnapshot } from '../domain/need';
 import { NeedId } from '../domain/need-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { NeedStatus } from '../domain/need-enums';
+import { haversineMeters } from '../../../shared/domain/geo-distance';
 
 export class InMemoryNeedRepository implements NeedRepository {
   private store = new Map<string, NeedSnapshot>();
@@ -20,34 +21,112 @@ export class InMemoryNeedRepository implements NeedRepository {
   findValidatedByEmergency(
     emergencyId: EmergencyId,
     filters?: NeedFilters,
+    pagination?: { limit: number; offset: number },
   ): Promise<Need[]> {
+    const now = new Date();
+    let snaps = [...this.store.values()].filter((s) => {
+      if (s.emergencyId !== emergencyId.value) return false;
+      if (s.status !== NeedStatus.Validated) return false;
+      // Exclude expired: expiresAt IS NOT NULL AND expiresAt <= now
+      if (
+        s.expiresAt !== null &&
+        s.expiresAt !== undefined &&
+        s.expiresAt <= now
+      )
+        return false;
+      if (filters?.priority !== undefined && s.priority !== filters.priority)
+        return false;
+      if (
+        filters?.category !== undefined &&
+        !s.items.some((i) => i.category === filters.category)
+      )
+        return false;
+      if (
+        filters?.resourceId !== undefined &&
+        filters.resourceId !== null &&
+        (s.resourceId ?? null) !== filters.resourceId
+      )
+        return false;
+      return true;
+    });
+
+    if (pagination !== undefined) {
+      // Match the drizzle order: newest first, id as a stable tiebreaker.
+      snaps = snaps
+        .sort((a, b) => {
+          const diff = b.createdAt.getTime() - a.createdAt.getTime();
+          if (diff !== 0) return diff;
+          return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+        })
+        .slice(pagination.offset, pagination.offset + pagination.limit);
+    }
+
+    return Promise.resolve(snaps.map((s) => Need.fromSnapshot(s)));
+  }
+
+  findNearbyValidated(
+    emergencyId: EmergencyId,
+    q: { lat: number; lng: number; radiusMeters: number; limit: number },
+  ): Promise<Array<{ need: Need; distanceMeters: number }>> {
     const now = new Date();
     const result = [...this.store.values()]
       .filter((s) => {
         if (s.emergencyId !== emergencyId.value) return false;
         if (s.status !== NeedStatus.Validated) return false;
-        // Exclude expired: expiresAt IS NOT NULL AND expiresAt <= now
         if (
           s.expiresAt !== null &&
           s.expiresAt !== undefined &&
           s.expiresAt <= now
         )
           return false;
-        if (filters?.priority !== undefined && s.priority !== filters.priority)
-          return false;
-        if (
-          filters?.category !== undefined &&
-          !s.items.some((i) => i.category === filters.category)
-        )
-          return false;
-        if (
-          filters?.resourceId !== undefined &&
-          filters.resourceId !== null &&
-          (s.resourceId ?? null) !== filters.resourceId
-        )
-          return false;
         return true;
       })
+      .map((s) => ({
+        snap: s,
+        dist: haversineMeters(
+          q.lat,
+          q.lng,
+          s.location.latitude,
+          s.location.longitude,
+        ),
+      }))
+      .filter(({ dist }) => dist <= q.radiusMeters)
+      .sort((a, b) => a.dist - b.dist)
+      .slice(0, q.limit)
+      .map(({ snap, dist }) => ({
+        need: Need.fromSnapshot(snap),
+        distanceMeters: Math.round(dist),
+      }));
+    return Promise.resolve(result);
+  }
+
+  findValidatedInBounds(
+    emergencyId: EmergencyId,
+    q: {
+      minLat: number;
+      minLng: number;
+      maxLat: number;
+      maxLng: number;
+      limit: number;
+    },
+  ): Promise<Need[]> {
+    const now = new Date();
+    const result = [...this.store.values()]
+      .filter((s) => {
+        if (s.emergencyId !== emergencyId.value) return false;
+        if (s.status !== NeedStatus.Validated) return false;
+        if (
+          s.expiresAt !== null &&
+          s.expiresAt !== undefined &&
+          s.expiresAt <= now
+        )
+          return false;
+        const { latitude, longitude } = s.location;
+        if (latitude < q.minLat || latitude > q.maxLat) return false;
+        if (longitude < q.minLng || longitude > q.maxLng) return false;
+        return true;
+      })
+      .slice(0, q.limit)
       .map((s) => Need.fromSnapshot(s));
     return Promise.resolve(result);
   }

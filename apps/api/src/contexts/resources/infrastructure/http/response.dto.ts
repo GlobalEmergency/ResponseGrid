@@ -116,6 +116,21 @@ export class ResourceViewDto {
   recipientType!: string | null;
 }
 
+/**
+ * Detail view returned by the single-resource endpoint: the base view plus an
+ * AGGREGATED inventory — only the distinct categories the place holds, never
+ * names or quantities (privacy: the endpoint is public/anonymous; see
+ * ResourceDetailView). List/map endpoints return ResourceViewDto.
+ */
+export class ResourceDetailViewDto extends ResourceViewDto {
+  @ApiProperty({
+    type: [String],
+    example: ['water', 'hygiene'],
+    description: 'Distinct categories of material this place has declared',
+  })
+  inventoryCategories!: string[];
+}
+
 export class NearbyResourceViewDto extends ResourceViewDto {
   @ApiProperty({
     example: 1234,

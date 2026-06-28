@@ -7,6 +7,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { randomUUID } from 'node:crypto';
 import type { Request, Response } from 'express';
+import { OAUTH_NEXT_COOKIE, sanitizeNextPath } from './oauth-next';
 
 /** Name of the cookie that carries the CSRF state token. */
 const STATE_COOKIE = 'rh_oauth_state';
@@ -33,21 +34,36 @@ function parseCookieHeader(
 }
 
 /**
- * Reads the OAuth CSRF state cookie from the request.
- * Prefers `req.cookies` (cookie-parser) but falls back to manual header parsing
- * since this project does NOT register cookie-parser middleware.
+ * Best-effort percent-decode. Express' `res.cookie` URL-encodes values, so the
+ * manual header parser must decode them back. Malformed sequences (rare) fall
+ * through to the raw value instead of throwing.
  */
-function readStateCookie(req: Request): string | undefined {
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+/**
+ * Reads a cookie from the request by name.
+ * Prefers `req.cookies` (cookie-parser, already decoded) but falls back to
+ * manual header parsing — this project does NOT register cookie-parser
+ * middleware — decoding the raw value to undo Express' `res.cookie` encoding.
+ */
+export function readCookie(req: Request, name: string): string | undefined {
   // Express types `req.cookies` as `any` (cookie-parser may or may not be
   // registered). We go through `unknown` to satisfy `no-unsafe-*` lint rules.
   const cookieJar: unknown = (req as Request & { cookies?: unknown }).cookies;
   if (cookieJar !== null && typeof cookieJar === 'object') {
-    const raw: unknown = (cookieJar as Record<string, unknown>)[STATE_COOKIE];
+    const raw: unknown = (cookieJar as Record<string, unknown>)[name];
     if (typeof raw === 'string') {
       return raw;
     }
   }
-  return parseCookieHeader(req.headers.cookie, STATE_COOKIE);
+  const fromHeader = parseCookieHeader(req.headers.cookie, name);
+  return fromHeader === undefined ? undefined : safeDecode(fromHeader);
 }
 
 /**
@@ -63,16 +79,29 @@ export function OAuthInitiateGuard(
 ): new () => CanActivate {
   class MixinOAuthInitiateGuard extends AuthGuard(provider) {
     override getAuthenticateOptions(context: ExecutionContext): object {
+      const req = context.switchToHttp().getRequest<Request>();
       const res = context.switchToHttp().getResponse<Response>();
       const state = randomUUID();
 
-      res.cookie(STATE_COOKIE, state, {
+      const cookieOptions = {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'lax' as const,
         path: '/auth',
         maxAge: STATE_MAX_AGE_MS,
         secure: process.env.COOKIE_SECURE === 'true',
-      });
+      };
+
+      res.cookie(STATE_COOKIE, state, cookieOptions);
+
+      // Stash the post-login return path so the callback can send the user back
+      // to the page that triggered the login. Cleared when absent or unsafe so a
+      // previous attempt's target can never leak into this one.
+      const next = sanitizeNextPath(req.query['next']);
+      if (next === undefined) {
+        res.clearCookie(OAUTH_NEXT_COOKIE, { path: '/auth' });
+      } else {
+        res.cookie(OAUTH_NEXT_COOKIE, next, cookieOptions);
+      }
 
       return { state };
     }
@@ -107,7 +136,7 @@ export function OAuthCallbackGuard(
       const stateFromQuery: string | undefined =
         typeof queryState === 'string' ? queryState : undefined;
 
-      const stateFromCookie = readStateCookie(req);
+      const stateFromCookie = readCookie(req, STATE_COOKIE);
 
       if (
         !stateFromQuery ||

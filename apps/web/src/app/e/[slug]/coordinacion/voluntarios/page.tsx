@@ -8,7 +8,6 @@ import { VolunteerRosterFilter } from '@/components/molecules/volunteer-roster-f
 import { TaskCard } from '@/components/organisms/task-card';
 import { CreateTaskForm } from '@/components/organisms/create-task-form';
 import { EmptyState } from '@/components/molecules/empty-state';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { getT } from '@/i18n/server';
 import type { components } from '@reliefhub/api-client';
 
@@ -116,80 +115,62 @@ export default async function CoordinacionVoluntariosPage({ params, searchParams
   const tc = t.coord;
 
   return (
-    <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-xl">
-        <PageHeaderBand
-          backHref={`/e/${slug}/coordinacion`}
-          backLabel={tc.back_coordination}
-          title={tc.volunteers_title}
-          subtitle={emergency.name}
-        />
-        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
+    <>
+      {/* ── ROSTER DE VOLUNTARIOS ────────────────────────────────── */}
+      <section aria-labelledby="roster-heading" className="flex flex-col gap-4">
+        <h2 id="roster-heading" className="text-xl font-bold text-ink">
+          {tc.roster_heading}
+        </h2>
 
-        {/* ── ROSTER DE VOLUNTARIOS ────────────────────────────────── */}
-        <section aria-labelledby="roster-heading" className="flex flex-col gap-4">
-          <h2
-            id="roster-heading"
-            className="text-xl font-bold text-ink"
-          >
-            {tc.roster_heading}
-          </h2>
+        <VolunteerRosterFilter />
 
-          <VolunteerRosterFilter />
+        {volunteers.length === 0 ? (
+          <EmptyState
+            title={tc.roster_empty_title}
+            description={tc.roster_empty_description}
+          />
+        ) : (
+          <ul className="flex flex-col gap-3" aria-label={tc.roster_list_label}>
+            {volunteers.map((volunteer) => (
+              <li key={volunteer.id}>
+                <VolunteerCard volunteer={volunteer} slug={slug} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
-          {volunteers.length === 0 ? (
-            <EmptyState
-              title={tc.roster_empty_title}
-              description={tc.roster_empty_description}
-            />
-          ) : (
-            <ul className="flex flex-col gap-3" aria-label={tc.roster_list_label}>
-              {volunteers.map((volunteer) => (
-                <li key={volunteer.id}>
-                  <VolunteerCard volunteer={volunteer} slug={slug} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+      <hr className="border-line" />
 
-        <hr className="border-line" />
+      {/* ── TAREAS ───────────────────────────────────────────────── */}
+      <section aria-labelledby="tasks-heading" className="flex flex-col gap-6">
+        <h2 id="tasks-heading" className="text-xl font-bold text-ink">
+          {tc.tasks_heading}
+        </h2>
 
-        {/* ── TAREAS ───────────────────────────────────────────────── */}
-        <section aria-labelledby="tasks-heading" className="flex flex-col gap-6">
-          <h2
-            id="tasks-heading"
-            className="text-xl font-bold text-ink"
-          >
-            {tc.tasks_heading}
-          </h2>
+        {/* Create task form */}
+        <CreateTaskForm emergencyId={emergencyId} slug={slug} />
 
-          {/* Create task form */}
-          <CreateTaskForm emergencyId={emergencyId} slug={slug} />
-
-          {/* Task list */}
-          {tasks.length === 0 ? (
-            <EmptyState
-              title={tc.tasks_empty_title}
-              description={tc.tasks_empty_description}
-            />
-          ) : (
-            <ul className="flex flex-col gap-4" aria-label={tc.tasks_list_label}>
-              {tasks.map((task) => (
-                <li key={task.id}>
-                  <TaskCard
-                    task={task}
-                    availableVolunteers={availableVolunteers}
-                    slug={slug}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        </div>
-      </div>
-    </main>
+        {/* Task list */}
+        {tasks.length === 0 ? (
+          <EmptyState
+            title={tc.tasks_empty_title}
+            description={tc.tasks_empty_description}
+          />
+        ) : (
+          <ul className="flex flex-col gap-4" aria-label={tc.tasks_list_label}>
+            {tasks.map((task) => (
+              <li key={task.id}>
+                <TaskCard
+                  task={task}
+                  availableVolunteers={availableVolunteers}
+                  slug={slug}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </>
   );
 }

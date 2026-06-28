@@ -1,10 +1,12 @@
+import { InvalidSlugError } from './invalid-slug.error';
+
 export class Slug {
   private static readonly RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
   private constructor(public readonly value: string) {}
 
   static fromString(s: string): Slug {
-    if (!Slug.RE.test(s)) throw new Error(`Invalid slug: "${s}"`);
+    if (!Slug.RE.test(s)) throw new InvalidSlugError(s);
     return new Slug(s);
   }
 

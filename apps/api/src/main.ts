@@ -7,6 +7,8 @@ import { AppModule } from './app.module';
 import { DomainExceptionFilter } from './contexts/resources/infrastructure/http/domain-exception.filter';
 import { NeedsDomainExceptionFilter } from './contexts/needs/infrastructure/http/domain-exception.filter';
 import { ReportExceptionFilter } from './contexts/reports/infrastructure/http/report-exception.filter';
+import { OffersDomainExceptionFilter } from './contexts/offers/infrastructure/http/domain-exception.filter';
+import { LogisticsDomainExceptionFilter } from './contexts/logistics/infrastructure/http/domain-exception.filter';
 
 /**
  * Validates that JWT_SECRET is strong enough in production.
@@ -65,6 +67,8 @@ async function bootstrap(): Promise<void> {
     new DomainExceptionFilter(),
     new NeedsDomainExceptionFilter(),
     new ReportExceptionFilter(),
+    new OffersDomainExceptionFilter(),
+    new LogisticsDomainExceptionFilter(),
   );
   app.enableShutdownHooks();
 
@@ -72,6 +76,11 @@ async function bootstrap(): Promise<void> {
     .setTitle('ResponseGrid API')
     .setDescription('API for humanitarian emergency resource coordination')
     .setVersion('0.1')
+    // Bearer JWT (user accounts) — matches @ApiBearerAuth() on write endpoints.
+    .addBearerAuth()
+    // Service-account API keys — matches @ApiSecurity('api-key'); sent as the
+    // `X-API-Key: rh_live_…` header (issue #96).
+    .addApiKey({ type: 'apiKey', name: 'X-API-Key', in: 'header' }, 'api-key')
     .addTag('resources')
     .build();
   const document = SwaggerModule.createDocument(app, config);

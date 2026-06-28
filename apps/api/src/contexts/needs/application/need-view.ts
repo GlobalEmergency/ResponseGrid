@@ -1,6 +1,6 @@
 import { Need } from '../domain/need';
 import { LocationProps } from '../../../shared/domain/location';
-import { NeedItemSnapshot } from '../domain/need-item';
+import { SupplyLineSnapshot } from '../../supplies/domain/supply-line';
 import { LocationSensitivity } from '../../../shared/domain/location-sensitivity';
 import { approximateLocation } from '../../../shared/domain/approximate-location';
 import { PersonnelSkill } from '../domain/need-enums';
@@ -15,7 +15,7 @@ export interface NeedView {
   priority: string;
   requesterOrganizationId: string | null;
   managingOrganizationId: string | null;
-  items: NeedItemSnapshot[];
+  items: SupplyLineSnapshot[];
   status: string;
   createdAt: string;
   expiresAt: string | null;

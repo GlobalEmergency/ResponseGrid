@@ -2,7 +2,7 @@ import { AssignNeedManager } from './assign-need-manager';
 import { CreateNeed } from './create-need';
 import { InMemoryNeedRepository } from '../infrastructure/in-memory-need.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
-import { NeedCategory, Priority } from '../domain/need-enums';
+import { Category, Priority } from '../domain/need-enums';
 import { NeedNotFoundError } from './need-not-found.error';
 import { NeedEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 
@@ -41,7 +41,7 @@ describe('AssignNeedManager', () => {
           name: 'Water',
           quantity: 10,
           unit: 'liters',
-          category: NeedCategory.Water,
+          category: Category.Water,
         },
       ],
     });
@@ -76,7 +76,7 @@ describe('AssignNeedManager', () => {
           name: 'Kits',
           quantity: 5,
           unit: 'kits',
-          category: NeedCategory.Medical,
+          category: Category.Medical,
         },
       ],
     });

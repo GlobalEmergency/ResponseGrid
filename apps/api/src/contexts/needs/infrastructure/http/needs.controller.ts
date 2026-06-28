@@ -5,6 +5,7 @@ import {
   HttpCode,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
   Request,
@@ -26,22 +27,36 @@ import {
 } from '@nestjs/swagger';
 import { CreateNeed } from '../../application/create-need';
 import { ValidateNeed } from '../../application/validate-need';
+import { EditNeed, EditNeedCommand } from '../../application/edit-need';
+import { DiscardNeed } from '../../application/discard-need';
 import { GetPublicNeeds } from '../../application/get-public-needs';
+import {
+  GetNearbyNeeds,
+  NearbyNeedView,
+} from '../../application/get-nearby-needs';
+import { GetNeedsInBounds } from '../../application/get-needs-in-bounds';
 import { GetNeedsQueue } from '../../application/get-needs-queue';
 import { AssignNeedManager } from '../../application/assign-need-manager';
 import { RenewNeed, GetExpiredNeeds } from '../../application/renew-need';
 import { SuggestVolunteersForNeed } from '../../application/suggest-volunteers-for-need';
 import { CreateTaskFromNeed } from '../../application/create-task-from-need';
 import { NeedView } from '../../application/need-view';
-import { NeedCategory, Priority } from '../../domain/need-enums';
+import { Category, Priority } from '../../domain/need-enums';
 import {
   CreateNeedDto,
   AssignNeedManagerDto,
   CreateTaskFromNeedDto,
+  NearbyNeedsQueryDto,
+  InBoundsNeedsQueryDto,
+  EditNeedDto,
+  DiscardNeedDto,
 } from './dto';
+import { setAuditContext } from '../../../audit/infrastructure/http/audit-context';
 import {
   CreateNeedResponseDto,
   NeedViewDto,
+  NearbyNeedsResponseDto,
+  InBoundsNeedsDto,
   VolunteerSuggestionDto,
   CreatedTaskFromNeedDto,
 } from './response.dto';
@@ -59,7 +74,11 @@ export class NeedsController {
   constructor(
     private readonly createNeed: CreateNeed,
     private readonly validateNeed: ValidateNeed,
+    private readonly editNeed: EditNeed,
+    private readonly discardNeed: DiscardNeed,
     private readonly getPublicNeeds: GetPublicNeeds,
+    private readonly getNearbyNeeds: GetNearbyNeeds,
+    private readonly getNeedsInBounds: GetNeedsInBounds,
     private readonly getNeedsQueue: GetNeedsQueue,
     private readonly assignNeedManager: AssignNeedManager,
     private readonly renewNeed: RenewNeed,
@@ -126,7 +145,7 @@ export class NeedsController {
   })
   @ApiQuery({
     name: 'category',
-    enum: NeedCategory,
+    enum: Category,
     required: false,
     description:
       'Filter by item category (needs with at least one item of this category)',
@@ -143,6 +162,16 @@ export class NeedsController {
     format: 'uuid',
     description: 'Filter to needs linked to this resource / final recipient',
   })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Page size for pagination (1-100). Omit to return all.',
+  })
+  @ApiQuery({
+    name: 'offset',
+    required: false,
+    description: 'Number of items to skip (pagination). Defaults to 0.',
+  })
   @ApiOkResponse({
     description: 'List of validated needs',
     type: [NeedViewDto],
@@ -152,21 +181,88 @@ export class NeedsController {
     @Query('category') category?: string,
     @Query('priority') priority?: string,
     @Query('resourceId') resourceId?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
   ): Promise<NeedView[]> {
-    const validCategory = Object.values(NeedCategory).includes(
-      category as NeedCategory,
-    )
-      ? (category as NeedCategory)
+    const validCategory = Object.values(Category).includes(category as Category)
+      ? (category as Category)
       : undefined;
     const validPriority = Object.values(Priority).includes(priority as Priority)
       ? (priority as Priority)
       : undefined;
+
+    // Pagination is opt-in: only applied when a valid `limit` is supplied, so
+    // existing callers that omit it still receive the full validated list.
+    const parsedLimit =
+      limit !== undefined
+        ? Math.min(Math.max(Number.parseInt(limit, 10) || 50, 1), 100)
+        : undefined;
+    const parsedOffset =
+      offset !== undefined
+        ? Math.max(Number.parseInt(offset, 10) || 0, 0)
+        : undefined;
 
     return this.getPublicNeeds.execute({
       emergencyId,
       ...(validCategory !== undefined && { category: validCategory }),
       ...(validPriority !== undefined && { priority: validPriority }),
       ...(resourceId !== undefined && { resourceId }),
+      ...(parsedLimit !== undefined && { limit: parsedLimit }),
+      ...(parsedOffset !== undefined && { offset: parsedOffset }),
+    });
+  }
+
+  @Get('emergencies/:emergencyId/public/needs/nearby')
+  @ApiOperation({
+    summary:
+      'List validated needs near a GPS point, ordered by distance (public, #57)',
+  })
+  @ApiParam({
+    name: 'emergencyId',
+    description: 'Emergency UUID',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Validated needs within radius ordered by distance',
+    type: NearbyNeedsResponseDto,
+  })
+  async listNearby(
+    @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
+    @Query() query: NearbyNeedsQueryDto,
+  ): Promise<{ items: NearbyNeedView[] }> {
+    return this.getNearbyNeeds.execute({
+      emergencyId,
+      lat: query.lat,
+      lng: query.lng,
+      radiusMeters: query.radius,
+      limit: query.limit ?? 50,
+    });
+  }
+
+  @Get('emergencies/:emergencyId/public/needs/in-bounds')
+  @ApiOperation({
+    summary: 'List validated needs within a geographic bounding box (public)',
+  })
+  @ApiParam({
+    name: 'emergencyId',
+    description: 'Emergency UUID',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Validated needs within the bounding box',
+    type: InBoundsNeedsDto,
+  })
+  async needsInBounds(
+    @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
+    @Query() query: InBoundsNeedsQueryDto,
+  ): Promise<{ items: NeedView[] }> {
+    return this.getNeedsInBounds.execute({
+      emergencyId,
+      minLat: query.minLat,
+      minLng: query.minLng,
+      maxLat: query.maxLat,
+      maxLng: query.maxLng,
+      limit: query.limit ?? 500,
     });
   }
 
@@ -184,7 +280,7 @@ export class NeedsController {
   })
   @ApiQuery({
     name: 'category',
-    enum: NeedCategory,
+    enum: Category,
     required: false,
     description:
       'Filter by item category (needs with at least one item of this category)',
@@ -205,10 +301,8 @@ export class NeedsController {
     @Query('category') category?: string,
     @Query('priority') priority?: string,
   ): Promise<NeedView[]> {
-    const validCategory = Object.values(NeedCategory).includes(
-      category as NeedCategory,
-    )
-      ? (category as NeedCategory)
+    const validCategory = Object.values(Category).includes(category as Category)
+      ? (category as Category)
       : undefined;
     const validPriority = Object.values(Priority).includes(priority as Priority)
       ? (priority as Priority)
@@ -239,6 +333,73 @@ export class NeedsController {
     @Param('needId', ParseUUIDPipe) needId: string,
   ): Promise<void> {
     await this.validateNeed.execute({ needId });
+  }
+
+  @Patch('needs/:needId')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('need:validate')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Edit a need during validation (validator/coordinator). Requires a reason; recorded in the audit trail.',
+  })
+  @ApiParam({ name: 'needId', description: 'Need UUID', format: 'uuid' })
+  @ApiNoContentResponse({ description: 'Need edited' })
+  @ApiNotFoundResponse({ description: 'Need not found' })
+  @ApiBadRequestResponse({
+    description: 'Missing reason or need is in a terminal status',
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Validator/coordinator role required' })
+  async edit(
+    @Param('needId', ParseUUIDPipe) needId: string,
+    @Body() dto: EditNeedDto,
+    @Request() req: AuthenticatedRequest,
+  ): Promise<void> {
+    const cmd: EditNeedCommand = { needId };
+    if (dto.title !== undefined) cmd.title = dto.title;
+    if (dto.description !== undefined) cmd.description = dto.description;
+    if (dto.priority !== undefined) cmd.priority = dto.priority;
+
+    const result = await this.editNeed.execute(cmd);
+    setAuditContext(req, {
+      reason: dto.reason,
+      changes: result.changes,
+      targetStatus: result.targetStatus,
+      emergencyId: result.emergencyId,
+    });
+  }
+
+  @Post('needs/:needId/discard')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('need:validate')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Discard a need during validation (validator/coordinator). Requires a reason; recorded in the audit trail.',
+  })
+  @ApiParam({ name: 'needId', description: 'Need UUID', format: 'uuid' })
+  @ApiNoContentResponse({ description: 'Need discarded (rejected)' })
+  @ApiNotFoundResponse({ description: 'Need not found' })
+  @ApiBadRequestResponse({
+    description: 'Missing reason or need is not in pending status',
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Validator/coordinator role required' })
+  async discard(
+    @Param('needId', ParseUUIDPipe) needId: string,
+    @Body() dto: DiscardNeedDto,
+    @Request() req: AuthenticatedRequest,
+  ): Promise<void> {
+    const result = await this.discardNeed.execute({ needId });
+    setAuditContext(req, {
+      reason: dto.reason,
+      changes: result.changes,
+      targetStatus: result.targetStatus,
+      emergencyId: result.emergencyId,
+    });
   }
 
   @Post('needs/:needId/assign-manager')

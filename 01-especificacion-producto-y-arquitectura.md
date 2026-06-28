@@ -186,9 +186,11 @@ Dos planos. El **global** es siempre compartido; el **operativo** cuelga de `eme
 - **campaigns**: id, emergency_id, name, type, organizer_org_id, verification_status, cif, responsible, bank_or_link, fund_destination, dates, public_visibility, status, risk_flags.
 - **incidents**: id, emergency_id, type, severity, related_entity_type, related_entity_id, description, reported_by, status, resolution.
 - **audit_log**: id, emergency_id, actor, action, entity, before, after, at.
-- **Fase 3–4 (roadmap):** `lots`, `shipments` (también con `emergency_id`).
+- **Fase 3–4:** `shipments` (expediciones) y capacidades de transporte ya implementados en el contexto **`logistics`** (con `emergency_id`); `lots`/agrupado (palés/cajas/lotes) sobre `SupplyLine` siguen en roadmap.
 
 > Semántica: `resources` = nodos/capacidad que se ofrecen; `donation_offers` = material concreto que dona un ciudadano; `needs` = necesidad validada desde destino; `reports` = señales de campo sobre un recurso.
+
+> **Actualización (modelo en uso).** La "línea de material" se unificó en un único value object **`SupplyLine`** (`nombre/cantidad/unidad/categoría/presentación`) que vive en un bounded context propio de insumos, **`supplies`**, junto al enum canónico **`Category`** y su tabla de definición `categories` (**`CategoryDefinition`**: etiquetas/jerarquía/alias). Lo reutilizan `needs`, `donation_offers`/`offers`, `resources` y `logistics` en vez de duplicar el ítem y el enum por contexto. Los **`resources`** llevan además **inventario declarado** (`resource_items`: qué material tiene cada lugar para entregar), capturado en `/registrar` y expuesto agregado por categorías en la ficha pública. Taxonomía servida por `GET /categories`.
 
 ---
 

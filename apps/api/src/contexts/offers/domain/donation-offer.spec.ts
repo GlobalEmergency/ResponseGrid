@@ -1,7 +1,7 @@
 import { DonationOffer } from './donation-offer';
 import { OfferId } from './offer-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { NeedCategory, OfferStatus } from './offer-enums';
+import { Category, OfferStatus } from './offer-enums';
 import {
   OfferNotOpenError,
   OfferNotMatchedError,
@@ -27,7 +27,7 @@ function makeOffer(): DonationOffer {
     emergencyId: EmergencyId.fromString(EM),
     donorUserId: USER_ID,
     donorOrganizationId: null,
-    category: NeedCategory.Food,
+    category: Category.Food,
     description: 'Rice bags 25kg',
     quantity: 50,
     unit: 'bags',
@@ -50,7 +50,7 @@ describe('DonationOffer aggregate', () => {
     const offer = makeOffer();
     expect(offer.donorUserId).toBe(USER_ID);
     expect(offer.donorOrganizationId).toBeNull();
-    expect(offer.category).toBe(NeedCategory.Food);
+    expect(offer.category).toBe(Category.Food);
     expect(offer.description).toBe('Rice bags 25kg');
     expect(offer.quantity).toBe(50);
     expect(offer.unit).toBe('bags');
@@ -65,7 +65,7 @@ describe('DonationOffer aggregate', () => {
       emergencyId: EmergencyId.fromString(EM),
       donorUserId: USER_ID,
       donorOrganizationId: null,
-      category: NeedCategory.Medical,
+      category: Category.Medical,
       description: 'First aid kits',
       quantity: 10,
       unit: null,
@@ -84,7 +84,7 @@ describe('DonationOffer aggregate', () => {
         emergencyId: EmergencyId.fromString(EM),
         donorUserId: USER_ID,
         donorOrganizationId: null,
-        category: NeedCategory.Water,
+        category: Category.Water,
         description: 'Water bottles',
         quantity: 0,
         unit: 'liters',
@@ -186,7 +186,7 @@ describe('DonationOffer aggregate', () => {
     expect(restored.status).toBe(OfferStatus.Matched);
     expect(restored.matchedNeedId).toBe(NEED_ID);
     expect(restored.donorUserId).toBe(USER_ID);
-    expect(restored.category).toBe(NeedCategory.Food);
+    expect(restored.category).toBe(Category.Food);
     expect(restored.description).toBe('Rice bags 25kg');
     expect(restored.quantity).toBe(50);
     expect(restored.unit).toBe('bags');

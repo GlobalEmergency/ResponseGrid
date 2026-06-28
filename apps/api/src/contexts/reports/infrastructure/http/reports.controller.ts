@@ -5,6 +5,7 @@ import {
   HttpCode,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
   Req,
@@ -26,8 +27,16 @@ import { SubmitReport } from '../../application/submit-report';
 import { GetReportsQueue } from '../../application/get-reports-queue';
 import { MarkReportReviewed } from '../../application/mark-report-reviewed';
 import { GetMyReports } from '../../application/get-my-reports';
-import { SubmitReportDto, GetReportsQueueQueryDto } from './dto';
+import { EditReport, EditReportCommand } from '../../application/edit-report';
+import { DiscardReport } from '../../application/discard-report';
+import {
+  SubmitReportDto,
+  GetReportsQueueQueryDto,
+  EditReportDto,
+  DiscardReportDto,
+} from './dto';
 import { ReportSnapshot } from '../../domain/report';
+import { setAuditContext } from '../../../audit/infrastructure/http/audit-context';
 
 @ApiTags('reports')
 @Controller()
@@ -37,6 +46,8 @@ export class ReportsController {
     private readonly getReportsQueue: GetReportsQueue,
     private readonly markReportReviewed: MarkReportReviewed,
     private readonly getMyReports: GetMyReports,
+    private readonly editReport: EditReport,
+    private readonly discardReport: DiscardReport,
   ) {}
 
   /** Submit a field report for an emergency. */
@@ -98,6 +109,76 @@ export class ReportsController {
     @Param('reportId', ParseUUIDPipe) reportId: string,
   ): Promise<void> {
     await this.markReportReviewed.execute({ reportId });
+  }
+
+  /** Edit a report during triage. Requires a reason; recorded in the audit trail. */
+  @Patch('reports/:reportId')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('report:triage')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Editar un reporte durante el triaje (coordinador). Requiere un motivo; se registra en la trazabilidad.',
+  })
+  @ApiParam({ name: 'reportId', type: String })
+  @ApiResponse({ status: 204, description: 'Report edited' })
+  @ApiResponse({
+    status: 400,
+    description: 'Missing reason or report is closed',
+  })
+  @ApiResponse({ status: 401, description: 'Missing or invalid token' })
+  @ApiResponse({ status: 403, description: 'Coordinator role required' })
+  @ApiResponse({ status: 404, description: 'Report not found' })
+  async edit(
+    @Param('reportId', ParseUUIDPipe) reportId: string,
+    @Body() dto: EditReportDto,
+    @Req() req: Request & { user?: AuthenticatedUser },
+  ): Promise<void> {
+    const cmd: EditReportCommand = { reportId };
+    if (dto.note !== undefined) cmd.note = dto.note;
+    if (dto.priority !== undefined) cmd.priority = dto.priority;
+
+    const result = await this.editReport.execute(cmd);
+    setAuditContext(req, {
+      reason: dto.reason,
+      changes: result.changes,
+      targetStatus: result.targetStatus,
+      emergencyId: result.emergencyId,
+    });
+  }
+
+  /** Discard a report during triage. Requires a reason; recorded in the audit trail. */
+  @Post('reports/:reportId/discard')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('report:triage')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Descartar un reporte durante el triaje (coordinador). Requiere un motivo; se registra en la trazabilidad.',
+  })
+  @ApiParam({ name: 'reportId', type: String })
+  @ApiResponse({ status: 204, description: 'Report discarded (closed)' })
+  @ApiResponse({
+    status: 400,
+    description: 'Missing reason or report already closed',
+  })
+  @ApiResponse({ status: 401, description: 'Missing or invalid token' })
+  @ApiResponse({ status: 403, description: 'Coordinator role required' })
+  @ApiResponse({ status: 404, description: 'Report not found' })
+  async discard(
+    @Param('reportId', ParseUUIDPipe) reportId: string,
+    @Body() dto: DiscardReportDto,
+    @Req() req: Request & { user?: AuthenticatedUser },
+  ): Promise<void> {
+    const result = await this.discardReport.execute({ reportId });
+    setAuditContext(req, {
+      reason: dto.reason,
+      changes: result.changes,
+      targetStatus: result.targetStatus,
+      emergencyId: result.emergencyId,
+    });
   }
 
   /** Get my own reports for an emergency. */

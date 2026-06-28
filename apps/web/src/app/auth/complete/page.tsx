@@ -9,11 +9,13 @@ import { completeOAuthAction } from './actions';
 /**
  * Landing page after OAuth redirect.
  *
- * The backend sends the browser here with the JWT in the URL fragment:
- *   /auth/complete#token=<jwt>
+ * The backend sends the browser here with the JWT in the URL fragment, plus an
+ * optional return path:
+ *   /auth/complete#token=<jwt>&next=<path>
  *
- * Fragments are never sent to the server, so we read it client-side and
- * pass it to a Server Action that stores it in an httpOnly cookie.
+ * Fragments are never sent to the server, so we read them client-side and
+ * pass them to a Server Action that stores the token in an httpOnly cookie and
+ * redirects to `next` (the page that originally triggered the login).
  */
 export default function AuthCompletePage() {
   const t = getMessages(useLocale()).auth_complete;
@@ -23,17 +25,18 @@ export default function AuthCompletePage() {
     if (done.current) return;
     done.current = true;
 
-    const hash = window.location.hash; // e.g. "#token=eyJ..."
+    const hash = window.location.hash; // e.g. "#token=eyJ...&next=%2Fgrupos"
     const params = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash);
     const token = params.get('token');
+    const next = params.get('next');
 
     if (!token) {
       window.location.replace('/login?error=oauth_failed');
       return;
     }
 
-    // Call the Server Action — it will set the cookie and redirect to /
-    void completeOAuthAction(token);
+    // Call the Server Action — it sets the cookie and redirects to `next` (or /).
+    void completeOAuthAction(token, next ?? undefined);
   }, []);
 
   return (

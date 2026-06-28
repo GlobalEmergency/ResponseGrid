@@ -12,6 +12,8 @@ import { FormField } from '@/components/molecules/form-field';
 import { FormSuccessScreen } from '@/components/molecules/form-success-screen';
 import { DraftRestoredBanner } from '@/components/atoms/draft-restored-banner';
 import { useFormDraft } from '@/lib/use-form-draft';
+import { useLocale } from '@/i18n/locale-context';
+import { MATERIAL_CATEGORIES, categoryLabel } from '@/lib/categories';
 import type { Messages } from '@/i18n/messages/es';
 
 const INITIAL_STATE: OfferState = { status: 'idle' };
@@ -45,6 +47,7 @@ export function DonarForm({
     action,
     INITIAL_STATE,
   );
+  const locale = useLocale();
 
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
@@ -72,15 +75,10 @@ export function DonarForm({
     if (state.status === 'success') clearDraft();
   }, [state.status, clearDraft]);
 
-  const categories = [
-    { value: 'food', label: t.category_food },
-    { value: 'water', label: t.category_water },
-    { value: 'hygiene', label: t.category_hygiene },
-    { value: 'medical', label: t.category_medical },
-    { value: 'shelter', label: t.category_shelter },
-    { value: 'tools', label: t.category_tools },
-    { value: 'other', label: t.category_other },
-  ] as const;
+  const categories = MATERIAL_CATEGORIES.map((slug) => ({
+    value: slug,
+    label: categoryLabel(slug, locale),
+  }));
 
   if (state.status === 'success') {
     return (

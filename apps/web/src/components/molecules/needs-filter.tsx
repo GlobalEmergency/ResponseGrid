@@ -3,6 +3,10 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Messages } from '@/i18n/messages/es';
 import { es } from '@/i18n/messages/es';
+import { Select } from '@/components/atoms/select';
+import { FilterField } from '@/components/molecules/filter-field';
+import { useLocale } from '@/i18n/locale-context';
+import { ALL_CATEGORIES, categoryLabel } from '@/lib/categories';
 
 interface NeedsFilterProps {
   t?: Messages['needs_filter'];
@@ -12,23 +16,17 @@ interface NeedsFilterProps {
 export function NeedsFilter({ t = es.needs_filter, te = es.emergency }: NeedsFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const locale = useLocale();
 
   const currentCategory = searchParams.get('category') ?? '';
   const currentPriority = searchParams.get('priority') ?? '';
 
   const categoryOptions = [
     { value: '', label: t.all_categories },
-    { value: 'food', label: te.category_food },
-    { value: 'water', label: te.category_water },
-    { value: 'hygiene', label: te.category_hygiene },
-    { value: 'medical', label: te.category_medical },
-    { value: 'shelter', label: te.category_shelter },
-    { value: 'tools', label: te.category_tools },
-    { value: 'other', label: te.category_other },
-    { value: 'medicines', label: te.category_medicines },
-    { value: 'medical_equipment', label: te.category_medical_equipment },
-    { value: 'medical_supplies', label: te.category_medical_supplies },
-    { value: 'medical_personnel', label: te.category_medical_personnel },
+    ...ALL_CATEGORIES.map((slug) => ({
+      value: slug,
+      label: categoryLabel(slug, locale),
+    })),
   ];
 
   const priorityOptions = [
@@ -50,13 +48,11 @@ export function NeedsFilter({ t = es.needs_filter, te = es.emergency }: NeedsFil
   }
 
   return (
-    <div className="flex flex-wrap gap-3" role="group" aria-label={t.aria_label}>
-      <label className="flex flex-col gap-1 text-xs font-medium text-muted">
-        <span>{t.category_label}</span>
-        <select
+    <div className="flex flex-col gap-3" role="group" aria-label={t.aria_label}>
+      <FilterField label={t.category_label}>
+        <Select
           value={currentCategory}
           onChange={(e) => updateParam('category', e.target.value)}
-          className="rounded-lg border-2 border-line bg-white px-3 py-1.5 text-sm text-ink focus:border-navy focus:outline-none"
           aria-label={t.aria_filter_category}
         >
           {categoryOptions.map((opt) => (
@@ -64,15 +60,13 @@ export function NeedsFilter({ t = es.needs_filter, te = es.emergency }: NeedsFil
               {opt.label}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </FilterField>
 
-      <label className="flex flex-col gap-1 text-xs font-medium text-muted">
-        <span>{t.priority_label}</span>
-        <select
+      <FilterField label={t.priority_label}>
+        <Select
           value={currentPriority}
           onChange={(e) => updateParam('priority', e.target.value)}
-          className="rounded-lg border-2 border-line bg-white px-3 py-1.5 text-sm text-ink focus:border-navy focus:outline-none"
           aria-label={t.aria_filter_priority}
         >
           {priorityOptions.map((opt) => (
@@ -80,8 +74,8 @@ export function NeedsFilter({ t = es.needs_filter, te = es.emergency }: NeedsFil
               {opt.label}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </FilterField>
     </div>
   );
 }

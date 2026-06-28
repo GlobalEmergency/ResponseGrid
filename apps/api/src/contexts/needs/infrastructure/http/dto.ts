@@ -5,60 +5,20 @@ import {
   IsLongitude,
   IsNotEmpty,
   IsOptional,
-  IsPositive,
   IsString,
   IsUUID,
   MinLength,
+  MaxLength,
   ValidateNested,
   IsInt,
+  IsNumber,
   Min,
+  Max,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  NeedCategory,
-  Priority,
-  PersonnelSkill,
-} from '../../domain/need-enums';
-
-export class NeedItemDto {
-  @ApiProperty({
-    example: 'Water bottles',
-    description: 'Name of the item needed',
-  })
-  @IsString()
-  @IsNotEmpty()
-  name!: string;
-
-  @ApiProperty({
-    example: 100,
-    description: 'Quantity needed (positive integer)',
-  })
-  @IsInt()
-  @IsPositive()
-  quantity!: number;
-
-  @ApiPropertyOptional({
-    example: 'liters',
-    description: 'Unit of measurement (optional)',
-  })
-  @IsOptional()
-  @IsString()
-  unit?: string;
-
-  @ApiProperty({ enum: NeedCategory, example: NeedCategory.Water })
-  @IsEnum(NeedCategory)
-  category!: NeedCategory;
-
-  @ApiPropertyOptional({
-    example: 'ampolla',
-    description:
-      'Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe, oxígeno… Optional, free-form (#61).',
-  })
-  @IsOptional()
-  @IsString()
-  presentation?: string;
-}
+import { Priority, PersonnelSkill } from '../../domain/need-enums';
+import { SupplyLineDto } from '../../../supplies/infrastructure/http/supply-line.dto';
 
 export class NeedLocationDto {
   @ApiProperty({ example: '123 Main Street, Caracas, Venezuela' })
@@ -105,14 +65,14 @@ export class CreateNeedDto {
   requesterOrganizationId?: string;
 
   @ApiProperty({
-    type: [NeedItemDto],
+    type: [SupplyLineDto],
     description: 'List of items needed (minimum 1)',
     minItems: 1,
   })
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  @Type(() => NeedItemDto)
-  items!: NeedItemDto[];
+  @Type(() => SupplyLineDto)
+  items!: SupplyLineDto[];
 
   /**
    * F05: Optional personnel-need fields.
@@ -164,6 +124,99 @@ export class CreateNeedDto {
   resourceId?: string;
 }
 
+export class NearbyNeedsQueryDto {
+  @ApiProperty({ example: 10.4806, description: 'Latitude between -90 and 90' })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  lat!: number;
+
+  @ApiProperty({
+    example: -66.9036,
+    description: 'Longitude between -180 and 180',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  lng!: number;
+
+  @ApiProperty({
+    example: 5000,
+    description: 'Search radius in meters (max 100000)',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(100000)
+  radius!: number;
+
+  @ApiPropertyOptional({
+    example: 50,
+    description: 'Max results (default 50, max 100)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+}
+
+export class InBoundsNeedsQueryDto {
+  @ApiProperty({
+    example: 10.3,
+    description: 'South latitude bound (-90 to 90)',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  minLat!: number;
+
+  @ApiProperty({
+    example: -67.2,
+    description: 'West longitude bound (-180 to 180)',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  minLng!: number;
+
+  @ApiProperty({
+    example: 10.7,
+    description: 'North latitude bound (-90 to 90)',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  maxLat!: number;
+
+  @ApiProperty({
+    example: -66.6,
+    description: 'East longitude bound (-180 to 180)',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  maxLng!: number;
+
+  @ApiPropertyOptional({
+    example: 500,
+    description: 'Max results (default 500, max 1000)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(1000)
+  limit?: number;
+}
+
 export class AssignNeedManagerDto {
   @ApiProperty({
     format: 'uuid',
@@ -172,6 +225,58 @@ export class AssignNeedManagerDto {
   })
   @IsUUID()
   organizationId!: string;
+}
+
+export class DiscardNeedDto {
+  @ApiProperty({
+    description: 'Motivo del descarte (obligatorio, para trazabilidad)',
+    minLength: 3,
+    maxLength: 1000,
+    example: 'Petición duplicada; ya validada en otra entrada',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(1000)
+  reason!: string;
+}
+
+export class EditNeedDto {
+  @ApiProperty({
+    description: 'Motivo de la edición (obligatorio, para trazabilidad)',
+    minLength: 3,
+    maxLength: 1000,
+    example: 'Se corrige la prioridad y se completa la descripción',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(1000)
+  reason!: string;
+
+  @ApiPropertyOptional({
+    description: 'Nuevo título (omitir para no cambiarlo)',
+    minLength: 2,
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  title?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Nueva descripción. Cadena vacía la borra. Omitir para no cambiarla.',
+    nullable: true,
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiPropertyOptional({ enum: Priority, description: 'Nueva prioridad' })
+  @IsOptional()
+  @IsEnum(Priority)
+  priority?: Priority;
 }
 
 export class CreateTaskFromNeedDto {

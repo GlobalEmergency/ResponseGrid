@@ -34,6 +34,15 @@ export const PERMISSION_CATALOG = {
   role: ['grant', 'revoke', 'create_custom'],
   apikey: ['create', 'revoke'],
   audit: ['read'],
+  // Logística de transporte (EPIC #103). 'create'/'read' existían como data
+  // antes del enforcement; #106 añade 'assign' (coordinador asigna capacidad y
+  // transportista) y 'update' (cambios de estado por el coordinador). 'track'
+  // lo usa el transportista para marcar tránsito/entrega de SU expedición.
+  shipment: ['create', 'assign', 'update', 'read', 'track'],
+  manifest: ['sign'],
+  // Capacidad de transporte (#105): ofertar mover carga A->B. 'publish' es de
+  // grado ciudadano (como 'offer:create'); 'read' lo consume la coordinación.
+  capacity: ['publish', 'read'],
 } as const;
 
 type Catalog = typeof PERMISSION_CATALOG;

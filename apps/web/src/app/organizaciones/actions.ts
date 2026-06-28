@@ -33,7 +33,7 @@ export async function createOrganizationAction(
 
   const { data, error, response } = await api.POST('/organizations', {
     headers: authHeaders(token),
-    body: { name, type: type as 'ngo' | 'company' | 'public_admin' | 'association' | 'other', taxId, contactEmail },
+    body: { name, type: type as 'ngo' | 'company' | 'public_admin' | 'association' | 'transport_operator' | 'other', taxId, contactEmail },
   });
 
   if (error !== undefined || data === undefined) {

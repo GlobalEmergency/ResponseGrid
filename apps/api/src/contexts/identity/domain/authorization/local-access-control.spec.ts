@@ -31,8 +31,8 @@ describe('LocalAccessControl', () => {
       ...valid,
       id: 'g2',
       scope: {
-        type: 'hub',
-        id: 'valencia',
+        type: 'customs_zone',
+        id: 'la-guaira',
       } as unknown as (typeof valid)['scope'],
     };
     const ctx: AuthorizationContext = {
@@ -184,6 +184,38 @@ describe('LocalAccessControl', () => {
     expect(perms.has('resource:verify')).toBe(true);
     // …and from the hub (group_manager) parent
     expect(perms.has('task:create')).toBe(true);
+  });
+
+  it('a hub_manager sees cargo transiting its hub across emergencies (§16.3 DAG)', async () => {
+    // Ana manages the Valencia hub and holds NO grant in any emergency.
+    const ctx = ctxWith(
+      Grant.create({
+        id: 'g1',
+        principalId: PRINCIPAL,
+        roleId: 'hub_manager',
+        scope: ScopeRef.hub('valencia'),
+      }),
+    );
+    // A shipment bound for the "dana" emergency that transits the Valencia hub:
+    // two DAG parents (hub + emergency).
+    const shipment = {
+      scopeChain: chain(
+        ScopeRef.entity('shipment', 's1'),
+        ScopeRef.hub('valencia'),
+        ScopeRef.emergency('dana'),
+        ScopeRef.platform(),
+      ),
+    };
+    // Authority enters via the hub parent, not the emergency.
+    await expect(ac.can(ctx, 'shipment:read', shipment)).resolves.toBe(true);
+    await expect(ac.can(ctx, 'shipment:track', shipment)).resolves.toBe(true);
+    // …but she is nothing in the emergency itself (no hub in that chain).
+    const emergencyOnly = {
+      scopeChain: chain(ScopeRef.emergency('dana'), ScopeRef.platform()),
+    };
+    await expect(ac.can(ctx, 'shipment:read', emergencyOnly)).resolves.toBe(
+      false,
+    );
   });
 
   it('effectivePermissions returns the union for a scope chain', async () => {

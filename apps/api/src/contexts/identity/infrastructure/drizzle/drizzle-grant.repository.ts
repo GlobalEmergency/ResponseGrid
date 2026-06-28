@@ -39,6 +39,8 @@ function rowToScope(row: Row): ScopeRefProps {
     case 'organization':
     case 'emergency':
     case 'group':
+    case 'hub':
+    case 'corridor':
       if (row.scopeId === null) {
         throw new Error(
           `grant ${row.id}: scope_id is required for scope ${row.scopeType}`,

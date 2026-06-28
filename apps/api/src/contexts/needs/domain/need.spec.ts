@@ -1,10 +1,14 @@
 import { Need, NeedItemsRequiredError, NEED_VALIDITY_HOURS } from './need';
 import { NeedId } from './need-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { Priority, NeedCategory, NeedStatus } from './need-enums';
-import { NeedNotPendingError } from './need-errors';
+import { Priority, Category, NeedStatus } from './need-enums';
+import {
+  NeedNotPendingError,
+  NeedNotEditableError,
+  NeedTitleRequiredError,
+} from './need-errors';
 import { Location } from '../../../shared/domain/location';
-import { NeedItem } from './need-item';
+import { SupplyLine } from '../../supplies/domain/supply-line';
 import { LocationSensitivity } from '../../../shared/domain/location-sensitivity';
 
 const EM = '11111111-1111-4111-8111-111111111111';
@@ -18,13 +22,13 @@ function makeLocation(): Location {
   });
 }
 
-function makeItems(): NeedItem[] {
+function makeItems(): SupplyLine[] {
   return [
-    NeedItem.create({
+    SupplyLine.create({
       name: 'Water bottles',
       quantity: 100,
       unit: 'units',
-      category: NeedCategory.Water,
+      category: Category.Water,
     }),
   ];
 }
@@ -59,12 +63,50 @@ describe('Need aggregate', () => {
     expect(need.requesterOrganizationId).toBeNull();
   });
 
+  describe('edit()', () => {
+    it('updates only the provided fields', () => {
+      const need = makeNeed();
+      need.edit({ title: 'Agua potable', priority: Priority.Low });
+      expect(need.title).toBe('Agua potable');
+      expect(need.priority).toBe(Priority.Low);
+      // description left untouched
+      expect(need.description).toBe('Urgent water supply needed');
+    });
+
+    it('trims the title and rejects an empty one', () => {
+      const need = makeNeed();
+      need.edit({ title: '  Comida  ' });
+      expect(need.title).toBe('Comida');
+      expect(() => need.edit({ title: '   ' })).toThrow(NeedTitleRequiredError);
+    });
+
+    it('clears the description with an empty string', () => {
+      const need = makeNeed();
+      need.edit({ description: '' });
+      expect(need.description).toBeNull();
+    });
+
+    it('cannot edit a rejected (discarded) need', () => {
+      const need = makeNeed();
+      need.reject();
+      expect(() => need.edit({ title: 'x' })).toThrow(NeedNotEditableError);
+    });
+
+    it('reflects edited fields in the snapshot', () => {
+      const need = makeNeed();
+      need.edit({ title: 'Nuevo', priority: Priority.Low });
+      const snap = need.toSnapshot();
+      expect(snap.title).toBe('Nuevo');
+      expect(snap.priority).toBe(Priority.Low);
+    });
+  });
+
   it('create() stores items on the aggregate', () => {
     const need = makeNeed();
     expect(need.items).toHaveLength(1);
     expect(need.items[0].name).toBe('Water bottles');
     expect(need.items[0].quantity).toBe(100);
-    expect(need.items[0].category).toBe(NeedCategory.Water);
+    expect(need.items[0].category).toBe(Category.Water);
   });
 
   it('create() throws NeedItemsRequiredError when items is empty', () => {
@@ -94,17 +136,17 @@ describe('Need aggregate', () => {
       requesterUserId: USER_ID,
       requesterOrganizationId: '11111111-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       items: [
-        NeedItem.create({
+        SupplyLine.create({
           name: 'Food',
           quantity: 50,
           unit: 'boxes',
-          category: NeedCategory.Food,
+          category: Category.Food,
         }),
-        NeedItem.create({
+        SupplyLine.create({
           name: 'Blankets',
           quantity: 20,
           unit: null,
-          category: NeedCategory.Shelter,
+          category: Category.Shelter,
         }),
       ],
     });
@@ -186,7 +228,7 @@ describe('Need aggregate', () => {
   });
 
   // F04 — Medical categories
-  it('accepts medicines as a NeedCategory enum value', () => {
+  it('accepts medicines as a Category enum value', () => {
     const need = Need.create({
       id: NeedId.create(),
       emergencyId: EmergencyId.fromString(EM),
@@ -197,23 +239,23 @@ describe('Need aggregate', () => {
       requesterUserId: USER_ID,
       requesterOrganizationId: null,
       items: [
-        NeedItem.create({
+        SupplyLine.create({
           name: 'Paracetamol',
           quantity: 500,
           unit: 'tablets',
-          category: NeedCategory.Medicines,
+          category: Category.Medicines,
         }),
       ],
     });
-    expect(need.items[0].category).toBe(NeedCategory.Medicines);
-    expect(NeedCategory.Medicines).toBe('medicines');
-    expect(NeedCategory.MedicalEquipment).toBe('medical_equipment');
-    expect(NeedCategory.MedicalSupplies).toBe('medical_supplies');
-    expect(NeedCategory.MedicalPersonnel).toBe('medical_personnel');
+    expect(need.items[0].category).toBe(Category.Medicines);
+    expect(Category.Medicines).toBe('medicines');
+    expect(Category.MedicalEquipment).toBe('medical_equipment');
+    expect(Category.MedicalSupplies).toBe('medical_supplies');
+    expect(Category.MedicalPersonnel).toBe('medical_personnel');
   });
 
   it('Medical (retrocompat) still exists alongside new health categories', () => {
-    expect(NeedCategory.Medical).toBe('medical');
+    expect(Category.Medical).toBe('medical');
   });
 
   // F06 — Expiry/freshness

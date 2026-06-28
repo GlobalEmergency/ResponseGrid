@@ -1,8 +1,11 @@
-import { and, between, count, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, between, count, eq, inArray, sql } from 'drizzle-orm';
+import { randomUUID } from 'node:crypto';
 import { Db } from '../../../../shared/db';
-import { resourcesTable } from './schema';
+import { resourcesTable, resourceItemsTable } from './schema';
 import { ResourceRepository } from '../../domain/ports/resource.repository';
 import { Resource, ResourceSnapshot, Provenance } from '../../domain/resource';
+import { SupplyLineSnapshot } from '../../../supplies/domain/supply-line';
+import { Category } from '../../../supplies/domain/category';
 import { ResourceId } from '../../domain/resource-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import {
@@ -13,6 +16,35 @@ import {
 } from '../../domain/resource-enums';
 
 type Row = typeof resourcesTable.$inferSelect;
+type ItemsRow = typeof resourceItemsTable.$inferSelect;
+
+function itemsToSnapshots(items: ItemsRow[]): SupplyLineSnapshot[] {
+  return items.map((i) => ({
+    name: i.name,
+    quantity: i.quantity,
+    unit: i.unit ?? null,
+    category: i.category as Category,
+    presentation: i.presentation ?? null,
+  }));
+}
+
+/** Operational statuses a resource must be in to appear in any public read. */
+const PUBLICLY_VISIBLE_STATUSES = [
+  PublicStatus.Active,
+  PublicStatus.Saturated,
+  PublicStatus.Paused,
+];
+
+/**
+ * Trust levels the public API is allowed to expose. The public read API is the
+ * product's "source of truth", so it must never surface `unverified` points —
+ * only `verified`/`official` ones (issue #94). Applied to every public read
+ * path (paged list, facets, nearby, in-bounds and single-resource lookup).
+ */
+const PUBLICLY_VISIBLE_VERIFICATION = [
+  VerificationLevel.Verified,
+  VerificationLevel.Official,
+];
 
 /**
  * Raw snake_case row returned by db.execute() (no Drizzle camelCase mapping).
@@ -119,6 +151,9 @@ function rawRowToSnapshot(row: RawRow): ResourceSnapshot {
     provenance,
     isFinalRecipient: row.is_final_recipient ?? false,
     recipientType: row.recipient_type ?? null,
+    // Raw SQL paths (nearby) power the map, which does not render inventory —
+    // items are intentionally not hydrated here to keep the payload lean.
+    items: [],
   };
 }
 
@@ -134,7 +169,7 @@ function rowToProvenance(row: Row): Provenance | null {
   };
 }
 
-function rowToSnapshot(row: Row): ResourceSnapshot {
+function rowToSnapshot(row: Row, items: ItemsRow[] = []): ResourceSnapshot {
   return {
     id: row.id,
     emergencyId: row.emergencyId,
@@ -161,50 +196,46 @@ function rowToSnapshot(row: Row): ResourceSnapshot {
     provenance: rowToProvenance(row),
     isFinalRecipient: row.isFinalRecipient ?? false,
     recipientType: row.recipientType ?? null,
+    items: itemsToSnapshots(items),
   };
 }
 
 export class DrizzleResourceRepository implements ResourceRepository {
   constructor(private readonly db: Db) {}
 
+  /**
+   * Load the declared inventory of a single resource. Only the single-resource
+   * lookups (findById/findByExternal) hydrate items: the detail page renders
+   * inventory, and ingest must preserve it across re-imports. List/map paths
+   * deliberately skip this to keep their payloads lean.
+   */
+  private loadItems(resourceId: string): Promise<ItemsRow[]> {
+    return this.db
+      .select()
+      .from(resourceItemsTable)
+      .where(eq(resourceItemsTable.resourceId, resourceId));
+  }
+
   async save(resource: Resource): Promise<void> {
     const s = resource.toSnapshot();
-    await this.db
-      .insert(resourcesTable)
-      .values({
-        id: s.id,
-        emergencyId: s.emergencyId,
-        type: s.type,
-        stage: s.stage,
-        name: s.name,
-        description: s.description,
-        address: s.location.address,
-        latitude: s.location.latitude,
-        longitude: s.location.longitude,
-        ownerUserId: s.ownerUserId,
-        ownerOrganizationId: s.ownerOrganizationId,
-        verificationLevel: s.verificationLevel,
-        publicStatus: s.publicStatus,
-        createdAt: s.createdAt,
-        contact: s.contact,
-        schedule: s.schedule,
-        manager: s.manager,
-        accepts: s.accepts,
-        country: s.country,
-        city: s.city,
-        sourceName: s.provenance?.sourceName ?? null,
-        externalId: s.provenance?.externalId ?? null,
-        externalUpdatedAt: s.provenance?.externalUpdatedAt ?? null,
-        raw: s.provenance?.raw ?? null,
-        isFinalRecipient: s.isFinalRecipient,
-        recipientType: s.recipientType,
-      })
-      .onConflictDoUpdate({
-        target: resourcesTable.id,
-        set: {
+    await this.db.transaction(async (tx) => {
+      await tx
+        .insert(resourcesTable)
+        .values({
+          id: s.id,
+          emergencyId: s.emergencyId,
+          type: s.type,
+          stage: s.stage,
+          name: s.name,
+          description: s.description,
+          address: s.location.address,
+          latitude: s.location.latitude,
+          longitude: s.location.longitude,
+          ownerUserId: s.ownerUserId,
+          ownerOrganizationId: s.ownerOrganizationId,
           verificationLevel: s.verificationLevel,
           publicStatus: s.publicStatus,
-          name: s.name,
+          createdAt: s.createdAt,
           contact: s.contact,
           schedule: s.schedule,
           manager: s.manager,
@@ -217,8 +248,48 @@ export class DrizzleResourceRepository implements ResourceRepository {
           raw: s.provenance?.raw ?? null,
           isFinalRecipient: s.isFinalRecipient,
           recipientType: s.recipientType,
-        },
-      });
+        })
+        .onConflictDoUpdate({
+          target: resourcesTable.id,
+          set: {
+            verificationLevel: s.verificationLevel,
+            publicStatus: s.publicStatus,
+            name: s.name,
+            contact: s.contact,
+            schedule: s.schedule,
+            manager: s.manager,
+            accepts: s.accepts,
+            country: s.country,
+            city: s.city,
+            sourceName: s.provenance?.sourceName ?? null,
+            externalId: s.provenance?.externalId ?? null,
+            externalUpdatedAt: s.provenance?.externalUpdatedAt ?? null,
+            raw: s.provenance?.raw ?? null,
+            isFinalRecipient: s.isFinalRecipient,
+            recipientType: s.recipientType,
+          },
+        });
+
+      // Sync inventory items: delete existing then re-insert (clean replace),
+      // mirroring the need_items strategy.
+      await tx
+        .delete(resourceItemsTable)
+        .where(eq(resourceItemsTable.resourceId, s.id));
+
+      if (s.items.length > 0) {
+        await tx.insert(resourceItemsTable).values(
+          s.items.map((item) => ({
+            id: randomUUID(),
+            resourceId: s.id,
+            name: item.name,
+            quantity: item.quantity,
+            unit: item.unit,
+            category: item.category,
+            presentation: item.presentation ?? null,
+          })),
+        );
+      }
+    });
   }
 
   async findById(id: ResourceId): Promise<Resource | null> {
@@ -227,7 +298,9 @@ export class DrizzleResourceRepository implements ResourceRepository {
       .from(resourcesTable)
       .where(eq(resourcesTable.id, id.value))
       .limit(1);
-    return rows[0] ? Resource.fromSnapshot(rowToSnapshot(rows[0])) : null;
+    if (!rows[0]) return null;
+    const items = await this.loadItems(rows[0].id);
+    return Resource.fromSnapshot(rowToSnapshot(rows[0], items));
   }
 
   async findPendingByEmergency(emergencyId: EmergencyId): Promise<Resource[]> {
@@ -241,6 +314,59 @@ export class DrizzleResourceRepository implements ResourceRepository {
         ),
       );
     return rows.map((r) => Resource.fromSnapshot(rowToSnapshot(r)));
+  }
+
+  async findPendingByEmergencyPaged(
+    emergencyId: EmergencyId,
+    q: {
+      page: number;
+      limit: number;
+      type?: string;
+      q?: string;
+    },
+  ): Promise<{ items: Resource[]; total: number }> {
+    const offset = (q.page - 1) * q.limit;
+
+    const conditions = [
+      eq(resourcesTable.emergencyId, emergencyId.value),
+      eq(resourcesTable.verificationLevel, VerificationLevel.Unverified),
+    ];
+
+    if (q.type) {
+      conditions.push(eq(resourcesTable.type, q.type));
+    }
+    if (q.q) {
+      // Escape SQL LIKE metacharacters so the user string is matched literally
+      // (mirrors findVisiblePaged). Search spans name, address and city.
+      const escaped = q.q.replace(/[%_\\]/g, (c) => `\\${c}`);
+      conditions.push(
+        sql`(${resourcesTable.name} ILIKE ${'%' + escaped + '%'} OR ${resourcesTable.address} ILIKE ${'%' + escaped + '%'} OR ${resourcesTable.city} ILIKE ${'%' + escaped + '%'})`,
+      );
+    }
+
+    const whereClause = and(...conditions);
+
+    const [rows, countRows] = await Promise.all([
+      this.db
+        .select()
+        .from(resourcesTable)
+        .where(whereClause)
+        // Same deterministic order as the public list (#58): points without
+        // contact data sink to the bottom, then by name, then id (stable paging).
+        .orderBy(
+          asc(sql`(${resourcesTable.contact} IS NULL)`),
+          asc(resourcesTable.name),
+          asc(resourcesTable.id),
+        )
+        .limit(q.limit)
+        .offset(offset),
+      this.db.select({ cnt: count() }).from(resourcesTable).where(whereClause),
+    ]);
+
+    return {
+      items: rows.map((r) => Resource.fromSnapshot(rowToSnapshot(r))),
+      total: Number(countRows[0]?.cnt ?? 0),
+    };
   }
 
   async findActiveByEmergency(emergencyId: EmergencyId): Promise<Resource[]> {
@@ -303,7 +429,9 @@ export class DrizzleResourceRepository implements ResourceRepository {
         ),
       )
       .limit(1);
-    return rows[0] ? Resource.fromSnapshot(rowToSnapshot(rows[0])) : null;
+    if (!rows[0]) return null;
+    const items = await this.loadItems(rows[0].id);
+    return Resource.fromSnapshot(rowToSnapshot(rows[0], items));
   }
 
   async findVisiblePaged(
@@ -316,16 +444,12 @@ export class DrizzleResourceRepository implements ResourceRepository {
       q?: string;
     },
   ): Promise<{ items: Resource[]; total: number }> {
-    const VISIBLE = [
-      PublicStatus.Active,
-      PublicStatus.Saturated,
-      PublicStatus.Paused,
-    ];
     const offset = (q.page - 1) * q.limit;
 
     const conditions = [
       eq(resourcesTable.emergencyId, emergencyId.value),
-      inArray(resourcesTable.publicStatus, VISIBLE),
+      inArray(resourcesTable.publicStatus, PUBLICLY_VISIBLE_STATUSES),
+      inArray(resourcesTable.verificationLevel, PUBLICLY_VISIBLE_VERIFICATION),
     ];
 
     if (q.category) {
@@ -353,6 +477,15 @@ export class DrizzleResourceRepository implements ResourceRepository {
         .select()
         .from(resourcesTable)
         .where(whereClause)
+        // Deterministic order (#58): points WITHOUT contact data sink to the
+        // bottom (they help the citizen less — there is nobody to call). Within
+        // each group, order by name, then id as a stable tiebreaker so paging is
+        // consistent across pages.
+        .orderBy(
+          asc(sql`(${resourcesTable.contact} IS NULL)`),
+          asc(resourcesTable.name),
+          asc(resourcesTable.id),
+        )
         .limit(q.limit)
         .offset(offset),
       this.db.select({ cnt: count() }).from(resourcesTable).where(whereClause),
@@ -369,18 +502,18 @@ export class DrizzleResourceRepository implements ResourceRepository {
     byCountry: Record<string, number>;
     total: number;
   }> {
-    const VISIBLE = [
-      PublicStatus.Active,
-      PublicStatus.Saturated,
-      PublicStatus.Paused,
-    ];
     const visibleWhere = and(
       eq(resourcesTable.emergencyId, emergencyId.value),
-      inArray(resourcesTable.publicStatus, VISIBLE),
+      inArray(resourcesTable.publicStatus, PUBLICLY_VISIBLE_STATUSES),
+      inArray(resourcesTable.verificationLevel, PUBLICLY_VISIBLE_VERIFICATION),
     );
 
     const visibleArr = sql.join(
-      VISIBLE.map((v) => sql`${v}`),
+      PUBLICLY_VISIBLE_STATUSES.map((v) => sql`${v}`),
+      sql`, `,
+    );
+    const verifiedArr = sql.join(
+      PUBLICLY_VISIBLE_VERIFICATION.map((v) => sql`${v}`),
       sql`, `,
     );
     const [totalRows, categoryRows, countryRows] = await Promise.all([
@@ -390,6 +523,7 @@ export class DrizzleResourceRepository implements ResourceRepository {
         FROM resources
         WHERE emergency_id = ${emergencyId.value}
           AND public_status = ANY(ARRAY[${visibleArr}])
+          AND verification_level = ANY(ARRAY[${verifiedArr}])
         GROUP BY cat
       `),
       this.db.execute<{ country: string; cnt: string }>(sql`
@@ -397,6 +531,7 @@ export class DrizzleResourceRepository implements ResourceRepository {
         FROM resources
         WHERE emergency_id = ${emergencyId.value}
           AND public_status = ANY(ARRAY[${visibleArr}])
+          AND verification_level = ANY(ARRAY[${verifiedArr}])
           AND country IS NOT NULL
         GROUP BY country
       `),
@@ -423,13 +558,12 @@ export class DrizzleResourceRepository implements ResourceRepository {
     emergencyId: EmergencyId,
     q: { lat: number; lng: number; radiusMeters: number; limit: number },
   ): Promise<Array<{ resource: Resource; distanceMeters: number }>> {
-    const VISIBLE = [
-      PublicStatus.Active,
-      PublicStatus.Saturated,
-      PublicStatus.Paused,
-    ];
     const visibleArr = sql.join(
-      VISIBLE.map((v) => sql`${v}`),
+      PUBLICLY_VISIBLE_STATUSES.map((v) => sql`${v}`),
+      sql`, `,
+    );
+    const verifiedArr = sql.join(
+      PUBLICLY_VISIBLE_VERIFICATION.map((v) => sql`${v}`),
       sql`, `,
     );
 
@@ -440,6 +574,7 @@ export class DrizzleResourceRepository implements ResourceRepository {
       FROM resources
       WHERE emergency_id = ${emergencyId.value}
         AND public_status = ANY(ARRAY[${visibleArr}])
+        AND verification_level = ANY(ARRAY[${verifiedArr}])
         AND earth_box(ll_to_earth(${q.lat}, ${q.lng}), ${q.radiusMeters}) @> ll_to_earth(latitude, longitude)
         AND earth_distance(ll_to_earth(${q.lat}, ${q.lng}), ll_to_earth(latitude, longitude)) <= ${q.radiusMeters}
       ORDER BY dist ASC
@@ -462,18 +597,17 @@ export class DrizzleResourceRepository implements ResourceRepository {
       limit: number;
     },
   ): Promise<Resource[]> {
-    const VISIBLE = [
-      PublicStatus.Active,
-      PublicStatus.Saturated,
-      PublicStatus.Paused,
-    ];
     const rows = await this.db
       .select()
       .from(resourcesTable)
       .where(
         and(
           eq(resourcesTable.emergencyId, emergencyId.value),
-          inArray(resourcesTable.publicStatus, VISIBLE),
+          inArray(resourcesTable.publicStatus, PUBLICLY_VISIBLE_STATUSES),
+          inArray(
+            resourcesTable.verificationLevel,
+            PUBLICLY_VISIBLE_VERIFICATION,
+          ),
           between(resourcesTable.latitude, q.minLat, q.maxLat),
           between(resourcesTable.longitude, q.minLng, q.maxLng),
         ),

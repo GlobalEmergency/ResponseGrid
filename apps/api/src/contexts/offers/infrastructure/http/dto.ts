@@ -8,12 +8,13 @@ import {
   IsString,
   IsUUID,
   MinLength,
+  MaxLength,
   ValidateNested,
   IsInt,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { NeedCategory } from '../../domain/offer-enums';
+import { Category } from '../../domain/offer-enums';
 
 export class OfferLocationDto {
   @ApiProperty({ example: '123 Main Street, Caracas, Venezuela' })
@@ -31,9 +32,9 @@ export class OfferLocationDto {
 }
 
 export class SubmitOfferDto {
-  @ApiProperty({ enum: NeedCategory, example: NeedCategory.Food })
-  @IsEnum(NeedCategory)
-  category!: NeedCategory;
+  @ApiProperty({ enum: Category, example: Category.Food })
+  @IsEnum(Category)
+  category!: Category;
 
   @ApiProperty({
     example: 'Rice bags 25kg',
@@ -93,4 +94,70 @@ export class MatchOfferDto {
   })
   @IsUUID()
   needId!: string;
+}
+
+export class DiscardOfferDto {
+  @ApiProperty({
+    description: 'Motivo del descarte (obligatorio, para trazabilidad)',
+    minLength: 3,
+    maxLength: 1000,
+    example: 'Oferta duplicada; ya gestionada en otra entrada',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(1000)
+  reason!: string;
+}
+
+export class EditOfferDto {
+  @ApiProperty({
+    description: 'Motivo de la edición (obligatorio, para trazabilidad)',
+    minLength: 3,
+    maxLength: 1000,
+    example: 'Se corrige la cantidad y se completa la descripción',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(1000)
+  reason!: string;
+
+  @ApiPropertyOptional({
+    description: 'Nueva descripción (omitir para no cambiarla)',
+    minLength: 2,
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  description?: string;
+
+  @ApiPropertyOptional({
+    example: 20,
+    description: 'Nueva cantidad (entero positivo). Omitir para no cambiarla.',
+  })
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  quantity?: number;
+
+  @ApiPropertyOptional({
+    description:
+      'Nueva unidad. Cadena vacía la borra. Omitir para no cambiarla.',
+    nullable: true,
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  unit?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Nuevas notas. Cadena vacía las borra. Omitir para no cambiarlas.',
+    nullable: true,
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  notes?: string;
 }

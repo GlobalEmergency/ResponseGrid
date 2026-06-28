@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { NeedCategory, OfferStatus } from '../../domain/offer-enums';
+import { Category, OfferStatus } from '../../domain/offer-enums';
 
 export class SubmitOfferResponseDto {
   @ApiProperty({
@@ -33,8 +33,8 @@ export class OfferViewDto {
   @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
   donorOrganizationId!: string | null;
 
-  @ApiProperty({ enum: NeedCategory, example: NeedCategory.Food })
-  category!: NeedCategory;
+  @ApiProperty({ enum: Category, example: Category.Food })
+  category!: Category;
 
   @ApiProperty({ example: 'Rice bags 25kg' })
   description!: string;

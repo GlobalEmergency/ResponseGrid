@@ -5,9 +5,9 @@ import { DrizzleNeedRepository } from './drizzle-need.repository';
 import { Need } from '../../domain/need';
 import { NeedId } from '../../domain/need-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
-import { NeedCategory, Priority, NeedStatus } from '../../domain/need-enums';
+import { Category, Priority, NeedStatus } from '../../domain/need-enums';
 import { Location } from '../../../../shared/domain/location';
-import { NeedItem } from '../../domain/need-item';
+import { SupplyLine } from '../../../supplies/domain/supply-line';
 import type { Pool } from 'pg';
 
 const URL =
@@ -26,16 +26,16 @@ function makeLocation() {
 
 function makeItems() {
   return [
-    NeedItem.create({
+    SupplyLine.create({
       name: 'Water',
       quantity: 50,
       unit: 'liters',
-      category: NeedCategory.Water,
+      category: Category.Water,
     }),
   ];
 }
 
-function makeNeed(overrides?: { title?: string; items?: NeedItem[] }) {
+function makeNeed(overrides?: { title?: string; items?: SupplyLine[] }) {
   return Need.create({
     id: NeedId.create(),
     emergencyId: EmergencyId.fromString(EM),
@@ -89,7 +89,7 @@ describe('DrizzleNeedRepository (integration)', () => {
     expect(found!.items[0].name).toBe('Water');
     expect(found!.items[0].quantity).toBe(50);
     expect(found!.items[0].unit).toBe('liters');
-    expect(found!.items[0].category).toBe(NeedCategory.Water);
+    expect(found!.items[0].category).toBe(Category.Water);
   });
 
   it('round-trips the resourceId link to a final recipient (#60)', async () => {
@@ -156,11 +156,11 @@ describe('DrizzleNeedRepository (integration)', () => {
       requesterUserId: USER_ID,
       requesterOrganizationId: null,
       items: [
-        NeedItem.create({
+        SupplyLine.create({
           name: 'Clindamicina',
           quantity: 20,
           unit: 'amp',
-          category: NeedCategory.Medicines,
+          category: Category.Medicines,
           presentation: 'EV/ampolla',
         }),
       ],
@@ -181,17 +181,17 @@ describe('DrizzleNeedRepository (integration)', () => {
       requesterUserId: USER_ID,
       requesterOrganizationId: null,
       items: [
-        NeedItem.create({
+        SupplyLine.create({
           name: 'Food',
           quantity: 100,
           unit: 'boxes',
-          category: NeedCategory.Food,
+          category: Category.Food,
         }),
-        NeedItem.create({
+        SupplyLine.create({
           name: 'Blankets',
           quantity: 30,
           unit: null,
-          category: NeedCategory.Shelter,
+          category: Category.Shelter,
         }),
       ],
     });
@@ -297,17 +297,17 @@ describe('DrizzleNeedRepository (integration)', () => {
       requesterUserId: USER_ID,
       requesterOrganizationId: null,
       items: [
-        NeedItem.create({
+        SupplyLine.create({
           name: 'Water',
           quantity: 50,
           unit: 'liters',
-          category: NeedCategory.Water,
+          category: Category.Water,
         }),
-        NeedItem.create({
+        SupplyLine.create({
           name: 'Bread',
           quantity: 20,
           unit: 'loaves',
-          category: NeedCategory.Food,
+          category: Category.Food,
         }),
       ],
     });
@@ -321,11 +321,11 @@ describe('DrizzleNeedRepository (integration)', () => {
       requesterUserId: USER_ID,
       requesterOrganizationId: null,
       items: [
-        NeedItem.create({
+        SupplyLine.create({
           name: 'Tent',
           quantity: 5,
           unit: null,
-          category: NeedCategory.Shelter,
+          category: Category.Shelter,
         }),
       ],
     });
@@ -398,17 +398,17 @@ describe('DrizzleNeedRepository (integration)', () => {
       requesterUserId: USER_ID,
       requesterOrganizationId: null,
       items: [
-        NeedItem.create({
+        SupplyLine.create({
           name: 'Paracetamol',
           quantity: 200,
           unit: 'tablets',
-          category: NeedCategory.Medicines,
+          category: Category.Medicines,
         }),
       ],
     });
     await repo.save(need);
     const found = await repo.findById(need.id);
-    expect(found!.items[0].category).toBe(NeedCategory.Medicines);
+    expect(found!.items[0].category).toBe(Category.Medicines);
     expect(found!.items[0].category).toBe('medicines');
   });
 
@@ -520,5 +520,96 @@ describe('DrizzleNeedRepository (integration)', () => {
       EmergencyId.fromString(EM),
     );
     expect(counts[NeedStatus.Pending]).toBe(1);
+  });
+
+  // #57 — needs near me
+  describe('findNearbyValidated', () => {
+    const ORIGIN_LAT = 10.4806;
+    const ORIGIN_LNG = -66.9036;
+
+    const makeAt = (title: string, lat: number, lng: number) =>
+      Need.create({
+        id: NeedId.create(),
+        emergencyId: EmergencyId.fromString(EM),
+        title,
+        description: null,
+        location: Location.create({
+          address: `${title} address`,
+          latitude: lat,
+          longitude: lng,
+        }),
+        priority: Priority.High,
+        requesterUserId: USER_ID,
+        requesterOrganizationId: null,
+        items: makeItems(),
+      });
+
+    it('returns validated needs within radius ordered by distance', async () => {
+      const near = makeAt('Near', ORIGIN_LAT, ORIGIN_LNG); // ~0 m
+      near.validate();
+      const medium = makeAt('Medium', 10.49, -66.903); // ~1.3 km
+      medium.validate();
+      const far = makeAt('Far', 10.8, -66.9); // ~35 km
+      far.validate();
+
+      await repo.save(near);
+      await repo.save(medium);
+      await repo.save(far);
+
+      const result = await repo.findNearbyValidated(
+        EmergencyId.fromString(EM),
+        { lat: ORIGIN_LAT, lng: ORIGIN_LNG, radiusMeters: 10000, limit: 50 },
+      );
+
+      expect(result.map((r) => r.need.title)).toEqual(['Near', 'Medium']);
+      expect(result[0].distanceMeters).toBeLessThanOrEqual(
+        result[1].distanceMeters,
+      );
+      expect(result[0].distanceMeters).toBeGreaterThanOrEqual(0);
+      // items are hydrated for each need
+      expect(result[0].need.items).toHaveLength(1);
+    });
+
+    it('excludes pending needs', async () => {
+      const validated = makeAt('Validated', ORIGIN_LAT, ORIGIN_LNG);
+      validated.validate();
+      const pending = makeAt('Pending', ORIGIN_LAT, ORIGIN_LNG); // not validated
+
+      await repo.save(validated);
+      await repo.save(pending);
+
+      const result = await repo.findNearbyValidated(
+        EmergencyId.fromString(EM),
+        { lat: ORIGIN_LAT, lng: ORIGIN_LNG, radiusMeters: 5000, limit: 50 },
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].need.title).toBe('Validated');
+    });
+
+    it('excludes expired needs', async () => {
+      const fresh = makeAt('Fresh', ORIGIN_LAT, ORIGIN_LNG);
+      fresh.validate();
+      const expired = makeAt('Expired', ORIGIN_LAT, ORIGIN_LNG);
+      expired.validate();
+
+      await repo.save(fresh);
+      await repo.save(expired);
+
+      const pastExpiry = new Date(Date.now() - 1000 * 60 * 60); // 1 h ago
+      await db
+        .update(needsTable)
+        .set({ expiresAt: pastExpiry })
+        .where(eq(needsTable.id, expired.id.value));
+
+      const result = await repo.findNearbyValidated(
+        EmergencyId.fromString(EM),
+        { lat: ORIGIN_LAT, lng: ORIGIN_LNG, radiusMeters: 5000, limit: 50 },
+      );
+
+      const titles = result.map((r) => r.need.title);
+      expect(titles).toContain('Fresh');
+      expect(titles).not.toContain('Expired');
+    });
   });
 });

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# EC2 user-data — paste this when launching the t3.micro (Ubuntu 22.04/24.04).
-# Installs Docker + Compose, adds swap (the instance has only 1 GiB RAM) and git.
+# EC2 user-data — paste this when launching the instance (Ubuntu 22.04/24.04).
+# Production runs on t3.small (2 GiB); t3.micro also works for a minimal deploy.
+# Installs Docker + Compose, 2 GB swap, and git. (The deploy installs a systemd
+# unit — deploy/responsegrid.service — that brings the stack up on every boot.)
 # After it runs you SSH in and clone + deploy (see docs/deploy/aws-free-tier.md).
 set -euxo pipefail
 

@@ -1,6 +1,7 @@
 import {
   IsEnum,
   IsString,
+  IsNotEmpty,
   MinLength,
   IsOptional,
   IsNumber,
@@ -15,6 +16,7 @@ import {
 import { Type, Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ResourceType, ResourceStage } from '../../domain/resource-enums';
+import { SupplyLineDto } from '../../../supplies/infrastructure/http/supply-line.dto';
 
 export class LocationDto {
   @ApiProperty({ example: 'Calle Mayor 1, Valencia' })
@@ -142,6 +144,17 @@ export class RegisterResourceDto {
   @IsOptional()
   @IsString()
   recipientType?: string;
+
+  @ApiPropertyOptional({
+    type: [SupplyLineDto],
+    description:
+      'Declared inventory: the supply lines this place holds for delivery (optional)',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SupplyLineDto)
+  items?: SupplyLineDto[];
 }
 
 /**
@@ -255,6 +268,53 @@ export class InBoundsQueryDto {
   limit?: number;
 }
 
+export class CoordinationQueueQueryDto {
+  @ApiPropertyOptional({
+    description: 'Page number (1-based)',
+    example: 1,
+    default: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number;
+
+  @ApiPropertyOptional({
+    description: 'Items per page (max 100)',
+    example: 50,
+    default: 50,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
+  @ApiPropertyOptional({
+    enum: ResourceType,
+    description: 'Filter the queue by resource type',
+    example: ResourceType.CollectionPoint,
+  })
+  @IsOptional()
+  @IsEnum(ResourceType)
+  type?: ResourceType;
+
+  @ApiPropertyOptional({
+    description:
+      'Full-text search string matched against name, address, and city (case-insensitive, max 100 chars)',
+    example: 'cruz roja',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  q?: string;
+}
+
 export class PublicResourcesQueryDto {
   @ApiPropertyOptional({
     description: 'Page number (1-based)',
@@ -307,4 +367,71 @@ export class PublicResourcesQueryDto {
     typeof value === 'string' ? value.trim() : value,
   )
   q?: string;
+}
+
+export class DiscardResourceDto {
+  @ApiProperty({
+    description: 'Motivo del descarte (obligatorio, para trazabilidad)',
+    minLength: 3,
+    maxLength: 1000,
+    example: 'Punto duplicado / fuera del ámbito de la emergencia',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(1000)
+  reason!: string;
+}
+
+export class EditResourceDto {
+  @ApiProperty({
+    description: 'Motivo de la edición (obligatorio, para trazabilidad)',
+    minLength: 3,
+    maxLength: 1000,
+    example: 'Se corrige el nombre y se completa el horario',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(1000)
+  reason!: string;
+
+  @ApiPropertyOptional({
+    description: 'Nuevo nombre (omitir para no cambiarlo)',
+    minLength: 2,
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  name?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Nueva descripción. Cadena vacía la borra. Omitir para no cambiarla.',
+    nullable: true,
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Nuevo contacto. Cadena vacía lo borra. Omitir para no cambiarlo.',
+    nullable: true,
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  contact?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Nuevo horario. Cadena vacía lo borra. Omitir para no cambiarlo.',
+    nullable: true,
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  schedule?: string;
 }

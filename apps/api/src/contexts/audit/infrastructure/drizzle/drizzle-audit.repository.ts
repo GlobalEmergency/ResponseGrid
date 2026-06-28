@@ -13,6 +13,7 @@ function rowToSnapshot(row: Row): AuditEntrySnapshot {
   return {
     id: row.id,
     actorUserId: row.actorUserId ?? null,
+    actorName: row.actorName ?? null,
     action: row.action,
     entityType: row.entityType ?? null,
     entityId: row.entityId ?? null,
@@ -20,6 +21,9 @@ function rowToSnapshot(row: Row): AuditEntrySnapshot {
     method: row.method,
     path: row.path,
     statusCode: row.statusCode,
+    reason: row.reason ?? null,
+    changes: row.changes ?? null,
+    targetStatus: row.targetStatus ?? null,
     createdAt: row.createdAt,
   };
 }
@@ -32,6 +36,7 @@ export class DrizzleAuditRepository implements AuditRepository {
     await this.db.insert(auditLogTable).values({
       id: s.id,
       actorUserId: s.actorUserId ?? null,
+      actorName: s.actorName ?? null,
       action: s.action,
       entityType: s.entityType ?? null,
       entityId: s.entityId ?? null,
@@ -39,6 +44,9 @@ export class DrizzleAuditRepository implements AuditRepository {
       method: s.method,
       path: s.path,
       statusCode: s.statusCode,
+      reason: s.reason ?? null,
+      changes: s.changes ?? null,
+      targetStatus: s.targetStatus ?? null,
       createdAt: s.createdAt,
     });
   }

@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
 import { emergenciesTable } from './schema';
 import { EmergencyRepository } from '../../domain/ports/emergency.repository';
@@ -69,6 +69,20 @@ export class DrizzleEmergencyRepository implements EmergencyRepository {
       .from(emergenciesTable)
       .where(eq(emergenciesTable.slug, slug.value));
     return rows[0] ? Emergency.fromSnapshot(rowToSnapshot(rows[0])) : null;
+  }
+
+  async findByIds(ids: EmergencyId[]): Promise<Emergency[]> {
+    if (ids.length === 0) return [];
+    const rows = await this.db
+      .select()
+      .from(emergenciesTable)
+      .where(
+        inArray(
+          emergenciesTable.id,
+          ids.map((id) => id.value),
+        ),
+      );
+    return rows.map((r) => Emergency.fromSnapshot(rowToSnapshot(r)));
   }
 
   async listActive(): Promise<Emergency[]> {

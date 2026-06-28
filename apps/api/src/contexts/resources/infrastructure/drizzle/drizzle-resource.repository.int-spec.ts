@@ -3,6 +3,8 @@ import { createDb, Db } from '../../../../shared/db';
 import { resourcesTable } from './schema';
 import { DrizzleResourceRepository } from './drizzle-resource.repository';
 import { Resource } from '../../domain/resource';
+import { SupplyLine } from '../../../supplies/domain/supply-line';
+import { Category } from '../../../supplies/domain/category';
 import { ResourceId } from '../../domain/resource-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import {
@@ -62,6 +64,83 @@ describe('DrizzleResourceRepository (integration)', () => {
     expect(found?.verificationLevel).toBe(VerificationLevel.Unverified);
   });
 
+  it('round-trips declared inventory items and replaces them on re-save', async () => {
+    const id = ResourceId.create();
+    const withItems = Resource.register({
+      id,
+      emergencyId: EmergencyId.fromString(EM),
+      type: ResourceType.Warehouse,
+      stage: ResourceStage.Origin,
+      name: 'Almacén con inventario',
+      location: baseLocation,
+      ownerUserId: OWNER_ID,
+      items: [
+        SupplyLine.create({
+          name: 'Agua',
+          quantity: 200,
+          unit: 'litros',
+          category: Category.Water,
+        }),
+        SupplyLine.create({
+          name: 'Mantas',
+          quantity: 50,
+          unit: null,
+          category: Category.Shelter,
+          presentation: null,
+        }),
+      ],
+    });
+    await repo.save(withItems);
+
+    const found = await repo.findById(id);
+    expect(found?.items).toHaveLength(2);
+    expect(found?.items.map((i) => i.toSnapshot())).toEqual(
+      expect.arrayContaining([
+        {
+          name: 'Agua',
+          quantity: 200,
+          unit: 'litros',
+          category: Category.Water,
+          presentation: null,
+        },
+        {
+          name: 'Mantas',
+          quantity: 50,
+          unit: null,
+          category: Category.Shelter,
+          presentation: null,
+        },
+      ]),
+    );
+
+    // Re-save with a different inventory: the previous lines must be replaced,
+    // not accumulated.
+    const reSaved = Resource.fromSnapshot({
+      ...found!.toSnapshot(),
+      items: [
+        {
+          name: 'Arroz',
+          quantity: 30,
+          unit: 'kg',
+          category: Category.Food,
+          presentation: null,
+        },
+      ],
+    });
+    await repo.save(reSaved);
+
+    const reFound = await repo.findById(id);
+    expect(reFound?.items.map((i) => i.toSnapshot())).toEqual([
+      {
+        name: 'Arroz',
+        quantity: 30,
+        unit: 'kg',
+        category: Category.Food,
+        presentation: null,
+      },
+    ]);
+  });
+
   it('round-trips resource with description and ownerOrganizationId', async () => {
     const r = Resource.register({
       id: ResourceId.create(),
@@ -109,6 +188,64 @@ describe('DrizzleResourceRepository (integration)', () => {
       EmergencyId.fromString(EM),
     );
     expect(result.map((x) => x.name)).toEqual(['P']);
+  });
+
+  it('findPendingByEmergencyPaged filters by type and free text, and paginates', async () => {
+    const acopio = Resource.register({
+      id: ResourceId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      type: ResourceType.CollectionPoint,
+      stage: ResourceStage.Origin,
+      name: 'Cruz Roja Centro',
+      location: baseLocation,
+      ownerUserId: OWNER_ID,
+    });
+    const almacen = Resource.register({
+      id: ResourceId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      type: ResourceType.Warehouse,
+      stage: ResourceStage.Intermediate,
+      name: 'Almacén Cáritas',
+      location: baseLocation,
+      ownerUserId: OWNER_ID,
+    });
+    const verified = Resource.register({
+      id: ResourceId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      type: ResourceType.CollectionPoint,
+      stage: ResourceStage.Origin,
+      name: 'Cruz Roja Verificada',
+      location: baseLocation,
+      ownerUserId: OWNER_ID,
+    });
+    verified.verify(VerificationLevel.Verified, 'c1');
+    await repo.save(acopio);
+    await repo.save(almacen);
+    await repo.save(verified);
+
+    // Type filter narrows to warehouses (and never returns verified rows).
+    const byType = await repo.findPendingByEmergencyPaged(
+      EmergencyId.fromString(EM),
+      { page: 1, limit: 50, type: ResourceType.Warehouse },
+    );
+    expect(byType.total).toBe(1);
+    expect(byType.items.map((x) => x.name)).toEqual(['Almacén Cáritas']);
+
+    // Free-text search matches the still-pending "Cruz Roja Centro" only.
+    const byText = await repo.findPendingByEmergencyPaged(
+      EmergencyId.fromString(EM),
+      { page: 1, limit: 50, q: 'cruz roja' },
+    );
+    expect(byText.total).toBe(1);
+    expect(byText.items.map((x) => x.name)).toEqual(['Cruz Roja Centro']);
+
+    // Pagination reports the full pending total but returns one item per page.
+    const page1 = await repo.findPendingByEmergencyPaged(
+      EmergencyId.fromString(EM),
+      { page: 1, limit: 1 },
+    );
+    expect(page1.total).toBe(2);
+    expect(page1.items).toHaveLength(1);
   });
 
   it('findActiveByEmergency returns only published resources and excludes them from pending', async () => {
@@ -521,6 +658,91 @@ describe('DrizzleResourceRepository (integration)', () => {
       expect(total).toBe(5);
     });
 
+    it('excludes active-but-unverified (ingested) points — #94', async () => {
+      const verified = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'Verified',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+      // Active yet Unverified, exactly as the external ingest writes it.
+      const unverified = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'Ingested Unverified',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Unverified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+      await repo.save(verified);
+      await repo.save(unverified);
+
+      const { items, total } = await repo.findVisiblePaged(
+        EmergencyId.fromString(EM),
+        { page: 1, limit: 10 },
+      );
+      expect(total).toBe(1);
+      expect(items.map((r) => r.name)).toEqual(['Verified']);
+    });
+
+    it('orders points without contact to the end (#58)', async () => {
+      const makeWithContact = (name: string, contact: string | null) =>
+        Resource.fromSnapshot({
+          ...Resource.register({
+            id: ResourceId.create(),
+            emergencyId: EmergencyId.fromString(EM),
+            type: ResourceType.CollectionPoint,
+            stage: ResourceStage.Origin,
+            name,
+            location: baseLocation,
+            ownerUserId: OWNER_ID,
+            contact,
+          }).toSnapshot(),
+          verificationLevel: VerificationLevel.Verified,
+          publicStatus: PublicStatus.Active,
+          createdAt: new Date(),
+        });
+
+      // Insert in an order that is NOT the desired output order.
+      await repo.save(makeWithContact('Zeta sin contacto', null));
+      await repo.save(makeWithContact('Alfa con contacto', '+58 212 555 0001'));
+      await repo.save(makeWithContact('Beta sin contacto', null));
+      await repo.save(
+        makeWithContact('Gamma con contacto', '+58 212 555 0002'),
+      );
+
+      const { items } = await repo.findVisiblePaged(
+        EmergencyId.fromString(EM),
+        {
+          page: 1,
+          limit: 10,
+        },
+      );
+
+      const names = items.map((r) => r.name);
+      // Points with contact come first (sorted by name), then the ones without.
+      expect(names).toEqual([
+        'Alfa con contacto',
+        'Gamma con contacto',
+        'Beta sin contacto',
+        'Zeta sin contacto',
+      ]);
+    });
+
     it('filters by category (accepts @> ARRAY[category])', async () => {
       const withWater = Resource.fromSnapshot({
         ...Resource.register({
@@ -789,6 +1011,53 @@ describe('DrizzleResourceRepository (integration)', () => {
       expect(byCategory['water']).not.toBe(3); // R3 excluded
       expect(byCountry['VE']).toBe(1); // R1
       expect(byCountry['CO']).toBe(1); // R2
+    });
+
+    it('does not count active-but-unverified (ingested) points — #94', async () => {
+      const verified = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'Verified',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+          accepts: ['water'],
+          country: 'VE',
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+      const unverified = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          stage: ResourceStage.Origin,
+          name: 'Ingested Unverified',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+          accepts: ['clothing'],
+          country: 'CO',
+        }).toSnapshot(),
+        verificationLevel: VerificationLevel.Unverified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+      await repo.save(verified);
+      await repo.save(unverified);
+
+      const { byCategory, byCountry, total } = await repo.facets(
+        EmergencyId.fromString(EM),
+      );
+
+      expect(total).toBe(1);
+      expect(byCategory['water']).toBe(1);
+      expect(byCategory['clothing']).toBeUndefined();
+      expect(byCountry['VE']).toBe(1);
+      expect(byCountry['CO']).toBeUndefined();
     });
   });
 
