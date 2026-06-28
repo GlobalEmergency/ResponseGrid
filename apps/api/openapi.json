@@ -3596,6 +3596,348 @@
         ]
       }
     },
+    "/logistics/shipments": {
+      "post": {
+        "operationId": "ShipmentController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateShipmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Shipment created (planned)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateShipmentResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing shipment:create permission"
+          },
+          "409": {
+            "description": "Emergency is not accepting intake (paused/closed)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a shipment / expedición (coordinator)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments/{id}/assign-capacity": {
+      "post": {
+        "operationId": "ShipmentController_assignCapacity",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipment UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignCapacityToShipmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Capacity assigned"
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing shipment:assign permission"
+          },
+          "404": {
+            "description": "Shipment not found"
+          },
+          "409": {
+            "description": "Shipment is not in planned status"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assign a transport capacity (and optional carrier) (coordinator)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments/{id}/in-transit": {
+      "post": {
+        "operationId": "ShipmentController_markInTransit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipment UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Shipment marked in transit"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Only the assigned carrier or a coordinator can act"
+          },
+          "404": {
+            "description": "Shipment not found"
+          },
+          "409": {
+            "description": "Shipment is not in assigned status"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark a shipment in transit (assigned carrier or coordinator)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments/{id}/deliver": {
+      "post": {
+        "operationId": "ShipmentController_deliver",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipment UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Shipment delivered"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Only the assigned carrier or a coordinator can act"
+          },
+          "404": {
+            "description": "Shipment not found"
+          },
+          "409": {
+            "description": "Shipment is not in transit"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Confirm a shipment delivery (assigned carrier or coordinator)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments/{id}/cancel": {
+      "post": {
+        "operationId": "ShipmentController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipment UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Shipment cancelled"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing shipment:update permission"
+          },
+          "404": {
+            "description": "Shipment not found"
+          },
+          "409": {
+            "description": "Shipment cannot be cancelled in its current status"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel a shipment (coordinator)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/shipments/mine": {
+      "get": {
+        "operationId": "ShipmentController_listMine",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": false,
+            "in": "query",
+            "description": "Optional emergency scope; omit to list across emergencies",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "My shipments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShipmentViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List my shipments as a carrier (\"mis expediciones\")",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/logistics/shipments": {
+      "get": {
+        "operationId": "ShipmentController_list",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "planned",
+                "assigned",
+                "in_transit",
+                "delivered",
+                "failed",
+                "cancelled"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Shipments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShipmentViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing shipment:read permission"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List shipments for an emergency (coordinator/verifier)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
     "/emergencies/{emergencyId}/volunteers": {
       "post": {
         "operationId": "VolunteersController_registerVolunteer",
@@ -8067,6 +8409,237 @@
           "coverage",
           "window",
           "constraints",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "ShipmentItemDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "example": "5 cajas de agua",
+            "description": "What moves"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 5,
+            "description": "How much (positive). Optional — cargo is often loose.",
+            "nullable": true
+          },
+          "unit": {
+            "type": "string",
+            "example": "cajas",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "example": "alimentacion",
+            "nullable": true
+          }
+        },
+        "required": [
+          "description"
+        ]
+      },
+      "CreateShipmentDto": {
+        "type": "object",
+        "properties": {
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Emergency this shipment serves"
+          },
+          "originResourceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Origin resource node (collection point) id"
+          },
+          "destinationResourceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Destination resource node id"
+          },
+          "items": {
+            "description": "Cargo manifest lines (at least one)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentItemDto"
+            }
+          },
+          "manifest": {
+            "type": "string",
+            "example": "Carga frágil, manipular con cuidado",
+            "description": "Free-text cargo manifest note"
+          }
+        },
+        "required": [
+          "emergencyId",
+          "originResourceId",
+          "destinationResourceId",
+          "items"
+        ]
+      },
+      "CreateShipmentResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "AssignShipmentCarrierDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "volunteer",
+              "organization"
+            ],
+            "example": "volunteer"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Volunteer or organization id (polymorphic, no FK)"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ]
+      },
+      "AssignCapacityToShipmentDto": {
+        "type": "object",
+        "properties": {
+          "assignedCapacityId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "TransportCapacity (#105) to earmark for this shipment"
+          },
+          "carrier": {
+            "description": "Optional carrier. Omit for an internal inventory transfer (no carrier).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AssignShipmentCarrierDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "assignedCapacityId"
+        ]
+      },
+      "ShipmentItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "example": "5 cajas de agua"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 5,
+            "nullable": true
+          },
+          "unit": {
+            "type": "string",
+            "example": "cajas",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "example": "alimentacion",
+            "nullable": true
+          }
+        },
+        "required": [
+          "description"
+        ]
+      },
+      "ShipmentViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originResourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationResourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentItemResponseDto"
+            }
+          },
+          "assignedCapacityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "carrierType": {
+            "type": "string",
+            "enum": [
+              "volunteer",
+              "organization"
+            ],
+            "nullable": true,
+            "example": "volunteer"
+          },
+          "carrierId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "manifest": {
+            "type": "string",
+            "example": "Carga frágil",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "assigned",
+              "in_transit",
+              "delivered",
+              "failed",
+              "cancelled"
+            ],
+            "example": "planned"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2026-07-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2026-07-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "emergencyId",
+          "originResourceId",
+          "destinationResourceId",
+          "items",
           "status",
           "createdAt",
           "updatedAt"

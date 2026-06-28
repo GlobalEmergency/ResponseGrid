@@ -1154,6 +1154,125 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/logistics/shipments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a shipment / expedición (coordinator) */
+        post: operations["ShipmentController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments/{id}/assign-capacity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assign a transport capacity (and optional carrier) (coordinator) */
+        post: operations["ShipmentController_assignCapacity"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments/{id}/in-transit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark a shipment in transit (assigned carrier or coordinator) */
+        post: operations["ShipmentController_markInTransit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments/{id}/deliver": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm a shipment delivery (assigned carrier or coordinator) */
+        post: operations["ShipmentController_deliver"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel a shipment (coordinator) */
+        post: operations["ShipmentController_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/logistics/shipments/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List my shipments as a carrier ("mis expediciones") */
+        get: operations["ShipmentController_listMine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/logistics/shipments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List shipments for an emergency (coordinator/verifier) */
+        get: operations["ShipmentController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/emergencies/{emergencyId}/volunteers": {
         parameters: {
             query?: never;
@@ -2921,6 +3040,115 @@ export interface components {
             status: "available" | "reserved" | "withdrawn";
             /** @example Salida diaria a las 08:00 */
             notes?: string | null;
+            /** @example 2026-07-01T00:00:00.000Z */
+            createdAt: string;
+            /** @example 2026-07-01T00:00:00.000Z */
+            updatedAt: string;
+        };
+        ShipmentItemDto: {
+            /**
+             * @description What moves
+             * @example 5 cajas de agua
+             */
+            description: string;
+            /**
+             * @description How much (positive). Optional — cargo is often loose.
+             * @example 5
+             */
+            quantity?: number | null;
+            /** @example cajas */
+            unit?: string | null;
+            /** @example alimentacion */
+            category?: string | null;
+        };
+        CreateShipmentDto: {
+            /**
+             * Format: uuid
+             * @description Emergency this shipment serves
+             */
+            emergencyId: string;
+            /**
+             * Format: uuid
+             * @description Origin resource node (collection point) id
+             */
+            originResourceId: string;
+            /**
+             * Format: uuid
+             * @description Destination resource node id
+             */
+            destinationResourceId: string;
+            /** @description Cargo manifest lines (at least one) */
+            items: components["schemas"]["ShipmentItemDto"][];
+            /**
+             * @description Free-text cargo manifest note
+             * @example Carga frágil, manipular con cuidado
+             */
+            manifest?: string;
+        };
+        CreateShipmentResponseDto: {
+            /**
+             * Format: uuid
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            id: string;
+        };
+        AssignShipmentCarrierDto: {
+            /**
+             * @example volunteer
+             * @enum {string}
+             */
+            type: "volunteer" | "organization";
+            /**
+             * Format: uuid
+             * @description Volunteer or organization id (polymorphic, no FK)
+             */
+            id: string;
+        };
+        AssignCapacityToShipmentDto: {
+            /**
+             * Format: uuid
+             * @description TransportCapacity (#105) to earmark for this shipment
+             */
+            assignedCapacityId: string;
+            /** @description Optional carrier. Omit for an internal inventory transfer (no carrier). */
+            carrier?: components["schemas"]["AssignShipmentCarrierDto"];
+        };
+        ShipmentItemResponseDto: {
+            /** @example 5 cajas de agua */
+            description: string;
+            /** @example 5 */
+            quantity?: number | null;
+            /** @example cajas */
+            unit?: string | null;
+            /** @example alimentacion */
+            category?: string | null;
+        };
+        ShipmentViewDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            emergencyId: string;
+            /** Format: uuid */
+            originResourceId: string;
+            /** Format: uuid */
+            destinationResourceId: string;
+            items: components["schemas"]["ShipmentItemResponseDto"][];
+            /** Format: uuid */
+            assignedCapacityId?: string | null;
+            /**
+             * @example volunteer
+             * @enum {string|null}
+             */
+            carrierType?: "volunteer" | "organization" | null;
+            /** Format: uuid */
+            carrierId?: string | null;
+            /** @example Carga frágil */
+            manifest?: string | null;
+            /**
+             * @example planned
+             * @enum {string}
+             */
+            status: "planned" | "assigned" | "in_transit" | "delivered" | "failed" | "cancelled";
             /** @example 2026-07-01T00:00:00.000Z */
             createdAt: string;
             /** @example 2026-07-01T00:00:00.000Z */
@@ -6079,6 +6307,335 @@ export interface operations {
                 content?: never;
             };
             /** @description Missing capacity:read permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateShipmentDto"];
+            };
+        };
+        responses: {
+            /** @description Shipment created (planned) */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateShipmentResponseDto"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing shipment:create permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Emergency is not accepting intake (paused/closed) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_assignCapacity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Shipment UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignCapacityToShipmentDto"];
+            };
+        };
+        responses: {
+            /** @description Capacity assigned */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing shipment:assign permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment is not in planned status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_markInTransit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Shipment UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Shipment marked in transit */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Only the assigned carrier or a coordinator can act */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment is not in assigned status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_deliver: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Shipment UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Shipment delivered */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Only the assigned carrier or a coordinator can act */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment is not in transit */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Shipment UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Shipment cancelled */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing shipment:update permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment cannot be cancelled in its current status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_listMine: {
+        parameters: {
+            query?: {
+                /** @description Optional emergency scope; omit to list across emergencies */
+                emergencyId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description My shipments */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentViewDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShipmentController_list: {
+        parameters: {
+            query?: {
+                /** @description Filter by status */
+                status?: "planned" | "assigned" | "in_transit" | "delivered" | "failed" | "cancelled";
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Shipments */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentViewDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing shipment:read permission */
             403: {
                 headers: {
                     [name: string]: unknown;
