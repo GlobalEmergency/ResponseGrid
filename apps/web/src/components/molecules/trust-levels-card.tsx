@@ -2,6 +2,8 @@
  * TrustLevelsCard — "La confianza es el producto": explains each verification
  * level next to the very badge users will see across the platform.
  */
+import { Card } from '@/components/atoms/card';
+import { SectionHeading } from '@/components/atoms/section-heading';
 import { VerificationBadge, type VerificationLevel } from '@/components/atoms/verification-badge';
 import type { Messages } from '@/i18n/messages/es';
 
@@ -19,8 +21,8 @@ interface TrustLevelsCardProps {
 
 export function TrustLevelsCard({ heading, intro, rows, tVerification }: TrustLevelsCardProps) {
   return (
-    <div className="rounded-card border border-line bg-white p-[18px]">
-      <h3 className="font-display text-base font-bold text-navy">{heading}</h3>
+    <Card className="p-[18px]">
+      <SectionHeading as="h3" size="sm">{heading}</SectionHeading>
       <p className="mt-1 text-[13px] leading-[1.45] text-muted">{intro}</p>
       <ul className="mt-3.5 grid gap-2.5 sm:grid-cols-3 sm:gap-4">
         {rows.map((row) => (
@@ -30,6 +32,6 @@ export function TrustLevelsCard({ heading, intro, rows, tVerification }: TrustLe
           </li>
         ))}
       </ul>
-    </div>
+    </Card>
   );
 }

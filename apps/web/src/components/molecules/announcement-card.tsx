@@ -4,6 +4,7 @@
  * `t` is optional — falls back to Spanish when omitted.
  */
 
+import { Card } from '@/components/atoms/card';
 import { RelativeTime } from '@/components/atoms/relative-time';
 import type { Messages } from '@/i18n/messages/es';
 import { es } from '@/i18n/messages/es';
@@ -29,10 +30,7 @@ export function AnnouncementCard({
   }
 
   return (
-    <aside
-      aria-label={t.aria_label}
-      className="flex flex-col gap-2 rounded-card border border-line bg-white px-4 py-4"
-    >
+    <Card as="aside" aria-label={t.aria_label} className="flex flex-col gap-2 px-4 py-4">
       <div className="flex items-center justify-between gap-2">
         <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-navy">
           {t.official_label}
@@ -46,6 +44,6 @@ export function AnnouncementCard({
         {t.last_updated}{' '}
         <RelativeTime isoString={updatedAt} />
       </p>
-    </aside>
+    </Card>
   );
 }

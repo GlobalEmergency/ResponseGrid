@@ -1,3 +1,5 @@
+import { Card } from '@/components/atoms/card';
+
 type Tone = 'navy' | 'success' | 'accent';
 
 interface MetricCardProps {
@@ -19,13 +21,13 @@ const TONE_CLASS: Record<Tone, string> = {
  */
 export function MetricCard({ value, label, tone = 'navy' }: MetricCardProps) {
   return (
-    <div className="rounded-card border border-line bg-white px-3.5 py-3">
+    <Card className="px-3.5 py-3">
       <span
         className={`block font-display text-[26px] font-extrabold leading-none tabular-nums ${TONE_CLASS[tone]}`}
       >
         {value}
       </span>
       <span className="mt-1.5 block text-xs leading-tight text-muted">{label}</span>
-    </div>
+    </Card>
   );
 }

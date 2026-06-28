@@ -4,6 +4,7 @@
  */
 import Link from 'next/link';
 import type { components } from '@reliefhub/api-client';
+import { Card } from '@/components/atoms/card';
 import { PriorityBadge, type Priority } from '@/components/atoms/priority-badge';
 import { FreshnessIndicator } from '@/components/atoms/freshness-indicator';
 import { PrivacyLocationNotice } from '@/components/atoms/privacy-location-notice';
@@ -33,7 +34,7 @@ export function NeedCard({ need, te, slug, active }: NeedCardProps) {
   const approximate = need.locationSensitivity === 'approximate';
 
   return (
-    <article className="flex flex-col gap-2.5 rounded-card border border-line bg-white p-4">
+    <Card as="article" className="flex flex-col gap-2.5 p-4">
       <div className="flex flex-wrap items-center gap-2">
         <PriorityBadge
           priority={priority}
@@ -53,6 +54,6 @@ export function NeedCard({ need, te, slug, active }: NeedCardProps) {
           {te.needs_offer_button}
         </Link>
       )}
-    </article>
+    </Card>
   );
 }

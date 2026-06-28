@@ -16,8 +16,8 @@ interface HelpActionRowProps {
 
 const CONTAINER: Record<Variant, string> = {
   primary: 'bg-navy text-white border border-navy hover:bg-navy-700 focus:ring-navy',
-  default: 'bg-white text-ink border-[1.5px] border-[#d8d2c8] hover:bg-surface focus:ring-navy',
-  danger: 'bg-danger-tint text-[#9a3b12] border-[1.5px] border-[#e9b79a] hover:brightness-[0.98] focus:ring-danger',
+  default: 'bg-white text-ink border-[1.5px] border-line-strong hover:bg-surface focus:ring-navy',
+  danger: 'bg-danger-tint text-danger-strong border-[1.5px] border-danger-line hover:brightness-[0.98] focus:ring-danger',
 };
 
 const ARROW: Record<Variant, string> = {
