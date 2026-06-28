@@ -154,6 +154,27 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'volunteer:read',
     ],
   },
+  transportista: {
+    id: 'transportista',
+    description:
+      'Transportista: ejecuta las expediciones asignadas, actualiza su estado ' +
+      'en tránsito y firma manifiestos (ciudadano con vehículo u operador).',
+    defaultScopeType: 'emergency',
+    permissions: ['shipment:read', 'shipment:track', 'manifest:sign'],
+  },
+  hub_manager: {
+    id: 'hub_manager',
+    description:
+      'Gestor de hub logístico: crea y opera las expediciones que transitan su ' +
+      'hub. Autoridad transversal a emergencias vía scope hub/entity (§16).',
+    defaultScopeType: 'entity',
+    permissions: [
+      'shipment:create',
+      'shipment:read',
+      'shipment:track',
+      'manifest:sign',
+    ],
+  },
   viewer: {
     id: 'viewer',
     description: 'Solo lectura.',

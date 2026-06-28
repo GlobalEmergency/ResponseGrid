@@ -34,6 +34,11 @@ export const PERMISSION_CATALOG = {
   role: ['grant', 'revoke', 'create_custom'],
   apikey: ['create', 'revoke'],
   audit: ['read'],
+  // Logística de transporte (EPIC #103). Definidos como data antes de que
+  // exista enforcement (la expedición se construye en #106); 'manifest:sign'
+  // cubre la cadena de custodia de la carga.
+  shipment: ['create', 'read', 'track'],
+  manifest: ['sign'],
 } as const;
 
 type Catalog = typeof PERMISSION_CATALOG;

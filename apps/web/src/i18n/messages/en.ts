@@ -1006,6 +1006,7 @@ export const en = {
     f_type_company: 'Company',
     f_type_public: 'Public administration',
     f_type_association: 'Association',
+    f_type_transport: 'Transport operator',
     f_type_other: 'Other',
     f_taxid: 'Tax ID',
     f_email: 'Contact email',

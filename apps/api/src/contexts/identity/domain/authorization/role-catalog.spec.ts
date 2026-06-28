@@ -21,6 +21,21 @@ describe('ROLE_CATALOG', () => {
     }
   });
 
+  it('defines the logistics roles transportista and hub_manager (EPIC #103)', () => {
+    expect(roleExists('transportista')).toBe(true);
+    expect(roleExists('hub_manager')).toBe(true);
+
+    const transportista = new Set(permissionsForRole('transportista'));
+    expect(transportista.has('shipment:track')).toBe(true);
+    expect(transportista.has('manifest:sign')).toBe(true);
+    // a carrier executes shipments; coordination/hub creates them
+    expect(transportista.has('shipment:create')).toBe(false);
+
+    const hubManager = new Set(permissionsForRole('hub_manager'));
+    expect(hubManager.has('shipment:create')).toBe(true);
+    expect(hubManager.has('shipment:track')).toBe(true);
+  });
+
   it('every role only references permissions that exist in the catalog', () => {
     const valid = new Set<string>(ALL_PERMISSIONS);
     for (const role of Object.values(ROLE_CATALOG)) {

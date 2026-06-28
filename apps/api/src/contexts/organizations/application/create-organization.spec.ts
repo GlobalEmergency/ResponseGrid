@@ -84,4 +84,22 @@ describe('CreateOrganization', () => {
     const saved = await orgRepo.findById(OrganizationId.fromString(id));
     expect(saved?.verificationLevel).toBe('unverified');
   });
+
+  it('creates a transport operator organization (logística de transporte)', async () => {
+    const orgRepo = new InMemoryOrganizationRepository();
+    const memberRepo = new InMemoryOrganizationMemberRepository(orgRepo);
+    const useCase = new CreateOrganization(orgRepo, memberRepo);
+
+    const { id } = await useCase.execute({
+      name: 'TransCarga Express',
+      type: OrganizationType.TransportOperator,
+      taxId: null,
+      contactEmail: null,
+      creatorUserId: 'eeeeeeee-0000-4000-8000-000000000001',
+    });
+
+    const saved = await orgRepo.findById(OrganizationId.fromString(id));
+    expect(saved?.type).toBe(OrganizationType.TransportOperator);
+    expect(saved?.type).toBe('transport_operator');
+  });
 });

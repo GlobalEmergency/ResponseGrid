@@ -2389,7 +2389,7 @@ export interface components {
              * @example ngo
              * @enum {string}
              */
-            type: "ngo" | "company" | "public_admin" | "association" | "other";
+            type: "ngo" | "company" | "public_admin" | "association" | "transport_operator" | "other";
             /** @example ES-12345678 */
             taxId?: string;
             /** @example contact@org.example */
@@ -2403,7 +2403,7 @@ export interface components {
             id: string;
             name: string;
             /** @enum {string} */
-            type: "ngo" | "company" | "public_admin" | "association" | "other";
+            type: "ngo" | "company" | "public_admin" | "association" | "transport_operator" | "other";
             verificationLevel: string;
         };
         OrganizationMemberDto: {
