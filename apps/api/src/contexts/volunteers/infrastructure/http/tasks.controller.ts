@@ -56,8 +56,8 @@ import {
   JwtAuthGuard,
   AuthenticatedUser,
 } from '../../../identity/infrastructure/http/jwt-auth.guard';
-import { RequireCoordinatorGuard } from '../../../identity/infrastructure/http/require-coordinator.guard';
-import { RequireTaskCoordinatorGuard } from '../../../identity/infrastructure/http/require-task-coordinator.guard';
+import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
+import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
 import {
   CreateTaskDto,
   AssignVolunteerDto,
@@ -97,7 +97,8 @@ export class TasksController {
 
   @Post('emergencies/:emergencyId/tasks')
   @HttpCode(201)
-  @UseGuards(JwtAuthGuard, RequireCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('task:create')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Create a task for an emergency (coordinator only)',
@@ -128,7 +129,8 @@ export class TasksController {
   // ─── GET /emergencies/:emergencyId/tasks ──────────────────────────────────
 
   @Get('emergencies/:emergencyId/tasks')
-  @UseGuards(JwtAuthGuard, RequireCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('task:read')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List tasks for an emergency (coordinator only)' })
   @ApiParam({ name: 'emergencyId', format: 'uuid' })
@@ -186,7 +188,8 @@ export class TasksController {
 
   @Post('tasks/:taskId/assign')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RequireTaskCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('task:assign')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Assign a volunteer to a task (coordinator only)' })
   @ApiParam({ name: 'taskId', format: 'uuid' })
@@ -208,7 +211,8 @@ export class TasksController {
 
   @Post('tasks/:taskId/unassign')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RequireTaskCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('task:assign')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Unassign a volunteer from a task (coordinator only)',
@@ -306,7 +310,8 @@ export class TasksController {
 
   @Post('tasks/:taskId/complete')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RequireTaskCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('task:assign')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Mark a task as completed (coordinator only)' })
   @ApiParam({ name: 'taskId', format: 'uuid' })
@@ -325,7 +330,8 @@ export class TasksController {
 
   @Post('tasks/:taskId/cancel')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RequireTaskCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('task:assign')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Cancel a task (coordinator only)' })
   @ApiParam({ name: 'taskId', format: 'uuid' })
