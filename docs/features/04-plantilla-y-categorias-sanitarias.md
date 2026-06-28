@@ -75,7 +75,7 @@ export enum NeedCategory {
 ```
 
 - Ventajas: simple, un único enum, compatible con el cliente tipado, filtraje global sin cambio de interfaz.
-- Desventajas: el enum crece con cada vertical (ej. futuro vertical SAR); las categorías son globales aunque no tengan sentido en todas las emergencias; migración de BD (ALTER TYPE).
+- Desventajas: el enum crece con cada vertical (ej. un futuro vertical logístico); las categorías son globales aunque no tengan sentido en todas las emergencias; migración de BD (ALTER TYPE).
 
 ---
 

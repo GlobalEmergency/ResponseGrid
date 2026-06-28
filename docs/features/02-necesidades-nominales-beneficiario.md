@@ -1,4 +1,4 @@
-# 02 · Necesidades nominales (beneficiario concreto) — Dominio: Personas y reunificación
+# 02 · Necesidades nominales (beneficiario concreto) — Dominio: Personas
 
 > Caso de uso capturado del análisis de REDH para el roadmap de ReliefHub. Entregable independiente y abordable por separado.
 
