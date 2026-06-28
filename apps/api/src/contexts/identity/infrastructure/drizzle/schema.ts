@@ -85,3 +85,35 @@ export const grantsTable = pgTable(
     index('grants_scope_idx').on(t.scopeType, t.scopeId),
   ],
 );
+
+/** Machine principal — receives grants like a user (principal_type='service_account'). */
+export const serviceAccountsTable = pgTable('service_accounts', {
+  id: uuid('id').primaryKey(),
+  name: text('name').notNull(),
+  ownerOrganizationId: uuid('owner_organization_id'),
+  createdByUserId: uuid('created_by_user_id').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+/** Credential for a service account. The plaintext secret is never stored. */
+export const apiKeysTable = pgTable(
+  'api_keys',
+  {
+    id: uuid('id').primaryKey(),
+    prefix: text('prefix').notNull().unique(),
+    hashedSecret: text('hashed_secret').notNull(),
+    serviceAccountId: uuid('service_account_id')
+      .notNull()
+      .references(() => serviceAccountsTable.id, { onDelete: 'cascade' }),
+    createdByUserId: uuid('created_by_user_id').notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }),
+    lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index('api_keys_service_account_idx').on(t.serviceAccountId)],
+);

@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto';
+import { randomBytes, createHash, timingSafeEqual } from 'node:crypto';
 
 export interface GeneratedApiKey {
   /** The full secret key, shown to the caller exactly once. */
@@ -23,4 +23,27 @@ export function prefixOf(plaintext: string): string | null {
   const match = KEY_RE.exec(plaintext);
   if (!match) return null;
   return `rh_live_${match[1].slice(0, 8)}`;
+}
+
+/**
+ * Hash an API key secret for storage. SHA-256 is appropriate here (the secret
+ * is high-entropy, unlike a password) and is fast enough to verify on every
+ * request — bcrypt would be needlessly slow for an API plane.
+ */
+export function hashApiKeySecret(plaintext: string): string {
+  return createHash('sha256').update(plaintext).digest('hex');
+}
+
+/** Constant-time verification of a presented key against a stored hash. */
+export function verifyApiKeySecret(plaintext: string, hash: string): boolean {
+  const presented = Buffer.from(hashApiKeySecret(plaintext), 'hex');
+  let stored: Buffer;
+  try {
+    stored = Buffer.from(hash, 'hex');
+  } catch {
+    return false;
+  }
+  return (
+    presented.length === stored.length && timingSafeEqual(presented, stored)
+  );
 }
