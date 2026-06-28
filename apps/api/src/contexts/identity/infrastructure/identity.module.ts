@@ -29,6 +29,10 @@ import { TOKEN_SERVICE } from '../domain/ports/token.service';
 import { DrizzleUserRepository } from './drizzle/drizzle-user.repository';
 import { DrizzleMembershipRepository } from './drizzle/drizzle-membership.repository';
 import { DrizzleGrantRepository } from './drizzle/drizzle-grant.repository';
+import { ACCESS_CONTROL } from '../domain/authorization/access-control';
+import { LocalAccessControl } from '../domain/authorization/local-access-control';
+import { PermissionGuard } from './http/permission.guard';
+import { SCOPE_RESOLVER, RequestScopeResolver } from './http/scope-resolver';
 import { DrizzleUserIdentityRepository } from './drizzle/drizzle-user-identity.repository';
 import { BcryptPasswordHasher } from './bcrypt-password-hasher';
 import { JwtTokenService } from './jwt-token.service';
@@ -92,6 +96,16 @@ const grantRepositoryProvider = {
   provide: GRANT_REPOSITORY,
   inject: [DB],
   useFactory: (db: Db): GrantRepository => new DrizzleGrantRepository(db),
+};
+
+const accessControlProvider = {
+  provide: ACCESS_CONTROL,
+  useFactory: () => new LocalAccessControl(),
+};
+
+const scopeResolverProvider = {
+  provide: SCOPE_RESOLVER,
+  useClass: RequestScopeResolver,
 };
 
 const userIdentityRepositoryProvider = {
@@ -213,6 +227,9 @@ const authenticateWithProviderProvider = {
     volunteerEmergencyLookupProvider,
     taskEmergencyLookupProvider,
     reportEmergencyLookupProvider,
+    accessControlProvider,
+    scopeResolverProvider,
+    PermissionGuard,
     JwtAuthGuard,
     OptionalJwtAuthGuard,
     RequireAdminGuard,
@@ -237,6 +254,9 @@ const authenticateWithProviderProvider = {
     VOLUNTEER_EMERGENCY_LOOKUP,
     TASK_EMERGENCY_LOOKUP,
     REPORT_EMERGENCY_LOOKUP,
+    ACCESS_CONTROL,
+    SCOPE_RESOLVER,
+    PermissionGuard,
     JwtAuthGuard,
     OptionalJwtAuthGuard,
     RequireAdminGuard,

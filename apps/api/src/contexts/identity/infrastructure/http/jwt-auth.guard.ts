@@ -14,6 +14,8 @@ import type { MembershipRepository } from '../../domain/ports/membership.reposit
 import { MEMBERSHIP_REPOSITORY } from '../../domain/ports/membership.repository';
 import { UserId } from '../../domain/user-id';
 import type { MembershipSnapshot } from '../../domain/membership';
+import type { GrantSnapshot } from '../../domain/authorization/grant';
+import { deriveGrantsFromLegacy } from '../../domain/authorization/legacy-grant-mapping';
 
 export interface AuthenticatedUser {
   id: string;
@@ -21,6 +23,8 @@ export interface AuthenticatedUser {
   name: string;
   isAdmin: boolean;
   memberships: MembershipSnapshot[];
+  /** Effective authorization grants for this request (see docs/features/13 §9). */
+  grants: GrantSnapshot[];
 }
 
 @Injectable()
@@ -51,13 +55,19 @@ export class JwtAuthGuard implements CanActivate {
     if (!user) throw new UnauthorizedException('User not found');
 
     const memberships = await this.membershipRepo.findByUser(user.id);
+    const membershipSnapshots = memberships.map((m) => m.toSnapshot());
 
     request.user = {
       id: user.id.value,
       email: user.email.value,
       name: user.name,
       isAdmin: user.isAdmin,
-      memberships: memberships.map((m) => m.toSnapshot()),
+      memberships: membershipSnapshots,
+      grants: deriveGrantsFromLegacy(
+        user.id.value,
+        user.isAdmin,
+        membershipSnapshots,
+      ),
     };
 
     return true;

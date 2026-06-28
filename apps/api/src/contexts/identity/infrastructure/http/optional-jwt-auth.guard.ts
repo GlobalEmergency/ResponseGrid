@@ -12,6 +12,7 @@ import { USER_REPOSITORY } from '../../domain/ports/user.repository';
 import type { MembershipRepository } from '../../domain/ports/membership.repository';
 import { MEMBERSHIP_REPOSITORY } from '../../domain/ports/membership.repository';
 import { UserId } from '../../domain/user-id';
+import { deriveGrantsFromLegacy } from '../../domain/authorization/legacy-grant-mapping';
 import { AuthenticatedUser } from './jwt-auth.guard';
 
 /**
@@ -49,12 +50,18 @@ export class OptionalJwtAuthGuard implements CanActivate {
       const user = await this.userRepo.findById(UserId.fromString(payload.sub));
       if (!user) return true;
       const memberships = await this.membershipRepo.findByUser(user.id);
+      const membershipSnapshots = memberships.map((m) => m.toSnapshot());
       request.user = {
         id: user.id.value,
         email: user.email.value,
         name: user.name,
         isAdmin: user.isAdmin,
-        memberships: memberships.map((m) => m.toSnapshot()),
+        memberships: membershipSnapshots,
+        grants: deriveGrantsFromLegacy(
+          user.id.value,
+          user.isAdmin,
+          membershipSnapshots,
+        ),
       };
     } catch {
       // If anything fails, proceed unauthenticated
