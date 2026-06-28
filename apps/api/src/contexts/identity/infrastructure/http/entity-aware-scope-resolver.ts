@@ -8,9 +8,17 @@ import { OFFER_EMERGENCY_LOOKUP } from '../../domain/ports/offer-emergency-looku
 import { VOLUNTEER_EMERGENCY_LOOKUP } from '../../domain/ports/volunteer-emergency-lookup';
 import { TASK_EMERGENCY_LOOKUP } from '../../domain/ports/task-emergency-lookup';
 import { REPORT_EMERGENCY_LOOKUP } from '../../domain/ports/report-emergency-lookup';
+import { REUNIFICATION_EMERGENCY_LOOKUP } from '../../domain/ports/reunification-emergency-lookup';
 
 interface EmergencyLookup {
   findEmergencyId(entityId: string): Promise<string | null>;
+}
+
+interface EntityParam {
+  param: string;
+  entityType: string;
+  /** Tried in order until one resolves (e.g. reportId: reports → reunification). */
+  lookups: EmergencyLookup[];
 }
 
 /**
@@ -19,16 +27,16 @@ interface EmergencyLookup {
  * (`:resourceId`, `:needId`, …) by reusing the existing *EmergencyLookup ports
  * — the same lookups the legacy Require*CoordinatorGuard family used. Preserves
  * the legacy 404 when the targeted entity does not exist, so migrating a route
- * from the old guard to @RequirePermission is behavior-preserving for the
- * not-found case. See docs/features/13 §9.
+ * from the old guard to @RequirePermission is behavior-preserving. See
+ * docs/features/13 §9.
+ *
+ * `reportId` is shared by two contexts (field reports and reunification
+ * reports); it is resolved by trying both lookups in turn — UUID id spaces do
+ * not collide.
  */
 @Injectable()
 export class EntityAwareScopeResolver implements ScopeResolver {
-  private readonly entityLookups: ReadonlyArray<{
-    param: string;
-    entityType: string;
-    lookup: EmergencyLookup;
-  }>;
+  private readonly entityParams: ReadonlyArray<EntityParam>;
 
   constructor(
     @Inject(RESOURCE_EMERGENCY_LOOKUP) resource: EmergencyLookup,
@@ -37,14 +45,19 @@ export class EntityAwareScopeResolver implements ScopeResolver {
     @Inject(VOLUNTEER_EMERGENCY_LOOKUP) volunteer: EmergencyLookup,
     @Inject(TASK_EMERGENCY_LOOKUP) task: EmergencyLookup,
     @Inject(REPORT_EMERGENCY_LOOKUP) report: EmergencyLookup,
+    @Inject(REUNIFICATION_EMERGENCY_LOOKUP) reunification: EmergencyLookup,
   ) {
-    this.entityLookups = [
-      { param: 'resourceId', entityType: 'resource', lookup: resource },
-      { param: 'needId', entityType: 'need', lookup: need },
-      { param: 'offerId', entityType: 'offer', lookup: offer },
-      { param: 'volunteerId', entityType: 'volunteer', lookup: volunteer },
-      { param: 'taskId', entityType: 'task', lookup: task },
-      { param: 'reportId', entityType: 'report', lookup: report },
+    this.entityParams = [
+      { param: 'resourceId', entityType: 'resource', lookups: [resource] },
+      { param: 'needId', entityType: 'need', lookups: [need] },
+      { param: 'offerId', entityType: 'offer', lookups: [offer] },
+      { param: 'volunteerId', entityType: 'volunteer', lookups: [volunteer] },
+      { param: 'taskId', entityType: 'task', lookups: [task] },
+      {
+        param: 'reportId',
+        entityType: 'report',
+        lookups: [report, reunification],
+      },
     ];
   }
 
@@ -56,19 +69,21 @@ export class EntityAwareScopeResolver implements ScopeResolver {
       return [{ type: 'emergency', id: emergencyId }, { type: 'platform' }];
     }
 
-    for (const { param, entityType, lookup } of this.entityLookups) {
+    for (const { param, entityType, lookups } of this.entityParams) {
       const entityId = params[param];
       if (!entityId) continue;
 
-      const resolvedEmergencyId = await lookup.findEmergencyId(entityId);
-      if (resolvedEmergencyId === null) {
-        throw new NotFoundException(`${entityType} ${entityId} not found`);
+      for (const lookup of lookups) {
+        const resolvedEmergencyId = await lookup.findEmergencyId(entityId);
+        if (resolvedEmergencyId !== null) {
+          return [
+            { type: 'entity', entityType, id: entityId },
+            { type: 'emergency', id: resolvedEmergencyId },
+            { type: 'platform' },
+          ];
+        }
       }
-      return [
-        { type: 'entity', entityType, id: entityId },
-        { type: 'emergency', id: resolvedEmergencyId },
-        { type: 'platform' },
-      ];
+      throw new NotFoundException(`${entityType} ${entityId} not found`);
     }
 
     return [{ type: 'platform' }];

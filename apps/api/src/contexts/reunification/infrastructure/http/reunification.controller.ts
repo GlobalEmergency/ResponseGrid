@@ -35,8 +35,8 @@ import {
   AuthenticatedUser,
 } from '../../../identity/infrastructure/http/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../../../identity/infrastructure/http/optional-jwt-auth.guard';
-import { RequireCoordinatorGuard } from '../../../identity/infrastructure/http/require-coordinator.guard';
-import { RequireReunificationReportCoordinatorGuard } from '../../../identity/infrastructure/http/require-reunification-report-coordinator.guard';
+import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
+import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
 import { CreateMissingPersonReport } from '../../application/create-missing-person-report';
 import { ListMissingPersonReports } from '../../application/list-missing-person-reports';
 import { GetMissingPersonReport } from '../../application/get-missing-person-report';
@@ -228,7 +228,8 @@ export class ReunificationController {
   // ── Coordinator endpoints (scoped by emergencyId) ────────────────────────
 
   @Get('emergencies/:emergencyId/reunification')
-  @UseGuards(JwtAuthGuard, RequireCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('reunification:read_private')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'List missing person reports for an emergency (coordinator only)',
@@ -256,7 +257,8 @@ export class ReunificationController {
   }
 
   @Get('emergencies/:emergencyId/reunification/search')
-  @UseGuards(JwtAuthGuard, RequireCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('reunification:read_private')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Search missing person reports by documentId (coordinator only)',
@@ -301,7 +303,8 @@ export class ReunificationController {
   // ── Entity-scoped coordinator endpoints (by reportId) ────────────────────
 
   @Get('reunification/:reportId')
-  @UseGuards(JwtAuthGuard, RequireReunificationReportCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('reunification:read_private')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get full detail of a missing person report (coordinator only)',
@@ -320,7 +323,8 @@ export class ReunificationController {
 
   @Patch('reunification/:reportId/status')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RequireReunificationReportCoordinatorGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('reunification:match')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Update the status of a missing person report (coordinator only)',

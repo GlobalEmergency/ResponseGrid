@@ -19,6 +19,7 @@ import { createDb } from '../src/shared/db';
 import {
   usersTable,
   membershipsTable,
+  grantsTable,
 } from '../src/contexts/identity/infrastructure/drizzle/schema';
 import { emergenciesTable } from '../src/contexts/emergencies/infrastructure/drizzle/schema';
 import {
@@ -37,6 +38,7 @@ const USER_R_ID = 'e1111111-0000-4000-8000-000000000011'; // regular user
 const COORD_R2_ID = 'e1111111-0000-4000-8000-000000000012'; // coordinator of another emergency
 
 const MEM_COORD_R = 'e1111111-0000-4000-8000-000000000020';
+const GRANT_OFFICER_R = 'e1111111-0000-4000-8000-000000000021';
 
 const BASE_REPORT_BODY = {
   person: {
@@ -149,6 +151,24 @@ describe('Reunification (e2e)', () => {
             userId: COORD_R_ID,
             emergencyId: EM_R,
             role: 'coordinator',
+          },
+        ])
+        .onConflictDoNothing();
+
+      // Reunification accesses special-category data and is restricted to the
+      // reunification_officer role (docs/features/13 §17), NOT every coordinator.
+      // Grant that role to the coord user so it can reach these endpoints.
+      await db
+        .insert(grantsTable)
+        .values([
+          {
+            id: GRANT_OFFICER_R,
+            principalId: COORD_R_ID,
+            principalType: 'user',
+            roleId: 'reunification_officer',
+            scopeType: 'emergency',
+            scopeId: EM_R,
+            grantedAt: new Date(),
           },
         ])
         .onConflictDoNothing();
