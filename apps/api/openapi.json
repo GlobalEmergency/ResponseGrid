@@ -5423,6 +5423,31 @@
           "groups"
         ]
       }
+    },
+    "/categories": {
+      "get": {
+        "operationId": "CategoriesController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The category taxonomy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "List the shared category taxonomy (slug + labels + hierarchy)",
+        "tags": [
+          "categories"
+        ]
+      }
     }
   },
   "info": {
@@ -6025,17 +6050,17 @@
         "properties": {
           "name": {
             "type": "string",
-            "example": "Agua embotellada",
-            "description": "Name of the supply / material held at this place"
+            "example": "Water bottles",
+            "description": "Name of the supply"
           },
           "quantity": {
             "type": "number",
             "example": 100,
-            "description": "Quantity available (positive integer)"
+            "description": "Quantity (positive integer)"
           },
           "unit": {
             "type": "string",
-            "example": "litros",
+            "example": "liters",
             "description": "Unit of measurement (optional)"
           },
           "category": {
@@ -6059,7 +6084,7 @@
           "presentation": {
             "type": "string",
             "example": "ampolla",
-            "description": "Presentation / route of administration (health vertical): ampolla, EV, inhalador… Optional, free-form."
+            "description": "Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe… Optional, free-form (#61)."
           }
         },
         "required": [
@@ -7147,54 +7172,6 @@
           "longitude"
         ]
       },
-      "NeedItemDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "example": "Water bottles",
-            "description": "Name of the item needed"
-          },
-          "quantity": {
-            "type": "number",
-            "example": 100,
-            "description": "Quantity needed (positive integer)"
-          },
-          "unit": {
-            "type": "string",
-            "example": "liters",
-            "description": "Unit of measurement (optional)"
-          },
-          "category": {
-            "type": "string",
-            "enum": [
-              "food",
-              "water",
-              "hygiene",
-              "clothing",
-              "medical",
-              "shelter",
-              "tools",
-              "other",
-              "medicines",
-              "medical_equipment",
-              "medical_supplies",
-              "medical_personnel"
-            ],
-            "example": "water"
-          },
-          "presentation": {
-            "type": "string",
-            "example": "ampolla",
-            "description": "Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe, oxígeno… Optional, free-form (#61)."
-          }
-        },
-        "required": [
-          "name",
-          "quantity",
-          "category"
-        ]
-      },
       "CreateNeedDto": {
         "type": "object",
         "properties": {
@@ -7231,7 +7208,7 @@
             "minItems": 1,
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/NeedItemDto"
+              "$ref": "#/components/schemas/SupplyLineDto"
             }
           },
           "requiredSkill": {
@@ -7311,7 +7288,7 @@
           "longitude"
         ]
       },
-      "NeedItemResponseDto": {
+      "SupplyLineResponseDto": {
         "type": "object",
         "properties": {
           "name": {
@@ -7415,7 +7392,7 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/NeedItemResponseDto"
+              "$ref": "#/components/schemas/SupplyLineResponseDto"
             }
           },
           "status": {
@@ -7540,7 +7517,7 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/NeedItemResponseDto"
+              "$ref": "#/components/schemas/SupplyLineResponseDto"
             }
           },
           "status": {
@@ -9718,6 +9695,46 @@
         },
         "required": [
           "userId"
+        ]
+      },
+      "CategoryDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "example": "medicines"
+          },
+          "labelEs": {
+            "type": "string",
+            "example": "Medicamentos"
+          },
+          "labelEn": {
+            "type": "string",
+            "example": "Medicines"
+          },
+          "parentSlug": {
+            "type": "string",
+            "example": "medical",
+            "nullable": true,
+            "description": "Parent category slug, or null for a top-level category"
+          },
+          "vertical": {
+            "type": "string",
+            "example": "general"
+          },
+          "sort": {
+            "type": "number",
+            "example": 41,
+            "description": "Display sort order"
+          }
+        },
+        "required": [
+          "slug",
+          "labelEs",
+          "labelEn",
+          "parentSlug",
+          "vertical",
+          "sort"
         ]
       }
     }

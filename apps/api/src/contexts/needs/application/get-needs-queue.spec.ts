@@ -3,7 +3,7 @@ import { CreateNeed } from './create-need';
 import { ValidateNeed } from './validate-need';
 import { InMemoryNeedRepository } from '../infrastructure/in-memory-need.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
-import { NeedCategory, Priority, NeedStatus } from '../domain/need-enums';
+import { Category, Priority, NeedStatus } from '../domain/need-enums';
 import { NeedEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 
 const EM = '11111111-1111-4111-8111-111111111111';
@@ -19,9 +19,7 @@ const baseCmd = {
   requesterOrganizationId: null,
   description: null,
   location: { address: 'Caracas', latitude: 10.4806, longitude: -66.9036 },
-  items: [
-    { name: 'Food', quantity: 10, unit: null, category: NeedCategory.Food },
-  ],
+  items: [{ name: 'Food', quantity: 10, unit: null, category: Category.Food }],
 };
 
 describe('GetNeedsQueue', () => {
@@ -69,7 +67,7 @@ describe('GetNeedsQueue', () => {
           name: 'Blankets',
           quantity: 30,
           unit: null,
-          category: NeedCategory.Shelter,
+          category: Category.Shelter,
         },
       ],
     });
@@ -100,7 +98,7 @@ describe('GetNeedsQueue', () => {
       title: 'Food need',
       priority: Priority.High,
       items: [
-        { name: 'Rice', quantity: 20, unit: null, category: NeedCategory.Food },
+        { name: 'Rice', quantity: 20, unit: null, category: Category.Food },
       ],
     });
     await createNeed.execute({
@@ -112,14 +110,14 @@ describe('GetNeedsQueue', () => {
           name: 'Bottles',
           quantity: 100,
           unit: null,
-          category: NeedCategory.Water,
+          category: Category.Water,
         },
       ],
     });
 
     const result = await getNeedsQueue.execute({
       emergencyId: EM,
-      category: NeedCategory.Food,
+      category: Category.Food,
     });
     expect(result).toHaveLength(1);
     expect(result[0].title).toBe('Food need');
@@ -135,15 +133,15 @@ describe('GetNeedsQueue', () => {
           name: 'Soap',
           quantity: 20,
           unit: null,
-          category: NeedCategory.Hygiene,
+          category: Category.Hygiene,
         },
-        { name: 'Rice', quantity: 10, unit: null, category: NeedCategory.Food },
+        { name: 'Rice', quantity: 10, unit: null, category: Category.Food },
       ],
     });
 
     const result = await getNeedsQueue.execute({
       emergencyId: EM,
-      category: NeedCategory.Hygiene,
+      category: Category.Hygiene,
     });
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe(id);
@@ -159,14 +157,14 @@ describe('GetNeedsQueue', () => {
           name: 'Tents',
           quantity: 5,
           unit: null,
-          category: NeedCategory.Shelter,
+          category: Category.Shelter,
         },
       ],
     });
 
     const result = await getNeedsQueue.execute({
       emergencyId: EM,
-      category: NeedCategory.Medical,
+      category: Category.Medical,
     });
     expect(result).toHaveLength(0);
   });
@@ -219,7 +217,7 @@ describe('GetNeedsQueue', () => {
           name: 'Canned food',
           quantity: 50,
           unit: null,
-          category: NeedCategory.Food,
+          category: Category.Food,
         },
       ],
     });
@@ -232,7 +230,7 @@ describe('GetNeedsQueue', () => {
           name: 'Bread',
           quantity: 10,
           unit: null,
-          category: NeedCategory.Food,
+          category: Category.Food,
         },
       ],
     });
@@ -245,14 +243,14 @@ describe('GetNeedsQueue', () => {
           name: 'Water',
           quantity: 100,
           unit: null,
-          category: NeedCategory.Water,
+          category: Category.Water,
         },
       ],
     });
 
     const result = await getNeedsQueue.execute({
       emergencyId: EM,
-      category: NeedCategory.Food,
+      category: Category.Food,
       priority: Priority.Urgent,
     });
     expect(result).toHaveLength(1);

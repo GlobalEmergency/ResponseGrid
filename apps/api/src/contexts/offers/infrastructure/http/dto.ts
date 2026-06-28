@@ -13,7 +13,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { NeedCategory } from '../../domain/offer-enums';
+import { Category } from '../../domain/offer-enums';
 
 export class OfferLocationDto {
   @ApiProperty({ example: '123 Main Street, Caracas, Venezuela' })
@@ -31,9 +31,9 @@ export class OfferLocationDto {
 }
 
 export class SubmitOfferDto {
-  @ApiProperty({ enum: NeedCategory, example: NeedCategory.Food })
-  @IsEnum(NeedCategory)
-  category!: NeedCategory;
+  @ApiProperty({ enum: Category, example: Category.Food })
+  @IsEnum(Category)
+  category!: Category;
 
   @ApiProperty({
     example: 'Rice bags 25kg',

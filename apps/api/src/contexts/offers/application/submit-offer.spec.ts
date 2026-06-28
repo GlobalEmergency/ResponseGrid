@@ -6,7 +6,7 @@ import {
 } from './submit-offer';
 import { InMemoryOfferRepository } from '../infrastructure/in-memory-offer.repository';
 import { FakeOfferEventBus } from '../infrastructure/fake-event-bus';
-import { NeedCategory, OfferStatus } from '../domain/offer-enums';
+import { Category, OfferStatus } from '../domain/offer-enums';
 import { OfferEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { NeedLookup } from '../domain/ports/need-lookup';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
@@ -56,7 +56,7 @@ function makeCmd(overrides?: Partial<SubmitOfferCommand>): SubmitOfferCommand {
     emergencyId: EM,
     donorUserId: USER_ID,
     donorOrganizationId: null,
-    category: NeedCategory.Food,
+    category: Category.Food,
     description: 'Rice bags 25kg',
     quantity: 50,
     unit: 'bags',
@@ -94,7 +94,7 @@ describe('SubmitOffer', () => {
     const result = await useCase.execute(makeCmd());
     const saved = await repo.findById({ value: result.id } as never);
     expect(saved!.donorUserId).toBe(USER_ID);
-    expect(saved!.category).toBe(NeedCategory.Food);
+    expect(saved!.category).toBe(Category.Food);
     expect(saved!.description).toBe('Rice bags 25kg');
     expect(saved!.quantity).toBe(50);
     expect(saved!.unit).toBe('bags');

@@ -7,7 +7,10 @@ import { NeedCreated } from './events/need-created.event';
 import { NeedValidated } from './events/need-validated.event';
 import { NeedRejected } from './events/need-rejected.event';
 import { Location, LocationProps } from '../../../shared/domain/location';
-import { NeedItem, NeedItemSnapshot } from './need-item';
+import {
+  SupplyLine,
+  SupplyLineSnapshot,
+} from '../../supplies/domain/supply-line';
 import { LocationSensitivity } from '../../../shared/domain/location-sensitivity';
 
 /** Hours a validated need stays visible before it expires. */
@@ -31,7 +34,7 @@ export interface CreateNeedProps {
   requesterOrganizationId: string | null;
   /** Default: 'public'. Use CreateNeed use case to get the correct auto-derived value. */
   locationSensitivity?: LocationSensitivity;
-  items: NeedItem[];
+  items: SupplyLine[];
   /** F05: optional personnel-need fields */
   requiredSkill?: PersonnelSkill | null;
   skillSpecialty?: string | null;
@@ -52,7 +55,7 @@ export interface NeedSnapshot {
   managingOrganizationId: string | null;
   /** Optional for backwards compatibility with legacy snapshots. Default: 'public'. */
   locationSensitivity?: LocationSensitivity;
-  items: NeedItemSnapshot[];
+  items: SupplyLineSnapshot[];
   status: NeedStatus;
   createdAt: Date;
   expiresAt: Date | null;
@@ -79,7 +82,7 @@ export class Need {
     public readonly requesterOrganizationId: string | null,
     private _managingOrganizationId: string | null,
     public readonly locationSensitivity: LocationSensitivity,
-    public readonly items: NeedItem[],
+    public readonly items: SupplyLine[],
     private _status: NeedStatus,
     public readonly createdAt: Date,
     private _expiresAt: Date | null,
@@ -146,7 +149,7 @@ export class Need {
       s.managingOrganizationId,
       // Fallback for legacy snapshots that pre-date the locationSensitivity field
       s.locationSensitivity ?? LocationSensitivity.Public,
-      s.items.map((i) => NeedItem.fromSnapshot(i)),
+      s.items.map((i) => SupplyLine.fromSnapshot(i)),
       s.status,
       s.createdAt,
       s.expiresAt ?? null,

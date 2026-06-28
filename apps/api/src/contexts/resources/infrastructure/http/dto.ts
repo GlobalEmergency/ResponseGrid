@@ -5,8 +5,6 @@ import {
   IsOptional,
   IsNumber,
   IsInt,
-  IsPositive,
-  IsNotEmpty,
   Min,
   Max,
   MaxLength,
@@ -17,7 +15,7 @@ import {
 import { Type, Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ResourceType, ResourceStage } from '../../domain/resource-enums';
-import { Category } from '../../../supplies/domain/category';
+import { SupplyLineDto } from '../../../supplies/infrastructure/http/supply-line.dto';
 
 export class LocationDto {
   @ApiProperty({ example: 'Calle Mayor 1, Valencia' })
@@ -39,49 +37,6 @@ export class LocationDto {
   @Min(-180)
   @Max(180)
   longitude!: number;
-}
-
-/**
- * A SupplyLine (línea de insumo): a quantity of a material in a category/unit.
- * Same shape used across the platform (needs, offers, inventory).
- */
-export class SupplyLineDto {
-  @ApiProperty({
-    example: 'Agua embotellada',
-    description: 'Name of the supply / material held at this place',
-  })
-  @IsString()
-  @IsNotEmpty()
-  name!: string;
-
-  @ApiProperty({
-    example: 100,
-    description: 'Quantity available (positive integer)',
-  })
-  @IsInt()
-  @IsPositive()
-  quantity!: number;
-
-  @ApiPropertyOptional({
-    example: 'litros',
-    description: 'Unit of measurement (optional)',
-  })
-  @IsOptional()
-  @IsString()
-  unit?: string;
-
-  @ApiProperty({ enum: Category, example: Category.Water })
-  @IsEnum(Category)
-  category!: Category;
-
-  @ApiPropertyOptional({
-    example: 'ampolla',
-    description:
-      'Presentation / route of administration (health vertical): ampolla, EV, inhalador… Optional, free-form.',
-  })
-  @IsOptional()
-  @IsString()
-  presentation?: string;
 }
 
 export class RegisterResourceDto {

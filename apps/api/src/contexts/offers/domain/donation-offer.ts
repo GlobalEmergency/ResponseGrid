@@ -1,6 +1,6 @@
 import { OfferId } from './offer-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { NeedCategory, OfferStatus } from './offer-enums';
+import { Category, OfferStatus } from './offer-enums';
 import {
   OfferNotOpenError,
   OfferNotMatchedError,
@@ -18,7 +18,7 @@ export interface CreateDonationOfferProps {
   emergencyId: EmergencyId;
   donorUserId: string;
   donorOrganizationId: string | null;
-  category: NeedCategory;
+  category: Category;
   description: string;
   quantity: number;
   unit: string | null;
@@ -32,7 +32,7 @@ export interface DonationOfferSnapshot {
   emergencyId: string;
   donorUserId: string;
   donorOrganizationId: string | null;
-  category: NeedCategory;
+  category: Category;
   description: string;
   quantity: number;
   unit: string | null;
@@ -53,7 +53,7 @@ export class DonationOffer {
     public readonly emergencyId: EmergencyId,
     public readonly donorUserId: string,
     public readonly donorOrganizationId: string | null,
-    public readonly category: NeedCategory,
+    public readonly category: Category,
     public readonly description: string,
     public readonly quantity: number,
     public readonly unit: string | null,

@@ -4,35 +4,24 @@ import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { getToken, authHeaders, clearToken } from '@/lib/auth';
+import { ALL_CATEGORIES } from '@/lib/categories';
 import { getT } from '@/i18n/server';
 
-type NeedCategory = components['schemas']['NeedItemDto']['category'];
+type Category = components['schemas']['SupplyLineDto']['category'];
 type NeedPriority = components['schemas']['CreateNeedDto']['priority'];
-type NeedItem = components['schemas']['NeedItemDto'];
+type SupplyLine = components['schemas']['SupplyLineDto'];
 
 export type PeticionState =
   | { status: 'idle' }
   | { status: 'success'; id: string }
   | { status: 'error'; message: string };
 
-const VALID_CATEGORIES: NeedCategory[] = [
-  'hygiene',
-  'water',
-  'food',
-  'medical',
-  'shelter',
-  'tools',
-  'other',
-  'medicines',
-  'medical_equipment',
-  'medical_supplies',
-  'medical_personnel',
-];
-
 const VALID_PRIORITIES: NeedPriority[] = ['low', 'medium', 'high', 'urgent'];
 
-function isCategory(value: unknown): value is NeedCategory {
-  return VALID_CATEGORIES.includes(value as NeedCategory);
+// Category validation uses the single canonical list (lib/categories), so the
+// server accepts exactly what the form offers (incl. clothing).
+function isCategory(value: unknown): value is Category {
+  return (ALL_CATEGORIES as readonly string[]).includes(value as string);
 }
 
 function isPriority(value: unknown): value is NeedPriority {
@@ -46,7 +35,7 @@ interface RawItem {
   category?: unknown;
 }
 
-function parseItems(raw: string): NeedItem[] | null {
+function parseItems(raw: string): SupplyLine[] | null {
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
@@ -56,7 +45,7 @@ function parseItems(raw: string): NeedItem[] | null {
 
   if (!Array.isArray(parsed) || parsed.length === 0) return null;
 
-  const items: NeedItem[] = [];
+  const items: SupplyLine[] = [];
   for (const entry of parsed as RawItem[]) {
     const name = typeof entry.name === 'string' ? entry.name.trim() : '';
     const quantity =

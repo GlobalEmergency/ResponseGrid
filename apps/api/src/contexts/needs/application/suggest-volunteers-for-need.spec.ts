@@ -2,7 +2,7 @@ import { SuggestVolunteersForNeed } from './suggest-volunteers-for-need';
 import { InMemoryNeedRepository } from '../infrastructure/in-memory-need.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { CreateNeed } from './create-need';
-import { NeedCategory, Priority, PersonnelSkill } from '../domain/need-enums';
+import { Category, Priority, PersonnelSkill } from '../domain/need-enums';
 import {
   VolunteerMatcherPort,
   VolunteerMatchResult,
@@ -25,7 +25,7 @@ const defaultItems = [
     name: 'Medical personnel',
     quantity: 2,
     unit: null,
-    category: NeedCategory.MedicalPersonnel,
+    category: Category.MedicalPersonnel,
   },
 ];
 

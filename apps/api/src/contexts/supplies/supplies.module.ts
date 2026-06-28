@@ -6,11 +6,20 @@ import {
   CategoryRepository,
 } from './domain/ports/category.repository';
 import { DrizzleCategoryRepository } from './infrastructure/drizzle/drizzle-category.repository';
+import { ListCategories } from './application/list-categories';
+import { CategoriesController } from './infrastructure/http/categories.controller';
 
 const categoryRepositoryProvider = {
   provide: CATEGORY_REPOSITORY,
   inject: [DB],
   useFactory: (db: Db): CategoryRepository => new DrizzleCategoryRepository(db),
+};
+
+const listCategoriesProvider = {
+  provide: ListCategories,
+  inject: [CATEGORY_REPOSITORY],
+  useFactory: (repo: CategoryRepository): ListCategories =>
+    new ListCategories(repo),
 };
 
 /**
@@ -20,7 +29,8 @@ const categoryRepositoryProvider = {
  */
 @Module({
   imports: [DatabaseModule],
-  providers: [categoryRepositoryProvider],
+  controllers: [CategoriesController],
+  providers: [categoryRepositoryProvider, listCategoriesProvider],
   exports: [CATEGORY_REPOSITORY],
 })
 export class SuppliesModule {}

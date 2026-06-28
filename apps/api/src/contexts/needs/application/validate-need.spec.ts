@@ -2,7 +2,7 @@ import { ValidateNeed } from './validate-need';
 import { CreateNeed } from './create-need';
 import { InMemoryNeedRepository } from '../infrastructure/in-memory-need.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
-import { NeedCategory, Priority, NeedStatus } from '../domain/need-enums';
+import { Category, Priority, NeedStatus } from '../domain/need-enums';
 import { NeedNotFoundError } from './need-not-found.error';
 import { NeedEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 
@@ -40,7 +40,7 @@ describe('ValidateNeed', () => {
           name: 'Kits',
           quantity: 10,
           unit: 'kits',
-          category: NeedCategory.Medical,
+          category: Category.Medical,
         },
       ],
     });

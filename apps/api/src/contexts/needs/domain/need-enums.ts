@@ -1,8 +1,7 @@
 export { Priority } from '../../../shared/domain/priority';
-// NeedCategory is the Category taxonomy owned by the supplies context — kept
-// under its local name so the needs context keeps reading `NeedCategory`, but
-// there is a single definition (supplies/domain/category) reused everywhere.
-export { Category as NeedCategory } from '../../supplies/domain/category';
+// Re-export the shared Category taxonomy (owned by the supplies context) as the
+// needs enum barrel, mirroring how Priority is re-exported from the shared kernel.
+export { Category } from '../../supplies/domain/category';
 
 /**
  * PersonnelSkill mirrors VolunteerSkill values WITHOUT importing from the

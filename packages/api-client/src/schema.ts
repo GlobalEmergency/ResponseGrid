@@ -1703,6 +1703,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the shared category taxonomy (slug + labels + hierarchy) */
+        get: operations["CategoriesController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1896,18 +1913,18 @@ export interface components {
         };
         SupplyLineDto: {
             /**
-             * @description Name of the supply / material held at this place
-             * @example Agua embotellada
+             * @description Name of the supply
+             * @example Water bottles
              */
             name: string;
             /**
-             * @description Quantity available (positive integer)
+             * @description Quantity (positive integer)
              * @example 100
              */
             quantity: number;
             /**
              * @description Unit of measurement (optional)
-             * @example litros
+             * @example liters
              */
             unit?: string;
             /**
@@ -1916,7 +1933,7 @@ export interface components {
              */
             category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
             /**
-             * @description Presentation / route of administration (health vertical): ampolla, EV, inhalador… Optional, free-form.
+             * @description Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe… Optional, free-form (#61).
              * @example ampolla
              */
             presentation?: string;
@@ -2440,33 +2457,6 @@ export interface components {
              */
             longitude: number;
         };
-        NeedItemDto: {
-            /**
-             * @description Name of the item needed
-             * @example Water bottles
-             */
-            name: string;
-            /**
-             * @description Quantity needed (positive integer)
-             * @example 100
-             */
-            quantity: number;
-            /**
-             * @description Unit of measurement (optional)
-             * @example liters
-             */
-            unit?: string;
-            /**
-             * @example water
-             * @enum {string}
-             */
-            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
-            /**
-             * @description Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe, oxígeno… Optional, free-form (#61).
-             * @example ampolla
-             */
-            presentation?: string;
-        };
         CreateNeedDto: {
             /** @example Alimentos para 50 familias */
             title: string;
@@ -2485,7 +2475,7 @@ export interface components {
              */
             requesterOrganizationId?: string;
             /** @description List of items needed (minimum 1) */
-            items: components["schemas"]["NeedItemDto"][];
+            items: components["schemas"]["SupplyLineDto"][];
             /**
              * @description Required volunteer skill for personnel needs
              * @example medical
@@ -2524,7 +2514,7 @@ export interface components {
             /** @example -66.9036 */
             longitude: number;
         };
-        NeedItemResponseDto: {
+        SupplyLineResponseDto: {
             /** @example Water bottles */
             name: string;
             /** @example 100 */
@@ -2573,7 +2563,7 @@ export interface components {
             requesterOrganizationId?: string | null;
             /** Format: uuid */
             managingOrganizationId?: string | null;
-            items: components["schemas"]["NeedItemResponseDto"][];
+            items: components["schemas"]["SupplyLineResponseDto"][];
             /**
              * @example pending
              * @enum {string}
@@ -2638,7 +2628,7 @@ export interface components {
             requesterOrganizationId?: string | null;
             /** Format: uuid */
             managingOrganizationId?: string | null;
-            items: components["schemas"]["NeedItemResponseDto"][];
+            items: components["schemas"]["SupplyLineResponseDto"][];
             /**
              * @example pending
              * @enum {string}
@@ -3527,6 +3517,26 @@ export interface components {
              * @description Member to appoint as manager
              */
             userId: string;
+        };
+        CategoryDto: {
+            /** @example medicines */
+            slug: string;
+            /** @example Medicamentos */
+            labelEs: string;
+            /** @example Medicines */
+            labelEn: string;
+            /**
+             * @description Parent category slug, or null for a top-level category
+             * @example medical
+             */
+            parentSlug: string | null;
+            /** @example general */
+            vertical: string;
+            /**
+             * @description Display sort order
+             * @example 41
+             */
+            sort: number;
         };
     };
     responses: never;
@@ -7901,6 +7911,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    CategoriesController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The category taxonomy */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryDto"][];
+                };
             };
         };
     };

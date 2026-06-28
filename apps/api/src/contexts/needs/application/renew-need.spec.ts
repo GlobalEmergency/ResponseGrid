@@ -3,14 +3,14 @@ import { CreateNeed } from './create-need';
 import { ValidateNeed } from './validate-need';
 import { InMemoryNeedRepository } from '../infrastructure/in-memory-need.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
-import { NeedCategory, Priority } from '../domain/need-enums';
+import { Category, Priority } from '../domain/need-enums';
 import { NeedNotFoundError } from './need-not-found.error';
 import { NeedEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { Need } from '../domain/need';
 import { NeedId } from '../domain/need-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Location } from '../../../shared/domain/location';
-import { NeedItem } from '../domain/need-item';
+import { SupplyLine } from '../../supplies/domain/supply-line';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const USER_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -38,11 +38,11 @@ function makeExpiredNeed(): Need {
     requesterUserId: USER_ID,
     requesterOrganizationId: null,
     items: [
-      NeedItem.create({
+      SupplyLine.create({
         name: 'Kits',
         quantity: 5,
         unit: null,
-        category: NeedCategory.Medical,
+        category: Category.Medical,
       }),
     ],
   });
@@ -93,7 +93,7 @@ describe('RenewNeed', () => {
           name: 'Bottles',
           quantity: 10,
           unit: null,
-          category: NeedCategory.Water,
+          category: Category.Water,
         },
       ],
     });
@@ -176,11 +176,11 @@ describe('GetExpiredNeeds', () => {
       requesterUserId: USER_ID,
       requesterOrganizationId: null,
       items: [
-        NeedItem.create({
+        SupplyLine.create({
           name: 'Food',
           quantity: 10,
           unit: null,
-          category: NeedCategory.Food,
+          category: Category.Food,
         }),
       ],
     });
@@ -207,11 +207,11 @@ describe('GetExpiredNeeds', () => {
       requesterUserId: USER_ID,
       requesterOrganizationId: null,
       items: [
-        NeedItem.create({
+        SupplyLine.create({
           name: 'Shelter',
           quantity: 1,
           unit: null,
-          category: NeedCategory.Shelter,
+          category: Category.Shelter,
         }),
       ],
     });
