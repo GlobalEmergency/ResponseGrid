@@ -15,6 +15,7 @@ import {
   roleExists,
 } from '../domain/authorization/role-catalog';
 import {
+  InvalidGrantExpiryError,
   NotAuthorizedToGrantError,
   PrivilegeEscalationError,
   UnknownRoleError,
@@ -46,6 +47,17 @@ export class GrantRole {
   async execute(cmd: GrantRoleCommand): Promise<{ id: string }> {
     if (!roleExists(cmd.roleId)) {
       throw new UnknownRoleError(cmd.roleId);
+    }
+
+    if (
+      cmd.expiresAt != null &&
+      (Number.isNaN(cmd.expiresAt.getTime()) ||
+        cmd.expiresAt.getTime() <= Date.now())
+    ) {
+      // Rejects both past expiries and Invalid Date (e.g. an unparseable
+      // expiresAt string from the HTTP layer) — otherwise NaN <= now is false
+      // and a "born-dead" grant with an Invalid Date would 500 on persist.
+      throw new InvalidGrantExpiryError();
     }
 
     const chain = ancestorChain(cmd.scope);

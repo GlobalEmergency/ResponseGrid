@@ -1,4 +1,4 @@
-import { and, count, eq, inArray, sql } from 'drizzle-orm';
+import { and, between, count, eq, inArray, sql } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
 import { resourcesTable } from './schema';
 import { ResourceRepository } from '../../domain/ports/resource.repository';
@@ -45,6 +45,8 @@ type RawRow = {
   country: string | null;
   city: string | null;
   raw: unknown;
+  is_final_recipient: boolean | null;
+  recipient_type: string | null;
 };
 
 /**
@@ -115,6 +117,8 @@ function rawRowToSnapshot(row: RawRow): ResourceSnapshot {
     country: row.country ?? null,
     city: row.city ?? null,
     provenance,
+    isFinalRecipient: row.is_final_recipient ?? false,
+    recipientType: row.recipient_type ?? null,
   };
 }
 
@@ -155,6 +159,8 @@ function rowToSnapshot(row: Row): ResourceSnapshot {
     country: row.country ?? null,
     city: row.city ?? null,
     provenance: rowToProvenance(row),
+    isFinalRecipient: row.isFinalRecipient ?? false,
+    recipientType: row.recipientType ?? null,
   };
 }
 
@@ -190,6 +196,8 @@ export class DrizzleResourceRepository implements ResourceRepository {
         externalId: s.provenance?.externalId ?? null,
         externalUpdatedAt: s.provenance?.externalUpdatedAt ?? null,
         raw: s.provenance?.raw ?? null,
+        isFinalRecipient: s.isFinalRecipient,
+        recipientType: s.recipientType,
       })
       .onConflictDoUpdate({
         target: resourcesTable.id,
@@ -207,6 +215,8 @@ export class DrizzleResourceRepository implements ResourceRepository {
           externalId: s.provenance?.externalId ?? null,
           externalUpdatedAt: s.provenance?.externalUpdatedAt ?? null,
           raw: s.provenance?.raw ?? null,
+          isFinalRecipient: s.isFinalRecipient,
+          recipientType: s.recipientType,
         },
       });
   }
@@ -440,6 +450,36 @@ export class DrizzleResourceRepository implements ResourceRepository {
       resource: Resource.fromSnapshot(rawRowToSnapshot(row)),
       distanceMeters: Math.round(Number(row.dist)),
     }));
+  }
+
+  async findInBounds(
+    emergencyId: EmergencyId,
+    q: {
+      minLat: number;
+      minLng: number;
+      maxLat: number;
+      maxLng: number;
+      limit: number;
+    },
+  ): Promise<Resource[]> {
+    const VISIBLE = [
+      PublicStatus.Active,
+      PublicStatus.Saturated,
+      PublicStatus.Paused,
+    ];
+    const rows = await this.db
+      .select()
+      .from(resourcesTable)
+      .where(
+        and(
+          eq(resourcesTable.emergencyId, emergencyId.value),
+          inArray(resourcesTable.publicStatus, VISIBLE),
+          between(resourcesTable.latitude, q.minLat, q.maxLat),
+          between(resourcesTable.longitude, q.minLng, q.maxLng),
+        ),
+      )
+      .limit(q.limit);
+    return rows.map((r) => Resource.fromSnapshot(rowToSnapshot(r)));
   }
 
   async countByEmergencyGroupedByPublicStatus(

@@ -5,6 +5,7 @@ import {
   timestamp,
   doublePrecision,
   jsonb,
+  boolean,
 } from 'drizzle-orm/pg-core';
 
 export const resourcesTable = pgTable('resources', {
@@ -33,4 +34,7 @@ export const resourcesTable = pgTable('resources', {
   country: text('country'),
   city: text('city'),
   raw: jsonb('raw'),
+  // destinatario final (0023_resource_recipient_role)
+  isFinalRecipient: boolean('is_final_recipient').notNull().default(false),
+  recipientType: text('recipient_type'),
 });

@@ -39,6 +39,33 @@ export class RegisterResponseDto {
   accessToken!: string;
 }
 
+export class MeGrantDto {
+  @ApiProperty({
+    description: 'Role id from the catalog',
+    example: 'org_admin',
+  })
+  roleId!: string;
+
+  @ApiProperty({
+    enum: ['platform', 'organization', 'emergency', 'group', 'entity'],
+  })
+  scopeType!: string;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description: 'Scope id (null for platform)',
+  })
+  scopeId!: string | null;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description: 'ISO expiry, or null',
+  })
+  expiresAt!: string | null;
+}
+
 export class MeResponseDto {
   @ApiProperty({ description: 'User UUID' })
   id!: string;
@@ -51,4 +78,10 @@ export class MeResponseDto {
 
   @ApiProperty()
   isAdmin!: boolean;
+
+  @ApiProperty({
+    type: [MeGrantDto],
+    description: 'The effective role grants (role @ scope) for this user',
+  })
+  grants!: MeGrantDto[];
 }

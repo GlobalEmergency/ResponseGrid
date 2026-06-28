@@ -10,6 +10,7 @@ import {
   MaxLength,
   ValidateNested,
   IsArray,
+  IsBoolean,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -123,6 +124,24 @@ export class RegisterResourceDto {
   @IsOptional()
   @IsString()
   city?: string;
+
+  @ApiPropertyOptional({
+    example: true,
+    description:
+      'Mark this resource as a final recipient of aid (requires the destination stage)',
+  })
+  @IsOptional()
+  @IsBoolean()
+  isFinalRecipient?: boolean;
+
+  @ApiPropertyOptional({
+    example: 'hospital',
+    description:
+      'Recipient type slug (see the emergency recipient-type taxonomy)',
+  })
+  @IsOptional()
+  @IsString()
+  recipientType?: string;
 }
 
 /**
@@ -180,6 +199,59 @@ export class NearbyResourcesQueryDto {
   @IsInt()
   @Min(1)
   @Max(100)
+  limit?: number;
+}
+
+export class InBoundsQueryDto {
+  @ApiProperty({
+    example: 10.3,
+    description: 'South latitude bound (-90 to 90)',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  minLat!: number;
+
+  @ApiProperty({
+    example: -67.2,
+    description: 'West longitude bound (-180 to 180)',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  minLng!: number;
+
+  @ApiProperty({
+    example: 10.7,
+    description: 'North latitude bound (-90 to 90)',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  maxLat!: number;
+
+  @ApiProperty({
+    example: -66.6,
+    description: 'East longitude bound (-180 to 180)',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  maxLng!: number;
+
+  @ApiPropertyOptional({
+    example: 500,
+    description: 'Max results (default 500, max 1000)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(1000)
   limit?: number;
 }
 

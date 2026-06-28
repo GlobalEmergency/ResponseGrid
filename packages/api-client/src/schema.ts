@@ -55,6 +55,145 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/grants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the grants held by a principal (admin) */
+        get: operations["GrantsController_list"];
+        put?: never;
+        /** Grant a role to a principal in a scope (delegated, attenuated) */
+        post: operations["GrantsController_grant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/grants/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Revoke a grant */
+        delete: operations["GrantsController_revoke"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/service-accounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List service accounts (admin) */
+        get: operations["ApiKeysController_listServiceAccounts"];
+        put?: never;
+        /** Create a service account (machine principal) */
+        post: operations["ApiKeysController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/service-accounts/{serviceAccountId}/api-keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List a service account’s keys — metadata only (admin) */
+        get: operations["ApiKeysController_listApiKeys"];
+        put?: never;
+        /** Issue an API key for a service account (secret shown once) */
+        post: operations["ApiKeysController_issue"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api-keys/{keyId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Revoke an API key */
+        delete: operations["ApiKeysController_revoke"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/service-accounts/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Introspect the calling service account (authenticated by X-API-Key) */
+        get: operations["ServiceAccountIntrospectionController_me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the fixed role catalog */
+        get: operations["RolesController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/lookup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resolve an email to a principal id (admin only) */
+        get: operations["UsersController_lookup"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/notifications/mine": {
         parameters: {
             query?: never;
@@ -242,6 +381,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/emergencies/{emergencyId}/public/resources/in-bounds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Find visible resources within a geographic bounding box */
+        get: operations["PublicController_inBounds"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/emergencies/{emergencyId}/public/resources/facets": {
         parameters: {
             query?: never;
@@ -304,7 +460,7 @@ export interface paths {
         /** List active emergencies */
         get: operations["EmergenciesController_list"];
         put?: never;
-        /** Create an emergency (admin only) */
+        /** Create an emergency (emergency:create) */
         post: operations["EmergenciesController_createEmergency"];
         delete?: never;
         options?: never;
@@ -338,7 +494,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Create an emergency from a template (admin only) */
+        /** Create an emergency from a template (emergency:create) */
         post: operations["EmergenciesController_createFromTemplateRoute"];
         delete?: never;
         options?: never;
@@ -630,10 +786,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List accreditations (admin only) */
+        /** List accreditations (accreditation:grant) */
         get: operations["AccreditationsController_listAccreditations"];
         put?: never;
-        /** Grant accreditation to an organization (admin only) */
+        /** Grant accreditation to an organization (accreditation:grant) */
         post: operations["AccreditationsController_grantAccreditation"];
         delete?: never;
         options?: never;
@@ -651,7 +807,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Revoke an accreditation (admin only) */
+        /** Revoke an accreditation (accreditation:revoke) */
         delete: operations["AccreditationsController_revokeAccreditation"];
         options?: never;
         head?: never;
@@ -1110,10 +1266,131 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List audit log entries (admin only) */
+        /** List audit log entries (audit:read) */
         get: operations["AuditController_list"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/groups/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the groups I belong to (any status) */
+        get: operations["GroupsController_mine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List groups under an org/emergency (all if you can read; else public) */
+        get: operations["GroupsController_list"];
+        put?: never;
+        /** Create a group (creator becomes its first manager) */
+        post: operations["GroupsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/groups/{groupId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a group’s basic info */
+        get: operations["GroupsController_getOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/groups/{groupId}/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request to join a public group (awaits approval) */
+        post: operations["GroupsController_join"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/groups/{groupId}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List a group’s members */
+        get: operations["GroupsController_members"];
+        put?: never;
+        /** Add a member by email (manager only) */
+        post: operations["GroupsController_addMember"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/groups/{groupId}/members/{userId}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve a pending member (manager only) */
+        post: operations["GroupsController_approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/groups/{groupId}/managers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Appoint a member as co-manager (delegated, attenuated) */
+        post: operations["GroupsController_assignManager"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1146,6 +1423,19 @@ export interface components {
             /** @description JWT access token (auto-login after registration) */
             accessToken: string;
         };
+        MeGrantDto: {
+            /**
+             * @description Role id from the catalog
+             * @example org_admin
+             */
+            roleId: string;
+            /** @enum {string} */
+            scopeType: "platform" | "organization" | "emergency" | "group" | "entity";
+            /** @description Scope id (null for platform) */
+            scopeId: string | null;
+            /** @description ISO expiry, or null */
+            expiresAt: string | null;
+        };
         MeResponseDto: {
             /** @description User UUID */
             id: string;
@@ -1154,6 +1444,115 @@ export interface components {
             /** @example Jane Doe */
             name: string;
             isAdmin: boolean;
+            /** @description The effective role grants (role @ scope) for this user */
+            grants: components["schemas"]["MeGrantDto"][];
+        };
+        GrantListItemDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            principalId: string;
+            /** @enum {string} */
+            principalType: "user" | "service_account";
+            roleId: string;
+            scopeType: string;
+            scopeId: string | null;
+            grantedByPrincipalId: string | null;
+            grantedAt: string;
+            expiresAt: string | null;
+        };
+        GrantRoleDto: {
+            /**
+             * Format: uuid
+             * @description Principal receiving the role
+             */
+            principalId: string;
+            /** @description Role id from the fixed catalog (e.g. emergency_coordinator) */
+            roleId: string;
+            /**
+             * @description Scope the role applies to
+             * @enum {string}
+             */
+            scopeType: "platform" | "organization" | "emergency" | "group" | "entity";
+            /** @description Scope id (required for every scope except platform) */
+            scopeId?: string;
+            /** @description Entity type (required for entity scope) */
+            scopeEntityType?: string;
+            /** @description ISO 8601 expiry — for temporary / break-glass grants */
+            expiresAt?: string;
+        };
+        GrantResponseDto: {
+            /** Format: uuid */
+            id: string;
+        };
+        ServiceAccountListItemDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: uuid */
+            ownerOrganizationId: Record<string, never> | null;
+            /** Format: uuid */
+            createdByUserId: string;
+            createdAt: string;
+        };
+        ApiKeyListItemDto: {
+            /** Format: uuid */
+            id: string;
+            /** @description Non-secret lookup prefix */
+            prefix: string;
+            active: boolean;
+            expiresAt: string | null;
+            lastUsedAt: string | null;
+            revokedAt: string | null;
+            createdAt: string;
+        };
+        CreateServiceAccountDto: {
+            /** @description Human-readable name for the service account */
+            name: string;
+            /**
+             * Format: uuid
+             * @description Owning organization; omit for a platform-level account
+             */
+            ownerOrganizationId?: string;
+        };
+        ServiceAccountResponseDto: {
+            /** Format: uuid */
+            id: string;
+        };
+        IssueApiKeyDto: {
+            /** @description ISO 8601 expiry for the key */
+            expiresAt?: string;
+        };
+        IssuedApiKeyResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** @description The full secret key — shown once; store it now */
+            apiKey: string;
+            prefix: string;
+        };
+        IntrospectedGrantDto: {
+            roleId: string;
+            scopeType: string;
+            scopeId: Record<string, never> | null;
+        };
+        ServiceAccountIdentityDto: {
+            /** Format: uuid */
+            principalId: string;
+            /** @enum {string} */
+            principalType: "service_account";
+            grants: components["schemas"]["IntrospectedGrantDto"][];
+        };
+        RoleDto: {
+            id: string;
+            description: string;
+            defaultScopeType: string;
+            permissions: string[];
+        };
+        UserLookupDto: {
+            /** Format: uuid */
+            id: string;
+            email: string;
+            name: string;
         };
         NotificationDto: {
             id: string;
@@ -1405,6 +1804,9 @@ export interface components {
         };
         NearbyResourcesResponseDto: {
             items: components["schemas"]["NearbyResourceViewDto"][];
+        };
+        InBoundsResourcesDto: {
+            items: components["schemas"]["ResourceViewDto"][];
         };
         ResourceFacetsDto: {
             /**
@@ -2162,6 +2564,80 @@ export interface components {
             entries: components["schemas"]["AuditEntryDto"][];
             total: number;
         };
+        MyGroupResponseDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** @enum {string} */
+            visibility: "public" | "private";
+            /** @enum {string} */
+            ownerKind: "organization" | "emergency";
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: uuid */
+            parentGroupId: Record<string, never> | null;
+            createdAt: string;
+            /** @enum {string} */
+            membershipStatus: "pending" | "approved";
+        };
+        GroupResponseDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** @enum {string} */
+            visibility: "public" | "private";
+            /** @enum {string} */
+            ownerKind: "organization" | "emergency";
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: uuid */
+            parentGroupId: Record<string, never> | null;
+            createdAt: string;
+        };
+        CreateGroupDto: {
+            /** @description Group/cuadrilla name */
+            name: string;
+            /** @enum {string} */
+            visibility: "public" | "private";
+            /**
+             * @description Whether the group hangs off an organization or an emergency
+             * @enum {string}
+             */
+            ownerKind: "organization" | "emergency";
+            /**
+             * Format: uuid
+             * @description Id of the owning org/emergency
+             */
+            ownerId: string;
+            /**
+             * Format: uuid
+             * @description Parent group (nesting)
+             */
+            parentGroupId?: string;
+        };
+        IdResponseDto: {
+            /** Format: uuid */
+            id: string;
+        };
+        GroupMemberResponseDto: {
+            /** Format: uuid */
+            userId: string;
+            /** @enum {string} */
+            status: "pending" | "approved";
+            /** Format: uuid */
+            addedByUserId: Record<string, never> | null;
+        };
+        AddMemberByEmailDto: {
+            /** @description Email of the user to add (must already exist) */
+            email: string;
+        };
+        AssignManagerDto: {
+            /**
+             * Format: uuid
+             * @description Member to appoint as manager
+             */
+            userId: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -2281,6 +2757,379 @@ export interface operations {
             };
             /** @description Missing or invalid token */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GrantsController_list: {
+        parameters: {
+            query: {
+                /** @description User or service-account id */
+                principalId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GrantListItemDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Admin access required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GrantsController_grant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GrantRoleDto"];
+            };
+        };
+        responses: {
+            /** @description Role granted */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GrantResponseDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authorized to grant, or privilege escalation */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GrantsController_revoke: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Grant revoked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authorized to revoke */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ApiKeysController_listServiceAccounts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceAccountListItemDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Admin access required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ApiKeysController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateServiceAccountDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceAccountResponseDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description apikey:create required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ApiKeysController_listApiKeys: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                serviceAccountId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKeyListItemDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Admin access required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ApiKeysController_issue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                serviceAccountId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IssueApiKeyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IssuedApiKeyResponseDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description apikey:create required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ApiKeysController_revoke: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                keyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Key revoked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description apikey:revoke required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ServiceAccountIntrospectionController_me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceAccountIdentityDto"];
+                };
+            };
+            /** @description Missing, malformed, invalid or revoked API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RolesController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleDto"][];
+                };
+            };
+        };
+    };
+    UsersController_lookup: {
+        parameters: {
+            query: {
+                email: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserLookupDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authorized to look up users */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No user with that email */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2721,6 +3570,40 @@ export interface operations {
             };
         };
     };
+    PublicController_inBounds: {
+        parameters: {
+            query: {
+                /** @description South latitude bound (-90 to 90) */
+                minLat: number;
+                /** @description West longitude bound (-180 to 180) */
+                minLng: number;
+                /** @description North latitude bound (-90 to 90) */
+                maxLat: number;
+                /** @description East longitude bound (-180 to 180) */
+                maxLng: number;
+                /** @description Max results (default 500, max 1000) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Resources within the bounding box */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InBoundsResourcesDto"];
+                };
+            };
+        };
+    };
     PublicController_facets: {
         parameters: {
             query?: never;
@@ -2921,7 +3804,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Admin access required */
+            /** @description emergency:create required */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3002,7 +3885,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Admin access required */
+            /** @description emergency:create required */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5067,7 +5950,310 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Admin access required */
+            /** @description audit:read required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GroupsController_mine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyGroupResponseDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GroupsController_list: {
+        parameters: {
+            query: {
+                ownerKind: "organization" | "emergency";
+                /** @description Id of the owning org/emergency */
+                ownerId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GroupResponseDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GroupsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateGroupDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdResponseDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description group:create required in the owner scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GroupsController_getOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                groupId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GroupResponseDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GroupsController_join: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                groupId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Join request registered */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Group is private */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GroupsController_members: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                groupId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GroupMemberResponseDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description group:read required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GroupsController_addMember: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                groupId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddMemberByEmailDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GroupMemberResponseDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description group:manage_members required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GroupsController_approve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                groupId: string;
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Member approved */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description group:manage_members required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GroupsController_assignManager: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                groupId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignManagerDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdResponseDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description role:grant required, or privilege escalation */
             403: {
                 headers: {
                     [name: string]: unknown;

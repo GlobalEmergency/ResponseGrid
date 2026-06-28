@@ -8,7 +8,8 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
-import { RequireAdminGuard } from '../../../identity/infrastructure/http/require-admin.guard';
+import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
+import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
 import {
   AUDIT_REPOSITORY,
   type AuditRepository,
@@ -23,16 +24,17 @@ import {
 @ApiTags('audit')
 @Controller('audit')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RequireAdminGuard)
+@UseGuards(JwtAuthGuard, PermissionGuard)
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-@ApiForbiddenResponse({ description: 'Admin access required' })
+@ApiForbiddenResponse({ description: 'audit:read required' })
 export class AuditController {
   constructor(
     @Inject(AUDIT_REPOSITORY) private readonly auditRepo: AuditRepository,
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'List audit log entries (admin only)' })
+  @RequirePermission('audit:read')
+  @ApiOperation({ summary: 'List audit log entries (audit:read)' })
   @ApiOkResponse({ type: AuditListResponseDto })
   async list(@Query() query: AuditQueryDto): Promise<AuditListResponseDto> {
     const filters: AuditQueryFilters = {

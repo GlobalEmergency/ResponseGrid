@@ -2,7 +2,9 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
+  Inject,
   Param,
   ParseUUIDPipe,
   Post,
@@ -15,6 +17,7 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNoContentResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiProperty,
   ApiTags,
@@ -24,9 +27,54 @@ import { Request } from 'express';
 import { CreateServiceAccount } from '../../application/create-service-account';
 import { IssueApiKey } from '../../application/issue-api-key';
 import { RevokeApiKey } from '../../application/revoke-api-key';
+import { SERVICE_ACCOUNT_REPOSITORY } from '../../domain/ports/service-account.repository';
+import type { ServiceAccountRepository } from '../../domain/ports/service-account.repository';
+import { API_KEY_REPOSITORY } from '../../domain/ports/api-key.repository';
+import type { ApiKeyRepository } from '../../domain/ports/api-key.repository';
 import { CreateServiceAccountDto, IssueApiKeyDto } from './api-keys-dto';
 import { ApiKeyExceptionFilter } from './api-key-exception.filter';
 import { JwtAuthGuard, AuthenticatedUser } from './jwt-auth.guard';
+import { RequireAdminGuard } from './require-admin.guard';
+
+class ServiceAccountListItemDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty()
+  name!: string;
+
+  @ApiProperty({ format: 'uuid', nullable: true })
+  ownerOrganizationId!: string | null;
+
+  @ApiProperty({ format: 'uuid' })
+  createdByUserId!: string;
+
+  @ApiProperty()
+  createdAt!: string;
+}
+
+class ApiKeyListItemDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ description: 'Non-secret lookup prefix' })
+  prefix!: string;
+
+  @ApiProperty()
+  active!: boolean;
+
+  @ApiProperty({ type: String, nullable: true })
+  expiresAt!: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  lastUsedAt!: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  revokedAt!: string | null;
+
+  @ApiProperty()
+  createdAt!: string;
+}
 
 class ServiceAccountResponseDto {
   @ApiProperty({ format: 'uuid' })
@@ -61,7 +109,54 @@ export class ApiKeysController {
     private readonly createServiceAccount: CreateServiceAccount,
     private readonly issueApiKey: IssueApiKey,
     private readonly revokeApiKey: RevokeApiKey,
+    @Inject(SERVICE_ACCOUNT_REPOSITORY)
+    private readonly serviceAccounts: ServiceAccountRepository,
+    @Inject(API_KEY_REPOSITORY) private readonly apiKeys: ApiKeyRepository,
   ) {}
+
+  @Get('service-accounts')
+  @UseGuards(RequireAdminGuard)
+  @ApiOperation({ summary: 'List service accounts (admin)' })
+  @ApiOkResponse({ type: [ServiceAccountListItemDto] })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Admin access required' })
+  async listServiceAccounts(): Promise<ServiceAccountListItemDto[]> {
+    const accounts = await this.serviceAccounts.listAll();
+    return accounts.map((a) => ({
+      id: a.id,
+      name: a.name,
+      ownerOrganizationId: a.ownerOrganizationId,
+      createdByUserId: a.createdByUserId,
+      createdAt: a.createdAt.toISOString(),
+    }));
+  }
+
+  @Get('service-accounts/:serviceAccountId/api-keys')
+  @UseGuards(RequireAdminGuard)
+  @ApiOperation({
+    summary: 'List a service account’s keys — metadata only (admin)',
+  })
+  @ApiOkResponse({ type: [ApiKeyListItemDto] })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Admin access required' })
+  async listApiKeys(
+    @Param('serviceAccountId', ParseUUIDPipe) serviceAccountId: string,
+  ): Promise<ApiKeyListItemDto[]> {
+    const keys = await this.apiKeys.listByServiceAccount(serviceAccountId);
+    const now = new Date();
+    return keys.map((k) => {
+      const s = k.toSnapshot();
+      return {
+        id: s.id,
+        prefix: s.prefix,
+        active: k.isActive(now),
+        expiresAt: s.expiresAt,
+        lastUsedAt: s.lastUsedAt,
+        revokedAt: s.revokedAt,
+        createdAt: s.createdAt,
+      };
+    });
+  }
 
   @Post('service-accounts')
   @HttpCode(201)

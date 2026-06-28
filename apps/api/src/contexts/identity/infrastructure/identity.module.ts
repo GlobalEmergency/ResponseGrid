@@ -8,6 +8,8 @@ import { OAuthController } from './http/oauth.controller';
 import { GrantsController } from './http/grants.controller';
 import { ApiKeysController } from './http/api-keys.controller';
 import { ServiceAccountIntrospectionController } from './http/service-account-introspection.controller';
+import { RolesController } from './http/roles.controller';
+import { UsersController } from './http/users.controller';
 import { Login } from '../application/login';
 import { RegisterUser } from '../application/register-user';
 import { AuthenticateWithProvider } from '../application/authenticate-with-provider';
@@ -16,6 +18,7 @@ import { RevokeGrant } from '../application/revoke-grant';
 import { CreateServiceAccount } from '../application/create-service-account';
 import { IssueApiKey } from '../application/issue-api-key';
 import { RevokeApiKey } from '../application/revoke-api-key';
+import { FindUserByEmail } from '../application/find-user-by-email';
 import {
   USER_REPOSITORY,
   UserRepository,
@@ -134,6 +137,13 @@ const revokeGrantProvider = {
   inject: [GRANT_REPOSITORY, ACCESS_CONTROL],
   useFactory: (grants: GrantRepository, access: AccessControl) =>
     new RevokeGrant(grants, access),
+};
+
+const findUserByEmailProvider = {
+  provide: FindUserByEmail,
+  inject: [USER_REPOSITORY, ACCESS_CONTROL],
+  useFactory: (users: UserRepository, access: AccessControl) =>
+    new FindUserByEmail(users, access),
 };
 
 const serviceAccountRepositoryProvider = {
@@ -284,6 +294,8 @@ const authenticateWithProviderProvider = {
     GrantsController,
     ApiKeysController,
     ServiceAccountIntrospectionController,
+    RolesController,
+    UsersController,
   ],
   providers: [
     userRepositoryProvider,
@@ -297,6 +309,7 @@ const authenticateWithProviderProvider = {
     authenticateWithProviderProvider,
     grantRoleProvider,
     revokeGrantProvider,
+    findUserByEmailProvider,
     serviceAccountRepositoryProvider,
     apiKeyRepositoryProvider,
     createServiceAccountProvider,

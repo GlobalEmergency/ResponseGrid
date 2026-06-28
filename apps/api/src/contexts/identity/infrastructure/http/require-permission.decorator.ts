@@ -13,7 +13,11 @@ export const REQUIRED_PERMISSION = 'required_permission';
  *
  * @example
  *   @RequirePermission('resource:verify')
- *   @Patch('emergencies/:emergencyId/resources/:resourceId/verify')
+ *   @Patch('resources/:resourceId/verify')
+ *
+ * Prefer entity-id routes (`:resourceId`) over nesting the scope id in the path
+ * (`:emergencyId/:resourceId`): the scope resolver derives the owning emergency
+ * from the entity itself, so a client-supplied path scope can't be trusted.
  */
 export const RequirePermission = (permission: Permission) =>
   SetMetadata(REQUIRED_PERMISSION, permission);

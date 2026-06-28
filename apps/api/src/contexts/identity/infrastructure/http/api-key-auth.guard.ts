@@ -21,6 +21,9 @@ import { AuthenticatedUser } from './jwt-auth.guard';
  */
 @Injectable()
 export class ApiKeyAuthGuard implements CanActivate {
+  /** Minimum gap between `lastUsedAt` writes for the same key. */
+  private static readonly USAGE_THROTTLE_MS = 5 * 60 * 1000;
+
   constructor(
     @Inject(API_KEY_REPOSITORY) private readonly keys: ApiKeyRepository,
     @Inject(GRANT_REPOSITORY) private readonly grants: GrantRepository,
@@ -38,13 +41,29 @@ export class ApiKeyAuthGuard implements CanActivate {
     const prefix = prefixOf(presented);
     if (!prefix) throw new UnauthorizedException('Malformed API key');
 
+    const now = new Date();
     const key = await this.keys.findByPrefix(prefix);
     if (
       !key ||
-      !key.isActive(new Date()) ||
+      !key.isActive(now) ||
       !verifyApiKeySecret(presented, key.hashedSecret)
     ) {
       throw new UnauthorizedException('Invalid or revoked API key');
+    }
+
+    // Record usage for leak detection, throttled so we don't write on every
+    // request (the secret hash never changes, so a coarse last-used is enough).
+    if (
+      key.lastUsedAt === null ||
+      now.getTime() - key.lastUsedAt.getTime() >
+        ApiKeyAuthGuard.USAGE_THROTTLE_MS
+    ) {
+      try {
+        await this.keys.save(key.markUsed(now));
+      } catch {
+        // Best-effort usage telemetry: a transient write failure must never
+        // fail an otherwise-valid API-key request.
+      }
     }
 
     const grants = await this.grants.findByPrincipal(key.serviceAccountId);

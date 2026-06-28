@@ -7,7 +7,10 @@ export interface GeneratedApiKey {
   prefix: string;
 }
 
-const KEY_RE = /^rh_live_([0-9a-f]{16,})$/;
+// Upper-bounded on purpose: an unbounded `{16,}` would let an unauthenticated
+// caller submit a multi-megabyte all-hex header that we then SHA-256. The real
+// secret is 48 hex chars, so 128 is generous headroom.
+const KEY_RE = /^rh_live_([0-9a-f]{16,128})$/;
 
 /** Generate a fresh API key: `rh_live_<48 hex>`, with an 8-char lookup prefix. */
 export function generateApiKey(): GeneratedApiKey {

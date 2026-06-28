@@ -5,7 +5,9 @@ import { AuthorizationContext } from '../domain/authorization/access-control';
 import { Grant } from '../domain/authorization/grant';
 import { ScopeRef } from '../domain/authorization/scope-ref';
 import {
+  CannotRevokeOwnAdminError,
   GrantNotFoundError,
+  LegacyGrantNotRevocableError,
   NotAuthorizedToRevokeError,
 } from '../domain/authorization/errors';
 
@@ -78,5 +80,51 @@ describe('RevokeGrant', () => {
     await expect(useCase.execute({ actor, grantId: GRANT_ID })).rejects.toThrow(
       NotAuthorizedToRevokeError,
     );
+  });
+
+  it('forbids an admin from revoking their own platform_admin grant (self-lockout)', async () => {
+    await repo.save(
+      Grant.create({
+        id: GRANT_ID,
+        principalId: ACTOR,
+        roleId: 'platform_admin',
+        scope: ScopeRef.platform(),
+      }),
+    );
+    const actor = actorWith({
+      roleId: 'platform_admin',
+      scope: ScopeRef.platform(),
+    });
+    await expect(useCase.execute({ actor, grantId: GRANT_ID })).rejects.toThrow(
+      CannotRevokeOwnAdminError,
+    );
+    expect(await repo.findById(GRANT_ID)).not.toBeNull();
+  });
+
+  it('still lets an admin revoke ANOTHER admin platform_admin grant', async () => {
+    await repo.save(
+      Grant.create({
+        id: GRANT_ID,
+        principalId: TARGET,
+        roleId: 'platform_admin',
+        scope: ScopeRef.platform(),
+      }),
+    );
+    const actor = actorWith({
+      roleId: 'platform_admin',
+      scope: ScopeRef.platform(),
+    });
+    await useCase.execute({ actor, grantId: GRANT_ID });
+    expect(await repo.findById(GRANT_ID)).toBeNull();
+  });
+
+  it('rejects revoking a legacy-derived grant with a clear error', async () => {
+    const actor = actorWith({
+      roleId: 'platform_admin',
+      scope: ScopeRef.platform(),
+    });
+    await expect(
+      useCase.execute({ actor, grantId: `legacy:admin:${TARGET}` }),
+    ).rejects.toThrow(LegacyGrantNotRevocableError);
   });
 });

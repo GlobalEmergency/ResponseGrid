@@ -3,10 +3,13 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
+  Inject,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   Req,
   UseFilters,
   UseGuards,
@@ -16,8 +19,10 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNoContentResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiProperty,
+  ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -25,13 +30,45 @@ import { Request } from 'express';
 import { GrantRole } from '../../application/grant-role';
 import { RevokeGrant } from '../../application/revoke-grant';
 import { ScopeRefProps } from '../../domain/authorization/scope-ref';
+import { GRANT_REPOSITORY } from '../../domain/ports/grant.repository';
+import type { GrantRepository } from '../../domain/ports/grant.repository';
 import { GrantRoleDto } from './grants-dto';
 import { GrantExceptionFilter } from './grant-exception.filter';
 import { JwtAuthGuard, AuthenticatedUser } from './jwt-auth.guard';
+import { RequireAdminGuard } from './require-admin.guard';
 
 class GrantResponseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
+}
+
+class GrantListItemDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  principalId!: string;
+
+  @ApiProperty({ enum: ['user', 'service_account'] })
+  principalType!: string;
+
+  @ApiProperty()
+  roleId!: string;
+
+  @ApiProperty()
+  scopeType!: string;
+
+  @ApiProperty({ type: String, nullable: true })
+  scopeId!: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  grantedByPrincipalId!: string | null;
+
+  @ApiProperty()
+  grantedAt!: string;
+
+  @ApiProperty({ type: String, nullable: true })
+  expiresAt!: string | null;
 }
 
 function buildScope(dto: GrantRoleDto): ScopeRefProps {
@@ -70,7 +107,42 @@ export class GrantsController {
   constructor(
     private readonly grantRole: GrantRole,
     private readonly revokeGrant: RevokeGrant,
+    @Inject(GRANT_REPOSITORY) private readonly grants: GrantRepository,
   ) {}
+
+  @Get()
+  @UseGuards(RequireAdminGuard)
+  @ApiOperation({ summary: 'List the grants held by a principal (admin)' })
+  @ApiQuery({
+    name: 'principalId',
+    required: true,
+    description: 'User or service-account id',
+  })
+  @ApiOkResponse({ type: [GrantListItemDto] })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Admin access required' })
+  async list(
+    @Query('principalId') principalId: string,
+  ): Promise<GrantListItemDto[]> {
+    if (!principalId) {
+      throw new BadRequestException('principalId query param is required');
+    }
+    const grants = await this.grants.findByPrincipal(principalId);
+    return grants.map((g) => {
+      const s = g.toSnapshot();
+      return {
+        id: s.id,
+        principalId: s.principalId,
+        principalType: s.principalType,
+        roleId: s.roleId,
+        scopeType: s.scope.type,
+        scopeId: 'id' in s.scope ? s.scope.id : null,
+        grantedByPrincipalId: s.grantedByPrincipalId,
+        grantedAt: s.grantedAt,
+        expiresAt: s.expiresAt,
+      };
+    });
+  }
 
   @Post()
   @HttpCode(201)

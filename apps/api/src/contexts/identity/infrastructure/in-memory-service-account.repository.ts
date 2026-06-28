@@ -25,4 +25,11 @@ export class InMemoryServiceAccountRepository implements ServiceAccountRepositor
       .map((s) => ServiceAccount.fromSnapshot(s));
     return Promise.resolve(result);
   }
+
+  listAll(): Promise<ServiceAccount[]> {
+    const result = [...this.store.values()].map((s) =>
+      ServiceAccount.fromSnapshot(s),
+    );
+    return Promise.resolve(result);
+  }
 }

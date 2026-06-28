@@ -99,6 +99,12 @@ export class AuthController {
       email: req.user.email,
       name: req.user.name,
       isAdmin: req.user.isAdmin,
+      grants: req.user.grants.map((g) => ({
+        roleId: g.roleId,
+        scopeType: g.scope.type,
+        scopeId: 'id' in g.scope ? g.scope.id : null,
+        expiresAt: g.expiresAt,
+      })),
     };
   }
 }

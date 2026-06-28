@@ -48,4 +48,9 @@ export class DrizzleServiceAccountRepository implements ServiceAccountRepository
       .where(eq(serviceAccountsTable.ownerOrganizationId, organizationId));
     return rows.map(rowToServiceAccount);
   }
+
+  async listAll(): Promise<ServiceAccount[]> {
+    const rows = await this.db.select().from(serviceAccountsTable);
+    return rows.map(rowToServiceAccount);
+  }
 }

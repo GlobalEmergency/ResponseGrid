@@ -8,12 +8,18 @@ import {
 import { GetPublicResources } from '../../application/get-public-resources';
 import { GetResourceFacets } from '../../application/get-resource-facets';
 import { GetNearbyResources } from '../../application/get-nearby-resources';
+import { GetResourcesInBounds } from '../../application/get-resources-in-bounds';
 import {
   PagedResourcesDto,
   ResourceFacetsDto,
   NearbyResourcesResponseDto,
+  InBoundsResourcesDto,
 } from './response.dto';
-import { PublicResourcesQueryDto, NearbyResourcesQueryDto } from './dto';
+import {
+  PublicResourcesQueryDto,
+  NearbyResourcesQueryDto,
+  InBoundsQueryDto,
+} from './dto';
 
 @ApiTags('public')
 @Controller()
@@ -22,6 +28,7 @@ export class PublicController {
     private readonly getPublicResources: GetPublicResources,
     private readonly getResourceFacets: GetResourceFacets,
     private readonly getNearbyResources: GetNearbyResources,
+    private readonly getResourcesInBounds: GetResourcesInBounds,
   ) {}
 
   @Get('emergencies/:emergencyId/public/resources')
@@ -75,6 +82,33 @@ export class PublicController {
       lng: query.lng,
       radiusMeters: query.radius,
       limit: query.limit ?? 50,
+    });
+  }
+
+  @Get('emergencies/:emergencyId/public/resources/in-bounds')
+  @ApiOperation({
+    summary: 'Find visible resources within a geographic bounding box',
+  })
+  @ApiParam({
+    name: 'emergencyId',
+    description: 'Emergency UUID',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Resources within the bounding box',
+    type: InBoundsResourcesDto,
+  })
+  async inBounds(
+    @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
+    @Query() query: InBoundsQueryDto,
+  ): Promise<InBoundsResourcesDto> {
+    return this.getResourcesInBounds.execute({
+      emergencyId,
+      minLat: query.minLat,
+      minLng: query.minLng,
+      maxLat: query.maxLat,
+      maxLng: query.maxLng,
+      limit: query.limit ?? 500,
     });
   }
 

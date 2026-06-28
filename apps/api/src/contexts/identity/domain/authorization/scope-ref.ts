@@ -61,6 +61,17 @@ export class ScopeRef {
         return ScopeRef.group(props.id);
       case 'entity':
         return ScopeRef.entity(props.entityType, props.id);
+      default: {
+        // Unknown scope type. The compiler proves this is unreachable for valid
+        // input, but grant snapshots arrive from JWTs and are not re-validated
+        // at runtime — so reject explicitly (fail-closed) rather than fall off
+        // the switch returning `undefined`, which would crash the PDP. Never map
+        // an unknown scope to `platform`: that would be a fail-open escalation.
+        const exhaustive: never = props;
+        throw new Error(
+          `unknown scope type: ${String((exhaustive as { type?: unknown }).type)}`,
+        );
+      }
     }
   }
 

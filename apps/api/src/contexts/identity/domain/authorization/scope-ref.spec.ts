@@ -59,5 +59,12 @@ describe('ScopeRef', () => {
     it('throws on an empty id', () => {
       expect(() => ScopeRef.emergency('')).toThrow();
     });
+    it('rejects an unknown scope type (fail-closed, never platform)', () => {
+      // Grant snapshots arrive from JWTs and are not type-checked at runtime.
+      const forged = { type: 'hub', id: 'x' } as unknown as Parameters<
+        typeof ScopeRef.fromProps
+      >[0];
+      expect(() => ScopeRef.fromProps(forged)).toThrow(/unknown scope type/);
+    });
   });
 });

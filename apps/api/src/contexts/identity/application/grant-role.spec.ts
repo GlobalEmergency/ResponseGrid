@@ -5,6 +5,7 @@ import { AuthorizationContext } from '../domain/authorization/access-control';
 import { Grant } from '../domain/authorization/grant';
 import { ScopeRef } from '../domain/authorization/scope-ref';
 import {
+  InvalidGrantExpiryError,
   NotAuthorizedToGrantError,
   PrivilegeEscalationError,
   UnknownRoleError,
@@ -130,5 +131,37 @@ describe('GrantRole (delegation with attenuation)', () => {
         scope: ScopeRef.platform().toPlain(),
       }),
     ).rejects.toThrow(UnknownRoleError);
+  });
+
+  it('rejects an expiry in the past (would create a dead grant)', async () => {
+    const actor = actorWith({
+      roleId: 'platform_admin',
+      scope: ScopeRef.platform(),
+    });
+    await expect(
+      useCase.execute({
+        actor,
+        targetPrincipalId: TARGET,
+        roleId: 'emergency_coordinator',
+        scope: ScopeRef.emergency('e1').toPlain(),
+        expiresAt: new Date(Date.now() - 60_000),
+      }),
+    ).rejects.toThrow(InvalidGrantExpiryError);
+  });
+
+  it('rejects an Invalid Date expiry instead of creating a dead grant / 500', async () => {
+    const actor = actorWith({
+      roleId: 'platform_admin',
+      scope: ScopeRef.platform(),
+    });
+    await expect(
+      useCase.execute({
+        actor,
+        targetPrincipalId: TARGET,
+        roleId: 'emergency_coordinator',
+        scope: ScopeRef.emergency('e1').toPlain(),
+        expiresAt: new Date('not-a-date'),
+      }),
+    ).rejects.toThrow(InvalidGrantExpiryError);
   });
 });
