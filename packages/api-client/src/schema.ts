@@ -177,6 +177,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/users/lookup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resolve an email to a principal id (admin only) */
+        get: operations["UsersController_lookup"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/notifications/mine": {
         parameters: {
             query?: never;
@@ -443,7 +460,7 @@ export interface paths {
         /** List active emergencies */
         get: operations["EmergenciesController_list"];
         put?: never;
-        /** Create an emergency (admin only) */
+        /** Create an emergency (emergency:create) */
         post: operations["EmergenciesController_createEmergency"];
         delete?: never;
         options?: never;
@@ -477,7 +494,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Create an emergency from a template (admin only) */
+        /** Create an emergency from a template (emergency:create) */
         post: operations["EmergenciesController_createFromTemplateRoute"];
         delete?: never;
         options?: never;
@@ -769,10 +786,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List accreditations (admin only) */
+        /** List accreditations (accreditation:grant) */
         get: operations["AccreditationsController_listAccreditations"];
         put?: never;
-        /** Grant accreditation to an organization (admin only) */
+        /** Grant accreditation to an organization (accreditation:grant) */
         post: operations["AccreditationsController_grantAccreditation"];
         delete?: never;
         options?: never;
@@ -790,7 +807,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Revoke an accreditation (admin only) */
+        /** Revoke an accreditation (accreditation:revoke) */
         delete: operations["AccreditationsController_revokeAccreditation"];
         options?: never;
         head?: never;
@@ -1249,7 +1266,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List audit log entries (admin only) */
+        /** List audit log entries (audit:read) */
         get: operations["AuditController_list"];
         put?: never;
         post?: never;
@@ -1530,6 +1547,12 @@ export interface components {
             description: string;
             defaultScopeType: string;
             permissions: string[];
+        };
+        UserLookupDto: {
+            /** Format: uuid */
+            id: string;
+            email: string;
+            name: string;
         };
         NotificationDto: {
             id: string;
@@ -3072,6 +3095,48 @@ export interface operations {
             };
         };
     };
+    UsersController_lookup: {
+        parameters: {
+            query: {
+                email: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserLookupDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authorized to look up users */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No user with that email */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     NotificationsController_getMyNotifications: {
         parameters: {
             query?: never;
@@ -3739,7 +3804,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Admin access required */
+            /** @description emergency:create required */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3820,7 +3885,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Admin access required */
+            /** @description emergency:create required */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5885,7 +5950,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Admin access required */
+            /** @description audit:read required */
             403: {
                 headers: {
                     [name: string]: unknown;

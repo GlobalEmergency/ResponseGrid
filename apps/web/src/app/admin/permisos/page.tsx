@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
-import { fetchRoles, fetchGrants } from './actions';
+import { fetchRoles, fetchGrants, resolvePrincipal } from './actions';
 import { GrantRoleForm } from './grant-role-form';
 import { RevokeGrantButton } from './revoke-grant-button';
 import { scopeLabel } from '@/lib/permissions';
@@ -29,7 +29,10 @@ export default async function PermisosPage({ searchParams }: Props) {
   if (!me.isAdmin) redirect('/');
 
   const { principalId } = await searchParams;
-  const lookupId = (principalId ?? '').trim();
+  const rawLookup = (principalId ?? '').trim();
+  // Accept a UUID or an email; resolve email → principal id via the directory.
+  const resolved = rawLookup ? await resolvePrincipal(rawLookup) : null;
+  const lookupId = resolved?.id ?? '';
 
   const [roles, grants] = await Promise.all([
     fetchRoles(),
@@ -64,8 +67,8 @@ export default async function PermisosPage({ searchParams }: Props) {
             <input
               type="text"
               name="principalId"
-              defaultValue={lookupId}
-              placeholder="UUID del usuario o cuenta de servicio"
+              defaultValue={rawLookup}
+              placeholder="Email del usuario, o UUID de usuario / cuenta de servicio"
               className="flex-1 rounded-lg border-2 border-gray-900 bg-white px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
             />
             <button
@@ -75,6 +78,21 @@ export default async function PermisosPage({ searchParams }: Props) {
               Consultar
             </button>
           </form>
+
+          {rawLookup && !resolved && (
+            <p className="text-sm text-amber-700 bg-amber-50 border border-amber-300 rounded px-3 py-2">
+              No se encontró ningún principal con «{rawLookup}». Usa un email
+              registrado o pega un UUID.
+            </p>
+          )}
+
+          {resolved && (resolved.name || resolved.email) && (
+            <p className="text-xs text-gray-500">
+              {resolved.name ?? 'Usuario'}
+              {resolved.email ? ` · ${resolved.email}` : ''} ·{' '}
+              <span className="font-mono break-all">{resolved.id}</span>
+            </p>
+          )}
 
           {lookupId &&
             (grants.length === 0 ? (

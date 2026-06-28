@@ -114,6 +114,50 @@
       }
     },
     "/grants": {
+      "get": {
+        "operationId": "GrantsController_list",
+        "parameters": [
+          {
+            "name": "principalId",
+            "required": true,
+            "in": "query",
+            "description": "User or service-account id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GrantListItemDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Admin access required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the grants held by a principal (admin)",
+        "tags": [
+          "grants"
+        ]
+      },
       "post": {
         "operationId": "GrantsController_grant",
         "parameters": [],
@@ -192,6 +236,40 @@
       }
     },
     "/service-accounts": {
+      "get": {
+        "operationId": "ApiKeysController_listServiceAccounts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ServiceAccountListItemDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Admin access required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List service accounts (admin)",
+        "tags": [
+          "service-accounts"
+        ]
+      },
       "post": {
         "operationId": "ApiKeysController_create",
         "parameters": [],
@@ -235,6 +313,49 @@
       }
     },
     "/service-accounts/{serviceAccountId}/api-keys": {
+      "get": {
+        "operationId": "ApiKeysController_listApiKeys",
+        "parameters": [
+          {
+            "name": "serviceAccountId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApiKeyListItemDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Admin access required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List a service account’s keys — metadata only (admin)",
+        "tags": [
+          "service-accounts"
+        ]
+      },
       "post": {
         "operationId": "ApiKeysController_issue",
         "parameters": [
@@ -348,6 +469,81 @@
         "summary": "Introspect the calling service account (authenticated by X-API-Key)",
         "tags": [
           "service-accounts"
+        ]
+      }
+    },
+    "/roles": {
+      "get": {
+        "operationId": "RolesController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoleDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the fixed role catalog",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/users/lookup": {
+      "get": {
+        "operationId": "UsersController_lookup",
+        "parameters": [
+          {
+            "name": "email",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserLookupDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not authorized to look up users"
+          },
+          "404": {
+            "description": "No user with that email"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Resolve an email to a principal id (admin only)",
+        "tags": [
+          "users"
         ]
       }
     },
@@ -1168,7 +1364,7 @@
             "description": "Missing or invalid token"
           },
           "403": {
-            "description": "Admin access required"
+            "description": "emergency:create required"
           },
           "409": {
             "description": "Slug already exists"
@@ -1179,7 +1375,7 @@
             "bearer": []
           }
         ],
-        "summary": "Create an emergency (admin only)",
+        "summary": "Create an emergency (emergency:create)",
         "tags": [
           "emergencies"
         ]
@@ -1274,7 +1470,7 @@
             "description": "Missing or invalid token"
           },
           "403": {
-            "description": "Admin access required"
+            "description": "emergency:create required"
           },
           "404": {
             "description": "Template not found"
@@ -1288,7 +1484,7 @@
             "bearer": []
           }
         ],
-        "summary": "Create an emergency from a template (admin only)",
+        "summary": "Create an emergency from a template (emergency:create)",
         "tags": [
           "emergencies"
         ]
@@ -2224,7 +2420,7 @@
             "bearer": []
           }
         ],
-        "summary": "Grant accreditation to an organization (admin only)",
+        "summary": "Grant accreditation to an organization (accreditation:grant)",
         "tags": [
           "accreditations"
         ]
@@ -2277,7 +2473,7 @@
             "bearer": []
           }
         ],
-        "summary": "List accreditations (admin only)",
+        "summary": "List accreditations (accreditation:grant)",
         "tags": [
           "accreditations"
         ]
@@ -2317,7 +2513,7 @@
             "bearer": []
           }
         ],
-        "summary": "Revoke an accreditation (admin only)",
+        "summary": "Revoke an accreditation (accreditation:revoke)",
         "tags": [
           "accreditations"
         ]
@@ -3804,7 +4000,7 @@
             "description": "Unauthorized"
           },
           "403": {
-            "description": "Admin access required"
+            "description": "audit:read required"
           }
         },
         "security": [
@@ -3812,9 +4008,403 @@
             "bearer": []
           }
         ],
-        "summary": "List audit log entries (admin only)",
+        "summary": "List audit log entries (audit:read)",
         "tags": [
           "audit"
+        ]
+      }
+    },
+    "/groups/mine": {
+      "get": {
+        "operationId": "GroupsController_mine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MyGroupResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the groups I belong to (any status)",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/groups": {
+      "get": {
+        "operationId": "GroupsController_list",
+        "parameters": [
+          {
+            "name": "ownerKind",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "organization",
+                "emergency"
+              ]
+            }
+          },
+          {
+            "name": "ownerId",
+            "required": true,
+            "in": "query",
+            "description": "Id of the owning org/emergency",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GroupResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List groups under an org/emergency (all if you can read; else public)",
+        "tags": [
+          "groups"
+        ]
+      },
+      "post": {
+        "operationId": "GroupsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGroupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "group:create required in the owner scope"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a group (creator becomes its first manager)",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/groups/{groupId}": {
+      "get": {
+        "operationId": "GroupsController_getOne",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a group’s basic info",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/groups/{groupId}/join": {
+      "post": {
+        "operationId": "GroupsController_join",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Join request registered"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Group is private"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Request to join a public group (awaits approval)",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/groups/{groupId}/members": {
+      "get": {
+        "operationId": "GroupsController_members",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GroupMemberResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "group:read required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List a group’s members",
+        "tags": [
+          "groups"
+        ]
+      },
+      "post": {
+        "operationId": "GroupsController_addMember",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddMemberByEmailDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupMemberResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "group:manage_members required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a member by email (manager only)",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/groups/{groupId}/members/{userId}/approve": {
+      "post": {
+        "operationId": "GroupsController_approve",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Member approved"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "group:manage_members required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Approve a pending member (manager only)",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/groups/{groupId}/managers": {
+      "post": {
+        "operationId": "GroupsController_assignManager",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignManagerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "role:grant required, or privilege escalation"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Appoint a member as co-manager (delegated, attenuated)",
+        "tags": [
+          "groups"
         ]
       }
     }
@@ -3903,6 +4493,42 @@
           "accessToken"
         ]
       },
+      "MeGrantDto": {
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "string",
+            "description": "Role id from the catalog",
+            "example": "org_admin"
+          },
+          "scopeType": {
+            "type": "string",
+            "enum": [
+              "platform",
+              "organization",
+              "emergency",
+              "group",
+              "entity"
+            ]
+          },
+          "scopeId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Scope id (null for platform)"
+          },
+          "expiresAt": {
+            "type": "string",
+            "nullable": true,
+            "description": "ISO expiry, or null"
+          }
+        },
+        "required": [
+          "roleId",
+          "scopeType",
+          "scopeId",
+          "expiresAt"
+        ]
+      },
       "MeResponseDto": {
         "type": "object",
         "properties": {
@@ -3920,13 +4546,73 @@
           },
           "isAdmin": {
             "type": "boolean"
+          },
+          "grants": {
+            "description": "The effective role grants (role @ scope) for this user",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MeGrantDto"
+            }
           }
         },
         "required": [
           "id",
           "email",
           "name",
-          "isAdmin"
+          "isAdmin",
+          "grants"
+        ]
+      },
+      "GrantListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "principalId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "principalType": {
+            "type": "string",
+            "enum": [
+              "user",
+              "service_account"
+            ]
+          },
+          "roleId": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "scopeId": {
+            "type": "string",
+            "nullable": true
+          },
+          "grantedByPrincipalId": {
+            "type": "string",
+            "nullable": true
+          },
+          "grantedAt": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "principalId",
+          "principalType",
+          "roleId",
+          "scopeType",
+          "scopeId",
+          "grantedByPrincipalId",
+          "grantedAt",
+          "expiresAt"
         ]
       },
       "GrantRoleDto": {
@@ -3981,6 +4667,77 @@
         },
         "required": [
           "id"
+        ]
+      },
+      "ServiceAccountListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerOrganizationId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "createdByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "ownerOrganizationId",
+          "createdByUserId",
+          "createdAt"
+        ]
+      },
+      "ApiKeyListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "prefix": {
+            "type": "string",
+            "description": "Non-secret lookup prefix"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "expiresAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastUsedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "revokedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "prefix",
+          "active",
+          "expiresAt",
+          "lastUsedAt",
+          "revokedAt",
+          "createdAt"
         ]
       },
       "CreateServiceAccountDto": {
@@ -4086,6 +4843,52 @@
           "principalId",
           "principalType",
           "grants"
+        ]
+      },
+      "RoleDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "defaultScopeType": {
+            "type": "string"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "description",
+          "defaultScopeType",
+          "permissions"
+        ]
+      },
+      "UserLookupDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name"
         ]
       },
       "NotificationDto": {
@@ -6540,6 +7343,211 @@
         "required": [
           "entries",
           "total"
+        ]
+      },
+      "MyGroupResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "public",
+              "private"
+            ]
+          },
+          "ownerKind": {
+            "type": "string",
+            "enum": [
+              "organization",
+              "emergency"
+            ]
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentGroupId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "membershipStatus": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "approved"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "visibility",
+          "ownerKind",
+          "ownerId",
+          "parentGroupId",
+          "createdAt",
+          "membershipStatus"
+        ]
+      },
+      "GroupResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "public",
+              "private"
+            ]
+          },
+          "ownerKind": {
+            "type": "string",
+            "enum": [
+              "organization",
+              "emergency"
+            ]
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentGroupId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "visibility",
+          "ownerKind",
+          "ownerId",
+          "parentGroupId",
+          "createdAt"
+        ]
+      },
+      "CreateGroupDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Group/cuadrilla name"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "public",
+              "private"
+            ]
+          },
+          "ownerKind": {
+            "type": "string",
+            "enum": [
+              "organization",
+              "emergency"
+            ],
+            "description": "Whether the group hangs off an organization or an emergency"
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Id of the owning org/emergency"
+          },
+          "parentGroupId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Parent group (nesting)"
+          }
+        },
+        "required": [
+          "name",
+          "visibility",
+          "ownerKind",
+          "ownerId"
+        ]
+      },
+      "IdResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "GroupMemberResponseDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "approved"
+            ]
+          },
+          "addedByUserId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "userId",
+          "status",
+          "addedByUserId"
+        ]
+      },
+      "AddMemberByEmailDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email of the user to add (must already exist)"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "AssignManagerDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Member to appoint as manager"
+          }
+        },
+        "required": [
+          "userId"
         ]
       }
     }

@@ -6,23 +6,35 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
+  CannotRevokeOwnAdminError,
   GrantNotFoundError,
+  InvalidGrantExpiryError,
+  LegacyGrantNotRevocableError,
   NotAuthorizedToGrantError,
+  NotAuthorizedToReadError,
   NotAuthorizedToRevokeError,
   PrivilegeEscalationError,
   UnknownRoleError,
 } from '../../domain/authorization/errors';
 
 type GrantError =
+  | CannotRevokeOwnAdminError
   | GrantNotFoundError
+  | InvalidGrantExpiryError
+  | LegacyGrantNotRevocableError
   | NotAuthorizedToGrantError
+  | NotAuthorizedToReadError
   | NotAuthorizedToRevokeError
   | PrivilegeEscalationError
   | UnknownRoleError;
 
 @Catch(
+  CannotRevokeOwnAdminError,
   GrantNotFoundError,
+  InvalidGrantExpiryError,
+  LegacyGrantNotRevocableError,
   NotAuthorizedToGrantError,
+  NotAuthorizedToReadError,
   NotAuthorizedToRevokeError,
   PrivilegeEscalationError,
   UnknownRoleError,
@@ -39,8 +51,14 @@ export class GrantExceptionFilter implements ExceptionFilter {
 
   private statusFor(exception: GrantError): number {
     if (exception instanceof GrantNotFoundError) return HttpStatus.NOT_FOUND;
-    if (exception instanceof UnknownRoleError) return HttpStatus.BAD_REQUEST;
-    // NotAuthorizedToGrant/Revoke + PrivilegeEscalation
+    if (
+      exception instanceof UnknownRoleError ||
+      exception instanceof InvalidGrantExpiryError
+    )
+      return HttpStatus.BAD_REQUEST;
+    if (exception instanceof LegacyGrantNotRevocableError)
+      return HttpStatus.CONFLICT;
+    // CannotRevokeOwnAdmin + NotAuthorizedToGrant/Revoke/Read + PrivilegeEscalation
     return HttpStatus.FORBIDDEN;
   }
 }

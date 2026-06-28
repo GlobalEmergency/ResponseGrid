@@ -40,7 +40,8 @@ import {
   JwtAuthGuard,
   AuthenticatedUser,
 } from '../../../identity/infrastructure/http/jwt-auth.guard';
-import { RequireAdminGuard } from '../../../identity/infrastructure/http/require-admin.guard';
+import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
+import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
 
 class AccreditationResponseDto {
   @ApiProperty({ format: 'uuid' })
@@ -69,7 +70,7 @@ class AccreditationViewDto implements AccreditationView {
 
 @ApiTags('accreditations')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RequireAdminGuard)
+@UseGuards(JwtAuthGuard, PermissionGuard)
 @UseFilters(AccreditationExceptionFilter)
 @Controller('accreditations')
 export class AccreditationsController {
@@ -81,8 +82,9 @@ export class AccreditationsController {
 
   @Post()
   @HttpCode(201)
+  @RequirePermission('accreditation:grant')
   @ApiOperation({
-    summary: 'Grant accreditation to an organization (admin only)',
+    summary: 'Grant accreditation to an organization (accreditation:grant)',
   })
   @ApiCreatedResponse({
     description: 'Accreditation granted',
@@ -104,7 +106,8 @@ export class AccreditationsController {
 
   @Delete(':id')
   @HttpCode(204)
-  @ApiOperation({ summary: 'Revoke an accreditation (admin only)' })
+  @RequirePermission('accreditation:revoke')
+  @ApiOperation({ summary: 'Revoke an accreditation (accreditation:revoke)' })
   @ApiParam({ name: 'id', description: 'Accreditation UUID', format: 'uuid' })
   @ApiNoContentResponse({ description: 'Accreditation revoked' })
   @ApiNotFoundResponse({ description: 'Accreditation not found' })
@@ -117,7 +120,8 @@ export class AccreditationsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List accreditations (admin only)' })
+  @RequirePermission('accreditation:grant')
+  @ApiOperation({ summary: 'List accreditations (accreditation:grant)' })
   @ApiQuery({
     name: 'organizationId',
     required: false,

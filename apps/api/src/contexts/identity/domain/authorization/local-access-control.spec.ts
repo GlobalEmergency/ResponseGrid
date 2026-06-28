@@ -19,6 +19,40 @@ function chain(...scopes: ScopeRef[]): ScopeRefProps[] {
 describe('LocalAccessControl', () => {
   const ac = new LocalAccessControl();
 
+  it('ignores a malformed grant (unknown scope type) without crashing the decision', async () => {
+    // A forged/stale JWT grant with a scope type the runtime does not know.
+    const valid = Grant.create({
+      id: 'g1',
+      principalId: PRINCIPAL,
+      roleId: 'emergency_coordinator',
+      scope: ScopeRef.emergency('venezuela'),
+    }).toSnapshot();
+    const malformed = {
+      ...valid,
+      id: 'g2',
+      scope: {
+        type: 'hub',
+        id: 'valencia',
+      } as unknown as (typeof valid)['scope'],
+    };
+    const ctx: AuthorizationContext = {
+      principalId: PRINCIPAL,
+      grants: [malformed, valid],
+    };
+    const resource = {
+      scopeChain: chain(ScopeRef.emergency('venezuela'), ScopeRef.platform()),
+    };
+    // The malformed grant contributes nothing; the valid one still applies.
+    await expect(ac.can(ctx, 'resource:verify', resource)).resolves.toBe(true);
+    await expect(
+      ac.can(
+        { principalId: PRINCIPAL, grants: [malformed] },
+        'resource:verify',
+        resource,
+      ),
+    ).resolves.toBe(false);
+  });
+
   it('a coordinator of an emergency can verify a resource in that emergency', async () => {
     const ctx = ctxWith(
       Grant.create({
