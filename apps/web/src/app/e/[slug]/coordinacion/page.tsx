@@ -73,8 +73,13 @@ export default async function CoordinacionPage({ params }: Props) {
 
   // --- Pending counters for each actionable section ---------------------
   // Resources: ask for one row only — we just need the `total`.
-  const [resourcesPending, needsPending, offersPending, shipmentsActive] =
-    await Promise.all([
+  const [
+    resourcesPending,
+    needsPending,
+    offersPending,
+    shipmentsActive,
+    disputesPending,
+  ] = await Promise.all([
     access.canVerifyResources
       ? api
           .GET('/emergencies/{emergencyId}/coordination/queue', {
@@ -122,6 +127,17 @@ export default async function CoordinacionPage({ params }: Props) {
             ).length;
           })
       : Promise.resolve(null),
+    access.canVerifyResources
+      ? api
+          .GET('/emergencies/{emergencyId}/coordination/disputed', {
+            params: { path: { emergencyId } },
+            headers,
+          })
+          .then(async (r) => {
+            await onUnauthorized(r.response.status);
+            return r.data?.length ?? 0;
+          })
+      : Promise.resolve(null),
   ]);
 
   const base = `/e/${slug}/coordinacion`;
@@ -143,6 +159,15 @@ export default async function CoordinacionPage({ params }: Props) {
               label={tc.hub_resources_label}
               description={tc.hub_resources_description}
               count={resourcesPending}
+              countAria={tc.hub_count_aria}
+            />
+          )}
+          {disputesPending !== null && (
+            <CoordinationSectionLink
+              href={`${base}/puntos-en-duda`}
+              label={tc.hub_disputes_label}
+              description={tc.hub_disputes_description}
+              count={disputesPending}
               countAria={tc.hub_count_aria}
             />
           )}

@@ -124,6 +124,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
           label: r.name,
           kind: 'resource',
           status: r.publicStatus,
+          disputed: r.disputed,
         }),
       ),
     ...validatedNeeds

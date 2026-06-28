@@ -62,6 +62,8 @@ export interface MapPoint {
   city?: string | null;
   country?: string | null;
   accepts?: string[];
+  /** Citizen-reported "disputed" flag (ficha 15) — shown as a popup warning. */
+  disputed?: boolean;
 }
 
 function resourceIcon(status: ResourcePublicStatus | undefined): L.Icon {
@@ -192,8 +194,12 @@ function ClusteredMarkersLayer({ points }: { points: MapPoint[] }) {
         point.kind === 'need' && point.approximate === true
           ? `<br/><span style="font-size:11px;color:#b45309;">📍 ${escapeHtml(tc.map_approx_location)}</span>`
           : '';
+      const disputedLabel =
+        point.kind === 'resource' && point.disputed === true
+          ? `<br/><span style="font-size:11px;color:#b45309;">⚠️ ${escapeHtml(tc.map_disputed)}</span>`
+          : '';
 
-      const popupHtml = `<strong>${escapeHtml(point.label)}</strong><br/><span style="font-size:11px;color:#6b7280;">${kindLabel}</span>${typeLabel}${locationLabel}${acceptsLabel}${approximateLabel}`;
+      const popupHtml = `<strong>${escapeHtml(point.label)}</strong><br/><span style="font-size:11px;color:#6b7280;">${kindLabel}</span>${typeLabel}${locationLabel}${acceptsLabel}${approximateLabel}${disputedLabel}`;
 
       L.marker([point.lat, point.lng], { icon })
         .bindPopup(popupHtml)

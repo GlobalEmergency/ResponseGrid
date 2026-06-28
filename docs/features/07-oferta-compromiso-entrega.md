@@ -1,3 +1,5 @@
+> ⚠️ **DEPRECADO** — ficha congelada como referencia histórica. El seguimiento de esta feature vive en **GitHub Issues**: #25 · #26 · #27. No edites esta ficha; trabaja en el issue. Convención: ver `AGENTS.md` y [`00-indice.md`](00-indice.md).
+
 # 07 · Oferta como compromiso/promesa de entrega — Dominio: Núcleo necesidades/ofertas
 
 > Caso de uso capturado del análisis de REDH para el roadmap de ReliefHub. Entregable independiente y abordable por separado.

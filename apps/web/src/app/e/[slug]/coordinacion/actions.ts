@@ -221,6 +221,10 @@ export async function verifyAndPublish(
       await clearToken();
       redirect(`/login?next=/e/${slug}/coordinacion`);
     }
+    // The verify step already persisted; refresh so the queue/badge reflect the
+    // now-verified state even though publishing failed (avoids a stale "Sin
+    // verificar" and a misleading retry).
+    revalidatePath(`/e/${slug}/coordinacion`);
     return {
       status: 'error',
       message: t.coord.err_publish_resource_failed,
@@ -529,6 +533,52 @@ export async function discardResource(
     return { status: 'error', message: t.coord.err_discard_failed };
   }
 
+  revalidatePath(`/e/${slug}/coordinacion`);
+  return { status: 'success' };
+}
+
+export type DisputeResolution = NonNullable<
+  components['schemas']['ResolveResourceDisputeDto']['resolution']
+>;
+
+/**
+ * Resolve a disputed resource (coordinator): confirm closure, mark invalid or
+ * dismiss the citizen reports. A mandatory reason is recorded in the audit
+ * trail; the API enforces the coordinator permission.
+ */
+export async function resolveDispute(
+  resourceId: string,
+  slug: string,
+  resolution: DisputeResolution,
+  reason: string,
+): Promise<ActionResult> {
+  const token = await getToken();
+  if (token === null)
+    redirect(`/login?next=/e/${slug}/coordinacion/puntos-en-duda`);
+
+  const { t } = await getT();
+  if (reasonTooShort(reason)) {
+    return { status: 'error', message: t.coord.err_reason_required };
+  }
+
+  const { error, response } = await api.POST(
+    '/resources/{resourceId}/dispute/resolve',
+    {
+      params: { path: { resourceId } },
+      body: { resolution, reason: reason.trim() },
+      headers: authHeaders(token),
+    },
+  );
+
+  if (error !== undefined) {
+    if (response.status === 401) {
+      await clearToken();
+      redirect(`/login?next=/e/${slug}/coordinacion/puntos-en-duda`);
+    }
+    return { status: 'error', message: t.coord.err_resolve_dispute_failed };
+  }
+
+  revalidatePath(`/e/${slug}/coordinacion/puntos-en-duda`);
   revalidatePath(`/e/${slug}/coordinacion`);
   return { status: 'success' };
 }

@@ -322,7 +322,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Publish a resource (coordinator of the resource's emergency only) */
+        /** Publish a resource (verifier or coordinator of the resource's emergency) */
         post: operations["ResourcesController_publishResource"];
         delete?: never;
         options?: never;
@@ -398,6 +398,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/resources/{resourceId}/validity-reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the citizen validity reports of a resource (coordinator) */
+        get: operations["ResourcesController_listValidityReports"];
+        put?: never;
+        /** Report a resource as closed / nonexistent / moved / outdated (any authenticated user) */
+        post: operations["ResourcesController_submitValidityReport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/resources/{resourceId}/dispute/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resolve a disputed resource (coordinator): confirm closure, mark invalid or dismiss. Requires a reason; recorded in the audit trail. */
+        post: operations["ResourcesController_resolveDisputeAction"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/emergencies/{emergencyId}/coordination/queue": {
         parameters: {
             query?: never;
@@ -407,6 +442,23 @@ export interface paths {
         };
         /** Get the verification queue for an emergency (paginated + searchable) */
         get: operations["CoordinationController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/coordination/disputed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List resources flagged as disputed by citizens, with a reason breakdown */
+        get: operations["CoordinationController_disputedQueue"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2414,6 +2466,81 @@ export interface components {
              * @example hospital
              */
             recipientType: string | null;
+            /**
+             * @description Whether enough citizens have reported this point as invalid; it stays visible with an "in review" warning until a coordinator resolves it.
+             * @example false
+             */
+            disputed: boolean;
+            /**
+             * @description When the point was flagged as disputed (ISO 8601), or null
+             * @example 2026-06-28T12:00:00.000Z
+             */
+            disputedAt: string | null;
+        };
+        ReportResourceValidityDto: {
+            /**
+             * @description Motivo: cerrado / ya no existe / se ha mudado / datos desactualizados
+             * @example closed
+             * @enum {string}
+             */
+            reason: "closed" | "nonexistent" | "moved" | "outdated";
+            /** @description Detalle opcional aportado por el ciudadano */
+            note?: string;
+            /** @description URLs de fotos de evidencia (subidas vía /files) */
+            photoUrls?: string[];
+        };
+        ReportResourceValidityResponseDto: {
+            /**
+             * Format: uuid
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            id: string;
+            /**
+             * @description Whether this report pushed the resource over the threshold to disputed
+             * @example false
+             */
+            disputed: boolean;
+        };
+        ResolveResourceDisputeDto: {
+            /**
+             * @description confirm_closed = cerrar (reversible) · mark_invalid = marcar inválido (rejected, para "ya no existe") · dismiss = descartar (sigue activo)
+             * @example confirm_closed
+             * @enum {string}
+             */
+            resolution: "confirm_closed" | "mark_invalid" | "dismiss";
+            /**
+             * @description Motivo de la resolución (obligatorio, para trazabilidad)
+             * @example Confirmado por teléfono con el responsable: el punto cerró.
+             */
+            reason: string;
+        };
+        ValidityReportDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            resourceId: string;
+            /** Format: uuid */
+            emergencyId: string;
+            /** Format: uuid */
+            reporterUserId: string;
+            /**
+             * @example closed
+             * @enum {string}
+             */
+            reason: "closed" | "nonexistent" | "moved" | "outdated";
+            note: string | null;
+            photoUrls: string[];
+            /**
+             * @example open
+             * @enum {string}
+             */
+            status: "open" | "accepted" | "dismissed";
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            resolvedByUserId: string | null;
+            /** Format: date-time */
+            resolvedAt: string | null;
         };
         PagedResourcesDto: {
             items: components["schemas"]["ResourceViewDto"][];
@@ -2423,6 +2550,26 @@ export interface components {
             page: number;
             /** @example 50 */
             limit: number;
+        };
+        DisputedResourceDto: {
+            resource: components["schemas"]["ResourceViewDto"];
+            /**
+             * @description Distinct citizens with an open report on this resource
+             * @example 3
+             */
+            distinctReporters: number;
+            /**
+             * @description Open-report counts keyed by reason
+             * @example {
+             *       "closed": 2,
+             *       "moved": 1
+             *     }
+             */
+            byReason: {
+                [key: string]: number;
+            };
+            /** Format: date-time */
+            lastReportedAt: string | null;
         };
         NearbyResourceViewDto: {
             /**
@@ -2494,6 +2641,16 @@ export interface components {
              * @example hospital
              */
             recipientType: string | null;
+            /**
+             * @description Whether enough citizens have reported this point as invalid; it stays visible with an "in review" warning until a coordinator resolves it.
+             * @example false
+             */
+            disputed: boolean;
+            /**
+             * @description When the point was flagged as disputed (ISO 8601), or null
+             * @example 2026-06-28T12:00:00.000Z
+             */
+            disputedAt: string | null;
             /**
              * @description Distance from query point in meters (rounded)
              * @example 1234
@@ -2595,6 +2752,16 @@ export interface components {
              * @example hospital
              */
             recipientType: string | null;
+            /**
+             * @description Whether enough citizens have reported this point as invalid; it stays visible with an "in review" warning until a coordinator resolves it.
+             * @example false
+             */
+            disputed: boolean;
+            /**
+             * @description When the point was flagged as disputed (ISO 8601), or null
+             * @example 2026-06-28T12:00:00.000Z
+             */
+            disputedAt: string | null;
             /**
              * @description Distinct categories of material this place has declared
              * @example [
@@ -5074,6 +5241,158 @@ export interface operations {
             };
         };
     };
+    ResourcesController_listValidityReports: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource UUID */
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Validity reports for the resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidityReportDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ResourcesController_submitValidityReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource UUID */
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportResourceValidityDto"];
+            };
+        };
+        responses: {
+            /** @description Report recorded */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportResourceValidityResponseDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The owner cannot report their own resource */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource is not publicly visible */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ResourcesController_resolveDisputeAction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource UUID */
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveResourceDisputeDto"];
+            };
+        };
+        responses: {
+            /** @description Dispute resolved */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing reason or invalid resolution */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource is not disputed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     CoordinationController_list: {
         parameters: {
             query?: {
@@ -5120,6 +5439,43 @@ export interface operations {
             };
             /** @description Emergency not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CoordinationController_disputedQueue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Disputed resources for the emergency */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DisputedResourceDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Coordinator role required for this emergency */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

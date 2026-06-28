@@ -1,3 +1,5 @@
+> ⚠️ **DEPRECADO** — ficha congelada como referencia histórica. El seguimiento de esta feature vive en **GitHub Issues**: EPIC #59. No edites esta ficha; trabaja en el issue. Convención: ver `AGENTS.md` y [`00-indice.md`](00-indice.md).
+
 # 14 · Destinatarios finales — Dominio: Núcleo de necesidades / Logística de destino
 
 > Caso de uso capturado de un **parte de campo** (La Guaira, 27‑jun; hospitales Domingo Luciani, Clínico Universitario y Militar Carlos Arvelo) y consolidado tras revisión de producto. Entregable abordable por fases. Tracking en el EPIC #59 y sub-issues #60, #62, #67, #64 (núcleo genérico) + #61, #63 (vertical sanitario).

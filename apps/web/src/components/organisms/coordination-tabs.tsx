@@ -36,6 +36,11 @@ export function CoordinationTabs({ slug, access }: CoordinationTabsProps) {
   ];
   if (access.canVerifyResources) {
     tabs.push({ href: `${base}/recursos`, label: tc.tab_resources, exact: false });
+    tabs.push({
+      href: `${base}/puntos-en-duda`,
+      label: tc.tab_disputes,
+      exact: false,
+    });
   }
   if (access.canValidateNeeds) {
     tabs.push({ href: `${base}/peticiones`, label: tc.tab_needs, exact: false });

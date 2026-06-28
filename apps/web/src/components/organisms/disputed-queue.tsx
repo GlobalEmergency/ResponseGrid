@@ -1,0 +1,212 @@
+'use client';
+
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState, useTransition } from 'react';
+import type { components } from '@reliefhub/api-client';
+import { Button } from '@/components/atoms/button';
+import { ErrorMessage } from '@/components/atoms/error-message';
+import { EmptyState } from '@/components/molecules/empty-state';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
+import type { Messages } from '@/i18n/messages/es';
+import {
+  resolveDispute,
+  type DisputeResolution,
+} from '@/app/e/[slug]/coordinacion/actions';
+
+type DisputedResource = components['schemas']['DisputedResourceDto'];
+
+const INPUT_CLASS =
+  'w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink focus:border-navy focus:outline-none';
+
+/**
+ * Coordination queue of resources flagged "disputed" by citizens. Each card
+ * shows the reason breakdown and lets a coordinator confirm closure, mark the
+ * point invalid or dismiss the reports — each requiring a reason (audit trail).
+ */
+export function DisputedQueue({
+  items,
+  slug,
+}: {
+  items: DisputedResource[];
+  slug: string;
+}) {
+  const tc = getMessages(useLocale()).coord;
+
+  if (items.length === 0) {
+    return (
+      <EmptyState
+        title={tc.disputes_empty_title}
+        description={tc.disputes_empty_description}
+      />
+    );
+  }
+
+  return (
+    <ul
+      className="flex flex-col gap-3"
+      role="list"
+      aria-label={tc.disputes_list_label}
+    >
+      {items.map((item) => (
+        <li key={item.resource.id}>
+          <DisputedCard item={item} slug={slug} tc={tc} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function DisputedCard({
+  item,
+  slug,
+  tc,
+}: {
+  item: DisputedResource;
+  slug: string;
+  tc: Messages['coord'];
+}) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [active, setActive] = useState<DisputeResolution | null>(null);
+  const [reason, setReason] = useState('');
+
+  const r = item.resource;
+  const reasonLabels: Record<string, string> = {
+    closed: tc.disputes_reason_closed,
+    nonexistent: tc.disputes_reason_nonexistent,
+    moved: tc.disputes_reason_moved,
+    outdated: tc.disputes_reason_outdated,
+  };
+  const location = [r.city, r.country].filter((p) => p != null).join(', ');
+  const reasonValid = reason.trim().length >= 3;
+
+  function open(resolution: DisputeResolution): void {
+    setActive(resolution);
+    setError(null);
+  }
+
+  function submit(resolution: DisputeResolution): void {
+    if (!reasonValid) {
+      setError(tc.reason_required);
+      return;
+    }
+    setError(null);
+    startTransition(async () => {
+      const res = await resolveDispute(r.id, slug, resolution, reason);
+      if (res.status === 'success') {
+        setActive(null);
+        setReason('');
+        router.refresh();
+      } else if (res.status === 'error') {
+        setError(res.message ?? tc.error_unknown);
+      }
+    });
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border border-line bg-surface p-4">
+      <div className="flex flex-col gap-0.5">
+        <Link
+          href={`/e/${slug}/recursos/${r.id}`}
+          className="text-[15px] font-bold text-ink hover:underline"
+        >
+          {r.name}
+        </Link>
+        {location !== '' && <p className="text-xs text-muted">{location}</p>}
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {Object.entries(item.byReason).map(([reasonKey, count]) => (
+          <span
+            key={reasonKey}
+            className="inline-flex items-center rounded-full border border-warning bg-warning-soft px-2.5 py-0.5 text-xs font-semibold text-warning"
+          >
+            {(reasonLabels[reasonKey] ?? reasonKey) + ' · ' + count}
+          </span>
+        ))}
+      </div>
+
+      <p className="text-xs text-muted">
+        {tc.disputes_reporters_label.replace(
+          '{n}',
+          String(item.distinctReporters),
+        )}
+        {item.lastReportedAt != null &&
+          ' · ' +
+            tc.disputes_last_reported_label.replace(
+              '{date}',
+              new Date(item.lastReportedAt).toLocaleDateString(),
+            )}
+      </p>
+
+      {error !== null && <ErrorMessage message={error} />}
+
+      {active === null ? (
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="danger-outline"
+            onClick={() => open('confirm_closed')}
+          >
+            {tc.disputes_action_confirm_closed}
+          </Button>
+          <Button
+            type="button"
+            variant="danger-outline"
+            onClick={() => open('mark_invalid')}
+          >
+            {tc.disputes_action_mark_invalid}
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => open('dismiss')}
+          >
+            {tc.disputes_action_dismiss}
+          </Button>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium text-ink">
+              {tc.reason_label} <span className="text-danger">*</span>
+            </span>
+            <textarea
+              className={INPUT_CLASS}
+              rows={2}
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder={tc.reason_placeholder}
+              aria-label={tc.reason_label}
+            />
+          </label>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={pending}
+              onClick={() => {
+                setActive(null);
+                setReason('');
+                setError(null);
+              }}
+            >
+              {tc.drawer_close}
+            </Button>
+            <Button
+              type="button"
+              fullWidth
+              disabled={pending || !reasonValid}
+              onClick={() => submit(active)}
+            >
+              {pending ? tc.disputes_resolving : tc.disputes_resolve_confirm}
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

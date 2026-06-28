@@ -38,7 +38,34 @@ export const resourcesTable = pgTable('resources', {
   // destinatario final (0023_resource_recipient_role)
   isFinalRecipient: boolean('is_final_recipient').notNull().default(false),
   recipientType: text('recipient_type'),
+  // validez reportada por ciudadanos (0031_resource_validity_reports):
+  // `disputed` = varios ciudadanos lo han reportado como cerrado/inexistente/…
+  disputed: boolean('disputed').notNull().default(false),
+  disputedAt: timestamp('disputed_at', { withTimezone: true }),
 });
+
+// Reportes ciudadanos de validez de un punto (0031_resource_validity_reports):
+// un usuario autenticado avisa de que un punto está cerrado/no existe/mudado/
+// desactualizado. Un reporte `open` por (recurso, usuario) — índice único
+// parcial; al llegar a N reportantes distintos el recurso pasa a `disputed`.
+export const resourceValidityReportsTable = pgTable(
+  'resource_validity_reports',
+  {
+    id: uuid('id').primaryKey(),
+    resourceId: uuid('resource_id')
+      .notNull()
+      .references(() => resourcesTable.id, { onDelete: 'cascade' }),
+    emergencyId: uuid('emergency_id').notNull(),
+    reporterUserId: uuid('reporter_user_id').notNull(),
+    reason: text('reason').notNull(),
+    note: text('note'),
+    photoUrls: text('photo_urls').array().notNull(),
+    status: text('status').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+    resolvedByUserId: uuid('resolved_by_user_id'),
+    resolvedAt: timestamp('resolved_at', { withTimezone: true }),
+  },
+);
 
 // Inventario declarado de un recurso/lugar (0028_resource_inventory):
 // líneas de insumo (SupplyLine) — qué material/productos tiene para entregar,
