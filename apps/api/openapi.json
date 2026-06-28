@@ -1000,18 +1000,66 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (1-based)",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page (max 100)",
+            "schema": {
+              "default": 50,
+              "example": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "Filter the queue by resource type",
+            "schema": {
+              "example": "collection_point",
+              "type": "string",
+              "enum": [
+                "collection_point",
+                "delivery_point",
+                "collection_and_delivery",
+                "warehouse",
+                "transport",
+                "supplier",
+                "venue"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Full-text search string matched against name, address, and city (case-insensitive, max 100 chars)",
+            "schema": {
+              "example": "cruz roja",
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "List of resources in queue",
+            "description": "Paged list of resources pending verification",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ResourceViewDto"
-                  }
+                  "$ref": "#/components/schemas/PagedResourcesDto"
                 }
               }
             }
@@ -1031,7 +1079,7 @@
             "bearer": []
           }
         ],
-        "summary": "Get the coordination queue for an emergency (coordinator only)",
+        "summary": "Get the verification queue for an emergency (paginated + searchable)",
         "tags": [
           "resources"
         ]
@@ -1946,6 +1994,24 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size for pagination (1-100). Omit to return all.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of items to skip (pagination). Defaults to 0.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2037,6 +2103,89 @@
           }
         },
         "summary": "List validated needs near a GPS point, ordered by distance (public, #57)",
+        "tags": [
+          "needs"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/public/needs/in-bounds": {
+      "get": {
+        "operationId": "NeedsController_needsInBounds",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "minLat",
+            "required": true,
+            "in": "query",
+            "description": "South latitude bound (-90 to 90)",
+            "schema": {
+              "example": 10.3,
+              "type": "number"
+            }
+          },
+          {
+            "name": "minLng",
+            "required": true,
+            "in": "query",
+            "description": "West longitude bound (-180 to 180)",
+            "schema": {
+              "example": -67.2,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxLat",
+            "required": true,
+            "in": "query",
+            "description": "North latitude bound (-90 to 90)",
+            "schema": {
+              "example": 10.7,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxLng",
+            "required": true,
+            "in": "query",
+            "description": "East longitude bound (-180 to 180)",
+            "schema": {
+              "example": -66.6,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max results (default 500, max 1000)",
+            "schema": {
+              "example": 500,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validated needs within the bounding box",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InBoundsNeedsDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List validated needs within a geographic bounding box (public)",
         "tags": [
           "needs"
         ]
@@ -6681,6 +6830,20 @@
           "items"
         ]
       },
+      "InBoundsNeedsDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NeedViewDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
       "AssignNeedManagerDto": {
         "type": "object",
         "properties": {
@@ -6862,6 +7025,7 @@
               "company",
               "public_admin",
               "association",
+              "transport_operator",
               "other"
             ],
             "example": "ngo"
@@ -6908,6 +7072,7 @@
               "company",
               "public_admin",
               "association",
+              "transport_operator",
               "other"
             ]
           },

@@ -54,6 +54,49 @@ export class InMemoryResourceRepository implements ResourceRepository {
     return Promise.resolve(result);
   }
 
+  findPendingByEmergencyPaged(
+    emergencyId: EmergencyId,
+    q: {
+      page: number;
+      limit: number;
+      type?: string;
+      q?: string;
+    },
+  ): Promise<{ items: Resource[]; total: number }> {
+    let all = [...this.store.values()].filter(
+      (s) =>
+        s.emergencyId === emergencyId.value &&
+        s.verificationLevel === VerificationLevel.Unverified,
+    );
+    if (q.type) {
+      all = all.filter((s) => s.type === q.type);
+    }
+    if (q.q) {
+      const term = q.q.toLowerCase();
+      all = all.filter(
+        (s) =>
+          s.name.toLowerCase().includes(term) ||
+          s.location.address.toLowerCase().includes(term) ||
+          (s.city != null && s.city.toLowerCase().includes(term)),
+      );
+    }
+    // Deterministic order mirrors the Drizzle repo: no-contact points sink,
+    // then by name, then id.
+    all.sort((a, b) => {
+      const aNoContact = a.contact == null ? 1 : 0;
+      const bNoContact = b.contact == null ? 1 : 0;
+      if (aNoContact !== bNoContact) return aNoContact - bNoContact;
+      if (a.name !== b.name) return a.name < b.name ? -1 : 1;
+      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+    });
+    const total = all.length;
+    const offset = (q.page - 1) * q.limit;
+    const items = all
+      .slice(offset, offset + q.limit)
+      .map((s) => Resource.fromSnapshot(s));
+    return Promise.resolve({ items, total });
+  }
+
   findActiveByEmergency(emergencyId: EmergencyId): Promise<Resource[]> {
     const result = [...this.store.values()]
       .filter(

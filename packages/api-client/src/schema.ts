@@ -371,7 +371,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get the coordination queue for an emergency (coordinator only) */
+        /** Get the verification queue for an emergency (paginated + searchable) */
         get: operations["CoordinationController_list"];
         put?: never;
         post?: never;
@@ -1961,9 +1961,6 @@ export interface components {
         InBoundsResourcesDto: {
             items: components["schemas"]["ResourceViewDto"][];
         };
-        InBoundsNeedsDto: {
-            items: components["schemas"]["NeedViewDto"][];
-        };
         ResourceFacetsDto: {
             /**
              * @example {
@@ -2387,6 +2384,9 @@ export interface components {
         };
         NearbyNeedsResponseDto: {
             items: components["schemas"]["NearbyNeedViewDto"][];
+        };
+        InBoundsNeedsDto: {
+            items: components["schemas"]["NeedViewDto"][];
         };
         AssignNeedManagerDto: {
             /**
@@ -3830,7 +3830,16 @@ export interface operations {
     };
     CoordinationController_list: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Page number (1-based) */
+                page?: number;
+                /** @description Items per page (max 100) */
+                limit?: number;
+                /** @description Filter the queue by resource type */
+                type?: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
+                /** @description Full-text search string matched against name, address, and city (case-insensitive, max 100 chars) */
+                q?: string;
+            };
             header?: never;
             path: {
                 /** @description Emergency UUID */
@@ -3840,13 +3849,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description List of resources in queue */
+            /** @description Paged list of resources pending verification */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ResourceViewDto"][];
+                    "application/json": components["schemas"]["PagedResourcesDto"];
                 };
             };
             /** @description Missing or invalid token */
@@ -3968,40 +3977,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["InBoundsResourcesDto"];
-                };
-            };
-        };
-    };
-    NeedsController_needsInBounds: {
-        parameters: {
-            query: {
-                /** @description South latitude bound (-90 to 90) */
-                minLat: number;
-                /** @description West longitude bound (-180 to 180) */
-                minLng: number;
-                /** @description North latitude bound (-90 to 90) */
-                maxLat: number;
-                /** @description East longitude bound (-180 to 180) */
-                maxLng: number;
-                /** @description Max results (default 500, max 1000) */
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                /** @description Emergency UUID */
-                emergencyId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Validated needs within the bounding box */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InBoundsNeedsDto"];
                 };
             };
         };
@@ -4643,6 +4618,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NearbyNeedsResponseDto"];
+                };
+            };
+        };
+    };
+    NeedsController_needsInBounds: {
+        parameters: {
+            query: {
+                /** @description South latitude bound (-90 to 90) */
+                minLat: number;
+                /** @description West longitude bound (-180 to 180) */
+                minLng: number;
+                /** @description North latitude bound (-90 to 90) */
+                maxLat: number;
+                /** @description East longitude bound (-180 to 180) */
+                maxLng: number;
+                /** @description Max results (default 500, max 1000) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Validated needs within the bounding box */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InBoundsNeedsDto"];
                 };
             };
         };

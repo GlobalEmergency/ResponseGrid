@@ -255,6 +255,53 @@ export class InBoundsQueryDto {
   limit?: number;
 }
 
+export class CoordinationQueueQueryDto {
+  @ApiPropertyOptional({
+    description: 'Page number (1-based)',
+    example: 1,
+    default: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number;
+
+  @ApiPropertyOptional({
+    description: 'Items per page (max 100)',
+    example: 50,
+    default: 50,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
+  @ApiPropertyOptional({
+    enum: ResourceType,
+    description: 'Filter the queue by resource type',
+    example: ResourceType.CollectionPoint,
+  })
+  @IsOptional()
+  @IsEnum(ResourceType)
+  type?: ResourceType;
+
+  @ApiPropertyOptional({
+    description:
+      'Full-text search string matched against name, address, and city (case-insensitive, max 100 chars)',
+    example: 'cruz roja',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  q?: string;
+}
+
 export class PublicResourcesQueryDto {
   @ApiPropertyOptional({
     description: 'Page number (1-based)',

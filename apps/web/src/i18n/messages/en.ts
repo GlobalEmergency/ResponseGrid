@@ -1542,6 +1542,63 @@ export const en = {
       'Your role does not include validation, verification or matching permissions here.',
     queue_view_detail: 'View detail',
 
+    // ── Sub-navigation / hub / search (#117) ──────────────────────────
+    tab_overview: 'Overview',
+    tab_resources: 'Resources',
+    tab_needs: 'Requests',
+    tab_offers: 'Offers',
+    tab_volunteers: 'Volunteers',
+    tab_reports: 'Reports',
+    tabs_aria: 'Coordination sections',
+
+    hub_sections_label: 'Coordination sections',
+    hub_count_aria: 'pending',
+    hub_resources_label: 'Resources to verify',
+    hub_resources_description: 'Review and publish pending points.',
+    hub_needs_label: 'Requests to validate',
+    hub_needs_description: 'Validate incoming citizen requests.',
+    hub_offers_label: 'Material offers',
+    hub_offers_description: 'Match donor offers with validated needs.',
+    hub_volunteers_label: 'Volunteers & tasks',
+    hub_volunteers_description: 'Coordinate the roster and assign tasks.',
+    hub_reports_label: 'Field reports',
+    hub_reports_description: 'Review reports sent from the field.',
+
+    search_placeholder: 'Search…',
+    search_aria: 'Search',
+    search_clear: 'Clear search',
+
+    pagination_prev: 'Previous',
+    pagination_next: 'Next',
+    pagination_summary: 'Page {page} of {pages} · {total} results',
+
+    resource_type_filter_label: 'Type',
+    resource_type_filter_aria: 'Filter by resource type',
+    resource_type_filter_all: 'All types',
+
+    offers_filter_group_label: 'Offer filters',
+    offers_filter_category_label: 'Category',
+    offers_filter_category_aria: 'Filter by category',
+    offers_filter_category_all: 'All categories',
+    offers_filter_status_label: 'Status',
+    offers_filter_status_aria: 'Filter by status',
+    offers_filter_status_all: 'All statuses',
+
+    resources_section_meta_title: 'Resources — {name} coordination · ResponseGrid',
+    resources_section_meta_description: 'Resource verification queue for {name}.',
+    resources_no_match_title: 'No resources for this search.',
+    resources_no_match_description: 'Try different terms or change the type filter.',
+
+    needs_section_meta_title: 'Requests — {name} coordination · ResponseGrid',
+    needs_section_meta_description: 'Request validation queue for {name}.',
+    needs_no_match_title: 'No requests for this search.',
+    needs_no_match_description: 'Try different terms or adjust the filters.',
+
+    offers_section_meta_title: 'Offers — {name} coordination · ResponseGrid',
+    offers_section_meta_description: 'Material offers queue for {name}.',
+    offers_no_match_title: 'No offers for these filters.',
+    offers_no_match_description: 'Adjust the category or status to see more offers.',
+
     controls_heading: 'Emergency controls',
     controls_intake_heading: 'Intake status',
     controls_intake_paused: 'Intake paused.',
