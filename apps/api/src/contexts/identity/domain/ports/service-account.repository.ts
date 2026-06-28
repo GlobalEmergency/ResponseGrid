@@ -6,4 +6,5 @@ export interface ServiceAccountRepository {
   save(serviceAccount: ServiceAccount): Promise<void>;
   findById(id: string): Promise<ServiceAccount | null>;
   listByOrganization(organizationId: string): Promise<ServiceAccount[]>;
+  listAll(): Promise<ServiceAccount[]>;
 }

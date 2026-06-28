@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   Req,
   UseFilters,
   UseGuards,
@@ -33,16 +34,63 @@ import { ApproveMember } from '../../application/approve-member';
 import { AddMemberByEmail } from '../../application/add-member-by-email';
 import { AssignGroupManager } from '../../application/assign-group-manager';
 import { ListGroupMembers } from '../../application/list-group-members';
+import { ListGroupsByOwner } from '../../application/list-groups-by-owner';
+import { ListMyGroups } from '../../application/list-my-groups';
+import { GroupSnapshot } from '../../domain/group';
 import {
   CreateGroupDto,
   AddMemberByEmailDto,
   AssignManagerDto,
+  ListGroupsQueryDto,
 } from './groups-dto';
 import { GroupExceptionFilter } from './group-exception.filter';
 
 class IdResponseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
+}
+
+class GroupResponseDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty()
+  name!: string;
+
+  @ApiProperty({ enum: ['public', 'private'] })
+  visibility!: string;
+
+  @ApiProperty({ enum: ['organization', 'emergency'] })
+  ownerKind!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  ownerId!: string;
+
+  @ApiProperty({ format: 'uuid', nullable: true })
+  parentGroupId!: string | null;
+
+  @ApiProperty()
+  createdAt!: string;
+}
+
+class MyGroupResponseDto extends GroupResponseDto {
+  @ApiProperty({ enum: ['pending', 'approved'] })
+  membershipStatus!: string;
+}
+
+function toGroupResponse(g: GroupSnapshot): GroupResponseDto {
+  return {
+    id: g.id,
+    name: g.name,
+    visibility: g.visibility,
+    ownerKind: g.ownerScope.kind,
+    ownerId:
+      g.ownerScope.kind === 'organization'
+        ? g.ownerScope.organizationId
+        : g.ownerScope.emergencyId,
+    parentGroupId: g.parentGroupId,
+    createdAt: g.createdAt,
+  };
 }
 
 class GroupMemberResponseDto {
@@ -84,7 +132,42 @@ export class GroupsController {
     private readonly addMemberByEmail: AddMemberByEmail,
     private readonly assignGroupManager: AssignGroupManager,
     private readonly listGroupMembers: ListGroupMembers,
+    private readonly listGroupsByOwner: ListGroupsByOwner,
+    private readonly listMyGroups: ListMyGroups,
   ) {}
+
+  @Get('mine')
+  @ApiOperation({ summary: 'List the groups I belong to (any status)' })
+  @ApiOkResponse({ type: [MyGroupResponseDto] })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  async mine(
+    @Req() req: Request & { user?: AuthenticatedUser },
+  ): Promise<MyGroupResponseDto[]> {
+    const mine = await this.listMyGroups.execute(req.user!.id);
+    return mine.map((x) => ({
+      ...toGroupResponse(x.group),
+      membershipStatus: x.status,
+    }));
+  }
+
+  @Get()
+  @ApiOperation({
+    summary:
+      'List groups under an org/emergency (all if you can read; else public)',
+  })
+  @ApiOkResponse({ type: [GroupResponseDto] })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  async list(
+    @Query() query: ListGroupsQueryDto,
+    @Req() req: Request & { user?: AuthenticatedUser },
+  ): Promise<GroupResponseDto[]> {
+    const user = req.user!;
+    const groups = await this.listGroupsByOwner.execute({
+      actor: { principalId: user.id, grants: user.grants },
+      owner: ownerScopeOf(query.ownerKind, query.ownerId),
+    });
+    return groups.map(toGroupResponse);
+  }
 
   @Post()
   @HttpCode(201)

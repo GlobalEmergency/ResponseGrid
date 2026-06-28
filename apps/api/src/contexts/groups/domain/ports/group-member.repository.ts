@@ -6,4 +6,5 @@ export interface GroupMemberRepository {
   save(member: GroupMember): Promise<void>;
   find(groupId: string, userId: string): Promise<GroupMember | null>;
   listByGroup(groupId: string): Promise<GroupMember[]>;
+  listByUser(userId: string): Promise<GroupMember[]>;
 }

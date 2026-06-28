@@ -56,4 +56,12 @@ export class DrizzleGroupMemberRepository implements GroupMemberRepository {
       .where(eq(groupMembersTable.groupId, groupId));
     return rows.map(rowToMember);
   }
+
+  async listByUser(userId: string): Promise<GroupMember[]> {
+    const rows = await this.db
+      .select()
+      .from(groupMembersTable)
+      .where(eq(groupMembersTable.userId, userId));
+    return rows.map(rowToMember);
+  }
 }

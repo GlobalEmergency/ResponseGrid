@@ -52,3 +52,16 @@ export class AssignManagerDto {
   @IsUUID()
   userId!: string;
 }
+
+export class ListGroupsQueryDto {
+  @ApiProperty({ enum: ['organization', 'emergency'] })
+  @IsIn(['organization', 'emergency'])
+  ownerKind!: 'organization' | 'emergency';
+
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Id of the owning org/emergency',
+  })
+  @IsUUID()
+  ownerId!: string;
+}

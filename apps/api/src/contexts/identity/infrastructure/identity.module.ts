@@ -8,6 +8,7 @@ import { OAuthController } from './http/oauth.controller';
 import { GrantsController } from './http/grants.controller';
 import { ApiKeysController } from './http/api-keys.controller';
 import { ServiceAccountIntrospectionController } from './http/service-account-introspection.controller';
+import { RolesController } from './http/roles.controller';
 import { Login } from '../application/login';
 import { RegisterUser } from '../application/register-user';
 import { AuthenticateWithProvider } from '../application/authenticate-with-provider';
@@ -284,6 +285,7 @@ const authenticateWithProviderProvider = {
     GrantsController,
     ApiKeysController,
     ServiceAccountIntrospectionController,
+    RolesController,
   ],
   providers: [
     userRepositoryProvider,

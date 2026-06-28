@@ -28,4 +28,12 @@ export class InMemoryGroupMemberRepository implements GroupMemberRepository {
         .map((s) => GroupMember.fromSnapshot(s)),
     );
   }
+
+  listByUser(userId: string): Promise<GroupMember[]> {
+    return Promise.resolve(
+      [...this.store.values()]
+        .filter((s) => s.userId === userId)
+        .map((s) => GroupMember.fromSnapshot(s)),
+    );
+  }
 }
