@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   HttpCode,
   Inject,
+  NotFoundException,
   Param,
   ParseUUIDPipe,
   Post,
@@ -107,10 +109,57 @@ export class ShipmentController {
     return { isCoordinator };
   }
 
+  /**
+   * Coordinator-or-admin gate for shipment writes whose route carries no
+   * scope-resolvable param (the global PermissionGuard would otherwise fall
+   * back to the platform scope and 403 a legitimate emergency coordinator).
+   * Mirrors how markInTransit/deliver resolve coordinator-ship from the
+   * shipment itself. 404s an unknown shipment before the 403, like the use
+   * cases do.
+   */
+  private async assertShipmentCoordinator(
+    shipmentId: string,
+    req: AuthenticatedRequest,
+  ): Promise<void> {
+    if (req.user.isAdmin) return;
+    const facts =
+      await this.shipmentAuthLookup.findAuthorizationFacts(shipmentId);
+    if (facts === null) {
+      throw new NotFoundException(`shipment ${shipmentId} not found`);
+    }
+    const isCoordinator = await this.membershipRepo.hasRole(
+      UserId.fromString(req.user.id),
+      facts.emergencyId,
+      Role.Coordinator,
+    );
+    if (!isCoordinator) {
+      throw new ForbiddenException(
+        'Only a coordinator of the shipment emergency can perform this action',
+      );
+    }
+  }
+
+  /** Coordinator-or-admin gate for creating a shipment in an emergency. */
+  private async assertEmergencyCoordinator(
+    emergencyId: string,
+    req: AuthenticatedRequest,
+  ): Promise<void> {
+    if (req.user.isAdmin) return;
+    const isCoordinator = await this.membershipRepo.hasRole(
+      UserId.fromString(req.user.id),
+      emergencyId,
+      Role.Coordinator,
+    );
+    if (!isCoordinator) {
+      throw new ForbiddenException(
+        'Only a coordinator of the emergency can create a shipment',
+      );
+    }
+  }
+
   @Post('logistics/shipments')
   @HttpCode(201)
-  @UseGuards(JwtAuthGuard, PermissionGuard)
-  @RequirePermission('shipment:create')
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Create a shipment / expedición (coordinator)',
@@ -121,13 +170,17 @@ export class ShipmentController {
   })
   @ApiBadRequestResponse({ description: 'Invalid request body' })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
-  @ApiForbiddenResponse({ description: 'Missing shipment:create permission' })
+  @ApiForbiddenResponse({
+    description: 'Not a coordinator of the emergency',
+  })
   @ApiConflictResponse({
     description: 'Emergency is not accepting intake (paused/closed)',
   })
   async create(
     @Body() dto: CreateShipmentDto,
+    @Request() req: AuthenticatedRequest,
   ): Promise<CreateShipmentResponseDto> {
+    await this.assertEmergencyCoordinator(dto.emergencyId, req);
     return this.createShipment.execute({
       emergencyId: dto.emergencyId,
       originResourceId: dto.originResourceId,
@@ -144,8 +197,7 @@ export class ShipmentController {
 
   @Post('logistics/shipments/:id/assign-capacity')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, PermissionGuard)
-  @RequirePermission('shipment:assign')
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Assign a transport capacity (and optional carrier) (coordinator)',
@@ -156,11 +208,15 @@ export class ShipmentController {
   @ApiNotFoundResponse({ description: 'Shipment not found' })
   @ApiConflictResponse({ description: 'Shipment is not in planned status' })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
-  @ApiForbiddenResponse({ description: 'Missing shipment:assign permission' })
+  @ApiForbiddenResponse({
+    description: 'Not a coordinator of the shipment emergency',
+  })
   async assignCapacity(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AssignCapacityToShipmentDto,
+    @Request() req: AuthenticatedRequest,
   ): Promise<void> {
+    await this.assertShipmentCoordinator(id, req);
     await this.assignCapacityToShipment.execute({
       shipmentId: id,
       assignedCapacityId: dto.assignedCapacityId,
@@ -226,8 +282,7 @@ export class ShipmentController {
 
   @Post('logistics/shipments/:id/cancel')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, PermissionGuard)
-  @RequirePermission('shipment:update')
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Cancel a shipment (coordinator)' })
   @ApiParam({ name: 'id', description: 'Shipment UUID', format: 'uuid' })
@@ -237,8 +292,14 @@ export class ShipmentController {
     description: 'Shipment cannot be cancelled in its current status',
   })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
-  @ApiForbiddenResponse({ description: 'Missing shipment:update permission' })
-  async cancel(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+  @ApiForbiddenResponse({
+    description: 'Not a coordinator of the shipment emergency',
+  })
+  async cancel(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Request() req: AuthenticatedRequest,
+  ): Promise<void> {
+    await this.assertShipmentCoordinator(id, req);
     await this.cancelShipment.execute({ shipmentId: id });
   }
 
@@ -286,8 +347,7 @@ export class ShipmentController {
   }
 
   @Get('logistics/shipments/:id/capacity-suggestions')
-  @UseGuards(JwtAuthGuard, PermissionGuard)
-  @RequirePermission('shipment:read')
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary:
@@ -300,10 +360,14 @@ export class ShipmentController {
   })
   @ApiNotFoundResponse({ description: 'Shipment not found' })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
-  @ApiForbiddenResponse({ description: 'Missing shipment:read permission' })
+  @ApiForbiddenResponse({
+    description: 'Not a coordinator of the shipment emergency',
+  })
   async capacitySuggestions(
     @Param('id', ParseUUIDPipe) id: string,
+    @Request() req: AuthenticatedRequest,
   ): Promise<CapacityView[]> {
+    await this.assertShipmentCoordinator(id, req);
     return this.suggestCapacitiesForShipment.execute({ shipmentId: id });
   }
 }
