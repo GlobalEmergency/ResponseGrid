@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useTransition } from 'react';
 import { markNotificationReadAction } from '@/app/notificaciones/actions';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 export interface NotificationItemProps {
   id: string;
@@ -28,6 +30,8 @@ export function NotificationItem({
   read,
   link,
 }: NotificationItemProps) {
+  const locale = useLocale();
+  const tn = getMessages(locale).notificaciones;
   const [isPending, startTransition] = useTransition();
 
   const handleMarkRead = () => {
@@ -36,13 +40,16 @@ export function NotificationItem({
     });
   };
 
-  const formattedDate = new Date(createdAt).toLocaleString('es-ES', {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  });
+  const formattedDate = new Date(createdAt).toLocaleString(
+    locale === 'en' ? 'en-GB' : 'es-ES',
+    {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    },
+  );
 
   const innerContent = (
     <div className="flex flex-col gap-1 flex-1 min-w-0">
@@ -68,7 +75,7 @@ export function NotificationItem({
           ? 'border-line bg-white'
           : 'border-navy bg-white'
       }`}
-      aria-label={read ? `Notificación leída: ${message}` : `Notificación no leída: ${message}`}
+      aria-label={read ? `${tn.item_read_aria}: ${message}` : `${tn.item_unread_aria}: ${message}`}
     >
       {/* Unread indicator dot */}
       <span
@@ -97,10 +104,10 @@ export function NotificationItem({
           type="button"
           onClick={handleMarkRead}
           disabled={isPending}
-          aria-label="Marcar como leída"
+          aria-label={tn.mark_read_label}
           className="flex-shrink-0 text-xs font-medium text-muted underline underline-offset-2 hover:text-ink focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {isPending ? 'Marcando…' : 'Marcar leída'}
+          {isPending ? tn.marking : tn.mark_read}
         </button>
       )}
     </li>

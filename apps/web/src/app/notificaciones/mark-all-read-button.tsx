@@ -3,6 +3,8 @@
 import { useTransition } from 'react';
 import { markAllNotificationsReadAction } from './actions';
 import { Button } from '@/components/atoms/button';
+import { useLocale } from '@/i18n/locale-context';
+import { getMessages } from '@/i18n';
 
 interface MarkAllReadButtonProps {
   hasUnread: boolean;
@@ -13,6 +15,7 @@ interface MarkAllReadButtonProps {
  * server action and shows a pending state while the request is in-flight.
  */
 export function MarkAllReadButton({ hasUnread }: MarkAllReadButtonProps) {
+  const tn = getMessages(useLocale()).notificaciones;
   const [isPending, startTransition] = useTransition();
 
   if (!hasUnread) return null;
@@ -29,9 +32,9 @@ export function MarkAllReadButton({ hasUnread }: MarkAllReadButtonProps) {
       size="sm"
       onClick={handleClick}
       disabled={isPending}
-      aria-label="Marcar todas las notificaciones como leídas"
+      aria-label={tn.mark_all_label}
     >
-      {isPending ? 'Marcando…' : 'Marcar todas como leídas'}
+      {isPending ? tn.marking : tn.mark_all}
     </Button>
   );
 }
