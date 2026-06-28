@@ -1851,6 +1851,13 @@ export const en = {
     ship_assign_placeholder: 'Select a capacity…',
     ship_assign_none: 'No capacities available',
     ship_assign_cta: 'Assign capacity',
+    // Capacity suggestions (#107)
+    ship_suggestions_heading: 'Capacity suggestions',
+    ship_suggestions_loading: 'Finding compatible capacities…',
+    ship_suggestions_error: 'Could not load suggestions. Please try again.',
+    ship_suggestions_empty: 'No compatible capacities',
+    ship_suggestions_show_all: 'Show all available',
+    ship_suggestions_assign: 'Assign',
     ship_mark_in_transit: 'Mark in transit',
     ship_confirm_delivery: 'Confirm delivery',
     ship_cancel: 'Cancel shipment',

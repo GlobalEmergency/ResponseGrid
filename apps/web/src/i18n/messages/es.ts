@@ -1882,6 +1882,13 @@ export const es = {
     ship_assign_placeholder: 'Selecciona una capacidad…',
     ship_assign_none: 'No hay capacidades disponibles',
     ship_assign_cta: 'Asignar capacidad',
+    // Sugerencias de capacidad (#107)
+    ship_suggestions_heading: 'Sugerencias de capacidad',
+    ship_suggestions_loading: 'Buscando capacidades compatibles…',
+    ship_suggestions_error: 'No se pudieron cargar las sugerencias. Inténtalo de nuevo.',
+    ship_suggestions_empty: 'No hay capacidades compatibles',
+    ship_suggestions_show_all: 'Ver todas las disponibles',
+    ship_suggestions_assign: 'Asignar',
     ship_mark_in_transit: 'Marcar en tránsito',
     ship_confirm_delivery: 'Confirmar entrega',
     ship_cancel: 'Cancelar expedición',

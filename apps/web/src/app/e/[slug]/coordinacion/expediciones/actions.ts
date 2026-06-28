@@ -13,6 +13,12 @@ export type ActionResult =
   | { status: 'error'; message: string };
 
 type ShipmentItemInput = components['schemas']['ShipmentItemDto'];
+type CapacityView = components['schemas']['CapacityViewDto'];
+
+/** Result of fetching ranked capacity suggestions for a shipment (#107). */
+export type SuggestionsResult =
+  | { status: 'success'; capacities: CapacityView[] }
+  | { status: 'error'; message: string };
 
 /**
  * Creates a shipment / expedición for the given emergency (coordinator).
@@ -129,6 +135,48 @@ export async function assignCapacity(
 
   revalidatePath(`/e/${slug}/coordinacion/expediciones`);
   return { status: 'success' };
+}
+
+/**
+ * Fetches ranked compatible capacities for a planned shipment (coordinator, #107).
+ * The API returns them already ordered best-first — we DON'T re-sort. Runs as a
+ * server action so the auth token (httpOnly cookie) never reaches the client.
+ */
+export async function getCapacitySuggestions(
+  shipmentId: string,
+  slug: string,
+): Promise<SuggestionsResult> {
+  const token = await getToken();
+  if (token === null) {
+    redirect(`/login?next=/e/${slug}/coordinacion/expediciones`);
+  }
+
+  const { t } = await getT();
+  const ts = t.coord;
+
+  const { data, error, response } = await api.GET(
+    '/logistics/shipments/{id}/capacity-suggestions',
+    {
+      params: { path: { id: shipmentId } },
+      headers: authHeaders(token),
+    },
+  );
+
+  if (error !== undefined || data === undefined) {
+    if (response.status === 401) {
+      await clearToken();
+      redirect(`/login?next=/e/${slug}/coordinacion/expediciones`);
+    }
+    if (response.status === 403) {
+      return { status: 'error', message: ts.ship_err_no_permission_assign };
+    }
+    if (response.status === 404) {
+      return { status: 'error', message: ts.ship_err_not_found };
+    }
+    return { status: 'error', message: ts.ship_suggestions_error };
+  }
+
+  return { status: 'success', capacities: data };
 }
 
 /**
