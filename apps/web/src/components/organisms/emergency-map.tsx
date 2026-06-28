@@ -246,12 +246,22 @@ function MapReadyEmitter({
   return null;
 }
 
-// ── Inner component that fits the bounds once the map is ready ────────────────
+// ── Inner component that fits the bounds ONCE, on the first non-empty data ─────
 function BoundsFitter({ points }: { points: MapPoint[] }) {
   const map = useMap();
+  const hasFittedRef = useRef(false);
 
   useEffect(() => {
+    // Fit the view to the data only ONCE (the initial SSR points). The wrapper
+    // re-fetches in-bounds points on every moveend/zoomend and replaces the
+    // marker set, so `points` changes whenever the user pans or zooms. Without
+    // this guard fitBounds re-ran on each fetch, yanking the user's zoom/pan and
+    // looping fit → moveend → fetch → fit (the user could never zoom in).
+    // Markers still update live; only the view is left under the user's control
+    // after the first fit.
+    if (hasFittedRef.current) return;
     if (points.length === 0) return;
+    hasFittedRef.current = true;
 
     if (points.length === 1) {
       const p = points[0];
