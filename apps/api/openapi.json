@@ -4683,6 +4683,18 @@
         "responses": {
           "204": {
             "description": "Report edited"
+          },
+          "400": {
+            "description": "Missing reason or report is closed"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Report not found"
           }
         },
         "security": [
@@ -4722,6 +4734,18 @@
         "responses": {
           "204": {
             "description": "Report discarded (closed)"
+          },
+          "400": {
+            "description": "Missing reason or report already closed"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Coordinator role required"
+          },
+          "404": {
+            "description": "Report not found"
           }
         },
         "security": [

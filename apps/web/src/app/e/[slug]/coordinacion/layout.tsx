@@ -114,6 +114,7 @@ export default async function CoordinacionLayout({
               canValidateNeeds: access.canValidateNeeds,
               canMatchOffers: access.canMatchOffers,
               canCoordinate: access.canCoordinate,
+              canViewAudit: access.canViewAudit,
             }}
           />
 

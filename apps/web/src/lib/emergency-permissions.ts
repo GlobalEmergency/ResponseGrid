@@ -25,6 +25,12 @@ export interface EmergencyAccess {
   canCoordinate: boolean;
   /** True when the principal can act on at least one coordination queue. */
   canActOnAnyQueue: boolean;
+  /**
+   * True when the principal may read this emergency's activity trail.
+   * Coordinators (and platform admins/operators) hold `audit:read`; verifiers
+   * do not — the log is coordinator-only.
+   */
+  canViewAudit: boolean;
 }
 
 /** Permissions that mean "this person runs coordinator-only surfaces". */
@@ -65,6 +71,7 @@ export function resolveEmergencyAccess(
   const canVerifyResources = permissions.has('resource:verify');
   const canMatchOffers = permissions.has('offer:match');
   const canCoordinate = COORDINATOR_PERMISSIONS.some((p) => permissions.has(p));
+  const canViewAudit = permissions.has('audit:read');
 
   return {
     roleIds,
@@ -74,5 +81,6 @@ export function resolveEmergencyAccess(
     canMatchOffers,
     canCoordinate,
     canActOnAnyQueue: canValidateNeeds || canVerifyResources || canMatchOffers,
+    canViewAudit,
   };
 }

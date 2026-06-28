@@ -123,6 +123,13 @@ export class ReportsController {
   })
   @ApiParam({ name: 'reportId', type: String })
   @ApiResponse({ status: 204, description: 'Report edited' })
+  @ApiResponse({
+    status: 400,
+    description: 'Missing reason or report is closed',
+  })
+  @ApiResponse({ status: 401, description: 'Missing or invalid token' })
+  @ApiResponse({ status: 403, description: 'Coordinator role required' })
+  @ApiResponse({ status: 404, description: 'Report not found' })
   async edit(
     @Param('reportId', ParseUUIDPipe) reportId: string,
     @Body() dto: EditReportDto,
@@ -153,6 +160,13 @@ export class ReportsController {
   })
   @ApiParam({ name: 'reportId', type: String })
   @ApiResponse({ status: 204, description: 'Report discarded (closed)' })
+  @ApiResponse({
+    status: 400,
+    description: 'Missing reason or report already closed',
+  })
+  @ApiResponse({ status: 401, description: 'Missing or invalid token' })
+  @ApiResponse({ status: 403, description: 'Coordinator role required' })
+  @ApiResponse({ status: 404, description: 'Report not found' })
   async discard(
     @Param('reportId', ParseUUIDPipe) reportId: string,
     @Body() dto: DiscardReportDto,

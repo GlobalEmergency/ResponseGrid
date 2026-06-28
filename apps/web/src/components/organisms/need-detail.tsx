@@ -1,7 +1,11 @@
 'use client';
 
 import { useActionState, useEffect } from 'react';
-import { validateNeed } from '@/app/e/[slug]/coordinacion/actions';
+import {
+  validateNeed,
+  editNeed,
+  discardNeed,
+} from '@/app/e/[slug]/coordinacion/actions';
 import type { components } from '@reliefhub/api-client';
 import type { ActionResult } from '@/app/e/[slug]/coordinacion/actions';
 import { Badge } from '@/components/atoms/badge';
@@ -9,6 +13,10 @@ import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { FreshnessIndicator } from '@/components/atoms/freshness-indicator';
 import { DetailDrawer } from '@/components/organisms/detail-drawer';
+import {
+  ValidationActions,
+  type EditField,
+} from '@/components/organisms/validation-actions';
 import { DetailField, DetailSection } from '@/components/molecules/detail-field';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
@@ -103,6 +111,25 @@ export function NeedDetail({
       ? (SKILL_LABELS[need.requiredSkill] ?? need.requiredSkill)
       : null;
 
+  const editFields: EditField[] = [
+    { key: 'title', label: tc.edit_field_title, kind: 'text', defaultValue: need.title },
+    {
+      key: 'description',
+      label: tc.detail_field_description,
+      kind: 'textarea',
+      defaultValue: need.description ?? '',
+    },
+    {
+      key: 'priority',
+      label: tc.detail_field_priority,
+      kind: 'select',
+      defaultValue: need.priority,
+      options: (
+        ['urgent', 'high', 'medium', 'low'] as NeedView['priority'][]
+      ).map((p) => ({ value: p, label: PRIORITY_LABELS[p] })),
+    },
+  ];
+
   const footer = canValidate ? (
     <div className="flex flex-col gap-3">
       {state.status === 'error' && (
@@ -113,6 +140,20 @@ export function NeedDetail({
           {pending ? tc.processing : tc.need_validate}
         </Button>
       </form>
+      <ValidationActions
+        canAct={canValidate}
+        editFields={editFields}
+        onEdit={(reason, values) =>
+          editNeed(need.id, slug, {
+            reason,
+            title: values.title,
+            description: values.description,
+            priority: values.priority as NeedView['priority'],
+          })
+        }
+        onDiscard={(reason) => discardNeed(need.id, slug, reason)}
+        onActionSuccess={onActionSuccess}
+      />
     </div>
   ) : undefined;
 

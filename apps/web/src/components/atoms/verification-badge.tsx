@@ -2,7 +2,11 @@ import { Badge } from '@/components/atoms/badge';
 import type { Messages } from '@/i18n/messages/es';
 import { es } from '@/i18n/messages/es';
 
-export type VerificationLevel = 'unverified' | 'verified' | 'official';
+export type VerificationLevel =
+  | 'unverified'
+  | 'verified'
+  | 'official'
+  | 'rejected';
 
 interface VerificationBadgeProps {
   level: VerificationLevel;
@@ -12,17 +16,26 @@ interface VerificationBadgeProps {
 
 const VARIANT_MAP: Record<
   VerificationLevel,
-  { variant: 'verification-official' | 'verification-verified' | 'unverified'; icon: string }
+  {
+    variant:
+      | 'verification-official'
+      | 'verification-verified'
+      | 'unverified'
+      | 'offer-cancelled';
+    icon: string;
+  }
 > = {
   official: { variant: 'verification-official', icon: '🏛️' },
   verified: { variant: 'verification-verified', icon: '🟢' },
   unverified: { variant: 'unverified', icon: '🔵' },
+  rejected: { variant: 'offer-cancelled', icon: '⛔' },
 };
 
 const LABEL_KEY: Record<VerificationLevel, keyof Messages['verification_badge']> = {
   official: 'official',
   verified: 'verified',
   unverified: 'unverified',
+  rejected: 'rejected',
 };
 
 /**

@@ -5,6 +5,8 @@ import {
   matchOffer,
   fulfillOffer,
   cancelOffer,
+  editOffer,
+  discardOffer,
 } from '@/app/e/[slug]/coordinacion/actions';
 import type { components } from '@reliefhub/api-client';
 import type { ActionResult } from '@/app/e/[slug]/coordinacion/actions';
@@ -13,6 +15,10 @@ import { Button } from '@/components/atoms/button';
 import { Select } from '@/components/atoms/select';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { DetailDrawer } from '@/components/organisms/detail-drawer';
+import {
+  ValidationActions,
+  type EditField,
+} from '@/components/organisms/validation-actions';
 import { DetailField, DetailSection } from '@/components/molecules/detail-field';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
@@ -125,6 +131,33 @@ export function OfferDetail({
   const coords = `${offer.location.latitude}, ${offer.location.longitude}`;
   const quantity = `${offer.quantity}${unit !== null ? ` ${unit}` : ''}`;
 
+  const editFields: EditField[] = [
+    {
+      key: 'description',
+      label: tc.detail_field_description,
+      kind: 'textarea',
+      defaultValue: offer.description,
+    },
+    {
+      key: 'quantity',
+      label: tc.edit_field_quantity,
+      kind: 'number',
+      defaultValue: String(offer.quantity),
+    },
+    {
+      key: 'unit',
+      label: tc.edit_field_unit,
+      kind: 'text',
+      defaultValue: offer.unit ?? '',
+    },
+    {
+      key: 'notes',
+      label: tc.edit_field_notes,
+      kind: 'textarea',
+      defaultValue: offer.notes ?? '',
+    },
+  ];
+
   const actions =
     canMatch && offer.status === 'open' ? (
       <div className="flex flex-col gap-3">
@@ -194,10 +227,28 @@ export function OfferDetail({
     ) : null;
 
   const footer =
-    actions != null || errorMessage !== undefined ? (
+    actions != null || errorMessage !== undefined || canMatch ? (
       <div className="flex flex-col gap-3">
         {errorMessage !== undefined && <ErrorMessage message={errorMessage} />}
         {actions}
+        <ValidationActions
+          canAct={canMatch}
+          editFields={editFields}
+          onEdit={(reason, values) =>
+            editOffer(offer.id, slug, {
+              reason,
+              description: values.description,
+              quantity:
+                values.quantity && values.quantity.trim() !== ''
+                  ? Number(values.quantity)
+                  : undefined,
+              unit: values.unit,
+              notes: values.notes,
+            })
+          }
+          onDiscard={(reason) => discardOffer(offer.id, slug, reason)}
+          onActionSuccess={onActionSuccess}
+        />
       </div>
     ) : undefined;
 

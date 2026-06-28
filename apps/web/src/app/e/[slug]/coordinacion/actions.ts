@@ -2,9 +2,46 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import type { components } from '@reliefhub/api-client';
 import { api } from '@/lib/api';
 import { getToken, clearToken, authHeaders } from '@/lib/auth';
 import { getT } from '@/i18n/server';
+
+/** A reason is mandatory for every edit/discard; mirror the API's min length. */
+function reasonTooShort(reason: string): boolean {
+  return reason.trim().length < 3;
+}
+
+type NeedPriority = NonNullable<components['schemas']['EditNeedDto']['priority']>;
+type ReportPriority = NonNullable<
+  components['schemas']['EditReportDto']['priority']
+>;
+
+export interface EditNeedInput {
+  reason: string;
+  title?: string;
+  description?: string;
+  priority?: NeedPriority;
+}
+export interface EditResourceInput {
+  reason: string;
+  name?: string;
+  description?: string;
+  contact?: string;
+  schedule?: string;
+}
+export interface EditOfferInput {
+  reason: string;
+  description?: string;
+  quantity?: number;
+  unit?: string;
+  notes?: string;
+}
+export interface EditReportInput {
+  reason: string;
+  note?: string;
+  priority?: ReportPriority;
+}
 
 /**
  * Matches an open offer to a need (coordinator only).
@@ -350,6 +387,285 @@ export async function resumeEmergency(
 
   revalidatePath(`/e/${slug}/coordinacion`);
   revalidatePath(`/e/${slug}`);
+  return { status: 'success' };
+}
+
+// ── Editar / descartar con motivo (trazabilidad) ─────────────────────────────
+// Each action requires a mandatory reason; the API records who acted, what
+// changed and the resulting state in the emergency's audit trail.
+
+export async function editNeed(
+  needId: string,
+  slug: string,
+  input: EditNeedInput,
+): Promise<ActionResult> {
+  const token = await getToken();
+  if (token === null) redirect(`/login?next=/e/${slug}/coordinacion`);
+
+  const { t } = await getT();
+  if (reasonTooShort(input.reason)) {
+    return { status: 'error', message: t.coord.err_reason_required };
+  }
+
+  const { error, response } = await api.PATCH('/needs/{needId}', {
+    params: { path: { needId } },
+    body: {
+      reason: input.reason.trim(),
+      ...(input.title !== undefined ? { title: input.title } : {}),
+      ...(input.description !== undefined
+        ? { description: input.description }
+        : {}),
+      ...(input.priority !== undefined ? { priority: input.priority } : {}),
+    },
+    headers: authHeaders(token),
+  });
+
+  if (error !== undefined) {
+    if (response.status === 401) {
+      await clearToken();
+      redirect(`/login?next=/e/${slug}/coordinacion`);
+    }
+    return { status: 'error', message: t.coord.err_edit_failed };
+  }
+
+  revalidatePath(`/e/${slug}/coordinacion`);
+  return { status: 'success' };
+}
+
+export async function discardNeed(
+  needId: string,
+  slug: string,
+  reason: string,
+): Promise<ActionResult> {
+  const token = await getToken();
+  if (token === null) redirect(`/login?next=/e/${slug}/coordinacion`);
+
+  const { t } = await getT();
+  if (reasonTooShort(reason)) {
+    return { status: 'error', message: t.coord.err_reason_required };
+  }
+
+  const { error, response } = await api.POST('/needs/{needId}/discard', {
+    params: { path: { needId } },
+    body: { reason: reason.trim() },
+    headers: authHeaders(token),
+  });
+
+  if (error !== undefined) {
+    if (response.status === 401) {
+      await clearToken();
+      redirect(`/login?next=/e/${slug}/coordinacion`);
+    }
+    return { status: 'error', message: t.coord.err_discard_failed };
+  }
+
+  revalidatePath(`/e/${slug}/coordinacion`);
+  return { status: 'success' };
+}
+
+export async function editResource(
+  resourceId: string,
+  slug: string,
+  input: EditResourceInput,
+): Promise<ActionResult> {
+  const token = await getToken();
+  if (token === null) redirect(`/login?next=/e/${slug}/coordinacion`);
+
+  const { t } = await getT();
+  if (reasonTooShort(input.reason)) {
+    return { status: 'error', message: t.coord.err_reason_required };
+  }
+
+  const { error, response } = await api.PATCH('/resources/{resourceId}', {
+    params: { path: { resourceId } },
+    body: {
+      reason: input.reason.trim(),
+      ...(input.name !== undefined ? { name: input.name } : {}),
+      ...(input.description !== undefined
+        ? { description: input.description }
+        : {}),
+      ...(input.contact !== undefined ? { contact: input.contact } : {}),
+      ...(input.schedule !== undefined ? { schedule: input.schedule } : {}),
+    },
+    headers: authHeaders(token),
+  });
+
+  if (error !== undefined) {
+    if (response.status === 401) {
+      await clearToken();
+      redirect(`/login?next=/e/${slug}/coordinacion`);
+    }
+    return { status: 'error', message: t.coord.err_edit_failed };
+  }
+
+  revalidatePath(`/e/${slug}/coordinacion`);
+  return { status: 'success' };
+}
+
+export async function discardResource(
+  resourceId: string,
+  slug: string,
+  reason: string,
+): Promise<ActionResult> {
+  const token = await getToken();
+  if (token === null) redirect(`/login?next=/e/${slug}/coordinacion`);
+
+  const { t } = await getT();
+  if (reasonTooShort(reason)) {
+    return { status: 'error', message: t.coord.err_reason_required };
+  }
+
+  const { error, response } = await api.POST('/resources/{resourceId}/discard', {
+    params: { path: { resourceId } },
+    body: { reason: reason.trim() },
+    headers: authHeaders(token),
+  });
+
+  if (error !== undefined) {
+    if (response.status === 401) {
+      await clearToken();
+      redirect(`/login?next=/e/${slug}/coordinacion`);
+    }
+    return { status: 'error', message: t.coord.err_discard_failed };
+  }
+
+  revalidatePath(`/e/${slug}/coordinacion`);
+  return { status: 'success' };
+}
+
+export async function editOffer(
+  offerId: string,
+  slug: string,
+  input: EditOfferInput,
+): Promise<ActionResult> {
+  const token = await getToken();
+  if (token === null) redirect(`/login?next=/e/${slug}/coordinacion`);
+
+  const { t } = await getT();
+  if (reasonTooShort(input.reason)) {
+    return { status: 'error', message: t.coord.err_reason_required };
+  }
+
+  const { error, response } = await api.PATCH('/offers/{offerId}', {
+    params: { path: { offerId } },
+    body: {
+      reason: input.reason.trim(),
+      ...(input.description !== undefined
+        ? { description: input.description }
+        : {}),
+      ...(input.quantity !== undefined ? { quantity: input.quantity } : {}),
+      ...(input.unit !== undefined ? { unit: input.unit } : {}),
+      ...(input.notes !== undefined ? { notes: input.notes } : {}),
+    },
+    headers: authHeaders(token),
+  });
+
+  if (error !== undefined) {
+    if (response.status === 401) {
+      await clearToken();
+      redirect(`/login?next=/e/${slug}/coordinacion`);
+    }
+    return { status: 'error', message: t.coord.err_edit_failed };
+  }
+
+  revalidatePath(`/e/${slug}/coordinacion`);
+  return { status: 'success' };
+}
+
+export async function discardOffer(
+  offerId: string,
+  slug: string,
+  reason: string,
+): Promise<ActionResult> {
+  const token = await getToken();
+  if (token === null) redirect(`/login?next=/e/${slug}/coordinacion`);
+
+  const { t } = await getT();
+  if (reasonTooShort(reason)) {
+    return { status: 'error', message: t.coord.err_reason_required };
+  }
+
+  const { error, response } = await api.POST('/offers/{offerId}/discard', {
+    params: { path: { offerId } },
+    body: { reason: reason.trim() },
+    headers: authHeaders(token),
+  });
+
+  if (error !== undefined) {
+    if (response.status === 401) {
+      await clearToken();
+      redirect(`/login?next=/e/${slug}/coordinacion`);
+    }
+    return { status: 'error', message: t.coord.err_discard_failed };
+  }
+
+  revalidatePath(`/e/${slug}/coordinacion`);
+  return { status: 'success' };
+}
+
+export async function editReport(
+  reportId: string,
+  slug: string,
+  input: EditReportInput,
+): Promise<ActionResult> {
+  const token = await getToken();
+  if (token === null) redirect(`/login?next=/e/${slug}/coordinacion`);
+
+  const { t } = await getT();
+  if (reasonTooShort(input.reason)) {
+    return { status: 'error', message: t.coord.err_reason_required };
+  }
+
+  const { error, response } = await api.PATCH('/reports/{reportId}', {
+    params: { path: { reportId } },
+    body: {
+      reason: input.reason.trim(),
+      ...(input.note !== undefined ? { note: input.note } : {}),
+      ...(input.priority !== undefined ? { priority: input.priority } : {}),
+    },
+    headers: authHeaders(token),
+  });
+
+  if (error !== undefined) {
+    if (response.status === 401) {
+      await clearToken();
+      redirect(`/login?next=/e/${slug}/coordinacion`);
+    }
+    return { status: 'error', message: t.coord.err_edit_failed };
+  }
+
+  revalidatePath(`/e/${slug}/coordinacion`);
+  return { status: 'success' };
+}
+
+export async function discardReport(
+  reportId: string,
+  slug: string,
+  reason: string,
+): Promise<ActionResult> {
+  const token = await getToken();
+  if (token === null) redirect(`/login?next=/e/${slug}/coordinacion`);
+
+  const { t } = await getT();
+  if (reasonTooShort(reason)) {
+    return { status: 'error', message: t.coord.err_reason_required };
+  }
+
+  const { error, response } = await api.POST('/reports/{reportId}/discard', {
+    params: { path: { reportId } },
+    body: { reason: reason.trim() },
+    headers: authHeaders(token),
+  });
+
+  if (error !== undefined) {
+    if (response.status === 401) {
+      await clearToken();
+      redirect(`/login?next=/e/${slug}/coordinacion`);
+    }
+    return { status: 'error', message: t.coord.err_discard_failed };
+  }
+
+  revalidatePath(`/e/${slug}/coordinacion`);
   return { status: 'success' };
 }
 
