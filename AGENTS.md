@@ -6,7 +6,7 @@ Canonical instructions for any AI agent or contributor working in this repo. Rea
 
 Multi-emergency **material aid coordination + logistics** platform (org: **Global Emergency**). Live: web `https://responsegrid.app` (Vercel), API `https://api.responsegrid.app` (EC2). Activated per emergency; data isolated by `emergency_id`/slug. Connects citizens, organizations and coordinators during a disaster.
 
-**In scope:** collection/logistic points (puntos de acopio), validated needs (with 48h freshness), material offers + matching to needs, volunteers + tasks, field reports (incident/stock/status), real-time Leaflet map, **authorization** (roles/grants/groups/API keys), public read-only API + developer `/docs`.
+**In scope:** collection/logistic points (puntos de acopio) **with declared material inventory per place**, validated needs (with 48h freshness), material offers + matching to needs, **a single shared catalogue of supplies + categories** (insumos), **transport capacity + shipments** (logistics), volunteers + tasks, field reports (incident/stock/status), real-time Leaflet map, **authorization** (roles/grants/groups/API keys), public read-only API + developer `/docs`.
 
 **Deliberately REMOVED — do NOT reintroduce:** family reunification, structural-damage/SAR reports, money-donation CTA. (Material-donation `/donar` stays.)
 
@@ -20,11 +20,13 @@ Multi-emergency **material aid coordination + logistics** platform (org: **Globa
 
 ## Architecture
 
-Hexagonal bounded contexts in `apps/api/src/contexts/`:
-`emergencies · resources · needs · offers · volunteers · reports · identity` (incl. authz: grants/groups/service-accounts/API keys) `· organizations · accreditation · templates · notifications · audit · metrics · geocoding · files · taxonomy`.
+Hexagonal bounded contexts in `apps/api/src/contexts/` (18):
+`emergencies · resources · needs · offers · supplies · logistics · volunteers · reports · identity` (authz: grants/service-accounts/API keys) `· groups` (cuadrillas) `· organizations · accreditation · templates · notifications · audit · metrics · geocoding · files`.
 
 - `domain/` and `application/` must **NOT** import `@nestjs/*`, drizzle, or infrastructure — enforced by ESLint `no-restricted-imports`. Output ports are mocked in tests; the real domain runs.
-- Shared kernel in `apps/api/src/shared/` (EmergencyId, Location, Priority, DomainEvent, cross-context errors, the single `pg.Pool` via `DatabaseModule`).
+- **`supplies` (insumos) — upstream supporting domain (the material line is the core of the platform).** Owns the single material-line model reused everywhere instead of a copy per context: `Category` (the **canonical** enum of aid-material categories — food/water/hygiene/clothing/medical/shelter/tools/other + health vertical medicines/medical_equipment/medical_supplies/medical_personnel), `CategoryDefinition` (the `categories` table: localized labels, hierarchy, import aliases, facet counts — enrichment, not a parallel enum), and the **`SupplyLine`** value object (`name/quantity/unit/category/presentation`). `needs`, `offers`, `resources` (inventory) and `logistics` (`ShipmentItem`) depend on it. Public **`GET /categories`** surfaces the taxonomy. (Replaced the old `taxonomy` context; designed to later reference a `Supply` master-data catalogue and a grouping aggregate —palet/caja/lote— without touching consumers (OCP/DIP).)
+- **Resource inventory.** A resource/place declares the material it holds for delivery as `SupplyLine[]` (`resource_items`, FK-cascade; migration `0028`). Captured at `/registrar`. The public detail endpoint exposes it **aggregated to distinct categories** (`inventoryCategories`) for privacy; the full lines are persisted for coordination.
+- Shared kernel in `apps/api/src/shared/` (EmergencyId, Location, Priority, DomainEvent, cross-context errors, the single `pg.Pool` via `DatabaseModule`). The material-line/category model lives in `supplies` (an upstream context), not in the shared kernel.
 - Authorization model: `Principal → Grant(role@scope) → Permission → can()`; `@RequirePermission` decorator (replaced the legacy per-context coordinator guards). API keys: `X-API-Key: rh_live_…`.
 
 ## Conventions
