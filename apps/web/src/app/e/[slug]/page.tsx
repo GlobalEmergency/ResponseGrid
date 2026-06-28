@@ -279,6 +279,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
               tStatusLight={t.status_light}
               tList={t.resource_list}
               tFilter={t.resource_filter}
+              tNearby={t.nearby_points}
               tEmpty={{
                 title: te.points_empty_title,
                 description: te.points_empty_description,
