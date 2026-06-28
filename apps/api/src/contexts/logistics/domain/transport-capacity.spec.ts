@@ -37,7 +37,8 @@ function makeCapacity(
     emergencyId: EmergencyId.fromString(EM),
     provider: { type: TransportProviderType.Volunteer, id: PROVIDER_ID },
     mode: overrides?.mode ?? TransportMode.Road,
-    capacity: overrides?.capacity ?? Capacity.create({ weightKg: 1000, volumeM3: 8 }),
+    capacity:
+      overrides?.capacity ?? Capacity.create({ weightKg: 1000, volumeM3: 8 }),
     coverage:
       overrides?.coverage ??
       Coverage.corridor({
@@ -68,9 +69,9 @@ describe('Capacity value object', () => {
   });
 
   it('throws when neither weight nor volume is present', () => {
-    expect(() =>
-      Capacity.create({ weightKg: null, volumeM3: null }),
-    ).toThrow(CapacityMustHaveWeightOrVolumeError);
+    expect(() => Capacity.create({ weightKg: null, volumeM3: null })).toThrow(
+      CapacityMustHaveWeightOrVolumeError,
+    );
   });
 
   it('throws when weight is not positive', () => {

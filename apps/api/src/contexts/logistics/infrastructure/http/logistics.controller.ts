@@ -29,11 +29,7 @@ import { PublishCapacity } from '../../application/publish-capacity';
 import { WithdrawCapacity } from '../../application/withdraw-capacity';
 import { ListCapacities } from '../../application/list-capacities';
 import { CapacityView } from '../../application/capacity-view';
-import {
-  PublishCapacityDto,
-  CoverageDto,
-  ListCapacitiesQueryDto,
-} from './dto';
+import { PublishCapacityDto, CoverageDto, ListCapacitiesQueryDto } from './dto';
 import { PublishCapacityResponseDto, CapacityViewDto } from './response.dto';
 import { CoverageProps } from '../../domain/coverage';
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
@@ -89,7 +85,8 @@ export class LogisticsController {
   @RequirePermission('capacity:publish')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Publish a transport-capacity offer (authenticated, citizen-grade)',
+    summary:
+      'Publish a transport-capacity offer (authenticated, citizen-grade)',
   })
   @ApiCreatedResponse({
     description: 'Capacity published',
@@ -169,7 +166,8 @@ export class LogisticsController {
   @RequirePermission('capacity:read')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'List transport capacities for an emergency (coordinator/verifier)',
+    summary:
+      'List transport capacities for an emergency (coordinator/verifier)',
   })
   @ApiParam({
     name: 'emergencyId',

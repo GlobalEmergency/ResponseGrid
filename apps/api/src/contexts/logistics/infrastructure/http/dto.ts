@@ -71,7 +71,10 @@ export class CoverageDto {
   @IsUUID()
   destinationResourceId?: string;
 
-  @ApiPropertyOptional({ example: 10.4806, description: 'Corridor: origin lat' })
+  @ApiPropertyOptional({
+    example: 10.4806,
+    description: 'Corridor: origin lat',
+  })
   @ValidateIf((o: CoverageDto) => o.kind === 'corridor')
   @IsOptional()
   @IsLatitude()
@@ -149,7 +152,10 @@ export class PublishCapacityProviderDto {
 }
 
 export class PublishCapacityDto {
-  @ApiProperty({ format: 'uuid', description: 'Emergency this capacity serves' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Emergency this capacity serves',
+  })
   @IsUUID()
   emergencyId!: string;
 

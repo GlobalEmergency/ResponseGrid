@@ -57,8 +57,7 @@ const publishCapacityProvider = {
 const withdrawCapacityProvider = {
   provide: WithdrawCapacity,
   inject: [TRANSPORT_CAPACITY_REPOSITORY],
-  useFactory: (repo: TransportCapacityRepository) =>
-    new WithdrawCapacity(repo),
+  useFactory: (repo: TransportCapacityRepository) => new WithdrawCapacity(repo),
 };
 
 const listCapacitiesProvider = {

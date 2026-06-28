@@ -27,9 +27,7 @@ function windowOverlaps(
   return true;
 }
 
-export class InMemoryTransportCapacityRepository
-  implements TransportCapacityRepository
-{
+export class InMemoryTransportCapacityRepository implements TransportCapacityRepository {
   private store = new Map<string, TransportCapacitySnapshot>();
 
   save(capacity: TransportCapacity): Promise<void> {
@@ -39,9 +37,7 @@ export class InMemoryTransportCapacityRepository
 
   findById(id: TransportCapacityId): Promise<TransportCapacity | null> {
     const snap = this.store.get(id.value);
-    return Promise.resolve(
-      snap ? TransportCapacity.fromSnapshot(snap) : null,
-    );
+    return Promise.resolve(snap ? TransportCapacity.fromSnapshot(snap) : null);
   }
 
   findByEmergency(

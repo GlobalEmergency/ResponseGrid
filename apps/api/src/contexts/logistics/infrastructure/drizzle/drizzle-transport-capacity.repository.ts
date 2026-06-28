@@ -16,7 +16,6 @@ import {
   TransportMode,
   TransportProviderType,
 } from '../../domain/transport-capacity-enums';
-import { CoverageProps } from '../../domain/coverage';
 
 type CapacityRow = typeof transportCapacitiesTable.$inferSelect;
 
@@ -31,7 +30,7 @@ function rowToSnapshot(row: CapacityRow): TransportCapacitySnapshot {
       weightKg: row.weightKg ?? null,
       volumeM3: row.volumeM3 ?? null,
     },
-    coverage: row.coverage as CoverageProps,
+    coverage: row.coverage,
     window: {
       from: row.windowFrom ? row.windowFrom.toISOString() : null,
       to: row.windowTo ? row.windowTo.toISOString() : null,
@@ -44,9 +43,7 @@ function rowToSnapshot(row: CapacityRow): TransportCapacitySnapshot {
   };
 }
 
-export class DrizzleTransportCapacityRepository
-  implements TransportCapacityRepository
-{
+export class DrizzleTransportCapacityRepository implements TransportCapacityRepository {
   constructor(private readonly db: Db) {}
 
   async save(capacity: TransportCapacity): Promise<void> {
@@ -79,9 +76,7 @@ export class DrizzleTransportCapacityRepository
       });
   }
 
-  async findById(
-    id: TransportCapacityId,
-  ): Promise<TransportCapacity | null> {
+  async findById(id: TransportCapacityId): Promise<TransportCapacity | null> {
     const rows = await this.db
       .select()
       .from(transportCapacitiesTable)

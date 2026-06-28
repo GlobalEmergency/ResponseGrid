@@ -29,7 +29,9 @@ export type CoverageProps = CorridorCoverageProps | AreaCoverageProps;
 
 function assertOptionalUuid(value: string | null, field: string): void {
   if (value !== null && !UUID_RE.test(value)) {
-    throw new InvalidCoverageError(`Coverage ${field} must be a UUID: ${value}`);
+    throw new InvalidCoverageError(
+      `Coverage ${field} must be a UUID: ${value}`,
+    );
   }
 }
 
@@ -58,9 +60,7 @@ function assertOptionalLng(value: number | null, field: string): void {
 export class Coverage {
   private constructor(private readonly props: CoverageProps) {}
 
-  static corridor(
-    props: Omit<CorridorCoverageProps, 'kind'>,
-  ): Coverage {
+  static corridor(props: Omit<CorridorCoverageProps, 'kind'>): Coverage {
     const originResourceId = props.originResourceId ?? null;
     const destinationResourceId = props.destinationResourceId ?? null;
     const originLat = props.originLat ?? null;
