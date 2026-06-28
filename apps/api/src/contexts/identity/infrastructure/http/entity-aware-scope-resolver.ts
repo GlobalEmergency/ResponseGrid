@@ -54,11 +54,13 @@ export class EntityAwareScopeResolver implements ScopeResolver {
   async resolve(request: Request): Promise<ScopeRefProps[]> {
     const params = (request.params ?? {}) as Record<string, string | undefined>;
 
-    const emergencyId = params.emergencyId;
-    if (emergencyId) {
-      return [{ type: 'emergency', id: emergencyId }, { type: 'platform' }];
-    }
-
+    // Resolve a targeted sub-entity FIRST. Its owning emergency is derived
+    // server-side from the entity id, so it is authoritative over any
+    // `:emergencyId` in the path — which the client controls. Trusting the path
+    // `:emergencyId` on a route that also carries `:resourceId`/`:needId`/… would
+    // let a coordinator of emergency A act on an entity in emergency B simply by
+    // putting A in the URL (privilege confusion). Always derive the chain from
+    // the entity instead. (docs/features/13 §9, §16)
     for (const { param, entityType, lookups } of this.entityParams) {
       const entityId = params[param];
       if (!entityId) continue;
@@ -74,6 +76,12 @@ export class EntityAwareScopeResolver implements ScopeResolver {
         }
       }
       throw new NotFoundException(`${entityType} ${entityId} not found`);
+    }
+
+    // No recognized sub-entity in the path → emergency-collection scope.
+    const emergencyId = params.emergencyId;
+    if (emergencyId) {
+      return [{ type: 'emergency', id: emergencyId }, { type: 'platform' }];
     }
 
     return [{ type: 'platform' }];

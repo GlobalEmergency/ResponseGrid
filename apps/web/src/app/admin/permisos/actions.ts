@@ -50,6 +50,38 @@ export async function fetchGrants(principalId: string): Promise<GrantView[]> {
   return (data ?? []) as GrantView[];
 }
 
+export interface ResolvedPrincipal {
+  id: string;
+  email?: string;
+  name?: string;
+}
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Resolve the lookup input to a principal id. A raw UUID is used as-is; anything
+ * else is treated as an email and resolved via the admin directory lookup, so
+ * an admin can find a user without knowing their UUID. Returns null when an
+ * email is unknown or malformed.
+ */
+export async function resolvePrincipal(
+  input: string,
+): Promise<ResolvedPrincipal | null> {
+  const query = input.trim();
+  if (!query) return null;
+  if (UUID_RE.test(query)) return { id: query };
+
+  const token = await getToken();
+  if (!token) return null;
+  const { data, error } = await api.GET('/users/lookup', {
+    params: { query: { email: query } },
+    headers: authHeaders(token),
+  });
+  if (error !== undefined || !data) return null;
+  return { id: data.id, email: data.email, name: data.name };
+}
+
 export async function grantRoleAction(
   _prev: GrantActionResult,
   formData: FormData,

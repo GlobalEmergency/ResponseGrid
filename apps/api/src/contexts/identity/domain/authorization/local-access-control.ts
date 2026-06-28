@@ -44,9 +44,19 @@ export class LocalAccessControl implements AccessControl {
     const out = new Set<Permission>();
 
     for (const snapshot of ctx.grants) {
-      const grant = Grant.fromSnapshot(snapshot);
-      if (!grant.isActive(now)) continue;
-      if (!grant.scope.coversAnyOf(chain)) continue;
+      // A single malformed grant (e.g. an unknown scope type from a stale or
+      // forged JWT) must not crash the whole decision — it simply contributes
+      // nothing. This keeps the PDP fail-closed and DoS-resistant rather than
+      // letting a TypeError propagate into a 500. Mirrors the unknown-role
+      // handling below.
+      let grant: Grant;
+      try {
+        grant = Grant.fromSnapshot(snapshot);
+        if (!grant.isActive(now)) continue;
+        if (!grant.scope.coversAnyOf(chain)) continue;
+      } catch {
+        continue;
+      }
 
       const role = ROLE_CATALOG[grant.roleId];
       if (role === undefined) continue; // unknown role → contributes nothing

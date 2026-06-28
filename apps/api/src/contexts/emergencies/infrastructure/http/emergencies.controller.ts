@@ -41,7 +41,6 @@ import {
 } from './dto';
 import { EmergencyExceptionFilter } from './emergency-exception.filter';
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
-import { RequireAdminGuard } from '../../../identity/infrastructure/http/require-admin.guard';
 import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
 import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
 
@@ -61,9 +60,10 @@ export class EmergenciesController {
 
   @Post()
   @HttpCode(201)
-  @UseGuards(JwtAuthGuard, RequireAdminGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('emergency:create')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create an emergency (admin only)' })
+  @ApiOperation({ summary: 'Create an emergency (emergency:create)' })
   @ApiCreatedResponse({
     description: 'Emergency created',
     type: CreateEmergencyResponseDto,
@@ -71,7 +71,7 @@ export class EmergenciesController {
   @ApiBadRequestResponse({ description: 'Invalid request body' })
   @ApiConflictResponse({ description: 'Slug already exists' })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
-  @ApiForbiddenResponse({ description: 'Admin access required' })
+  @ApiForbiddenResponse({ description: 'emergency:create required' })
   async createEmergency(
     @Body() dto: CreateEmergencyDto,
   ): Promise<CreateEmergencyResponseDto> {
@@ -105,10 +105,11 @@ export class EmergenciesController {
 
   @Post('from-template')
   @HttpCode(201)
-  @UseGuards(JwtAuthGuard, RequireAdminGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('emergency:create')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Create an emergency from a template (admin only)',
+    summary: 'Create an emergency from a template (emergency:create)',
   })
   @ApiCreatedResponse({
     description: 'Emergency created from template',
@@ -118,7 +119,7 @@ export class EmergenciesController {
   @ApiConflictResponse({ description: 'Slug already exists' })
   @ApiNotFoundResponse({ description: 'Template not found' })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
-  @ApiForbiddenResponse({ description: 'Admin access required' })
+  @ApiForbiddenResponse({ description: 'emergency:create required' })
   async createFromTemplateRoute(
     @Body() dto: CreateEmergencyFromTemplateDto,
   ): Promise<CreateEmergencyResponseDto> {

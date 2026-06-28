@@ -17,4 +17,8 @@ describe('api-key-generator', () => {
     expect(prefixOf('rh_live_')).toBeNull();
     expect(prefixOf('rh_test_abcdef12')).toBeNull();
   });
+
+  it('prefixOf rejects an over-long key (DoS guard)', () => {
+    expect(prefixOf(`rh_live_${'a'.repeat(200)}`)).toBeNull();
+  });
 });

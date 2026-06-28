@@ -5,7 +5,9 @@ import {
 } from '../domain/authorization/access-control';
 import { ancestorChain } from '../domain/authorization/scope-ref';
 import {
+  CannotRevokeOwnAdminError,
   GrantNotFoundError,
+  LegacyGrantNotRevocableError,
   NotAuthorizedToRevokeError,
 } from '../domain/authorization/errors';
 
@@ -27,9 +29,25 @@ export class RevokeGrant {
   ) {}
 
   async execute(cmd: RevokeGrantCommand): Promise<void> {
+    // Legacy-derived grants are not persisted rows; they carry a `legacy:` id and
+    // would otherwise surface as a misleading "not found". Reject them clearly.
+    if (cmd.grantId.startsWith('legacy:')) {
+      throw new LegacyGrantNotRevocableError(cmd.grantId);
+    }
+
     const grant = await this.grants.findById(cmd.grantId);
     if (!grant) {
       throw new GrantNotFoundError(cmd.grantId);
+    }
+
+    // Self-lockout guard: an admin must not revoke their own platform_admin
+    // grant. Removing other admins still requires platform `role:revoke` below.
+    if (
+      grant.principalId === cmd.actor.principalId &&
+      grant.roleId === 'platform_admin' &&
+      grant.scope.type === 'platform'
+    ) {
+      throw new CannotRevokeOwnAdminError();
     }
 
     const chain = ancestorChain(grant.scope.toPlain());

@@ -9,6 +9,11 @@ export class JwtTokenService implements TokenService {
   }
 
   verify(token: string): TokenPayload {
-    return this.jwtService.verify<TokenPayload>(token);
+    // Pin the accepted algorithm. The current setup is symmetric (HS256), so
+    // this is defence-in-depth against algorithm-confusion if an asymmetric key
+    // is ever introduced; it also rejects `alg: none` explicitly.
+    return this.jwtService.verify<TokenPayload>(token, {
+      algorithms: ['HS256'],
+    });
   }
 }
