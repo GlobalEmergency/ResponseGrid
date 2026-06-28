@@ -16,7 +16,7 @@
 
 import { useState, useTransition, useEffect, useMemo, useRef } from 'react';
 import { createResponseGridClient } from '@reliefhub/api-client';
-import type { components } from '@reliefhub/api-client';
+import { groupByCountry, type ResourceViewDto } from '@/lib/group-by-country';
 import { PublicResourceCard } from '@/components/organisms/public-resource-card';
 import { ResourceFilterBar } from '@/components/molecules/resource-filter-bar';
 import { EmptyState } from '@/components/molecules/empty-state';
@@ -31,43 +31,7 @@ if (!API_URL) {
   );
 }
 
-type ResourceViewDto = components['schemas']['ResourceViewDto'];
-
 const LIMIT = 50;
-
-/**
- * Returns true when a country value represents Venezuela.
- * The ingested data stores the source's `pais` field as a full Spanish name
- * (e.g. "Venezuela"), not an ISO code — so we match case-insensitively on
- * the full name and also accept the ISO 3166-1 alpha-2 fallback "VE".
- */
-function isVenezuela(country: string): boolean {
-  const c = country.trim().toLowerCase();
-  return c === 'venezuela' || c === 've';
-}
-
-/** Groups items into: Venezuela, Diaspora (non-Venezuela with country), Others (no country). */
-function groupByCountry(items: ResourceViewDto[]): {
-  venezuela: ResourceViewDto[];
-  diaspora: ResourceViewDto[];
-  other: ResourceViewDto[];
-} {
-  const venezuela: ResourceViewDto[] = [];
-  const diaspora: ResourceViewDto[] = [];
-  const other: ResourceViewDto[] = [];
-
-  for (const item of items) {
-    if (item.country != null && item.country !== '' && isVenezuela(item.country)) {
-      venezuela.push(item);
-    } else if (item.country != null && item.country !== '') {
-      diaspora.push(item);
-    } else {
-      other.push(item);
-    }
-  }
-
-  return { venezuela, diaspora, other };
-}
 
 interface ResourceListProps {
   emergencyId: string;
@@ -75,7 +39,7 @@ interface ResourceListProps {
   total: number;
   /** Facet counts keyed by category slug */
   facetsByCategory: Record<string, number>;
-  /** Facet counts keyed by country code */
+  /** Facet counts keyed by the stored country string (full Spanish name, e.g. "Venezuela") */
   facetsByCountry: Record<string, number>;
   t: Messages['resource_card'];
   tVerification: Messages['verification_badge'];

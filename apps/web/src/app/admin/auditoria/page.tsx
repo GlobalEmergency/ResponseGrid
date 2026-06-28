@@ -75,7 +75,7 @@ export default async function AuditoriaPage({ searchParams }: PageProps) {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-start bg-white px-4 py-10">
+    <main className="flex-1 flex flex-col items-center justify-start bg-white px-4 py-10">
       <div className="w-full max-w-5xl flex flex-col gap-10">
 
         {/* ── CABECERA ────────────────────────────────────────────────── */}

@@ -33,7 +33,7 @@ export default function AuthCompletePage() {
   }, []);
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-white">
+    <main className="flex-1 flex items-center justify-center bg-white">
       <p className="text-base text-gray-500">Conectando…</p>
     </main>
   );

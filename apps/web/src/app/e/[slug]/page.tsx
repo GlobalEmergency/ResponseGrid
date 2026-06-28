@@ -13,7 +13,7 @@ import { StatusBanner } from '@/components/molecules/status-banner';
 import { AnnouncementCard } from '@/components/molecules/announcement-card';
 import { HelpActionRow } from '@/components/molecules/help-action-row';
 import { NeedCard } from '@/components/molecules/need-card';
-import { LandingFooter } from '@/components/molecules/landing-footer';
+import { EmergencyQuickLinks } from '@/components/molecules/emergency-quick-links';
 import type { MapPoint } from '@/components/emergency-map';
 import { getT } from '@/i18n/server';
 
@@ -144,7 +144,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
   const sectionTitle = 'font-display text-base font-bold text-navy';
 
   return (
-    <main className="min-h-screen bg-surface">
+    <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-md bg-surface lg:max-w-6xl">
         <OfficialHeaderBand
           name={emergency.name}
@@ -301,7 +301,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
             <EmergencyMapWrapper points={mapPoints} emergencyId={emergencyId} />
           </section>
 
-          <LandingFooter slug={slug} te={te} authed={token !== null} />
+          <EmergencyQuickLinks slug={slug} te={te} authed={token !== null} />
         </div>
       </div>
     </main>

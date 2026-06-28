@@ -89,11 +89,12 @@ export function PublicResourceCard({
         </div>
       )}
 
-      {/* ── Meta row: contact / schedule / manager / source ─────────────── */}
+      {/* ── Meta row: contact / schedule / manager ──────────────────────── */}
+      {/* sourceName is intentionally NOT rendered — ResponseGrid is the
+          source of truth; external provenance is internal metadata only. */}
       {(resource.contact != null ||
         resource.schedule != null ||
-        resource.manager != null ||
-        resource.sourceName != null) && (
+        resource.manager != null) && (
         <dl className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted">
           {resource.contact != null && (
             <div className="flex items-center gap-1">
@@ -111,12 +112,6 @@ export function PublicResourceCard({
             <div className="flex items-center gap-1">
               <dt className="font-medium text-muted-soft">{t.meta_manager}</dt>
               <dd>{resource.manager}</dd>
-            </div>
-          )}
-          {resource.sourceName != null && (
-            <div className="flex items-center gap-1">
-              <dt className="font-medium text-muted-soft">{t.meta_source}</dt>
-              <dd>{resource.sourceName}</dd>
             </div>
           )}
         </dl>

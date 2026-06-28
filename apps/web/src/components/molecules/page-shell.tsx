@@ -17,7 +17,7 @@ const MAX_WIDTH_CLASSES: Record<MaxWidth, string> = {
 
 /**
  * PageShell — the outer page wrapper used by every page.
- * Encapsulates: min-h-screen, flex centering, bg-white, px-4 py-10,
+ * Encapsulates: flex-1, flex centering, bg-white, px-4 py-10,
  * and the inner max-width container with gap.
  *
  * Server component — no 'use client' needed.
@@ -29,7 +29,7 @@ export function PageShell({
 }: PageShellProps) {
   return (
     <main
-      className={`min-h-screen flex flex-col items-center ${centered ? 'justify-center' : 'justify-start'} bg-white px-4 py-10`}
+      className={`flex-1 flex flex-col items-center ${centered ? 'justify-center' : 'justify-start'} bg-white px-4 py-10`}
     >
       <div
         className={`w-full ${MAX_WIDTH_CLASSES[maxWidth]} flex flex-col gap-10`}

@@ -21,7 +21,7 @@ export default async function LoginPage({ searchParams }: Props) {
   const { t } = await getT();
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 py-10 bg-white">
+    <main className="flex-1 flex flex-col items-center justify-center px-4 py-10 bg-white">
       <div className="w-full max-w-sm flex flex-col gap-8">
         {/* Header */}
         <header className="flex flex-col gap-1">

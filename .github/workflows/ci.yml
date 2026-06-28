@@ -1,0 +1,139 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # ── Format check ────────────────────────────────────────────────────────────
+  format:
+    name: Format check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Only apps/api has a .prettierrc; check its src + test dirs.
+      # prettier lives in apps/api's deps, so run it from there (root has no prettier bin).
+      - name: Prettier — api
+        run: pnpm --filter api exec prettier --check "src/**/*.ts" "test/**/*.ts"
+
+  # ── Lint ────────────────────────────────────────────────────────────────────
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # api lint script has --fix; in CI we want read-only + fail on warnings
+      - name: Lint — api
+        run: pnpm --filter api exec eslint "{src,apps,libs,test}/**/*.ts" --max-warnings=0
+
+      - name: Lint — web
+        run: pnpm --filter web lint
+
+  # ── Build ───────────────────────────────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build — api-client
+        run: pnpm --filter @reliefhub/api-client build
+
+      - name: Build — api (nest build / tsc)
+        run: pnpm --filter api build
+
+      - name: Build — web (next build)
+        run: pnpm --filter web build
+
+  # ── Tests ───────────────────────────────────────────────────────────────────
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: reliefhub
+          POSTGRES_PASSWORD: reliefhub
+          POSTGRES_DB: reliefhub
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd="pg_isready -U reliefhub"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6380:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests — api
+        env:
+          DATABASE_URL: postgres://reliefhub:reliefhub@localhost:5433/reliefhub
+          TEST_DATABASE_URL: postgres://reliefhub:reliefhub@localhost:5433/reliefhub_test
+          REDIS_URL: redis://localhost:6380
+          JWT_SECRET: ci-jwt-secret-32-chars-minimum-ok
+          NODE_ENV: test
+        run: pnpm --filter api test

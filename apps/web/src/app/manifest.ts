@@ -4,12 +4,18 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'ResponseGrid',
     short_name: 'ResponseGrid',
-    description: 'Coordinación de recursos en emergencias',
+    description: 'Coordinación de ayuda en emergencias — un proyecto de Global Emergency',
     start_url: '/',
     display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#111827',
+    background_color: '#fbfaf8',
+    theme_color: '#112b4a',
     icons: [
+      {
+        src: '/icon.svg',
+        sizes: 'any',
+        type: 'image/svg+xml',
+        purpose: 'any',
+      },
       {
         src: '/icons/icon-192.png',
         sizes: '192x192',
