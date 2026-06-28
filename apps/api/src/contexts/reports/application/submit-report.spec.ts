@@ -5,9 +5,7 @@ import {
   ReportType,
   ReportPriority,
   ReportStatus,
-  DamageLevel,
 } from '../domain/report-enums';
-import { Priority } from '../../../shared/domain/priority';
 
 function makeRepo(): ReportRepository {
   const store = new Map<string, Report>();
@@ -31,17 +29,6 @@ function makeRepo(): ReportRepository {
       return Promise.resolve(
         [...store.values()].filter(
           (r) => r.emergencyId === emergencyId && r.reporterUserId === uid,
-        ),
-      );
-    },
-    findPublishedStructuralByEmergencyId(
-      emergencyId: string,
-    ): Promise<Report[]> {
-      return Promise.resolve(
-        [...store.values()].filter(
-          (r) =>
-            r.emergencyId === emergencyId &&
-            r.status === ReportStatus.Published,
         ),
       );
     },
@@ -97,68 +84,5 @@ describe('SubmitReport', () => {
     const saved = await repo.findById(id);
     expect(saved!.resourceId).toBe('res-5678');
     expect(saved!.location?.toPlain().address).toBe('Test Ave');
-  });
-
-  it('auto-elevates priority to urgent for trapped_persons type', async () => {
-    const repo = makeRepo();
-    const uc = new SubmitReport(repo);
-    const { id } = await uc.execute({
-      emergencyId: 'em-1111',
-      reporterUserId: 'usr-2222',
-      type: ReportType.TrappedPersons,
-      note: 'People trapped in rubble',
-      priority: ReportPriority.Low,
-      structuralDetail: {
-        damageLevel: DamageLevel.Severe,
-        trappedPersonsEstimate: 5,
-        accessibleForRescue: false,
-        buildingType: 'residential',
-      },
-    });
-    const saved = await repo.findById(id);
-    expect(saved!.priority).toBe(Priority.Urgent);
-  });
-
-  it('auto-elevates priority to urgent for collapsed damage level', async () => {
-    const repo = makeRepo();
-    const uc = new SubmitReport(repo);
-    const { id } = await uc.execute({
-      emergencyId: 'em-1111',
-      reporterUserId: 'usr-2222',
-      type: ReportType.StructuralDamage,
-      note: 'Building collapsed',
-      priority: ReportPriority.Medium,
-      structuralDetail: {
-        damageLevel: DamageLevel.Collapsed,
-        trappedPersonsEstimate: null,
-        accessibleForRescue: null,
-        buildingType: null,
-      },
-    });
-    const saved = await repo.findById(id);
-    expect(saved!.priority).toBe(Priority.Urgent);
-  });
-
-  it('persists structural detail fields', async () => {
-    const repo = makeRepo();
-    const uc = new SubmitReport(repo);
-    const { id } = await uc.execute({
-      emergencyId: 'em-1111',
-      reporterUserId: 'usr-2222',
-      type: ReportType.StructuralDamage,
-      note: 'School damaged',
-      priority: ReportPriority.High,
-      structuralDetail: {
-        damageLevel: DamageLevel.Severe,
-        trappedPersonsEstimate: 2,
-        accessibleForRescue: true,
-        buildingType: 'school',
-      },
-    });
-    const saved = await repo.findById(id);
-    expect(saved!.damageLevel).toBe(DamageLevel.Severe);
-    expect(saved!.trappedPersonsEstimate).toBe(2);
-    expect(saved!.accessibleForRescue).toBe(true);
-    expect(saved!.buildingType).toBe('school');
   });
 });

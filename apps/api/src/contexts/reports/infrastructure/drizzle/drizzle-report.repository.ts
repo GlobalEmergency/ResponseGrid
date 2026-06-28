@@ -1,4 +1,4 @@
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
 import {
   ReportRepository,
@@ -9,8 +9,6 @@ import {
   ReportType,
   ReportPriority,
   ReportStatus,
-  DamageLevel,
-  STRUCTURAL_TYPES,
 } from '../../domain/report-enums';
 import { reportsTable } from './schema';
 
@@ -37,12 +35,6 @@ function rowToSnapshot(row: typeof reportsTable.$inferSelect): ReportSnapshot {
         : null,
     createdAt: row.createdAt,
     reviewedAt: row.reviewedAt ?? null,
-    damageLevel: (row.damageLevel as DamageLevel) ?? null,
-    trappedPersonsEstimate: row.trappedPersonsEstimate ?? null,
-    accessibleForRescue: row.accessibleForRescue ?? null,
-    buildingType: row.buildingType ?? null,
-    publishedAt: row.publishedAt ?? null,
-    publishNote: row.publishNote ?? null,
   };
 }
 
@@ -68,12 +60,6 @@ export class DrizzleReportRepository implements ReportRepository {
         locationLongitude: s.location?.longitude ?? null,
         createdAt: s.createdAt,
         reviewedAt: s.reviewedAt ?? null,
-        damageLevel: s.damageLevel ?? null,
-        trappedPersonsEstimate: s.trappedPersonsEstimate ?? null,
-        accessibleForRescue: s.accessibleForRescue ?? null,
-        buildingType: s.buildingType ?? null,
-        publishedAt: s.publishedAt ?? null,
-        publishNote: s.publishNote ?? null,
       })
       .onConflictDoUpdate({
         target: [reportsTable.id],
@@ -81,12 +67,6 @@ export class DrizzleReportRepository implements ReportRepository {
           status: s.status,
           priority: s.priority,
           reviewedAt: s.reviewedAt ?? null,
-          damageLevel: s.damageLevel ?? null,
-          trappedPersonsEstimate: s.trappedPersonsEstimate ?? null,
-          accessibleForRescue: s.accessibleForRescue ?? null,
-          buildingType: s.buildingType ?? null,
-          publishedAt: s.publishedAt ?? null,
-          publishNote: s.publishNote ?? null,
         },
       });
   }
@@ -131,23 +111,6 @@ export class DrizzleReportRepository implements ReportRepository {
         and(
           eq(reportsTable.emergencyId, emergencyId),
           eq(reportsTable.reporterUserId, reporterUserId),
-        ),
-      );
-    return rows.map((r) => Report.fromSnapshot(rowToSnapshot(r)));
-  }
-
-  async findPublishedStructuralByEmergencyId(
-    emergencyId: string,
-  ): Promise<Report[]> {
-    const structuralTypeValues = [...STRUCTURAL_TYPES] as string[];
-    const rows = await this.db
-      .select()
-      .from(reportsTable)
-      .where(
-        and(
-          eq(reportsTable.emergencyId, emergencyId),
-          eq(reportsTable.status, ReportStatus.Published),
-          inArray(reportsTable.type, structuralTypeValues),
         ),
       );
     return rows.map((r) => Report.fromSnapshot(rowToSnapshot(r)));

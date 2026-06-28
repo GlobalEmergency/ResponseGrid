@@ -96,20 +96,10 @@ export const es = {
     metric_tile_covered: 'Cubiertas',
     metric_tile_queue: 'En cola',
 
-    // Lo más eficaz ahora
-    effective_overline: 'Lo más eficaz ahora',
-    effective_title: 'Dona dinero a entidades verificadas',
-    effective_cta: 'Ver campañas verificadas',
-
     // Subtítulos de "¿Cómo quieres ayudar?"
     help_offer_subtitle: 'Almacén · transporte · espacio',
     help_volunteer_subtitle: 'Disponibilidad y habilidades',
     help_petition_subtitle: 'Solicitar material validado',
-    help_report_title: 'Reportar daños o personas atrapadas',
-
-    // Buscar familiar
-    family_title: 'Buscar a un familiar',
-    family_subtitle: 'Datos privados · solo personal autorizado',
 
     // Qué NO hacer ahora
     dont_do_heading: 'Qué NO hacer ahora',
@@ -145,8 +135,6 @@ export const es = {
     action_submit_petition: 'Poner una petición',
     action_donate: 'Donar material',
     action_volunteer: 'Apuntarme como voluntario',
-    action_report_damage: '🏚 Reportar daños estructurales',
-    action_find_family: 'Buscar familiar',
     actions_paused:
       'El alta de recursos y peticiones está en pausa. Consulta la información disponible y vuelve más tarde.',
 
@@ -170,11 +158,6 @@ export const es = {
     map_legend_saturated: 'Saturado',
     map_legend_paused: 'En pausa',
     map_legend_need: 'Petición',
-    map_legend_damage_collapsed: 'Colapsada',
-    map_legend_damage_severe: 'Daño grave',
-    map_legend_damage_moderate: 'Daño moderado',
-    map_damage_toggle_show: 'Mostrar daños',
-    map_damage_toggle_hide: 'Ocultar daños',
     map_user_location_notice: 'Tu ubicación no se publica ni se comparte.',
 
     // Privacy (F09)
@@ -183,7 +166,6 @@ export const es = {
     // Footer links
     footer_my_points: 'Mis puntos',
     footer_my_volunteer: 'Mi voluntariado',
-    footer_my_search: 'Mi búsqueda',
     footer_report: 'Reportar',
     footer_coordination: 'Acceso de coordinación',
 
@@ -522,132 +504,6 @@ export const es = {
     view_volunteering: 'Ver mi voluntariado',
   },
 
-  // ── Buscar familiar (reunificación) ──────────────────────────────────────
-  buscar_familiar: {
-    page_title: 'Buscar familiar',
-    page_subtitle:
-      '{emergencyName} · Si buscas a alguien, rellena el formulario. Personal autorizado gestionará tu solicitud.',
-    meta_title: 'Buscar familiar — {emergencyName} · ResponseGrid',
-    meta_description:
-      'Registra una búsqueda de familiar en {emergencyName}. Datos estrictamente privados.',
-
-    // Section headings
-    person_section: 'Datos de la persona buscada',
-    reporter_section: 'Tus datos de contacto',
-    consent_section: 'Consentimiento',
-
-    // Person fields
-    first_name_label: 'Nombre',
-    first_name_placeholder: 'Ej. María',
-    last_name_label: 'Apellido(s)',
-    last_name_placeholder: 'Ej. García López',
-    document_id_label: 'Documento de identidad (DNI/NIE/Pasaporte)',
-    document_id_placeholder: 'Ej. 12345678A',
-    approximate_age_label: 'Edad aproximada',
-    approximate_age_placeholder: 'Ej. 45',
-    last_known_location_label: 'Última ubicación conocida',
-    last_known_location_placeholder: 'Ej. Calle Mayor 10, Valencia',
-    description_label: 'Descripción física / ropa',
-    description_placeholder:
-      'Rasgos físicos, ropa que llevaba en el último momento que se le vio…',
-
-    // Reporter fields
-    reporter_name_label: 'Tu nombre completo',
-    reporter_name_placeholder: 'Ej. Juan García',
-    reporter_phone_label: 'Tu teléfono de contacto',
-    reporter_phone_placeholder: 'Ej. 612 345 678',
-    reporter_email_label: 'Tu correo electrónico',
-    reporter_email_placeholder: 'Ej. juan@ejemplo.com',
-
-    // Consent
-    consent_text:
-      'Acepto el tratamiento de mis datos personales y los de la persona buscada para la gestión de esta solicitud de reunificación familiar, conforme al RGPD. Los datos serán usados exclusivamente por personal autorizado de la emergencia.',
-
-    // Submission
-    submit: 'Enviar solicitud',
-    submitting: 'Enviando…',
-
-    // Errors
-    error_paused:
-      'Esta emergencia está en pausa y no acepta nuevas solicitudes en este momento.',
-    error_consent: 'Debes aceptar el consentimiento de tratamiento de datos.',
-    error_fallback: 'Error al enviar la solicitud. Inténtalo de nuevo.',
-
-    // Success
-    success_title: 'Solicitud registrada',
-    success_body:
-      'Tu solicitud ha sido registrada. El personal autorizado la revisará y se pondrá en contacto contigo a través de los datos facilitados.',
-    success_privacy:
-      'Recuerda: los datos son estrictamente privados y solo accesibles para el personal autorizado de la emergencia.',
-    back_to_emergency: 'Volver a la emergencia',
-  },
-
-  // ── Mi búsqueda (vista personal) ─────────────────────────────────────────
-  mi_busqueda: {
-    page_title: 'Mi búsqueda',
-    meta_title: 'Mi búsqueda — {emergencyName} · ResponseGrid',
-    no_reports_title: 'No tienes búsquedas registradas.',
-    no_reports_description:
-      'Si registraste una búsqueda sin iniciar sesión, no podrás verla aquí.',
-    report_id_label: 'Ref.',
-    person_label: 'Persona buscada',
-    status_label: 'Estado',
-    submitted_label: 'Enviada el',
-    sightings_label: 'Avistamientos',
-    no_sightings: 'Sin avistamientos aún.',
-    sighting_at: 'Avistado en',
-  },
-
-  // ── Coordinación / reunificación ─────────────────────────────────────────
-  coord_reunificacion: {
-    page_title: 'Reunificación familiar',
-    meta_title: 'Reunificación — {emergencyName} · ResponseGrid',
-    queue_heading: 'Cola de solicitudes',
-    filter_label: 'Filtrar por estado',
-    filter_all: 'Todos los estados',
-    search_heading: 'Buscar por documento',
-    search_placeholder: 'Nº documento (DNI, NIE, Pasaporte…)',
-    search_button: 'Buscar',
-    search_no_results: 'No se encontraron coincidencias.',
-    col_name: 'Persona',
-    col_document: 'Documento',
-    col_age: 'Edad aprox.',
-    col_status: 'Estado',
-    col_date: 'Fecha',
-    col_actions: 'Acciones',
-    view_detail: 'Ver detalle',
-    empty_queue: 'No hay solicitudes con este estado.',
-
-    // Detail
-    detail_heading: 'Detalle de la solicitud',
-    back_to_queue: '← Volver a la cola',
-    person_section: 'Persona buscada',
-    reporter_section: 'Datos del solicitante',
-    sightings_section: 'Avistamientos',
-    no_sightings: 'Sin avistamientos registrados.',
-    change_status_heading: 'Cambiar estado',
-    add_sighting_heading: 'Registrar avistamiento',
-
-    // Status change form
-    new_status_label: 'Nuevo estado',
-    match_note_label: 'Nota de cruce (opcional)',
-    match_note_placeholder: 'Ej. Confirmado en hospital La Fe…',
-    save_status: 'Guardar estado',
-    saving_status: 'Guardando…',
-    status_updated: 'Estado actualizado correctamente.',
-
-    // Sighting form
-    sighting_location_label: 'Lugar del avistamiento',
-    sighting_location_placeholder: 'Ej. Plaza Mayor, Valencia',
-    sighting_note_label: 'Nota',
-    sighting_note_placeholder: 'Describe lo que se vio…',
-    add_sighting_submit: 'Añadir avistamiento',
-    adding_sighting: 'Añadiendo…',
-    sighting_added: 'Avistamiento registrado.',
-
-    error_fallback: 'Error al procesar la acción. Inténtalo de nuevo.',
-  },
-
   // ── Reportar form ─────────────────────────────────────────────────────────
   reportar: {
     page_title: 'Enviar parte de campo',
@@ -665,8 +521,6 @@ export const es = {
     type_stock: 'Stock',
     type_status: 'Estado',
     type_other: 'Otro',
-    type_structural_damage: '🏚 Daños estructurales',
-    type_trapped_persons: '🆘 Personas atrapadas',
 
     priority_low: 'Baja',
     priority_medium: 'Media',

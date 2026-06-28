@@ -3,11 +3,7 @@ import {
   ReportRepository,
 } from '../domain/ports/report.repository';
 import { Report } from '../domain/report';
-import {
-  ReportType,
-  ReportPriority,
-  StructuralDetail,
-} from '../domain/report-enums';
+import { ReportType, ReportPriority } from '../domain/report-enums';
 import { LocationProps } from '../../../shared/domain/location';
 
 export interface SubmitReportCommand {
@@ -19,7 +15,6 @@ export interface SubmitReportCommand {
   priority: ReportPriority;
   resourceId?: string | null;
   location?: LocationProps | null;
-  structuralDetail?: StructuralDetail | null;
 }
 
 export { REPORT_REPOSITORY };
@@ -37,7 +32,6 @@ export class SubmitReport {
       photoUrls: cmd.photoUrls ?? [],
       priority: cmd.priority,
       location: cmd.location ?? null,
-      structuralDetail: cmd.structuralDetail ?? null,
     });
     await this.repo.save(report);
     return { id: report.id };

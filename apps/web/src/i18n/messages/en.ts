@@ -95,20 +95,10 @@ export const en = {
     metric_tile_covered: 'Covered',
     metric_tile_queue: 'In queue',
 
-    // Most effective now
-    effective_overline: 'Most effective right now',
-    effective_title: 'Donate money to verified organisations',
-    effective_cta: 'View verified campaigns',
-
     // "How do you want to help?" subtitles
     help_offer_subtitle: 'Warehouse · transport · space',
     help_volunteer_subtitle: 'Availability and skills',
     help_petition_subtitle: 'Request validated supplies',
-    help_report_title: 'Report damage or trapped people',
-
-    // Family search
-    family_title: 'Search for a relative',
-    family_subtitle: 'Private data · authorised personnel only',
 
     // What NOT to do
     dont_do_heading: 'What NOT to do right now',
@@ -141,7 +131,6 @@ export const en = {
     action_submit_petition: 'Submit a request',
     action_donate: 'Donate supplies',
     action_volunteer: 'Sign up as a volunteer',
-    action_report_damage: '🏚 Report structural damage',
     actions_paused:
       'Resource and request registration is paused. Check the available information and come back later.',
 
@@ -162,11 +151,6 @@ export const en = {
     map_legend_saturated: 'Saturated',
     map_legend_paused: 'Paused',
     map_legend_need: 'Request',
-    map_legend_damage_collapsed: 'Collapsed',
-    map_legend_damage_severe: 'Severe damage',
-    map_legend_damage_moderate: 'Moderate damage',
-    map_damage_toggle_show: 'Show damage',
-    map_damage_toggle_hide: 'Hide damage',
     map_user_location_notice: 'Your location is not published or shared.',
 
     // Privacy (F09)
@@ -174,7 +158,6 @@ export const en = {
 
     footer_my_points: 'My points',
     footer_my_volunteer: 'My volunteering',
-    footer_my_search: 'My search',
     footer_report: 'Report',
     footer_coordination: 'Coordination access',
 

@@ -11,7 +11,6 @@ import { FormSuccessScreen } from '@/components/molecules/form-success-screen';
 import { PhotoUploader } from '@/components/molecules/photo-uploader';
 import { DraftRestoredBanner } from '@/components/atoms/draft-restored-banner';
 import { useFormDraft } from '@/lib/use-form-draft';
-import { StructuralDamageForm } from '@/components/molecules/structural-damage-form';
 import type { Messages } from '@/i18n/messages/es';
 
 const INITIAL_STATE: SubmitReportState = { status: 'idle' };
@@ -68,15 +67,11 @@ export function ReportForm({
     photoUrlsRef.current = urls;
   }, []);
 
-  const isStructuralType = type === 'structural_damage' || type === 'trapped_persons';
-
   const reportTypes = [
     { value: 'incident', label: t.type_incident },
     { value: 'stock', label: t.type_stock },
     { value: 'status', label: t.type_status },
     { value: 'other', label: t.type_other },
-    { value: 'structural_damage', label: t.type_structural_damage },
-    { value: 'trapped_persons', label: t.type_trapped_persons },
   ] as const;
 
   const reportPriorities = [
@@ -131,9 +126,6 @@ export function ReportForm({
           ))}
         </Select>
       </FormField>
-
-      {/* Sub-formulario SAR — aparece cuando el tipo es estructural */}
-      {isStructuralType && <StructuralDamageForm />}
 
       {/* Prioridad */}
       <FormField

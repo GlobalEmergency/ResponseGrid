@@ -44,8 +44,8 @@ async function bootstrap(): Promise<void> {
   );
 
   // ── CORS ───────────────────────────────────────────────────────────────────
-  // The Next.js frontend issues client-side fetches (e.g. the public damage-layer
-  // GeoJSON consumed by the Leaflet map) to this API from a different origin
+  // The Next.js frontend issues client-side fetches (e.g. the public resource
+  // points consumed by the Leaflet map) to this API from a different origin
   // (3001 → 3000). Without CORS the browser blocks those responses ("Failed to
   // fetch"). credentials:true allows the httpOnly auth cookie on client-side
   // authenticated calls. Origin is restricted to FRONTEND_URL (no wildcard).

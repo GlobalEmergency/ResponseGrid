@@ -5,13 +5,7 @@ import { getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 
-export type ReportType =
-  | 'incident'
-  | 'stock'
-  | 'status'
-  | 'other'
-  | 'structural_damage'
-  | 'trapped_persons';
+export type ReportType = 'incident' | 'stock' | 'status' | 'other';
 export type ReportPriority = 'low' | 'medium' | 'high' | 'urgent';
 
 export type SubmitReportState =
@@ -19,14 +13,7 @@ export type SubmitReportState =
   | { status: 'success' }
   | { status: 'error'; message: string };
 
-const VALID_TYPES: ReportType[] = [
-  'incident',
-  'stock',
-  'status',
-  'other',
-  'structural_damage',
-  'trapped_persons',
-];
+const VALID_TYPES: ReportType[] = ['incident', 'stock', 'status', 'other'];
 const VALID_PRIORITIES: ReportPriority[] = ['low', 'medium', 'high', 'urgent'];
 
 function isReportType(v: unknown): v is ReportType {
@@ -86,45 +73,6 @@ export async function submitReport(
     body.resourceId = resourceId.trim();
   }
 
-  // Parse structural detail fields when type is structural_damage or trapped_persons
-  if (type === 'structural_damage' || type === 'trapped_persons') {
-    const damageLevelRaw = formData.get('damageLevel');
-    const VALID_DAMAGE_LEVELS = ['collapsed', 'severe', 'moderate'] as const;
-    type DamageLevel = typeof VALID_DAMAGE_LEVELS[number];
-
-    const isValidDamageLevel = (v: unknown): v is DamageLevel =>
-      typeof v === 'string' && (VALID_DAMAGE_LEVELS as readonly string[]).includes(v);
-
-    if (!isValidDamageLevel(damageLevelRaw)) {
-      return { status: 'error', message: 'Selecciona el nivel de daño estructural.' };
-    }
-
-    const trappedRaw = formData.get('trappedPersonsEstimate');
-    const accessibleRaw = formData.get('accessibleForRescue');
-    const buildingTypeRaw = formData.get('buildingType');
-
-    const structuralDetail: components['schemas']['StructuralDetailDto'] = {
-      damageLevel: damageLevelRaw,
-    };
-
-    if (typeof trappedRaw === 'string' && trappedRaw.trim().length > 0) {
-      const parsed = parseInt(trappedRaw.trim(), 10);
-      if (!isNaN(parsed) && parsed >= 0) {
-        structuralDetail.trappedPersonsEstimate = parsed;
-      }
-    }
-
-    if (accessibleRaw === 'true') {
-      structuralDetail.accessibleForRescue = true;
-    }
-
-    if (typeof buildingTypeRaw === 'string' && buildingTypeRaw.trim().length > 0) {
-      structuralDetail.buildingType = buildingTypeRaw.trim();
-    }
-
-    body.structuralDetail = structuralDetail;
-  }
-
   const { response } = await api.POST('/emergencies/{emergencyId}/reports', {
     params: { path: { emergencyId } },
     body,
@@ -177,48 +125,6 @@ export async function reviewReport(
 
   if (!response.ok) {
     return { status: 'error', message: 'No se pudo marcar como revisado. Inténtalo de nuevo.' };
-  }
-
-  return { status: 'success' };
-}
-
-export type PublishReportResult =
-  | { status: 'idle' }
-  | { status: 'success' }
-  | { status: 'error'; message: string };
-
-export async function publishReport(
-  reportId: string,
-  slug: string,
-  publishNote?: string,
-): Promise<PublishReportResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion/reportes`);
-  }
-
-  const body: components['schemas']['PublishReportDto'] = {};
-  if (typeof publishNote === 'string' && publishNote.trim().length > 0) {
-    body.publishNote = publishNote.trim();
-  }
-
-  const { response } = await api.POST('/reports/{reportId}/publish', {
-    params: { path: { reportId } },
-    body,
-    headers: authHeaders(token),
-  });
-
-  if (response.status === 401) {
-    await clearToken();
-    redirect(`/login?next=/e/${slug}/coordinacion/reportes`);
-  }
-
-  if (response.status === 403) {
-    return { status: 'error', message: 'No tienes permisos para publicar este parte.' };
-  }
-
-  if (!response.ok) {
-    return { status: 'error', message: 'No se pudo publicar el parte. Inténtalo de nuevo.' };
   }
 
   return { status: 'success' };

@@ -170,15 +170,6 @@ export default async function CoordinacionPage({ params, searchParams }: Props) 
           <span aria-hidden="true" className="text-lg">→</span>
         </Link>
 
-        {/* ── ENLACE A REUNIFICACIÓN FAMILIAR ─────────────────────────── */}
-        <Link
-          href={`/e/${slug}/coordinacion/reunificacion`}
-          className="flex items-center justify-between gap-3 rounded-lg border-2 border-amber-600 bg-amber-50 px-5 py-4 font-semibold text-gray-900 transition-colors hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2"
-        >
-          <span>Reunificación familiar</span>
-          <span aria-hidden="true" className="text-lg">→</span>
-        </Link>
-
         <hr className="border-gray-200" />
 
         {/* ── RECURSOS PENDIENTES ─────────────────────────────────────── */}

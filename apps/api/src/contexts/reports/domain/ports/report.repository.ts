@@ -21,5 +21,4 @@ export interface ReportRepository {
     emergencyId: string,
     reporterUserId: string,
   ): Promise<Report[]>;
-  findPublishedStructuralByEmergencyId(emergencyId: string): Promise<Report[]>;
 }

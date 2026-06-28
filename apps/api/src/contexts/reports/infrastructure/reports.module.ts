@@ -7,8 +7,6 @@ import { SubmitReport } from '../application/submit-report';
 import { GetReportsQueue } from '../application/get-reports-queue';
 import { MarkReportReviewed } from '../application/mark-report-reviewed';
 import { GetMyReports } from '../application/get-my-reports';
-import { PublishStructuralReport } from '../application/publish-structural-report';
-import { GetPublishedDamageLayer } from '../application/get-published-damage-layer';
 import {
   REPORT_REPOSITORY,
   ReportRepository,
@@ -45,18 +43,6 @@ const getMyReportsProvider = {
   useFactory: (repo: ReportRepository) => new GetMyReports(repo),
 };
 
-const publishStructuralReportProvider = {
-  provide: PublishStructuralReport,
-  inject: [REPORT_REPOSITORY],
-  useFactory: (repo: ReportRepository) => new PublishStructuralReport(repo),
-};
-
-const getPublishedDamageLayerProvider = {
-  provide: GetPublishedDamageLayer,
-  inject: [REPORT_REPOSITORY],
-  useFactory: (repo: ReportRepository) => new GetPublishedDamageLayer(repo),
-};
-
 @Module({
   imports: [DatabaseModule, IdentityModule],
   controllers: [ReportsController],
@@ -66,8 +52,6 @@ const getPublishedDamageLayerProvider = {
     getReportsQueueProvider,
     markReportReviewedProvider,
     getMyReportsProvider,
-    publishStructuralReportProvider,
-    getPublishedDamageLayerProvider,
   ],
 })
 export class ReportsModule {}

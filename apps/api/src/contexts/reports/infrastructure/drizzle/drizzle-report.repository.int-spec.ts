@@ -6,7 +6,6 @@ import {
   ReportType,
   ReportPriority,
   ReportStatus,
-  DamageLevel,
 } from '../../domain/report-enums';
 import { reportsTable } from './schema';
 
@@ -140,121 +139,14 @@ describe('DrizzleReportRepository (int-spec)', () => {
     expect(results[0].note).toBe('Mine');
   });
 
-  it('round-trips structural SAR fields', async () => {
-    const EM = '66666666-6666-4666-8666-666666666666';
-    const report = Report.create({
-      emergencyId: EM,
-      reporterUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
-      type: ReportType.StructuralDamage,
-      note: 'Hospital damaged',
-      priority: ReportPriority.High,
-      structuralDetail: {
-        damageLevel: DamageLevel.Severe,
-        trappedPersonsEstimate: 5,
-        accessibleForRescue: true,
-        buildingType: 'hospital',
-      },
-    });
-    await repo.save(report);
-    const found = await repo.findById(report.id);
-    expect(found!.damageLevel).toBe(DamageLevel.Severe);
-    expect(found!.trappedPersonsEstimate).toBe(5);
-    expect(found!.accessibleForRescue).toBe(true);
-    expect(found!.buildingType).toBe('hospital');
-  });
-
-  it('round-trips publishedAt and publishNote after publish()', async () => {
-    const EM = '77777777-7777-4777-8777-777777777777';
-    const report = Report.create({
-      emergencyId: EM,
-      reporterUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
-      type: ReportType.StructuralDamage,
-      note: 'School damaged',
-      priority: ReportPriority.High,
-      structuralDetail: {
-        damageLevel: DamageLevel.Moderate,
-        trappedPersonsEstimate: null,
-        accessibleForRescue: null,
-        buildingType: null,
-      },
-    });
-    await repo.save(report);
-    report.markReviewed();
-    await repo.save(report);
-    report.publish('Verified by SAR coordinator');
-    await repo.save(report);
-    const found = await repo.findById(report.id);
-    expect(found!.status).toBe(ReportStatus.Published);
-    expect(found!.publishNote).toBe('Verified by SAR coordinator');
-    expect(found!.publishedAt).not.toBeNull();
-  });
-
-  it('findPublishedStructuralByEmergencyId returns only published structural reports', async () => {
-    const EM = '88888888-8888-4888-8888-888888888888';
-    const published = Report.create({
-      emergencyId: EM,
-      reporterUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
-      type: ReportType.StructuralDamage,
-      note: 'Published one',
-      priority: ReportPriority.High,
-      structuralDetail: {
-        damageLevel: DamageLevel.Severe,
-        trappedPersonsEstimate: null,
-        accessibleForRescue: null,
-        buildingType: null,
-      },
-    });
-    published.markReviewed();
-    published.publish('All clear');
-
-    const openStructural = Report.create({
-      emergencyId: EM,
-      reporterUserId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
-      type: ReportType.StructuralDamage,
-      note: 'Still open',
-      priority: ReportPriority.Medium,
-      structuralDetail: {
-        damageLevel: DamageLevel.Moderate,
-        trappedPersonsEstimate: null,
-        accessibleForRescue: null,
-        buildingType: null,
-      },
-    });
-
-    const nonStructural = Report.create({
-      emergencyId: EM,
-      reporterUserId: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
-      type: ReportType.Incident,
-      note: 'Incident',
-      priority: ReportPriority.Low,
-    });
-
-    await Promise.all([
-      repo.save(published),
-      repo.save(openStructural),
-      repo.save(nonStructural),
-    ]);
-
-    const results = await repo.findPublishedStructuralByEmergencyId(EM);
-    expect(results).toHaveLength(1);
-    expect(results[0].id).toBe(published.id);
-    expect(results[0].status).toBe(ReportStatus.Published);
-  });
-
   it('filters findByEmergencyId by type', async () => {
     const EM = '99999999-9999-4999-8999-999999999999';
-    const structural = Report.create({
+    const stock = Report.create({
       emergencyId: EM,
       reporterUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
-      type: ReportType.StructuralDamage,
-      note: 'Structural',
+      type: ReportType.Stock,
+      note: 'Stock',
       priority: ReportPriority.High,
-      structuralDetail: {
-        damageLevel: DamageLevel.Moderate,
-        trappedPersonsEstimate: null,
-        accessibleForRescue: null,
-        buildingType: null,
-      },
     });
     const incident = Report.create({
       emergencyId: EM,
@@ -263,12 +155,12 @@ describe('DrizzleReportRepository (int-spec)', () => {
       note: 'Incident',
       priority: ReportPriority.Low,
     });
-    await Promise.all([repo.save(structural), repo.save(incident)]);
+    await Promise.all([repo.save(stock), repo.save(incident)]);
 
     const results = await repo.findByEmergencyId(EM, {
-      type: ReportType.StructuralDamage,
+      type: ReportType.Stock,
     });
     expect(results).toHaveLength(1);
-    expect(results[0].type).toBe(ReportType.StructuralDamage);
+    expect(results[0].type).toBe(ReportType.Stock);
   });
 });

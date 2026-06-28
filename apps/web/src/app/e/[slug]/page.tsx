@@ -11,9 +11,7 @@ import { EmptyState } from '@/components/molecules/empty-state';
 import { MetricCard } from '@/components/molecules/metric-card';
 import { StatusBanner } from '@/components/molecules/status-banner';
 import { AnnouncementCard } from '@/components/molecules/announcement-card';
-import { EffectiveActionCard } from '@/components/molecules/effective-action-card';
 import { HelpActionRow } from '@/components/molecules/help-action-row';
-import { FamilySearchCard } from '@/components/molecules/family-search-card';
 import { NeedCard } from '@/components/molecules/need-card';
 import { LandingFooter } from '@/components/molecules/landing-footer';
 import type { MapPoint } from '@/components/emergency-map';
@@ -158,30 +156,12 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
         <div className="flex flex-col gap-5 px-4 pb-12 pt-5 lg:gap-6 lg:px-8">
           <StatusBanner status={emergency.status} t={t.status_banner} />
 
-          {/* Comunicado oficial + "Lo más eficaz ahora" (lado a lado en escritorio) */}
-          {isActive ? (
-            <div className="grid gap-5 lg:grid-cols-3">
-              <div className="lg:col-span-2">
-                <AnnouncementCard
-                  announcement={typeof emergency.announcement === 'string' ? emergency.announcement : null}
-                  updatedAt={emergency.updatedAt}
-                  t={t.announcement}
-                />
-              </div>
-              <EffectiveActionCard
-                href={`/e/${slug}/donar`}
-                overline={te.effective_overline}
-                title={te.effective_title}
-                cta={te.effective_cta}
-              />
-            </div>
-          ) : (
-            <AnnouncementCard
-              announcement={typeof emergency.announcement === 'string' ? emergency.announcement : null}
-              updatedAt={emergency.updatedAt}
-              t={t.announcement}
-            />
-          )}
+          {/* Comunicado oficial */}
+          <AnnouncementCard
+            announcement={typeof emergency.announcement === 'string' ? emergency.announcement : null}
+            updatedAt={emergency.updatedAt}
+            t={t.announcement}
+          />
 
           {/* Métricas (fila de KPIs) */}
           {metrics !== undefined && (
@@ -222,20 +202,8 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
                   title={te.action_submit_petition}
                   subtitle={te.help_petition_subtitle}
                 />
-                <HelpActionRow
-                  href={`/e/${slug}/reportar`}
-                  icon="⚠️"
-                  title={te.help_report_title}
-                  variant="danger"
-                />
               </div>
             )}
-
-            <FamilySearchCard
-              href={`/e/${slug}/buscar-familiar`}
-              title={te.family_title}
-              subtitle={te.family_subtitle}
-            />
 
             {!isActive && (
               <p className="rounded-card border border-line bg-surface-alt px-4 py-4 text-sm text-muted">

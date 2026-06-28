@@ -4,8 +4,6 @@ import {
   text,
   timestamp,
   doublePrecision,
-  integer,
-  boolean,
 } from 'drizzle-orm/pg-core';
 
 export const reportsTable = pgTable('reports', {
@@ -23,11 +21,4 @@ export const reportsTable = pgTable('reports', {
   locationLongitude: doublePrecision('location_longitude'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
   reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
-  // Structural SAR fields (nullable; only populated for structural_damage / trapped_persons types)
-  damageLevel: text('damage_level'),
-  trappedPersonsEstimate: integer('trapped_persons_estimate'),
-  accessibleForRescue: boolean('accessible_for_rescue'),
-  buildingType: text('building_type'),
-  publishedAt: timestamp('published_at', { withTimezone: true }),
-  publishNote: text('publish_note'),
 });

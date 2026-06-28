@@ -1,17 +1,6 @@
 import { Report } from './report';
-import {
-  ReportType,
-  ReportPriority,
-  ReportStatus,
-  DamageLevel,
-} from './report-enums';
-import {
-  ReportAlreadyReviewedError,
-  ReportNotPublishableError,
-  ReportNotInReviewedStatusError,
-  ReportStructuralDetailRequiredError,
-} from './report-errors';
-import { Priority } from '../../../shared/domain/priority';
+import { ReportType, ReportPriority, ReportStatus } from './report-enums';
+import { ReportAlreadyReviewedError } from './report-errors';
 
 const baseProps = {
   emergencyId: 'em-1111-1111-1111-111111111111',
@@ -83,107 +72,6 @@ describe('Report aggregate', () => {
       expect(report.note).toBe(baseProps.note);
       expect(report.priority).toBe(ReportPriority.High);
     });
-
-    // Structural SAR tests
-    it('auto-elevates priority to urgent for trapped_persons type', () => {
-      const report = Report.create({
-        ...baseProps,
-        type: ReportType.TrappedPersons,
-        priority: ReportPriority.Low,
-        structuralDetail: {
-          damageLevel: DamageLevel.Severe,
-          trappedPersonsEstimate: 3,
-          accessibleForRescue: true,
-          buildingType: 'residential',
-        },
-      });
-      expect(report.priority).toBe(Priority.Urgent);
-    });
-
-    it('auto-elevates priority to urgent for collapsed damage level', () => {
-      const report = Report.create({
-        ...baseProps,
-        type: ReportType.StructuralDamage,
-        priority: ReportPriority.Medium,
-        structuralDetail: {
-          damageLevel: DamageLevel.Collapsed,
-          trappedPersonsEstimate: null,
-          accessibleForRescue: null,
-          buildingType: null,
-        },
-      });
-      expect(report.priority).toBe(Priority.Urgent);
-    });
-
-    it('does NOT auto-elevate priority for severe damage without trapped_persons type', () => {
-      const report = Report.create({
-        ...baseProps,
-        type: ReportType.StructuralDamage,
-        priority: ReportPriority.Medium,
-        structuralDetail: {
-          damageLevel: DamageLevel.Severe,
-          trappedPersonsEstimate: null,
-          accessibleForRescue: null,
-          buildingType: null,
-        },
-      });
-      expect(report.priority).toBe(ReportPriority.Medium);
-    });
-
-    it('keeps high priority already set if not auto-elevated', () => {
-      const report = Report.create({
-        ...baseProps,
-        type: ReportType.StructuralDamage,
-        priority: ReportPriority.High,
-        structuralDetail: {
-          damageLevel: DamageLevel.Moderate,
-          trappedPersonsEstimate: null,
-          accessibleForRescue: null,
-          buildingType: null,
-        },
-      });
-      expect(report.priority).toBe(ReportPriority.High);
-    });
-
-    it('stores structural detail for structural_damage type', () => {
-      const report = Report.create({
-        ...baseProps,
-        type: ReportType.StructuralDamage,
-        structuralDetail: {
-          damageLevel: DamageLevel.Severe,
-          trappedPersonsEstimate: 2,
-          accessibleForRescue: false,
-          buildingType: 'hospital',
-        },
-      });
-      expect(report.damageLevel).toBe(DamageLevel.Severe);
-      expect(report.trappedPersonsEstimate).toBe(2);
-      expect(report.accessibleForRescue).toBe(false);
-      expect(report.buildingType).toBe('hospital');
-    });
-
-    it('stores null structural fields for non-structural types', () => {
-      const report = Report.create(baseProps);
-      expect(report.damageLevel).toBeNull();
-      expect(report.trappedPersonsEstimate).toBeNull();
-      expect(report.accessibleForRescue).toBeNull();
-      expect(report.buildingType).toBeNull();
-    });
-
-    it('throws ReportStructuralDetailRequiredError when structuralDetail provided for non-structural type', () => {
-      expect(() =>
-        Report.create({
-          ...baseProps,
-          type: ReportType.Incident,
-          structuralDetail: {
-            damageLevel: DamageLevel.Moderate,
-            trappedPersonsEstimate: null,
-            accessibleForRescue: null,
-            buildingType: null,
-          },
-        }),
-      ).toThrow(ReportStructuralDetailRequiredError);
-    });
   });
 
   describe('markReviewed()', () => {
@@ -212,96 +100,6 @@ describe('Report aggregate', () => {
     });
   });
 
-  describe('publish()', () => {
-    it('transitions status from Reviewed to Published', () => {
-      const report = Report.create({
-        ...baseProps,
-        type: ReportType.StructuralDamage,
-        structuralDetail: {
-          damageLevel: DamageLevel.Severe,
-          trappedPersonsEstimate: null,
-          accessibleForRescue: null,
-          buildingType: null,
-        },
-      });
-      report.markReviewed();
-      report.publish('Confirmed damage, SAR team dispatched');
-      expect(report.status).toBe(ReportStatus.Published);
-      expect(report.publishNote).toBe('Confirmed damage, SAR team dispatched');
-      expect(report.publishedAt).not.toBeNull();
-    });
-
-    it('sets publishedAt to current date', () => {
-      const report = Report.create({
-        ...baseProps,
-        type: ReportType.TrappedPersons,
-        structuralDetail: {
-          damageLevel: DamageLevel.Collapsed,
-          trappedPersonsEstimate: 4,
-          accessibleForRescue: true,
-          buildingType: null,
-        },
-      });
-      report.markReviewed();
-      const before = new Date();
-      report.publish();
-      const after = new Date();
-      expect(report.publishedAt!.getTime()).toBeGreaterThanOrEqual(
-        before.getTime(),
-      );
-      expect(report.publishedAt!.getTime()).toBeLessThanOrEqual(
-        after.getTime(),
-      );
-    });
-
-    it('throws ReportNotInReviewedStatusError when publishing from Open status', () => {
-      const report = Report.create({
-        ...baseProps,
-        type: ReportType.StructuralDamage,
-        structuralDetail: {
-          damageLevel: DamageLevel.Moderate,
-          trappedPersonsEstimate: null,
-          accessibleForRescue: null,
-          buildingType: null,
-        },
-      });
-      expect(() => report.publish()).toThrow(ReportNotInReviewedStatusError);
-    });
-
-    it('throws ReportNotPublishableError when already published', () => {
-      const report = Report.create({
-        ...baseProps,
-        type: ReportType.StructuralDamage,
-        structuralDetail: {
-          damageLevel: DamageLevel.Severe,
-          trappedPersonsEstimate: null,
-          accessibleForRescue: null,
-          buildingType: null,
-        },
-      });
-      report.markReviewed();
-      report.publish();
-      expect(() => report.publish()).toThrow(ReportNotPublishableError);
-    });
-
-    it('allows publish with no publishNote (nullable)', () => {
-      const report = Report.create({
-        ...baseProps,
-        type: ReportType.StructuralDamage,
-        structuralDetail: {
-          damageLevel: DamageLevel.Moderate,
-          trappedPersonsEstimate: null,
-          accessibleForRescue: null,
-          buildingType: null,
-        },
-      });
-      report.markReviewed();
-      report.publish();
-      expect(report.publishNote).toBeNull();
-      expect(report.status).toBe(ReportStatus.Published);
-    });
-  });
-
   describe('fromSnapshot() / toSnapshot()', () => {
     it('round-trips through snapshot', () => {
       const original = Report.create({
@@ -318,32 +116,6 @@ describe('Report aggregate', () => {
       expect(restored.reviewedAt).toEqual(original.reviewedAt);
       expect(restored.photoUrls).toEqual(['http://example.com/a.jpg']);
       expect(restored.location?.toPlain().address).toBe('Test street');
-    });
-
-    it('round-trips structural fields through snapshot', () => {
-      const original = Report.create({
-        ...baseProps,
-        type: ReportType.StructuralDamage,
-        structuralDetail: {
-          damageLevel: DamageLevel.Severe,
-          trappedPersonsEstimate: 3,
-          accessibleForRescue: true,
-          buildingType: 'school',
-        },
-      });
-      original.markReviewed();
-      original.publish('Verified — school partially collapsed');
-      const snapshot = original.toSnapshot();
-      const restored = Report.fromSnapshot(snapshot);
-      expect(restored.damageLevel).toBe(DamageLevel.Severe);
-      expect(restored.trappedPersonsEstimate).toBe(3);
-      expect(restored.accessibleForRescue).toBe(true);
-      expect(restored.buildingType).toBe('school');
-      expect(restored.status).toBe(ReportStatus.Published);
-      expect(restored.publishNote).toBe(
-        'Verified — school partially collapsed',
-      );
-      expect(restored.publishedAt).not.toBeNull();
     });
   });
 });
