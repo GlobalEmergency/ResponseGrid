@@ -1946,6 +1946,24 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size for pagination (1-100). Omit to return all.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of items to skip (pagination). Defaults to 0.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2037,6 +2055,89 @@
           }
         },
         "summary": "List validated needs near a GPS point, ordered by distance (public, #57)",
+        "tags": [
+          "needs"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/public/needs/in-bounds": {
+      "get": {
+        "operationId": "NeedsController_needsInBounds",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "minLat",
+            "required": true,
+            "in": "query",
+            "description": "South latitude bound (-90 to 90)",
+            "schema": {
+              "example": 10.3,
+              "type": "number"
+            }
+          },
+          {
+            "name": "minLng",
+            "required": true,
+            "in": "query",
+            "description": "West longitude bound (-180 to 180)",
+            "schema": {
+              "example": -67.2,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxLat",
+            "required": true,
+            "in": "query",
+            "description": "North latitude bound (-90 to 90)",
+            "schema": {
+              "example": 10.7,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxLng",
+            "required": true,
+            "in": "query",
+            "description": "East longitude bound (-180 to 180)",
+            "schema": {
+              "example": -66.6,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max results (default 500, max 1000)",
+            "schema": {
+              "example": 500,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validated needs within the bounding box",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InBoundsNeedsDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List validated needs within a geographic bounding box (public)",
         "tags": [
           "needs"
         ]
@@ -3257,6 +3358,193 @@
         "summary": "Cancel an offer (owner or coordinator)",
         "tags": [
           "offers"
+        ]
+      }
+    },
+    "/logistics/capacities": {
+      "post": {
+        "operationId": "LogisticsController_publish",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishCapacityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Capacity published",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishCapacityResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing capacity:publish permission"
+          },
+          "409": {
+            "description": "Emergency is not accepting intake (paused/closed)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Publish a transport-capacity offer (authenticated, citizen-grade)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/capacities/{id}/withdraw": {
+      "post": {
+        "operationId": "LogisticsController_withdraw",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Capacity UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Capacity withdrawn"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Only the provider or a coordinator can withdraw"
+          },
+          "404": {
+            "description": "Capacity not found"
+          },
+          "409": {
+            "description": "Capacity cannot be withdrawn in its current status"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Withdraw a transport-capacity offer (provider or coordinator)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/emergencies/{emergencyId}/logistics/capacities": {
+      "get": {
+        "operationId": "LogisticsController_list",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "mode",
+            "required": false,
+            "in": "query",
+            "description": "Filter by mode",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "road",
+                "sea",
+                "air"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "available",
+                "reserved",
+                "withdrawn"
+              ]
+            }
+          },
+          {
+            "name": "availableFrom",
+            "required": false,
+            "in": "query",
+            "description": "Keep capacities available at/after this instant (ISO-8601)",
+            "schema": {
+              "example": "2026-07-05T00:00:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "availableTo",
+            "required": false,
+            "in": "query",
+            "description": "Keep capacities available at/before this instant (ISO-8601)",
+            "schema": {
+              "example": "2026-07-10T00:00:00.000Z",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Capacities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CapacityViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing capacity:read permission"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List transport capacities for an emergency (coordinator/verifier)",
+        "tags": [
+          "logistics"
         ]
       }
     },
@@ -6681,6 +6969,20 @@
           "items"
         ]
       },
+      "InBoundsNeedsDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NeedViewDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
       "AssignNeedManagerDto": {
         "type": "object",
         "properties": {
@@ -6862,6 +7164,7 @@
               "company",
               "public_admin",
               "association",
+              "transport_operator",
               "other"
             ],
             "example": "ngo"
@@ -6908,6 +7211,7 @@
               "company",
               "public_admin",
               "association",
+              "transport_operator",
               "other"
             ]
           },
@@ -7373,6 +7677,351 @@
         },
         "required": [
           "needId"
+        ]
+      },
+      "PublishCapacityProviderDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "volunteer",
+              "organization"
+            ],
+            "example": "volunteer"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Volunteer or organization id (polymorphic, no FK)"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ]
+      },
+      "CapacityAmountDto": {
+        "type": "object",
+        "properties": {
+          "weightKg": {
+            "type": "number",
+            "example": 1500,
+            "description": "Carrying weight in kilograms (positive)",
+            "nullable": true
+          },
+          "volumeM3": {
+            "type": "number",
+            "example": 12,
+            "description": "Carrying volume in cubic metres (positive)",
+            "nullable": true
+          }
+        }
+      },
+      "CoverageDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "corridor",
+              "area"
+            ],
+            "example": "corridor"
+          },
+          "originResourceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Corridor: origin collection point (resource) id"
+          },
+          "destinationResourceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Corridor: destination collection point (resource) id"
+          },
+          "originLat": {
+            "type": "number",
+            "example": 10.4806,
+            "description": "Corridor: origin lat"
+          },
+          "originLng": {
+            "type": "number",
+            "example": -66.9036,
+            "description": "Corridor: origin lng"
+          },
+          "destinationLat": {
+            "type": "number",
+            "example": 10.6,
+            "description": "Corridor: destination lat"
+          },
+          "destinationLng": {
+            "type": "number",
+            "example": -67,
+            "description": "Corridor: destination lng"
+          },
+          "area": {
+            "type": "string",
+            "example": "Estado Vargas",
+            "description": "Area: free-text served area (required when kind=area)"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "CapacityWindowDto": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "example": "2026-07-01T00:00:00.000Z",
+            "description": "Availability start (ISO-8601)"
+          },
+          "to": {
+            "type": "string",
+            "example": "2026-07-31T00:00:00.000Z",
+            "description": "Availability end (ISO-8601)"
+          }
+        }
+      },
+      "PublishCapacityDto": {
+        "type": "object",
+        "properties": {
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Emergency this capacity serves"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/PublishCapacityProviderDto"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "road",
+              "sea",
+              "air"
+            ],
+            "example": "road"
+          },
+          "capacity": {
+            "description": "At least one of weightKg / volumeM3 is required",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CapacityAmountDto"
+              }
+            ]
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/CoverageDto"
+          },
+          "window": {
+            "$ref": "#/components/schemas/CapacityWindowDto"
+          },
+          "constraints": {
+            "example": [
+              "refrigerated",
+              "hazmat"
+            ],
+            "description": "Free-form constraints",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "string",
+            "example": "Salida diaria a las 08:00",
+            "description": "Additional notes"
+          }
+        },
+        "required": [
+          "emergencyId",
+          "provider",
+          "mode",
+          "capacity",
+          "coverage"
+        ]
+      },
+      "PublishCapacityResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "CapacityAmountResponseDto": {
+        "type": "object",
+        "properties": {
+          "weightKg": {
+            "type": "number",
+            "example": 1500,
+            "nullable": true
+          },
+          "volumeM3": {
+            "type": "number",
+            "example": 12,
+            "nullable": true
+          }
+        }
+      },
+      "CoverageResponseDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "corridor",
+              "area"
+            ],
+            "example": "corridor"
+          },
+          "originResourceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "destinationResourceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "originLat": {
+            "type": "number",
+            "example": 10.4806,
+            "nullable": true
+          },
+          "originLng": {
+            "type": "number",
+            "example": -66.9036,
+            "nullable": true
+          },
+          "destinationLat": {
+            "type": "number",
+            "example": 10.6,
+            "nullable": true
+          },
+          "destinationLng": {
+            "type": "number",
+            "example": -67,
+            "nullable": true
+          },
+          "area": {
+            "type": "string",
+            "example": "Estado Vargas"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "CapacityWindowResponseDto": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "example": "2026-07-01T00:00:00.000Z",
+            "nullable": true
+          },
+          "to": {
+            "type": "string",
+            "example": "2026-07-31T00:00:00.000Z",
+            "nullable": true
+          }
+        }
+      },
+      "CapacityViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "providerType": {
+            "type": "string",
+            "enum": [
+              "volunteer",
+              "organization"
+            ],
+            "example": "volunteer"
+          },
+          "providerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "road",
+              "sea",
+              "air"
+            ],
+            "example": "road"
+          },
+          "capacity": {
+            "$ref": "#/components/schemas/CapacityAmountResponseDto"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/CoverageResponseDto"
+          },
+          "window": {
+            "$ref": "#/components/schemas/CapacityWindowResponseDto"
+          },
+          "constraints": {
+            "example": [
+              "refrigerated"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "available",
+              "reserved",
+              "withdrawn"
+            ],
+            "example": "available"
+          },
+          "notes": {
+            "type": "string",
+            "example": "Salida diaria a las 08:00",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2026-07-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2026-07-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "emergencyId",
+          "providerType",
+          "providerId",
+          "mode",
+          "capacity",
+          "coverage",
+          "window",
+          "constraints",
+          "status",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "RegisterVolunteerDto": {

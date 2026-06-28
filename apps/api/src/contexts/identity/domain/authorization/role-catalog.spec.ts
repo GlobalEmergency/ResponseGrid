@@ -36,6 +36,16 @@ describe('ROLE_CATALOG', () => {
     expect(hubManager.has('shipment:track')).toBe(true);
   });
 
+  it('wires the transport-capacity permissions (#105)', () => {
+    // citizen publishes (grado ciudadano, como offer:create)
+    expect(permissionsForRole('citizen')).toContain('capacity:publish');
+    // coordination and verification read capacities (como offer:read)
+    expect(permissionsForRole('emergency_coordinator')).toContain(
+      'capacity:read',
+    );
+    expect(permissionsForRole('emergency_verifier')).toContain('capacity:read');
+  });
+
   it('every role only references permissions that exist in the catalog', () => {
     const valid = new Set<string>(ALL_PERMISSIONS);
     for (const role of Object.values(ROLE_CATALOG)) {

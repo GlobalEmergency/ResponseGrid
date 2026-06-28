@@ -90,6 +90,7 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'need:prioritize',
       'offer:read',
       'offer:match',
+      'capacity:read',
       'campaign:read',
       'campaign:verify',
       'campaign:block',
@@ -120,6 +121,7 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'campaign:read',
       'campaign:verify',
       'offer:read',
+      'capacity:read',
     ],
   },
   group_manager: {
@@ -189,6 +191,7 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
     permissions: [
       'offer:create',
       'offer:read',
+      'capacity:publish',
       'resource:register',
       'resource:read',
       'need:read',

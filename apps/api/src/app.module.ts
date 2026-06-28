@@ -10,6 +10,7 @@ import { AccreditationModule } from './contexts/accreditation/infrastructure/acc
 import { GeocodingModule } from './contexts/geocoding/infrastructure/geocoding.module';
 import { MetricsModule } from './contexts/metrics/infrastructure/metrics.module';
 import { OffersModule } from './contexts/offers/infrastructure/offers.module';
+import { LogisticsModule } from './contexts/logistics/infrastructure/logistics.module';
 import { VolunteersModule } from './contexts/volunteers/infrastructure/volunteers.module';
 import { FilesModule } from './contexts/files/infrastructure/files.module';
 import { ReportsModule } from './contexts/reports/infrastructure/reports.module';
@@ -48,6 +49,7 @@ const isTestEnv = process.env.NODE_ENV === 'test';
     GeocodingModule,
     MetricsModule,
     OffersModule,
+    LogisticsModule,
     VolunteersModule,
     FilesModule,
     ReportsModule,
