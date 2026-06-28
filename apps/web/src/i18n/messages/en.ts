@@ -295,6 +295,9 @@ export const en = {
     aria_label: 'Active point: {name}',
     // Final recipient (#60)
     final_recipient_label: 'Final recipient',
+    // Official contact (#64)
+    meta_contact_official: 'Official contact:',
+    no_official_contact: 'No official contact',
   },
 
   resource_list: {

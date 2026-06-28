@@ -311,6 +311,9 @@ export const es = {
     aria_label: 'Punto activo: {name}',
     // Destinatario final (#60)
     final_recipient_label: 'Destinatario final',
+    // Contacto oficial (#64)
+    meta_contact_official: 'Contacto oficial:',
+    no_official_contact: 'Sin contacto oficial',
   },
 
   // ── ResourceList ──────────────────────────────────────────────────────────
