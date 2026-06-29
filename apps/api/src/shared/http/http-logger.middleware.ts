@@ -1,22 +1,28 @@
-import { Logger } from '@nestjs/common';
 import type { NextFunction, Request, Response } from 'express';
 import tracer from 'dd-trace';
 
 /** Binary/high-noise prefixes we don't emit an access line for. */
 const SKIP_PREFIXES = ['/files/', '/docs'];
 
-const logger = new Logger('HTTP');
-
 /**
- * Express middleware that emits ONE structured log line per HTTP request, once
+ * Express middleware that emits ONE structured JSON line per HTTP request, once
  * the response is flushed (so status, size and duration are final — this also
  * captures 404s and errors handled by the exception filters).
  *
- * Captures the request metadata needed to slice traffic in Datadog: method,
- * path, status, latency, client IP, user-agent and referer. The active
- * dd-trace span ids are injected as `dd.trace_id`/`dd.span_id` so each log
- * line links to its APM trace (the native ConsoleLogger isn't covered by
- * DD_LOGS_INJECTION, so we inject them by hand).
+ * Field names follow Datadog's **standard/reserved attributes** so the data
+ * lands on the out-of-the-box facets and pipelines with NO custom facet setup:
+ *   - `status`               → Status remapper (severity)
+ *   - `http.method` / `http.status_code` / `http.url` / `http.useragent` /
+ *     `http.referer`         → standard HTTP facets
+ *   - `network.client.ip`    → standard; also triggers Datadog's GeoIP
+ *                              (country/city facets) automatically
+ *   - `network.bytes_written`→ standard
+ *   - `duration` (nanoseconds)→ standard measure
+ *   - `dd.trace_id` / `dd.span_id` → log↔APM trace correlation
+ *
+ * Written straight to stdout (not via Nest's Logger) because the ConsoleLogger
+ * json mode nests the payload under `message.*`, which would break the standard
+ * attribute mapping. The Datadog agent collects the container's stdout.
  *
  * Deliberately omits request/response bodies and auth headers (passwords/PII).
  * `req.ip` is the real client only because `trust proxy` is set in main.ts
@@ -28,8 +34,7 @@ export function httpLogger(
   res: Response,
   next: NextFunction,
 ): void {
-  const path = req.path;
-  if (SKIP_PREFIXES.some((prefix) => path.startsWith(prefix))) {
+  if (SKIP_PREFIXES.some((prefix) => req.path.startsWith(prefix))) {
     next();
     return;
   }
@@ -40,27 +45,39 @@ export function httpLogger(
   const span = tracer.scope().active();
 
   res.on('finish', () => {
-    const elapsedNs = Number(process.hrtime.bigint() - start);
-    const payload = {
-      method: req.method,
-      path,
-      statusCode: res.statusCode,
-      durationMs: Math.round(elapsedNs / 1e4) / 100,
-      ip: req.ip ?? null,
-      userAgent: req.get('user-agent') ?? null,
-      referer: req.get('referer') ?? null,
-      contentLength: res.get('content-length') ?? null,
+    const { statusCode } = res;
+    const status =
+      statusCode >= 500 ? 'error' : statusCode >= 400 ? 'warn' : 'info';
+    const contentLength = res.get('content-length');
+
+    // JSON.stringify drops undefined fields, so optional attributes simply
+    // don't appear when absent.
+    const entry = {
+      status,
+      message: `${req.method} ${req.originalUrl} ${statusCode}`,
+      http: {
+        method: req.method,
+        status_code: statusCode,
+        url: req.originalUrl,
+        useragent: req.get('user-agent'),
+        referer: req.get('referer'),
+      },
+      network: {
+        client: { ip: req.ip },
+        bytes_written: contentLength ? Number(contentLength) : undefined,
+      },
+      duration: Number(process.hrtime.bigint() - start),
       ...(span
         ? {
-            'dd.trace_id': span.context().toTraceId(),
-            'dd.span_id': span.context().toSpanId(),
+            dd: {
+              trace_id: span.context().toTraceId(),
+              span_id: span.context().toSpanId(),
+            },
           }
         : {}),
     };
 
-    if (res.statusCode >= 500) logger.error(payload);
-    else if (res.statusCode >= 400) logger.warn(payload);
-    else logger.log(payload);
+    process.stdout.write(`${JSON.stringify(entry)}\n`);
   });
 
   next();

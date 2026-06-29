@@ -11,7 +11,7 @@ Corre como un servicio más del stack (`datadog` en `deploy/docker-compose.prod.
 - **Redis** — memoria, ops, clientes (integración `redisdb` por Autodiscovery).
 - **Logs** — de **todos** los contenedores (API, Postgres, Redis, Caddy) → ver errores en vivo.
 - **APM / trazas** — peticiones de la API instrumentadas con `dd-trace`: latencia y errores por endpoint, con spans de Postgres y Redis. Cada span lleva método, ruta, status, user-agent e **IP del cliente** (`DD_TRACE_CLIENT_IP_ENABLED`, leída del `X-Forwarded-For` de Caddy).
-- **Access logs** — una línea JSON por petición (middleware `http-logger.middleware.ts`): `method`, `path`, `statusCode`, `durationMs`, `ip`, `userAgent`, `referer`, `contentLength`, más `dd.trace_id`/`dd.span_id` para saltar del log a su traza APM. **No** registra bodies ni cabeceras de auth (contraseñas/PII). El IP real depende de `trust proxy` en `main.ts` (un único salto de Caddy).
+- **Access logs** — una línea JSON por petición (middleware `http-logger.middleware.ts`), con los **atributos estándar de Datadog** para que caigan en los facets y pipelines out-of-the-box **sin crear facets custom**: `status`, `http.method`, `http.status_code`, `http.url`, `http.useragent`, `http.referer`, `network.client.ip` (dispara el GeoIP → país/ciudad), `network.bytes_written`, `duration` (en ns), y `dd.trace_id`/`dd.span_id` para saltar del log a su traza APM. Se escribe directo a stdout (el `ConsoleLogger` json anidaría todo bajo `message.*` y rompería el mapeo estándar). **No** registra bodies ni cabeceras de auth (contraseñas/PII). El IP real depende de `trust proxy` en `main.ts` (un único salto de Caddy).
 
 ## Decisiones (caja pequeña)
 
