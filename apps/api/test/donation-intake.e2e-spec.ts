@@ -321,7 +321,7 @@ describe('Donation intake flow (e2e)', () => {
     expect(body.slug).toBe('intake-e2e-emergency');
     expect(body.resourceId).toBe(RESOURCE);
     expect(body.url).toBe(
-      `http://localhost:3001/e/intake-e2e-emergency/donar-acopio?resourceId=${RESOURCE}`,
+      `http://localhost:3001/e/intake-e2e-emergency/pre-registro?resourceId=${RESOURCE}`,
     );
   });
 

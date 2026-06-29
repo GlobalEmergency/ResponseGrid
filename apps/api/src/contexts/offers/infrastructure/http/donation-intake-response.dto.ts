@@ -36,7 +36,7 @@ export class PendingIntakeSummaryDto {
 export class IntakeDeepLinkDto {
   @ApiProperty({
     example:
-      'http://localhost:3001/e/mexico-demo/donar-acopio?resourceId=33333333-3333-4333-8333-333333333331',
+      'http://localhost:3001/e/mexico-demo/pre-registro?resourceId=33333333-3333-4333-8333-333333333331',
   })
   url!: string;
 
@@ -143,4 +143,103 @@ export class DonationIntakeSearchHitDto {
 
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
+}
+
+/** Public donor tracking view (#168) — no third-party PII. */
+export class DonationIntakeTrackingDto {
+  @ApiProperty({ example: 'ACO-7F3K' })
+  intakeCode!: string;
+
+  @ApiProperty({ enum: DonationIntakeStatus })
+  status!: string;
+
+  @ApiPropertyOptional({
+    example: 'Acopio CDMX Norte',
+    nullable: true,
+    type: String,
+  })
+  resourceName!: string | null;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  createdAt!: Date;
+
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  receivedAt!: Date | null;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  updatedAt!: Date;
+
+  @ApiProperty({ type: [SupplyLineResponseDto] })
+  lines!: SupplyLineResponseDto[];
+}
+
+/** One aggregated line of expected incoming material for a point (#200 forecast). */
+export class IncomingSummaryLineDto {
+  @ApiProperty({ example: 'Agua embotellada' })
+  name!: string;
+
+  @ApiProperty({ example: 'water' })
+  category!: string;
+
+  @ApiPropertyOptional({ nullable: true, type: String })
+  unit!: string | null;
+
+  @ApiPropertyOptional({ nullable: true, type: String })
+  presentation!: string | null;
+
+  @ApiProperty({
+    description: 'Total expected across all pending intakes for this line',
+    example: 200,
+  })
+  totalQuantity!: number;
+
+  @ApiProperty({
+    description: 'Distinct pending intakes contributing to this line',
+    example: 3,
+  })
+  intakeCount!: number;
+}
+
+/** Forecast of incoming material for a collection point (pending intakes). */
+export class IncomingSummaryDto {
+  @ApiProperty({ type: [IncomingSummaryLineDto] })
+  lines!: IncomingSummaryLineDto[];
+
+  @ApiProperty({ example: 5 })
+  totalPendingIntakes!: number;
+}
+
+/** One of the authenticated donor's own donations (#168, platform-level list). */
+export class MyDonationIntakeDto {
+  @ApiProperty({ example: 'ACO-7F3K' })
+  intakeCode!: string;
+
+  @ApiProperty({ enum: DonationIntakeStatus })
+  status!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  emergencyId!: string;
+
+  @ApiPropertyOptional({
+    example: 'terremoto-venezuela-2026',
+    nullable: true,
+    type: String,
+  })
+  emergencySlug!: string | null;
+
+  @ApiPropertyOptional({
+    example: 'Acopio CDMX Norte',
+    nullable: true,
+    type: String,
+  })
+  resourceName!: string | null;
+
+  @ApiProperty({ example: 3 })
+  itemCount!: number;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  createdAt!: Date;
+
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  receivedAt!: Date | null;
 }

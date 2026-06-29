@@ -14,8 +14,14 @@ import { QRCodeSVG } from 'qrcode.react';
  */
 
 interface IntakeReceiptProps {
-  /** Short delivery code (e.g. "ACO-7F3K") — both shown and encoded in the QR. */
+  /** Short delivery code (e.g. "ACO-7F3K") shown to the donor. */
   code: string;
+  /**
+   * App-relative path the QR should encode (e.g. `/e/{slug}/donacion/{code}`),
+   * turned into an absolute URL client-side so scanning opens the tracking page.
+   * Falls back to encoding the bare code when absent.
+   */
+  trackUrl?: string;
   title: string;
   /** Body copy, already interpolated with the point name. */
   body: string;
@@ -29,6 +35,7 @@ interface IntakeReceiptProps {
 
 export function IntakeReceipt({
   code,
+  trackUrl,
   title,
   body,
   codeLabel,
@@ -38,6 +45,13 @@ export function IntakeReceipt({
   secondaryHref,
   secondaryLabel,
 }: IntakeReceiptProps) {
+  // Encode an absolute tracking URL so a phone camera opens the page; fall back
+  // to the bare code. Rendered only client-side (after submit), so window exists.
+  const qrValue =
+    trackUrl != null && trackUrl !== ''
+      ? `${typeof window !== 'undefined' ? window.location.origin : ''}${trackUrl}`
+      : code;
+
   return (
     <section
       role="alert"
@@ -51,7 +65,7 @@ export function IntakeReceipt({
 
       <div className="flex flex-col items-center gap-4 rounded-lg bg-surface px-4 py-6">
         <div className="rounded-lg border-2 border-navy bg-white p-3">
-          <QRCodeSVG value={code} size={188} title={qrAlt} marginSize={0} />
+          <QRCodeSVG value={qrValue} size={188} title={qrAlt} marginSize={0} />
         </div>
         <div className="flex flex-col items-center gap-1">
           <span className="text-xs font-semibold uppercase tracking-wide text-muted">

@@ -13,6 +13,7 @@ import type { MeGrant, RoleCatalogEntry } from '@/lib/admin-scopes';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { formatDate } from '@/lib/format-date';
+import { categoryLabel } from '@/lib/categories';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
@@ -72,11 +73,9 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
   const { t, locale } = await getT();
   const tr = t.recepcion;
 
-  const q =
-    typeof sp.q === 'string' ? sp.q.trim().slice(0, 100) : '';
+  const q = typeof sp.q === 'string' ? sp.q.trim().slice(0, 100) : '';
 
-  // The operator's own collection points (to list their pending intakes and
-  // map a target resource id to a human name).
+  // The operator's own collection points — each one is a "centro de recepción".
   const mineRes = await api.GET('/emergencies/{emergencyId}/resources/mine', {
     params: { path: { emergencyId } },
     headers,
@@ -88,9 +87,8 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
   const myPoints = (mineRes.data ?? []).filter((r) =>
     COLLECTION_TYPES.has(r.type),
   );
-  const pointName = new Map(myPoints.map((p) => [p.id, p.name]));
 
-  // Search mode (by code/email/phone) vs. default pending list at my point(s).
+  // Search mode (by code/email/phone) vs. the per-center desk.
   const searching = q !== '';
 
   const searchHits = searching
@@ -102,19 +100,29 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
         .then((r) => r.data ?? [])
     : [];
 
-  const pending = !searching
-    ? (
-        await Promise.all(
-          myPoints.map((p) =>
-            api
-              .GET('/resources/{resourceId}/donation-intakes/pending', {
-                params: { path: { resourceId: p.id } },
-                headers,
-              })
-              .then((r) => r.data ?? []),
-          ),
-        )
-      ).flat()
+  // Per-center desk: each managed center carries its own incoming forecast (#200)
+  // and its own pending intakes, so the operator works "respecto al centro de
+  // recepción", not against one aggregate across every point.
+  const centers = !searching
+    ? await Promise.all(
+        myPoints.map(async (point) => {
+          const [pendingRes, incomingRes] = await Promise.all([
+            api.GET('/resources/{resourceId}/donation-intakes/pending', {
+              params: { path: { resourceId: point.id } },
+              headers,
+            }),
+            api.GET(
+              '/resources/{resourceId}/donation-intakes/incoming-summary',
+              { params: { path: { resourceId: point.id } }, headers },
+            ),
+          ]);
+          return {
+            point,
+            pending: pendingRes.data ?? [],
+            incoming: incomingRes.data ?? { lines: [], totalPendingIntakes: 0 },
+          };
+        }),
+      )
     : [];
 
   const statusLabel = (s: string): string =>
@@ -129,12 +137,14 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
   const rowClass =
     'flex items-center justify-between gap-3 rounded-lg border-2 border-line bg-white px-4 py-3.5 transition-colors hover:border-navy focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2';
 
+  const subheading = 'text-sm font-bold uppercase tracking-wide text-muted';
+
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
         <PageHeaderBand
-          backHref={`/e/${slug}`}
-          backLabel={t.common.back_to_emergency}
+          backHref={`/e/${slug}/coordinacion`}
+          backLabel={tr.back_to_hub}
           title={tr.page_title}
           subtitle={tr.page_subtitle}
         />
@@ -199,43 +209,98 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
                 </ul>
               )}
             </section>
+          ) : myPoints.length === 0 ? (
+            <EmptyState title={tr.no_points_note} />
           ) : (
-            <section className="flex flex-col gap-3">
-              <h2 className="font-display text-base font-bold text-navy">
-                {tr.pending_heading}
-              </h2>
-              {myPoints.length === 0 ? (
-                <EmptyState title={tr.no_points_note} />
-              ) : pending.length === 0 ? (
-                <EmptyState title={tr.pending_empty} />
-              ) : (
-                <ul className="flex flex-col gap-2.5" role="list">
-                  {pending.map((it) => (
-                    <li key={it.id}>
-                      <Link
-                        href={`/e/${slug}/recepcion/${it.id}`}
-                        className={rowClass}
-                      >
-                        <span className="flex min-w-0 flex-col">
-                          <span className="font-display text-base font-bold tracking-wide text-navy">
-                            {it.intakeCode}
-                          </span>
-                          <span className="truncate text-[12.5px] text-muted">
-                            {pointName.get(it.targetResourceId) ?? tr.point_label}{' '}
-                            ·{' '}
-                            {tr.item_lines.replace('{n}', String(it.itemCount))} ·{' '}
-                            {formatDate(it.createdAt, locale)}
-                          </span>
-                        </span>
-                        <span className="shrink-0 text-sm font-semibold text-navy">
-                          {tr.item_select} →
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
+            <div className="flex flex-col gap-5">
+              {centers.map(({ point, pending, incoming }) => (
+                <section
+                  key={point.id}
+                  aria-label={point.name}
+                  className="flex flex-col gap-4 rounded-lg border-2 border-navy bg-white p-4"
+                >
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-muted">
+                      {tr.center_label}
+                    </span>
+                    <h2 className="font-display text-lg font-bold text-navy">
+                      {point.name}
+                    </h2>
+                  </div>
+
+                  {/* Por entrar (previsión) del centro */}
+                  <div className="flex flex-col gap-2">
+                    <h3 className={subheading}>{tr.incoming_heading}</h3>
+                    {incoming.lines.length === 0 ? (
+                      <p className="text-sm text-muted">{tr.incoming_empty}</p>
+                    ) : (
+                      <ul className="flex flex-col gap-2" role="list">
+                        {incoming.lines.map((line, i) => (
+                          <li
+                            key={i}
+                            className="flex items-center justify-between gap-3 rounded-lg border border-line bg-surface px-3 py-2.5"
+                          >
+                            <span className="flex min-w-0 flex-col">
+                              <span className="truncate text-[15px] font-semibold text-ink">
+                                {line.name}
+                              </span>
+                              <span className="text-[12.5px] text-muted">
+                                {categoryLabel(line.category, locale)} ·{' '}
+                                {tr.incoming_from_intakes.replace(
+                                  '{n}',
+                                  String(line.intakeCount),
+                                )}
+                              </span>
+                            </span>
+                            <span className="shrink-0 text-sm font-semibold text-ink">
+                              {line.totalQuantity}
+                              {line.unit != null && line.unit !== ''
+                                ? ` ${line.unit}`
+                                : ''}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  {/* Entregas pendientes del centro */}
+                  <div className="flex flex-col gap-2">
+                    <h3 className={subheading}>{tr.pending_heading}</h3>
+                    {pending.length === 0 ? (
+                      <p className="text-sm text-muted">{tr.pending_empty}</p>
+                    ) : (
+                      <ul className="flex flex-col gap-2.5" role="list">
+                        {pending.map((it) => (
+                          <li key={it.id}>
+                            <Link
+                              href={`/e/${slug}/recepcion/${it.id}`}
+                              className={rowClass}
+                            >
+                              <span className="flex min-w-0 flex-col">
+                                <span className="font-display text-base font-bold tracking-wide text-navy">
+                                  {it.intakeCode}
+                                </span>
+                                <span className="truncate text-[12.5px] text-muted">
+                                  {tr.item_lines.replace(
+                                    '{n}',
+                                    String(it.itemCount),
+                                  )}{' '}
+                                  · {formatDate(it.createdAt, locale)}
+                                </span>
+                              </span>
+                              <span className="shrink-0 text-sm font-semibold text-navy">
+                                {tr.item_select} →
+                              </span>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </section>
+              ))}
+            </div>
           )}
         </div>
       </div>

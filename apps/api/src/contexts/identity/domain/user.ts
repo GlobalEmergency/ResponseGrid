@@ -8,6 +8,8 @@ export interface CreateUserProps {
   passwordHash: string | null;
   name: string;
   isAdmin: boolean;
+  /** Optional contact phone; defaults to null (not all accounts have one). */
+  phone?: string | null;
 }
 
 export interface UserSnapshot {
@@ -17,6 +19,7 @@ export interface UserSnapshot {
   passwordHash: string | null;
   name: string;
   isAdmin: boolean;
+  phone: string | null;
 }
 
 export class User {
@@ -27,6 +30,7 @@ export class User {
     public readonly passwordHash: string | null,
     public readonly name: string,
     public readonly isAdmin: boolean,
+    public readonly phone: string | null,
   ) {}
 
   static create(props: CreateUserProps): User {
@@ -36,6 +40,7 @@ export class User {
       props.passwordHash,
       props.name,
       props.isAdmin,
+      props.phone ?? null,
     );
   }
 
@@ -46,6 +51,7 @@ export class User {
       snap.passwordHash,
       snap.name,
       snap.isAdmin,
+      snap.phone,
     );
   }
 
@@ -56,6 +62,7 @@ export class User {
       passwordHash: this.passwordHash,
       name: this.name,
       isAdmin: this.isAdmin,
+      phone: this.phone,
     };
   }
 }

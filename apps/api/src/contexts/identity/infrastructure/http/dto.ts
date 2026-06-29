@@ -80,6 +80,14 @@ export class MeResponseDto {
   isAdmin!: boolean;
 
   @ApiProperty({
+    example: '+58 412 555 0101',
+    nullable: true,
+    type: String,
+    description: 'Optional contact phone, null until the user provides one',
+  })
+  phone!: string | null;
+
+  @ApiProperty({
     type: [MeGrantDto],
     description: 'The effective role grants (role @ scope) for this user',
   })

@@ -24,6 +24,12 @@ import { ListApiKeys } from '../application/list-api-keys';
 import { ListServiceAccountsByOrg } from '../application/list-service-accounts-by-org';
 import { ListUsersAdmin } from '../application/list-users-admin';
 import { GetUserAdminDetail } from '../application/get-user-admin-detail';
+import { EnsureDonorAccount } from '../application/ensure-donor-account';
+import {
+  SET_PASSWORD_INVITER,
+  SetPasswordInviter,
+} from '../domain/ports/set-password-inviter';
+import { NoopSetPasswordInviter } from './noop-set-password-inviter';
 import {
   USER_REPOSITORY,
   UserRepository,
@@ -396,6 +402,18 @@ const authenticateWithProviderProvider = {
   ) => new AuthenticateWithProvider(userRepo, identityRepo, tokenService),
 };
 
+const setPasswordInviterProvider = {
+  provide: SET_PASSWORD_INVITER,
+  useClass: NoopSetPasswordInviter,
+};
+
+const ensureDonorAccountProvider = {
+  provide: EnsureDonorAccount,
+  inject: [USER_REPOSITORY, SET_PASSWORD_INVITER],
+  useFactory: (users: UserRepository, inviter: SetPasswordInviter) =>
+    new EnsureDonorAccount(users, inviter),
+};
+
 @Module({
   imports: [
     DatabaseModule,
@@ -427,6 +445,8 @@ const authenticateWithProviderProvider = {
     loginProvider,
     registerUserProvider,
     authenticateWithProviderProvider,
+    setPasswordInviterProvider,
+    ensureDonorAccountProvider,
     grantRoleProvider,
     revokeGrantProvider,
     findUserByEmailProvider,
@@ -468,6 +488,7 @@ const authenticateWithProviderProvider = {
     SERVICE_ACCOUNT_REPOSITORY,
     API_KEY_REPOSITORY,
     TOKEN_SERVICE,
+    EnsureDonorAccount,
     RESOURCE_EMERGENCY_LOOKUP,
     NEED_EMERGENCY_LOOKUP,
     OFFER_EMERGENCY_LOOKUP,

@@ -607,6 +607,8 @@ export const es = {
     contact_heading: 'Cómo localizarte',
     contact_hint:
       'Indica al menos un dato de contacto. Solo lo verá el punto para localizar tu entrega.',
+    account_contact_note:
+      'Usaremos los datos de tu cuenta para esta donación. La verás en «Mis donaciones».',
     email_label: 'Correo electrónico',
     email_placeholder: 'maria@example.com',
     phone_label: 'Teléfono',
@@ -663,8 +665,12 @@ export const es = {
       'Localiza el pre-registro por código, correo o teléfono y confírmalo en el mostrador.',
 
     // Entrada desde el hub de coordinación
-    hub_label: 'Recepción de donaciones',
-    hub_description: 'Confirma las entregas pre-registradas en el mostrador',
+    hub_label: 'Centro de recepción',
+    hub_description: 'Previsión de entrante y entregas por confirmar, por centro',
+
+    // Cabecera del centro y vuelta al panel de coordinación
+    back_to_hub: 'Volver a coordinación',
+    center_label: 'Centro de recepción',
 
     no_points_note:
       'No gestionas ningún punto de recogida en esta emergencia, pero puedes buscar una entrega por su código.',
@@ -677,7 +683,7 @@ export const es = {
     search_empty: 'No hay entregas que coincidan con la búsqueda.',
 
     // Pendientes
-    pending_heading: 'Entregas pendientes en tu punto',
+    pending_heading: 'Entregas pendientes',
     pending_empty: 'No hay entregas pendientes ahora mismo.',
     new_intake_cta: 'Registrar una entrega nueva',
 
@@ -714,6 +720,56 @@ export const es = {
 
     err_action_failed: 'No se pudo completar la acción. Inténtalo de nuevo.',
     err_already_processed: 'La entrega ya había sido procesada.',
+
+    // Previsión de entrante (#129)
+    incoming_heading: 'Por entrar (previsión)',
+    incoming_hint: 'Material pre-registrado aún no recibido en tus puntos.',
+    incoming_empty: 'Nada pre-registrado por ahora.',
+    incoming_from_intakes: 'en {n} pre-registros',
+  },
+
+  // ── Seguimiento público de la donación (#168) ─────────────────────────────
+  donacion: {
+    meta_title: 'Seguimiento de tu donación — {emergencyName} · ResponseGrid',
+    page_title: 'Seguimiento de tu donación',
+    page_subtitle: 'Consulta el estado de tu entrega con tu código.',
+    code_label: 'Código',
+    not_found_title: 'No encontramos esa donación',
+    not_found_body:
+      'Revisa el código de tu comprobante. Si acabas de pre-registrarte, espera unos segundos y recarga.',
+    status_label: 'Estado',
+    status_pending: 'Pre-registrada · pendiente de entrega',
+    status_received: 'Recibida',
+    status_rejected: 'Rechazada',
+    status_incomplete: 'Incompleta',
+    point_label: 'Punto de acopio',
+    timeline_heading: 'Recorrido',
+    step_preregistered: 'Pre-registrada',
+    step_received: 'Recibida en {pointName}',
+    step_rejected: 'Rechazada en recepción',
+    step_incomplete: 'Marcada como incompleta',
+    step_pending: 'Pendiente de entrega',
+    lines_heading: 'Lo que registraste',
+  },
+
+  // ── Mis donaciones (#168) ─────────────────────────────────────────────────
+  misDonaciones: {
+    meta_title: 'Mis donaciones · ResponseGrid',
+    meta_description:
+      'Sigue el estado de las donaciones que has pre-registrado con tu cuenta.',
+    page_title: 'Mis donaciones',
+    page_subtitle:
+      'Las donaciones que has registrado con tu cuenta y su estado.',
+    back_to_panel: 'Volver al panel',
+    empty_title: 'Aún no has registrado donaciones',
+    empty_body:
+      'Cuando pre-registres una entrega con tu cuenta, aparecerá aquí para que sigas su recorrido.',
+    unknown_point: 'Punto de acopio',
+    item_lines: '{n} líneas',
+    status_pending: 'Pendiente de entrega',
+    status_received: 'Recibida',
+    status_rejected: 'Rechazada',
+    status_incomplete: 'Incompleta',
   },
 
   // ── Ofrecer transporte (#105) ─────────────────────────────────────────────
@@ -2533,6 +2589,7 @@ export const es = {
     quick_actions_heading: 'Accesos rápidos',
     qa_administration: 'Administración',
     qa_notifications: 'Notificaciones',
+    qa_my_donations: 'Mis donaciones',
     qa_explore: 'Ver emergencias',
   },
 };

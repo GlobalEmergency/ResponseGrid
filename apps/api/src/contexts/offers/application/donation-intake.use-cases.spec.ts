@@ -27,6 +27,10 @@ import { FakeOfferEventBus } from '../infrastructure/fake-event-bus';
 import { DonationIntakeId } from '../domain/donation-intake-id';
 import { GetIntakeDeepLink } from './get-intake-deep-link';
 import { IntakeQrEncoder } from '../domain/ports/intake-qr-encoder';
+import {
+  DonorAccountPort,
+  DonorAccountInput,
+} from '../domain/ports/donor-account.port';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const RESOURCE = '33333333-3333-4333-8333-333333333331';
@@ -48,6 +52,15 @@ class FakeResourceLookup implements IntakeResourceLookup {
 class FakeQrEncoder implements IntakeQrEncoder {
   encodeToPng(url: string): Promise<Buffer> {
     return Promise.resolve(Buffer.from(`qr:${url}`));
+  }
+}
+
+class RecordingDonorAccount implements DonorAccountPort {
+  readonly calls: DonorAccountInput[] = [];
+  constructor(private readonly userId: string | null) {}
+  ensureByContact(input: DonorAccountInput): Promise<string | null> {
+    this.calls.push(input);
+    return Promise.resolve(this.userId);
   }
 }
 
@@ -130,6 +143,63 @@ describe('DonationIntake use cases', () => {
       await expect(uc.execute(makeCmd())).rejects.toThrow(
         InvalidIntakeTargetResourceError,
       );
+    });
+
+    it('links a passwordless profile when an anonymous donor leaves an email', async () => {
+      const donorAccount = new RecordingDonorAccount('user-123');
+      const uc = new CreateDonationIntake(
+        repo,
+        new FakeStatusReader('active'),
+        new FakeResourceLookup(validResource),
+        donorAccount,
+      );
+      const result = await uc.execute(
+        makeCmd({ donorUserId: null, donorEmail: 'donor@example.com' }),
+      );
+      const saved = await repo.findById(DonationIntakeId.fromString(result.id));
+      expect(saved!.donorUserId).toBe('user-123');
+      expect(donorAccount.calls).toEqual([
+        {
+          email: 'donor@example.com',
+          name: 'María López',
+          phone: '+52 55 1234 5678',
+        },
+      ]);
+    });
+
+    it('keeps the authenticated donor and skips account resolution', async () => {
+      const donorAccount = new RecordingDonorAccount('unused');
+      const uc = new CreateDonationIntake(
+        repo,
+        new FakeStatusReader('active'),
+        new FakeResourceLookup(validResource),
+        donorAccount,
+      );
+      const result = await uc.execute(
+        makeCmd({
+          donorUserId: 'logged-in-user',
+          donorEmail: 'donor@example.com',
+        }),
+      );
+      const saved = await repo.findById(DonationIntakeId.fromString(result.id));
+      expect(saved!.donorUserId).toBe('logged-in-user');
+      expect(donorAccount.calls).toHaveLength(0);
+    });
+
+    it('does not resolve an account when no email is provided', async () => {
+      const donorAccount = new RecordingDonorAccount('user-123');
+      const uc = new CreateDonationIntake(
+        repo,
+        new FakeStatusReader('active'),
+        new FakeResourceLookup(validResource),
+        donorAccount,
+      );
+      const result = await uc.execute(
+        makeCmd({ donorUserId: null, donorEmail: null }),
+      );
+      const saved = await repo.findById(DonationIntakeId.fromString(result.id));
+      expect(saved!.donorUserId).toBeNull();
+      expect(donorAccount.calls).toHaveLength(0);
     });
   });
 
@@ -281,7 +351,7 @@ describe('DonationIntake use cases', () => {
   });
 
   describe('GetIntakeDeepLink', () => {
-    it('builds the canonical donar-acopio URL for a published collection point', async () => {
+    it('builds the canonical pre-registro URL for a published collection point', async () => {
       const uc = new GetIntakeDeepLink(
         new FakeResourceLookup(validResource),
         'http://localhost:3001',
@@ -291,7 +361,7 @@ describe('DonationIntake use cases', () => {
       const result = await uc.execute(RESOURCE);
 
       expect(result).toEqual({
-        url: `http://localhost:3001/e/mexico-demo/donar-acopio?resourceId=${RESOURCE}`,
+        url: `http://localhost:3001/e/mexico-demo/pre-registro?resourceId=${RESOURCE}`,
         resourceName: 'Acopio CDMX Norte',
         slug: 'mexico-demo',
         resourceId: RESOURCE,
@@ -320,7 +390,7 @@ describe('DonationIntake use cases', () => {
       const png = await uc.generateQr(RESOURCE);
 
       expect(png.toString()).toBe(
-        `qr:http://localhost:3001/e/mexico-demo/donar-acopio?resourceId=${RESOURCE}`,
+        `qr:http://localhost:3001/e/mexico-demo/pre-registro?resourceId=${RESOURCE}`,
       );
     });
   });

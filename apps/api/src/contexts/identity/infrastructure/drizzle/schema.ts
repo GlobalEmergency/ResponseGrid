@@ -15,6 +15,8 @@ export const usersTable = pgTable('users', {
   passwordHash: text('password_hash'),
   name: text('name').notNull(),
   isAdmin: boolean('is_admin').notNull().default(false),
+  /** Optional contact phone (migration 0035). */
+  phone: text('phone'),
   /** Registration date (migration 0032). */
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()

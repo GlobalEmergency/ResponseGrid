@@ -217,6 +217,16 @@ export class DrizzleDonationIntakeRepository implements DonationIntakeRepository
     return this.hydrateMany(rows);
   }
 
+  async findByDonorUserId(donorUserId: string): Promise<DonationIntake[]> {
+    const rows = await this.db
+      .select()
+      .from(donationIntakesTable)
+      .where(eq(donationIntakesTable.donorUserId, donorUserId))
+      .orderBy(desc(donationIntakesTable.createdAt));
+
+    return this.hydrateMany(rows);
+  }
+
   async findPendingByContact(
     emergencyId: EmergencyId,
     contactNormalized: string,

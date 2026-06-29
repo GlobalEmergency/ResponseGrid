@@ -16,6 +16,12 @@ import { ListOffersForNeed } from '../application/list-offers-for-need';
 import { SuggestOffersForNeedWithLocation } from '../application/suggest-offers-for-need';
 import { GetMyOffers } from '../application/get-my-offers';
 import { CreateDonationIntake } from '../application/create-donation-intake';
+import {
+  DONOR_ACCOUNT_PORT,
+  DonorAccountPort,
+} from '../domain/ports/donor-account.port';
+import { IdentityDonorAccountAdapter } from './identity-donor-account.adapter';
+import { EnsureDonorAccount } from '../../identity/application/ensure-donor-account';
 import { LookupDonorByContact } from '../application/lookup-donor-by-contact';
 import { UpdateDonationIntake } from '../application/update-donation-intake';
 import { SearchDonationIntakes } from '../application/search-donation-intakes';
@@ -25,6 +31,9 @@ import { ConfirmIntakeReception } from '../application/confirm-intake-reception'
 import { RejectIntake } from '../application/reject-intake';
 import { MarkIntakeIncomplete } from '../application/mark-intake-incomplete';
 import { GetIntakeDeepLink } from '../application/get-intake-deep-link';
+import { GetDonationIntakeTracking } from '../application/get-donation-intake-tracking';
+import { GetIncomingSummaryByResource } from '../application/get-incoming-summary-by-resource';
+import { GetMyDonationIntakes } from '../application/get-my-donation-intakes';
 import {
   INTAKE_QR_ENCODER,
   IntakeQrEncoder,
@@ -198,18 +207,28 @@ const intakeResourceLookupProvider = {
     new DrizzleIntakeResourceLookup(db),
 };
 
+const donorAccountPortProvider = {
+  provide: DONOR_ACCOUNT_PORT,
+  inject: [EnsureDonorAccount],
+  useFactory: (ensureDonorAccount: EnsureDonorAccount) =>
+    new IdentityDonorAccountAdapter(ensureDonorAccount),
+};
+
 const createDonationIntakeProvider = {
   provide: CreateDonationIntake,
   inject: [
     DONATION_INTAKE_REPOSITORY,
     OFFER_EMERGENCY_STATUS_READER,
     INTAKE_RESOURCE_LOOKUP,
+    DONOR_ACCOUNT_PORT,
   ],
   useFactory: (
     repo: DonationIntakeRepository,
     statusReader: OfferEmergencyStatusReader,
     resourceLookup: IntakeResourceLookup,
-  ) => new CreateDonationIntake(repo, statusReader, resourceLookup),
+    donorAccount: DonorAccountPort,
+  ) =>
+    new CreateDonationIntake(repo, statusReader, resourceLookup, donorAccount),
 };
 
 const lookupDonorByContactProvider = {
@@ -283,6 +302,31 @@ const getIntakeDeepLinkProvider = {
     ),
 };
 
+const getDonationIntakeTrackingProvider = {
+  provide: GetDonationIntakeTracking,
+  inject: [DONATION_INTAKE_REPOSITORY, INTAKE_RESOURCE_LOOKUP],
+  useFactory: (
+    repo: DonationIntakeRepository,
+    resourceLookup: IntakeResourceLookup,
+  ) => new GetDonationIntakeTracking(repo, resourceLookup),
+};
+
+const getIncomingSummaryByResourceProvider = {
+  provide: GetIncomingSummaryByResource,
+  inject: [DONATION_INTAKE_REPOSITORY],
+  useFactory: (repo: DonationIntakeRepository) =>
+    new GetIncomingSummaryByResource(repo),
+};
+
+const getMyDonationIntakesProvider = {
+  provide: GetMyDonationIntakes,
+  inject: [DONATION_INTAKE_REPOSITORY, INTAKE_RESOURCE_LOOKUP],
+  useFactory: (
+    repo: DonationIntakeRepository,
+    resourceLookup: IntakeResourceLookup,
+  ) => new GetMyDonationIntakes(repo, resourceLookup),
+};
+
 @Module({
   imports: [DatabaseModule, IdentityModule, NotificationsModule],
   controllers: [OffersController, DonationIntakesController],
@@ -304,6 +348,7 @@ const getIntakeDeepLinkProvider = {
     getMyOffersProvider,
     donationIntakeRepositoryProvider,
     intakeResourceLookupProvider,
+    donorAccountPortProvider,
     createDonationIntakeProvider,
     lookupDonorByContactProvider,
     updateDonationIntakeProvider,
@@ -315,6 +360,9 @@ const getIntakeDeepLinkProvider = {
     markIntakeIncompleteProvider,
     intakeQrEncoderProvider,
     getIntakeDeepLinkProvider,
+    getDonationIntakeTrackingProvider,
+    getIncomingSummaryByResourceProvider,
+    getMyDonationIntakesProvider,
   ],
 })
 export class OffersModule implements OnModuleDestroy {

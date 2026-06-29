@@ -580,6 +580,8 @@ export const en = {
     contact_heading: 'How to reach you',
     contact_hint:
       'Provide at least one contact detail. Only the point sees it to locate your delivery.',
+    account_contact_note:
+      'We’ll use your account details for this donation. You’ll find it under “My donations”.',
     email_label: 'Email',
     email_placeholder: 'maria@example.com',
     phone_label: 'Phone',
@@ -635,8 +637,12 @@ export const en = {
       'Find the pre-registration by code, email or phone and confirm it at the desk.',
 
     // Entry from the coordination hub
-    hub_label: 'Donation reception',
-    hub_description: 'Confirm pre-registered deliveries at the desk',
+    hub_label: 'Reception center',
+    hub_description: 'Incoming forecast and deliveries to confirm, per center',
+
+    // Center header and back-link to the coordination hub
+    back_to_hub: 'Back to coordination',
+    center_label: 'Reception center',
 
     no_points_note:
       'You don’t manage any collection point in this emergency, but you can search a delivery by its code.',
@@ -649,7 +655,7 @@ export const en = {
     search_empty: 'No deliveries match your search.',
 
     // Pending
-    pending_heading: 'Pending deliveries at your point',
+    pending_heading: 'Pending deliveries',
     pending_empty: 'No pending deliveries right now.',
     new_intake_cta: 'Register a new delivery',
 
@@ -686,6 +692,56 @@ export const en = {
 
     err_action_failed: 'Couldn’t complete the action. Please try again.',
     err_already_processed: 'The delivery had already been processed.',
+
+    // Incoming forecast (#129)
+    incoming_heading: 'Incoming (forecast)',
+    incoming_hint: 'Pre-registered material not yet received at your points.',
+    incoming_empty: 'Nothing pre-registered yet.',
+    incoming_from_intakes: 'across {n} pre-registrations',
+  },
+
+  // ── Public donation tracking (#168) ───────────────────────────────────────
+  donacion: {
+    meta_title: 'Track your donation — {emergencyName} · ResponseGrid',
+    page_title: 'Track your donation',
+    page_subtitle: 'Check your delivery status with your code.',
+    code_label: 'Code',
+    not_found_title: 'We couldn’t find that donation',
+    not_found_body:
+      'Check the code on your receipt. If you just pre-registered, wait a few seconds and reload.',
+    status_label: 'Status',
+    status_pending: 'Pre-registered · awaiting delivery',
+    status_received: 'Received',
+    status_rejected: 'Rejected',
+    status_incomplete: 'Incomplete',
+    point_label: 'Collection point',
+    timeline_heading: 'Journey',
+    step_preregistered: 'Pre-registered',
+    step_received: 'Received at {pointName}',
+    step_rejected: 'Rejected at reception',
+    step_incomplete: 'Marked incomplete',
+    step_pending: 'Awaiting delivery',
+    lines_heading: 'What you registered',
+  },
+
+  // ── My donations (#168) ───────────────────────────────────────────────────
+  misDonaciones: {
+    meta_title: 'My donations · ResponseGrid',
+    meta_description:
+      'Track the status of the donations you have pre-registered with your account.',
+    page_title: 'My donations',
+    page_subtitle:
+      'The donations you registered with your account and their status.',
+    back_to_panel: 'Back to panel',
+    empty_title: 'You haven’t registered any donations yet',
+    empty_body:
+      'When you pre-register a delivery with your account, it will show up here so you can follow it.',
+    unknown_point: 'Collection point',
+    item_lines: '{n} lines',
+    status_pending: 'Awaiting delivery',
+    status_received: 'Received',
+    status_rejected: 'Rejected',
+    status_incomplete: 'Incomplete',
   },
 
   // ── Offer transport (#105) ────────────────────────────────────────────────
@@ -2496,6 +2552,7 @@ export const en = {
     quick_actions_heading: 'Quick actions',
     qa_administration: 'Administration',
     qa_notifications: 'Notifications',
+    qa_my_donations: 'My donations',
     qa_explore: 'View emergencies',
   },
 } satisfies Messages;

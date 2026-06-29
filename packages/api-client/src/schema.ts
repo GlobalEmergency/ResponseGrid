@@ -1496,6 +1496,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/emergencies/{emergencyId}/donation-intakes/by-code/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Track a donation by its code (public, no PII) */
+        get: operations["DonationIntakesController_trackByCode"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/resources/{resourceId}/donation-intakes/incoming-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Aggregated forecast of incoming material for a collection point */
+        get: operations["DonationIntakesController_incomingSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/donation-intakes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the authenticated donor's own donations */
+        get: operations["DonationIntakesController_myDonations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/donation-intakes/{intakeId}/receive": {
         parameters: {
             query?: never;
@@ -2398,6 +2449,11 @@ export interface components {
             /** @example Jane Doe */
             name: string;
             isAdmin: boolean;
+            /**
+             * @description Optional contact phone, null until the user provides one
+             * @example +58 412 555 0101
+             */
+            phone: string | null;
             /** @description The effective role grants (role @ scope) for this user */
             grants: components["schemas"]["MeGrantDto"][];
         };
@@ -4218,8 +4274,64 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        DonationIntakeTrackingDto: {
+            /** @example ACO-7F3K */
+            intakeCode: string;
+            /** @enum {string} */
+            status: "pending" | "received" | "rejected" | "incomplete";
+            /** @example Acopio CDMX Norte */
+            resourceName?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            receivedAt?: string | null;
+            /** Format: date-time */
+            updatedAt: string;
+            lines: components["schemas"]["SupplyLineResponseDto"][];
+        };
+        IncomingSummaryLineDto: {
+            /** @example Agua embotellada */
+            name: string;
+            /** @example water */
+            category: string;
+            unit?: string | null;
+            presentation?: string | null;
+            /**
+             * @description Total expected across all pending intakes for this line
+             * @example 200
+             */
+            totalQuantity: number;
+            /**
+             * @description Distinct pending intakes contributing to this line
+             * @example 3
+             */
+            intakeCount: number;
+        };
+        IncomingSummaryDto: {
+            lines: components["schemas"]["IncomingSummaryLineDto"][];
+            /** @example 5 */
+            totalPendingIntakes: number;
+        };
+        MyDonationIntakeDto: {
+            /** @example ACO-7F3K */
+            intakeCode: string;
+            /** @enum {string} */
+            status: "pending" | "received" | "rejected" | "incomplete";
+            /** Format: uuid */
+            emergencyId: string;
+            /** @example terremoto-venezuela-2026 */
+            emergencySlug?: string | null;
+            /** @example Acopio CDMX Norte */
+            resourceName?: string | null;
+            /** @example 3 */
+            itemCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            receivedAt?: string | null;
+        };
         IntakeDeepLinkDto: {
-            /** @example http://localhost:3001/e/mexico-demo/donar-acopio?resourceId=33333333-3333-4333-8333-333333333331 */
+            /** @example http://localhost:3001/e/mexico-demo/pre-registro?resourceId=33333333-3333-4333-8333-333333333331 */
             url: string;
             /** @example Acopio CDMX Norte */
             resourceName: string;
@@ -8656,6 +8768,103 @@ export interface operations {
             };
             /** @description Intake not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DonationIntakesController_trackByCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                emergencyId: string;
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DonationIntakeTrackingDto"];
+                };
+            };
+            /** @description No donation with that code */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DonationIntakesController_incomingSummary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IncomingSummaryDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing intake:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DonationIntakesController_myDonations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyDonationIntakeDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

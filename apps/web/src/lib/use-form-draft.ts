@@ -23,6 +23,11 @@ type Setters<T extends StringRecord> = { [K in keyof T]: (v: T[K]) => void };
 
 interface DraftOptions {
   debounce?: number;
+  /**
+   * When false, the draft is neither restored nor persisted (e.g. a logged-in
+   * user whose fields come authoritatively from their profile). Default true.
+   */
+  enabled?: boolean;
 }
 
 interface DraftReturn {
@@ -35,7 +40,7 @@ export function useFormDraft<T extends StringRecord>(
   key: string,
   values: T,
   setters: Setters<T>,
-  { debounce = 600 }: DraftOptions = {},
+  { debounce = 600, enabled = true }: DraftOptions = {},
 ): DraftReturn {
   const storageKey = `rh-draft:${key}`;
   const restoredRef = useRef(false);
@@ -49,6 +54,8 @@ export function useFormDraft<T extends StringRecord>(
   useEffect(() => {
     if (restoredRef.current) return;
     restoredRef.current = true;
+    // Disabled (e.g. logged-in user): never restore and never persist.
+    if (!enabled) return;
 
     try {
       const raw = localStorage.getItem(storageKey);
@@ -86,7 +93,7 @@ export function useFormDraft<T extends StringRecord>(
 
   // Persist on every values change (debounced), skip before first restore
   useEffect(() => {
-    if (!readyToSave.current) return;
+    if (!enabled || !readyToSave.current) return;
 
     if (timerRef.current !== null) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
@@ -100,7 +107,7 @@ export function useFormDraft<T extends StringRecord>(
     return () => {
       if (timerRef.current !== null) clearTimeout(timerRef.current);
     };
-  }, [values, storageKey, debounce]);
+  }, [values, storageKey, debounce, enabled]);
 
   const clearDraft = useCallback(() => {
     if (timerRef.current !== null) {
