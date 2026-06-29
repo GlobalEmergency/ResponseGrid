@@ -9,6 +9,7 @@ import { LocalDate } from '@/components/atoms/local-date';
 import { categoryLabel, categoryColor } from '@/lib/categories';
 import { getT } from '@/i18n/server';
 import { fetchAdminResourceDetail } from '../actions';
+import { RecordInventoryEntry } from './record-inventory-entry';
 import {
   resourceTypeLabel,
   statusLabel,
@@ -179,12 +180,15 @@ export default async function CentroDetailPage({ params }: Props) {
             aria-labelledby="inventory-heading"
             className="flex flex-col gap-3"
           >
-            <h2 id="inventory-heading" className="text-lg font-bold text-ink">
-              {ta.centros_detail_inventory_heading.replace(
-                '{count}',
-                String(inventoryCategories.length),
-              )}
-            </h2>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 id="inventory-heading" className="text-lg font-bold text-ink">
+                {ta.centros_detail_inventory_heading.replace(
+                  '{count}',
+                  String(inventoryCategories.length),
+                )}
+              </h2>
+              <RecordInventoryEntry resourceId={resource.id} />
+            </div>
             {inventoryCategories.length === 0 ? (
               <EmptyState title={ta.centros_detail_inventory_empty} />
             ) : (
