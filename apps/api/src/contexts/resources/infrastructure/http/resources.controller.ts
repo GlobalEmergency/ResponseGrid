@@ -20,6 +20,7 @@ import {
   ApiConflictResponse,
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiSecurity,
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
   ApiOkResponse,
@@ -62,8 +63,11 @@ import {
   JwtAuthGuard,
   AuthenticatedUser,
 } from '../../../identity/infrastructure/http/jwt-auth.guard';
+import { JwtOrApiKeyAuthGuard } from '../../../identity/infrastructure/http/jwt-or-api-key-auth.guard';
 import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
+import { ServiceAccountPermissionGuard } from '../../../identity/infrastructure/http/service-account-permission.guard';
 import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
+import { requireAuthorForServiceAccount } from '../../../identity/infrastructure/http/require-author-for-service-account';
 import { ResourceView } from '../../application/resource-view';
 
 @ApiTags('resources')
@@ -85,10 +89,16 @@ export class ResourcesController {
 
   @Post('emergencies/:emergencyId/resources')
   @HttpCode(201)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtOrApiKeyAuthGuard, ServiceAccountPermissionGuard)
+  @RequirePermission('resource:register')
   @ApiBearerAuth()
+  @ApiSecurity('api-key')
   @ApiOperation({
     summary: 'Register a resource for an emergency (requires authentication)',
+    description:
+      'Open to any authenticated user. A trusted integration may also register ' +
+      'on behalf of a third party with its service-account API key when it ' +
+      'holds `resource:register` and includes the `author` block (#235).',
   })
   @ApiParam({
     name: 'emergencyId',
@@ -99,13 +109,21 @@ export class ResourcesController {
     description: 'Resource registered',
     type: RegisterResourceResponseDto,
   })
-  @ApiBadRequestResponse({ description: 'Invalid request body or UUID' })
-  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiBadRequestResponse({
+    description:
+      'Invalid request body or UUID, or missing author for an API key',
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid credentials' })
+  @ApiForbiddenResponse({
+    description:
+      'Service account lacks the resource:register grant at this scope',
+  })
   async create(
     @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
     @Body() dto: RegisterResourceDto,
     @Req() req: Request & { user?: AuthenticatedUser },
   ): Promise<RegisterResourceResponseDto> {
+    requireAuthorForServiceAccount(req.user, dto.author);
     const ownerUserId = req.user!.id;
     return this.register.execute({
       emergencyId,
@@ -132,6 +150,7 @@ export class ResourcesController {
         presentation: i.presentation ?? null,
         expiresAt: i.expiresAt ?? null,
       })),
+      author: dto.author ?? null,
     });
   }
 

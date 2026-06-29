@@ -14,6 +14,7 @@ import {
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { SupplyLineDto } from '../../../supplies/infrastructure/http/supply-line.dto';
+import { AuthorDto } from '../../../../shared/infrastructure/http/author.dto';
 
 export class OfferLocationDto {
   @ApiProperty({ example: '123 Main Street, Caracas, Venezuela' })
@@ -69,6 +70,18 @@ export class SubmitOfferDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @ApiPropertyOptional({
+    type: AuthorDto,
+    description:
+      'Restricted contact of the real donor this offer is filed on behalf of ' +
+      '(#235). Optional; required when a trusted integration writes via API ' +
+      'key. Never exposed on public reads.',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AuthorDto)
+  author?: AuthorDto;
 }
 
 export class MatchOfferDto {

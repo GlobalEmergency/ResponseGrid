@@ -75,6 +75,7 @@ export class ApiKeyAuthGuard implements CanActivate {
       phone: null,
       memberships: [],
       grants: grants.map((g) => g.toSnapshot()),
+      isServiceAccount: true,
     };
     return true;
   }

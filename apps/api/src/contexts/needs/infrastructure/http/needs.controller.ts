@@ -21,6 +21,7 @@ import {
   ApiNotFoundResponse,
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiSecurity,
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
   ApiOkResponse,
@@ -61,11 +62,19 @@ import {
   CreatedTaskFromNeedDto,
 } from './response.dto';
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
+import { JwtOrApiKeyAuthGuard } from '../../../identity/infrastructure/http/jwt-or-api-key-auth.guard';
 import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
+import { ServiceAccountPermissionGuard } from '../../../identity/infrastructure/http/service-account-permission.guard';
 import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
+import { requireAuthorForServiceAccount } from '../../../identity/infrastructure/http/require-author-for-service-account';
 
 interface AuthenticatedRequest extends Express.Request {
-  user: { id: string; email: string; isAdmin: boolean };
+  user: {
+    id: string;
+    email: string;
+    isAdmin: boolean;
+    isServiceAccount: boolean;
+  };
 }
 
 @ApiTags('needs')
@@ -89,10 +98,17 @@ export class NeedsController {
 
   @Post('emergencies/:emergencyId/needs')
   @HttpCode(201)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtOrApiKeyAuthGuard, ServiceAccountPermissionGuard)
+  @RequirePermission('need:create')
   @ApiBearerAuth()
+  @ApiSecurity('api-key')
   @ApiOperation({
     summary: 'Create a need for an emergency (authenticated requester)',
+    description:
+      'Open to any authenticated user (a citizen submits; a coordinator ' +
+      'validates later). A trusted integration may also create on behalf of a ' +
+      'third party with its service-account API key when it holds `need:create` ' +
+      'and includes the `author` block (#235).',
   })
   @ApiParam({
     name: 'emergencyId',
@@ -103,13 +119,20 @@ export class NeedsController {
     description: 'Need created',
     type: CreateNeedResponseDto,
   })
-  @ApiBadRequestResponse({ description: 'Invalid request body or UUID' })
-  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiBadRequestResponse({
+    description:
+      'Invalid request body or UUID, or missing author for an API key',
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid credentials' })
+  @ApiForbiddenResponse({
+    description: 'Service account lacks the need:create grant at this scope',
+  })
   async create(
     @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
     @Body() dto: CreateNeedDto,
     @Request() req: AuthenticatedRequest,
   ): Promise<CreateNeedResponseDto> {
+    requireAuthorForServiceAccount(req.user, dto.author);
     return this.createNeed.execute({
       emergencyId,
       requesterUserId: req.user.id,
@@ -134,6 +157,7 @@ export class NeedsController {
       skillSpecialty: dto.skillSpecialty ?? null,
       requestedCount: dto.requestedCount ?? null,
       resourceId: dto.resourceId ?? null,
+      author: dto.author ?? null,
     });
   }
 

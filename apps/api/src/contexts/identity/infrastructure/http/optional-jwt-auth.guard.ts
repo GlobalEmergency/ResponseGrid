@@ -65,6 +65,7 @@ export class OptionalJwtAuthGuard implements CanActivate {
         isAdmin: user.isAdmin,
         phone: user.phone,
         memberships: membershipSnapshots,
+        isServiceAccount: false,
         grants: [
           ...deriveGrantsFromLegacy(
             user.id.value,

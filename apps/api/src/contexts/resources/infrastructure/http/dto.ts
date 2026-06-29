@@ -25,6 +25,7 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ValidityReason } from '../../domain/resource-validity-report';
 import { SupplyLineDto } from '../../../supplies/infrastructure/http/supply-line.dto';
+import { AuthorDto } from '../../../../shared/infrastructure/http/author.dto';
 
 export class LocationDto {
   @ApiProperty({ example: 'Calle Mayor 1, Valencia' })
@@ -163,6 +164,18 @@ export class RegisterResourceDto {
   @ValidateNested({ each: true })
   @Type(() => SupplyLineDto)
   items?: SupplyLineDto[];
+
+  @ApiPropertyOptional({
+    type: AuthorDto,
+    description:
+      'Restricted contact of the real person this place is registered on ' +
+      'behalf of (#235). Optional; required when a trusted integration writes ' +
+      'via API key. Never exposed on public reads.',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AuthorDto)
+  author?: AuthorDto;
 }
 
 /**

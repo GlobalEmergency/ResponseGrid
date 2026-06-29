@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Priority, NeedStatus, PersonnelSkill } from '../../domain/need-enums';
 import { LocationSensitivity } from '../../../../shared/domain/location-sensitivity';
 import { SupplyLineResponseDto } from '../../../supplies/infrastructure/http/supply-line.dto';
+import { AuthorResponseDto } from '../../../../shared/infrastructure/http/author.dto';
 
 export class CreateNeedResponseDto {
   @ApiProperty({
@@ -153,6 +154,15 @@ export class CoordinatorNeedViewDto extends NeedViewDto {
     description: 'Free-text specialty detail (coordinator-only)',
   })
   skillSpecialty!: string | null;
+
+  @ApiPropertyOptional({
+    type: AuthorResponseDto,
+    nullable: true,
+    description:
+      'Restricted contact of the real requester when filed by an integration ' +
+      'on their behalf (#235). Coordinator-only — never returned publicly.',
+  })
+  author!: AuthorResponseDto | null;
 }
 
 export class VolunteerSuggestionDto {

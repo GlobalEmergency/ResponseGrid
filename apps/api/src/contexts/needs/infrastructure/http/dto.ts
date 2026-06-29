@@ -19,6 +19,7 @@ import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Priority, PersonnelSkill } from '../../domain/need-enums';
 import { SupplyLineDto } from '../../../supplies/infrastructure/http/supply-line.dto';
+import { AuthorDto } from '../../../../shared/infrastructure/http/author.dto';
 
 export class NeedLocationDto {
   @ApiProperty({ example: '123 Main Street, Caracas, Venezuela' })
@@ -122,6 +123,18 @@ export class CreateNeedDto {
   @IsOptional()
   @IsUUID()
   resourceId?: string;
+
+  @ApiPropertyOptional({
+    type: AuthorDto,
+    description:
+      'Restricted contact of the real person this need is filed on behalf of ' +
+      '(#235). Optional; only meaningful — and required — when a trusted ' +
+      'integration writes via API key. Never exposed on public reads.',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AuthorDto)
+  author?: AuthorDto;
 }
 
 export class NearbyNeedsQueryDto {

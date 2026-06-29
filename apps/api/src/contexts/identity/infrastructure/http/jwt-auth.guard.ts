@@ -28,6 +28,13 @@ export interface AuthenticatedUser {
   memberships: MembershipSnapshot[];
   /** Effective authorization grants for this request (see docs/features/13 §9). */
   grants: GrantSnapshot[];
+  /**
+   * True when the principal is a service account authenticated by an API key
+   * rather than a human with a JWT. Lets write endpoints apply the delegated
+   * "act on behalf of" rules (grant + author required) only to machine
+   * principals while leaving the human flow untouched (issue #235).
+   */
+  isServiceAccount: boolean;
 }
 
 @Injectable()
@@ -70,6 +77,7 @@ export class JwtAuthGuard implements CanActivate {
       isAdmin: user.isAdmin,
       phone: user.phone,
       memberships: membershipSnapshots,
+      isServiceAccount: false,
       // Legacy-derived grants (live source of truth for coordinator/verifier/
       // admin) merged with persisted grants (new role types: group_manager,
       // delegated and break-glass grants). See §9.

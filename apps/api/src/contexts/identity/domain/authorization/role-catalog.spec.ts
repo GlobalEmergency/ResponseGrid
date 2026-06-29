@@ -21,6 +21,18 @@ describe('ROLE_CATALOG', () => {
     }
   });
 
+  it('integration_partner can create on behalf of third parties but not validate/match (#235)', () => {
+    expect(roleExists('integration_partner')).toBe(true);
+    const perms = new Set(permissionsForRole('integration_partner'));
+    expect(perms.has('need:create')).toBe(true);
+    expect(perms.has('offer:create')).toBe(true);
+    expect(perms.has('resource:register')).toBe(true);
+    // citizen-grade writer: it never moderates / coordinates.
+    expect(perms.has('need:validate')).toBe(false);
+    expect(perms.has('offer:match')).toBe(false);
+    expect(perms.has('resource:verify')).toBe(false);
+  });
+
   it('defines the logistics roles transportista and hub_manager (EPIC #103)', () => {
     expect(roleExists('transportista')).toBe(true);
     expect(roleExists('hub_manager')).toBe(true);
