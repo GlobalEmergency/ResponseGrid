@@ -12,6 +12,22 @@ export interface SupplySearchParams {
   offset: number;
 }
 
+export interface SupplyCatalogRecord {
+  id: string;
+  code: string;
+  nameEs: string;
+  nameEn: string | null;
+  categorySlug: string;
+  categoryLabelEs: string;
+  categoryLabelEn: string;
+  defaultUnit: string | null;
+  attributes: Record<string, unknown>;
+  variantOfId: string | null;
+  status: Supply['status'];
+  registrationNotes: string | null;
+  aliases: string[];
+}
+
 /**
  * Puerto de persistencia del catálogo maestro de insumos. La implementación
  * Drizzle vive en infrastructure; el dominio/aplicación solo dependen de esta
@@ -22,4 +38,5 @@ export interface SupplyRepository {
   findByCode(code: string): Promise<Supply | null>;
   search(params: SupplySearchParams): Promise<Supply[]>;
   save(supply: Supply): Promise<void>;
+  loadCatalog(): Promise<SupplyCatalogRecord[]>;
 }
