@@ -48,6 +48,14 @@ export default async function RecipientResourcePage({ params }: Props) {
   const recipientNeeds = needs ?? [];
   const inventoryCategories = resource.inventoryCategories ?? [];
 
+  // Citizen delivery pre-registration (#130) is offered only for active
+  // collection points of an active emergency — the same targets the API accepts.
+  const canPreRegister =
+    isActive &&
+    resource.publicStatus === 'active' &&
+    (resource.type === 'collection_point' ||
+      resource.type === 'collection_and_delivery');
+
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-md bg-surface lg:max-w-3xl">
@@ -66,6 +74,18 @@ export default async function RecipientResourcePage({ params }: Props) {
             tStatusLight={t.status_light}
             locale={locale}
           />
+
+          {canPreRegister && (
+            <Link
+              href={`/e/${slug}/pre-registro?resourceId=${resourceId}`}
+              className="flex flex-col gap-0.5 rounded-lg bg-navy px-5 py-4 transition-colors hover:bg-navy-700 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
+            >
+              <span className="text-base font-semibold text-white">
+                {td.prereg_cta}
+              </span>
+              <span className="text-sm text-white/80">{td.prereg_cta_hint}</span>
+            </Link>
+          )}
 
           <Link
             href={`/e/${slug}/recursos/${resourceId}/reportar-estado`}

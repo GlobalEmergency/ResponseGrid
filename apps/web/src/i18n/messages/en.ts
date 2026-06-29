@@ -314,6 +314,8 @@ export const en = {
     needs_empty: 'This recipient has no published needs.',
     inventory_heading: 'Available materials',
     inventory_empty: 'This point has not declared available materials.',
+    prereg_cta: 'Pre-register what I’ll bring',
+    prereg_cta_hint: 'Declare your delivery and get a code to speed up the desk.',
   },
 
   resource_list: {
@@ -528,6 +530,75 @@ export const en = {
     err_invalid_quantity: 'Quantity must be a positive whole number.',
     err_location_required: 'Select a location.',
     err_submit_failed: 'Couldn’t submit the offer. Please try again.',
+  },
+
+  // ── Citizen delivery pre-registration (#130) ──────────────────────────────
+  prereg: {
+    page_title: 'Pre-register my delivery',
+    page_subtitle:
+      '{pointName} · List what you’ll bring and get your code for the desk.',
+    meta_title: 'Pre-register delivery — {emergencyName} · ResponseGrid',
+    meta_description:
+      'Pre-register the supplies you’ll bring to a collection point of {emergencyName} and get your receipt.',
+
+    point_label: 'Collection point',
+
+    no_point_title: 'Choose a collection point first',
+    no_point_body:
+      'Open a collection point’s page and tap “Pre-register what I’ll bring”.',
+    no_point_cta: 'See the emergency’s points',
+    not_eligible_title: 'This point doesn’t accept pre-registration',
+    not_eligible_body:
+      'Only active collection points accept delivery pre-registration. Please choose another point.',
+
+    donor_name_label: 'Your name',
+    donor_name_placeholder: 'e.g. María López',
+    contact_heading: 'How to reach you',
+    contact_hint:
+      'Provide at least one contact detail. Only the point sees it to locate your delivery.',
+    email_label: 'Email',
+    email_placeholder: 'maria@example.com',
+    phone_label: 'Phone',
+    phone_placeholder: '+52 55 1234 5678',
+
+    // Line editor (reuses InventoryField)
+    lines: {
+      inventory_heading: 'What will you bring?',
+      inventory_hint:
+        'Add the supplies you’ll deliver. You can adjust quantities at the point.',
+      inventory_add: '+ Add supply',
+      inventory_empty: 'Add at least one supply.',
+      item_number: 'Supply {n}',
+      item_remove: 'Remove supply {n}',
+      item_remove_label: 'Remove',
+      item_name_label: 'Supply / product',
+      item_name_placeholder: 'e.g. Bottled water',
+      item_quantity_label: 'Quantity',
+      item_unit_label: 'Unit',
+      item_unit_opt: '(opt.)',
+      item_unit_placeholder: 'boxes, litres…',
+      item_category_label: 'Category',
+    },
+
+    submit: 'Generate my code',
+    submitting: 'Generating…',
+
+    // Receipt
+    success_title: 'Pre-registration ready!',
+    success_body: 'Show this code at {pointName} when you deliver your supplies.',
+    code_label: 'Your delivery code',
+    qr_alt: 'QR code of your pre-registration',
+    success_register_another: 'Pre-register another delivery',
+
+    // server-action messages
+    err_name_required: 'Enter your name.',
+    err_contact_required: 'Enter at least an email or a phone.',
+    err_items_required: 'Add at least one supply.',
+    err_invalid_items:
+      'Check the supplies: each line needs a name, quantity and category.',
+    err_submit_failed: 'Couldn’t complete the pre-registration. Please try again.',
+    err_not_accepting: 'This point isn’t accepting pre-registrations right now.',
+    err_too_many: 'Too many attempts. Please wait a moment and try again.',
   },
 
   // ── Offer transport (#105) ────────────────────────────────────────────────
