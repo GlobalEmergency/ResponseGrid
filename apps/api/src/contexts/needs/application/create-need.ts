@@ -19,6 +19,7 @@ export interface CreateNeedItemCommand {
   category: Category;
   /** Presentation / route of administration (#61). Optional. */
   presentation?: string | null;
+  expiresAt?: string | null;
 }
 
 export interface CreateNeedLocationCommand {
@@ -73,6 +74,7 @@ export class CreateNeed {
         unit: i.unit,
         category: i.category,
         presentation: i.presentation ?? null,
+        expiresAt: i.expiresAt ?? null,
       }),
     );
 

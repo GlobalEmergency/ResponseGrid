@@ -11,4 +11,3 @@ Describe qué cambia y por qué.
 ## Cierre
 
 - Closes #
-

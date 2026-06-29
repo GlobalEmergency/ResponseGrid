@@ -46,6 +46,11 @@ export function NeedCard({ need, te, slug, active, locale }: NeedCardProps) {
           {item.presentation}
         </p>
       )}
+      {item?.expiresAt != null && (
+        <p className="text-[12.5px] text-muted">
+          {item.expiresAt}
+        </p>
+      )}
       {approximate && <PrivacyLocationNotice text={te.privacy_approximate_location} />}
       {active && (
         <Link

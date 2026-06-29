@@ -81,6 +81,7 @@ describe('DrizzleResourceRepository (integration)', () => {
           quantity: 200,
           unit: 'litros',
           category: Category.Water,
+          expiresAt: '2026-07-01',
         }),
         SupplyLine.create({
           name: 'Mantas',
@@ -103,6 +104,7 @@ describe('DrizzleResourceRepository (integration)', () => {
           unit: 'litros',
           category: Category.Water,
           presentation: null,
+          expiresAt: '2026-07-01',
         },
         {
           name: 'Mantas',
@@ -110,6 +112,7 @@ describe('DrizzleResourceRepository (integration)', () => {
           unit: null,
           category: Category.Shelter,
           presentation: null,
+          expiresAt: null,
         },
       ]),
     );
@@ -125,6 +128,7 @@ describe('DrizzleResourceRepository (integration)', () => {
           unit: 'kg',
           category: Category.Food,
           presentation: null,
+          expiresAt: null,
         },
       ],
     });
