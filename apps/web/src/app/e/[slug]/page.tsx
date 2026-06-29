@@ -51,16 +51,6 @@ const VALID_PRIORITIES = ['low', 'medium', 'high', 'urgent'] as const;
 
 type NeedCategory = typeof VALID_CATEGORIES[number];
 type Priority = typeof VALID_PRIORITIES[number];
-type NeedViewDto = {
-  id: string;
-  title: string;
-  location: {
-    latitude: number;
-    longitude: number;
-  };
-  locationSensitivity: 'exact' | 'approximate' | string;
-};
-
 export default async function EmergencyPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
@@ -115,7 +105,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
   const resourcesTotal = resourcesPage?.total ?? 0;
   const facetsByCategory = (facets?.byCategory ?? {}) as Record<string, number>;
   const facetsByCountry = (facets?.byCountry ?? {}) as Record<string, number>;
-  const validatedNeeds = (needs ?? []) as NeedViewDto[];
+  const validatedNeeds = needs ?? [];
   const officialContacts = activeResources
     .filter((resource: ResourceViewDto) => resource.verificationLevel === 'official' && resource.contact != null)
     .slice(0, 3);
