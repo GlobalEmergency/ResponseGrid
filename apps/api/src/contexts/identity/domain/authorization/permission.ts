@@ -44,6 +44,10 @@ export const PERMISSION_CATALOG = {
   // grado ciudadano (como 'offer:create'); 'read' lo consume la coordinación.
   capacity: ['publish', 'read'],
   intake: ['create', 'read', 'receive', 'update'],
+  // Empaquetado rastreable (#140): contenedores palet/caja/lote en supplies.
+  // 'manage' = crear/anidar/precintar/mover (coordinador / responsable de punto,
+  // mirror de capacity:* y shipment:*); 'read' lo consume coordinación/verificación.
+  container: ['manage', 'read'],
 } as const;
 
 type Catalog = typeof PERMISSION_CATALOG;

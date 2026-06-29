@@ -5,26 +5,21 @@ import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { getToken, authHeaders, clearToken } from '@/lib/auth';
 import { getT } from '@/i18n/server';
+import { MATERIAL_CATEGORIES } from '@/lib/categories';
 
-type OfferCategory = components['schemas']['SubmitOfferDto']['category'];
+type OfferCategory =
+  components['schemas']['SubmitOfferDto']['items'][number]['category'];
 
 export type OfferState =
   | { status: 'idle' }
   | { status: 'success'; id: string }
   | { status: 'error'; message: string };
 
-const VALID_CATEGORIES: OfferCategory[] = [
-  'hygiene',
-  'water',
-  'food',
-  'medical',
-  'shelter',
-  'tools',
-  'other',
-];
-
+// Validate against the same material catalogue the donor form offers
+// (MATERIAL_CATEGORIES) so every category the UI shows is accepted — avoids the
+// drift where a hardcoded subset rejected clothing/medicines/etc.
 function isCategory(value: unknown): value is OfferCategory {
-  return VALID_CATEGORIES.includes(value as OfferCategory);
+  return (MATERIAL_CATEGORIES as readonly string[]).includes(value as string);
 }
 
 export async function submitOffer(
@@ -109,10 +104,16 @@ export async function submitOffer(
       params: { path: { emergencyId } },
       headers: authHeaders(token),
       body: {
-        category: rawCategory,
-        description,
-        quantity: quantityRaw,
-        ...(unit !== undefined ? { unit } : {}),
+        // The donor form captures a single line; the offer model is multi-line
+        // (SupplyLine[]) like needs/resources, so we send it as a one-item list.
+        items: [
+          {
+            name: description,
+            quantity: quantityRaw,
+            category: rawCategory,
+            ...(unit !== undefined ? { unit } : {}),
+          },
+        ],
         location: { address, latitude, longitude },
         ...(targetNeedId !== undefined ? { targetNeedId } : {}),
         ...(donorOrganizationId !== undefined ? { donorOrganizationId } : {}),

@@ -1,4 +1,14 @@
-import { pgTable, text, integer, AnyPgColumn } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  text,
+  integer,
+  uuid,
+  jsonb,
+  doublePrecision,
+  timestamp,
+  AnyPgColumn,
+} from 'drizzle-orm/pg-core';
+import { SupplyLineSnapshot } from '../../domain/supply-line';
 
 export const categoriesTable = pgTable('categories', {
   slug: text('slug').primaryKey(),
@@ -17,4 +27,47 @@ export const categoryAliasesTable = pgTable('category_aliases', {
   categorySlug: text('category_slug')
     .notNull()
     .references(() => categoriesTable.slug),
+});
+
+/**
+ * Trackable packaging units (palet/caja/lote) — #140. Composition is by
+ * reference via the self-FK `parent_container_id` (ON DELETE SET NULL: deleting
+ * a parent un-nests its children). Direct content is the SupplyLine[] jsonb;
+ * the polymorphic holder (resource|shipment, no FK) records where it is now.
+ */
+export const containersTable = pgTable('containers', {
+  id: uuid('id').primaryKey(),
+  emergencyId: uuid('emergency_id').notNull(),
+  // Generated legible code / QR payload (e.g. PAL-0001). Unique per emergency.
+  code: text('code').notNull(),
+  type: text('type').notNull(),
+  parentContainerId: uuid('parent_container_id').references(
+    (): AnyPgColumn => containersTable.id,
+    { onDelete: 'set null' },
+  ),
+  // Loose supply lines held directly in this container (VO from #131).
+  lines: jsonb('lines').$type<SupplyLineSnapshot[]>().notNull(),
+  // Declared gross weight/volume (not yet derived from a catalogue).
+  grossWeightKg: doublePrecision('gross_weight_kg'),
+  grossVolumeM3: doublePrecision('gross_volume_m3'),
+  // Polymorphic holder (no FK): 'resource' | 'shipment'. Null when held by none.
+  holderType: text('holder_type'),
+  holderId: uuid('holder_id'),
+  status: text('status').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+});
+
+/**
+ * Monotonic per-(emergency, type) allocator for container codes. An atomic
+ * upsert (`INSERT … ON CONFLICT (emergency_id, type) DO UPDATE SET
+ * last_value = last_value + 1 RETURNING last_value`) hands out the next value,
+ * so concurrent creates never mint the same code and a deleted container never
+ * frees its code for reuse — keeping `containers.code` unique per emergency.
+ * The composite primary key (emergency_id, type) lives in migration 0033.
+ */
+export const containerCodeSequencesTable = pgTable('container_code_sequences', {
+  emergencyId: uuid('emergency_id').notNull(),
+  type: text('type').notNull(),
+  lastValue: integer('last_value').notNull(),
 });

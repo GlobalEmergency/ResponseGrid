@@ -57,10 +57,15 @@ describe('SuggestOffersForNeed', () => {
       emergencyId: EM,
       donorUserId: USER_ID,
       donorOrganizationId: null,
-      category,
-      description: `Offer ${category}`,
-      quantity: 10,
-      unit: null,
+      items: [
+        {
+          name: `Offer ${category}`,
+          quantity: 10,
+          unit: null,
+          category,
+          presentation: null,
+        },
+      ],
       location: { address: 'Test', latitude: lat, longitude: lon },
       targetNeedId: null,
       notes: null,
@@ -88,7 +93,7 @@ describe('SuggestOffersForNeed', () => {
     });
 
     expect(result.length).toBe(1);
-    expect(result[0].category).toBe(Category.Food);
+    expect(result[0].items[0].category).toBe(Category.Food);
   });
 
   it('sorts results by proximity (closest first)', async () => {

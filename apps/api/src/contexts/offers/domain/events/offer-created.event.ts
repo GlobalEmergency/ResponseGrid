@@ -8,7 +8,8 @@ export class OfferCreated implements DomainEvent {
     readonly aggregateId: string,
     readonly payload: {
       emergencyId: string;
-      category: string;
+      /** Distinct categories across the offer's supply lines. */
+      categories: string[];
     },
   ) {}
 }

@@ -1,13 +1,12 @@
 import { OfferId } from './offer-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { Category, OfferStatus } from './offer-enums';
+import { OfferStatus } from './offer-enums';
 import {
   OfferNotOpenError,
   OfferNotMatchedError,
   OfferCannotBeCancelledError,
   OfferNotEditableError,
-  OfferDescriptionRequiredError,
-  OfferQuantityInvalidError,
+  OfferItemsRequiredError,
 } from './offer-errors';
 import { DomainEvent } from './events/domain-event';
 import { OfferCreated } from './events/offer-created.event';
@@ -15,16 +14,17 @@ import { OfferMatched } from './events/offer-matched.event';
 import { OfferFulfilled } from './events/offer-fulfilled.event';
 import { OfferCancelled } from './events/offer-cancelled.event';
 import { Location, LocationProps } from '../../../shared/domain/location';
+import {
+  SupplyLine,
+  SupplyLineSnapshot,
+} from '../../supplies/domain/supply-line';
 
 export interface CreateDonationOfferProps {
   id: OfferId;
   emergencyId: EmergencyId;
   donorUserId: string;
   donorOrganizationId: string | null;
-  category: Category;
-  description: string;
-  quantity: number;
-  unit: string | null;
+  items: SupplyLine[];
   location: Location;
   targetNeedId: string | null;
   notes: string | null;
@@ -32,9 +32,8 @@ export interface CreateDonationOfferProps {
 
 /** Fields a coordinator may change. Omit a field to keep it. */
 export interface EditOfferProps {
-  description?: string;
-  quantity?: number;
-  unit?: string | null;
+  /** Replaces the whole list of supply lines when provided. */
+  items?: SupplyLine[];
   notes?: string | null;
 }
 
@@ -43,10 +42,7 @@ export interface DonationOfferSnapshot {
   emergencyId: string;
   donorUserId: string;
   donorOrganizationId: string | null;
-  category: Category;
-  description: string;
-  quantity: number;
-  unit: string | null;
+  items: SupplyLineSnapshot[];
   location: LocationProps;
   targetNeedId: string | null;
   matchedNeedId: string | null;
@@ -56,6 +52,13 @@ export interface DonationOfferSnapshot {
   updatedAt: Date;
 }
 
+/**
+ * DonationOffer — what a donor commits to deliver. Like a need or a place's
+ * inventory, it is a list of {@link SupplyLine} (the single material-line model
+ * owned by the supplies context): name + quantity + unit + category +
+ * presentation. The aggregate keeps the offer's lifecycle (open → matched →
+ * fulfilled / cancelled); the lines describe the material.
+ */
 export class DonationOffer {
   private events: DomainEvent[] = [];
 
@@ -64,10 +67,7 @@ export class DonationOffer {
     public readonly emergencyId: EmergencyId,
     public readonly donorUserId: string,
     public readonly donorOrganizationId: string | null,
-    public readonly category: Category,
-    private _description: string,
-    private _quantity: number,
-    private _unit: string | null,
+    private _items: SupplyLine[],
     public readonly location: Location,
     public readonly targetNeedId: string | null,
     private _matchedNeedId: string | null,
@@ -78,8 +78,8 @@ export class DonationOffer {
   ) {}
 
   static create(props: CreateDonationOfferProps): DonationOffer {
-    if (props.quantity <= 0) {
-      throw new Error('Offer quantity must be greater than 0');
+    if (props.items.length === 0) {
+      throw new OfferItemsRequiredError();
     }
     const now = new Date();
     const offer = new DonationOffer(
@@ -87,10 +87,7 @@ export class DonationOffer {
       props.emergencyId,
       props.donorUserId,
       props.donorOrganizationId,
-      props.category,
-      props.description,
-      props.quantity,
-      props.unit,
+      props.items,
       props.location,
       props.targetNeedId,
       null,
@@ -102,7 +99,7 @@ export class DonationOffer {
     offer.events.push(
       new OfferCreated(offer.id.value, {
         emergencyId: offer.emergencyId.value,
-        category: offer.category,
+        categories: offer.categories,
       }),
     );
     return offer;
@@ -114,10 +111,7 @@ export class DonationOffer {
       EmergencyId.fromString(s.emergencyId),
       s.donorUserId,
       s.donorOrganizationId,
-      s.category,
-      s.description,
-      s.quantity,
-      s.unit,
+      s.items.map((i) => SupplyLine.fromSnapshot(i)),
       Location.create(s.location),
       s.targetNeedId,
       s.matchedNeedId,
@@ -136,16 +130,13 @@ export class DonationOffer {
     return this._matchedNeedId;
   }
 
-  get description(): string {
-    return this._description;
+  get items(): readonly SupplyLine[] {
+    return this._items;
   }
 
-  get quantity(): number {
-    return this._quantity;
-  }
-
-  get unit(): string | null {
-    return this._unit;
+  /** Distinct categories present across the offer's lines. */
+  get categories(): string[] {
+    return [...new Set(this._items.map((i) => i.category))];
   }
 
   get notes(): string | null {
@@ -157,9 +148,9 @@ export class DonationOffer {
   }
 
   /**
-   * Coordinator edit: complete or correct the offer's core fields. Only
-   * `undefined` props are left untouched (passing `null`/'' to unit/notes clears
-   * them). Terminal offers (fulfilled/cancelled) are immutable.
+   * Coordinator edit: correct the offer's lines and/or notes. Only `undefined`
+   * props are left untouched (passing `null`/'' to notes clears it). Terminal
+   * offers (fulfilled/cancelled) are immutable.
    */
   edit(props: EditOfferProps): void {
     if (
@@ -168,17 +159,9 @@ export class DonationOffer {
     ) {
       throw new OfferNotEditableError();
     }
-    if (props.description !== undefined) {
-      const trimmed = props.description.trim();
-      if (trimmed.length === 0) throw new OfferDescriptionRequiredError();
-      this._description = trimmed;
-    }
-    if (props.quantity !== undefined) {
-      if (props.quantity <= 0) throw new OfferQuantityInvalidError();
-      this._quantity = props.quantity;
-    }
-    if (props.unit !== undefined) {
-      this._unit = props.unit === null ? null : props.unit.trim() || null;
+    if (props.items !== undefined) {
+      if (props.items.length === 0) throw new OfferItemsRequiredError();
+      this._items = props.items;
     }
     if (props.notes !== undefined) {
       this._notes = props.notes === null ? null : props.notes.trim() || null;
@@ -239,15 +222,12 @@ export class DonationOffer {
       emergencyId: this.emergencyId.value,
       donorUserId: this.donorUserId,
       donorOrganizationId: this.donorOrganizationId,
-      category: this.category,
-      description: this.description,
-      quantity: this.quantity,
-      unit: this.unit,
+      items: this._items.map((i) => i.toSnapshot()),
       location: this.location.toPlain(),
       targetNeedId: this.targetNeedId,
       matchedNeedId: this._matchedNeedId,
       status: this._status,
-      notes: this.notes,
+      notes: this._notes,
       createdAt: this.createdAt,
       updatedAt: this._updatedAt,
     };

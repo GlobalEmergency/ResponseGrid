@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Category, OfferStatus } from '../../domain/offer-enums';
+import { OfferStatus } from '../../domain/offer-enums';
+import { SupplyLineResponseDto } from '../../../supplies/infrastructure/http/supply-line.dto';
 
 export class SubmitOfferResponseDto {
   @ApiProperty({
@@ -33,17 +34,8 @@ export class OfferViewDto {
   @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
   donorOrganizationId!: string | null;
 
-  @ApiProperty({ enum: Category, example: Category.Food })
-  category!: Category;
-
-  @ApiProperty({ example: 'Rice bags 25kg' })
-  description!: string;
-
-  @ApiProperty({ example: 50 })
-  quantity!: number;
-
-  @ApiPropertyOptional({ example: 'bags', nullable: true, type: String })
-  unit!: string | null;
+  @ApiProperty({ type: [SupplyLineResponseDto] })
+  items!: SupplyLineResponseDto[];
 
   @ApiProperty({ type: OfferLocationResponseDto })
   location!: OfferLocationResponseDto;

@@ -6,6 +6,7 @@ import {
   integer,
   doublePrecision,
 } from 'drizzle-orm/pg-core';
+import { supplyLineColumns } from '../../../supplies/infrastructure/drizzle/supply-line-columns';
 
 export const needsTable = pgTable('needs', {
   id: uuid('id').primaryKey(),
@@ -37,10 +38,5 @@ export const needItemsTable = pgTable('need_items', {
   needId: uuid('need_id')
     .notNull()
     .references(() => needsTable.id, { onDelete: 'cascade' }),
-  name: text('name').notNull(),
-  quantity: integer('quantity').notNull(),
-  unit: text('unit'),
-  category: text('category').notNull(),
-  /** Presentation / route of administration of a medical item (#61). */
-  presentation: text('presentation'),
+  ...supplyLineColumns(),
 });

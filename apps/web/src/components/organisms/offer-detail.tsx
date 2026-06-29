@@ -23,6 +23,7 @@ import { DetailField, DetailSection } from '@/components/molecules/detail-field'
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
 import { categoryLabel } from '@/lib/categories';
+import { offerTitle, lineSummary } from '@/lib/supply-lines';
 
 type OfferViewDto = components['schemas']['OfferViewDto'];
 type NeedViewDto = components['schemas']['NeedViewDto'];
@@ -114,30 +115,12 @@ export function OfferDetail({
 
   const isDirected =
     typeof offer.targetNeedId === 'string' && offer.targetNeedId !== '';
-  const unit =
-    typeof offer.unit === 'string' && offer.unit !== '' ? offer.unit : null;
   const coords = `${offer.location.latitude}, ${offer.location.longitude}`;
-  const quantity = `${offer.quantity}${unit !== null ? ` ${unit}` : ''}`;
+  const title = offerTitle(offer.items);
 
+  // The offer's lines (SupplyLine[]) are shown read-only; the coordinator edit
+  // here covers notes. Editing the lines themselves can be added later.
   const editFields: EditField[] = [
-    {
-      key: 'description',
-      label: tc.detail_field_description,
-      kind: 'textarea',
-      defaultValue: offer.description,
-    },
-    {
-      key: 'quantity',
-      label: tc.edit_field_quantity,
-      kind: 'number',
-      defaultValue: String(offer.quantity),
-    },
-    {
-      key: 'unit',
-      label: tc.edit_field_unit,
-      kind: 'text',
-      defaultValue: offer.unit ?? '',
-    },
     {
       key: 'notes',
       label: tc.edit_field_notes,
@@ -230,12 +213,6 @@ export function OfferDetail({
           onEdit={(reason, values) =>
             editOffer(offer.id, slug, {
               reason,
-              description: values.description,
-              quantity:
-                values.quantity && values.quantity.trim() !== ''
-                  ? Number(values.quantity)
-                  : undefined,
-              unit: values.unit,
               notes: values.notes,
             })
           }
@@ -249,8 +226,8 @@ export function OfferDetail({
     <DetailDrawer
       open={open}
       onClose={onClose}
-      title={offer.description}
-      ariaLabel={tc.drawer_open_offer.replace('{description}', offer.description)}
+      title={title}
+      ariaLabel={tc.drawer_open_offer.replace('{description}', title)}
       titleAdornment={
         <Badge variant={STATUS_BADGE[offer.status]}>
           {STATUS_LABELS[offer.status]}
@@ -265,11 +242,13 @@ export function OfferDetail({
       )}
 
       <DetailSection title={tc.detail_section_meta}>
-        <DetailField
-          label={tc.detail_field_category}
-          value={categoryLabel(offer.category, locale)}
-        />
-        <DetailField label={tc.detail_field_quantity} value={quantity} />
+        {offer.items.map((item, i) => (
+          <DetailField
+            key={i}
+            label={categoryLabel(item.category, locale)}
+            value={lineSummary(item)}
+          />
+        ))}
         <DetailField
           label={tc.detail_field_status}
           value={STATUS_LABELS[offer.status]}

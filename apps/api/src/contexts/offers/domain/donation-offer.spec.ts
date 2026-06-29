@@ -6,7 +6,9 @@ import {
   OfferNotOpenError,
   OfferNotMatchedError,
   OfferCannotBeCancelledError,
+  OfferItemsRequiredError,
 } from './offer-errors';
+import { SupplyLine } from '../../supplies/domain/supply-line';
 import { Location } from '../../../shared/domain/location';
 
 const EM = '11111111-1111-4111-8111-111111111111';
@@ -21,16 +23,24 @@ function makeLocation(): Location {
   });
 }
 
+function line(overrides?: Partial<Parameters<typeof SupplyLine.create>[0]>) {
+  return SupplyLine.create({
+    name: 'Rice bags 25kg',
+    quantity: 50,
+    unit: 'bags',
+    category: Category.Food,
+    presentation: null,
+    ...overrides,
+  });
+}
+
 function makeOffer(): DonationOffer {
   return DonationOffer.create({
     id: OfferId.create(),
     emergencyId: EmergencyId.fromString(EM),
     donorUserId: USER_ID,
     donorOrganizationId: null,
-    category: Category.Food,
-    description: 'Rice bags 25kg',
-    quantity: 50,
-    unit: 'bags',
+    items: [line()],
     location: makeLocation(),
     targetNeedId: null,
     notes: null,
@@ -50,13 +60,34 @@ describe('DonationOffer aggregate', () => {
     const offer = makeOffer();
     expect(offer.donorUserId).toBe(USER_ID);
     expect(offer.donorOrganizationId).toBeNull();
-    expect(offer.category).toBe(Category.Food);
-    expect(offer.description).toBe('Rice bags 25kg');
-    expect(offer.quantity).toBe(50);
-    expect(offer.unit).toBe('bags');
+    expect(offer.items).toHaveLength(1);
+    expect(offer.items[0].name).toBe('Rice bags 25kg');
+    expect(offer.items[0].category).toBe(Category.Food);
+    expect(offer.items[0].quantity).toBe(50);
+    expect(offer.items[0].unit).toBe('bags');
     expect(offer.targetNeedId).toBeNull();
     expect(offer.matchedNeedId).toBeNull();
     expect(offer.notes).toBeNull();
+  });
+
+  it('exposes the distinct categories of its lines', () => {
+    const offer = DonationOffer.create({
+      id: OfferId.create(),
+      emergencyId: EmergencyId.fromString(EM),
+      donorUserId: USER_ID,
+      donorOrganizationId: null,
+      items: [
+        line({ name: 'Rice', category: Category.Food }),
+        line({ name: 'Water', category: Category.Water }),
+        line({ name: 'Beans', category: Category.Food }),
+      ],
+      location: makeLocation(),
+      targetNeedId: null,
+      notes: null,
+    });
+    expect(offer.categories.sort()).toEqual(
+      [Category.Food, Category.Water].sort(),
+    );
   });
 
   it('create() with targetNeedId stores it', () => {
@@ -65,10 +96,7 @@ describe('DonationOffer aggregate', () => {
       emergencyId: EmergencyId.fromString(EM),
       donorUserId: USER_ID,
       donorOrganizationId: null,
-      category: Category.Medical,
-      description: 'First aid kits',
-      quantity: 10,
-      unit: null,
+      items: [line({ name: 'First aid kits', category: Category.Medical })],
       location: makeLocation(),
       targetNeedId: NEED_ID,
       notes: 'Urgent delivery',
@@ -77,22 +105,19 @@ describe('DonationOffer aggregate', () => {
     expect(offer.status).toBe(OfferStatus.Open);
   });
 
-  it('create() throws when quantity is 0', () => {
+  it('create() throws when there are no items', () => {
     expect(() =>
       DonationOffer.create({
         id: OfferId.create(),
         emergencyId: EmergencyId.fromString(EM),
         donorUserId: USER_ID,
         donorOrganizationId: null,
-        category: Category.Water,
-        description: 'Water bottles',
-        quantity: 0,
-        unit: 'liters',
+        items: [],
         location: makeLocation(),
         targetNeedId: null,
         notes: null,
       }),
-    ).toThrow('Offer quantity must be greater than 0');
+    ).toThrow(OfferItemsRequiredError);
   });
 
   it('matchTo() transitions Open → Matched and sets matchedNeedId', () => {
@@ -170,6 +195,21 @@ describe('DonationOffer aggregate', () => {
     expect(() => offer.cancel()).toThrow(OfferCannotBeCancelledError);
   });
 
+  it('edit() replaces the lines and bumps updatedAt', () => {
+    const offer = makeOffer();
+    offer.edit({
+      items: [line({ name: 'Beans', quantity: 12, unit: 'cans' })],
+    });
+    expect(offer.items).toHaveLength(1);
+    expect(offer.items[0].name).toBe('Beans');
+    expect(offer.items[0].quantity).toBe(12);
+  });
+
+  it('edit() throws when items would become empty', () => {
+    const offer = makeOffer();
+    expect(() => offer.edit({ items: [] })).toThrow(OfferItemsRequiredError);
+  });
+
   it('pullDomainEvents() drains events (idempotent second call)', () => {
     const offer = makeOffer();
     offer.pullDomainEvents();
@@ -186,10 +226,11 @@ describe('DonationOffer aggregate', () => {
     expect(restored.status).toBe(OfferStatus.Matched);
     expect(restored.matchedNeedId).toBe(NEED_ID);
     expect(restored.donorUserId).toBe(USER_ID);
-    expect(restored.category).toBe(Category.Food);
-    expect(restored.description).toBe('Rice bags 25kg');
-    expect(restored.quantity).toBe(50);
-    expect(restored.unit).toBe('bags');
+    expect(restored.items).toHaveLength(1);
+    expect(restored.items[0].name).toBe('Rice bags 25kg');
+    expect(restored.items[0].category).toBe(Category.Food);
+    expect(restored.items[0].quantity).toBe(50);
+    expect(restored.items[0].unit).toBe('bags');
     expect(restored.location.address).toBe('Av. Principal, Caracas');
     expect(restored.location.latitude).toBe(10.4806);
     expect(restored.pullDomainEvents()).toHaveLength(0);
@@ -203,7 +244,7 @@ describe('DonationOffer aggregate', () => {
     expect(restored.targetNeedId).toBeNull();
     expect(restored.matchedNeedId).toBeNull();
     expect(restored.notes).toBeNull();
-    expect(restored.unit).toBe('bags');
+    expect(restored.items[0].unit).toBe('bags');
   });
 
   it('matchTo() bumps updatedAt', () => {
