@@ -13,8 +13,20 @@ export class DrizzleCategoryRepository implements CategoryRepository {
   }
 
   async listCategories(): Promise<CategoryDefinition[]> {
+    // Proyección PÚBLICA de la taxonomía: allow-list explícito de columnas. NO
+    // hacemos `select()` de toda la fila para que campos internos que se añadan
+    // a `categories` en el futuro (p.ej. notas de gestión o un flag de
+    // desactivación) no se traigan ni se filtren por accidente. Cuando exista
+    // un estado de categoría, las desactivadas se excluyen aquí (`.where(...)`).
     const rows = await this.db
-      .select()
+      .select({
+        slug: categoriesTable.slug,
+        labelEs: categoriesTable.labelEs,
+        labelEn: categoriesTable.labelEn,
+        parentSlug: categoriesTable.parentSlug,
+        vertical: categoriesTable.vertical,
+        sort: categoriesTable.sort,
+      })
       .from(categoriesTable)
       .orderBy(asc(categoriesTable.sort));
     return rows.map((r) => ({

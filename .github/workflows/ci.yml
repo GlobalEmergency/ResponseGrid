@@ -62,6 +62,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Las migraciones son inmutables una vez mergeadas: migrate.sh aplica por
+      # NOMBRE DE FICHERO, así que editar/borrar una ya aplicada no se reaplica
+      # en prod y rompe el deploy (incidente #237). Solo se permite AÑADIR.
+      - name: Guard — migraciones ya mergeadas no se modifican ni borran
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch --no-tags origin "$GITHUB_BASE_REF"
+          changed=$(git diff --diff-filter=MD --name-only "origin/$GITHUB_BASE_REF...HEAD" -- 'apps/api/drizzle/*.sql')
+          if [ -n "$changed" ]; then
+            echo "::error::Estas migraciones ya están en '$GITHUB_BASE_REF' y no se pueden modificar ni borrar: deploy/migrate.sh las aplica por nombre de fichero, así que el cambio NO se reaplica en prod y rompe el deploy (ver #237). Haz fix-forward con una migración nueva (siguiente número libre)."
+            printf '  %s\n' $changed
+            exit 1
+          fi
+          echo "OK — ninguna migración existente fue modificada o borrada."
 
       - uses: pnpm/action-setup@v4
         with:
