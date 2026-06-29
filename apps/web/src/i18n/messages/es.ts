@@ -661,8 +661,12 @@ export const es = {
       'Localiza el pre-registro por código, correo o teléfono y confírmalo en el mostrador.',
 
     // Entrada desde el hub de coordinación
-    hub_label: 'Recepción de donaciones',
-    hub_description: 'Confirma las entregas pre-registradas en el mostrador',
+    hub_label: 'Centro de recepción',
+    hub_description: 'Previsión de entrante y entregas por confirmar, por centro',
+
+    // Cabecera del centro y vuelta al panel de coordinación
+    back_to_hub: 'Volver a coordinación',
+    center_label: 'Centro de recepción',
 
     no_points_note:
       'No gestionas ningún punto de recogida en esta emergencia, pero puedes buscar una entrega por su código.',
@@ -675,7 +679,7 @@ export const es = {
     search_empty: 'No hay entregas que coincidan con la búsqueda.',
 
     // Pendientes
-    pending_heading: 'Entregas pendientes en tu punto',
+    pending_heading: 'Entregas pendientes',
     pending_empty: 'No hay entregas pendientes ahora mismo.',
     new_intake_cta: 'Registrar una entrega nueva',
 

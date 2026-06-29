@@ -633,8 +633,12 @@ export const en = {
       'Find the pre-registration by code, email or phone and confirm it at the desk.',
 
     // Entry from the coordination hub
-    hub_label: 'Donation reception',
-    hub_description: 'Confirm pre-registered deliveries at the desk',
+    hub_label: 'Reception center',
+    hub_description: 'Incoming forecast and deliveries to confirm, per center',
+
+    // Center header and back-link to the coordination hub
+    back_to_hub: 'Back to coordination',
+    center_label: 'Reception center',
 
     no_points_note:
       'You don’t manage any collection point in this emergency, but you can search a delivery by its code.',
@@ -647,7 +651,7 @@ export const en = {
     search_empty: 'No deliveries match your search.',
 
     // Pending
-    pending_heading: 'Pending deliveries at your point',
+    pending_heading: 'Pending deliveries',
     pending_empty: 'No pending deliveries right now.',
     new_intake_cta: 'Register a new delivery',
 
