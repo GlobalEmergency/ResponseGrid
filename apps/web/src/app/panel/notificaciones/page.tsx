@@ -38,7 +38,7 @@ export default async function NotificacionesPage() {
 
   return (
     <main className="flex-1 bg-surface">
-      <PageContainer width="feed">
+      <PageContainer>
         <PageHeader
           title={hasUnread ? tn.title_unread.replace('{count}', String(unreadCount)) : tn.title}
         />

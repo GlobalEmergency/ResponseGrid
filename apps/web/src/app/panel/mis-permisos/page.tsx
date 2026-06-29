@@ -35,7 +35,7 @@ export default async function MisPermisosPage() {
 
   return (
     <main className="flex-1 bg-surface">
-      <PageContainer width="feed">
+      <PageContainer>
         <PageHeader
           title="Mis permisos"
           subtitle="Tus roles, dónde aplican y qué te permiten hacer."

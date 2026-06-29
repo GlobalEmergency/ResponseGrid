@@ -72,7 +72,7 @@ export default async function PanelPage() {
 
   return (
     <main className="flex-1 bg-surface">
-      <PageContainer width="wide">
+      <PageContainer>
         <PageHeader title={tp.title} subtitle={tp.subtitle} />
 
         {/* Quick actions */}

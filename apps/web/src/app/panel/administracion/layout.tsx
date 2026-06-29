@@ -20,7 +20,7 @@ export default async function AdministracionLayout({
 
   return (
     <main className="flex-1 bg-surface">
-      <PageContainer width="wide">
+      <PageContainer>
         <AdminTabs isPlatformAdmin={isPlatformAdmin} />
         {children}
       </PageContainer>

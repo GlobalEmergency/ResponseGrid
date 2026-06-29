@@ -131,7 +131,7 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-md">
+      <div className="mx-auto w-full max-w-3xl">
         <PageHeaderBand
           backHref={`/e/${slug}`}
           backLabel={t.common.back_to_emergency}

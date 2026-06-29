@@ -54,7 +54,7 @@ export default async function HomePage() {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-md bg-surface lg:max-w-5xl">
+      <div className="mx-auto w-full max-w-3xl bg-surface">
         <SiteHeaderBand />
 
         <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">

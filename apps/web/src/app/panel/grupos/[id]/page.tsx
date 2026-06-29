@@ -45,7 +45,7 @@ export default async function GroupDetailPage({ params }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
-      <PageContainer width="feed">
+      <PageContainer>
         <PageHeader
           title={group.name}
           backHref="/panel/grupos"

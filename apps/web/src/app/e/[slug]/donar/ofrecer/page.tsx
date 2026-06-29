@@ -72,7 +72,7 @@ export default async function DonarPage({ params, searchParams }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-md lg:max-w-2xl">
+      <div className="mx-auto w-full max-w-3xl">
         <PageHeaderBand
           backHref={`/e/${slug}`}
           backLabel={t.common.back_to_emergency}

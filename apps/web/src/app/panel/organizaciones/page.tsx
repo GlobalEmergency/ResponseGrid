@@ -35,7 +35,7 @@ export default async function OrganizacionesPage() {
 
   return (
     <main className="flex-1 bg-surface">
-      <PageContainer width="feed">
+      <PageContainer>
         <PageHeader title={to.title} subtitle={to.subtitle} />
 
         {/* Org list */}

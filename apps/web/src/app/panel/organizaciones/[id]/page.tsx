@@ -64,7 +64,7 @@ export default async function OrganizationDetailPage({ params }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
-      <PageContainer width="feed">
+      <PageContainer>
         <PageHeader
           backHref="/panel/organizaciones"
           backLabel={td.back}

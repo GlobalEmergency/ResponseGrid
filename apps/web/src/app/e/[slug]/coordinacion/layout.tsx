@@ -89,7 +89,7 @@ export default async function CoordinacionLayout({
   return (
     <DashboardLayout emergencyContext={banner}>
       <main className="flex-1 bg-surface">
-        <div className="mx-auto flex w-full max-w-md flex-col gap-8 px-5 pb-12 pt-6 lg:max-w-5xl lg:px-8">
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">
           <header className="flex flex-col gap-2">
             <h1 className="font-display text-xl font-bold text-navy lg:text-2xl">
               {tc.dashboard_title}

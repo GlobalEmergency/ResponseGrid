@@ -44,7 +44,7 @@ export default async function GruposPage() {
 
   return (
     <main className="flex-1 bg-surface">
-      <PageContainer width="feed">
+      <PageContainer>
         <PageHeader
           title="Mis grupos"
           subtitle="Cuadrillas y grupos de voluntarios a los que perteneces o gestionas."

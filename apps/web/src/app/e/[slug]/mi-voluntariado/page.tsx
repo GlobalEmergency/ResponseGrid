@@ -81,7 +81,7 @@ export default async function MiVoluntariadoPage({ params }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-xl lg:max-w-3xl">
+      <div className="mx-auto w-full max-w-3xl">
         <PageHeaderBand
           backHref={`/e/${slug}`}
           backLabel={emergency.name}

@@ -24,7 +24,7 @@ export default async function LoginPage({ searchParams }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-sm lg:max-w-md">
+      <div className="mx-auto w-full max-w-3xl">
         <PageHeaderBand title={t.login.title} subtitle={t.login.subtitle} />
         <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">
           <Card className="flex flex-col gap-8 p-5 lg:p-7">
