@@ -33,6 +33,7 @@ export class ListOrganizationsAdmin {
           type: org.type,
           taxId: org.taxId,
           contactEmail: org.contactEmail,
+          contactPhone: org.contactPhone,
           verificationLevel: org.verificationLevel,
           memberCount: members.length,
           accreditationStatus: deriveAccreditationStatus(accreditations),

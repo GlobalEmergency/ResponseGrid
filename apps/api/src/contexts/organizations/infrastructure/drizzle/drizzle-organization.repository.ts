@@ -14,6 +14,7 @@ function rowToSnapshot(row: Row): OrganizationSnapshot {
     type: row.type,
     taxId: row.taxId,
     contactEmail: row.contactEmail,
+    contactPhone: row.contactPhone,
     verificationLevel: row.verificationLevel,
     createdAt: row.createdAt,
   };
@@ -32,6 +33,7 @@ export class DrizzleOrganizationRepository implements OrganizationRepository {
         type: s.type,
         taxId: s.taxId,
         contactEmail: s.contactEmail,
+        contactPhone: s.contactPhone,
         verificationLevel: s.verificationLevel,
         createdAt: s.createdAt,
       })
@@ -42,6 +44,7 @@ export class DrizzleOrganizationRepository implements OrganizationRepository {
           type: s.type,
           taxId: s.taxId,
           contactEmail: s.contactEmail,
+          contactPhone: s.contactPhone,
           verificationLevel: s.verificationLevel,
         },
       });

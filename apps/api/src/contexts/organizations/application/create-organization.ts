@@ -12,6 +12,7 @@ export interface CreateOrganizationCommand {
   type: OrganizationType;
   taxId: string | null;
   contactEmail: string | null;
+  contactPhone: string | null;
   creatorUserId: string;
 }
 
@@ -29,6 +30,7 @@ export class CreateOrganization {
       type: cmd.type,
       taxId: cmd.taxId,
       contactEmail: cmd.contactEmail,
+      contactPhone: cmd.contactPhone,
     });
 
     await this.orgRepo.save(org);

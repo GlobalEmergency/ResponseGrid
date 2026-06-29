@@ -68,6 +68,7 @@ export class GetOrganizationAdminDetail {
       type: org.type,
       taxId: org.taxId,
       contactEmail: org.contactEmail,
+      contactPhone: org.contactPhone,
       verificationLevel: org.verificationLevel,
       createdAt: org.createdAt.toISOString(),
       accreditationStatus: deriveAccreditationStatus(accreditations),

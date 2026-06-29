@@ -23,6 +23,11 @@ export class CreateOrganizationDto {
   @IsOptional()
   @IsString()
   contactEmail?: string;
+
+  @ApiPropertyOptional({ example: '+58 412-1234567' })
+  @IsOptional()
+  @IsString()
+  contactPhone?: string;
 }
 
 export class CreateOrganizationResponseDto {
@@ -81,6 +86,9 @@ export class OrganizationAdminListItemDto {
 
   @ApiProperty({ nullable: true, example: 'contact@org.example' })
   contactEmail!: string | null;
+
+  @ApiProperty({ nullable: true, example: '+58 412-1234567' })
+  contactPhone!: string | null;
 
   @ApiProperty({ example: 'unverified' })
   verificationLevel!: string;
@@ -144,6 +152,9 @@ export class OrganizationAdminDetailDto {
 
   @ApiProperty({ nullable: true })
   contactEmail!: string | null;
+
+  @ApiProperty({ nullable: true })
+  contactPhone!: string | null;
 
   @ApiProperty({ example: 'unverified' })
   verificationLevel!: string;

@@ -85,6 +85,7 @@ export class OrganizationsController {
       type: dto.type,
       taxId: dto.taxId ?? null,
       contactEmail: dto.contactEmail ?? null,
+      contactPhone: dto.contactPhone ?? null,
       creatorUserId: req.user.id,
     });
   }

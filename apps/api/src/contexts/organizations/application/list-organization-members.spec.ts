@@ -21,6 +21,7 @@ function makeOrg(): Organization {
     type: OrganizationType.Ngo,
     taxId: null,
     contactEmail: null,
+    contactPhone: null,
   });
 }
 

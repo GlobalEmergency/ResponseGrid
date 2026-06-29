@@ -53,13 +53,18 @@ async function seedOrg(
   name: string,
   type: OrganizationType,
   creatorUserId: string,
-  opts: { taxId?: string | null; contactEmail?: string | null } = {},
+  opts: {
+    taxId?: string | null;
+    contactEmail?: string | null;
+    contactPhone?: string | null;
+  } = {},
 ): Promise<string> {
   const { id } = await create.execute({
     name,
     type,
     taxId: opts.taxId ?? null,
     contactEmail: opts.contactEmail ?? null,
+    contactPhone: opts.contactPhone ?? null,
     creatorUserId,
   });
   return id;
@@ -249,6 +254,7 @@ describe('GetOrganizationAdminDetail', () => {
       {
         taxId: 'ES-1',
         contactEmail: 'info@cruzroja.example',
+        contactPhone: '+58 412-1234567',
       },
     );
     await memberRepo.add(orgId, memberId, OrganizationRole.Member);
@@ -278,6 +284,7 @@ describe('GetOrganizationAdminDetail', () => {
     expect(detail.name).toBe('Cruz Roja');
     expect(detail.taxId).toBe('ES-1');
     expect(detail.contactEmail).toBe('info@cruzroja.example');
+    expect(detail.contactPhone).toBe('+58 412-1234567');
     expect(detail.accreditationStatus).toBe('emergency');
 
     expect(detail.members).toHaveLength(2);
