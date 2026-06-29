@@ -26,7 +26,7 @@ export function GlobalFooter({ tf }: GlobalFooterProps) {
   const nav = [
     { href: '/', label: tf.nav_home },
     { href: '/#emergencias', label: tf.nav_emergencies },
-    { href: '/organizaciones', label: tf.nav_orgs },
+    { href: '/panel/organizaciones', label: tf.nav_orgs },
     { href: '/login', label: tf.nav_coordination },
   ];
   const resources = [

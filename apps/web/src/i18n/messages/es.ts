@@ -44,6 +44,8 @@ export const es = {
       aria_label: 'Pie de página',
     },
 
+    menu_aria: 'Menú',
+
     // server-action messages
     default_address: 'Sin dirección',
     intake_paused: 'El alta está en pausa en esta emergencia. Inténtalo más tarde.',
@@ -2470,6 +2472,16 @@ export const es = {
     nav_aria: 'Navegación principal',
     emergency_context: 'Operativo',
     exit_emergency: 'Salir del operativo',
+    admin_overview: 'Resumen',
+    admin_users: 'Usuarios',
+    admin_orgs: 'Organizaciones',
+    admin_centros: 'Centros',
+    admin_permissions: 'Permisos',
+    admin_api_keys: 'API keys',
+    admin_accreditations: 'Acreditaciones',
+    admin_templates: 'Plantillas',
+    admin_audit: 'Auditoría',
+    admin_tabs_aria: 'Secciones de administración',
   },
 
   panel: {

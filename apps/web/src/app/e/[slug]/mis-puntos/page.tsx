@@ -64,14 +64,14 @@ export default async function MisPuntosPage({ params }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-xl">
+      <div className="mx-auto w-full max-w-3xl">
         <PageHeaderBand
           backHref={`/e/${slug}`}
           backLabel={emergency.name}
           title={ta.points_title}
           subtitle={ta.points_subtitle}
         />
-        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
+        <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">
 
         {/* ── LISTA DE PUNTOS ───────────────────────────────────────── */}
         <section aria-labelledby="my-points-heading" className="flex flex-col gap-4">

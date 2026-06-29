@@ -45,6 +45,8 @@ export const en = {
       aria_label: 'Footer',
     },
 
+    menu_aria: 'Menu',
+
     // server-action messages
     default_address: 'No address',
     intake_paused: 'Intake is paused for this emergency. Please try again later.',
@@ -2433,6 +2435,16 @@ export const en = {
     nav_aria: 'Main navigation',
     emergency_context: 'Operating',
     exit_emergency: 'Exit operation',
+    admin_overview: 'Overview',
+    admin_users: 'Users',
+    admin_orgs: 'Organizations',
+    admin_centros: 'Centers',
+    admin_permissions: 'Permissions',
+    admin_api_keys: 'API keys',
+    admin_accreditations: 'Accreditations',
+    admin_templates: 'Templates',
+    admin_audit: 'Audit log',
+    admin_tabs_aria: 'Administration sections',
   },
 
   panel: {

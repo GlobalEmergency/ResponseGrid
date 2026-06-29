@@ -21,6 +21,8 @@ import { Card } from '@/components/atoms/card';
 import { Badge } from '@/components/atoms/badge';
 import { SectionHeading } from '@/components/atoms/section-heading';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { PageContainer } from '@/components/molecules/page-container';
+import { PageHeader } from '@/components/molecules/page-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,13 +72,8 @@ export default async function PanelPage() {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto flex w-full max-w-md flex-col gap-8 px-5 pb-12 pt-6 lg:max-w-5xl lg:px-8">
-        <header className="flex flex-col gap-1">
-          <h1 className="font-display text-xl font-bold text-navy lg:text-2xl">
-            {tp.title}
-          </h1>
-          <p className="text-sm text-muted">{tp.subtitle}</p>
-        </header>
+      <PageContainer>
+        <PageHeader title={tp.title} subtitle={tp.subtitle} />
 
         {/* Quick actions */}
         <section aria-labelledby="qa-heading" className={sectionGap}>
@@ -85,17 +82,17 @@ export default async function PanelPage() {
           </SectionHeading>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {isManager && (
-              <QuickAction href="/administracion" label={tp.qa_administration} />
+              <QuickAction href="/panel/administracion" label={tp.qa_administration} />
             )}
             <QuickAction
-              href="/notificaciones"
+              href="/panel/notificaciones"
               label={
                 unread > 0
                   ? `${tp.qa_notifications} (${unread > 99 ? '99+' : unread})`
                   : tp.qa_notifications
               }
             />
-            <QuickAction href="/grupos" label={t.nav.my_groups} />
+            <QuickAction href="/panel/grupos" label={t.nav.my_groups} />
             <QuickAction href="/" label={tp.qa_explore} />
           </div>
         </section>
@@ -183,7 +180,7 @@ export default async function PanelPage() {
             <ul className="grid gap-3 sm:grid-cols-2" role="list">
               {groups.map((g) => (
                 <li key={g.id}>
-                  <Link href={`/grupos/${g.id}`} className="block">
+                  <Link href={`/panel/grupos/${g.id}`} className="block">
                     <Card className="flex items-center justify-between gap-3 p-4 transition-colors hover:bg-surface">
                       <span className="truncate text-sm font-semibold text-ink">
                         {g.name}
@@ -218,7 +215,7 @@ export default async function PanelPage() {
             <ul className="grid gap-3 sm:grid-cols-2" role="list">
               {orgs.map((o) => (
                 <li key={o.id}>
-                  <Link href={`/organizaciones/${o.id}`} className="block">
+                  <Link href={`/panel/organizaciones/${o.id}`} className="block">
                     <Card className="flex items-center justify-between gap-3 p-4 transition-colors hover:bg-surface">
                       <span className="truncate text-sm font-semibold text-ink">
                         {o.name}
@@ -231,7 +228,7 @@ export default async function PanelPage() {
             </ul>
           )}
         </section>
-      </div>
+      </PageContainer>
     </main>
   );
 }

@@ -8,6 +8,7 @@ import { LocationPicker } from '@/components/organisms/location-picker';
 import { submitOffer } from './actions';
 import { DonarForm } from './donar-form';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { Card } from '@/components/atoms/card';
 import { getT } from '@/i18n/server';
 
 type Props = {
@@ -71,24 +72,26 @@ export default async function DonarPage({ params, searchParams }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-md">
+      <div className="mx-auto w-full max-w-3xl">
         <PageHeaderBand
           backHref={`/e/${slug}`}
           backLabel={t.common.back_to_emergency}
           title={t.donar.page_title}
           subtitle={t.donar.page_subtitle.replace('{emergencyName}', emergency.name)}
         />
-        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
-          <DonarForm
-            action={boundAction}
-            slug={slug}
-            targetNeedTitle={targetNeedTitle}
-            targetNeedId={targetNeedId}
-            locationPicker={<LocationPicker />}
-            orgSelector={<OrgSelector />}
-            t={t.donar}
-            backToEmergencyLabel={t.common.back_to_emergency}
-          />
+        <div className="px-5 pb-12 pt-6 lg:px-8">
+          <Card className="p-5 lg:p-7">
+            <DonarForm
+              action={boundAction}
+              slug={slug}
+              targetNeedTitle={targetNeedTitle}
+              targetNeedId={targetNeedId}
+              locationPicker={<LocationPicker />}
+              orgSelector={<OrgSelector />}
+              t={t.donar}
+              backToEmergencyLabel={t.common.back_to_emergency}
+            />
+          </Card>
         </div>
       </div>
     </main>

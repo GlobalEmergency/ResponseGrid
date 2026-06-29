@@ -81,14 +81,14 @@ export default async function MiVoluntariadoPage({ params }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-xl">
+      <div className="mx-auto w-full max-w-3xl">
         <PageHeaderBand
           backHref={`/e/${slug}`}
           backLabel={emergency.name}
           title={ta.vol_title}
           subtitle={ta.vol_subtitle}
         />
-        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
+        <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">
 
         {/* ── PERFIL ────────────────────────────────────────────────── */}
         <section aria-labelledby="profile-heading" className="flex flex-col gap-4">

@@ -41,7 +41,7 @@ export default function AuthCompletePage() {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-sm">
+      <div className="mx-auto w-full max-w-3xl">
         <PageHeaderBand />
         <div className="flex flex-col items-center text-center gap-6 px-4 pb-12 pt-6">
           <p className="text-base text-muted">{t.connecting}</p>

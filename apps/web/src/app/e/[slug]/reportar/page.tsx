@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { submitReport } from './actions';
 import { ReportForm } from './report-form';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { Card } from '@/components/atoms/card';
 import { getT } from '@/i18n/server';
 
 type Props = {
@@ -72,22 +73,24 @@ export default async function ReportarPage({ params, searchParams }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-md">
+      <div className="mx-auto w-full max-w-3xl">
         <PageHeaderBand
           backHref={`/e/${slug}`}
           backLabel={t.common.back_to_emergency}
           title={t.reportar.page_title}
           subtitle={emergency.name}
         />
-        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
-          <ReportForm
-            action={boundAction}
-            slug={slug}
-            myResources={myResources}
-            prefilledResourceId={prefilledResourceId}
-            t={t.reportar}
-            backToEmergencyLabel={t.common.back_to_emergency}
-          />
+        <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">
+          <Card className="p-5 lg:p-7">
+            <ReportForm
+              action={boundAction}
+              slug={slug}
+              myResources={myResources}
+              prefilledResourceId={prefilledResourceId}
+              t={t.reportar}
+              backToEmergencyLabel={t.common.back_to_emergency}
+            />
+          </Card>
         </div>
       </div>
     </main>

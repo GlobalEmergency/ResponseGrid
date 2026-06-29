@@ -28,7 +28,7 @@ interface ContentPageProps {
 export function ContentPage({ overline, h1, lead, illustration, children, cta }: ContentPageProps) {
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-md bg-surface lg:max-w-5xl">
+      <div className="mx-auto w-full max-w-3xl bg-surface">
         <SiteHeaderBand />
 
         <article className="px-5 pb-16 pt-8 lg:px-8 lg:pt-10">

@@ -244,7 +244,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
         </section>
 
         {/* ── Panel: acciones, métricas, listas ──────────────────────────────── */}
-        <div className="flex min-w-0 flex-1 flex-col gap-6 px-4 pb-12 pt-5 lg:px-8 lg:pt-7">
+        <div className="flex min-w-0 flex-1 flex-col gap-6 px-4 pb-12 pt-5 lg:mx-auto lg:max-w-3xl lg:px-8 lg:pt-7">
           {/* Comunicado oficial (sólo si existe) */}
           {announcement !== null && (
             <AnnouncementCard
