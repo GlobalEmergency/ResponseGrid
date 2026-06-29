@@ -1,5 +1,9 @@
 import { asc, eq } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
+import { Supply } from '../../domain/supply';
+import { SupplyAlias } from '../../domain/supply-alias';
+import { normalizeSupplyText } from '../../domain/supply-normalize';
+import { SupplyResolver } from '../../domain/supply-resolver';
 import {
   categoryTranslationsTable,
   categoriesTable,
@@ -9,12 +13,78 @@ import {
 } from './schema';
 import {
   SupplyCatalogRecord,
+  SupplySearchParams,
   SupplyRepository,
 } from '../../domain/ports/supply.repository';
-import { SupplyStatus } from '../../domain/supply';
 
 export class DrizzleSupplyRepository implements SupplyRepository {
   constructor(private readonly db: Db) {}
+
+  async findById(id: string): Promise<Supply | null> {
+    const record = (await this.loadCatalog()).find((item) => item.id === id);
+    return record ? this.toSupply(record) : null;
+  }
+
+  async findByCode(code: string): Promise<Supply | null> {
+    const normalized = code.trim().toLowerCase();
+    const record = (await this.loadCatalog()).find(
+      (item) => item.code.toLowerCase() === normalized,
+    );
+    return record ? this.toSupply(record) : null;
+  }
+
+  async search(params: SupplySearchParams): Promise<Supply[]> {
+    const catalog = await this.loadCatalog();
+    const resolver = this.buildResolver(catalog);
+    const normalizedQuery = params.query
+      ? normalizeSupplyText(params.query)
+      : '';
+    const exactMatchId = params.query ? resolver.resolve(params.query) : null;
+
+    const filtered = catalog.filter((record) => {
+      if (params.categorySlug && record.categorySlug !== params.categorySlug) {
+        return false;
+      }
+      if (!normalizedQuery) {
+        return true;
+      }
+      if (exactMatchId && record.id === exactMatchId) {
+        return true;
+      }
+      const searchable = normalizeSupplyText(
+        [
+          record.code,
+          record.nameEs,
+          record.nameEn ?? '',
+          record.categorySlug,
+          record.categoryLabelEs,
+          record.categoryLabelEn,
+          ...record.aliases,
+        ].join(' '),
+      );
+      return searchable.includes(normalizedQuery);
+    });
+
+    const sorted = [...filtered].sort((a, b) => {
+      if (exactMatchId) {
+        const aExact = a.id === exactMatchId;
+        const bExact = b.id === exactMatchId;
+        if (aExact !== bExact) {
+          return aExact ? -1 : 1;
+        }
+      }
+      return a.nameEs.localeCompare(b.nameEs, 'es');
+    });
+
+    return sorted
+      .slice(params.offset, params.offset + params.limit)
+      .map((r) => this.toSupply(r));
+  }
+
+  async save(_supply: Supply): Promise<void> {
+    // ponytail: read-only path for #220; admin write APIs will own persistence.
+    throw new Error('Not implemented');
+  }
 
   async loadCatalog(): Promise<SupplyCatalogRecord[]> {
     const [
@@ -68,10 +138,41 @@ export class DrizzleSupplyRepository implements SupplyRepository {
         defaultUnit: row.defaultUnit ?? null,
         attributes: (row.attributes ?? {}) as Record<string, unknown>,
         variantOfId: row.variantOfId ?? null,
-        status: row.status as SupplyStatus,
+        status: row.status as Supply['status'],
         registrationNotes: row.registrationNotes ?? null,
         aliases: aliasesBySupplyId.get(row.id) ?? [],
       };
+    });
+  }
+
+  private buildResolver(
+    records: readonly SupplyCatalogRecord[],
+  ): SupplyResolver {
+    const supplies = records.map((record) =>
+      this.toSupply({
+        ...record,
+        aliases: record.aliases,
+      }),
+    );
+    const aliases = records.flatMap((record) =>
+      record.aliases.map((alias) =>
+        SupplyAlias.create({ alias, supplyId: record.id }),
+      ),
+    );
+    return new SupplyResolver(supplies, aliases);
+  }
+
+  private toSupply(record: SupplyCatalogRecord): Supply {
+    return Supply.fromSnapshot({
+      id: record.id,
+      code: record.code,
+      name: record.nameEs,
+      categorySlug: record.categorySlug,
+      defaultUnit: record.defaultUnit,
+      attributes: record.attributes,
+      variantOfId: record.variantOfId,
+      status: record.status,
+      registrationNotes: record.registrationNotes,
     });
   }
 }
