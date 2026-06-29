@@ -1,14 +1,23 @@
-import { notFound } from 'next/navigation';
-import Link from 'next/link';
-import { api } from '@/lib/api';
-import { getEmergencyBySlug } from '@/lib/emergencies';
-import { PublicResourceCard } from '@/components/organisms/public-resource-card';
-import { NeedCard } from '@/components/molecules/need-card';
-import { EmptyState } from '@/components/molecules/empty-state';
-import { categoryLabel, categoryColor } from '@/lib/categories';
-import { getT } from '@/i18n/server';
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { clearToken, getToken } from "@/lib/auth";
+import { api } from "@/lib/api";
+import { getEmergencyBySlug } from "@/lib/emergencies";
+import { getMe, getRoles } from "@/lib/navigation-data";
+import type { MeGrant, RoleCatalogEntry } from "@/lib/admin-scopes";
+import {
+  resolveEmergencyAccess,
+  type EmergencyAccess,
+} from "@/lib/emergency-permissions";
+import { PublicResourceCard } from "@/components/organisms/public-resource-card";
+import { NeedCard } from "@/components/molecules/need-card";
+import { EmptyState } from "@/components/molecules/empty-state";
+import { categoryLabel, categoryColor } from "@/lib/categories";
+import { getT } from "@/i18n/server";
+import { ResourceGrantsPanel } from "./resource-grants-panel";
+import { fetchResourceGrants } from "./actions";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 type Props = {
   params: Promise<{ slug: string; resourceId: string }>;
@@ -24,13 +33,28 @@ export default async function RecipientResourcePage({ params }: Props) {
   }
 
   const emergencyId = emergency.id;
-  const isActive = emergency.status === 'active';
+  const isActive = emergency.status === "active";
+  const token = await getToken();
+  let access: EmergencyAccess | null = null;
+
+  if (token !== null) {
+    const [me, roles] = await Promise.all([getMe(), getRoles()]);
+    if (me === null) {
+      await clearToken();
+    } else {
+      access = resolveEmergencyAccess(
+        emergencyId,
+        (me.grants ?? []) as MeGrant[],
+        roles as RoleCatalogEntry[],
+      );
+    }
+  }
 
   const [{ data: resource }, { data: needs }] = await Promise.all([
-    api.GET('/emergencies/{emergencyId}/public/resources/{resourceId}', {
+    api.GET("/emergencies/{emergencyId}/public/resources/{resourceId}", {
       params: { path: { emergencyId, resourceId } },
     }),
-    api.GET('/emergencies/{emergencyId}/public/needs', {
+    api.GET("/emergencies/{emergencyId}/public/needs", {
       params: { path: { emergencyId }, query: { resourceId } },
     }),
   ]);
@@ -43,14 +67,18 @@ export default async function RecipientResourcePage({ params }: Props) {
   const td = t.resource_detail;
   const recipientNeeds = needs ?? [];
   const inventoryCategories = resource.inventoryCategories ?? [];
+  const canManagePoint = access?.canCoordinate ?? false;
+  const resourceGrants = canManagePoint
+    ? await fetchResourceGrants(resourceId)
+    : [];
 
   // Citizen delivery pre-registration (#130) is offered only for active
   // collection points of an active emergency — the same targets the API accepts.
   const canPreRegister =
     isActive &&
-    resource.publicStatus === 'active' &&
-    (resource.type === 'collection_point' ||
-      resource.type === 'collection_and_delivery');
+    resource.publicStatus === "active" &&
+    (resource.type === "collection_point" ||
+      resource.type === "collection_and_delivery");
 
   return (
     <main className="flex-1 bg-surface">
@@ -79,7 +107,9 @@ export default async function RecipientResourcePage({ params }: Props) {
               <span className="text-base font-semibold text-white">
                 {td.prereg_cta}
               </span>
-              <span className="text-sm text-white/80">{td.prereg_cta_hint}</span>
+              <span className="text-sm text-white/80">
+                {td.prereg_cta_hint}
+              </span>
             </Link>
           )}
 
@@ -89,6 +119,15 @@ export default async function RecipientResourcePage({ params }: Props) {
           >
             {t.resource_card.report_cta}
           </Link>
+
+          {canManagePoint && (
+            <ResourceGrantsPanel
+              slug={slug}
+              resourceId={resourceId}
+              grants={resourceGrants}
+              locale={locale}
+            />
+          )}
 
           <section
             aria-labelledby="resource-inventory-heading"

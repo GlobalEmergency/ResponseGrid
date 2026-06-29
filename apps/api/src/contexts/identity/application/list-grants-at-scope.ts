@@ -8,11 +8,10 @@ import {
   AuthorizationContext,
 } from '../domain/authorization/access-control';
 import { Permission } from '../domain/authorization/permission';
-import {
-  ScopeRefProps,
-  ancestorChain,
-} from '../domain/authorization/scope-ref';
+import { ScopeRefProps } from '../domain/authorization/scope-ref';
 import { NotAuthorizedToReadError } from '../domain/authorization/errors';
+import { ResourceEmergencyLookup } from '../domain/ports/resource-emergency-lookup';
+import { authorizationChainForScope } from './scope-chain';
 
 /**
  * Permissions that make a principal an *administrator* of a scope — any of them
@@ -51,13 +50,15 @@ export class ListGrantsAtScope {
     private readonly access: AccessControl,
     private readonly users: UserRepository,
     private readonly serviceAccounts: ServiceAccountRepository,
+    private readonly resourceEmergencyLookup: ResourceEmergencyLookup,
   ) {}
 
   async execute(cmd: ListGrantsAtScopeCommand): Promise<ScopeGrantView[]> {
-    const perms = await this.access.effectivePermissions(
-      cmd.actor,
-      ancestorChain(cmd.scope),
+    const scopeChain = await authorizationChainForScope(
+      cmd.scope,
+      this.resourceEmergencyLookup,
     );
+    const perms = await this.access.effectivePermissions(cmd.actor, scopeChain);
     if (!ADMIN_READ_PERMISSIONS.some((p) => perms.has(p))) {
       throw new NotAuthorizedToReadError('grants at this scope');
     }

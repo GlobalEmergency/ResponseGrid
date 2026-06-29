@@ -10,6 +10,7 @@ import {
   LegacyGrantNotRevocableError,
   NotAuthorizedToRevokeError,
 } from '../domain/authorization/errors';
+import { ResourceEmergencyLookup } from '../domain/ports/resource-emergency-lookup';
 
 const ACTOR = '11111111-1111-4111-8111-111111111111';
 const TARGET = '22222222-2222-4222-8222-222222222222';
@@ -31,13 +32,22 @@ function actorWith(
   };
 }
 
+function resourceEmergencyLookup(
+  map: Record<string, string>,
+): ResourceEmergencyLookup {
+  return {
+    findEmergencyId: (resourceId: string) =>
+      Promise.resolve(map[resourceId] ?? null),
+  };
+}
+
 async function seedTargetGrant(repo: InMemoryGrantRepository): Promise<void> {
   await repo.save(
     Grant.create({
       id: GRANT_ID,
       principalId: TARGET,
-      roleId: 'emergency_coordinator',
-      scope: ScopeRef.emergency('e1'),
+      roleId: 'point_manager',
+      scope: ScopeRef.entity('resource', 'r1'),
     }),
   );
 }
@@ -48,7 +58,11 @@ describe('RevokeGrant', () => {
 
   beforeEach(() => {
     repo = new InMemoryGrantRepository();
-    useCase = new RevokeGrant(repo, new LocalAccessControl());
+    useCase = new RevokeGrant(
+      repo,
+      new LocalAccessControl(),
+      resourceEmergencyLookup({ r1: 'e1' }),
+    );
   });
 
   it('a platform_admin can revoke a grant', async () => {
@@ -80,6 +94,18 @@ describe('RevokeGrant', () => {
     await expect(useCase.execute({ actor, grantId: GRANT_ID })).rejects.toThrow(
       NotAuthorizedToRevokeError,
     );
+  });
+
+  it('uses the owning emergency when revoking a resource entity grant', async () => {
+    await seedTargetGrant(repo);
+    const actor = actorWith({
+      roleId: 'emergency_coordinator',
+      scope: ScopeRef.emergency('e1'),
+    });
+    await expect(
+      useCase.execute({ actor, grantId: GRANT_ID }),
+    ).resolves.toBeUndefined();
+    expect(await repo.findById(GRANT_ID)).toBeNull();
   });
 
   it('forbids an admin from revoking their own platform_admin grant (self-lockout)', async () => {

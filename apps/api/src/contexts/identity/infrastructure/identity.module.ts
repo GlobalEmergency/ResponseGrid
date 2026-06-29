@@ -164,16 +164,22 @@ const scopeResolverProvider = {
 
 const grantRoleProvider = {
   provide: GrantRole,
-  inject: [GRANT_REPOSITORY, ACCESS_CONTROL],
-  useFactory: (grants: GrantRepository, access: AccessControl) =>
-    new GrantRole(grants, access),
+  inject: [GRANT_REPOSITORY, ACCESS_CONTROL, RESOURCE_EMERGENCY_LOOKUP],
+  useFactory: (
+    grants: GrantRepository,
+    access: AccessControl,
+    resourceEmergencyLookup: ResourceEmergencyLookup,
+  ) => new GrantRole(grants, access, resourceEmergencyLookup),
 };
 
 const revokeGrantProvider = {
   provide: RevokeGrant,
-  inject: [GRANT_REPOSITORY, ACCESS_CONTROL],
-  useFactory: (grants: GrantRepository, access: AccessControl) =>
-    new RevokeGrant(grants, access),
+  inject: [GRANT_REPOSITORY, ACCESS_CONTROL, RESOURCE_EMERGENCY_LOOKUP],
+  useFactory: (
+    grants: GrantRepository,
+    access: AccessControl,
+    resourceEmergencyLookup: ResourceEmergencyLookup,
+  ) => new RevokeGrant(grants, access, resourceEmergencyLookup),
 };
 
 const findUserByEmailProvider = {
@@ -240,13 +246,16 @@ const listGrantsAtScopeProvider = {
     ACCESS_CONTROL,
     USER_REPOSITORY,
     SERVICE_ACCOUNT_REPOSITORY,
+    RESOURCE_EMERGENCY_LOOKUP,
   ],
   useFactory: (
     grants: GrantRepository,
     access: AccessControl,
     users: UserRepository,
     sas: ServiceAccountRepository,
-  ) => new ListGrantsAtScope(grants, access, users, sas),
+    resourceEmergencyLookup: ResourceEmergencyLookup,
+  ) =>
+    new ListGrantsAtScope(grants, access, users, sas, resourceEmergencyLookup),
 };
 
 const serviceAccountRepositoryProvider = {

@@ -3,13 +3,14 @@ import {
   AccessControl,
   AuthorizationContext,
 } from '../domain/authorization/access-control';
-import { ancestorChain } from '../domain/authorization/scope-ref';
 import {
   CannotRevokeOwnAdminError,
   GrantNotFoundError,
   LegacyGrantNotRevocableError,
   NotAuthorizedToRevokeError,
 } from '../domain/authorization/errors';
+import { ResourceEmergencyLookup } from '../domain/ports/resource-emergency-lookup';
+import { authorizationChainForScope } from './scope-chain';
 
 export interface RevokeGrantCommand {
   actor: AuthorizationContext;
@@ -26,6 +27,7 @@ export class RevokeGrant {
   constructor(
     private readonly grants: GrantRepository,
     private readonly access: AccessControl,
+    private readonly resourceEmergencyLookup: ResourceEmergencyLookup,
   ) {}
 
   async execute(cmd: RevokeGrantCommand): Promise<void> {
@@ -50,7 +52,10 @@ export class RevokeGrant {
       throw new CannotRevokeOwnAdminError();
     }
 
-    const chain = ancestorChain(grant.scope.toPlain());
+    const chain = await authorizationChainForScope(
+      grant.scope.toPlain(),
+      this.resourceEmergencyLookup,
+    );
     const actorPermissions = await this.access.effectivePermissions(
       cmd.actor,
       chain,

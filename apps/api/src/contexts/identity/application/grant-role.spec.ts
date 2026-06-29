@@ -10,6 +10,7 @@ import {
   PrivilegeEscalationError,
   UnknownRoleError,
 } from '../domain/authorization/errors';
+import { ResourceEmergencyLookup } from '../domain/ports/resource-emergency-lookup';
 
 const ACTOR = '11111111-1111-4111-8111-111111111111';
 const TARGET = '22222222-2222-4222-8222-222222222222';
@@ -30,13 +31,26 @@ function actorWith(
   };
 }
 
+function resourceEmergencyLookup(
+  map: Record<string, string>,
+): ResourceEmergencyLookup {
+  return {
+    findEmergencyId: (resourceId: string) =>
+      Promise.resolve(map[resourceId] ?? null),
+  };
+}
+
 describe('GrantRole (delegation with attenuation)', () => {
   let repo: InMemoryGrantRepository;
   let useCase: GrantRole;
 
   beforeEach(() => {
     repo = new InMemoryGrantRepository();
-    useCase = new GrantRole(repo, new LocalAccessControl());
+    useCase = new GrantRole(
+      repo,
+      new LocalAccessControl(),
+      resourceEmergencyLookup({ r1: 'e1' }),
+    );
   });
 
   it('a platform_admin can grant emergency_coordinator and records the granter', async () => {
@@ -56,6 +70,21 @@ describe('GrantRole (delegation with attenuation)', () => {
     expect(saved).toHaveLength(1);
     expect(saved[0].roleId).toBe('emergency_coordinator');
     expect(saved[0].grantedByPrincipalId).toBe(ACTOR);
+  });
+
+  it('uses the owning emergency when authorizing a resource entity scope', async () => {
+    const actor = actorWith({
+      roleId: 'emergency_coordinator',
+      scope: ScopeRef.emergency('e1'),
+    });
+    await expect(
+      useCase.execute({
+        actor,
+        targetPrincipalId: TARGET,
+        roleId: 'point_manager',
+        scope: ScopeRef.entity('resource', 'r1').toPlain(),
+      }),
+    ).resolves.toHaveProperty('id');
   });
 
   it('an org_admin can grant org_member within their organization', async () => {
@@ -90,7 +119,7 @@ describe('GrantRole (delegation with attenuation)', () => {
 
   it('a principal without role:grant cannot delegate', async () => {
     const actor = actorWith({
-      roleId: 'emergency_coordinator',
+      roleId: 'emergency_verifier',
       scope: ScopeRef.emergency('e1'),
     });
     await expect(

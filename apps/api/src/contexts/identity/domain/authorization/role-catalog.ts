@@ -81,10 +81,13 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'emergency:pause',
       'emergency:resume',
       'emergency:announce',
+      'role:grant',
+      'role:revoke',
       'resource:read',
       'resource:verify',
       'resource:close',
       'resource:edit',
+      'need:create',
       'need:read',
       'need:validate',
       'need:prioritize',
@@ -118,6 +121,20 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       // actividad de SU emergencia. El scope emergency del grant limita la
       // lectura a su propia emergencia (ver EmergencyAuditController).
       'audit:read',
+    ],
+  },
+  point_manager: {
+    id: 'point_manager',
+    description:
+      'Responsable de punto: opera un único punto de acopio sin coordinar toda la emergencia.',
+    defaultScopeType: 'entity',
+    permissions: [
+      'resource:read',
+      'resource:edit',
+      'container:manage',
+      'container:read',
+      'need:create',
+      'need:read',
     ],
   },
   emergency_verifier: {
