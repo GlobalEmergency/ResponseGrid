@@ -1,8 +1,3 @@
-/**
- * PageHeaderBand — reusable navy band for secondary/inner pages: brand + ES/EN
- * (via HeaderBandShell), an optional back link, and an optional title/subtitle.
- * Pair it with a `bg-surface` page wrapper for the full "Banda oficial" look.
- */
 import Link from 'next/link';
 import { HeaderBandShell } from '@/components/molecules/header-band-shell';
 

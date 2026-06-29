@@ -1,12 +1,5 @@
 'use client';
 
-/**
- * HeaderMenu — a compact "options" dropdown for the header band. Collapses the
- * language switch and a few site links behind a single button so the navy band
- * stays small on mobile. Renders a white dropdown anchored to the button; closes
- * on outside click or Escape. Shared by the public site header and the emergency
- * header (each passes its own labels + links).
- */
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { LanguageSwitcher } from '@/components/molecules/language-switcher';
@@ -17,9 +10,7 @@ export interface HeaderMenuLink {
 }
 
 interface HeaderMenuProps {
-  /** Accessible label for the trigger button. */
   ariaLabel: string;
-  /** Heading shown above the language switch. */
   languageLabel: string;
   links: HeaderMenuLink[];
 }
@@ -78,14 +69,14 @@ export function HeaderMenu({ ariaLabel, languageLabel, links }: HeaderMenuProps)
             <LanguageSwitcher tone="light" />
           </div>
           {links.length > 0 && <div className="my-1 border-t border-line" />}
-          {links.map((l) => (
+          {links.map((link) => (
             <Link
-              key={l.href}
-              href={l.href}
+              key={link.href}
+              href={link.href}
               role="menuitem"
               className="block rounded-lg px-2 py-2 text-sm font-medium text-ink-soft transition-colors hover:bg-surface focus:bg-surface focus:outline-none"
             >
-              {l.label}
+              {link.label}
             </Link>
           ))}
         </div>

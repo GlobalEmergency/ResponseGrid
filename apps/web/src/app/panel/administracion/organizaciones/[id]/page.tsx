@@ -30,7 +30,6 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function OrganizacionDetailPage({ params }: Props) {
   const { id } = await params;
 
-  // ── Auth guard ──────────────────────────────────────────────────────────
   const token = await getToken();
   if (!token) redirect(`/login?next=/panel/administracion/organizaciones/${id}`);
 
@@ -68,7 +67,6 @@ export default async function OrganizacionDetailPage({ params }: Props) {
         backLabel={ta.orgs_detail_back}
       />
       <div className="flex flex-col gap-8">
-        {/* ── Resumen ─────────────────────────────────────────────────── */}
         <Card className="flex flex-col gap-3 border-navy p-4">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant={accreditationBadgeVariant(org.accreditationStatus)}>
@@ -124,7 +122,6 @@ export default async function OrganizacionDetailPage({ params }: Props) {
           </dl>
         </Card>
 
-        {/* ── Miembros ────────────────────────────────────────────────── */}
         <section
           aria-labelledby="members-heading"
           className="flex flex-col gap-3"
@@ -167,7 +164,6 @@ export default async function OrganizacionDetailPage({ params }: Props) {
           )}
         </section>
 
-        {/* ── Cuentas de servicio / API keys ──────────────────────────── */}
         <section
           aria-labelledby="accounts-heading"
           className="flex flex-col gap-3"
@@ -206,7 +202,6 @@ export default async function OrganizacionDetailPage({ params }: Props) {
           )}
         </section>
 
-        {/* ── Acreditaciones ──────────────────────────────────────────── */}
         <section
           aria-labelledby="accreditations-heading"
           className="flex flex-col gap-3"
@@ -251,7 +246,6 @@ export default async function OrganizacionDetailPage({ params }: Props) {
           )}
         </section>
 
-        {/* ── Emergencias en las que participa ────────────────────────── */}
         <section
           aria-labelledby="emergencies-heading"
           className="flex flex-col gap-3"

@@ -15,15 +15,13 @@ export type ActionResult =
 type ShipmentItemInput = components['schemas']['SupplyLineDto'];
 type CapacityView = components['schemas']['CapacityViewDto'];
 
-/** Result of fetching ranked capacity suggestions for a shipment (#107). */
 export type SuggestionsResult =
   | { status: 'success'; capacities: CapacityView[] }
   | { status: 'error'; message: string };
 
 /**
- * Creates a shipment / expedición for the given emergency (coordinator).
  * `emergencyId` is bound server-side in the page so it is never trusted from
- * the client form. Origin/destination are resource ids picked from a select.
+ * the client form.
  */
 export async function createShipment(
   emergencyId: string,
@@ -179,9 +177,6 @@ export async function getCapacitySuggestions(
   return { status: 'success', capacities: data };
 }
 
-/**
- * Marks an assigned shipment as in transit (assigned carrier or coordinator).
- */
 export async function markInTransit(
   shipmentId: string,
   slug: string,
@@ -227,9 +222,6 @@ export async function markInTransit(
   return { status: 'success' };
 }
 
-/**
- * Confirms a shipment delivery (assigned carrier or coordinator).
- */
 export async function confirmDelivery(
   shipmentId: string,
   slug: string,
@@ -273,9 +265,6 @@ export async function confirmDelivery(
   return { status: 'success' };
 }
 
-/**
- * Cancels a planned/assigned shipment (coordinator).
- */
 export async function cancelShipment(
   shipmentId: string,
   slug: string,

@@ -60,7 +60,6 @@ export function RegistrarForm({
     draftSetters,
   );
 
-  // Clear draft on successful submit
   useEffect(() => {
     if (state.status === 'success') clearDraft();
   }, [state.status, clearDraft]);
@@ -101,7 +100,6 @@ export function RegistrarForm({
         <ErrorMessage message={state.message ?? t.error_fallback} />
       )}
 
-      {/* Tipo de recurso */}
       <FormField
         htmlFor="type"
         label={<>{t.type_label} <span aria-hidden="true">*</span></>}
@@ -124,7 +122,6 @@ export function RegistrarForm({
         </Select>
       </FormField>
 
-      {/* Etapa */}
       <FormField
         htmlFor="stage"
         label={<>{t.stage_label} <span aria-hidden="true">*</span></>}
@@ -147,7 +144,6 @@ export function RegistrarForm({
         </Select>
       </FormField>
 
-      {/* Nombre */}
       <FormField
         htmlFor="name"
         label={<>{t.name_label} <span aria-hidden="true">*</span></>}
@@ -164,7 +160,6 @@ export function RegistrarForm({
         />
       </FormField>
 
-      {/* Descripción */}
       <FormField
         htmlFor="description"
         label={
@@ -184,7 +179,6 @@ export function RegistrarForm({
         />
       </FormField>
 
-      {/* Ubicación */}
       <FormField
         htmlFor="location-search"
         label={<>{t.location_label} <span aria-hidden="true">*</span></>}
@@ -193,13 +187,10 @@ export function RegistrarForm({
         {locationPicker}
       </FormField>
 
-      {/* Organización */}
       {orgSelector}
 
-      {/* Inventario / material disponible (opcional) */}
       <InventoryField t={t} locale={locale} />
 
-      {/* Submit */}
       <Button type="submit" disabled={pending} fullWidth>
         {pending ? t.submitting : t.submit}
       </Button>

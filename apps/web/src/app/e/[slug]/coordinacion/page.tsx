@@ -14,7 +14,6 @@ import { CoordinationSectionLink } from '@/components/molecules/coordination-sec
 import { EmptyState } from '@/components/molecules/empty-state';
 import { getT } from '@/i18n/server';
 
-// Always fetch live data — never serve a stale cached page.
 export const dynamic = 'force-dynamic';
 
 type Props = {
@@ -35,7 +34,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CoordinacionPage({ params }: Props) {
   const { slug } = await params;
 
-  // --- Auth + emergency (frame is rendered by the layout) ---------------
   const token = await getToken();
   if (token === null) {
     redirect(`/login?next=/e/${slug}/coordinacion`);
@@ -71,7 +69,6 @@ export default async function CoordinacionPage({ params }: Props) {
     }
   };
 
-  // --- Pending counters for each actionable section ---------------------
   // Resources: ask for one row only — we just need the `total`.
   const [
     resourcesPending,
@@ -121,7 +118,6 @@ export default async function CoordinacionPage({ params }: Props) {
           })
           .then(async (r) => {
             await onUnauthorized(r.response.status);
-            // Count only the in-flight shipments (not delivered/cancelled).
             return (r.data ?? []).filter(
               (s) => s.status !== 'delivered' && s.status !== 'cancelled',
             ).length;

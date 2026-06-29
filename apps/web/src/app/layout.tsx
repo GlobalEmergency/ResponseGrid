@@ -6,7 +6,6 @@ import { GlobalFooter } from '@/components/organisms/global-footer';
 import { getT } from '@/i18n/server';
 import { LocaleProvider } from '@/i18n/locale-context';
 
-// Display face (headings, metrics, wordmark) and body face — self-hosted by next/font.
 const archivo = Archivo({
   subsets: ['latin'],
   weight: ['500', '600', '700', '800'],

@@ -1,9 +1,3 @@
-/**
- * AppShell — the responsive dashboard chrome for authenticated/role areas.
- * Persistent navy sidebar at lg+, a hamburger drawer below that. Server
- * component: it only lays out and renders the client nav/drawer/account
- * islands, receiving an already-resolved nav model (plain strings) as props.
- */
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { BrandLogo } from '@/components/molecules/brand-logo';
@@ -57,7 +51,6 @@ export function AppShell({
 
   return (
     <div className="flex flex-1 flex-col lg:flex-row">
-      {/* Desktop sidebar */}
       <aside className="hidden bg-navy lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-64 lg:shrink-0 lg:flex-col">
         <div className="px-4 py-4">{brand}</div>
         <nav aria-label={chrome.navAria} className="flex-1 overflow-y-auto px-2">
@@ -66,7 +59,6 @@ export function AppShell({
         <div className="pb-4">{account}</div>
       </aside>
 
-      {/* Mobile top bar + slide-in drawer */}
       <NavDrawer
         brand={brand}
         account={account}
@@ -77,7 +69,6 @@ export function AppShell({
         {navGroups}
       </NavDrawer>
 
-      {/* Content column */}
       <div className="flex min-w-0 flex-1 flex-col">
         {emergencyContext}
         {children}

@@ -1,12 +1,4 @@
-/**
- * Brand illustrations — self-authored, decorative inline SVGs for the static
- * content pages. Vector (crisp at any size), themed with the design-system
- * palette, and lightweight (no external assets). Marked aria-hidden: the page
- * copy carries the meaning. Each accepts a className for sizing.
- *
- * Palette: navy #112b4a · navy-700 #13315c · accent #e8740e · surface-alt
- * #f4f1ec · line #e7e2da.
- */
+// Decorative inline SVGs: aria-hidden because the page copy carries the meaning.
 interface IllustrationProps {
   className?: string;
 }

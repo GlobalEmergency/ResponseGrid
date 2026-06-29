@@ -63,7 +63,6 @@ export async function fetchRoles(): Promise<RoleView[]> {
   return (data ?? []) as RoleView[];
 }
 
-/** Grants made at a scope (who holds a role here), enriched with name/email. */
 export async function fetchScopeGrants(
   scopeType: ScopeType,
   scopeId: string,
@@ -98,7 +97,6 @@ async function resolvePrincipalId(
   return data.id;
 }
 
-/** Grant a catalog role (by email or id) within this scope. */
 export async function grantRoleAction(
   _prev: ActionResult,
   formData: FormData,
@@ -177,8 +175,7 @@ export async function revokeGrantAction(
   return { status: 'success' };
 }
 
-// ── Service accounts (organization scope only) ──────────────────────────────
-
+// Service accounts exist only at organization scope.
 export async function fetchOrgServiceAccounts(
   orgId: string,
 ): Promise<ServiceAccountView[]> {

@@ -15,7 +15,6 @@ import { CoordinationTabs } from '@/components/organisms/coordination-tabs';
 import { Badge } from '@/components/atoms/badge';
 import type { Messages } from '@/i18n/messages/es';
 
-/** Friendly per-role label, falling back to the catalog description. */
 function roleLabel(
   roleId: string,
   tc: Messages['coord'],
@@ -35,13 +34,6 @@ function roleLabel(
   }
 }
 
-/**
- * Coordination shell: dashboard chrome + emergency context banner, plus the
- * panel container, integrated header (title · emergency name · role badges) and
- * the permission-aware sub-nav ({@link CoordinationTabs}). Every coordination
- * page renders only its own sections inside this frame — the header and tabs no
- * longer live in each page.
- */
 export default async function CoordinacionLayout({
   children,
   params,

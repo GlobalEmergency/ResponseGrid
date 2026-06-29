@@ -11,7 +11,6 @@ import { getT } from '@/i18n/server';
 type ResourceType = components['schemas']['RegisterResourceDto']['type'];
 type Stage = components['schemas']['RegisterResourceDto']['stage'];
 
-/** Narrow a free string to a known material category slug (single source). */
 function isMaterialCategory(v: string): boolean {
   return (MATERIAL_CATEGORIES as readonly string[]).includes(v);
 }

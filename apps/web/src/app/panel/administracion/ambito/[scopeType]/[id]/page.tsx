@@ -76,7 +76,6 @@ export default async function ScopeAdminPage({ params }: PageProps) {
       />
       <p className="font-mono text-xs text-muted break-all">{scopeId}</p>
 
-      {/* ── MIEMBROS / ROLES ─────────────────────────────────────────────── */}
       <section aria-labelledby="members-heading" className="flex flex-col gap-4">
         <h2 id="members-heading" className="text-xl font-bold text-ink">
           Roles concedidos ({grants.length})
@@ -131,7 +130,6 @@ export default async function ScopeAdminPage({ params }: PageProps) {
 
       <hr className="border-line" />
 
-      {/* ── CONCEDER ROL ─────────────────────────────────────────────────── */}
       <section aria-labelledby="grant-heading" className="flex flex-col gap-4">
         <h2 id="grant-heading" className="text-xl font-bold text-ink">
           Asignar un rol
@@ -139,7 +137,6 @@ export default async function ScopeAdminPage({ params }: PageProps) {
         <GrantRoleForm scopeType={scopeType} scopeId={scopeId} roles={roles} />
       </section>
 
-      {/* ── CUENTAS DE SERVICIO (solo organización) ──────────────────────── */}
       {serviceAccounts !== null && (
         <>
           <hr className="border-line" />

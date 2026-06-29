@@ -61,7 +61,6 @@ export function VoluntarioForm({ action, slug, existingProfile, t, backToEmergen
     { debounce: existingProfile !== null ? 999999 : 600 },
   );
 
-  // Clear draft on successful submit
   useEffect(() => {
     if (state.status === 'success') clearDraft();
   }, [state.status, clearDraft]);
@@ -146,7 +145,6 @@ export function VoluntarioForm({ action, slug, existingProfile, t, backToEmergen
         <ErrorMessage message={state.message} />
       )}
 
-      {/* Nombre */}
       <FormField
         htmlFor="name"
         label={<>{t.name_label} <span aria-hidden="true">*</span></>}
@@ -163,7 +161,6 @@ export function VoluntarioForm({ action, slug, existingProfile, t, backToEmergen
         />
       </FormField>
 
-      {/* Contacto */}
       <FormField
         htmlFor="contact"
         label={<>{t.contact_label} <span aria-hidden="true">*</span></>}
@@ -180,7 +177,6 @@ export function VoluntarioForm({ action, slug, existingProfile, t, backToEmergen
         />
       </FormField>
 
-      {/* Municipio */}
       <FormField
         htmlFor="municipality"
         label={<>{t.municipality_label} <span aria-hidden="true">*</span></>}
@@ -197,7 +193,6 @@ export function VoluntarioForm({ action, slug, existingProfile, t, backToEmergen
         />
       </FormField>
 
-      {/* Habilidades */}
       <fieldset className="flex flex-col gap-3">
         <legend className="text-sm font-semibold text-ink uppercase tracking-wide">
           {t.skills_legend}
@@ -230,7 +225,6 @@ export function VoluntarioForm({ action, slug, existingProfile, t, backToEmergen
         </div>
       </fieldset>
 
-      {/* Disponibilidad */}
       <FormField
         htmlFor="availability"
         label={<>{t.availability_label} <span aria-hidden="true">*</span></>}
@@ -253,7 +247,6 @@ export function VoluntarioForm({ action, slug, existingProfile, t, backToEmergen
         </Select>
       </FormField>
 
-      {/* Vehículo */}
       <FormField
         htmlFor="vehicle"
         label={<>{t.vehicle_label} <span aria-hidden="true">*</span></>}

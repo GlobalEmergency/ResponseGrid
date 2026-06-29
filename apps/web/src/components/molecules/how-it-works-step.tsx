@@ -1,6 +1,3 @@
-/**
- * HowItWorksStep — a numbered step in the Home "Cómo funciona" section.
- */
 interface HowItWorksStepProps {
   index: number;
   title: string;

@@ -1,19 +1,11 @@
 'use client';
 
-/**
- * SectionTabs — reusable pill sub-navigation. Mobile-first: a horizontally
- * scrollable row of pills that wraps to multiple lines on wider screens. The
- * active tab is derived from the current path and exposed via
- * `aria-current="page"`. Shared by the coordination and administration areas
- * (each builds its own permission-gated tab list and renders this).
- */
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 export interface SectionTab {
   href: string;
   label: string;
-  /** Active-match strategy: exact path vs path prefix (default: prefix). */
   exact?: boolean;
 }
 

@@ -1,10 +1,5 @@
 import type { ReactNode } from 'react';
 
-/**
- * FilterField — a labelled form control for the filter bars. Keeps every field
- * (selects, search) visually identical: full width, label above, consistent
- * spacing. Wrapping in <label> means the caption also focuses the control.
- */
 interface FilterFieldProps {
   label: string;
   children: ReactNode;

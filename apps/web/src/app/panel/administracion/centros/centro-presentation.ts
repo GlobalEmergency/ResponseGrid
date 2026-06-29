@@ -1,9 +1,3 @@
-/**
- * Pure presentation helpers for the admin centers/resources pages: maps backend
- * enum values (resource type, public status, verification level, report status)
- * to localized labels and to badge styling. Safe to import from Server or Client
- * Components.
- */
 import type { Messages } from '@/i18n/messages/es';
 
 type AdminMessages = Messages['admin'];
@@ -23,7 +17,6 @@ export function resourceTypeLabel(type: string, ta: AdminMessages): string {
   return key ? ta[key] : type;
 }
 
-/** Resource types in display order, for the filter dropdown. */
 export const RESOURCE_TYPES: ReadonlyArray<string> = [
   'collection_point',
   'delivery_point',
@@ -47,7 +40,6 @@ export function statusLabel(status: string, ta: AdminMessages): string {
   return key ? ta[key] : status;
 }
 
-/** Public statuses in display order, for the filter dropdown. */
 export const PUBLIC_STATUSES: ReadonlyArray<string> = [
   'active',
   'saturated',
@@ -88,7 +80,6 @@ export function verificationLabel(level: string, ta: AdminMessages): string {
   return key ? ta[key] : level;
 }
 
-/** Maps a verification level to a shared Badge variant. */
 export function verificationBadgeVariant(
   level: string,
 ): 'verification-official' | 'verification-verified' | 'offer-cancelled' | 'unverified' {

@@ -41,7 +41,6 @@ export default async function MisPermisosPage() {
           subtitle="Tus roles, dónde aplican y qué te permiten hacer."
         />
 
-        {/* Identity */}
         <section className="flex flex-col gap-2 rounded-lg border border-line p-4">
           <div className="flex items-center gap-3">
             <span className="text-lg font-bold text-ink">{me.name}</span>
@@ -55,7 +54,6 @@ export default async function MisPermisosPage() {
           <span className="text-xs text-muted break-all">ID: {me.id}</span>
         </section>
 
-        {/* Grants */}
         <section aria-labelledby="grants-heading" className="flex flex-col gap-4">
           <h2 id="grants-heading" className="text-xl font-bold text-ink">
             Mis roles ({grants.length})

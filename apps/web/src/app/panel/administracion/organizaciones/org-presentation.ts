@@ -1,8 +1,3 @@
-/**
- * Pure presentation helpers for the admin organizations pages: maps backend
- * enum values to localized labels and to the shared Badge variants. Safe to
- * import from Server or Client Components.
- */
 import type { Messages } from '@/i18n/messages/es';
 import type { AccreditationStatus } from './actions';
 
@@ -35,7 +30,6 @@ export function accreditationLabel(
   return ta[ACCR_KEYS[status]];
 }
 
-/** Maps accreditation status to a shared Badge variant. */
 export function accreditationBadgeVariant(
   status: AccreditationStatus,
 ): 'verification-official' | 'verification-verified' | 'unverified' {

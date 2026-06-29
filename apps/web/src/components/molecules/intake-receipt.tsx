@@ -4,8 +4,6 @@ import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
 
 /**
- * IntakeReceipt — molecule.
- *
  * The donor's proof of a delivery pre-registration (#130): the short, human
  * code plus a QR encoding it, shown after a successful pre-registration so the
  * person can present it at the collection-point desk. The desk operator finds

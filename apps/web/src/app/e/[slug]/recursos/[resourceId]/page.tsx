@@ -14,10 +14,6 @@ type Props = {
   params: Promise<{ slug: string; resourceId: string }>;
 };
 
-/**
- * Public detail page for a single resource / final recipient: its ficha plus
- * the list of needs linked to it (1‑a‑N, via ?resourceId=). EPIC #59.
- */
 export default async function RecipientResourcePage({ params }: Props) {
   const { slug, resourceId } = await params;
   const emergency = await getEmergencyBySlug(slug);

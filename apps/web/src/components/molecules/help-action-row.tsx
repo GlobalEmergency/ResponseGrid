@@ -1,7 +1,3 @@
-/**
- * HelpActionRow — a single "¿Cómo quieres ayudar?" action: icon, title, optional
- * subtitle and a trailing arrow. Linked. Variants set the visual weight.
- */
 import Link from 'next/link';
 
 type Variant = 'primary' | 'default' | 'danger';

@@ -28,7 +28,6 @@ export function AddMemberForm({ orgId }: AddMemberFormProps) {
         <ErrorMessage message={state.message ?? td.add_error} />
       )}
 
-      {/* Success */}
       {state.status === 'success' && (
         <p
           role="status"

@@ -6,11 +6,6 @@ interface DetailFieldProps {
   value?: ReactNode;
 }
 
-/**
- * DetailField — a single labelled row inside a detail drawer body.
- * Renders nothing when the value is empty, so callers can pass optional DTO
- * fields directly without guarding each one.
- */
 export function DetailField({ label, value }: DetailFieldProps) {
   if (value == null || value === '') return null;
   return (
@@ -28,7 +23,6 @@ interface DetailSectionProps {
   children: ReactNode;
 }
 
-/** A titled group of {@link DetailField}s. */
 export function DetailSection({ title, children }: DetailSectionProps) {
   return (
     <section className="border-t border-line first:border-t-0">

@@ -15,10 +15,6 @@ const TONE_CLASS: Record<Tone, string> = {
   accent: 'text-accent',
 };
 
-/**
- * MetricCard — a single metric tile (big figure + label) for the emergency
- * summary grid. Branded "Banda oficial" look: warm card, Archivo figure.
- */
 export function MetricCard({ value, label, tone = 'navy' }: MetricCardProps) {
   return (
     <Card className="px-3.5 py-3">

@@ -11,10 +11,6 @@ export type PersonnelActionResult =
   | { status: 'success'; taskId: string }
   | { status: 'error'; message: string };
 
-/**
- * Crea una tarea a partir de una need de personal y opcionalmente asigna
- * voluntarios. Solo coordinadores.
- */
 export async function createTaskFromNeed(
   needId: string,
   slug: string,

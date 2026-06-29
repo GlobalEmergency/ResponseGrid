@@ -31,7 +31,6 @@ export function LoginForm({ next, t }: LoginFormProps) {
           <ErrorMessage message={state.message ?? t.error_fallback} />
         )}
 
-        {/* Email */}
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="email">{t.email_label}</Label>
           <Input
@@ -44,7 +43,6 @@ export function LoginForm({ next, t }: LoginFormProps) {
           />
         </div>
 
-        {/* Password */}
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="password">{t.password_label}</Label>
           <Input

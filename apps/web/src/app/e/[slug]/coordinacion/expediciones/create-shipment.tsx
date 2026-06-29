@@ -15,7 +15,6 @@ import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
 import { MATERIAL_CATEGORIES, categoryLabel } from '@/lib/categories';
 
-/** A resource option for the origin/destination selects. */
 export interface ResourceOption {
   id: string;
   name: string;
@@ -45,12 +44,6 @@ interface CreateShipmentProps {
 }
 
 /**
- * "Crear expedición" — a button that opens a drawer with a minimal create form:
- * origin/destination selects (from the emergency's resources), repeatable cargo
- * lines (the canonical SupplyLine: insumo + cantidad + unidad + categoría) and a
- * free-text manifiesto. On success the drawer closes and the route refreshes so
- * the new shipment appears.
- *
  * The loose lines use the shared material model (#141); loading trackable
  * containers (#140) onto a shipment is a separate flow, not part of this form.
  */
@@ -221,7 +214,6 @@ export function CreateShipment({
               </Select>
             </FormField>
 
-            {/* Repeatable cargo lines (canonical SupplyLine) */}
             <fieldset className="flex flex-col gap-3">
               <legend className="text-sm font-semibold text-ink uppercase tracking-wide">
                 {tc.ship_items_legend} <span aria-hidden="true">*</span>

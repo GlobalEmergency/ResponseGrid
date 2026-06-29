@@ -158,7 +158,6 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
     { color: 'bg-red-500', label: te.map_legend_need },
   ];
 
-  // ── Slots handed to the segmented explorer ──────────────────────────────────
   const pointsSlot = (
     <ResourceList
       emergencyId={emergencyId}
@@ -220,7 +219,6 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
         a la derecha. En móvil el mapa es un "hero" arriba y el panel va debajo.
       */}
       <div className="lg:flex lg:items-start">
-        {/* ── Mapa: hero en móvil, panel fijo en escritorio ──────────────────── */}
         <section
           aria-labelledby="map-heading"
           className="relative lg:sticky lg:top-0 lg:h-screen lg:w-[58%] lg:shrink-0"
@@ -232,7 +230,6 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
             slug={slug}
             containerClassName="h-[44vh] min-h-[300px] max-h-[480px] border-y border-line lg:h-full lg:min-h-0 lg:max-h-none lg:border-y-0 lg:border-r"
           />
-          {/* Leyenda flotante sobre el mapa */}
           <div className="pointer-events-none absolute bottom-3 left-3 z-[500] flex max-w-[calc(100%-1.5rem)] flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-line bg-white/95 px-3 py-2 text-[11px] font-medium text-muted shadow-md backdrop-blur-sm">
             {legendItems.map((item) => (
               <span key={item.label} className="flex items-center gap-1.5">
@@ -243,9 +240,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
           </div>
         </section>
 
-        {/* ── Panel: acciones, métricas, listas ──────────────────────────────── */}
         <div className="flex min-w-0 flex-1 flex-col gap-6 px-4 pb-12 pt-5 lg:mx-auto lg:max-w-3xl lg:px-8 lg:pt-7">
-          {/* Comunicado oficial (sólo si existe) */}
           {announcement !== null && (
             <AnnouncementCard
               announcement={announcement}
@@ -254,7 +249,6 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
             />
           )}
 
-          {/* ¿Cómo quieres colaborar? — acción primaria, arriba del todo */}
           <section aria-labelledby="actions-heading" className="flex flex-col gap-3">
             <h2 id="actions-heading" className={sectionTitle}>{te.actions_heading}</h2>
             {isActive ? (

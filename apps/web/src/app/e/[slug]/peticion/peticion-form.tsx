@@ -58,7 +58,6 @@ export function PeticionForm({
     draftSetters,
   );
 
-  // Clear draft on successful submit
   useEffect(() => {
     if (state.status === 'success') clearDraft();
   }, [state.status, clearDraft]);
@@ -93,7 +92,6 @@ export function PeticionForm({
       {/* Organización — primer campo: en nombre de quién se hace la petición */}
       {orgSelector}
 
-      {/* Título */}
       <FormField
         htmlFor="title"
         label={<>{t.title_label} <span aria-hidden="true">*</span></>}
@@ -110,7 +108,6 @@ export function PeticionForm({
         />
       </FormField>
 
-      {/* Descripción */}
       <FormField
         htmlFor="description"
         label={
@@ -130,7 +127,6 @@ export function PeticionForm({
         />
       </FormField>
 
-      {/* Prioridad */}
       <FormField
         htmlFor="priority"
         label={<>{t.priority_label} <span aria-hidden="true">*</span></>}
@@ -153,7 +149,6 @@ export function PeticionForm({
         </Select>
       </FormField>
 
-      {/* Ubicación */}
       <FormField
         htmlFor="location-search"
         label={<>{t.location_label} <span aria-hidden="true">*</span></>}
@@ -162,10 +157,8 @@ export function PeticionForm({
         {locationPicker}
       </FormField>
 
-      {/* Artículos */}
       {itemsField}
 
-      {/* Submit */}
       <Button type="submit" disabled={pending} fullWidth>
         {pending ? t.submitting : t.submit}
       </Button>

@@ -158,7 +158,6 @@ export function InventoryField({
         ))
       )}
 
-      {/* Hidden input carries serialized items to the server action */}
       <input type="hidden" name="items" value={serialized} />
     </div>
   );

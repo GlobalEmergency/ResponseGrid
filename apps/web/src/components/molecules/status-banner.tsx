@@ -1,9 +1,3 @@
-/**
- * StatusBanner — prominent banner shown when an emergency is paused or closed.
- * Renders nothing when status is 'active'.
- * `t` is optional — falls back to Spanish when omitted.
- */
-
 import type { Messages } from '@/i18n/messages/es';
 import { es } from '@/i18n/messages/es';
 

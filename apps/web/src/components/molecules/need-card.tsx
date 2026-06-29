@@ -1,7 +1,3 @@
-/**
- * NeedCard — a validated need (Banda oficial look): priority pill + freshness on
- * top, title, the headline item, optional privacy notice and an offer CTA.
- */
 import Link from 'next/link';
 import type { components } from '@reliefhub/api-client';
 import { Card } from '@/components/atoms/card';

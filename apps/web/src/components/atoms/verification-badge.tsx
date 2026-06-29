@@ -38,13 +38,7 @@ const LABEL_KEY: Record<VerificationLevel, keyof Messages['verification_badge']>
   rejected: 'rejected',
 };
 
-/**
- * VerificationBadge — visual indicator for resource trust level.
- *
- * Renders as a <span> so it can be used inline inside flex rows.
- * Accessible: aria-label describes both the type and value.
- * `t` is optional — falls back to Spanish when omitted (used in coordinator pages).
- */
+// `t` is optional — falls back to Spanish when omitted (used in coordinator pages).
 export function VerificationBadge({
   level,
   t = es.verification_badge,

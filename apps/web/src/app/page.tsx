@@ -26,7 +26,6 @@ export default async function HomePage() {
   const { t } = await getT();
   const { data: emergencies } = await api.GET('/emergencies');
 
-  // Fetch notification unread count and admin status when authenticated.
   const token = await getToken();
   let notificationUnreadCount = 0;
   let isAdmin = false;

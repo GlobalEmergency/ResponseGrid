@@ -1,22 +1,5 @@
 'use client';
 
-/**
- * ResourceList — paginated "load more" list of public resources.
- *
- * Starts with the `initialItems` fetched server-side (page 1).
- * Each "Cargar más" click fetches the next page from the client using the
- * typed API client and appends results (no full page reload).
- *
- * Supports:
- *  - Category + country filter props: re-fetches page 1 and resets
- *    accumulated items whenever they change.
- *  - Server-side full-text search via `q` query param (debounced ~300 ms).
- *  - Geographic grouping: Venezuela first, diaspora/others after.
- *  - Nearby mode: citizen geolocates and sees nearest points, ordered by
- *    distance. Filter bar, load-more and geographic grouping are hidden in
- *    this mode.
- */
-
 import { useState, useTransition, useEffect, useMemo, useRef } from 'react';
 import { createResponseGridClient } from '@reliefhub/api-client';
 import type { components } from '@reliefhub/api-client';
@@ -230,7 +213,6 @@ export function ResourceList({
   if (nearbyItems !== null) {
     return (
       <div className="flex flex-col gap-4">
-        {/* NearbyButton in active state (shows "Volver a la lista") */}
         <NearbyButton
           tNearby={tNearby}
           onLocate={handleNearbyLocate}
@@ -239,15 +221,12 @@ export function ResourceList({
           active
         />
 
-        {/* Summary */}
         <p className="text-xs text-muted">
           {tNearby.showing_nearby.replace('{n}', String(nearbyItems.length))}
         </p>
 
-        {/* Privacy notice */}
         <PrivacyLocationNotice text={tNearby.privacy_note} />
 
-        {/* Nearby items list */}
         <ul className="flex flex-col gap-3" role="list">
           {nearbyItems.map((item) => (
             <li key={item.id}>
@@ -276,7 +255,6 @@ export function ResourceList({
   if (items.length === 0 && !isPending) {
     return (
       <div className="flex flex-col gap-4">
-        {/* NearbyButton above filter bar */}
         <NearbyButton
           tNearby={tNearby}
           onLocate={handleNearbyLocate}
@@ -285,7 +263,6 @@ export function ResourceList({
           active={nearbyItems !== null}
         />
 
-        {/* Geo error alert */}
         {geoError && (
           <p role="alert" className="rounded-card border border-warning bg-warning-soft px-3 py-2 text-xs text-warning">
             {tNearby.geo_error}
@@ -320,7 +297,6 @@ export function ResourceList({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* ── NearbyButton above filter bar ───────────────────────────────── */}
       <NearbyButton
         tNearby={tNearby}
         onLocate={handleNearbyLocate}
@@ -329,7 +305,6 @@ export function ResourceList({
         active={nearbyItems !== null}
       />
 
-      {/* ── Geo error alert ──────────────────────────────────────────────── */}
       {geoError && nearbyItems === null && (
         <p role="alert" className="rounded-card border border-warning bg-warning-soft px-3 py-2 text-xs text-warning">
           {tNearby.geo_error}
@@ -345,7 +320,6 @@ export function ResourceList({
         </p>
       )}
 
-      {/* ── Filter bar ──────────────────────────────────────────────────── */}
       <ResourceFilterBar
         byCategory={facetsByCategory}
         byCountry={facetsByCountry}
@@ -359,7 +333,6 @@ export function ResourceList({
         locale={locale}
       />
 
-      {/* ── Summary line ────────────────────────────────────────────────── */}
       <p className="text-xs text-muted">
         {isSearching
           ? tList.search_results.replace('{n}', String(total))
@@ -372,7 +345,6 @@ export function ResourceList({
         <EmptyState title={tEmpty.title} description={tEmpty.description} />
       ) : (
         <div className="flex flex-col gap-6">
-          {/* Venezuela group */}
           {venezuela.length > 0 && (
             <section aria-labelledby="group-ve-heading">
               <h3
@@ -398,7 +370,6 @@ export function ResourceList({
             </section>
           )}
 
-          {/* Diaspora group */}
           {diaspora.length > 0 && (
             <section aria-labelledby="group-diaspora-heading">
               <h3
@@ -424,7 +395,6 @@ export function ResourceList({
             </section>
           )}
 
-          {/* Other group (no country) */}
           {other.length > 0 && (
             <section aria-labelledby="group-other-heading">
               <h3
@@ -452,7 +422,6 @@ export function ResourceList({
         </div>
       )}
 
-      {/* ── Load more / errors ──────────────────────────────────────────── */}
       {loadMoreError && (
         <p role="alert" className="text-center text-sm text-danger">
           <button

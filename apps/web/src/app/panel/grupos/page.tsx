@@ -34,7 +34,6 @@ export default async function GruposPage() {
     redirect('/login?next=/panel/grupos');
   }
 
-  // Can the user create groups? True if any of their roles confers group:create.
   const roleMap = new Map((roles ?? []).map((r) => [r.id, r]));
   const canCreate =
     me.isAdmin ||
