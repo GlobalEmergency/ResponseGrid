@@ -9,3 +9,6 @@ ALTER TABLE "need_items"
 
 ALTER TABLE "donation_intake_lines"
   ADD COLUMN IF NOT EXISTS "expires_at" timestamp with time zone;
+
+ALTER TABLE "offer_items"
+  ADD COLUMN IF NOT EXISTS "expires_at" timestamp with time zone;
