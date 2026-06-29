@@ -26,14 +26,18 @@ export async function createOrganizationAction(
   const type = String(formData.get('type') ?? '').trim();
   const taxId = String(formData.get('taxId') ?? '').trim() || undefined;
   const contactEmail = String(formData.get('contactEmail') ?? '').trim() || undefined;
+  const contactPhone = String(formData.get('contactPhone') ?? '').trim() || undefined;
 
   if (!name || !type) {
     return { status: 'error', message: t.organizaciones.err_name_type_required };
   }
+  if (!contactEmail || !contactPhone) {
+    return { status: 'error', message: t.organizaciones.err_contact_required };
+  }
 
   const { data, error, response } = await api.POST('/organizations', {
     headers: authHeaders(token),
-    body: { name, type: type as 'ngo' | 'company' | 'public_admin' | 'association' | 'transport_operator' | 'other', taxId, contactEmail },
+    body: { name, type: type as 'ngo' | 'company' | 'public_admin' | 'association' | 'transport_operator' | 'other', taxId, contactEmail, contactPhone },
   });
 
   if (error !== undefined || data === undefined) {

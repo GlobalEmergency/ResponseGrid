@@ -3788,6 +3788,8 @@ export interface components {
             taxId?: string;
             /** @example contact@org.example */
             contactEmail?: string;
+            /** @example +58 412-1234567 */
+            contactPhone?: string;
         };
         CreateOrganizationResponseDto: {
             /** @description New organization UUID */
@@ -3810,6 +3812,8 @@ export interface components {
             taxId: Record<string, never> | null;
             /** @example contact@org.example */
             contactEmail: Record<string, never> | null;
+            /** @example +58 412-1234567 */
+            contactPhone: Record<string, never> | null;
             /** @example unverified */
             verificationLevel: string;
             /** @example 3 */
@@ -3866,6 +3870,7 @@ export interface components {
             type: "ngo" | "company" | "public_admin" | "association" | "transport_operator" | "other";
             taxId: Record<string, never> | null;
             contactEmail: Record<string, never> | null;
+            contactPhone: Record<string, never> | null;
             /** @example unverified */
             verificationLevel: string;
             /** @description ISO 8601 timestamp */

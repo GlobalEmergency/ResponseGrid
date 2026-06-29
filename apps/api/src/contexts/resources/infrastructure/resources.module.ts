@@ -22,6 +22,8 @@ import { PublishResource } from '../application/publish-resource';
 import { EditResource } from '../application/edit-resource';
 import { DiscardResource } from '../application/discard-resource';
 import { UpdateResourcePublicStatus } from '../application/update-resource-public-status';
+import { ReceiveDonationIntoInventory } from '../application/receive-donation-into-inventory';
+import { DonationEventsWorker } from './donation-events.worker';
 import {
   RESOURCE_REPOSITORY,
   ResourceRepository,
@@ -284,6 +286,22 @@ const getResourceAdminDetailProvider = {
   ) => new GetResourceAdminDetail(repo, validityRepo),
 };
 
+// Donation reception → inventory (#129): apply received intake lines to the
+// target point's stock, consumed off the `donation_intake.received` event.
+const receiveDonationIntoInventoryProvider = {
+  provide: ReceiveDonationIntoInventory,
+  inject: [RESOURCE_REPOSITORY],
+  useFactory: (repo: ResourceRepository) =>
+    new ReceiveDonationIntoInventory(repo),
+};
+
+const donationEventsWorkerProvider = {
+  provide: DonationEventsWorker,
+  inject: [ReceiveDonationIntoInventory],
+  useFactory: (receive: ReceiveDonationIntoInventory) =>
+    new DonationEventsWorker(receive),
+};
+
 @Module({
   imports: [DatabaseModule, IdentityModule, NotificationsModule],
   controllers: [
@@ -322,6 +340,8 @@ const getResourceAdminDetailProvider = {
     getResourceValidityReportsProvider,
     listResourcesAdminProvider,
     getResourceAdminDetailProvider,
+    receiveDonationIntoInventoryProvider,
+    donationEventsWorkerProvider,
   ],
 })
 export class ResourcesModule implements OnModuleDestroy {

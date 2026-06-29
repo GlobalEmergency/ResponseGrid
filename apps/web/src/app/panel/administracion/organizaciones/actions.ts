@@ -12,6 +12,7 @@ export interface OrganizationListItem {
   type: string;
   taxId: string | null;
   contactEmail: string | null;
+  contactPhone: string | null;
   verificationLevel: string;
   memberCount: number;
   accreditationStatus: AccreditationStatus;
@@ -46,6 +47,7 @@ export interface OrganizationDetail {
   type: string;
   taxId: string | null;
   contactEmail: string | null;
+  contactPhone: string | null;
   verificationLevel: string;
   createdAt: string;
   accreditationStatus: AccreditationStatus;

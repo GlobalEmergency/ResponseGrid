@@ -67,10 +67,17 @@ export function CreateOrgForm() {
       {/* Contact email */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="org-email" className="text-sm font-semibold text-ink">
-          {to.f_email}
-          <span className="ml-1 text-xs font-normal text-muted">{m.common.optional}</span>
+          {to.f_email} <span aria-hidden="true">*</span>
         </label>
-        <Input id="org-email" name="contactEmail" type="email" placeholder={to.f_email_ph} />
+        <Input id="org-email" name="contactEmail" type="email" required placeholder={to.f_email_ph} />
+      </div>
+
+      {/* Contact phone */}
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="org-phone" className="text-sm font-semibold text-ink">
+          {to.f_phone} <span aria-hidden="true">*</span>
+        </label>
+        <Input id="org-phone" name="contactPhone" type="tel" required placeholder={to.f_phone_ph} />
       </div>
 
       <Button type="submit" disabled={pending} fullWidth>

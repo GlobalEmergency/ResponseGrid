@@ -25,6 +25,7 @@ describe('ListOrganizations', () => {
       type: OrganizationType.Ngo,
       taxId: null,
       contactEmail: null,
+      contactPhone: null,
       creatorUserId: 'aaaaaaaa-0000-4000-8000-000000000001',
     });
     await createUseCase.execute({
@@ -32,6 +33,7 @@ describe('ListOrganizations', () => {
       type: OrganizationType.Company,
       taxId: null,
       contactEmail: null,
+      contactPhone: null,
       creatorUserId: 'bbbbbbbb-0000-4000-8000-000000000001',
     });
 
@@ -57,6 +59,7 @@ describe('ListMyOrganizations', () => {
       type: OrganizationType.Ngo,
       taxId: null,
       contactEmail: null,
+      contactPhone: null,
       creatorUserId: userId1,
     });
     await createUseCase.execute({
@@ -64,6 +67,7 @@ describe('ListMyOrganizations', () => {
       type: OrganizationType.Company,
       taxId: null,
       contactEmail: null,
+      contactPhone: null,
       creatorUserId: userId2,
     });
 

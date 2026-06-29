@@ -93,6 +93,7 @@ describe('Organization admin reads (integration)', () => {
     type: OrganizationType,
     taxId: string | null = null,
     contactEmail: string | null = null,
+    contactPhone: string | null = null,
   ): Promise<string> {
     const org = Organization.create({
       id: OrganizationId.create(),
@@ -100,6 +101,7 @@ describe('Organization admin reads (integration)', () => {
       type,
       taxId,
       contactEmail,
+      contactPhone,
     });
     await orgRepo.save(org);
     return org.id.value;

@@ -7,6 +7,7 @@ export interface CreateOrganizationProps {
   type: OrganizationType;
   taxId: string | null;
   contactEmail: string | null;
+  contactPhone: string | null;
 }
 
 export interface OrganizationSnapshot {
@@ -15,6 +16,7 @@ export interface OrganizationSnapshot {
   type: string;
   taxId: string | null;
   contactEmail: string | null;
+  contactPhone: string | null;
   verificationLevel: string;
   createdAt: Date;
 }
@@ -26,6 +28,7 @@ export class Organization {
     public readonly type: OrganizationType,
     public readonly taxId: string | null,
     public readonly contactEmail: string | null,
+    public readonly contactPhone: string | null,
     public readonly verificationLevel: VerificationLevel,
     public readonly createdAt: Date,
   ) {}
@@ -37,6 +40,7 @@ export class Organization {
       props.type,
       props.taxId,
       props.contactEmail,
+      props.contactPhone,
       VerificationLevel.Unverified,
       new Date(),
     );
@@ -49,6 +53,7 @@ export class Organization {
       snap.type as OrganizationType,
       snap.taxId,
       snap.contactEmail,
+      snap.contactPhone,
       snap.verificationLevel as VerificationLevel,
       snap.createdAt,
     );
@@ -61,6 +66,7 @@ export class Organization {
       type: this.type,
       taxId: this.taxId,
       contactEmail: this.contactEmail,
+      contactPhone: this.contactPhone,
       verificationLevel: this.verificationLevel,
       createdAt: this.createdAt,
     };

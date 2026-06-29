@@ -90,6 +90,9 @@ export function PeticionForm({
         <ErrorMessage message={state.message ?? t.error_fallback} />
       )}
 
+      {/* Organización — primer campo: en nombre de quién se hace la petición */}
+      {orgSelector}
+
       {/* Título */}
       <FormField
         htmlFor="title"
@@ -158,9 +161,6 @@ export function PeticionForm({
       >
         {locationPicker}
       </FormField>
-
-      {/* Organización */}
-      {orgSelector}
 
       {/* Artículos */}
       {itemsField}
