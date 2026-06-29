@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Request,
   UseFilters,
@@ -25,11 +26,16 @@ import { Request as ExpressRequest } from 'express';
 import { Login } from '../../application/login';
 import { RegisterUser } from '../../application/register-user';
 import {
+  UpdateProfile,
+  UpdateProfileResult,
+} from '../../application/update-profile';
+import {
   LoginDto,
   LoginResponseDto,
   RegisterDto,
   RegisterResponseDto,
   MeResponseDto,
+  UpdateProfileDto,
 } from './dto';
 import { IdentityExceptionFilter } from './identity-exception.filter';
 import { JwtAuthGuard, AuthenticatedUser } from './jwt-auth.guard';
@@ -43,6 +49,7 @@ export class AuthController {
   constructor(
     private readonly login: Login,
     private readonly registerUser: RegisterUser,
+    private readonly updateProfile: UpdateProfile,
   ) {}
 
   @Post('login')
@@ -81,6 +88,7 @@ export class AuthController {
       email: dto.email,
       password: dto.password,
       name: dto.name,
+      phone: dto.phone,
     });
   }
 
@@ -107,5 +115,25 @@ export class AuthController {
         expiresAt: g.expiresAt,
       })),
     };
+  }
+
+  @Patch('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Actualizar teléfono y/o nombre del perfil autenticado',
+  })
+  @ApiOkResponse({ description: 'Perfil actualizado', type: MeResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Token inválido o ausente' })
+  async updateMe(
+    @Request() req: AuthedRequest,
+    @Body() dto: UpdateProfileDto,
+  ): Promise<UpdateProfileResult> {
+    return this.updateProfile.execute({
+      userId: req.user.id,
+      phone: dto.phone,
+      name: dto.name,
+    });
   }
 }

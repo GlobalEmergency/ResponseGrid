@@ -25,6 +25,7 @@ import { ListServiceAccountsByOrg } from '../application/list-service-accounts-b
 import { ListUsersAdmin } from '../application/list-users-admin';
 import { GetUserAdminDetail } from '../application/get-user-admin-detail';
 import { EnsureDonorAccount } from '../application/ensure-donor-account';
+import { UpdateProfile } from '../application/update-profile';
 import {
   SET_PASSWORD_INVITER,
   SetPasswordInviter,
@@ -163,16 +164,22 @@ const scopeResolverProvider = {
 
 const grantRoleProvider = {
   provide: GrantRole,
-  inject: [GRANT_REPOSITORY, ACCESS_CONTROL],
-  useFactory: (grants: GrantRepository, access: AccessControl) =>
-    new GrantRole(grants, access),
+  inject: [GRANT_REPOSITORY, ACCESS_CONTROL, RESOURCE_EMERGENCY_LOOKUP],
+  useFactory: (
+    grants: GrantRepository,
+    access: AccessControl,
+    resourceEmergencyLookup: ResourceEmergencyLookup,
+  ) => new GrantRole(grants, access, resourceEmergencyLookup),
 };
 
 const revokeGrantProvider = {
   provide: RevokeGrant,
-  inject: [GRANT_REPOSITORY, ACCESS_CONTROL],
-  useFactory: (grants: GrantRepository, access: AccessControl) =>
-    new RevokeGrant(grants, access),
+  inject: [GRANT_REPOSITORY, ACCESS_CONTROL, RESOURCE_EMERGENCY_LOOKUP],
+  useFactory: (
+    grants: GrantRepository,
+    access: AccessControl,
+    resourceEmergencyLookup: ResourceEmergencyLookup,
+  ) => new RevokeGrant(grants, access, resourceEmergencyLookup),
 };
 
 const findUserByEmailProvider = {
@@ -239,13 +246,16 @@ const listGrantsAtScopeProvider = {
     ACCESS_CONTROL,
     USER_REPOSITORY,
     SERVICE_ACCOUNT_REPOSITORY,
+    RESOURCE_EMERGENCY_LOOKUP,
   ],
   useFactory: (
     grants: GrantRepository,
     access: AccessControl,
     users: UserRepository,
     sas: ServiceAccountRepository,
-  ) => new ListGrantsAtScope(grants, access, users, sas),
+    resourceEmergencyLookup: ResourceEmergencyLookup,
+  ) =>
+    new ListGrantsAtScope(grants, access, users, sas, resourceEmergencyLookup),
 };
 
 const serviceAccountRepositoryProvider = {
@@ -414,6 +424,12 @@ const ensureDonorAccountProvider = {
     new EnsureDonorAccount(users, inviter),
 };
 
+const updateProfileProvider = {
+  provide: UpdateProfile,
+  inject: [USER_REPOSITORY],
+  useFactory: (userRepo: UserRepository) => new UpdateProfile(userRepo),
+};
+
 @Module({
   imports: [
     DatabaseModule,
@@ -447,6 +463,7 @@ const ensureDonorAccountProvider = {
     authenticateWithProviderProvider,
     setPasswordInviterProvider,
     ensureDonorAccountProvider,
+    updateProfileProvider,
     grantRoleProvider,
     revokeGrantProvider,
     findUserByEmailProvider,

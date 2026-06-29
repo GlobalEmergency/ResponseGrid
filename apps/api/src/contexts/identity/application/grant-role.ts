@@ -5,11 +5,7 @@ import {
   AuthorizationContext,
 } from '../domain/authorization/access-control';
 import { Grant } from '../domain/authorization/grant';
-import {
-  ScopeRef,
-  ScopeRefProps,
-  ancestorChain,
-} from '../domain/authorization/scope-ref';
+import { ScopeRef, ScopeRefProps } from '../domain/authorization/scope-ref';
 import {
   permissionsForRole,
   roleExists,
@@ -20,6 +16,8 @@ import {
   PrivilegeEscalationError,
   UnknownRoleError,
 } from '../domain/authorization/errors';
+import { ResourceEmergencyLookup } from '../domain/ports/resource-emergency-lookup';
+import { authorizationChainForScope } from './scope-chain';
 
 export interface GrantRoleCommand {
   /** Who is granting — their effective grants for this request. */
@@ -42,6 +40,7 @@ export class GrantRole {
   constructor(
     private readonly grants: GrantRepository,
     private readonly access: AccessControl,
+    private readonly resourceEmergencyLookup: ResourceEmergencyLookup,
   ) {}
 
   async execute(cmd: GrantRoleCommand): Promise<{ id: string }> {
@@ -60,7 +59,10 @@ export class GrantRole {
       throw new InvalidGrantExpiryError();
     }
 
-    const chain = ancestorChain(cmd.scope);
+    const chain = await authorizationChainForScope(
+      cmd.scope,
+      this.resourceEmergencyLookup,
+    );
     const actorPermissions = await this.access.effectivePermissions(
       cmd.actor,
       chain,

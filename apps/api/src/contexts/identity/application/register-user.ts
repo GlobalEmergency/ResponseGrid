@@ -10,6 +10,7 @@ export interface RegisterUserCommand {
   email: string;
   password: string;
   name: string;
+  phone?: string | undefined;
 }
 
 export class RegisterUser {
@@ -33,6 +34,7 @@ export class RegisterUser {
       passwordHash,
       name: cmd.name,
       isAdmin: false,
+      phone: cmd.phone ?? null,
     });
     await this.userRepo.save(user);
 

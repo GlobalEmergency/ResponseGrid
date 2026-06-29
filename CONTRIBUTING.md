@@ -113,4 +113,6 @@ Añade phone opcional al registro y un endpoint PATCH /auth/me para editarlo.
 
 - `AGENTS.md` — reglas canónicas del repo, gate de CI y protocolo de agentes paralelos
 - `README.md` — arquitectura y arranque local
+- `AGENTS.md` para reglas canónicas del repo
+- `README.md` para arquitectura y arranque local
 - `docs/DEFINITION_OF_DONE.md` — DoD compartida para features y épicas

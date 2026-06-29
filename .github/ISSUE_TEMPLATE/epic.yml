@@ -24,6 +24,10 @@ body:
     id: done
     attributes:
       label: Definición de Done
-      description: Qué tiene que pasar para cerrarla
+      description: Qué tiene que pasar para cerrarla (ver docs/DEFINITION_OF_DONE.md para criterios base)
+      placeholder: |
+        Criterios base: gate CI verde, tests, gen:api si aplica, PR con Closes #NN.
+        Criterios específicos de esta épica:
+        - [ ] ...
     validations:
       required: true

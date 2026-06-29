@@ -2554,5 +2554,20 @@ export const en = {
     qa_notifications: 'Notifications',
     qa_my_donations: 'My donations',
     qa_explore: 'View emergencies',
+    qa_my_profile: 'My profile',
+  },
+
+  miPerfil: {
+    meta_title: 'My profile — ResponseGrid',
+    meta_description: 'Edit your name and contact phone.',
+    page_title: 'My profile',
+    page_subtitle: 'Update your name and contact phone.',
+    label_name: 'Name',
+    label_phone: 'Phone',
+    phone_hint: 'Optional. Leave blank to remove it.',
+    btn_save: 'Save changes',
+    btn_saving: 'Saving…',
+    success: 'Profile updated.',
+    error: 'Could not save. Please try again.',
   },
 } satisfies Messages;

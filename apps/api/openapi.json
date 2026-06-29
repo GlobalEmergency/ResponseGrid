@@ -111,6 +111,44 @@
         "tags": [
           "auth"
         ]
+      },
+      "patch": {
+        "operationId": "AuthController_updateMe",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Perfil actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token inválido o ausente"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Actualizar teléfono y/o nombre del perfil autenticado",
+        "tags": [
+          "auth"
+        ]
       }
     },
     "/grants/at-scope": {
@@ -121,13 +159,21 @@
             "name": "scopeType",
             "required": true,
             "in": "query",
-            "description": "platform | organization | emergency | group",
+            "description": "platform | organization | emergency | group | entity",
             "schema": {
               "type": "string"
             }
           },
           {
             "name": "scopeId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scopeEntityType",
             "required": false,
             "in": "query",
             "schema": {
@@ -4428,6 +4474,129 @@
         ]
       }
     },
+    "/emergencies/{emergencyId}/donation-intakes/by-code/{code}": {
+      "get": {
+        "operationId": "DonationIntakesController_trackByCode",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "ACO-7F3K",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonationIntakeTrackingDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No donation with that code"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Track a donation by its code (public, no PII)",
+        "tags": [
+          "donation-intakes"
+        ]
+      }
+    },
+    "/resources/{resourceId}/donation-intakes/incoming-summary": {
+      "get": {
+        "operationId": "DonationIntakesController_incomingSummary",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomingSummaryDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing intake:read"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Aggregated forecast of incoming material for a collection point",
+        "tags": [
+          "donation-intakes"
+        ]
+      }
+    },
+    "/me/donation-intakes": {
+      "get": {
+        "operationId": "DonationIntakesController_myDonations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MyDonationIntakeDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the authenticated donor's own donations",
+        "tags": [
+          "donation-intakes"
+        ]
+      }
+    },
     "/donation-intakes/{intakeId}": {
       "patch": {
         "operationId": "DonationIntakesController_update",
@@ -7644,6 +7813,12 @@
           "name": {
             "type": "string",
             "example": "Jane Doe"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+58 412 555 0101",
+            "nullable": true,
+            "description": "Teléfono de contacto opcional"
           }
         },
         "required": [
@@ -7718,6 +7893,12 @@
           "isAdmin": {
             "type": "boolean"
           },
+          "phone": {
+            "type": "string",
+            "example": "+58 412 555 0101",
+            "nullable": true,
+            "description": "Optional contact phone, null until the user provides one"
+          },
           "grants": {
             "description": "The effective role grants (role @ scope) for this user",
             "type": "array",
@@ -7731,8 +7912,24 @@
           "email",
           "name",
           "isAdmin",
+          "phone",
           "grants"
         ]
+      },
+      "UpdateProfileDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+58 412 555 0101",
+            "nullable": true,
+            "description": "Nuevo teléfono. null para borrar."
+          },
+          "name": {
+            "type": "string",
+            "example": "Nuevo Nombre"
+          }
+        }
       },
       "GrantListItemDto": {
         "type": "object",
@@ -11739,6 +11936,163 @@
           "pendingIntakes"
         ]
       },
+      "DonationIntakeTrackingDto": {
+        "type": "object",
+        "properties": {
+          "intakeCode": {
+            "type": "string",
+            "example": "ACO-7F3K"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "received",
+              "rejected",
+              "incomplete"
+            ]
+          },
+          "resourceName": {
+            "type": "string",
+            "example": "Acopio CDMX Norte",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyLineResponseDto"
+            }
+          }
+        },
+        "required": [
+          "intakeCode",
+          "status",
+          "createdAt",
+          "updatedAt",
+          "lines"
+        ]
+      },
+      "IncomingSummaryLineDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Agua embotellada"
+          },
+          "category": {
+            "type": "string",
+            "example": "water"
+          },
+          "unit": {
+            "type": "string",
+            "nullable": true
+          },
+          "presentation": {
+            "type": "string",
+            "nullable": true
+          },
+          "totalQuantity": {
+            "type": "number",
+            "description": "Total expected across all pending intakes for this line",
+            "example": 200
+          },
+          "intakeCount": {
+            "type": "number",
+            "description": "Distinct pending intakes contributing to this line",
+            "example": 3
+          }
+        },
+        "required": [
+          "name",
+          "category",
+          "totalQuantity",
+          "intakeCount"
+        ]
+      },
+      "IncomingSummaryDto": {
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncomingSummaryLineDto"
+            }
+          },
+          "totalPendingIntakes": {
+            "type": "number",
+            "example": 5
+          }
+        },
+        "required": [
+          "lines",
+          "totalPendingIntakes"
+        ]
+      },
+      "MyDonationIntakeDto": {
+        "type": "object",
+        "properties": {
+          "intakeCode": {
+            "type": "string",
+            "example": "ACO-7F3K"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "received",
+              "rejected",
+              "incomplete"
+            ]
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emergencySlug": {
+            "type": "string",
+            "example": "terremoto-venezuela-2026",
+            "nullable": true
+          },
+          "resourceName": {
+            "type": "string",
+            "example": "Acopio CDMX Norte",
+            "nullable": true
+          },
+          "itemCount": {
+            "type": "number",
+            "example": 3
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "intakeCode",
+          "status",
+          "emergencyId",
+          "itemCount",
+          "createdAt"
+        ]
+      },
       "UpdateDonationIntakeDto": {
         "type": "object",
         "properties": {
@@ -11976,7 +12330,7 @@
         "properties": {
           "url": {
             "type": "string",
-            "example": "http://localhost:3001/e/mexico-demo/donar-acopio?resourceId=33333333-3333-4333-8333-333333333331"
+            "example": "http://localhost:3001/e/mexico-demo/pre-registro?resourceId=33333333-3333-4333-8333-333333333331"
           },
           "resourceName": {
             "type": "string",

@@ -118,6 +118,7 @@ function buildScope(dto: GrantRoleDto): ScopeRefProps {
 function buildScopeFromQuery(
   scopeType: string,
   scopeId?: string,
+  scopeEntityType?: string,
 ): ScopeRefProps {
   if (scopeType === 'platform') return { type: 'platform' };
   if (
@@ -131,6 +132,14 @@ function buildScopeFromQuery(
       );
     }
     return { type: scopeType, id: scopeId };
+  }
+  if (scopeType === 'entity') {
+    if (!scopeId || !scopeEntityType) {
+      throw new BadRequestException(
+        'scopeId and scopeEntityType are required for an entity scope',
+      );
+    }
+    return { type: 'entity', id: scopeId, entityType: scopeEntityType };
   }
   throw new BadRequestException(`unsupported scopeType '${scopeType}'`);
 }
@@ -175,9 +184,10 @@ export class GrantsController {
   @ApiQuery({
     name: 'scopeType',
     required: true,
-    description: 'platform | organization | emergency | group',
+    description: 'platform | organization | emergency | group | entity',
   })
   @ApiQuery({ name: 'scopeId', required: false })
+  @ApiQuery({ name: 'scopeEntityType', required: false })
   @ApiOkResponse({ type: [GrantListItemDto] })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
   @ApiForbiddenResponse({
@@ -187,11 +197,12 @@ export class GrantsController {
     @Query('scopeType') scopeType: string,
     @Req() req: Request & { user?: AuthenticatedUser },
     @Query('scopeId') scopeId?: string,
+    @Query('scopeEntityType') scopeEntityType?: string,
   ): Promise<GrantListItemDto[]> {
     const user = req.user!;
     const views = await this.listGrantsAtScope.execute({
       actor: { principalId: user.id, grants: user.grants },
-      scope: buildScopeFromQuery(scopeType, scopeId),
+      scope: buildScopeFromQuery(scopeType, scopeId, scopeEntityType),
     });
     return views.map((v) =>
       toGrantListItem(v.grant, v.principalName, v.principalEmail),
