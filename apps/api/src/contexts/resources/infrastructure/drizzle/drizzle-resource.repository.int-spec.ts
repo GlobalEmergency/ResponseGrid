@@ -142,6 +142,7 @@ describe('DrizzleResourceRepository (integration)', () => {
         unit: 'kg',
         category: Category.Food,
         presentation: null,
+        expiresAt: null,
       },
     ]);
   });
