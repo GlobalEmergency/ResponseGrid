@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { ConsoleLogger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
@@ -23,7 +24,13 @@ function validateJwtSecret(): void {
 async function bootstrap(): Promise<void> {
   validateJwtSecret();
 
-  const app = await NestFactory.create(AppModule);
+  // En producción emitimos logs JSON estructurados (sin colores ANSI) para que
+  // Datadog los parsee en campos; en dev seguimos con el logger coloreado.
+  const app = await NestFactory.create(AppModule, {
+    ...(process.env.NODE_ENV === 'production'
+      ? { logger: new ConsoleLogger({ json: true }) }
+      : {}),
+  });
 
   // ── Security headers (Helmet) ──────────────────────────────────────────────
   // crossOriginResourcePolicy: 'cross-origin' is required so that the Next.js
