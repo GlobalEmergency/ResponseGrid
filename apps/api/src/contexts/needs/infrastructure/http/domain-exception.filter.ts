@@ -12,13 +12,17 @@ import {
   NeedTitleRequiredError,
 } from '../../domain/need-errors';
 import { EmergencyNotAcceptingIntakeError } from '../../../emergencies/domain/emergency-not-accepting-intake.error';
+import { InvalidAuthorError } from '../../../../shared/domain/author';
+import { SupplyLineValidationError } from '../../../supplies/domain/supply-line';
 
 type DomainError =
   | NeedNotFoundError
   | NeedNotPendingError
   | NeedNotEditableError
   | NeedTitleRequiredError
-  | EmergencyNotAcceptingIntakeError;
+  | EmergencyNotAcceptingIntakeError
+  | InvalidAuthorError
+  | SupplyLineValidationError;
 
 // Only catches domain errors from the needs context; everything else falls through
 // to Nest's default handler.
@@ -28,6 +32,8 @@ type DomainError =
   NeedNotEditableError,
   NeedTitleRequiredError,
   EmergencyNotAcceptingIntakeError,
+  InvalidAuthorError,
+  SupplyLineValidationError,
 )
 export class NeedsDomainExceptionFilter implements ExceptionFilter {
   catch(exception: DomainError, host: ArgumentsHost): void {
@@ -35,7 +41,9 @@ export class NeedsDomainExceptionFilter implements ExceptionFilter {
     const statusCode =
       exception instanceof NeedNotFoundError
         ? HttpStatus.NOT_FOUND
-        : exception instanceof NeedTitleRequiredError
+        : exception instanceof NeedTitleRequiredError ||
+            exception instanceof InvalidAuthorError ||
+            exception instanceof SupplyLineValidationError
           ? HttpStatus.BAD_REQUEST
           : HttpStatus.CONFLICT;
     response

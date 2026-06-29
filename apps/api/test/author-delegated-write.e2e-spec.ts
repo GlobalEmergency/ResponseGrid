@@ -319,4 +319,12 @@ describe('Author delegated writes via API key (e2e, #235)', () => {
       .send(needBody({ author: { name: 'X', email: 'not-an-email' } }))
       .expect(400);
   });
+
+  it('rejects an author with no contact fields → 400', async () => {
+    await request(server)
+      .post(`/emergencies/${EM}/needs`)
+      .set('X-API-Key', grantedKey)
+      .send(needBody({ author: { verified: true, source: 'test-app' } }))
+      .expect(400);
+  });
 });

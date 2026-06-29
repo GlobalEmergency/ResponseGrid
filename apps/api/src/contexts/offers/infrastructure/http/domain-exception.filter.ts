@@ -30,6 +30,7 @@ import {
   DonationIntakeLineLimitError,
 } from '../../domain/donation-intake-errors';
 import { SupplyLineValidationError } from '../../../supplies/domain/supply-line';
+import { InvalidAuthorError } from '../../../../shared/domain/author';
 
 type DomainError =
   | OfferNotFoundError
@@ -50,7 +51,8 @@ type DomainError =
   | InvalidDonationIntakeContactError
   | InvalidIntakeTargetResourceError
   | DonationIntakeLineLimitError
-  | SupplyLineValidationError;
+  | SupplyLineValidationError
+  | InvalidAuthorError;
 
 @Catch(
   OfferNotFoundError,
@@ -72,6 +74,7 @@ type DomainError =
   InvalidIntakeTargetResourceError,
   DonationIntakeLineLimitError,
   SupplyLineValidationError,
+  InvalidAuthorError,
 )
 export class OffersDomainExceptionFilter implements ExceptionFilter {
   catch(exception: DomainError, host: ArgumentsHost): void {
@@ -97,15 +100,18 @@ export class OffersDomainExceptionFilter implements ExceptionFilter {
                         ? HttpStatus.BAD_REQUEST
                         : exception instanceof SupplyLineValidationError
                           ? HttpStatus.BAD_REQUEST
-                          : exception instanceof
-                              EmergencyNotAcceptingIntakeError
-                            ? HttpStatus.CONFLICT
-                            : exception instanceof OfferCancelUnauthorizedError
-                              ? HttpStatus.FORBIDDEN
+                          : exception instanceof InvalidAuthorError
+                            ? HttpStatus.BAD_REQUEST
+                            : exception instanceof
+                                EmergencyNotAcceptingIntakeError
+                              ? HttpStatus.CONFLICT
                               : exception instanceof
-                                  DonationIntakeContactMismatchError
+                                  OfferCancelUnauthorizedError
                                 ? HttpStatus.FORBIDDEN
-                                : HttpStatus.CONFLICT;
+                                : exception instanceof
+                                    DonationIntakeContactMismatchError
+                                  ? HttpStatus.FORBIDDEN
+                                  : HttpStatus.CONFLICT;
     response
       .status(statusCode)
       .json({ statusCode, message: exception.message });
