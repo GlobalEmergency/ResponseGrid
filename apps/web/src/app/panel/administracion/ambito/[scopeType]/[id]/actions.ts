@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
+import { parseDateInput } from '@/lib/parse-date-input';
 
 export interface RoleView {
   id: string;
@@ -108,6 +109,7 @@ export async function grantRoleAction(
 
   const principalInput = String(formData.get('principal') ?? '').trim();
   const roleId = String(formData.get('roleId') ?? '').trim();
+  const expiresAt = parseDateInput(String(formData.get('expiresAt') ?? ''));
   if (!scopeType || !scopeId || !principalInput || !roleId) {
     return { status: 'error', message: 'Indica el usuario y el rol.' };
   }
@@ -121,7 +123,13 @@ export async function grantRoleAction(
   }
 
   const { error, response } = await api.POST('/grants', {
-    body: { principalId, roleId, scopeType, scopeId },
+    body: {
+      principalId,
+      roleId,
+      scopeType,
+      scopeId,
+      ...(expiresAt ? { expiresAt } : {}),
+    },
     headers: authHeaders(token),
   });
 

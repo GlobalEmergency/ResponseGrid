@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
+import { parseDateInput } from '@/lib/parse-date-input';
 
 export type GrantActionResult =
   | { status: 'idle' }
@@ -93,7 +94,7 @@ export async function grantRoleAction(
   const roleId = String(formData.get('roleId') ?? '').trim();
   const scopeType = String(formData.get('scopeType') ?? '').trim();
   const scopeId = String(formData.get('scopeId') ?? '').trim();
-  const expiresAt = String(formData.get('expiresAt') ?? '').trim();
+  const expiresAt = parseDateInput(String(formData.get('expiresAt') ?? ''));
 
   if (!principalId || !roleId || !scopeType) {
     return { status: 'error', message: 'Principal, rol y ámbito son obligatorios.' };
@@ -116,7 +117,7 @@ export async function grantRoleAction(
         | 'group'
         | 'entity',
       ...(scopeType !== 'platform' ? { scopeId } : {}),
-      ...(expiresAt ? { expiresAt: new Date(expiresAt).toISOString() } : {}),
+      ...(expiresAt ? { expiresAt } : {}),
     },
     headers: authHeaders(token),
   });
