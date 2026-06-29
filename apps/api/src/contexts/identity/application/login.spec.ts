@@ -58,6 +58,25 @@ describe('Login', () => {
     expect(result.accessToken).toContain('true');
   });
 
+  it('records the last login on success (issue #176)', async () => {
+    const repo = await buildRepo('admin@reliefhub.org', 'admin1234', true);
+    const login = new Login(repo, hasher, tokenService);
+    await login.execute({
+      email: 'admin@reliefhub.org',
+      password: 'admin1234',
+    });
+    expect(repo.lastLoginOf(UserId.fromString(USER_ID))).toBeInstanceOf(Date);
+  });
+
+  it('does not record a login on invalid credentials', async () => {
+    const repo = await buildRepo('admin@reliefhub.org', 'admin1234', true);
+    const login = new Login(repo, hasher, tokenService);
+    await expect(
+      login.execute({ email: 'admin@reliefhub.org', password: 'wrong' }),
+    ).rejects.toThrow(InvalidCredentialsError);
+    expect(repo.lastLoginOf(UserId.fromString(USER_ID))).toBeUndefined();
+  });
+
   it('throws InvalidCredentialsError for unknown email', async () => {
     const repo = new InMemoryUserRepository(); // empty
     const login = new Login(repo, hasher, tokenService);
