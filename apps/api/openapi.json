@@ -866,6 +866,7 @@
     },
     "/emergencies/{emergencyId}/resources": {
       "post": {
+        "description": "Open to any authenticated user. A trusted integration may also register on behalf of a third party with its service-account API key when it holds `resource:register` and includes the `author` block (#235).",
         "operationId": "ResourcesController_create",
         "parameters": [
           {
@@ -901,13 +902,19 @@
             }
           },
           "400": {
-            "description": "Invalid request body or UUID"
+            "description": "Invalid request body or UUID, or missing author for an API key"
           },
           "401": {
-            "description": "Missing or invalid token"
+            "description": "Missing or invalid credentials"
+          },
+          "403": {
+            "description": "Service account lacks the resource:register grant at this scope"
           }
         },
         "security": [
+          {
+            "api-key": []
+          },
           {
             "bearer": []
           }
@@ -2550,6 +2557,7 @@
     },
     "/emergencies/{emergencyId}/needs": {
       "post": {
+        "description": "Open to any authenticated user (a citizen submits; a coordinator validates later). A trusted integration may also create on behalf of a third party with its service-account API key when it holds `need:create` and includes the `author` block (#235).",
         "operationId": "NeedsController_create",
         "parameters": [
           {
@@ -2585,13 +2593,19 @@
             }
           },
           "400": {
-            "description": "Invalid request body or UUID"
+            "description": "Invalid request body or UUID, or missing author for an API key"
           },
           "401": {
-            "description": "Missing or invalid token"
+            "description": "Missing or invalid credentials"
+          },
+          "403": {
+            "description": "Service account lacks the need:create grant at this scope"
           }
         },
         "security": [
+          {
+            "api-key": []
+          },
           {
             "bearer": []
           }
@@ -3881,6 +3895,7 @@
     },
     "/emergencies/{emergencyId}/offers": {
       "post": {
+        "description": "Open to any authenticated user. A trusted integration may also submit on behalf of a third party with its service-account API key when it holds `offer:create` and includes the `author` block (#235).",
         "operationId": "OffersController_submit",
         "parameters": [
           {
@@ -3916,16 +3931,22 @@
             }
           },
           "400": {
-            "description": "Invalid request body or UUID"
+            "description": "Invalid request body or UUID, or missing author for an API key"
           },
           "401": {
-            "description": "Missing or invalid token"
+            "description": "Missing or invalid credentials"
+          },
+          "403": {
+            "description": "Service account lacks the offer:create grant at this scope"
           },
           "409": {
             "description": "Emergency is not accepting intake (paused/closed)"
           }
         },
         "security": [
+          {
+            "api-key": []
+          },
           {
             "bearer": []
           }
@@ -8784,6 +8805,44 @@
           "category"
         ]
       },
+      "AuthorDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "María P.",
+            "maxLength": 200
+          },
+          "email": {
+            "type": "string",
+            "example": "maria@example.com",
+            "maxLength": 320
+          },
+          "phone": {
+            "type": "string",
+            "example": "+58 412 1234567",
+            "maxLength": 64
+          },
+          "note": {
+            "type": "string",
+            "example": "Contactar por la tarde; vive en el 3er piso",
+            "maxLength": 2000,
+            "description": "Free-text contact / context note"
+          },
+          "verified": {
+            "type": "boolean",
+            "example": false,
+            "default": false,
+            "description": "Whether the integrating source verified this identity (e.g. OTP). Defaults to false — public anonymous capture is unverified."
+          },
+          "source": {
+            "type": "string",
+            "example": "terremotovenezuela.app",
+            "maxLength": 200,
+            "description": "Which integration contributed this author"
+          }
+        }
+      },
       "RegisterResourceDto": {
         "type": "object",
         "properties": {
@@ -8885,6 +8944,14 @@
             "items": {
               "$ref": "#/components/schemas/SupplyLineDto"
             }
+          },
+          "author": {
+            "description": "Restricted contact of the real person this place is registered on behalf of (#235). Optional; required when a trusted integration writes via API key. Never exposed on public reads.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuthorDto"
+              }
+            ]
           }
         },
         "required": [
@@ -9795,6 +9862,42 @@
           "inventoryCategories"
         ]
       },
+      "AuthorResponseDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "example": "María P."
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "example": "maria@example.com"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true,
+            "example": "+58…"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "verified": {
+            "type": "boolean",
+            "example": false
+          },
+          "source": {
+            "type": "string",
+            "nullable": true,
+            "example": "terremotovenezuela.app"
+          }
+        },
+        "required": [
+          "verified"
+        ]
+      },
       "ResourceAdminViewDto": {
         "type": "object",
         "properties": {
@@ -9943,6 +10046,16 @@
             "example": "Terremoto Venezuela 2026",
             "nullable": true,
             "description": "Resolved emergency name, or null when it could not be found"
+          },
+          "author": {
+            "nullable": true,
+            "description": "Restricted contact of the real registrant when filed by an integration on their behalf (#235). Platform-admin only — never returned publicly.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuthorResponseDto"
+              }
+            ]
           }
         },
         "required": [
@@ -10148,6 +10261,16 @@
             "example": "Terremoto Venezuela 2026",
             "nullable": true,
             "description": "Resolved emergency name, or null when it could not be found"
+          },
+          "author": {
+            "nullable": true,
+            "description": "Restricted contact of the real registrant when filed by an integration on their behalf (#235). Platform-admin only — never returned publicly.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuthorResponseDto"
+              }
+            ]
           },
           "inventoryCategories": {
             "example": [
@@ -10631,6 +10754,14 @@
             "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
             "description": "Link this need to a resource / final recipient (#60). Optional.",
             "nullable": true
+          },
+          "author": {
+            "description": "Restricted contact of the real person this need is filed on behalf of (#235). Optional; only meaningful — and required — when a trusted integration writes via API key. Never exposed on public reads.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuthorDto"
+              }
+            ]
           }
         },
         "required": [
@@ -11803,6 +11934,14 @@
             "type": "string",
             "example": "Available for pickup Mon-Fri",
             "description": "Additional notes (optional)"
+          },
+          "author": {
+            "description": "Restricted contact of the real donor this offer is filed on behalf of (#235). Optional; required when a trusted integration writes via API key. Never exposed on public reads.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuthorDto"
+              }
+            ]
           }
         },
         "required": [
@@ -11906,6 +12045,16 @@
           "updatedAt": {
             "type": "string",
             "example": "2024-01-01T00:00:00.000Z"
+          },
+          "author": {
+            "nullable": true,
+            "description": "Restricted contact of the real donor when filed by an integration on their behalf (#235). Coordinator/owner-only — never returned publicly.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuthorResponseDto"
+              }
+            ]
           }
         },
         "required": [

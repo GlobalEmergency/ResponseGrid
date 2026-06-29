@@ -8,6 +8,7 @@ import {
   ResourceWithEmergency,
 } from '../../domain/ports/resource.repository';
 import { Resource, ResourceSnapshot, Provenance } from '../../domain/resource';
+import { AuthorSnapshot } from '../../../../shared/domain/author';
 import {
   rowToSupplyLineSnapshot,
   supplyLineToColumns,
@@ -81,6 +82,7 @@ type RawRow = {
   recipient_type: string | null;
   disputed: boolean | null;
   disputed_at: unknown;
+  author?: unknown;
 };
 
 /**
@@ -155,6 +157,7 @@ function rawRowToSnapshot(row: RawRow): ResourceSnapshot {
     recipientType: row.recipient_type ?? null,
     disputed: row.disputed ?? false,
     disputedAt: toDateOrNull(row.disputed_at),
+    author: (row.author as AuthorSnapshot | null | undefined) ?? null,
     // Raw SQL paths (nearby) power the map, which does not render inventory —
     // items are intentionally not hydrated here to keep the payload lean.
     items: [],
@@ -202,6 +205,7 @@ function rowToSnapshot(row: Row, items: ItemsRow[] = []): ResourceSnapshot {
     recipientType: row.recipientType ?? null,
     disputed: row.disputed ?? false,
     disputedAt: row.disputedAt ?? null,
+    author: row.author ?? null,
     items: itemsToSnapshots(items),
   };
 }
@@ -256,6 +260,7 @@ export class DrizzleResourceRepository implements ResourceRepository {
           recipientType: s.recipientType,
           disputed: s.disputed ?? false,
           disputedAt: s.disputedAt ?? null,
+          author: s.author ?? null,
         })
         .onConflictDoUpdate({
           target: resourcesTable.id,

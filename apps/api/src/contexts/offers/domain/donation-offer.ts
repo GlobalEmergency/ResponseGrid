@@ -18,6 +18,7 @@ import {
   SupplyLine,
   SupplyLineSnapshot,
 } from '../../supplies/domain/supply-line';
+import { Author, AuthorSnapshot } from '../../../shared/domain/author';
 
 export interface CreateDonationOfferProps {
   id: OfferId;
@@ -28,6 +29,8 @@ export interface CreateDonationOfferProps {
   location: Location;
   targetNeedId: string | null;
   notes: string | null;
+  /** Restricted author attribution when filed via integration (#235). */
+  author?: Author | null;
 }
 
 /** Fields a coordinator may change. Omit a field to keep it. */
@@ -50,6 +53,8 @@ export interface DonationOfferSnapshot {
   notes: string | null;
   createdAt: Date;
   updatedAt: Date;
+  /** Optional (legacy-safe) restricted author attribution (#235). */
+  author?: AuthorSnapshot | null;
 }
 
 /**
@@ -75,6 +80,7 @@ export class DonationOffer {
     private _notes: string | null,
     public readonly createdAt: Date,
     private _updatedAt: Date,
+    public readonly author: Author | null,
   ) {}
 
   static create(props: CreateDonationOfferProps): DonationOffer {
@@ -95,6 +101,7 @@ export class DonationOffer {
       props.notes,
       now,
       now,
+      props.author ?? null,
     );
     offer.events.push(
       new OfferCreated(offer.id.value, {
@@ -119,6 +126,7 @@ export class DonationOffer {
       s.notes,
       s.createdAt,
       s.updatedAt,
+      s.author ? Author.fromSnapshot(s.author) : null,
     );
   }
 
@@ -230,6 +238,7 @@ export class DonationOffer {
       notes: this._notes,
       createdAt: this.createdAt,
       updatedAt: this._updatedAt,
+      author: this.author ? this.author.toSnapshot() : null,
     };
   }
 

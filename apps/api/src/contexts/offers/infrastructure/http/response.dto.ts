@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { OfferStatus } from '../../domain/offer-enums';
 import { SupplyLineResponseDto } from '../../../supplies/infrastructure/http/supply-line.dto';
+import { AuthorResponseDto } from '../../../../shared/infrastructure/http/author.dto';
 
 export class SubmitOfferResponseDto {
   @ApiProperty({
@@ -61,4 +62,13 @@ export class OfferViewDto {
 
   @ApiProperty({ example: '2024-01-01T00:00:00.000Z' })
   updatedAt!: string;
+
+  @ApiPropertyOptional({
+    type: AuthorResponseDto,
+    nullable: true,
+    description:
+      'Restricted contact of the real donor when filed by an integration on ' +
+      'their behalf (#235). Coordinator/owner-only — never returned publicly.',
+  })
+  author!: AuthorResponseDto | null;
 }

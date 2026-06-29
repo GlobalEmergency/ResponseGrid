@@ -22,6 +22,7 @@ import {
   ApiNotFoundResponse,
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiSecurity,
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
   ApiOkResponse,
@@ -46,8 +47,11 @@ import {
 import { setAuditContext } from '../../../audit/infrastructure/http/audit-context';
 import { SubmitOfferResponseDto, OfferViewDto } from './response.dto';
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
+import { JwtOrApiKeyAuthGuard } from '../../../identity/infrastructure/http/jwt-or-api-key-auth.guard';
 import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
+import { ServiceAccountPermissionGuard } from '../../../identity/infrastructure/http/service-account-permission.guard';
 import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
+import { requireAuthorForServiceAccount } from '../../../identity/infrastructure/http/require-author-for-service-account';
 import {
   OFFER_NEED_LOOKUP,
   type NeedLookup,
@@ -65,7 +69,12 @@ import { Role } from '../../../identity/domain/role';
 import { OfferView } from '../../application/offer-view';
 
 interface AuthenticatedRequest extends Express.Request {
-  user: { id: string; email: string; isAdmin: boolean };
+  user: {
+    id: string;
+    email: string;
+    isAdmin: boolean;
+    isServiceAccount: boolean;
+  };
 }
 
 @ApiTags('offers')
@@ -92,10 +101,16 @@ export class OffersController {
 
   @Post('emergencies/:emergencyId/offers')
   @HttpCode(201)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtOrApiKeyAuthGuard, ServiceAccountPermissionGuard)
+  @RequirePermission('offer:create')
   @ApiBearerAuth()
+  @ApiSecurity('api-key')
   @ApiOperation({
     summary: 'Submit a donation offer for an emergency (authenticated donor)',
+    description:
+      'Open to any authenticated user. A trusted integration may also submit ' +
+      'on behalf of a third party with its service-account API key when it ' +
+      'holds `offer:create` and includes the `author` block (#235).',
   })
   @ApiParam({
     name: 'emergencyId',
@@ -106,8 +121,14 @@ export class OffersController {
     description: 'Offer created',
     type: SubmitOfferResponseDto,
   })
-  @ApiBadRequestResponse({ description: 'Invalid request body or UUID' })
-  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiBadRequestResponse({
+    description:
+      'Invalid request body or UUID, or missing author for an API key',
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid credentials' })
+  @ApiForbiddenResponse({
+    description: 'Service account lacks the offer:create grant at this scope',
+  })
   @ApiConflictResponse({
     description: 'Emergency is not accepting intake (paused/closed)',
   })
@@ -116,6 +137,7 @@ export class OffersController {
     @Body() dto: SubmitOfferDto,
     @Request() req: AuthenticatedRequest,
   ): Promise<SubmitOfferResponseDto> {
+    requireAuthorForServiceAccount(req.user, dto.author);
     return this.submitOffer.execute({
       emergencyId,
       donorUserId: req.user.id,
@@ -134,6 +156,7 @@ export class OffersController {
       },
       targetNeedId: dto.targetNeedId ?? null,
       notes: dto.notes ?? null,
+      author: dto.author ?? null,
     });
   }
 

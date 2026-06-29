@@ -8,6 +8,7 @@ import {
   boolean,
 } from 'drizzle-orm/pg-core';
 import { supplyLineColumns } from '../../../supplies/infrastructure/drizzle/supply-line-columns';
+import { AuthorSnapshot } from '../../../../shared/domain/author';
 
 export const resourcesTable = pgTable('resources', {
   id: uuid('id').primaryKey(),
@@ -42,6 +43,8 @@ export const resourcesTable = pgTable('resources', {
   // `disputed` = varios ciudadanos lo han reportado como cerrado/inexistente/…
   disputed: boolean('disputed').notNull().default(false),
   disputedAt: timestamp('disputed_at', { withTimezone: true }),
+  /** Restricted self-reported author attribution (#235). Never public. */
+  author: jsonb('author').$type<AuthorSnapshot>(),
 });
 
 // Reportes ciudadanos de validez de un punto (0031_resource_validity_reports):

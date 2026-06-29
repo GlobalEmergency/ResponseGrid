@@ -60,6 +60,7 @@ function rowToSnapshot(row: NeedsRow, items: ItemsRow[]): NeedSnapshot {
     skillSpecialty: row.skillSpecialty ?? null,
     requestedCount: row.requestedCount ?? null,
     resourceId: row.resourceId ?? null,
+    author: row.author ?? null,
   };
 }
 
@@ -93,6 +94,7 @@ export class DrizzleNeedRepository implements NeedRepository {
           skillSpecialty: s.skillSpecialty ?? null,
           requestedCount: s.requestedCount ?? null,
           resourceId: s.resourceId ?? null,
+          author: s.author ?? null,
         })
         .onConflictDoUpdate({
           target: needsTable.id,

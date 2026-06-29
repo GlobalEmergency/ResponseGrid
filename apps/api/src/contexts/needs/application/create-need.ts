@@ -9,6 +9,7 @@ import { Location } from '../../../shared/domain/location';
 import { SupplyLine } from '../../supplies/domain/supply-line';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 import { LocationSensitivity } from '../../../shared/domain/location-sensitivity';
+import { Author, AuthorProps } from '../../../shared/domain/author';
 
 const ACTIVE_STATUS = 'active';
 
@@ -43,6 +44,11 @@ export interface CreateNeedCommand {
   requestedCount?: number | null;
   /** Optional link to the resource / final recipient (#60). */
   resourceId?: string | null;
+  /**
+   * Optional restricted author attribution (#235): the real person a trusted
+   * integration filed this need on behalf of. Validated into an {@link Author}.
+   */
+  author?: AuthorProps | null;
 }
 
 export class CreateNeed {
@@ -101,6 +107,7 @@ export class CreateNeed {
       skillSpecialty: cmd.skillSpecialty ?? null,
       requestedCount: cmd.requestedCount ?? null,
       resourceId: cmd.resourceId ?? null,
+      author: cmd.author ? Author.create(cmd.author) : null,
     });
 
     await this.repo.save(need);

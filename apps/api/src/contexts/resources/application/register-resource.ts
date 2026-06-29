@@ -8,6 +8,7 @@ import { ResourceId } from '../domain/resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { ResourceType, ResourceStage } from '../domain/resource-enums';
 import { Location, LocationProps } from '../../../shared/domain/location';
+import { Author, AuthorProps } from '../../../shared/domain/author';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 
 const ACTIVE_STATUS = 'active';
@@ -41,6 +42,8 @@ export interface RegisterResourceCommand {
     presentation?: string | null;
     expiresAt?: string | null;
   }>;
+  /** Optional restricted author attribution (#235). */
+  author?: AuthorProps | null;
 }
 
 export class RegisterResource {
@@ -88,6 +91,7 @@ export class RegisterResource {
           expiresAt: i.expiresAt ?? null,
         }),
       ),
+      author: cmd.author ? Author.create(cmd.author) : null,
     });
     await this.repo.save(resource);
     await this.bus.publish(resource.pullDomainEvents());

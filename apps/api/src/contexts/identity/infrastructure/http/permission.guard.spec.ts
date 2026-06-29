@@ -25,7 +25,9 @@ function userWith(
     email: 'u@reliefhub.test',
     name: 'U',
     isAdmin,
+    phone: null,
     memberships,
+    isServiceAccount: false,
     grants: deriveGrantsFromLegacy(USER, isAdmin, memberships),
   };
 }

@@ -1,10 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   ResourceType,
   ResourceStage,
   VerificationLevel,
   PublicStatus,
 } from '../../domain/resource-enums';
+import { AuthorResponseDto } from '../../../../shared/infrastructure/http/author.dto';
 import {
   ValidityReason,
   ValidityReportStatus,
@@ -275,6 +276,15 @@ export class ResourceAdminViewDto extends ResourceViewDto {
     description: 'Resolved emergency name, or null when it could not be found',
   })
   emergencyName!: string | null;
+
+  @ApiPropertyOptional({
+    type: AuthorResponseDto,
+    nullable: true,
+    description:
+      'Restricted contact of the real registrant when filed by an integration ' +
+      'on their behalf (#235). Platform-admin only — never returned publicly.',
+  })
+  author!: AuthorResponseDto | null;
 }
 
 export class PagedAdminResourcesDto {

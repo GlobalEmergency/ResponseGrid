@@ -323,7 +323,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Register a resource for an emergency (requires authentication) */
+        /**
+         * Register a resource for an emergency (requires authentication)
+         * @description Open to any authenticated user. A trusted integration may also register on behalf of a third party with its service-account API key when it holds `resource:register` and includes the `author` block (#235).
+         */
         post: operations["ResourcesController_create"];
         delete?: never;
         options?: never;
@@ -819,7 +822,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Create a need for an emergency (authenticated requester) */
+        /**
+         * Create a need for an emergency (authenticated requester)
+         * @description Open to any authenticated user (a citizen submits; a coordinator validates later). A trusted integration may also create on behalf of a third party with its service-account API key when it holds `need:create` and includes the `author` block (#235).
+         */
         post: operations["NeedsController_create"];
         delete?: never;
         options?: never;
@@ -1216,7 +1222,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Submit a donation offer for an emergency (authenticated donor) */
+        /**
+         * Submit a donation offer for an emergency (authenticated donor)
+         * @description Open to any authenticated user. A trusted integration may also submit on behalf of a third party with its service-account API key when it holds `offer:create` and includes the `author` block (#235).
+         */
         post: operations["OffersController_submit"];
         delete?: never;
         options?: never;
@@ -2739,6 +2748,30 @@ export interface components {
              */
             expiresAt?: string;
         };
+        AuthorDto: {
+            /** @example María P. */
+            name?: string;
+            /** @example maria@example.com */
+            email?: string;
+            /** @example +58 412 1234567 */
+            phone?: string;
+            /**
+             * @description Free-text contact / context note
+             * @example Contactar por la tarde; vive en el 3er piso
+             */
+            note?: string;
+            /**
+             * @description Whether the integrating source verified this identity (e.g. OTP). Defaults to false — public anonymous capture is unverified.
+             * @default false
+             * @example false
+             */
+            verified: boolean;
+            /**
+             * @description Which integration contributed this author
+             * @example terremotovenezuela.app
+             */
+            source?: string;
+        };
         RegisterResourceDto: {
             /**
              * @example collection_point
@@ -2808,6 +2841,8 @@ export interface components {
             recipientType?: string;
             /** @description Declared inventory: the supply lines this place holds for delivery (optional) */
             items?: components["schemas"]["SupplyLineDto"][];
+            /** @description Restricted contact of the real person this place is registered on behalf of (#235). Optional; required when a trusted integration writes via API key. Never exposed on public reads. */
+            author?: components["schemas"]["AuthorDto"];
         };
         RegisterResourceResponseDto: {
             /**
@@ -3234,6 +3269,19 @@ export interface components {
              */
             inventoryCategories: string[];
         };
+        AuthorResponseDto: {
+            /** @example María P. */
+            name?: string | null;
+            /** @example maria@example.com */
+            email?: string | null;
+            /** @example +58… */
+            phone?: string | null;
+            note?: string | null;
+            /** @example false */
+            verified: boolean;
+            /** @example terremotovenezuela.app */
+            source?: string | null;
+        };
         ResourceAdminViewDto: {
             /**
              * Format: uuid
@@ -3325,6 +3373,8 @@ export interface components {
              * @example Terremoto Venezuela 2026
              */
             emergencyName: string | null;
+            /** @description Restricted contact of the real registrant when filed by an integration on their behalf (#235). Platform-admin only — never returned publicly. */
+            author?: components["schemas"]["AuthorResponseDto"] | null;
         };
         PagedAdminResourcesDto: {
             items: components["schemas"]["ResourceAdminViewDto"][];
@@ -3426,6 +3476,8 @@ export interface components {
              * @example Terremoto Venezuela 2026
              */
             emergencyName: string | null;
+            /** @description Restricted contact of the real registrant when filed by an integration on their behalf (#235). Platform-admin only — never returned publicly. */
+            author?: components["schemas"]["AuthorResponseDto"] | null;
             /**
              * @description Distinct categories of material this place has declared
              * @example [
@@ -3643,6 +3695,8 @@ export interface components {
              * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
              */
             resourceId?: string | null;
+            /** @description Restricted contact of the real person this need is filed on behalf of (#235). Optional; only meaningful — and required — when a trusted integration writes via API key. Never exposed on public reads. */
+            author?: components["schemas"]["AuthorDto"];
         };
         CreateNeedResponseDto: {
             /**
@@ -4143,6 +4197,8 @@ export interface components {
              * @example Available for pickup Mon-Fri
              */
             notes?: string;
+            /** @description Restricted contact of the real donor this offer is filed on behalf of (#235). Optional; required when a trusted integration writes via API key. Never exposed on public reads. */
+            author?: components["schemas"]["AuthorDto"];
         };
         SubmitOfferResponseDto: {
             /**
@@ -4185,6 +4241,8 @@ export interface components {
             createdAt: string;
             /** @example 2024-01-01T00:00:00.000Z */
             updatedAt: string;
+            /** @description Restricted contact of the real donor when filed by an integration on their behalf (#235). Coordinator/owner-only — never returned publicly. */
+            author?: components["schemas"]["AuthorResponseDto"] | null;
         };
         MatchOfferDto: {
             /**
@@ -5980,15 +6038,22 @@ export interface operations {
                     "application/json": components["schemas"]["RegisterResourceResponseDto"];
                 };
             };
-            /** @description Invalid request body or UUID */
+            /** @description Invalid request body or UUID, or missing author for an API key */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Missing or invalid token */
+            /** @description Missing or invalid credentials */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Service account lacks the resource:register grant at this scope */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7338,15 +7403,22 @@ export interface operations {
                     "application/json": components["schemas"]["CreateNeedResponseDto"];
                 };
             };
-            /** @description Invalid request body or UUID */
+            /** @description Invalid request body or UUID, or missing author for an API key */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Missing or invalid token */
+            /** @description Missing or invalid credentials */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Service account lacks the need:create grant at this scope */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -8355,15 +8427,22 @@ export interface operations {
                     "application/json": components["schemas"]["SubmitOfferResponseDto"];
                 };
             };
-            /** @description Invalid request body or UUID */
+            /** @description Invalid request body or UUID, or missing author for an API key */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Missing or invalid token */
+            /** @description Missing or invalid credentials */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Service account lacks the offer:create grant at this scope */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

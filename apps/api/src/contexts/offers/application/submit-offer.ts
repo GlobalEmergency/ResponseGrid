@@ -8,6 +8,7 @@ import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Category } from '../domain/offer-enums';
 import { SupplyLine } from '../../supplies/domain/supply-line';
 import { Location } from '../../../shared/domain/location';
+import { Author, AuthorProps } from '../../../shared/domain/author';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 
 const ACTIVE_STATUS = 'active';
@@ -50,6 +51,8 @@ export interface SubmitOfferCommand {
   location: SubmitOfferLocationCommand;
   targetNeedId: string | null;
   notes: string | null;
+  /** Optional restricted author attribution (#235). */
+  author?: AuthorProps | null;
 }
 
 export class SubmitOffer {
@@ -109,6 +112,7 @@ export class SubmitOffer {
       location,
       targetNeedId: cmd.targetNeedId,
       notes: cmd.notes,
+      author: cmd.author ? Author.create(cmd.author) : null,
     });
 
     await this.repo.save(offer);

@@ -16,6 +16,7 @@ import {
   SupplyLineSnapshot,
 } from '../../supplies/domain/supply-line';
 import { LocationSensitivity } from '../../../shared/domain/location-sensitivity';
+import { Author, AuthorSnapshot } from '../../../shared/domain/author';
 
 /** Hours a validated need stays visible before it expires. */
 export const NEED_VALIDITY_HOURS = 48;
@@ -45,6 +46,12 @@ export interface CreateNeedProps {
   requestedCount?: number | null;
   /** Optional link to the resource / final recipient this need belongs to (#60). */
   resourceId?: string | null;
+  /**
+   * Optional self-reported contact of the real person this need was filed on
+   * behalf of, when created by a trusted integration via API key (#235).
+   * RESTRICTED — never exposed on public reads.
+   */
+  author?: Author | null;
 }
 
 /** Fields a coordinator may change while validating. Omit a field to keep it. */
@@ -77,6 +84,8 @@ export interface NeedSnapshot {
   requestedCount?: number | null;
   /** Optional (legacy-safe) link to the resource / final recipient (#60). */
   resourceId?: string | null;
+  /** Optional (legacy-safe) restricted author attribution (#235). */
+  author?: AuthorSnapshot | null;
 }
 
 export class Need {
@@ -103,6 +112,7 @@ export class Need {
     public readonly skillSpecialty: string | null,
     public readonly requestedCount: number | null,
     public readonly resourceId: string | null,
+    public readonly author: Author | null,
   ) {}
 
   static create(props: CreateNeedProps): Need {
@@ -137,6 +147,7 @@ export class Need {
       props.skillSpecialty ?? null,
       props.requestedCount ?? null,
       props.resourceId ?? null,
+      props.author ?? null,
     );
     need.events.push(
       new NeedCreated(need.id.value, {
@@ -169,6 +180,7 @@ export class Need {
       s.skillSpecialty ?? null,
       s.requestedCount ?? null,
       s.resourceId ?? null,
+      s.author ? Author.fromSnapshot(s.author) : null,
     );
   }
 
@@ -304,6 +316,7 @@ export class Need {
       skillSpecialty: this.skillSpecialty,
       requestedCount: this.requestedCount,
       resourceId: this.resourceId,
+      author: this.author ? this.author.toSnapshot() : null,
     };
   }
 
