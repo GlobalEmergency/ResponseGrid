@@ -2591,6 +2591,21 @@ export const es = {
     qa_notifications: 'Notificaciones',
     qa_my_donations: 'Mis donaciones',
     qa_explore: 'Ver emergencias',
+    qa_my_profile: 'Mi perfil',
+  },
+
+  miPerfil: {
+    meta_title: 'Mi perfil — ResponseGrid',
+    meta_description: 'Edita tu nombre y teléfono de contacto.',
+    page_title: 'Mi perfil',
+    page_subtitle: 'Actualiza tu nombre y teléfono de contacto.',
+    label_name: 'Nombre',
+    label_phone: 'Teléfono',
+    phone_hint: 'Opcional. Déjalo vacío para no mostrarlo.',
+    btn_save: 'Guardar cambios',
+    btn_saving: 'Guardando…',
+    success: 'Perfil actualizado.',
+    error: 'No se pudo guardar. Inténtalo de nuevo.',
   },
 };
 
