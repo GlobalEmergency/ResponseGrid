@@ -121,13 +121,21 @@
             "name": "scopeType",
             "required": true,
             "in": "query",
-            "description": "platform | organization | emergency | group",
+            "description": "platform | organization | emergency | group | entity",
             "schema": {
               "type": "string"
             }
           },
           {
             "name": "scopeId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scopeEntityType",
             "required": false,
             "in": "query",
             "schema": {

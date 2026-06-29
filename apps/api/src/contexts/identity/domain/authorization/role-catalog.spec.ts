@@ -85,6 +85,33 @@ describe('ROLE_CATALOG', () => {
     expect(verifier.has('container:manage')).toBe(false);
   });
 
+  it('defines a point_manager role scoped to one resource', () => {
+    expect(roleExists('point_manager')).toBe(true);
+
+    const pointManager = ROLE_CATALOG.point_manager;
+    expect(pointManager.defaultScopeType).toBe('entity');
+    expect(new Set(pointManager.permissions).size).toBe(
+      pointManager.permissions.length,
+    );
+    expect(pointManager.permissions).toEqual(
+      expect.arrayContaining([
+        'resource:read',
+        'resource:edit',
+        'container:manage',
+        'container:read',
+        'need:create',
+        'need:read',
+      ]),
+    );
+  });
+
+  it('lets emergency coordinators grant and revoke point managers', () => {
+    const coordinator = new Set(permissionsForRole('emergency_coordinator'));
+    expect(coordinator.has('role:grant')).toBe(true);
+    expect(coordinator.has('role:revoke')).toBe(true);
+    expect(coordinator.has('need:create')).toBe(true);
+  });
+
   it('every role only references permissions that exist in the catalog', () => {
     const valid = new Set<string>(ALL_PERMISSIONS);
     for (const role of Object.values(ROLE_CATALOG)) {
