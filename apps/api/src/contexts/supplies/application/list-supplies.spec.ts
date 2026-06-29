@@ -37,8 +37,6 @@ describe('ListSupplies', () => {
   function readModel(): SupplyCatalogReadModel {
     return {
       listActive: () => Promise.resolve(catalog),
-      findActiveById: (id) =>
-        Promise.resolve(catalog.find((record) => record.id === id) ?? null),
     };
   }
 

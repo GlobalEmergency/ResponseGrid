@@ -36,11 +36,6 @@ export class CachingSupplyCatalogReadModel implements SupplyCatalogReadModel {
     return this.inflight;
   }
 
-  async findActiveById(id: string): Promise<PublicSupplyRecord | null> {
-    const records = await this.listActive();
-    return records.find((record) => record.id === id) ?? null;
-  }
-
   private async refresh(): Promise<PublicSupplyRecord[]> {
     try {
       const records = await this.inner.listActive();

@@ -27,10 +27,12 @@ export interface PublicSupplyRecord {
  * Puerto de LECTURA del catálogo público (CQRS-light). Separado del
  * `SupplyRepository` (escritura/gestión interna) para que la cara pública no
  * pueda fugar datos internos: aquí solo existen proyecciones publicables.
+ *
+ * Expone únicamente la carga del catálogo activo; el detalle por id y la
+ * búsqueda se resuelven en la aplicación sobre esta lista (cacheada), sin
+ * lógica de consulta extra en infraestructura.
  */
 export interface SupplyCatalogReadModel {
   /** Insumos `active` del catálogo, como proyección pública. */
   listActive(): Promise<PublicSupplyRecord[]>;
-  /** Un insumo `active` por id, o `null` si no existe / está archivado. */
-  findActiveById(id: string): Promise<PublicSupplyRecord | null>;
 }

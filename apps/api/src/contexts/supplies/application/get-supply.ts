@@ -6,7 +6,8 @@ import {
 export class GetSupply {
   constructor(private readonly catalog: SupplyCatalogReadModel) {}
 
-  execute(id: string): Promise<PublicSupplyRecord | null> {
-    return this.catalog.findActiveById(id);
+  async execute(id: string): Promise<PublicSupplyRecord | null> {
+    const records = await this.catalog.listActive();
+    return records.find((record) => record.id === id) ?? null;
   }
 }

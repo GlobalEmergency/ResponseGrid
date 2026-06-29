@@ -55,9 +55,13 @@ export class ListSupplies {
   async execute(query: SupplyCatalogQuery): Promise<PublicSupplyRecord[]> {
     const records = await this.catalog.listActive();
     const resolvedLocale = query.locale === 'en' ? 'en' : 'es';
-    const resolver = toSupplyResolver(records);
+    // El resolver (índice de match exacto por nombre/código/alias) solo hace
+    // falta cuando hay término de búsqueda; evitamos construirlo —O(N) objetos—
+    // en listados por categoría o sin filtro.
     const normalizedQuery = query.q ? normalizeSupplyText(query.q) : '';
-    const exactMatchId = query.q ? resolver.resolve(query.q) : null;
+    const exactMatchId = query.q
+      ? toSupplyResolver(records).resolve(query.q)
+      : null;
 
     const filtered = records.filter((record) => {
       if (query.categorySlug && record.categorySlug !== query.categorySlug) {

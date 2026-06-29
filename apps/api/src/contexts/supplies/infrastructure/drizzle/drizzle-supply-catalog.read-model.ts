@@ -1,4 +1,4 @@
-import { and, asc, eq } from 'drizzle-orm';
+import { asc, eq } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
 import {
   PublicSupplyRecord,
@@ -73,58 +73,6 @@ export class DrizzleSupplyCatalogReadModel implements SupplyCatalogReadModel {
         categoryLabelEnBySlug.get(row.categorySlug) ?? null,
         aliasesBySupplyId.get(row.id) ?? [],
       ),
-    );
-  }
-
-  async findActiveById(id: string): Promise<PublicSupplyRecord | null> {
-    const [row] = await this.db
-      .select()
-      .from(suppliesTable)
-      .where(and(eq(suppliesTable.id, id), eq(suppliesTable.status, ACTIVE)))
-      .limit(1);
-    if (!row) {
-      return null;
-    }
-
-    const [nameEnRow, categoryRow, categoryLabelEnRow, aliasRows] =
-      await Promise.all([
-        this.db
-          .select()
-          .from(supplyTranslationsTable)
-          .where(
-            and(
-              eq(supplyTranslationsTable.supplyId, id),
-              eq(supplyTranslationsTable.locale, EN),
-            ),
-          )
-          .limit(1),
-        this.db
-          .select()
-          .from(categoriesTable)
-          .where(eq(categoriesTable.slug, row.categorySlug))
-          .limit(1),
-        this.db
-          .select()
-          .from(categoryTranslationsTable)
-          .where(
-            and(
-              eq(categoryTranslationsTable.categorySlug, row.categorySlug),
-              eq(categoryTranslationsTable.locale, EN),
-            ),
-          )
-          .limit(1),
-        this.db
-          .select()
-          .from(supplyAliasesTable)
-          .where(eq(supplyAliasesTable.supplyId, id)),
-      ]);
-
-    return this.toRecord(
-      row,
-      nameEnRow[0]?.name ?? null,
-      categoryRow[0],
-      categoryLabelEnRow[0]?.label ?? null,
-      aliasRows.map((alias) => alias.aliasNorm),
     );
   }
 

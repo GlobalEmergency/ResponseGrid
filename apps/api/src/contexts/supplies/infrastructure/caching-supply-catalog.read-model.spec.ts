@@ -31,7 +31,6 @@ describe('CachingSupplyCatalogReadModel', () => {
           calls += 1;
           return Promise.resolve([record]);
         },
-        findActiveById: () => Promise.resolve(null),
       },
     };
   }
@@ -66,25 +65,6 @@ describe('CachingSupplyCatalogReadModel', () => {
     await cache.listActive();
 
     expect(inner.calls()).toBe(2);
-  });
-
-  it('findActiveById se sirve de la misma caché', async () => {
-    const clock = 1000;
-    const inner = fakeInner();
-    const cache = new CachingSupplyCatalogReadModel(
-      inner.readModel,
-      60_000,
-      () => clock,
-    );
-
-    const found = await cache.findActiveById(record.id);
-    const missing = await cache.findActiveById(
-      '22222222-2222-4222-8222-222222222222',
-    );
-
-    expect(found?.id).toBe(record.id);
-    expect(missing).toBeNull();
-    expect(inner.calls()).toBe(1);
   });
 
   it('dedupe cargas concurrentes (sin estampida)', async () => {

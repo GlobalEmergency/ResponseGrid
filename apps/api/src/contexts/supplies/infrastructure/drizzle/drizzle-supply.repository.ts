@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
 import { Supply, SupplyStatus } from '../../domain/supply';
 import { SupplyRepository } from '../../domain/ports/supply.repository';
@@ -23,10 +23,13 @@ export class DrizzleSupplyRepository implements SupplyRepository {
   }
 
   async findByCode(code: string): Promise<Supply | null> {
+    // Búsqueda por código insensible a mayúsculas (los códigos canónicos son
+    // 'INS-NNNN', pero no asumimos el casing del llamante).
+    const normalized = code.trim().toLowerCase();
     const [row] = await this.db
       .select()
       .from(suppliesTable)
-      .where(eq(suppliesTable.code, code.trim()))
+      .where(sql`lower(${suppliesTable.code}) = ${normalized}`)
       .limit(1);
     return row ? this.toSupply(row) : null;
   }
