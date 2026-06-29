@@ -75,7 +75,6 @@ export default async function PanelPage() {
       <PageContainer>
         <PageHeader title={tp.title} subtitle={tp.subtitle} />
 
-        {/* Quick actions */}
         <section aria-labelledby="qa-heading" className={sectionGap}>
           <SectionHeading id="qa-heading" size="sm">
             {tp.quick_actions_heading}
@@ -97,7 +96,6 @@ export default async function PanelPage() {
           </div>
         </section>
 
-        {/* My emergencies */}
         <section aria-labelledby="emg-heading" className={sectionGap}>
           <SectionHeading id="emg-heading" size="sm">
             {tp.emergencies_heading}
@@ -169,7 +167,6 @@ export default async function PanelPage() {
           </section>
         )}
 
-        {/* My groups */}
         <section aria-labelledby="grp-heading" className={sectionGap}>
           <SectionHeading id="grp-heading" size="sm">
             {tp.groups_heading}
@@ -204,7 +201,6 @@ export default async function PanelPage() {
           )}
         </section>
 
-        {/* My organizations */}
         <section aria-labelledby="org-heading" className={sectionGap}>
           <SectionHeading id="org-heading" size="sm">
             {tp.orgs_heading}

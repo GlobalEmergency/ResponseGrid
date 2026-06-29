@@ -1,8 +1,3 @@
-/**
- * Pure presentation helpers for the admin users pages: maps backend enum values
- * to localized labels and to shared Badge variants. Safe to import from Server
- * or Client Components.
- */
 import type { Messages } from '@/i18n/messages/es';
 import type { UserGrant } from './actions';
 
@@ -34,7 +29,6 @@ export function grantScopeLabel(grant: UserGrant, ta: AdminMessages): string {
   return scopeTypeLabel(grant.scopeType, ta);
 }
 
-/** True when a grant has an expiry that is already in the past. */
 export function isExpired(grant: UserGrant, now: Date = new Date()): boolean {
   return grant.expiresAt !== null && new Date(grant.expiresAt) <= now;
 }

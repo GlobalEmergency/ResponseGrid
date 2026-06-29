@@ -25,7 +25,6 @@ export function SocialLoginButtons({ next }: SocialLoginButtonsProps) {
         <div className="flex-1 h-px bg-line" />
       </div>
 
-      {/* Google */}
       <a
         href={`${API_URL}/auth/google${nextQuery}`}
         className="flex items-center justify-center gap-3 w-full rounded-lg border border-line bg-white px-4 py-2.5 text-sm font-medium text-ink-soft hover:bg-surface transition-colors"
@@ -51,7 +50,6 @@ export function SocialLoginButtons({ next }: SocialLoginButtonsProps) {
         {t.continue_with.replace('{provider}', 'Google')}
       </a>
 
-      {/* Facebook */}
       <a
         href={`${API_URL}/auth/facebook${nextQuery}`}
         className="flex items-center justify-center gap-3 w-full rounded-lg border border-line bg-white px-4 py-2.5 text-sm font-medium text-ink-soft hover:bg-surface transition-colors"

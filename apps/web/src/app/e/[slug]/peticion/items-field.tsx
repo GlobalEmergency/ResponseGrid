@@ -32,7 +32,6 @@ export function ItemsField({ t }: ItemsFieldProps) {
   const [items, setItems] = useState<Item[]>([makeItem()]);
   const locale = useLocale();
 
-  // Show personnel fields when at least one item is in the medical_personnel category
   const hasPersonnelCategory = items.some(
     (item) => item.category === 'medical_personnel',
   );
@@ -50,7 +49,6 @@ export function ItemsField({ t }: ItemsFieldProps) {
     categoryLabel: t.item_category_label,
   };
 
-  // Serialize to hidden input on every change
   const serialized = JSON.stringify(
     items.map(({ name, quantity, unit, category }) => ({
       name,
@@ -107,10 +105,8 @@ export function ItemsField({ t }: ItemsFieldProps) {
         />
       ))}
 
-      {/* Hidden input carries serialized items to the server action */}
       <input type="hidden" name="items" value={serialized} />
 
-      {/* Personnel detail fields — visible when at least one item is medical_personnel */}
       {hasPersonnelCategory && <PersonnelNeedFields />}
     </div>
   );

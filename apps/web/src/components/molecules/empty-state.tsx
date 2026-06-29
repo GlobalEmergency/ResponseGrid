@@ -3,11 +3,6 @@ interface EmptyStateProps {
   description?: string;
 }
 
-/**
- * EmptyState — dashed-border placeholder used when a list has no items.
- * Matches the `rounded-lg border-2 border-dashed border-line px-6 py-10 text-center`
- * pattern that appears in the emergency list, needs list, resources list, etc.
- */
 export function EmptyState({ title, description }: EmptyStateProps) {
   return (
     <div className="rounded-lg border-2 border-dashed border-line px-6 py-10 text-center">

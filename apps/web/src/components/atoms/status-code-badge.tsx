@@ -2,10 +2,6 @@ interface StatusCodeBadgeProps {
   code: number;
 }
 
-/**
- * StatusCodeBadge — coloured pill for HTTP status codes.
- * Green  for 2xx, amber for 3xx, red for 4xx/5xx.
- */
 export function StatusCodeBadge({ code }: StatusCodeBadgeProps) {
   let classes: string;
 

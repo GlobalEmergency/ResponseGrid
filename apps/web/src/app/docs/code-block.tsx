@@ -1,10 +1,6 @@
 'use client';
 
 /**
- * CodeBlock — presentational code/JSON/curl sample for the developer docs page
- * (/docs). Dark navy surface so samples stand out from the warm page, with an
- * optional language label and a copy-to-clipboard button.
- *
  * Client component (clipboard + local "copied" state). Per the project i18n
  * pattern, the translated button labels are passed in as plain-string props
  * from the Server Component that renders it — no dictionary is read here.

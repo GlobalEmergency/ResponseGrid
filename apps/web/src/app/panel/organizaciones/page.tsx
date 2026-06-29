@@ -38,7 +38,6 @@ export default async function OrganizacionesPage() {
       <PageContainer>
         <PageHeader title={to.title} subtitle={to.subtitle} />
 
-        {/* Org list */}
         <section aria-labelledby="orgs-heading" className="flex flex-col gap-4">
           <h2 id="orgs-heading" className="text-xl font-bold text-ink">
             {to.list_heading} ({myOrgs.length})
@@ -65,7 +64,6 @@ export default async function OrganizacionesPage() {
           )}
         </section>
 
-        {/* Create org form */}
         <section aria-labelledby="create-org-heading" className="flex flex-col gap-4">
           <h2 id="create-org-heading" className="text-xl font-bold text-ink">
             {to.create_heading}

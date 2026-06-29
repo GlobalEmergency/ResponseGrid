@@ -61,19 +61,16 @@ export default async function MiVoluntariadoPage({ params }: Props) {
     inactive: ta.vol_status_inactive,
   };
 
-  // --- Auth guard -----------------------------------------------------------
   const token = await getToken();
   if (token === null) {
     redirect(`/login?next=/e/${slug}/mi-voluntariado`);
   }
 
-  // --- Emergency resolution -------------------------------------------------
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
     notFound();
   }
 
-  // --- Fetch data in parallel -----------------------------------------------
   const [profile, myTasks] = await Promise.all([
     fetchMyVolunteerProfile(emergency.id, slug),
     fetchMyTasks(emergency.id, slug),
@@ -90,7 +87,6 @@ export default async function MiVoluntariadoPage({ params }: Props) {
         />
         <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">
 
-        {/* ── PERFIL ────────────────────────────────────────────────── */}
         <section aria-labelledby="profile-heading" className="flex flex-col gap-4">
           <h2 id="profile-heading" className="text-xl font-bold text-ink">
             {ta.profile_heading}
@@ -139,7 +135,6 @@ export default async function MiVoluntariadoPage({ params }: Props) {
                 </span>
               </div>
 
-              {/* Skills */}
               {profile.skills.length > 0 && (
                 <div className="flex flex-col gap-2">
                   <p className="text-xs font-semibold text-muted uppercase tracking-wide">
@@ -155,7 +150,6 @@ export default async function MiVoluntariadoPage({ params }: Props) {
                 </div>
               )}
 
-              {/* Meta */}
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted border-t border-line pt-3">
                 <span>
                   {ta.availability_label}{' '}
@@ -181,7 +175,6 @@ export default async function MiVoluntariadoPage({ params }: Props) {
           )}
         </section>
 
-        {/* ── MIS TAREAS ────────────────────────────────────────────── */}
         {profile !== null && (
           <section aria-labelledby="tasks-heading" className="flex flex-col gap-4">
             <h2 id="tasks-heading" className="text-xl font-bold text-ink">

@@ -34,7 +34,6 @@ export function CreateOrgForm() {
         <ErrorMessage message={state.message ?? to.form_error} />
       )}
 
-      {/* Name */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="org-name" className="text-sm font-semibold text-ink">
           {to.f_name} <span aria-hidden="true">*</span>
@@ -42,7 +41,6 @@ export function CreateOrgForm() {
         <Input id="org-name" name="name" type="text" required placeholder={to.f_name_ph} />
       </div>
 
-      {/* Type */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="org-type" className="text-sm font-semibold text-ink">
           {to.f_type} <span aria-hidden="true">*</span>
@@ -55,7 +53,6 @@ export function CreateOrgForm() {
         </Select>
       </div>
 
-      {/* Tax ID */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="org-taxid" className="text-sm font-semibold text-ink">
           {to.f_taxid}
@@ -64,7 +61,6 @@ export function CreateOrgForm() {
         <Input id="org-taxid" name="taxId" type="text" placeholder="ES-12345678" />
       </div>
 
-      {/* Contact email */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="org-email" className="text-sm font-semibold text-ink">
           {to.f_email} <span aria-hidden="true">*</span>
@@ -72,7 +68,6 @@ export function CreateOrgForm() {
         <Input id="org-email" name="contactEmail" type="email" required placeholder={to.f_email_ph} />
       </div>
 
-      {/* Contact phone */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="org-phone" className="text-sm font-semibold text-ink">
           {to.f_phone} <span aria-hidden="true">*</span>

@@ -22,13 +22,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AcreditacionesPage() {
-  // ── Auth guard ──────────────────────────────────────────────────────────
   const token = await getToken();
   if (!token) {
     redirect('/login?next=/panel/administracion/acreditaciones');
   }
 
-  // ── Admin check via GET /auth/me ────────────────────────────────────────
   const { data: me, response: meResponse } = await api.GET('/auth/me', {
     headers: authHeaders(token),
   });
@@ -41,7 +39,6 @@ export default async function AcreditacionesPage() {
     redirect('/');
   }
 
-  // ── Fetch existing accreditations ────────────────────────────────────────
   const accreditations = await fetchAccreditations();
 
   const { t, locale } = await getT();
@@ -61,7 +58,6 @@ export default async function AcreditacionesPage() {
           </Link>
         </p>
 
-        {/* ── LISTADO DE ACREDITACIONES ────────────────────────────────── */}
         <section aria-labelledby="list-heading" className="flex flex-col gap-4">
           <h2 id="list-heading" className="text-xl font-bold text-ink">
             {ta.acc_list_heading.replace('{count}', String(accreditations.length))}
@@ -116,7 +112,6 @@ export default async function AcreditacionesPage() {
 
         <hr className="border-line" />
 
-        {/* ── CONCEDER ACREDITACIÓN ────────────────────────────────────── */}
         <section aria-labelledby="grant-heading" className="flex flex-col gap-4">
           <h2 id="grant-heading" className="text-xl font-bold text-ink">
             {ta.acc_grant_heading}

@@ -17,7 +17,6 @@ interface EmergencyControlsProps {
   emergencyId: string;
   slug: string;
   status: 'active' | 'paused' | 'closed';
-  /** Current announcement text, used to pre-fill the textarea */
   currentAnnouncement: string | null;
 }
 

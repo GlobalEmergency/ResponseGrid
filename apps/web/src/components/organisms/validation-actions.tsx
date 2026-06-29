@@ -7,7 +7,6 @@ import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
 import type { ActionResult } from '@/app/e/[slug]/coordinacion/actions';
 
-/** A field a coordinator can edit while validating. */
 export type EditField =
   | {
       key: string;

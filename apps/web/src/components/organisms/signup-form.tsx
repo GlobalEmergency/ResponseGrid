@@ -31,7 +31,6 @@ export function SignupForm({ next, t }: SignupFormProps) {
           <ErrorMessage message={state.message ?? t.error_fallback} />
         )}
 
-        {/* Name */}
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="name">{t.name_label}</Label>
           <Input
@@ -44,7 +43,6 @@ export function SignupForm({ next, t }: SignupFormProps) {
           />
         </div>
 
-        {/* Email */}
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="email">{t.email_label}</Label>
           <Input
@@ -57,7 +55,6 @@ export function SignupForm({ next, t }: SignupFormProps) {
           />
         </div>
 
-        {/* Password */}
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="password">
             {t.password_label}{' '}

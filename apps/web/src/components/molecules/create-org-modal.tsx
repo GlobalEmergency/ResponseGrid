@@ -1,16 +1,8 @@
 'use client';
 
-/**
- * CreateOrgModal — inline organization creation in a modal.
- *
- * Lets a user create an organization without leaving the form they are filling
- * in (petición/registrar/donar). On success it calls `onCreated` with the new
- * org so the caller can select it immediately.
- *
- * Inputs are controlled (no nested `<form>` submission to the parent form); the
- * server action is invoked directly. The surrounding `Modal` portals this out
- * of the parent form's DOM, so the `<form>` here is safe.
- */
+// Inputs are controlled (no nested `<form>` submission to the parent form); the
+// server action is invoked directly. The surrounding `Modal` portals this out
+// of the parent form's DOM, so the `<form>` here is safe.
 import { useState, type FormEvent } from 'react';
 import { Modal } from '@/components/molecules/modal';
 import { Input } from '@/components/atoms/input';
@@ -110,7 +102,6 @@ export function CreateOrgModal({ open, onClose, onCreated }: CreateOrgModalProps
       <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
         {error !== null && <ErrorMessage message={error} />}
 
-        {/* Name */}
         <div className="flex flex-col gap-1.5">
           <label htmlFor="modal-org-name" className="text-sm font-semibold text-ink">
             {to.f_name} <span aria-hidden="true">*</span>
@@ -126,7 +117,6 @@ export function CreateOrgModal({ open, onClose, onCreated }: CreateOrgModalProps
           />
         </div>
 
-        {/* Type */}
         <div className="flex flex-col gap-1.5">
           <label htmlFor="modal-org-type" className="text-sm font-semibold text-ink">
             {to.f_type} <span aria-hidden="true">*</span>
@@ -149,7 +139,6 @@ export function CreateOrgModal({ open, onClose, onCreated }: CreateOrgModalProps
           </Select>
         </div>
 
-        {/* Tax ID */}
         <div className="flex flex-col gap-1.5">
           <label htmlFor="modal-org-taxid" className="text-sm font-semibold text-ink">
             {to.f_taxid}
@@ -165,7 +154,6 @@ export function CreateOrgModal({ open, onClose, onCreated }: CreateOrgModalProps
           />
         </div>
 
-        {/* Contact email */}
         <div className="flex flex-col gap-1.5">
           <label htmlFor="modal-org-email" className="text-sm font-semibold text-ink">
             {to.f_email} <span aria-hidden="true">*</span>
@@ -181,7 +169,6 @@ export function CreateOrgModal({ open, onClose, onCreated }: CreateOrgModalProps
           />
         </div>
 
-        {/* Contact phone */}
         <div className="flex flex-col gap-1.5">
           <label htmlFor="modal-org-phone" className="text-sm font-semibold text-ink">
             {to.f_phone} <span aria-hidden="true">*</span>
@@ -197,7 +184,6 @@ export function CreateOrgModal({ open, onClose, onCreated }: CreateOrgModalProps
           />
         </div>
 
-        {/* Actions */}
         <div className="flex gap-3 pt-1">
           <Button
             type="button"

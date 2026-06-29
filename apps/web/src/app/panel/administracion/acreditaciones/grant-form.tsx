@@ -47,7 +47,6 @@ export function GrantAccreditationForm() {
         />
       </FormField>
 
-      {/* Scope radio group */}
       <fieldset className="flex flex-col gap-2">
         <legend className="text-sm font-semibold text-ink uppercase tracking-wide">
           {ta.acc_f_scope_legend}

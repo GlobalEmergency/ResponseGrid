@@ -1,14 +1,6 @@
 'use client';
 
 /**
- * NeedsList — public list of validated needs with an optional "near me" mode.
- *
- * By default it renders the `initialItems` fetched server-side (already
- * filtered by category/priority via the URL). When the citizen activates the
- * NearbyButton, their ephemeral location is sent to the needs/nearby endpoint
- * and the list is replaced by the nearest validated needs, each annotated with
- * a DistanceBadge. Clearing returns to the default (filtered) list.
- *
  * Location privacy: the coordinates never leave the browser except as the
  * query of a single API call, and the distances shown for needs flagged as
  * "approximate" are derived server-side from the jittered point (see

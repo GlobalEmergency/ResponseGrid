@@ -25,7 +25,6 @@ export interface AccreditationDto {
   grantedAt: string;
 }
 
-/** Fetch all accreditations, optionally filtered by org or emergency. */
 export async function fetchAccreditations(
   organizationId?: string,
   emergencyId?: string,
@@ -46,7 +45,6 @@ export async function fetchAccreditations(
   return (data ?? []) as unknown as AccreditationDto[];
 }
 
-/** Grant an accreditation (POST /accreditations). */
 export async function grantAccreditationAction(
   _prev: AccreditationActionResult,
   formData: FormData,
@@ -100,7 +98,6 @@ export async function grantAccreditationAction(
   return { status: 'success' };
 }
 
-/** Revoke an accreditation (DELETE /accreditations/{id}). */
 export async function revokeAccreditationAction(
   id: string,
 ): Promise<AccreditationActionResult> {

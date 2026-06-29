@@ -4,17 +4,11 @@ import type { InputHTMLAttributes } from 'react';
 
 interface ConsentCheckboxProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
-  /** Legal text shown next to the checkbox. */
   label: string;
   id: string;
   name: string;
 }
 
-/**
- * ConsentCheckbox — Blocking checkbox with legal text.
- * Renders a styled checkbox with accessible label. Form submission is
- * blocked unless this is checked (required attribute + form validation).
- */
 export function ConsentCheckbox({
   label,
   id,

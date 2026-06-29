@@ -53,7 +53,6 @@ export function Modal({ open, onClose, title, children, closeLabel, ariaLabel }:
       aria-modal="true"
       aria-label={ariaLabel ?? title}
     >
-      {/* Backdrop */}
       <button
         type="button"
         aria-label={closeLabel}
@@ -61,9 +60,7 @@ export function Modal({ open, onClose, title, children, closeLabel, ariaLabel }:
         className="absolute inset-0 bg-black/50"
       />
 
-      {/* Panel: bottom sheet on mobile, centered card on desktop */}
       <div className="relative z-10 flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:m-4 sm:max-w-md sm:rounded-2xl">
-        {/* Header */}
         <div className="flex items-start justify-between gap-3 border-b border-line px-5 py-4">
           <h2 className="text-lg font-bold leading-tight text-ink break-words">{title}</h2>
           <button
@@ -88,7 +85,6 @@ export function Modal({ open, onClose, title, children, closeLabel, ariaLabel }:
           </button>
         </div>
 
-        {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto px-5 py-4">{children}</div>
       </div>
     </div>,

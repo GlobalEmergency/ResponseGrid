@@ -1,15 +1,5 @@
 'use client';
 
-/**
- * LanguageSwitcher — molecule component.
- *
- * Sets the `rh_locale` cookie and reloads the current page to apply the new locale.
- * Uses a pair of <button> elements (not a <select>) for clarity and accessibility.
- * Classified as a molecule: it composes multiple button atoms with cookie/locale logic.
- *
- * `tone="dark"` renders for placement on the navy header band.
- */
-
 import { useLocale } from '@/i18n/locale-context';
 import { LOCALE_COOKIE } from '@/i18n/index';
 import type { Locale } from '@/i18n/index';

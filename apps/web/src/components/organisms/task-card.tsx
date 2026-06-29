@@ -96,9 +96,7 @@ export function TaskCard({ task, availableVolunteers, slug }: TaskCardProps) {
 
   const isTerminal = task.status === 'completed' || task.status === 'cancelled';
 
-  // Volunteers already assigned to this task (by id)
   const assignedIds = new Set(task.assignments.map((a) => a.volunteerId));
-  // Volunteers not yet assigned
   const unassignedAvailable = availableVolunteers.filter((v) => !assignedIds.has(v.id));
 
   return (
@@ -106,7 +104,6 @@ export function TaskCard({ task, availableVolunteers, slug }: TaskCardProps) {
       aria-label={tc.task_card_label.replace('{title}', task.title)}
       className="flex flex-col gap-4 rounded-lg border-2 border-navy bg-white p-5"
     >
-      {/* Header */}
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex flex-col gap-1 flex-1 min-w-0">
           <h3 className="text-base font-bold text-ink leading-tight break-words">{task.title}</h3>
@@ -117,7 +114,6 @@ export function TaskCard({ task, availableVolunteers, slug }: TaskCardProps) {
         </span>
       </div>
 
-      {/* Meta */}
       <div className="flex flex-wrap gap-3 text-xs text-muted">
         {task.requiredSkill != null && (
           <span>
@@ -133,7 +129,6 @@ export function TaskCard({ task, availableVolunteers, slug }: TaskCardProps) {
         )}
       </div>
 
-      {/* Assignments */}
       {task.assignments.length > 0 && (
         <div className="flex flex-col gap-2">
           <p className="text-xs font-semibold text-ink-soft uppercase tracking-wide">
@@ -169,13 +164,10 @@ export function TaskCard({ task, availableVolunteers, slug }: TaskCardProps) {
         </div>
       )}
 
-      {/* Error */}
       {errorMessage !== undefined && <ErrorMessage message={errorMessage} />}
 
-      {/* Actions — only for non-terminal tasks */}
       {!isTerminal && (
         <div className="flex flex-col gap-3">
-          {/* Assign volunteer */}
           {unassignedAvailable.length > 0 && (
             <form action={assignFormAction} className="flex flex-col gap-2">
               <select
@@ -206,7 +198,6 @@ export function TaskCard({ task, availableVolunteers, slug }: TaskCardProps) {
             </form>
           )}
 
-          {/* Complete / Cancel */}
           <div className="flex gap-2 flex-wrap">
             <form action={completeFormAction} className="flex-1">
               <Button
@@ -235,8 +226,6 @@ export function TaskCard({ task, availableVolunteers, slug }: TaskCardProps) {
     </article>
   );
 }
-
-// ---------- sub-component ----------
 
 interface UnassignButtonProps {
   taskId: string;

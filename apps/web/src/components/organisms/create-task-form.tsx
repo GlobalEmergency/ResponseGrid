@@ -39,7 +39,6 @@ export function CreateTaskForm({ emergencyId, slug }: CreateTaskFormProps) {
     async (_prev, formData) => {
       const result = await createTask(emergencyId, slug, formData);
       if (result.status === 'success') {
-        // Reset the form on success
         formRef.current?.reset();
       }
       return result;
@@ -105,7 +104,6 @@ export function CreateTaskForm({ emergencyId, slug }: CreateTaskFormProps) {
         </select>
       </FormField>
 
-      {/* Optional location */}
       <fieldset className="flex flex-col gap-3 rounded-lg border border-line p-4">
         <legend className="px-1 text-xs font-semibold text-ink-soft uppercase tracking-wide">
           {tc.task_location_legend}

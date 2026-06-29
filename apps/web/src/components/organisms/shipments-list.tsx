@@ -1,16 +1,9 @@
 'use client';
 
-/**
- * Clickable shipments / expediciones list. Each row is a full-surface tap
- * target (≥44px, no hover-only affordances) that opens the mobile-first
- * {@link ShipmentDetail} drawer with the shipment's full detail + the lifecycle
- * actions allowed in its current status.
- *
- * Unlike the offers/needs queues, a shipment is NOT removed when acted on — its
- * lifecycle has several steps (planned → assigned → in_transit → delivered), so
- * after a successful transition we close the drawer and refresh the route (the
- * server action has already revalidated) to reflect the new status server-side.
- */
+// Unlike the offers/needs queues, a shipment is NOT removed when acted on — its
+// lifecycle has several steps (planned → assigned → in_transit → delivered), so
+// after a successful transition we close the drawer and refresh the route (the
+// server action has already revalidated) to reflect the new status server-side.
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { components } from '@reliefhub/api-client';

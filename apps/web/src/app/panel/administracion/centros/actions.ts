@@ -11,12 +11,8 @@ export type ResourceAdminDetail =
   components['schemas']['ResourceAdminDetailDto'];
 export type ValidityReport = components['schemas']['ValidityReportDto'];
 
-/**
- * Fetch the admin global list of ALL resources (GET /resources) — every
- * emergency, status and verification level. On 401 the session is cleared and
- * the user is redirected to login. Mirrors the users/organizations admin fetch
- * (#175/#176).
- */
+// Unlike the public listing, returns resources of every status and
+// verification level (admin-only view).
 export async function fetchAdminResources(): Promise<ResourceAdminListItem[]> {
   const token = await getToken();
   if (!token) redirect('/login?next=/panel/administracion/centros');
@@ -39,10 +35,7 @@ export async function fetchAdminResources(): Promise<ResourceAdminListItem[]> {
   return (data?.items ?? []) as ResourceAdminListItem[];
 }
 
-/**
- * Fetch one resource's admin detail (GET /resources/:id), of ANY status.
- * Returns null on 404 so the page can render a not-found state.
- */
+// Returns null on 404 so the page can render a not-found state.
 export async function fetchAdminResourceDetail(
   id: string,
 ): Promise<ResourceAdminDetail | null> {

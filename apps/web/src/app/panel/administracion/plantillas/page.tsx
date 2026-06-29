@@ -22,13 +22,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function TemplatesPage() {
-  // ── Auth guard ──────────────────────────────────────────────────────────
   const token = await getToken();
   if (!token) {
     redirect('/login?next=/panel/administracion/plantillas');
   }
 
-  // ── Admin check via GET /auth/me ────────────────────────────────────────
   const { data: me, response: meResponse } = await api.GET('/auth/me', {
     headers: authHeaders(token),
   });
@@ -41,7 +39,6 @@ export default async function TemplatesPage() {
     redirect('/');
   }
 
-  // ── Fetch templates ──────────────────────────────────────────────────────
   const templates = await fetchTemplates();
 
   const { t } = await getT();
@@ -50,7 +47,6 @@ export default async function TemplatesPage() {
     <>
       <PageHeader title={t.templates.title} subtitle={t.templates.subtitle} />
 
-      {/* ── LISTADO ─────────────────────────────────────────────────── */}
         <section aria-labelledby="list-heading" className="flex flex-col gap-4">
           <h2 id="list-heading" className="text-xl font-bold text-ink">
             {t.templates.list_heading.replace('{count}', String(templates.length))}
@@ -80,7 +76,6 @@ export default async function TemplatesPage() {
 
         <hr className="border-line" />
 
-        {/* ── CREAR PLANTILLA ─────────────────────────────────────────── */}
         <section aria-labelledby="create-template-heading" className="flex flex-col gap-4">
           <h2 id="create-template-heading" className="text-xl font-bold text-ink">
             {t.templates.new_heading}
@@ -90,7 +85,6 @@ export default async function TemplatesPage() {
 
         <hr className="border-line" />
 
-        {/* ── CREAR EMERGENCIA DESDE PLANTILLA ────────────────────────── */}
         <section aria-labelledby="create-emergency-heading" className="flex flex-col gap-4">
           <h2 id="create-emergency-heading" className="text-xl font-bold text-ink">
             {t.templates.create_from_heading}

@@ -10,10 +10,6 @@ interface MarkAllReadButtonProps {
   hasUnread: boolean;
 }
 
-/**
- * MarkAllReadButton — client component that calls the markAllNotificationsRead
- * server action and shows a pending state while the request is in-flight.
- */
 export function MarkAllReadButton({ hasUnread }: MarkAllReadButtonProps) {
   const tn = getMessages(useLocale()).notificaciones;
   const [isPending, startTransition] = useTransition();

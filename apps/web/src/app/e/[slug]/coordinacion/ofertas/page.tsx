@@ -78,7 +78,6 @@ export default async function CoordinacionOfertasPage({
     redirect(`/e/${slug}/coordinacion`);
   }
 
-  // --- Parse filter params ----------------------------------------------
   const rawCategory =
     typeof resolvedSearchParams.category === 'string' ? resolvedSearchParams.category : undefined;
   const rawStatus =
@@ -102,7 +101,6 @@ export default async function CoordinacionOfertasPage({
     }
   };
 
-  // --- Fetch the offers queue + validated needs (match targets) ---------
   const [offersQueue, validatedNeeds] = await Promise.all([
     api
       .GET('/emergencies/{emergencyId}/offers/queue', {

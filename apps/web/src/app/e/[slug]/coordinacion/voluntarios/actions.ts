@@ -11,9 +11,6 @@ export type ActionResult =
   | { status: 'success' }
   | { status: 'error'; message: string };
 
-/**
- * Update the status of a volunteer (coordinator only).
- */
 export async function updateVolunteerStatus(
   volunteerId: string,
   status: 'available' | 'assigned' | 'inactive',
@@ -50,9 +47,6 @@ export async function updateVolunteerStatus(
   return { status: 'success' };
 }
 
-/**
- * Create a new task for an emergency (coordinator only).
- */
 export async function createTask(
   emergencyId: string,
   slug: string,
@@ -84,7 +78,6 @@ export async function createTask(
 
   const skillValue = VALID_SKILLS.includes(requiredSkill as Skill) ? (requiredSkill as Skill) : undefined;
 
-  // Build optional location only when all three fields are present
   let location: { address: string; latitude: number; longitude: number } | undefined;
   if (address !== '' && latitudeRaw !== '' && longitudeRaw !== '') {
     const latitude = parseFloat(latitudeRaw);
@@ -120,9 +113,6 @@ export async function createTask(
   return { status: 'success' };
 }
 
-/**
- * Assign a volunteer to a task (coordinator only).
- */
 export async function assignVolunteer(
   taskId: string,
   volunteerId: string,
@@ -162,9 +152,6 @@ export async function assignVolunteer(
   return { status: 'success' };
 }
 
-/**
- * Unassign a volunteer from a task (coordinator only).
- */
 export async function unassignVolunteer(
   taskId: string,
   volunteerId: string,
@@ -204,9 +191,6 @@ export async function unassignVolunteer(
   return { status: 'success' };
 }
 
-/**
- * Mark a task as completed (coordinator only).
- */
 export async function completeTask(
   taskId: string,
   slug: string,
@@ -241,9 +225,6 @@ export async function completeTask(
   return { status: 'success' };
 }
 
-/**
- * Cancel a task (coordinator only).
- */
 export async function cancelTask(
   taskId: string,
   slug: string,

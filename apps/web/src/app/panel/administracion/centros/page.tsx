@@ -18,13 +18,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CentrosPage() {
-  // ── Auth guard ──────────────────────────────────────────────────────────
   const token = await getToken();
   if (!token) {
     redirect('/login?next=/panel/administracion/centros');
   }
 
-  // ── Admin check via GET /auth/me ────────────────────────────────────────
   const { data: me, response: meResponse } = await api.GET('/auth/me', {
     headers: authHeaders(token),
   });

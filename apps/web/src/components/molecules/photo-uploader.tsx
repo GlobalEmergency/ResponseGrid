@@ -138,7 +138,6 @@ export function PhotoUploader({ onUrlsChange }: PhotoUploaderProps) {
           const formData = new FormData();
           formData.append('file', blob, file.name);
 
-          // POST to the Next.js proxy which reads the httpOnly cookie server-side
           const res = await fetch('/api/upload', {
             method: 'POST',
             body: formData,

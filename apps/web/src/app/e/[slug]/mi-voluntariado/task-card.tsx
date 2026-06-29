@@ -71,7 +71,6 @@ export function TaskCard({ task, volunteerId, slug }: TaskCardProps) {
       aria-label={ta.task_card_aria.replace('{name}', task.title)}
       className="flex flex-col gap-4 rounded-lg border-2 border-navy bg-white p-5"
     >
-      {/* Header */}
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="text-lg font-bold text-ink leading-tight flex-1">
@@ -88,7 +87,6 @@ export function TaskCard({ task, volunteerId, slug }: TaskCardProps) {
         )}
       </div>
 
-      {/* Metadata */}
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
         <span>
           {ta.task_status_label}{' '}
@@ -112,19 +110,16 @@ export function TaskCard({ task, volunteerId, slug }: TaskCardProps) {
         )}
       </div>
 
-      {/* Errors */}
       {errorMessage !== null && (
         <ErrorMessage message={errorMessage} />
       )}
 
-      {/* Success feedback */}
       {(checkInState.status === 'success' || checkOutState.status === 'success') && (
         <p role="alert" aria-live="polite" className="text-xs text-success font-medium">
           {ta.updated_success}
         </p>
       )}
 
-      {/* Check-in / Check-out buttons */}
       {myStatus === 'assigned' && (
         <form action={checkInAction}>
           <Button

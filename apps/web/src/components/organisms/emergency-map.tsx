@@ -341,7 +341,6 @@ export default function EmergencyMap({
         <ClusteredMarkersLayer points={points} slug={slug} />
       </MapContainer>
 
-      {/* Empty-state overlay rendered on top of the map */}
       {points.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-[1000] pointer-events-none">
           <p className="text-sm font-medium text-muted">

@@ -68,7 +68,6 @@ export default async function GroupDetailPage({ params }: Props) {
           }
         />
 
-        {/* ── Manager view ─────────────────────────────────────────────── */}
         {isManager ? (
           <>
             <section className="flex flex-col gap-4">
@@ -117,7 +116,6 @@ export default async function GroupDetailPage({ params }: Props) {
             </section>
           </>
         ) : (
-          /* ── Member / visitor view ──────────────────────────────────── */
           <section className="flex flex-col gap-4">
             {myMembership ? (
               myMembership.membershipStatus === 'approved' ? (

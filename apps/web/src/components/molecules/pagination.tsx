@@ -1,11 +1,7 @@
 import Link from 'next/link';
 
-/**
- * Server-rendered pager. Prev/next links preserve the current filter params
- * (e.g. `q`, `type`) and only set `page` when it is > 1, keeping page-1 URLs
- * clean. Renders a summary line ("Página X de Y · N resultados") and hides the
- * prev/next controls when there is a single page.
- */
+// Prev/next links preserve the current filter params and only set `page` when
+// it is > 1, keeping page-1 URLs clean.
 interface PaginationProps {
   page: number;
   limit: number;

@@ -9,7 +9,6 @@ import { PageHeader } from '@/components/molecules/page-header';
 import { MarkAllReadButton } from './mark-all-read-button';
 import { getT } from '@/i18n/server';
 
-// Always reflect the latest notifications state.
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -43,7 +42,6 @@ export default async function NotificacionesPage() {
           title={hasUnread ? tn.title_unread.replace('{count}', String(unreadCount)) : tn.title}
         />
 
-        {/* ── LISTA DE NOTIFICACIONES ───────────────────────────────── */}
         <section aria-labelledby="notifications-heading" className="flex flex-col gap-4">
           <h2 id="notifications-heading" className="sr-only">
             {tn.heading_sr}

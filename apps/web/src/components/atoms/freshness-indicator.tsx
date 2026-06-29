@@ -1,15 +1,9 @@
 'use client';
 
 /**
- * FreshnessIndicator — shows an amber "verify before acting" badge when a need
- * is considered stale but not yet expired.
- *
- * Staleness criteria (either condition triggers the badge):
- *   • lastVerifiedAt is more than 6 hours ago, OR
- *   • expiresAt is less than 2 hours away
- *
- * Expired needs are excluded from public listings by the backend, so this
- * component only needs to handle the stale-but-active case.
+ * Stale = lastVerifiedAt more than 6 hours ago, OR expiresAt less than 2 hours
+ * away. Expired needs are excluded from public listings by the backend, so this
+ * only needs to handle the stale-but-active case.
  */
 
 import { useLocale } from '@/i18n/locale-context';

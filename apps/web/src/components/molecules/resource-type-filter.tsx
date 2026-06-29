@@ -1,10 +1,5 @@
 'use client';
 
-/**
- * Single-select filter for the resource verification queue: narrows the queue
- * by resource type via the `type` search param. Pairs with {@link SearchBox}
- * and pagination on the coordination Recursos page. Resets `page` on change.
- */
 import type { ChangeEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Select } from '@/components/atoms/select';

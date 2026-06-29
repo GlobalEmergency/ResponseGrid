@@ -56,10 +56,6 @@ export interface UserDetail {
   activity: UserActivity[];
 }
 
-/**
- * Fetch the admin global list of users (GET /users). On 401 the session is
- * cleared and the user is redirected to login.
- */
 export async function fetchUsers(): Promise<UserListItem[]> {
   const token = await getToken();
   if (!token) redirect('/login?next=/panel/administracion/usuarios');
@@ -79,10 +75,7 @@ export async function fetchUsers(): Promise<UserListItem[]> {
   return (data ?? []) as UserListItem[];
 }
 
-/**
- * Fetch one user's admin detail (GET /users/:id). Returns null on 404 so the
- * page can render a not-found state.
- */
+// Returns null on 404 so the page can render a not-found state.
 export async function fetchUserDetail(id: string): Promise<UserDetail | null> {
   const token = await getToken();
   if (!token) redirect(`/login?next=/panel/administracion/usuarios/${id}`);

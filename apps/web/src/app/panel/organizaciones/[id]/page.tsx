@@ -28,19 +28,16 @@ export default async function OrganizationDetailPage({ params }: Props) {
     redirect(`/login?next=/panel/organizaciones/${id}`);
   }
 
-  // Fetch current user id to determine ownership
   const { data: me } = await api.GET('/auth/me', {
     headers: authHeaders(token),
   });
 
-  // Fetch my orgs to show org name
   const { data: myOrgs } = await api.GET('/organizations/mine', {
     headers: authHeaders(token),
   });
 
   const org = myOrgs?.find((o) => o.id === id);
 
-  // Fetch members
   const { data: members, error: membersError } = await api.GET(
     '/organizations/{id}/members',
     {
@@ -72,7 +69,6 @@ export default async function OrganizationDetailPage({ params }: Props) {
           subtitle={org ? `${org.type} · ${org.verificationLevel}` : undefined}
         />
 
-        {/* Members list */}
         <section aria-labelledby="members-heading" className="flex flex-col gap-4">
           <h2 id="members-heading" className="text-xl font-bold text-ink">
             {td.members_heading} ({memberList.length})
@@ -103,7 +99,6 @@ export default async function OrganizationDetailPage({ params }: Props) {
           </ul>
         </section>
 
-        {/* Add member form */}
         <section aria-labelledby="add-member-heading" className="flex flex-col gap-4">
           <h2 id="add-member-heading" className="text-xl font-bold text-ink">
             {td.add_heading}
