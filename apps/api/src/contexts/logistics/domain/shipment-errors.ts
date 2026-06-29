@@ -1,16 +1,14 @@
 import { ShipmentStatus } from './shipment-enums';
 
-export class ShipmentMustHaveItemsError extends Error {
+/**
+ * A shipment must move *something*: at least one loose {@link SupplyLine} or at
+ * least one {@link Container}. Raised by {@link Shipment.create} when both the
+ * lines and the container manifest are empty.
+ */
+export class ShipmentMustHaveCargoError extends Error {
   constructor() {
-    super('A shipment must declare at least one item');
-    this.name = 'ShipmentMustHaveItemsError';
-  }
-}
-
-export class ShipmentItemValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ShipmentItemValidationError';
+    super('A shipment must carry at least one supply line or container');
+    this.name = 'ShipmentMustHaveCargoError';
   }
 }
 

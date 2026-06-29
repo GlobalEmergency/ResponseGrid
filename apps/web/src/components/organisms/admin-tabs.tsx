@@ -26,6 +26,7 @@ export function AdminTabs({ isPlatformAdmin }: AdminTabsProps) {
     { href: base, label: tn.admin_overview, exact: true },
     { href: `${base}/usuarios`, label: tn.admin_users },
     { href: `${base}/organizaciones`, label: tn.admin_orgs },
+    { href: `${base}/centros`, label: tn.admin_centros },
     { href: `${base}/permisos`, label: tn.admin_permissions },
     { href: `${base}/api-keys`, label: tn.admin_api_keys },
     { href: `${base}/acreditaciones`, label: tn.admin_accreditations },

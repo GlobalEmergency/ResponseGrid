@@ -33,6 +33,10 @@ export interface EmergencyAccess {
    * do not — the log is coordinator-only.
    */
   canViewAudit: boolean;
+  /** Can read this emergency's donation intakes (search / list / detail). */
+  canReadIntakes: boolean;
+  /** Can confirm / reject / mark-incomplete reception of donation intakes. */
+  canReceiveIntakes: boolean;
 }
 
 /** Permissions that mean "this person runs coordinator-only surfaces". */
@@ -77,6 +81,8 @@ export function resolveEmergencyAccess(
   const canCoordinateLogistics = permissions.has('shipment:read');
   const canCoordinate = COORDINATOR_PERMISSIONS.some((p) => permissions.has(p));
   const canViewAudit = permissions.has('audit:read');
+  const canReadIntakes = permissions.has('intake:read');
+  const canReceiveIntakes = permissions.has('intake:receive');
 
   return {
     roleIds,
@@ -88,6 +94,8 @@ export function resolveEmergencyAccess(
     canCoordinate,
     canActOnAnyQueue: canValidateNeeds || canVerifyResources || canMatchOffers,
     canViewAudit,
+    canReadIntakes,
+    canReceiveIntakes,
   };
 }
 

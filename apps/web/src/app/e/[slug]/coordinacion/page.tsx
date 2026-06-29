@@ -144,14 +144,18 @@ export default async function CoordinacionPage({ params }: Props) {
 
   return (
     <>
-      {!access.canActOnAnyQueue && !access.canCoordinate && (
-        <EmptyState
-          title={tc.no_actionable_queues_title}
-          description={tc.no_actionable_queues_description}
-        />
-      )}
+      {!access.canActOnAnyQueue &&
+        !access.canCoordinate &&
+        !access.canReadIntakes && (
+          <EmptyState
+            title={tc.no_actionable_queues_title}
+            description={tc.no_actionable_queues_description}
+          />
+        )}
 
-      {(access.canActOnAnyQueue || access.canCoordinate) && (
+      {(access.canActOnAnyQueue ||
+        access.canCoordinate ||
+        access.canReadIntakes) && (
         <section aria-label={tc.hub_sections_label} className="flex flex-col gap-4">
           {resourcesPending !== null && (
             <CoordinationSectionLink
@@ -196,6 +200,13 @@ export default async function CoordinacionPage({ params }: Props) {
               description={tc.hub_shipments_description}
               count={shipmentsActive}
               countAria={tc.hub_shipments_count_aria}
+            />
+          )}
+          {access.canReadIntakes && (
+            <CoordinationSectionLink
+              href={`/e/${slug}/recepcion`}
+              label={t.recepcion.hub_label}
+              description={t.recepcion.hub_description}
             />
           )}
           {access.canCoordinate && (

@@ -30,6 +30,8 @@ const ROLES = [
   { id: 'platform_viewer', permissions: ['org:read'] },
   // A citizen — only the implicit self perms, never coordination.
   { id: 'volunteer', permissions: ['task:read'] },
+  // A collection-point operator — handles donation reception only.
+  { id: 'point_operator', permissions: ['intake:read', 'intake:receive'] },
 ];
 
 const E1 = '11111111-1111-4111-8111-111111111111';
@@ -126,4 +128,25 @@ test('canCoordinateAtPlatform: unknown roleId contributes nothing', () => {
 
 test('canCoordinateAtPlatform: no grants → false', () => {
   assert.equal(canCoordinateAtPlatform([], ROLES), false);
+});
+
+test('resolveEmergencyAccess: intake flags reflect intake:read / intake:receive', () => {
+  const operator = resolveEmergencyAccess(
+    E1,
+    [{ roleId: 'point_operator', scopeType: 'emergency', scopeId: E1 }],
+    ROLES,
+  );
+  assert.equal(operator.canReadIntakes, true);
+  assert.equal(operator.canReceiveIntakes, true);
+  // An intake-only operator is not a coordinator queue actor.
+  assert.equal(operator.canActOnAnyQueue, false);
+
+  // A coordinator without intake perms gets no intake access.
+  const coordinator = resolveEmergencyAccess(
+    E1,
+    [{ roleId: 'emergency_coordinator', scopeType: 'emergency', scopeId: E1 }],
+    ROLES,
+  );
+  assert.equal(coordinator.canReadIntakes, false);
+  assert.equal(coordinator.canReceiveIntakes, false);
 });

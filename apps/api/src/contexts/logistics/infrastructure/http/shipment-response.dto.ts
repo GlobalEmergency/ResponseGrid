@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CarrierType, ShipmentStatus } from '../../domain/shipment-enums';
+import { SupplyLineResponseDto } from '../../../supplies/infrastructure/http/supply-line.dto';
 
 export class CreateShipmentResponseDto {
   @ApiProperty({
@@ -7,24 +8,6 @@ export class CreateShipmentResponseDto {
     example: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
   })
   id!: string;
-}
-
-export class ShipmentItemResponseDto {
-  @ApiProperty({ example: '5 cajas de agua' })
-  description!: string;
-
-  @ApiPropertyOptional({ example: 5, nullable: true, type: Number })
-  quantity!: number | null;
-
-  @ApiPropertyOptional({ example: 'cajas', nullable: true, type: String })
-  unit!: string | null;
-
-  @ApiPropertyOptional({
-    example: 'alimentacion',
-    nullable: true,
-    type: String,
-  })
-  category!: string | null;
 }
 
 export class ShipmentViewDto {
@@ -40,8 +23,18 @@ export class ShipmentViewDto {
   @ApiProperty({ format: 'uuid' })
   destinationResourceId!: string;
 
-  @ApiProperty({ type: [ShipmentItemResponseDto] })
-  items!: ShipmentItemResponseDto[];
+  @ApiProperty({
+    type: [SupplyLineResponseDto],
+    description: 'Loose cargo lines (canonical SupplyLine, #141)',
+  })
+  items!: SupplyLineResponseDto[];
+
+  @ApiProperty({
+    type: [String],
+    format: 'uuid',
+    description: 'Trackable containers (#140) loaded onto the expedition',
+  })
+  containerIds!: string[];
 
   @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
   assignedCapacityId!: string | null;

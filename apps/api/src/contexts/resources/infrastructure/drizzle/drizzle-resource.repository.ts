@@ -2,7 +2,11 @@ import { and, asc, between, count, eq, inArray, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { Db } from '../../../../shared/db';
 import { resourcesTable, resourceItemsTable } from './schema';
-import { ResourceRepository } from '../../domain/ports/resource.repository';
+import { emergenciesTable } from '../../../emergencies/infrastructure/drizzle/schema';
+import {
+  ResourceRepository,
+  ResourceWithEmergency,
+} from '../../domain/ports/resource.repository';
 import { Resource, ResourceSnapshot, Provenance } from '../../domain/resource';
 import {
   rowToSupplyLineSnapshot,
@@ -398,6 +402,98 @@ export class DrizzleResourceRepository implements ResourceRepository {
         ),
       );
     return rows.map((r) => Resource.fromSnapshot(rowToSnapshot(r)));
+  }
+
+  async findAllPaged(q: {
+    page: number;
+    limit: number;
+    emergencyId?: EmergencyId;
+    type?: ResourceType;
+    status?: PublicStatus;
+    verification?: VerificationLevel;
+    q?: string;
+  }): Promise<{ items: ResourceWithEmergency[]; total: number }> {
+    const offset = (q.page - 1) * q.limit;
+
+    // Admin read: NO status/verification gate. Every filter is optional; with
+    // none, this returns every resource of every emergency.
+    const conditions = [];
+    if (q.emergencyId) {
+      conditions.push(eq(resourcesTable.emergencyId, q.emergencyId.value));
+    }
+    if (q.type) {
+      conditions.push(eq(resourcesTable.type, q.type));
+    }
+    if (q.status) {
+      conditions.push(eq(resourcesTable.publicStatus, q.status));
+    }
+    if (q.verification) {
+      conditions.push(eq(resourcesTable.verificationLevel, q.verification));
+    }
+    if (q.q) {
+      // Escape SQL LIKE metacharacters so the user string matches literally
+      // (mirrors findVisiblePaged). Search spans name, address and city.
+      const escaped = q.q.replace(/[%_\\]/g, (c) => `\\${c}`);
+      conditions.push(
+        sql`(${resourcesTable.name} ILIKE ${'%' + escaped + '%'} OR ${resourcesTable.address} ILIKE ${'%' + escaped + '%'} OR ${resourcesTable.city} ILIKE ${'%' + escaped + '%'})`,
+      );
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    // LEFT JOIN resolves the emergency name in the same query (no N+1); LEFT so
+    // an orphaned resource still appears (name → null) instead of vanishing.
+    const [rows, countRows] = await Promise.all([
+      this.db
+        .select({
+          resource: resourcesTable,
+          emergencyName: emergenciesTable.name,
+        })
+        .from(resourcesTable)
+        .leftJoin(
+          emergenciesTable,
+          eq(resourcesTable.emergencyId, emergenciesTable.id),
+        )
+        .where(whereClause)
+        // Newest first: the admin console is an audit/oversight surface where
+        // recent registrations matter most; id breaks ties for stable paging.
+        .orderBy(sql`${resourcesTable.createdAt} DESC`, asc(resourcesTable.id))
+        .limit(q.limit)
+        .offset(offset),
+      this.db.select({ cnt: count() }).from(resourcesTable).where(whereClause),
+    ]);
+
+    return {
+      items: rows.map((r) => ({
+        resource: Resource.fromSnapshot(rowToSnapshot(r.resource)),
+        emergencyName: r.emergencyName ?? null,
+      })),
+      total: Number(countRows[0]?.cnt ?? 0),
+    };
+  }
+
+  async findByIdForAdmin(
+    id: ResourceId,
+  ): Promise<ResourceWithEmergency | null> {
+    const rows = await this.db
+      .select({
+        resource: resourcesTable,
+        emergencyName: emergenciesTable.name,
+      })
+      .from(resourcesTable)
+      .leftJoin(
+        emergenciesTable,
+        eq(resourcesTable.emergencyId, emergenciesTable.id),
+      )
+      .where(eq(resourcesTable.id, id.value))
+      .limit(1);
+    if (!rows[0]) return null;
+    // Hydrate the declared inventory for the admin ficha (mirrors findById).
+    const items = await this.loadItems(rows[0].resource.id);
+    return {
+      resource: Resource.fromSnapshot(rowToSnapshot(rows[0].resource, items)),
+      emergencyName: rows[0].emergencyName ?? null,
+    };
   }
 
   async findVisibleByEmergency(emergencyId: EmergencyId): Promise<Resource[]> {

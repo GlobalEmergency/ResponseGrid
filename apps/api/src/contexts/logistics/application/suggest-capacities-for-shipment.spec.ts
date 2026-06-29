@@ -4,7 +4,10 @@ import { CreateShipment } from './create-shipment';
 import { InMemoryShipmentRepository } from '../infrastructure/in-memory-shipment.repository';
 import { InMemoryTransportCapacityRepository } from '../infrastructure/in-memory-transport-capacity.repository';
 import { InMemoryResourceLocationLookup } from '../infrastructure/in-memory-resource-location-lookup';
+import { FakeShipmentContainerPort } from '../infrastructure/fake-shipment-container-port';
 import { LogisticsEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
+import { SupplyLineProps } from '../../supplies/domain/supply-line';
+import { Category } from '../../supplies/domain/category';
 import { TransportCapacity } from '../domain/transport-capacity';
 import { TransportCapacityId } from '../domain/transport-capacity-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
@@ -68,16 +71,20 @@ function makeCapacity(opts: {
 
 async function seedShipment(
   shipments: InMemoryShipmentRepository,
-  opts?: { items?: { description: string; quantity?: number }[] },
+  opts?: { items?: SupplyLineProps[] },
 ): Promise<string> {
   const { id } = await new CreateShipment(
     shipments,
     new FakeStatusReader(),
+    new FakeShipmentContainerPort(),
   ).execute({
     emergencyId: EM,
     originResourceId: ORIGIN,
     destinationResourceId: DEST,
-    items: opts?.items ?? [{ description: 'agua', quantity: 5 }],
+    items: opts?.items ?? [
+      { name: 'agua', quantity: 5, unit: null, category: Category.Water },
+    ],
+    containerIds: [],
     manifest: null,
   });
   return id;

@@ -498,12 +498,10 @@ function SuggestionCard({
   );
 }
 
-function formatItem(item: components['schemas']['ShipmentItemResponseDto']): string {
-  const qty =
-    typeof item.quantity === 'number' && Number.isFinite(item.quantity)
-      ? `${item.quantity}${typeof item.unit === 'string' && item.unit !== '' ? ` ${item.unit}` : ''}`
-      : '';
-  return qty !== '' ? `${item.description} · ${qty}` : item.description;
+function formatItem(item: ShipmentViewDto['items'][number]): string {
+  const unit =
+    typeof item.unit === 'string' && item.unit !== '' ? ` ${item.unit}` : '';
+  return `${item.name} · ${item.quantity}${unit}`;
 }
 
 /** Short label for a capacity option: mode + weight/volume. */

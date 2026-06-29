@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import type { components } from '@reliefhub/api-client';
 import { createShipment } from './actions';
 import { Button } from '@/components/atoms/button';
 import { Input } from '@/components/atoms/input';
@@ -12,6 +13,7 @@ import { FormField } from '@/components/molecules/form-field';
 import { DetailDrawer } from '@/components/organisms/detail-drawer';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
+import { MATERIAL_CATEGORIES, categoryLabel } from '@/lib/categories';
 
 /** A resource option for the origin/destination selects. */
 export interface ResourceOption {
@@ -19,13 +21,22 @@ export interface ResourceOption {
   name: string;
 }
 
+type CargoLine = components['schemas']['SupplyLineDto'];
+type CargoCategory = CargoLine['category'];
+
 interface ItemRow {
-  description: string;
+  name: string;
   quantity: string;
   unit: string;
+  category: CargoCategory;
 }
 
-const EMPTY_ROW: ItemRow = { description: '', quantity: '', unit: '' };
+const EMPTY_ROW: ItemRow = {
+  name: '',
+  quantity: '1',
+  unit: '',
+  category: MATERIAL_CATEGORIES[0] as CargoCategory,
+};
 
 interface CreateShipmentProps {
   emergencyId: string;
@@ -35,19 +46,21 @@ interface CreateShipmentProps {
 
 /**
  * "Crear expedición" — a button that opens a drawer with a minimal create form:
- * origin/destination selects (from the emergency's resources), repeatable item
- * rows (descripción + cantidad + unidad) and a free-text manifiesto. On success
- * the drawer closes and the route refreshes so the new shipment appears.
+ * origin/destination selects (from the emergency's resources), repeatable cargo
+ * lines (the canonical SupplyLine: insumo + cantidad + unidad + categoría) and a
+ * free-text manifiesto. On success the drawer closes and the route refreshes so
+ * the new shipment appears.
  *
- * ponytail: selects planos para origen/destino (sin map-resource-picker) y form
- * mínimo — sin draft persistence ni categoría por línea de carga en v1.
+ * The loose lines use the shared material model (#141); loading trackable
+ * containers (#140) onto a shipment is a separate flow, not part of this form.
  */
 export function CreateShipment({
   emergencyId,
   slug,
   resources,
 }: CreateShipmentProps) {
-  const tc = getMessages(useLocale()).coord;
+  const locale = useLocale();
+  const tc = getMessages(locale).coord;
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -85,30 +98,31 @@ export function CreateShipment({
   function handleSubmit() {
     setError(undefined);
 
+    let invalid = false;
     const items = rows
-      .map((row) => {
-        const description = row.description.trim();
-        if (description === '') return null;
-        const qtyRaw = row.quantity.trim();
-        const quantity = qtyRaw === '' ? undefined : Number(qtyRaw);
-        if (quantity !== undefined && (!Number.isFinite(quantity) || quantity <= 0)) {
-          return undefined; // sentinel for "invalid quantity"
+      .map((row): CargoLine | null => {
+        const name = row.name.trim();
+        if (name === '') return null;
+        const quantity = Number(row.quantity.trim());
+        if (!Number.isInteger(quantity) || quantity < 1) {
+          invalid = true;
+          return null;
         }
         const unit = row.unit.trim();
         return {
-          description,
-          ...(quantity !== undefined ? { quantity } : {}),
+          name,
+          quantity,
+          category: row.category,
           ...(unit !== '' ? { unit } : {}),
         };
       })
-      .filter((x) => x !== null);
+      .filter((x): x is CargoLine => x !== null);
 
-    if (items.some((x) => x === undefined)) {
+    if (invalid) {
       setError(tc.ship_err_quantity_invalid);
       return;
     }
-    const cleanItems = items as { description: string; quantity?: number; unit?: string }[];
-    if (cleanItems.length === 0) {
+    if (items.length === 0) {
       setError(tc.ship_err_items_required);
       return;
     }
@@ -117,7 +131,7 @@ export function CreateShipment({
       const result = await createShipment(emergencyId, slug, {
         originResourceId: originId,
         destinationResourceId: destinationId,
-        items: cleanItems,
+        items,
         ...(manifest.trim() !== '' ? { manifest: manifest.trim() } : {}),
       });
       if (result.status === 'success') {
@@ -207,7 +221,7 @@ export function CreateShipment({
               </Select>
             </FormField>
 
-            {/* Repeatable cargo lines */}
+            {/* Repeatable cargo lines (canonical SupplyLine) */}
             <fieldset className="flex flex-col gap-3">
               <legend className="text-sm font-semibold text-ink uppercase tracking-wide">
                 {tc.ship_items_legend} <span aria-hidden="true">*</span>
@@ -220,18 +234,16 @@ export function CreateShipment({
                   <Input
                     aria-label={tc.ship_item_description_label}
                     placeholder={tc.ship_item_description_placeholder}
-                    value={row.description}
-                    onChange={(e) =>
-                      updateRow(index, { description: e.target.value })
-                    }
+                    value={row.name}
+                    onChange={(e) => updateRow(index, { name: e.target.value })}
                   />
                   <div className="flex gap-2">
                     <Input
                       aria-label={tc.ship_item_quantity_label}
                       type="number"
-                      inputMode="decimal"
-                      min={0}
-                      step="any"
+                      inputMode="numeric"
+                      min={1}
+                      step={1}
                       placeholder={tc.ship_item_quantity_placeholder}
                       value={row.quantity}
                       onChange={(e) =>
@@ -245,6 +257,21 @@ export function CreateShipment({
                       onChange={(e) => updateRow(index, { unit: e.target.value })}
                     />
                   </div>
+                  <Select
+                    aria-label={tc.ship_item_category_label}
+                    value={row.category}
+                    onChange={(e) =>
+                      updateRow(index, {
+                        category: e.target.value as CargoCategory,
+                      })
+                    }
+                  >
+                    {MATERIAL_CATEGORIES.map((slug) => (
+                      <option key={slug} value={slug}>
+                        {categoryLabel(slug, locale)}
+                      </option>
+                    ))}
+                  </Select>
                   {rows.length > 1 && (
                     <button
                       type="button"

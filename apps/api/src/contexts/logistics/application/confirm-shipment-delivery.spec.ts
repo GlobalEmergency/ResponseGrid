@@ -4,9 +4,11 @@ import { AssignCapacityToShipment } from './assign-capacity-to-shipment';
 import { CreateShipment } from './create-shipment';
 import { InMemoryShipmentRepository } from '../infrastructure/in-memory-shipment.repository';
 import { FakeShipmentEventBus } from '../infrastructure/fake-shipment-event-bus';
+import { FakeShipmentContainerPort } from '../infrastructure/fake-shipment-container-port';
 import { LogisticsEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { ShipmentId } from '../domain/shipment-id';
 import { CarrierType, ShipmentStatus } from '../domain/shipment-enums';
+import { Category } from '../../supplies/domain/category';
 import { ShipmentNotFoundError } from './shipment-not-found.error';
 import { ShipmentActionUnauthorizedError } from './mark-shipment-in-transit';
 import { InvalidShipmentTransitionError } from '../domain/shipment-errors';
@@ -18,6 +20,7 @@ const DEST = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
 const CAPACITY = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
 const CARRIER_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const OTHER_USER = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+const CONTAINER_A = '11111111-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 
 class FakeStatusReader implements LogisticsEmergencyStatusReader {
   getStatus(): Promise<string | null> {
@@ -27,16 +30,23 @@ class FakeStatusReader implements LogisticsEmergencyStatusReader {
 
 async function seedInTransit(
   repo: InMemoryShipmentRepository,
+  port: FakeShipmentContainerPort,
+  opts?: { containerIds?: string[] },
 ): Promise<string> {
-  const { id } = await new CreateShipment(repo, new FakeStatusReader()).execute(
-    {
-      emergencyId: EM,
-      originResourceId: ORIGIN,
-      destinationResourceId: DEST,
-      items: [{ description: 'agua', quantity: 5 }],
-      manifest: null,
-    },
-  );
+  const { id } = await new CreateShipment(
+    repo,
+    new FakeStatusReader(),
+    port,
+  ).execute({
+    emergencyId: EM,
+    originResourceId: ORIGIN,
+    destinationResourceId: DEST,
+    items: [
+      { name: 'agua', quantity: 5, unit: null, category: Category.Water },
+    ],
+    containerIds: opts?.containerIds ?? [],
+    manifest: null,
+  });
   await new AssignCapacityToShipment(repo).execute({
     shipmentId: id,
     assignedCapacityId: CAPACITY,
@@ -54,8 +64,9 @@ describe('ConfirmShipmentDelivery', () => {
   it('delivers (in_transit → delivered) and publishes ShipmentDelivered', async () => {
     const repo = new InMemoryShipmentRepository();
     const bus = new FakeShipmentEventBus();
-    const id = await seedInTransit(repo);
-    const useCase = new ConfirmShipmentDelivery(repo, bus);
+    const port = new FakeShipmentContainerPort();
+    const id = await seedInTransit(repo, port);
+    const useCase = new ConfirmShipmentDelivery(repo, bus, port);
 
     await useCase.execute({
       shipmentId: id,
@@ -77,11 +88,49 @@ describe('ConfirmShipmentDelivery', () => {
     });
   });
 
+  it('moves the loaded containers to the destination resource on delivery', async () => {
+    const repo = new InMemoryShipmentRepository();
+    const bus = new FakeShipmentEventBus();
+    const port = new FakeShipmentContainerPort();
+    const id = await seedInTransit(repo, port, { containerIds: [CONTAINER_A] });
+    const useCase = new ConfirmShipmentDelivery(repo, bus, port);
+
+    await useCase.execute({
+      shipmentId: id,
+      requesterUserId: CARRIER_ID,
+      isCoordinator: true,
+    });
+
+    expect(port.moved).toHaveLength(1);
+    expect(port.moved[0]).toEqual({
+      emergencyId: EM,
+      containerIds: [CONTAINER_A],
+      resourceId: DEST,
+    });
+  });
+
+  it('does not move containers for a shipment that carries none', async () => {
+    const repo = new InMemoryShipmentRepository();
+    const bus = new FakeShipmentEventBus();
+    const port = new FakeShipmentContainerPort();
+    const id = await seedInTransit(repo, port);
+    const useCase = new ConfirmShipmentDelivery(repo, bus, port);
+
+    await useCase.execute({
+      shipmentId: id,
+      requesterUserId: CARRIER_ID,
+      isCoordinator: false,
+    });
+
+    expect(port.moved).toHaveLength(0);
+  });
+
   it('rejects a non-carrier non-coordinator', async () => {
     const repo = new InMemoryShipmentRepository();
     const bus = new FakeShipmentEventBus();
-    const id = await seedInTransit(repo);
-    const useCase = new ConfirmShipmentDelivery(repo, bus);
+    const port = new FakeShipmentContainerPort();
+    const id = await seedInTransit(repo, port, { containerIds: [CONTAINER_A] });
+    const useCase = new ConfirmShipmentDelivery(repo, bus, port);
 
     await expect(
       useCase.execute({
@@ -91,12 +140,15 @@ describe('ConfirmShipmentDelivery', () => {
       }),
     ).rejects.toThrow(ShipmentActionUnauthorizedError);
     expect(bus.published).toHaveLength(0);
+    // auth fails before any container move
+    expect(port.moved).toHaveLength(0);
   });
 
   it('throws ShipmentNotFoundError for an unknown shipment', async () => {
     const repo = new InMemoryShipmentRepository();
     const bus = new FakeShipmentEventBus();
-    const useCase = new ConfirmShipmentDelivery(repo, bus);
+    const port = new FakeShipmentContainerPort();
+    const useCase = new ConfirmShipmentDelivery(repo, bus, port);
 
     await expect(
       useCase.execute({
@@ -110,15 +162,20 @@ describe('ConfirmShipmentDelivery', () => {
   it('rejects delivering a shipment that is not in transit', async () => {
     const repo = new InMemoryShipmentRepository();
     const bus = new FakeShipmentEventBus();
+    const port = new FakeShipmentContainerPort();
     // assigned but never marked in_transit
     const { id } = await new CreateShipment(
       repo,
       new FakeStatusReader(),
+      port,
     ).execute({
       emergencyId: EM,
       originResourceId: ORIGIN,
       destinationResourceId: DEST,
-      items: [{ description: 'agua', quantity: 5 }],
+      items: [
+        { name: 'agua', quantity: 5, unit: null, category: Category.Water },
+      ],
+      containerIds: [],
       manifest: null,
     });
     await new AssignCapacityToShipment(repo).execute({
@@ -126,7 +183,7 @@ describe('ConfirmShipmentDelivery', () => {
       assignedCapacityId: CAPACITY,
       carrier: { type: CarrierType.Volunteer, id: CARRIER_ID },
     });
-    const useCase = new ConfirmShipmentDelivery(repo, bus);
+    const useCase = new ConfirmShipmentDelivery(repo, bus, port);
 
     await expect(
       useCase.execute({

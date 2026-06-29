@@ -29,16 +29,17 @@ export interface ShipmentMatchCriteria {
 }
 
 /**
- * Total weight/volume of a shipment's cargo. Shipment items do not carry weight
- * or volume today, so both come back null and the size filter is skipped. When
- * (and only when) items begin to carry those figures, summing them here makes
- * the size filter kick in automatically — no change needed at the matcher.
+ * Total weight/volume of a shipment's cargo. SupplyLine items and containers do
+ * not carry weight or volume in the matcher today, so both come back null and
+ * the size filter is skipped. When (and only when) the cargo begins to carry
+ * those figures, summing them here makes the size filter kick in automatically
+ * — no change needed at the matcher (see #142).
  */
 function deriveLoad(_shipment: Shipment): {
   weightKg: number | null;
   volumeM3: number | null;
 } {
-  // No weight/volume on ShipmentItem yet → unknown load. Do NOT fabricate data.
+  // No weight/volume on the cargo yet → unknown load. Do NOT fabricate data.
   return { weightKg: null, volumeM3: null };
 }
 

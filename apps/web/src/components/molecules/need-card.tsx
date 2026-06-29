@@ -53,7 +53,7 @@ export function NeedCard({ need, te, slug, active, locale }: NeedCardProps) {
       {approximate && <PrivacyLocationNotice text={te.privacy_approximate_location} />}
       {active && (
         <Link
-          href={`/e/${slug}/donar?needId=${need.id}`}
+          href={`/e/${slug}/donar/ofrecer?needId=${need.id}`}
           className="inline-flex w-fit items-center justify-center rounded-lg border border-navy bg-white px-4 py-2 text-sm font-semibold text-navy transition-colors hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
         >
           {te.needs_offer_button}

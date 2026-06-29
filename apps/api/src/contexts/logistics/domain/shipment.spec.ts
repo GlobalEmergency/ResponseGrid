@@ -1,14 +1,13 @@
 import { Shipment, CarrierPrincipal } from './shipment';
 import { ShipmentId } from './shipment-id';
-import { ShipmentItem } from './shipment-item';
+import { SupplyLine } from '../../supplies/domain/supply-line';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { CarrierType, ShipmentStatus } from './shipment-enums';
 import { Category } from '../../supplies/domain/category';
 import {
   InvalidShipmentRouteError,
   InvalidShipmentTransitionError,
-  ShipmentItemValidationError,
-  ShipmentMustHaveItemsError,
+  ShipmentMustHaveCargoError,
 } from './shipment-errors';
 import { ShipmentDelivered } from './events/shipment-delivered.event';
 
@@ -17,15 +16,27 @@ const ORIGIN = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
 const DEST = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
 const CAPACITY = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
 const CARRIER_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+const CONTAINER_A = '11111111-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+const CONTAINER_B = '22222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 
 const CARRIER: CarrierPrincipal = {
   type: CarrierType.Volunteer,
   id: CARRIER_ID,
 };
 
+function line(name: string, quantity = 1): SupplyLine {
+  return SupplyLine.create({
+    name,
+    quantity,
+    unit: null,
+    category: Category.Water,
+  });
+}
+
 function makeShipment(
   overrides?: Partial<{
-    items: ShipmentItem[];
+    items: SupplyLine[];
+    containerIds: string[];
     originResourceId: string;
     destinationResourceId: string;
     manifest: string | null;
@@ -36,9 +47,8 @@ function makeShipment(
     emergencyId: EmergencyId.fromString(EM),
     originResourceId: overrides?.originResourceId ?? ORIGIN,
     destinationResourceId: overrides?.destinationResourceId ?? DEST,
-    items: overrides?.items ?? [
-      ShipmentItem.create({ description: '5 cajas de agua', quantity: 5 }),
-    ],
+    items: overrides?.items ?? [line('Agua', 5)],
+    containerIds: overrides?.containerIds ?? [],
     manifest:
       overrides && 'manifest' in overrides
         ? overrides.manifest
@@ -46,59 +56,40 @@ function makeShipment(
   });
 }
 
-describe('ShipmentItem value object', () => {
-  it('accepts a description-only item (quantity/unit/category optional)', () => {
-    const item = ShipmentItem.create({ description: 'ropa surtida' });
-    expect(item.description).toBe('ropa surtida');
-    expect(item.quantity).toBeNull();
-    expect(item.unit).toBeNull();
-    expect(item.category).toBeNull();
-  });
-
-  it('keeps all provided fields', () => {
-    const item = ShipmentItem.create({
-      description: 'agua',
-      quantity: 10,
-      unit: 'cajas',
-      category: Category.Food,
-    });
-    expect(item.quantity).toBe(10);
-    expect(item.unit).toBe('cajas');
-    expect(item.category).toBe(Category.Food);
-  });
-
-  it('trims the description', () => {
-    expect(ShipmentItem.create({ description: '  agua  ' }).description).toBe(
-      'agua',
-    );
-  });
-
-  it('throws on an empty description', () => {
-    expect(() => ShipmentItem.create({ description: '   ' })).toThrow(
-      ShipmentItemValidationError,
-    );
-  });
-
-  it('throws on a non-positive quantity when provided', () => {
-    expect(() =>
-      ShipmentItem.create({ description: 'agua', quantity: 0 }),
-    ).toThrow(ShipmentItemValidationError);
-  });
-});
-
 describe('Shipment aggregate — creation', () => {
   it('creates with planned status and no carrier/capacity', () => {
     const s = makeShipment();
     expect(s.status).toBe(ShipmentStatus.Planned);
     expect(s.carrier).toBeNull();
     expect(s.assignedCapacityId).toBeNull();
+    expect(s.containerIds).toEqual([]);
     expect(s.pullDomainEvents()).toHaveLength(0);
   });
 
-  it('throws when there are no items', () => {
-    expect(() => makeShipment({ items: [] })).toThrow(
-      ShipmentMustHaveItemsError,
+  it('can be created with containers only (no loose lines)', () => {
+    const s = makeShipment({ items: [], containerIds: [CONTAINER_A] });
+    expect(s.items).toHaveLength(0);
+    expect(s.containerIds).toEqual([CONTAINER_A]);
+  });
+
+  it('throws when it carries neither lines nor containers', () => {
+    expect(() => makeShipment({ items: [], containerIds: [] })).toThrow(
+      ShipmentMustHaveCargoError,
     );
+  });
+
+  it('dedupes repeated container ids', () => {
+    const s = makeShipment({
+      items: [],
+      containerIds: [CONTAINER_A, CONTAINER_A, CONTAINER_B],
+    });
+    expect(s.containerIds).toEqual([CONTAINER_A, CONTAINER_B]);
+  });
+
+  it('throws when a container id is not a uuid', () => {
+    expect(() =>
+      makeShipment({ items: [], containerIds: ['not-a-uuid'] }),
+    ).toThrow(InvalidShipmentRouteError);
   });
 
   it('throws when origin and destination are equal', () => {
@@ -255,17 +246,18 @@ describe('Shipment aggregate — status machine (rejected transitions)', () => {
 });
 
 describe('Shipment aggregate — snapshot round-trip', () => {
-  it('round-trips a planned internal transfer (no carrier)', () => {
+  it('round-trips a planned internal transfer (lines + containers, no carrier)', () => {
     const s = makeShipment({
       items: [
-        ShipmentItem.create({
-          description: 'mantas',
+        SupplyLine.create({
+          name: 'mantas',
           quantity: 20,
           unit: 'uds',
           category: Category.Clothing,
         }),
-        ShipmentItem.create({ description: 'varios' }),
+        line('varios'),
       ],
+      containerIds: [CONTAINER_A, CONTAINER_B],
       manifest: null,
     });
     const restored = Shipment.fromSnapshot(s.toSnapshot());
@@ -274,9 +266,9 @@ describe('Shipment aggregate — snapshot round-trip', () => {
     expect(restored.originResourceId).toBe(ORIGIN);
     expect(restored.destinationResourceId).toBe(DEST);
     expect(restored.items).toHaveLength(2);
-    expect(restored.items[0].description).toBe('mantas');
+    expect(restored.items[0].name).toBe('mantas');
     expect(restored.items[0].quantity).toBe(20);
-    expect(restored.items[1].quantity).toBeNull();
+    expect(restored.containerIds).toEqual([CONTAINER_A, CONTAINER_B]);
     expect(restored.assignedCapacityId).toBeNull();
     expect(restored.carrier).toBeNull();
     expect(restored.manifest).toBeNull();

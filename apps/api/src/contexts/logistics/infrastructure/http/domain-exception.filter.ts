@@ -20,9 +20,13 @@ import { ShipmentActionUnauthorizedError } from '../../application/mark-shipment
 import {
   InvalidShipmentRouteError,
   InvalidShipmentTransitionError,
-  ShipmentItemValidationError,
-  ShipmentMustHaveItemsError,
+  ShipmentMustHaveCargoError,
 } from '../../domain/shipment-errors';
+import { SupplyLineValidationError } from '../../../supplies/domain/supply-line';
+import {
+  ShipmentContainerNotFoundError,
+  ShipmentContainerUnavailableError,
+} from '../../application/shipment-cargo-errors';
 import { EmergencyNotAcceptingIntakeError } from '../../../emergencies/domain/emergency-not-accepting-intake.error';
 
 type DomainError =
@@ -38,8 +42,10 @@ type DomainError =
   | ShipmentActionUnauthorizedError
   | InvalidShipmentTransitionError
   | InvalidShipmentRouteError
-  | ShipmentItemValidationError
-  | ShipmentMustHaveItemsError
+  | ShipmentMustHaveCargoError
+  | SupplyLineValidationError
+  | ShipmentContainerNotFoundError
+  | ShipmentContainerUnavailableError
   | EmergencyNotAcceptingIntakeError;
 
 @Catch(
@@ -55,8 +61,10 @@ type DomainError =
   ShipmentActionUnauthorizedError,
   InvalidShipmentTransitionError,
   InvalidShipmentRouteError,
-  ShipmentItemValidationError,
-  ShipmentMustHaveItemsError,
+  ShipmentMustHaveCargoError,
+  SupplyLineValidationError,
+  ShipmentContainerNotFoundError,
+  ShipmentContainerUnavailableError,
   EmergencyNotAcceptingIntakeError,
 )
 export class LogisticsDomainExceptionFilter implements ExceptionFilter {
@@ -85,7 +93,8 @@ export class LogisticsDomainExceptionFilter implements ExceptionFilter {
       exception instanceof EmergencyNotAcceptingIntakeError ||
       exception instanceof CapacityAlreadyWithdrawnError ||
       exception instanceof CapacityNotAvailableError ||
-      exception instanceof InvalidShipmentTransitionError
+      exception instanceof InvalidShipmentTransitionError ||
+      exception instanceof ShipmentContainerUnavailableError
     ) {
       return HttpStatus.CONFLICT;
     }

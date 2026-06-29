@@ -1,11 +1,14 @@
 import { ShipmentId } from './shipment-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { CarrierType, ShipmentStatus } from './shipment-enums';
-import { ShipmentItem, ShipmentItemSnapshot } from './shipment-item';
+import {
+  SupplyLine,
+  SupplyLineSnapshot,
+} from '../../supplies/domain/supply-line';
 import {
   InvalidShipmentRouteError,
   InvalidShipmentTransitionError,
-  ShipmentMustHaveItemsError,
+  ShipmentMustHaveCargoError,
 } from './shipment-errors';
 import { DomainEvent } from './events/domain-event';
 import { ShipmentDelivered } from './events/shipment-delivered.event';
@@ -28,7 +31,10 @@ export interface CreateShipmentProps {
   emergencyId: EmergencyId;
   originResourceId: string;
   destinationResourceId: string;
-  items: ShipmentItem[];
+  /** Loose cargo lines (non-palletised material), as the canonical SupplyLine. */
+  items: SupplyLine[];
+  /** Trackable containers (palet/caja/lote, #140) loaded onto this expedition. */
+  containerIds: string[];
   manifest: string | null;
 }
 
@@ -37,7 +43,8 @@ export interface ShipmentSnapshot {
   emergencyId: string;
   originResourceId: string;
   destinationResourceId: string;
-  items: ShipmentItemSnapshot[];
+  items: SupplyLineSnapshot[];
+  containerIds: string[];
   assignedCapacityId: string | null;
   carrierType: CarrierType | null;
   carrierId: string | null;
@@ -53,6 +60,13 @@ export interface ShipmentSnapshot {
  * {@link TransportCapacity} (which OFFERS movement); a shipment is the movement
  * itself, with a status machine and a cargo manifest.
  *
+ * Cargo is the canonical material model (#141): a list of {@link SupplyLine}s
+ * (loose, non-palletised material) plus a set of {@link Container} ids (the
+ * trackable packaging of #140). At least one of the two must be non-empty.
+ * Loading/unloading containers is a cross-aggregate move (a Container's holder
+ * becomes this shipment, then the destination resource on delivery); the
+ * Shipment only records *which* containers it carries.
+ *
  * Key decision (#106): ONE aggregate with an OPTIONAL carrier. An internal
  * inventory transfer is a shipment with no `carrierPrincipal`/`assignedCapacityId`;
  * a third-party expedition fills them in via {@link assignCapacity}.
@@ -65,7 +79,8 @@ export class Shipment {
     public readonly emergencyId: EmergencyId,
     public readonly originResourceId: string,
     public readonly destinationResourceId: string,
-    public readonly items: ShipmentItem[],
+    public readonly items: SupplyLine[],
+    public readonly containerIds: string[],
     private _assignedCapacityId: string | null,
     private _carrier: CarrierPrincipal | null,
     public readonly manifest: string | null,
@@ -82,8 +97,13 @@ export class Shipment {
         'A shipment origin and destination must differ',
       );
     }
-    if (props.items.length === 0) {
-      throw new ShipmentMustHaveItemsError();
+    // Dedupe the container manifest (loading the same container twice is a
+    // no-op) and validate each id; a shipment with neither lines nor
+    // containers carries nothing.
+    const containerIds = [...new Set(props.containerIds)];
+    containerIds.forEach((id) => Shipment.assertUuid(id, 'containerId'));
+    if (props.items.length === 0 && containerIds.length === 0) {
+      throw new ShipmentMustHaveCargoError();
     }
     const now = new Date();
     return new Shipment(
@@ -92,6 +112,7 @@ export class Shipment {
       props.originResourceId,
       props.destinationResourceId,
       [...props.items],
+      containerIds,
       null,
       null,
       props.manifest,
@@ -107,7 +128,8 @@ export class Shipment {
       EmergencyId.fromString(s.emergencyId),
       s.originResourceId,
       s.destinationResourceId,
-      s.items.map((i) => ShipmentItem.fromSnapshot(i)),
+      s.items.map((i) => SupplyLine.fromSnapshot(i)),
+      [...s.containerIds],
       s.assignedCapacityId,
       s.carrierType !== null && s.carrierId !== null
         ? { type: s.carrierType, id: s.carrierId }
@@ -216,6 +238,7 @@ export class Shipment {
       originResourceId: this.originResourceId,
       destinationResourceId: this.destinationResourceId,
       items: this.items.map((i) => i.toSnapshot()),
+      containerIds: [...this.containerIds],
       assignedCapacityId: this._assignedCapacityId,
       carrierType: this._carrier?.type ?? null,
       carrierId: this._carrier?.id ?? null,

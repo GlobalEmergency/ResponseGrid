@@ -116,7 +116,7 @@ export function ShipmentsList({
                 <div className={META_ROW_CLASS}>
                   {firstItem !== undefined && (
                     <span className="font-medium break-words">
-                      {firstItem.description}
+                      {firstItem.name}
                       {shipment.items.length > 1
                         ? ` +${shipment.items.length - 1}`
                         : ''}

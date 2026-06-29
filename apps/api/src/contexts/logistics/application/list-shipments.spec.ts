@@ -2,8 +2,10 @@ import { ListShipments } from './list-shipments';
 import { AssignCapacityToShipment } from './assign-capacity-to-shipment';
 import { CreateShipment } from './create-shipment';
 import { InMemoryShipmentRepository } from '../infrastructure/in-memory-shipment.repository';
+import { FakeShipmentContainerPort } from '../infrastructure/fake-shipment-container-port';
 import { LogisticsEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { CarrierType, ShipmentStatus } from '../domain/shipment-enums';
+import { Category } from '../../supplies/domain/category';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const OTHER_EM = '22222222-2222-4222-8222-222222222222';
@@ -22,15 +24,20 @@ async function create(
   repo: InMemoryShipmentRepository,
   emergencyId: string,
 ): Promise<string> {
-  const { id } = await new CreateShipment(repo, new FakeStatusReader()).execute(
-    {
-      emergencyId,
-      originResourceId: ORIGIN,
-      destinationResourceId: DEST,
-      items: [{ description: 'agua', quantity: 5 }],
-      manifest: null,
-    },
-  );
+  const { id } = await new CreateShipment(
+    repo,
+    new FakeStatusReader(),
+    new FakeShipmentContainerPort(),
+  ).execute({
+    emergencyId,
+    originResourceId: ORIGIN,
+    destinationResourceId: DEST,
+    items: [
+      { name: 'agua', quantity: 5, unit: null, category: Category.Water },
+    ],
+    containerIds: [],
+    manifest: null,
+  });
   return id;
 }
 

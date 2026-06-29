@@ -260,11 +260,17 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
             {isActive ? (
               <div className="flex flex-col gap-2.5">
                 <HelpActionRow
-                  href={`/e/${slug}/registrar`}
+                  href={`/e/${slug}/donar`}
                   icon="📦"
+                  title={te.action_donate}
+                  subtitle={te.help_donate_subtitle}
+                  variant="primary"
+                />
+                <HelpActionRow
+                  href={`/e/${slug}/registrar`}
+                  icon="🏬"
                   title={te.action_offer_resource}
                   subtitle={te.help_offer_subtitle}
-                  variant="primary"
                 />
                 <HelpActionRow
                   href={`/e/${slug}/voluntario`}

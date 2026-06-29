@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import type { Messages } from '@/i18n/messages/es';
 import {
   SupplyLineRowFields,
   type SupplyLineRowLabels,
@@ -28,21 +27,55 @@ function makeItem(): Item {
   };
 }
 
+/**
+ * Labels consumed by {@link InventoryField}. A structural subset shared by the
+ * registrar form (`Messages['registrar']`) and the citizen pre-registration
+ * form (`Messages['prereg']['lines']`), so the same editor serves both surfaces
+ * without coupling to one feature's message namespace.
+ */
+export interface InventoryFieldLabels {
+  inventory_heading: string;
+  inventory_hint: string;
+  inventory_add: string;
+  inventory_empty: string;
+  item_number: string;
+  item_remove: string;
+  item_remove_label: string;
+  item_name_label: string;
+  item_name_placeholder: string;
+  item_quantity_label: string;
+  item_unit_label: string;
+  item_unit_opt: string;
+  item_unit_placeholder: string;
+  item_category_label: string;
+}
+
 interface InventoryFieldProps {
-  t: Messages['registrar'];
+  t: InventoryFieldLabels;
   locale: 'es' | 'en';
+  /**
+   * Start with one empty row instead of an empty list. Used by surfaces where
+   * at least one line is expected (citizen pre-registration), versus the
+   * registrar where declared inventory is fully optional.
+   */
+  startWithOneRow?: boolean;
 }
 
 /**
- * Optional declared inventory (supply lines) for the place being registered:
- * qué material/insumos tiene para entregar. Mirrors the petición items field
- * but the list starts empty — a point can be registered with no declared stock.
+ * Editable list of supply lines (`SupplyLine[]`). Originally the optional
+ * declared inventory for `/registrar`; now also reused by `/pre-registro`.
  * Category options come from the single canonical source (lib/categories), so
  * needs, offers and inventory stay consistent. Serializes the filled rows
  * (non-empty name) to a hidden `items` input as JSON.
  */
-export function InventoryField({ t, locale }: InventoryFieldProps) {
-  const [items, setItems] = useState<Item[]>([]);
+export function InventoryField({
+  t,
+  locale,
+  startWithOneRow = false,
+}: InventoryFieldProps) {
+  const [items, setItems] = useState<Item[]>(
+    startWithOneRow ? [makeItem()] : [],
+  );
 
   const labels: SupplyLineRowLabels = {
     itemNumber: t.item_number,

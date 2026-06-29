@@ -29,6 +29,7 @@ import {
   InvalidIntakeTargetResourceError,
   DonationIntakeLineLimitError,
 } from '../../domain/donation-intake-errors';
+import { SupplyLineValidationError } from '../../../supplies/domain/supply-line';
 
 type DomainError =
   | OfferNotFoundError
@@ -48,7 +49,8 @@ type DomainError =
   | DonationIntakeContactMismatchError
   | InvalidDonationIntakeContactError
   | InvalidIntakeTargetResourceError
-  | DonationIntakeLineLimitError;
+  | DonationIntakeLineLimitError
+  | SupplyLineValidationError;
 
 @Catch(
   OfferNotFoundError,
@@ -69,6 +71,7 @@ type DomainError =
   InvalidDonationIntakeContactError,
   InvalidIntakeTargetResourceError,
   DonationIntakeLineLimitError,
+  SupplyLineValidationError,
 )
 export class OffersDomainExceptionFilter implements ExceptionFilter {
   catch(exception: DomainError, host: ArgumentsHost): void {
