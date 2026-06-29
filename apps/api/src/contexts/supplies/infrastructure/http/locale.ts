@@ -1,6 +1,6 @@
 import { CategoryDefinition } from '../../domain/category-definition';
 
-export type CategoryLocale = 'es' | 'en' | string;
+export type CategoryLocale = string;
 
 export function resolveLocale(
   localeParam?: string,

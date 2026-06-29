@@ -240,18 +240,16 @@ export class DrizzleCategoryRepository implements CategoryRepository {
     const grouped = new Map<string, CategoryDefinition>();
 
     for (const row of rows) {
-      const current =
-        grouped.get(row.category.slug) ??
-        ({
-          slug: row.category.slug,
-          labelEs: row.category.labelEs,
-          labelEn: row.category.labelEn,
-          parentSlug: row.category.parentSlug ?? null,
-          vertical: row.category.vertical,
-          sort: row.category.sort,
-          archivedAt: row.category.archivedAt ?? null,
-          translations: [],
-        } as CategoryDefinition);
+      const current = grouped.get(row.category.slug) ?? {
+        slug: row.category.slug,
+        labelEs: row.category.labelEs,
+        labelEn: row.category.labelEn,
+        parentSlug: row.category.parentSlug ?? null,
+        vertical: row.category.vertical,
+        sort: row.category.sort,
+        archivedAt: row.category.archivedAt ?? null,
+        translations: [],
+      };
 
       if (row.translation) {
         current.translations = [

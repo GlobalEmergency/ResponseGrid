@@ -9,7 +9,7 @@ import {
   CategoryWriteInput,
 } from '../domain/ports/category.repository';
 
-export interface CreateCategoryCommand extends CategoryWriteInput {}
+export type CreateCategoryCommand = CategoryWriteInput;
 
 export class CreateCategory {
   constructor(private readonly repo: CategoryRepository) {}
