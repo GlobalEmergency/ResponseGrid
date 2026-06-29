@@ -2432,6 +2432,11 @@ export interface components {
             /** @example Jane Doe */
             name: string;
             isAdmin: boolean;
+            /**
+             * @description Optional contact phone, null until the user provides one
+             * @example +58 412 555 0101
+             */
+            phone: string | null;
             /** @description The effective role grants (role @ scope) for this user */
             grants: components["schemas"]["MeGrantDto"][];
         };

@@ -15,6 +15,7 @@ function rowToSnapshot(row: Row): UserSnapshot {
     passwordHash: row.passwordHash,
     name: row.name,
     isAdmin: row.isAdmin,
+    phone: row.phone ?? null,
   };
 }
 
@@ -28,7 +29,7 @@ export class DrizzleUserRepository implements UserRepository {
       .values({ ...s, passwordHash: s.passwordHash, isAdmin: s.isAdmin })
       .onConflictDoUpdate({
         target: usersTable.id,
-        set: { name: s.name, isAdmin: s.isAdmin },
+        set: { name: s.name, isAdmin: s.isAdmin, phone: s.phone },
       });
   }
 

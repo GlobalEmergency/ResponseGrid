@@ -19,6 +19,13 @@ type BoundAction = (
   formData: FormData,
 ) => Promise<PreRegState>;
 
+/** The logged-in donor's account contact, used to prefill/lock the form. */
+export interface PreRegDonorProfile {
+  name: string;
+  email: string;
+  phone: string | null;
+}
+
 interface PreRegistroFormProps {
   action: BoundAction;
   slug: string;
@@ -27,6 +34,11 @@ interface PreRegistroFormProps {
   t: Messages['prereg'];
   locale: 'es' | 'en';
   backToEmergencyLabel: string;
+  /**
+   * When set the donor is logged in: name/email come from their account (and so
+   * does the phone when they have one), and no local draft is kept.
+   */
+  profile?: PreRegDonorProfile | null;
 }
 
 export function PreRegistroForm({
@@ -37,15 +49,20 @@ export function PreRegistroForm({
   t,
   locale,
   backToEmergencyLabel,
+  profile = null,
 }: PreRegistroFormProps) {
   const [state, formAction, pending] = useActionState<PreRegState, FormData>(
     action,
     INITIAL_STATE,
   );
 
-  const [donorName, setDonorName] = useState('');
-  const [donorEmail, setDonorEmail] = useState('');
-  const [donorPhone, setDonorPhone] = useState('');
+  const loggedIn = profile != null;
+  const phoneLocked =
+    loggedIn && profile?.phone != null && profile.phone !== '';
+
+  const [donorName, setDonorName] = useState(profile?.name ?? '');
+  const [donorEmail, setDonorEmail] = useState(profile?.email ?? '');
+  const [donorPhone, setDonorPhone] = useState(profile?.phone ?? '');
 
   const draftValues = { donorName, donorEmail, donorPhone };
   const draftSetters = {
@@ -53,10 +70,13 @@ export function PreRegistroForm({
     donorEmail: setDonorEmail,
     donorPhone: setDonorPhone,
   };
+  // A logged-in donor's contact is authoritative (and re-applied server-side),
+  // so we don't restore/persist a local draft for them.
   const { clearDraft, wasRestored } = useFormDraft(
     `prereg-${slug}-${resourceId}`,
     draftValues,
     draftSetters,
+    { enabled: !loggedIn },
   );
 
   useEffect(() => {
@@ -80,12 +100,20 @@ export function PreRegistroForm({
     );
   }
 
+  const lockedClass = 'bg-surface text-muted';
+
   return (
     <form action={formAction} className="flex flex-col gap-6" noValidate>
       {wasRestored && <DraftRestoredBanner />}
 
       {state.status === 'error' && (
         <ErrorMessage message={state.message ?? t.err_submit_failed} />
+      )}
+
+      {loggedIn && (
+        <p className="rounded-lg border-2 border-line bg-surface px-4 py-3 text-sm text-muted">
+          {t.account_contact_note}
+        </p>
       )}
 
       {/* Tu nombre */}
@@ -106,6 +134,8 @@ export function PreRegistroForm({
           placeholder={t.donor_name_placeholder}
           value={donorName}
           onChange={(e) => setDonorName(e.target.value)}
+          readOnly={loggedIn}
+          className={loggedIn ? lockedClass : ''}
         />
       </FormField>
 
@@ -114,7 +144,7 @@ export function PreRegistroForm({
         <legend className="px-1 text-sm font-semibold uppercase tracking-wide text-ink">
           {t.contact_heading}
         </legend>
-        <p className="text-xs text-muted">{t.contact_hint}</p>
+        {!loggedIn && <p className="text-xs text-muted">{t.contact_hint}</p>}
 
         <FormField htmlFor="donorEmail" label={t.email_label}>
           <Input
@@ -126,6 +156,8 @@ export function PreRegistroForm({
             placeholder={t.email_placeholder}
             value={donorEmail}
             onChange={(e) => setDonorEmail(e.target.value)}
+            readOnly={loggedIn}
+            className={loggedIn ? lockedClass : ''}
           />
         </FormField>
 
@@ -139,6 +171,8 @@ export function PreRegistroForm({
             placeholder={t.phone_placeholder}
             value={donorPhone}
             onChange={(e) => setDonorPhone(e.target.value)}
+            readOnly={phoneLocked}
+            className={phoneLocked ? lockedClass : ''}
           />
         </FormField>
       </fieldset>

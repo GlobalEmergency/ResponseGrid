@@ -24,6 +24,7 @@ export interface AuthenticatedUser {
   email: string;
   name: string;
   isAdmin: boolean;
+  phone: string | null;
   memberships: MembershipSnapshot[];
   /** Effective authorization grants for this request (see docs/features/13 §9). */
   grants: GrantSnapshot[];
@@ -67,6 +68,7 @@ export class JwtAuthGuard implements CanActivate {
       email: user.email.value,
       name: user.name,
       isAdmin: user.isAdmin,
+      phone: user.phone,
       memberships: membershipSnapshots,
       // Legacy-derived grants (live source of truth for coordinator/verifier/
       // admin) merged with persisted grants (new role types: group_manager,

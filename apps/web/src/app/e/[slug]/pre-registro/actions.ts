@@ -3,6 +3,7 @@
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
 import { getToken, authHeaders } from '@/lib/auth';
+import { getMe } from '@/lib/navigation-data';
 import { MATERIAL_CATEGORIES } from '@/lib/categories';
 import { parseSupplyLines } from '@/lib/supply-lines';
 
@@ -34,22 +35,39 @@ export async function submitPreRegistration(
   const rawName = formData.get('donorName');
   const rawEmail = formData.get('donorEmail');
   const rawPhone = formData.get('donorPhone');
+  const formPhone = typeof rawPhone === 'string' ? rawPhone.trim() : '';
 
-  const donorName = typeof rawName === 'string' ? rawName.trim() : '';
-  if (donorName.length < 1) {
-    return { status: 'error', message: tp.err_name_required };
-  }
+  // When the donor is logged in, their contact is taken authoritatively from
+  // their account (name/email always; phone from the profile, falling back to a
+  // phone typed here when the profile has none). Anonymous donors type it all.
+  const me = await getMe();
 
-  const donorEmail =
-    typeof rawEmail === 'string' && rawEmail.trim() !== ''
-      ? rawEmail.trim()
-      : undefined;
-  const donorPhone =
-    typeof rawPhone === 'string' && rawPhone.trim() !== ''
-      ? rawPhone.trim()
-      : undefined;
-  if (donorEmail === undefined && donorPhone === undefined) {
-    return { status: 'error', message: tp.err_contact_required };
+  let donorName: string;
+  let donorEmail: string | undefined;
+  let donorPhone: string | undefined;
+
+  if (me) {
+    donorName = me.name;
+    donorEmail = me.email;
+    donorPhone =
+      me.phone != null && me.phone !== ''
+        ? me.phone
+        : formPhone !== ''
+          ? formPhone
+          : undefined;
+  } else {
+    donorName = typeof rawName === 'string' ? rawName.trim() : '';
+    if (donorName.length < 1) {
+      return { status: 'error', message: tp.err_name_required };
+    }
+    donorEmail =
+      typeof rawEmail === 'string' && rawEmail.trim() !== ''
+        ? rawEmail.trim()
+        : undefined;
+    donorPhone = formPhone !== '' ? formPhone : undefined;
+    if (donorEmail === undefined && donorPhone === undefined) {
+      return { status: 'error', message: tp.err_contact_required };
+    }
   }
 
   const items = parseSupplyLines(formData.get('items'), {

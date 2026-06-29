@@ -605,6 +605,8 @@ export const es = {
     contact_heading: 'Cómo localizarte',
     contact_hint:
       'Indica al menos un dato de contacto. Solo lo verá el punto para localizar tu entrega.',
+    account_contact_note:
+      'Usaremos los datos de tu cuenta para esta donación. La verás en «Mis donaciones».',
     email_label: 'Correo electrónico',
     email_placeholder: 'maria@example.com',
     phone_label: 'Teléfono',

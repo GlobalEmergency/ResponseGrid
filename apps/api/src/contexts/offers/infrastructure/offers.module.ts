@@ -16,6 +16,12 @@ import { ListOffersForNeed } from '../application/list-offers-for-need';
 import { SuggestOffersForNeedWithLocation } from '../application/suggest-offers-for-need';
 import { GetMyOffers } from '../application/get-my-offers';
 import { CreateDonationIntake } from '../application/create-donation-intake';
+import {
+  DONOR_ACCOUNT_PORT,
+  DonorAccountPort,
+} from '../domain/ports/donor-account.port';
+import { IdentityDonorAccountAdapter } from './identity-donor-account.adapter';
+import { EnsureDonorAccount } from '../../identity/application/ensure-donor-account';
 import { LookupDonorByContact } from '../application/lookup-donor-by-contact';
 import { UpdateDonationIntake } from '../application/update-donation-intake';
 import { SearchDonationIntakes } from '../application/search-donation-intakes';
@@ -201,18 +207,28 @@ const intakeResourceLookupProvider = {
     new DrizzleIntakeResourceLookup(db),
 };
 
+const donorAccountPortProvider = {
+  provide: DONOR_ACCOUNT_PORT,
+  inject: [EnsureDonorAccount],
+  useFactory: (ensureDonorAccount: EnsureDonorAccount) =>
+    new IdentityDonorAccountAdapter(ensureDonorAccount),
+};
+
 const createDonationIntakeProvider = {
   provide: CreateDonationIntake,
   inject: [
     DONATION_INTAKE_REPOSITORY,
     OFFER_EMERGENCY_STATUS_READER,
     INTAKE_RESOURCE_LOOKUP,
+    DONOR_ACCOUNT_PORT,
   ],
   useFactory: (
     repo: DonationIntakeRepository,
     statusReader: OfferEmergencyStatusReader,
     resourceLookup: IntakeResourceLookup,
-  ) => new CreateDonationIntake(repo, statusReader, resourceLookup),
+    donorAccount: DonorAccountPort,
+  ) =>
+    new CreateDonationIntake(repo, statusReader, resourceLookup, donorAccount),
 };
 
 const lookupDonorByContactProvider = {
@@ -332,6 +348,7 @@ const getMyDonationIntakesProvider = {
     getMyOffersProvider,
     donationIntakeRepositoryProvider,
     intakeResourceLookupProvider,
+    donorAccountPortProvider,
     createDonationIntakeProvider,
     lookupDonorByContactProvider,
     updateDonationIntakeProvider,

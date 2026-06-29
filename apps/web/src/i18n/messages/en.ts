@@ -578,6 +578,8 @@ export const en = {
     contact_heading: 'How to reach you',
     contact_hint:
       'Provide at least one contact detail. Only the point sees it to locate your delivery.',
+    account_contact_note:
+      'We’ll use your account details for this donation. You’ll find it under “My donations”.',
     email_label: 'Email',
     email_placeholder: 'maria@example.com',
     phone_label: 'Phone',
