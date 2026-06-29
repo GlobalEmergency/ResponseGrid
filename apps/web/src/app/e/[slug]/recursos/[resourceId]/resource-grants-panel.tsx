@@ -15,6 +15,16 @@ import {
 
 const INITIAL: ActionResult = { status: "idle" };
 
+// Etiquetas de los roles concedibles en un punto. Al añadir roles (voluntarios
+// de entrega/recogida, #208) basta extender este mapa.
+const ROLE_LABELS: Record<string, string> = {
+  point_manager: "Responsable de punto",
+};
+
+function roleLabel(roleId: string): string {
+  return ROLE_LABELS[roleId] ?? roleId;
+}
+
 function formatGrantedAt(locale: string, value: string): string {
   const date = new Date(value);
   return Number.isNaN(date.getTime())
@@ -50,7 +60,7 @@ function ResourceGrantRow({
         <div className="flex flex-col gap-1">
           <p className="font-semibold text-ink">{principalLabel}</p>
           <p className="text-sm text-muted-soft">
-            Responsable de punto · concedido el{" "}
+            {roleLabel(grant.roleId)} · concedido el{" "}
             {formatGrantedAt(locale, grant.grantedAt)}
           </p>
         </div>

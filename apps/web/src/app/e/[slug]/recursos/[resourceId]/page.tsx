@@ -67,8 +67,8 @@ export default async function RecipientResourcePage({ params }: Props) {
   const td = t.resource_detail;
   const recipientNeeds = needs ?? [];
   const inventoryCategories = resource.inventoryCategories ?? [];
-  const canManagePoint = access?.canCoordinate ?? false;
-  const resourceGrants = canManagePoint
+  const canCoordinate = access?.canCoordinate ?? false;
+  const resourceGrants = canCoordinate
     ? await fetchResourceGrants(resourceId)
     : [];
 
@@ -120,7 +120,7 @@ export default async function RecipientResourcePage({ params }: Props) {
             {t.resource_card.report_cta}
           </Link>
 
-          {canManagePoint && (
+          {canCoordinate && (
             <ResourceGrantsPanel
               slug={slug}
               resourceId={resourceId}
