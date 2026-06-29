@@ -102,6 +102,11 @@ export async function grantResourceRoleAction(
     };
   }
 
+  // El <input type="date"> da "YYYY-MM-DD"; lo interpretamos como fin de ese día
+  // (UTC) para que una caducidad de hoy no nazca ya vencida en el backend.
+  const expiresInput = String(formData.get("expiresAt") ?? "").trim();
+  const expiresAt = expiresInput ? `${expiresInput}T23:59:59.999Z` : undefined;
+
   const { error, response } = await api.POST("/grants", {
     body: {
       principalId,
@@ -109,6 +114,7 @@ export async function grantResourceRoleAction(
       scopeType: RESOURCE_SCOPE_TYPE,
       scopeId: resourceId,
       scopeEntityType: RESOURCE_SCOPE_ENTITY_TYPE,
+      ...(expiresAt ? { expiresAt } : {}),
     },
     headers: authHeaders(token),
   });
