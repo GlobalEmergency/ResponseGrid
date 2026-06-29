@@ -281,7 +281,7 @@ describe('DonationIntake use cases', () => {
   });
 
   describe('GetIntakeDeepLink', () => {
-    it('builds the canonical donar-acopio URL for a published collection point', async () => {
+    it('builds the canonical pre-registro URL for a published collection point', async () => {
       const uc = new GetIntakeDeepLink(
         new FakeResourceLookup(validResource),
         'http://localhost:3001',
@@ -291,7 +291,7 @@ describe('DonationIntake use cases', () => {
       const result = await uc.execute(RESOURCE);
 
       expect(result).toEqual({
-        url: `http://localhost:3001/e/mexico-demo/donar-acopio?resourceId=${RESOURCE}`,
+        url: `http://localhost:3001/e/mexico-demo/pre-registro?resourceId=${RESOURCE}`,
         resourceName: 'Acopio CDMX Norte',
         slug: 'mexico-demo',
         resourceId: RESOURCE,
@@ -320,7 +320,7 @@ describe('DonationIntake use cases', () => {
       const png = await uc.generateQr(RESOURCE);
 
       expect(png.toString()).toBe(
-        `qr:http://localhost:3001/e/mexico-demo/donar-acopio?resourceId=${RESOURCE}`,
+        `qr:http://localhost:3001/e/mexico-demo/pre-registro?resourceId=${RESOURCE}`,
       );
     });
   });

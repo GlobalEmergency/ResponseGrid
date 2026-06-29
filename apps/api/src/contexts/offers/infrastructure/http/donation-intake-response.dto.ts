@@ -36,7 +36,7 @@ export class PendingIntakeSummaryDto {
 export class IntakeDeepLinkDto {
   @ApiProperty({
     example:
-      'http://localhost:3001/e/mexico-demo/donar-acopio?resourceId=33333333-3333-4333-8333-333333333331',
+      'http://localhost:3001/e/mexico-demo/pre-registro?resourceId=33333333-3333-4333-8333-333333333331',
   })
   url!: string;
 

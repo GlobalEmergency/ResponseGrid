@@ -23,7 +23,7 @@ export class GetIntakeDeepLink {
     );
 
     const base = this.frontendBaseUrl.replace(/\/$/, '');
-    const url = `${base}/e/${resource.emergencySlug}/donar-acopio?resourceId=${resourceId}`;
+    const url = `${base}/e/${resource.emergencySlug}/pre-registro?resourceId=${resourceId}`;
 
     return {
       url,
