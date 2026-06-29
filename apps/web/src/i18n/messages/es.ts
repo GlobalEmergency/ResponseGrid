@@ -712,6 +712,36 @@ export const es = {
 
     err_action_failed: 'No se pudo completar la acción. Inténtalo de nuevo.',
     err_already_processed: 'La entrega ya había sido procesada.',
+
+    // Previsión de entrante (#129)
+    incoming_heading: 'Por entrar (previsión)',
+    incoming_hint: 'Material pre-registrado aún no recibido en tus puntos.',
+    incoming_empty: 'Nada pre-registrado por ahora.',
+    incoming_from_intakes: 'en {n} pre-registros',
+  },
+
+  // ── Seguimiento público de la donación (#168) ─────────────────────────────
+  donacion: {
+    meta_title: 'Seguimiento de tu donación — {emergencyName} · ResponseGrid',
+    page_title: 'Seguimiento de tu donación',
+    page_subtitle: 'Consulta el estado de tu entrega con tu código.',
+    code_label: 'Código',
+    not_found_title: 'No encontramos esa donación',
+    not_found_body:
+      'Revisa el código de tu comprobante. Si acabas de pre-registrarte, espera unos segundos y recarga.',
+    status_label: 'Estado',
+    status_pending: 'Pre-registrada · pendiente de entrega',
+    status_received: 'Recibida',
+    status_rejected: 'Rechazada',
+    status_incomplete: 'Incompleta',
+    point_label: 'Punto de acopio',
+    timeline_heading: 'Recorrido',
+    step_preregistered: 'Pre-registrada',
+    step_received: 'Recibida en {pointName}',
+    step_rejected: 'Rechazada en recepción',
+    step_incomplete: 'Marcada como incompleta',
+    step_pending: 'Pendiente de entrega',
+    lines_heading: 'Lo que registraste',
   },
 
   // ── Ofrecer transporte (#105) ─────────────────────────────────────────────

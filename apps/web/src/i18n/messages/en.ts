@@ -684,6 +684,36 @@ export const en = {
 
     err_action_failed: 'Couldn’t complete the action. Please try again.',
     err_already_processed: 'The delivery had already been processed.',
+
+    // Incoming forecast (#129)
+    incoming_heading: 'Incoming (forecast)',
+    incoming_hint: 'Pre-registered material not yet received at your points.',
+    incoming_empty: 'Nothing pre-registered yet.',
+    incoming_from_intakes: 'across {n} pre-registrations',
+  },
+
+  // ── Public donation tracking (#168) ───────────────────────────────────────
+  donacion: {
+    meta_title: 'Track your donation — {emergencyName} · ResponseGrid',
+    page_title: 'Track your donation',
+    page_subtitle: 'Check your delivery status with your code.',
+    code_label: 'Code',
+    not_found_title: 'We couldn’t find that donation',
+    not_found_body:
+      'Check the code on your receipt. If you just pre-registered, wait a few seconds and reload.',
+    status_label: 'Status',
+    status_pending: 'Pre-registered · awaiting delivery',
+    status_received: 'Received',
+    status_rejected: 'Rejected',
+    status_incomplete: 'Incomplete',
+    point_label: 'Collection point',
+    timeline_heading: 'Journey',
+    step_preregistered: 'Pre-registered',
+    step_received: 'Received at {pointName}',
+    step_rejected: 'Rejected at reception',
+    step_incomplete: 'Marked incomplete',
+    step_pending: 'Awaiting delivery',
+    lines_heading: 'What you registered',
   },
 
   // ── Offer transport (#105) ────────────────────────────────────────────────

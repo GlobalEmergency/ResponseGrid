@@ -67,6 +67,7 @@ export function PreRegistroForm({
     return (
       <IntakeReceipt
         code={state.code}
+        trackUrl={`/e/${slug}/donacion/${state.code}`}
         title={t.success_title}
         body={t.success_body.replace('{pointName}', pointName)}
         codeLabel={t.code_label}

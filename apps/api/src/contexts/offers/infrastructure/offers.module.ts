@@ -25,6 +25,8 @@ import { ConfirmIntakeReception } from '../application/confirm-intake-reception'
 import { RejectIntake } from '../application/reject-intake';
 import { MarkIntakeIncomplete } from '../application/mark-intake-incomplete';
 import { GetIntakeDeepLink } from '../application/get-intake-deep-link';
+import { GetDonationIntakeTracking } from '../application/get-donation-intake-tracking';
+import { GetIncomingSummaryByResource } from '../application/get-incoming-summary-by-resource';
 import {
   INTAKE_QR_ENCODER,
   IntakeQrEncoder,
@@ -283,6 +285,22 @@ const getIntakeDeepLinkProvider = {
     ),
 };
 
+const getDonationIntakeTrackingProvider = {
+  provide: GetDonationIntakeTracking,
+  inject: [DONATION_INTAKE_REPOSITORY, INTAKE_RESOURCE_LOOKUP],
+  useFactory: (
+    repo: DonationIntakeRepository,
+    resourceLookup: IntakeResourceLookup,
+  ) => new GetDonationIntakeTracking(repo, resourceLookup),
+};
+
+const getIncomingSummaryByResourceProvider = {
+  provide: GetIncomingSummaryByResource,
+  inject: [DONATION_INTAKE_REPOSITORY],
+  useFactory: (repo: DonationIntakeRepository) =>
+    new GetIncomingSummaryByResource(repo),
+};
+
 @Module({
   imports: [DatabaseModule, IdentityModule, NotificationsModule],
   controllers: [OffersController, DonationIntakesController],
@@ -315,6 +333,8 @@ const getIntakeDeepLinkProvider = {
     markIntakeIncompleteProvider,
     intakeQrEncoderProvider,
     getIntakeDeepLinkProvider,
+    getDonationIntakeTrackingProvider,
+    getIncomingSummaryByResourceProvider,
   ],
 })
 export class OffersModule implements OnModuleDestroy {

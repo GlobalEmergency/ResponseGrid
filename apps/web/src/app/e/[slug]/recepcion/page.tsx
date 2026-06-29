@@ -13,12 +13,42 @@ import type { MeGrant, RoleCatalogEntry } from '@/lib/admin-scopes';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { formatDate } from '@/lib/format-date';
+import { categoryLabel } from '@/lib/categories';
+import type { components } from '@reliefhub/api-client';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
 
 /** Resource types whose pending intakes an operator receives. */
 const COLLECTION_TYPES = new Set(['collection_point', 'collection_and_delivery']);
+
+type IncomingSummary = components['schemas']['IncomingSummaryDto'];
+type IncomingLine = components['schemas']['IncomingSummaryLineDto'];
+
+/** Merge per-point incoming forecasts into a single aggregate for the operator. */
+function mergeIncoming(summaries: IncomingSummary[]): IncomingSummary {
+  const byKey = new Map<string, IncomingLine>();
+  let totalPendingIntakes = 0;
+  for (const s of summaries) {
+    totalPendingIntakes += s.totalPendingIntakes;
+    for (const line of s.lines) {
+      const key = JSON.stringify([
+        line.name,
+        line.category,
+        line.unit,
+        line.presentation,
+      ]);
+      const existing = byKey.get(key);
+      if (existing) {
+        existing.totalQuantity += line.totalQuantity;
+        existing.intakeCount += line.intakeCount;
+      } else {
+        byKey.set(key, { ...line });
+      }
+    }
+  }
+  return { lines: [...byKey.values()], totalPendingIntakes };
+}
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -117,6 +147,25 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
       ).flat()
     : [];
 
+  // Forecast of incoming material across the operator's points (#200): aggregate
+  // the lines of pending intakes so they can plan what's about to arrive.
+  const incoming = !searching
+    ? mergeIncoming(
+        (
+          await Promise.all(
+            myPoints.map((p) =>
+              api
+                .GET(
+                  '/resources/{resourceId}/donation-intakes/incoming-summary',
+                  { params: { path: { resourceId: p.id } }, headers },
+                )
+                .then((r) => r.data),
+            ),
+          )
+        ).filter((d): d is IncomingSummary => d != null),
+      )
+    : { lines: [], totalPendingIntakes: 0 };
+
   const statusLabel = (s: string): string =>
     s === 'received'
       ? tr.status_received
@@ -162,6 +211,46 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
               {tr.search_button}
             </button>
           </form>
+
+          {!searching && myPoints.length > 0 && (
+            <section className="flex flex-col gap-3">
+              <h2 className="font-display text-base font-bold text-navy">
+                {tr.incoming_heading}
+              </h2>
+              <p className="text-xs text-muted">{tr.incoming_hint}</p>
+              {incoming.lines.length === 0 ? (
+                <EmptyState title={tr.incoming_empty} />
+              ) : (
+                <ul className="flex flex-col gap-2" role="list">
+                  {incoming.lines.map((line, i) => (
+                    <li
+                      key={i}
+                      className="flex items-center justify-between gap-3 rounded-lg border-2 border-line bg-white px-4 py-3"
+                    >
+                      <span className="flex min-w-0 flex-col">
+                        <span className="truncate text-[15px] font-semibold text-ink">
+                          {line.name}
+                        </span>
+                        <span className="text-[12.5px] text-muted">
+                          {categoryLabel(line.category, locale)} ·{' '}
+                          {tr.incoming_from_intakes.replace(
+                            '{n}',
+                            String(line.intakeCount),
+                          )}
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-sm font-semibold text-ink">
+                        {line.totalQuantity}
+                        {line.unit != null && line.unit !== ''
+                          ? ` ${line.unit}`
+                          : ''}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          )}
 
           {searching ? (
             <section className="flex flex-col gap-3">
