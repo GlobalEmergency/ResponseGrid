@@ -228,6 +228,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin global list of ALL users, enriched with a roles summary and grant count (user:read — platform admin only, PII) */
+        get: operations["UsersController_listAdmin"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin detail of one user: grants by scope (with resolved names), organizations and recent activity (user:read — platform admin only, PII) */
+        get: operations["UsersController_detail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/notifications/mine": {
         parameters: {
             query?: never;
@@ -2256,6 +2290,65 @@ export interface components {
             id: string;
             email: string;
             name: string;
+        };
+        UserAdminListItemDto: {
+            /** Format: uuid */
+            id: string;
+            email: string;
+            name: string;
+            isAdmin: boolean;
+            /** @description ISO 8601 registration date */
+            createdAt: string;
+            /** @description ISO 8601 last login, or null if never logged in */
+            lastLoginAt: string | null;
+            /** @description Distinct roles the user holds across every scope */
+            roles: string[];
+            /** @description Number of active grants held */
+            grantCount: number;
+        };
+        UserGrantDto: {
+            /** Format: uuid */
+            id: string;
+            roleId: string;
+            scopeType: string;
+            scopeId: string | null;
+            /** @description Display name of the scope (org/emergency/group), when resolvable */
+            scopeName: string | null;
+            grantedByPrincipalId: string | null;
+            grantedAt: string;
+            expiresAt: string | null;
+        };
+        UserOrganizationDto: {
+            /** Format: uuid */
+            organizationId: string;
+            organizationName: string;
+            role: string;
+        };
+        UserActivityDto: {
+            /** Format: uuid */
+            id: string;
+            action: string;
+            entityType: string | null;
+            entityId: string | null;
+            emergencyId: string | null;
+            method: string;
+            path: string;
+            statusCode: number;
+            /** @description ISO 8601 timestamp */
+            createdAt: string;
+        };
+        UserAdminDetailDto: {
+            /** Format: uuid */
+            id: string;
+            email: string;
+            name: string;
+            isAdmin: boolean;
+            /** @description ISO 8601 registration date */
+            createdAt: string;
+            lastLoginAt: string | null;
+            grants: components["schemas"]["UserGrantDto"][];
+            organizations: components["schemas"]["UserOrganizationDto"][];
+            activity: components["schemas"]["UserActivityDto"][];
         };
         NotificationDto: {
             id: string;
@@ -4902,6 +4995,81 @@ export interface operations {
                 content?: never;
             };
             /** @description No user with that email */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_listAdmin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserAdminListItemDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing user:read permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserAdminDetailDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing user:read permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description User not found */
             404: {
                 headers: {
                     [name: string]: unknown;

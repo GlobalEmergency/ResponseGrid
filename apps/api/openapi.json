@@ -646,6 +646,87 @@
         ]
       }
     },
+    "/users": {
+      "get": {
+        "operationId": "UsersController_listAdmin",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserAdminListItemDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing user:read permission"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Admin global list of ALL users, enriched with a roles summary and grant count (user:read — platform admin only, PII)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "UsersController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserAdminDetailDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing user:read permission"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Admin detail of one user: grants by scope (with resolved names), organizations and recent activity (user:read — platform admin only, PII)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
     "/notifications/mine": {
       "get": {
         "operationId": "NotificationsController_getMyNotifications",
@@ -7209,6 +7290,222 @@
           "id",
           "email",
           "name"
+        ]
+      },
+      "UserAdminListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "isAdmin": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO 8601 registration date"
+          },
+          "lastLoginAt": {
+            "type": "string",
+            "nullable": true,
+            "description": "ISO 8601 last login, or null if never logged in"
+          },
+          "roles": {
+            "description": "Distinct roles the user holds across every scope",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "grantCount": {
+            "type": "number",
+            "description": "Number of active grants held"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "isAdmin",
+          "createdAt",
+          "lastLoginAt",
+          "roles",
+          "grantCount"
+        ]
+      },
+      "UserGrantDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roleId": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "scopeId": {
+            "type": "string",
+            "nullable": true
+          },
+          "scopeName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Display name of the scope (org/emergency/group), when resolvable"
+          },
+          "grantedByPrincipalId": {
+            "type": "string",
+            "nullable": true
+          },
+          "grantedAt": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "roleId",
+          "scopeType",
+          "scopeId",
+          "scopeName",
+          "grantedByPrincipalId",
+          "grantedAt",
+          "expiresAt"
+        ]
+      },
+      "UserOrganizationDto": {
+        "type": "object",
+        "properties": {
+          "organizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "organizationName": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "organizationId",
+          "organizationName",
+          "role"
+        ]
+      },
+      "UserActivityDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string"
+          },
+          "entityType": {
+            "type": "string",
+            "nullable": true
+          },
+          "entityId": {
+            "type": "string",
+            "nullable": true
+          },
+          "emergencyId": {
+            "type": "string",
+            "nullable": true
+          },
+          "method": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "statusCode": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO 8601 timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "action",
+          "entityType",
+          "entityId",
+          "emergencyId",
+          "method",
+          "path",
+          "statusCode",
+          "createdAt"
+        ]
+      },
+      "UserAdminDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "isAdmin": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO 8601 registration date"
+          },
+          "lastLoginAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "grants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserGrantDto"
+            }
+          },
+          "organizations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserOrganizationDto"
+            }
+          },
+          "activity": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserActivityDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "isAdmin",
+          "createdAt",
+          "lastLoginAt",
+          "grants",
+          "organizations",
+          "activity"
         ]
       },
       "NotificationDto": {
