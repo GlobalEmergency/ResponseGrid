@@ -132,7 +132,8 @@ export const es = {
     metric_tile_queue: 'En cola',
 
     // Subtítulos de "¿Cómo quieres ayudar?"
-    help_offer_subtitle: 'Almacén · transporte · espacio',
+    help_donate_subtitle: 'Ofrécelo o pre-regístralo en un punto',
+    help_offer_subtitle: 'Punto de acopio · almacén · espacio',
     help_volunteer_subtitle: 'Disponibilidad y habilidades',
     help_petition_subtitle: 'Solicitar material validado',
     help_transport_subtitle: 'Carretera · marítimo · aéreo',
@@ -168,7 +169,7 @@ export const es = {
 
     // "¿Cómo quieres colaborar?"
     actions_heading: '¿Cómo quieres colaborar?',
-    action_offer_resource: 'Ofrecer un recurso',
+    action_offer_resource: 'Registrar un punto logístico',
     action_submit_petition: 'Poner una petición',
     action_donate: 'Donar material',
     action_volunteer: 'Apuntarme como voluntario',
@@ -405,10 +406,10 @@ export const es = {
 
   // ── Registrar form ────────────────────────────────────────────────────────
   registrar: {
-    page_title: 'Ofrecer un recurso',
-    page_subtitle: '{emergencyName} · Rellena el formulario. Te validaremos antes de activarte.',
-    meta_title: 'Ofrecer un recurso — {emergencyName} · ResponseGrid',
-    meta_description: 'Regístrate como recurso disponible para {emergencyName}.',
+    page_title: 'Registrar un punto logístico',
+    page_subtitle: '{emergencyName} · Da de alta un punto de acopio, almacén, espacio o hub. Lo validaremos antes de activarlo.',
+    meta_title: 'Registrar un punto logístico — {emergencyName} · ResponseGrid',
+    meta_description: 'Da de alta un punto logístico (acopio, almacén, espacio) para {emergencyName}.',
 
     type_label: 'Tipo de recurso',
     stage_label: 'Etapa',
@@ -526,6 +527,17 @@ export const es = {
     meta_title: 'Donar material — {emergencyName} · ResponseGrid',
     meta_description: 'Ofrece material de ayuda para {emergencyName}.',
 
+    // Selector de donación (#130): llevarlo a un punto vs ofrecer material
+    choose_title: '¿Cómo quieres donar?',
+    choose_subtitle: 'Elige cómo harás llegar tu material.',
+    choose_meta_title: 'Donar material — {emergencyName} · ResponseGrid',
+    choose_deliver_title: 'Voy a llevarlo a un punto',
+    choose_deliver_subtitle:
+      'Elige el punto y pre-registra tu entrega — obtienes un código/QR para el mostrador',
+    choose_offer_title: 'Ofrecer material',
+    choose_offer_subtitle:
+      'Lo describes y el equipo de coordinación lo gestiona',
+
     directed_offer_label: 'Ofreces para:',
     category_label: 'Categoría del material',
     description_label: 'Descripción del material',
@@ -565,6 +577,20 @@ export const es = {
       'Pre-registra el material que llevarás a un punto de acopio de {emergencyName} y obtén tu comprobante.',
 
     point_label: 'Punto de acopio',
+
+    // Paso 1 — selección del punto de entrega
+    pick_title: '¿A qué punto lo llevarás?',
+    pick_hint:
+      'Busca y elige el punto de acopio donde entregarás tu material.',
+    pick_search_label: 'Buscar punto',
+    pick_search_placeholder: 'Nombre o ciudad…',
+    pick_search_button: 'Buscar',
+    pick_results_empty:
+      'No encontramos puntos de recogida que coincidan. Prueba con otra búsqueda.',
+    pick_all_hint:
+      'Puntos de recogida activos. Usa el buscador para acotar por nombre o ciudad.',
+    pick_select: 'Pre-registrar aquí',
+    back_to_pick: 'Elegir otro punto',
 
     no_point_title: 'Elige primero un punto de acopio',
     no_point_body:

@@ -131,7 +131,8 @@ export const en = {
     metric_tile_queue: 'In queue',
 
     // "How do you want to help?" subtitles
-    help_offer_subtitle: 'Warehouse · transport · space',
+    help_donate_subtitle: 'Offer it or pre-register it at a point',
+    help_offer_subtitle: 'Collection point · warehouse · space',
     help_volunteer_subtitle: 'Availability and skills',
     help_petition_subtitle: 'Request validated supplies',
     help_transport_subtitle: 'Road · sea · air',
@@ -164,7 +165,7 @@ export const en = {
     ],
 
     actions_heading: 'How do you want to help?',
-    action_offer_resource: 'Offer a resource',
+    action_offer_resource: 'Register a logistics point',
     action_submit_petition: 'Submit a request',
     action_donate: 'Donate supplies',
     action_volunteer: 'Sign up as a volunteer',
@@ -385,10 +386,10 @@ export const en = {
   draft_restored: 'Draft restored',
 
   registrar: {
-    page_title: 'Offer a resource',
-    page_subtitle: '{emergencyName} · Fill in the form. We will validate you before activating.',
-    meta_title: 'Offer a resource — {emergencyName} · ResponseGrid',
-    meta_description: 'Register as an available resource for {emergencyName}.',
+    page_title: 'Register a logistics point',
+    page_subtitle: '{emergencyName} · Register a collection point, warehouse, space or hub. We will validate it before activating.',
+    meta_title: 'Register a logistics point — {emergencyName} · ResponseGrid',
+    meta_description: 'Register a logistics point (collection, warehouse, space) for {emergencyName}.',
 
     type_label: 'Resource type',
     stage_label: 'Stage',
@@ -503,6 +504,16 @@ export const en = {
     meta_title: 'Donate supplies — {emergencyName} · ResponseGrid',
     meta_description: 'Offer aid supplies for {emergencyName}.',
 
+    // Donation selector (#130): bring it to a point vs offer supplies
+    choose_title: 'How do you want to donate?',
+    choose_subtitle: 'Choose how you’ll get your supplies there.',
+    choose_meta_title: 'Donate supplies — {emergencyName} · ResponseGrid',
+    choose_deliver_title: 'I’ll bring it to a point',
+    choose_deliver_subtitle:
+      'Choose the point and pre-register your delivery — you get a code/QR for the desk',
+    choose_offer_title: 'Offer supplies',
+    choose_offer_subtitle: 'Describe it and the coordination team handles it',
+
     directed_offer_label: 'Offering for:',
     category_label: 'Supply category',
     description_label: 'Supply description',
@@ -542,6 +553,17 @@ export const en = {
       'Pre-register the supplies you’ll bring to a collection point of {emergencyName} and get your receipt.',
 
     point_label: 'Collection point',
+
+    // Step 1 — choosing the delivery point
+    pick_title: 'Which point will you bring it to?',
+    pick_hint: 'Search and choose the collection point where you’ll deliver your supplies.',
+    pick_search_label: 'Search point',
+    pick_search_placeholder: 'Name or city…',
+    pick_search_button: 'Search',
+    pick_results_empty: 'No matching collection points found. Try another search.',
+    pick_all_hint: 'Active collection points. Use the search to narrow by name or city.',
+    pick_select: 'Pre-register here',
+    back_to_pick: 'Choose another point',
 
     no_point_title: 'Choose a collection point first',
     no_point_body:
