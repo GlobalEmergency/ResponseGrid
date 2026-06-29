@@ -1,12 +1,13 @@
-import { text, integer } from 'drizzle-orm/pg-core';
+import { integer, text, timestamp } from 'drizzle-orm/pg-core';
 import { Category } from '../../domain/category';
 import { SupplyLineSnapshot } from '../../domain/supply-line';
 
 /**
  * The shared Drizzle columns of a supply line — the canonical material line of
- * the platform: `name + quantity + unit + category + presentation`. Spread into
- * every `*_items` child table (`need_items`, `resource_items`, `offer_items`,
- * `donation_intake_lines`) so the column set can never drift across contexts.
+ * the platform: name + quantity + unit + category + presentation + expiresAt.
+ * Spread into every `*_items` child table (`need_items`, `resource_items`,
+ * `offer_items`, `donation_intake_lines`) so the column set can never drift
+ * across contexts.
  *
  * A factory (not a shared constant) so each table gets its own fresh column
  * builders.
@@ -18,6 +19,7 @@ export function supplyLineColumns() {
     unit: text('unit'),
     category: text('category').notNull(),
     presentation: text('presentation'),
+    expiresAt: timestamp('expires_at', { withTimezone: true }),
   };
 }
 
@@ -28,6 +30,16 @@ export interface SupplyLineRow {
   unit: string | null;
   category: string;
   presentation: string | null;
+  expiresAt: Date | null;
+}
+
+function supplyLineDateToDb(value: string | null | undefined): Date | null {
+  if (value == null || value === '') return null;
+  return new Date(`${value}T00:00:00.000Z`);
+}
+
+function supplyLineDateFromDb(value: Date | null | undefined): string | null {
+  return value ? value.toISOString().slice(0, 10) : null;
 }
 
 /** Map a persisted row to the canonical {@link SupplyLineSnapshot}. */
@@ -40,6 +52,7 @@ export function rowToSupplyLineSnapshot(
     unit: row.unit ?? null,
     category: row.category as Category,
     presentation: row.presentation ?? null,
+    expiresAt: supplyLineDateFromDb(row.expiresAt),
   };
 }
 
@@ -51,5 +64,6 @@ export function supplyLineToColumns(line: SupplyLineSnapshot): SupplyLineRow {
     unit: line.unit,
     category: line.category,
     presentation: line.presentation ?? null,
+    expiresAt: supplyLineDateToDb(line.expiresAt),
   };
 }

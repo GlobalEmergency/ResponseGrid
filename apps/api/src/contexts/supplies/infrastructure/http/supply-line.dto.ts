@@ -5,13 +5,15 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  Matches,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Category } from '../../domain/category';
 
 /**
  * SupplyLineDto — the single request shape for a line of aid material
- * (a {@link SupplyLine}): name + quantity + unit + category + presentation.
+ * (a {@link SupplyLine}): name + quantity + unit + category + presentation +
+ * optional expiresAt freshness date.
  * Shared by every context that accepts supply lines (needs, resources
  * inventory) so the contract stays identical.
  */
@@ -46,6 +48,16 @@ export class SupplyLineDto {
   @IsOptional()
   @IsString()
   presentation?: string;
+
+  @ApiPropertyOptional({
+    example: '2026-07-01',
+    format: 'date',
+    description:
+      'Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD).',
+  })
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  expiresAt?: string;
 }
 
 /**
@@ -72,4 +84,14 @@ export class SupplyLineResponseDto {
       'Presentation / route of administration (ampolla, EV, inhalador…) — #61.',
   })
   presentation!: string | null;
+
+  @ApiPropertyOptional({
+    example: '2026-07-01',
+    nullable: true,
+    type: String,
+    format: 'date',
+    description:
+      'Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD).',
+  })
+  expiresAt!: string | null;
 }

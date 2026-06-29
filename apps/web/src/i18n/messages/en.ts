@@ -175,6 +175,16 @@ export const en = {
     actions_paused:
       'Resource and request registration is paused. Check the available information and come back later.',
 
+    quick_access_heading: 'Quick access',
+    quick_access_card_label: 'At a glance',
+    quick_access_help_intro: 'Go straight to the action area if you want to help right now.',
+    quick_access_help_cta: 'See how to help',
+    quick_access_where_intro: 'Jump to the verified points that are already active.',
+    quick_access_where_cta: 'See where to go',
+    quick_access_call_heading: 'Who to call',
+    quick_access_call_intro: 'Official contacts from verified points appear here first.',
+    quick_access_no_official_contact: 'No verified official contacts are published yet.',
+
     points_heading: 'Active points',
     points_empty_title: 'No active points yet.',
     points_empty_description:
@@ -438,6 +448,8 @@ export const en = {
     item_unit_label: 'Unit',
     item_unit_opt: '(opt.)',
     item_unit_placeholder: 'boxes, liters…',
+    item_expiry_label: 'Expires',
+    item_expiry_opt: '(optional)',
     item_category_label: 'Category',
 
     // server-action messages
@@ -1115,7 +1127,7 @@ export const en = {
     n_privacy:
       'Privacy: some needs expose approximate coordinates (locationSensitivity: "approximate") so as not to reveal a requester’s home. Do not try to de-obfuscate them; treat them as indicative.',
     n_fields:
-      'Each need includes id, title, description, location, locationSensitivity, priority, items (with name, quantity, unit and category), status, createdAt, expiresAt and lastVerifiedAt.',
+      'Each need includes id, title, description, location, locationSensitivity, priority, items (with name, quantity, unit, category and optional expiresAt), status, createdAt, expiresAt and lastVerifiedAt.',
 
     // States & categories
     enums_heading: 'States & categories',
