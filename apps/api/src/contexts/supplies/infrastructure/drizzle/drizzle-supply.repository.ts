@@ -81,9 +81,9 @@ export class DrizzleSupplyRepository implements SupplyRepository {
       .map((r) => this.toSupply(r));
   }
 
-  async save(_supply: Supply): Promise<void> {
+  save(_supply: Supply): Promise<void> {
     // ponytail: read-only path for #220; admin write APIs will own persistence.
-    throw new Error('Not implemented');
+    return Promise.reject(new Error('Not implemented'));
   }
 
   async loadCatalog(): Promise<SupplyCatalogRecord[]> {
