@@ -22,6 +22,8 @@ import { FindUserByEmail } from '../application/find-user-by-email';
 import { ListGrantsAtScope } from '../application/list-grants-at-scope';
 import { ListApiKeys } from '../application/list-api-keys';
 import { ListServiceAccountsByOrg } from '../application/list-service-accounts-by-org';
+import { ListUsersAdmin } from '../application/list-users-admin';
+import { GetUserAdminDetail } from '../application/get-user-admin-detail';
 import {
   USER_REPOSITORY,
   UserRepository,
@@ -46,9 +48,29 @@ import {
   USER_IDENTITY_REPOSITORY,
   UserIdentityRepository,
 } from '../domain/ports/user-identity.repository';
+import {
+  USER_ADMIN_REPOSITORY,
+  UserAdminRepository,
+} from '../domain/ports/user-admin.repository';
+import {
+  ORGANIZATION_READER,
+  OrganizationReader,
+} from '../domain/ports/organization-reader';
+import {
+  USER_ACTIVITY_READER,
+  UserActivityReader,
+} from '../domain/ports/user-activity-reader';
+import {
+  SCOPE_NAME_READER,
+  ScopeNameReader,
+} from '../domain/ports/scope-name-reader';
 import { PASSWORD_HASHER } from '../domain/ports/password-hasher';
 import { TOKEN_SERVICE } from '../domain/ports/token.service';
 import { DrizzleUserRepository } from './drizzle/drizzle-user.repository';
+import { DrizzleUserAdminRepository } from './drizzle/drizzle-user-admin.repository';
+import { DrizzleOrganizationReader } from './drizzle/drizzle-organization-reader';
+import { DrizzleUserActivityReader } from './drizzle/drizzle-user-activity-reader';
+import { DrizzleScopeNameReader } from './drizzle/drizzle-scope-name-reader';
 import { DrizzleMembershipRepository } from './drizzle/drizzle-membership.repository';
 import { DrizzleGrantRepository } from './drizzle/drizzle-grant.repository';
 import { DrizzleServiceAccountRepository } from './drizzle/drizzle-service-account.repository';
@@ -151,6 +173,57 @@ const findUserByEmailProvider = {
   provide: FindUserByEmail,
   inject: [USER_REPOSITORY],
   useFactory: (users: UserRepository) => new FindUserByEmail(users),
+};
+
+const userAdminRepositoryProvider = {
+  provide: USER_ADMIN_REPOSITORY,
+  inject: [DB],
+  useFactory: (db: Db): UserAdminRepository =>
+    new DrizzleUserAdminRepository(db),
+};
+
+const organizationReaderProvider = {
+  provide: ORGANIZATION_READER,
+  inject: [DB],
+  useFactory: (db: Db): OrganizationReader => new DrizzleOrganizationReader(db),
+};
+
+const userActivityReaderProvider = {
+  provide: USER_ACTIVITY_READER,
+  inject: [DB],
+  useFactory: (db: Db): UserActivityReader => new DrizzleUserActivityReader(db),
+};
+
+const scopeNameReaderProvider = {
+  provide: SCOPE_NAME_READER,
+  inject: [DB],
+  useFactory: (db: Db): ScopeNameReader => new DrizzleScopeNameReader(db),
+};
+
+const listUsersAdminProvider = {
+  provide: ListUsersAdmin,
+  inject: [USER_ADMIN_REPOSITORY, GRANT_REPOSITORY],
+  useFactory: (users: UserAdminRepository, grants: GrantRepository) =>
+    new ListUsersAdmin(users, grants),
+};
+
+const getUserAdminDetailProvider = {
+  provide: GetUserAdminDetail,
+  inject: [
+    USER_ADMIN_REPOSITORY,
+    GRANT_REPOSITORY,
+    ORGANIZATION_READER,
+    USER_ACTIVITY_READER,
+    SCOPE_NAME_READER,
+  ],
+  useFactory: (
+    users: UserAdminRepository,
+    grants: GrantRepository,
+    organizations: OrganizationReader,
+    activity: UserActivityReader,
+    scopeNames: ScopeNameReader,
+  ) =>
+    new GetUserAdminDetail(users, grants, organizations, activity, scopeNames),
 };
 
 const listGrantsAtScopeProvider = {
@@ -357,6 +430,12 @@ const authenticateWithProviderProvider = {
     grantRoleProvider,
     revokeGrantProvider,
     findUserByEmailProvider,
+    userAdminRepositoryProvider,
+    organizationReaderProvider,
+    userActivityReaderProvider,
+    scopeNameReaderProvider,
+    listUsersAdminProvider,
+    getUserAdminDetailProvider,
     listGrantsAtScopeProvider,
     serviceAccountRepositoryProvider,
     apiKeyRepositoryProvider,

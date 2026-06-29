@@ -33,6 +33,10 @@ export class Login {
     const valid = await this.hasher.compare(cmd.password, user.passwordHash);
     if (!valid) throw new InvalidCredentialsError();
 
+    // Stamp last login for the admin users console (#176). Best-effort: a write
+    // failure here must not deny an otherwise-valid login.
+    await this.userRepo.recordLogin(user.id, new Date());
+
     const accessToken = this.tokenService.sign({
       sub: user.id.value,
       email: user.email.value,

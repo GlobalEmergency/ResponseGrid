@@ -120,10 +120,13 @@ export class OffersController {
       emergencyId,
       donorUserId: req.user.id,
       donorOrganizationId: dto.donorOrganizationId ?? null,
-      category: dto.category,
-      description: dto.description,
-      quantity: dto.quantity,
-      unit: dto.unit ?? null,
+      items: dto.items.map((i) => ({
+        name: i.name,
+        quantity: i.quantity,
+        unit: i.unit ?? null,
+        category: i.category,
+        presentation: i.presentation ?? null,
+      })),
       location: {
         address: dto.location.address,
         latitude: dto.location.latitude,
@@ -304,9 +307,15 @@ export class OffersController {
     @Request() req: AuthenticatedRequest,
   ): Promise<void> {
     const cmd: EditOfferCommand = { offerId };
-    if (dto.description !== undefined) cmd.description = dto.description;
-    if (dto.quantity !== undefined) cmd.quantity = dto.quantity;
-    if (dto.unit !== undefined) cmd.unit = dto.unit;
+    if (dto.items !== undefined) {
+      cmd.items = dto.items.map((i) => ({
+        name: i.name,
+        quantity: i.quantity,
+        unit: i.unit ?? null,
+        category: i.category,
+        presentation: i.presentation ?? null,
+      }));
+    }
     if (dto.notes !== undefined) cmd.notes = dto.notes;
 
     const result = await this.editOffer.execute(cmd);

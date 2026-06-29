@@ -1,72 +1,88 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseSupplyLines } from './supply-lines.ts';
+import {
+  parseSupplyLines,
+  offerTitle,
+  quantityLabel,
+  lineSummary,
+} from './supply-lines.ts';
 
-const CATS = ['food', 'water', 'hygiene'] as const;
+const isCat = (c: string) => ['food', 'water', 'hygiene'].includes(c);
+const REQUIRED = { isValidCategory: isCat, allowEmpty: false };
+const OPTIONAL = { isValidCategory: isCat, allowEmpty: true };
 
-test('empty or whitespace payload yields an empty list (optional field)', () => {
-  assert.deepEqual(parseSupplyLines(''), []);
-  assert.deepEqual(parseSupplyLines('   '), []);
-  assert.deepEqual(parseSupplyLines(null), []);
-  assert.deepEqual(parseSupplyLines(undefined), []);
+test('absent payload: [] when allowEmpty, null when required', () => {
+  assert.deepEqual(parseSupplyLines('', OPTIONAL), []);
+  assert.deepEqual(parseSupplyLines('   ', OPTIONAL), []);
+  assert.deepEqual(parseSupplyLines(null, OPTIONAL), []);
+  assert.equal(parseSupplyLines('', REQUIRED), null);
+  assert.equal(parseSupplyLines(null, REQUIRED), null);
+});
+
+test('empty array respects allowEmpty', () => {
+  assert.deepEqual(parseSupplyLines('[]', OPTIONAL), []);
+  assert.equal(parseSupplyLines('[]', REQUIRED), null);
 });
 
 test('parses a well-formed line and trims name/unit', () => {
   const raw = JSON.stringify([
     { name: '  Agua  ', quantity: 5, unit: ' cajas ', category: 'water' },
   ]);
-  assert.deepEqual(parseSupplyLines(raw, CATS), [
+  assert.deepEqual(parseSupplyLines(raw, REQUIRED), [
     { name: 'Agua', quantity: 5, unit: 'cajas', category: 'water' },
   ]);
 });
 
-test('omits an empty/whitespace unit instead of sending a blank string', () => {
+test('omits a blank unit instead of sending an empty string', () => {
   const raw = JSON.stringify([
     { name: 'Arroz', quantity: 2, unit: '   ', category: 'food' },
   ]);
-  assert.deepEqual(parseSupplyLines(raw, CATS), [
+  assert.deepEqual(parseSupplyLines(raw, REQUIRED), [
     { name: 'Arroz', quantity: 2, category: 'food' },
   ]);
 });
 
 test('returns null on malformed JSON or a non-array root', () => {
-  assert.equal(parseSupplyLines('{not json', CATS), null);
-  assert.equal(parseSupplyLines('{"a":1}', CATS), null);
-  assert.equal(parseSupplyLines('42', CATS), null);
+  assert.equal(parseSupplyLines('{not json', REQUIRED), null);
+  assert.equal(parseSupplyLines('{"a":1}', REQUIRED), null);
 });
 
-test('rejects lines with a missing/blank name', () => {
+test('rejects blank name, bad quantity, or invalid category', () => {
   assert.equal(
-    parseSupplyLines(JSON.stringify([{ name: '  ', quantity: 1, category: 'food' }]), CATS),
+    parseSupplyLines(
+      JSON.stringify([{ name: ' ', quantity: 1, category: 'food' }]),
+      REQUIRED,
+    ),
     null,
   );
-  assert.equal(
-    parseSupplyLines(JSON.stringify([{ quantity: 1, category: 'food' }]), CATS),
-    null,
-  );
-});
-
-test('rejects non-positive or non-integer quantities', () => {
-  for (const quantity of [0, -3, 1.5, '2']) {
+  for (const q of [0, -1, 1.5, '2']) {
     assert.equal(
       parseSupplyLines(
-        JSON.stringify([{ name: 'X', quantity, category: 'food' }]),
-        CATS,
+        JSON.stringify([{ name: 'X', quantity: q, category: 'food' }]),
+        REQUIRED,
       ),
       null,
-      `quantity=${String(quantity)} should be rejected`,
+      `quantity=${String(q)} should be rejected`,
     );
   }
+  assert.equal(
+    parseSupplyLines(
+      JSON.stringify([{ name: 'X', quantity: 1, category: 'weapons' }]),
+      REQUIRED,
+    ),
+    null,
+  );
 });
 
-test('enforces the injected category allow-list when provided', () => {
-  const raw = JSON.stringify([{ name: 'X', quantity: 1, category: 'weapons' }]);
-  assert.equal(parseSupplyLines(raw, CATS), null);
+test('offerTitle summarises a list of lines', () => {
+  assert.equal(offerTitle([]), '—');
+  assert.equal(offerTitle([{ name: 'Agua' }]), 'Agua');
+  assert.equal(offerTitle([{ name: 'Agua' }, { name: 'Arroz' }]), 'Agua +1');
 });
 
-test('validates shape only (defers category check) when no allow-list is given', () => {
-  const raw = JSON.stringify([{ name: 'X', quantity: 1, category: 'anything' }]);
-  assert.deepEqual(parseSupplyLines(raw), [
-    { name: 'X', quantity: 1, category: 'anything' },
-  ]);
+test('quantityLabel and lineSummary format a line', () => {
+  assert.equal(quantityLabel({ quantity: 5, unit: 'cajas' }), '5 cajas');
+  assert.equal(quantityLabel({ quantity: 3 }), '3');
+  assert.equal(quantityLabel({ quantity: 3, unit: '' }), '3');
+  assert.equal(lineSummary({ name: 'Agua', quantity: 5, unit: 'L' }), 'Agua · 5 L');
 });

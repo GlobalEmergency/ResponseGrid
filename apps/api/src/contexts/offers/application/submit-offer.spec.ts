@@ -56,10 +56,15 @@ function makeCmd(overrides?: Partial<SubmitOfferCommand>): SubmitOfferCommand {
     emergencyId: EM,
     donorUserId: USER_ID,
     donorOrganizationId: null,
-    category: Category.Food,
-    description: 'Rice bags 25kg',
-    quantity: 50,
-    unit: 'bags',
+    items: [
+      {
+        name: 'Rice bags 25kg',
+        quantity: 50,
+        unit: 'bags',
+        category: Category.Food,
+        presentation: null,
+      },
+    ],
     location: {
       address: 'Av. Principal, Caracas',
       latitude: 10.48,
@@ -94,10 +99,11 @@ describe('SubmitOffer', () => {
     const result = await useCase.execute(makeCmd());
     const saved = await repo.findById({ value: result.id } as never);
     expect(saved!.donorUserId).toBe(USER_ID);
-    expect(saved!.category).toBe(Category.Food);
-    expect(saved!.description).toBe('Rice bags 25kg');
-    expect(saved!.quantity).toBe(50);
-    expect(saved!.unit).toBe('bags');
+    expect(saved!.items).toHaveLength(1);
+    expect(saved!.items[0].category).toBe(Category.Food);
+    expect(saved!.items[0].name).toBe('Rice bags 25kg');
+    expect(saved!.items[0].quantity).toBe(50);
+    expect(saved!.items[0].unit).toBe('bags');
     expect(saved!.location.address).toBe('Av. Principal, Caracas');
     expect(saved!.targetNeedId).toBeNull();
     expect(saved!.matchedNeedId).toBeNull();

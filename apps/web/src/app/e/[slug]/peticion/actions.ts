@@ -5,11 +5,11 @@ import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { getToken, authHeaders, clearToken } from '@/lib/auth';
 import { ALL_CATEGORIES } from '@/lib/categories';
+import { parseSupplyLines } from '@/lib/supply-lines';
 import { getT } from '@/i18n/server';
 
 type Category = components['schemas']['SupplyLineDto']['category'];
 type NeedPriority = components['schemas']['CreateNeedDto']['priority'];
-type SupplyLine = components['schemas']['SupplyLineDto'];
 
 export type PeticionState =
   | { status: 'idle' }
@@ -26,51 +26,6 @@ function isCategory(value: unknown): value is Category {
 
 function isPriority(value: unknown): value is NeedPriority {
   return VALID_PRIORITIES.includes(value as NeedPriority);
-}
-
-interface RawItem {
-  name?: unknown;
-  quantity?: unknown;
-  unit?: unknown;
-  category?: unknown;
-}
-
-function parseItems(raw: string): SupplyLine[] | null {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    return null;
-  }
-
-  if (!Array.isArray(parsed) || parsed.length === 0) return null;
-
-  const items: SupplyLine[] = [];
-  for (const entry of parsed as RawItem[]) {
-    const name = typeof entry.name === 'string' ? entry.name.trim() : '';
-    const quantity =
-      typeof entry.quantity === 'number' && entry.quantity > 0
-        ? entry.quantity
-        : 0;
-    const unit =
-      typeof entry.unit === 'string' && entry.unit.trim() !== ''
-        ? entry.unit.trim()
-        : undefined;
-    const category = entry.category;
-
-    if (name === '') return null;
-    if (quantity <= 0) return null;
-    if (!isCategory(category)) return null;
-
-    items.push({
-      name,
-      quantity,
-      category,
-      ...(unit !== undefined ? { unit } : {}),
-    });
-  }
-
-  return items.length > 0 ? items : null;
 }
 
 export async function submitPeticion(
@@ -121,7 +76,10 @@ export async function submitPeticion(
     return { status: 'error', message: t.peticion.err_items_required };
   }
 
-  const items = parseItems(rawItems);
+  const items = parseSupplyLines(rawItems, {
+    isValidCategory: isCategory,
+    allowEmpty: false,
+  });
   if (items === null) {
     return {
       status: 'error',

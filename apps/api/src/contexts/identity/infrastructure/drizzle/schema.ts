@@ -15,6 +15,12 @@ export const usersTable = pgTable('users', {
   passwordHash: text('password_hash'),
   name: text('name').notNull(),
   isAdmin: boolean('is_admin').notNull().default(false),
+  /** Registration date (migration 0032). */
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  /** Last successful login; null until the user logs in (migration 0032). */
+  lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
 });
 
 export const membershipsTable = pgTable(

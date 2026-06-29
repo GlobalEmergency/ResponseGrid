@@ -33,6 +33,23 @@ export class PendingIntakeSummaryDto {
   createdAt!: Date;
 }
 
+export class IntakeDeepLinkDto {
+  @ApiProperty({
+    example:
+      'http://localhost:3001/e/mexico-demo/donar-acopio?resourceId=33333333-3333-4333-8333-333333333331',
+  })
+  url!: string;
+
+  @ApiProperty({ example: 'Acopio CDMX Norte' })
+  resourceName!: string;
+
+  @ApiProperty({ example: 'mexico-demo' })
+  slug!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  resourceId!: string;
+}
+
 export class LookupDonorByContactResponseDto {
   @ApiPropertyOptional({ example: 'María López', nullable: true, type: String })
   donorName!: string | null;

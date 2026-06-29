@@ -11,8 +11,7 @@ import {
   OfferNotMatchedError,
   OfferCannotBeCancelledError,
   OfferNotEditableError,
-  OfferDescriptionRequiredError,
-  OfferQuantityInvalidError,
+  OfferItemsRequiredError,
 } from '../../domain/offer-errors';
 import { EmergencyNotAcceptingIntakeError } from '../../../emergencies/domain/emergency-not-accepting-intake.error';
 import { OfferCancelUnauthorizedError } from '../../application/cancel-offer';
@@ -23,7 +22,6 @@ import {
 } from '../../application/submit-offer';
 import { NeedForSuggestNotFoundError } from '../../application/suggest-offers-for-need';
 import { DonationIntakeNotFoundError } from '../../application/donation-intake-not-found.error';
-import { SupplyLineValidationError } from '../../../supplies/domain/supply-line';
 import {
   DonationIntakeAlreadyProcessedError,
   DonationIntakeContactMismatchError,
@@ -31,6 +29,7 @@ import {
   InvalidIntakeTargetResourceError,
   DonationIntakeLineLimitError,
 } from '../../domain/donation-intake-errors';
+import { SupplyLineValidationError } from '../../../supplies/domain/supply-line';
 
 type DomainError =
   | OfferNotFoundError
@@ -38,8 +37,7 @@ type DomainError =
   | OfferNotMatchedError
   | OfferCannotBeCancelledError
   | OfferNotEditableError
-  | OfferDescriptionRequiredError
-  | OfferQuantityInvalidError
+  | OfferItemsRequiredError
   | EmergencyNotAcceptingIntakeError
   | OfferCancelUnauthorizedError
   | OfferNeedEmergencyMismatchError
@@ -60,8 +58,7 @@ type DomainError =
   OfferNotMatchedError,
   OfferCannotBeCancelledError,
   OfferNotEditableError,
-  OfferDescriptionRequiredError,
-  OfferQuantityInvalidError,
+  OfferItemsRequiredError,
   EmergencyNotAcceptingIntakeError,
   OfferCancelUnauthorizedError,
   OfferNeedEmergencyMismatchError,
@@ -92,26 +89,23 @@ export class OffersDomainExceptionFilter implements ExceptionFilter {
                 ? HttpStatus.UNPROCESSABLE_ENTITY
                 : exception instanceof InvalidIntakeTargetResourceError
                   ? HttpStatus.UNPROCESSABLE_ENTITY
-                  : exception instanceof OfferDescriptionRequiredError
+                  : exception instanceof OfferItemsRequiredError
                     ? HttpStatus.BAD_REQUEST
-                    : exception instanceof OfferQuantityInvalidError
+                    : exception instanceof InvalidDonationIntakeContactError
                       ? HttpStatus.BAD_REQUEST
-                      : exception instanceof InvalidDonationIntakeContactError
+                      : exception instanceof DonationIntakeLineLimitError
                         ? HttpStatus.BAD_REQUEST
-                        : exception instanceof DonationIntakeLineLimitError
+                        : exception instanceof SupplyLineValidationError
                           ? HttpStatus.BAD_REQUEST
-                          : exception instanceof SupplyLineValidationError
-                            ? HttpStatus.BAD_REQUEST
-                            : exception instanceof
-                                EmergencyNotAcceptingIntakeError
-                              ? HttpStatus.CONFLICT
+                          : exception instanceof
+                              EmergencyNotAcceptingIntakeError
+                            ? HttpStatus.CONFLICT
+                            : exception instanceof OfferCancelUnauthorizedError
+                              ? HttpStatus.FORBIDDEN
                               : exception instanceof
-                                  OfferCancelUnauthorizedError
+                                  DonationIntakeContactMismatchError
                                 ? HttpStatus.FORBIDDEN
-                                : exception instanceof
-                                    DonationIntakeContactMismatchError
-                                  ? HttpStatus.FORBIDDEN
-                                  : HttpStatus.CONFLICT;
+                                : HttpStatus.CONFLICT;
     response
       .status(statusCode)
       .json({ statusCode, message: exception.message });

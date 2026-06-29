@@ -6,9 +6,12 @@ import {
 } from '../../domain/donation-intake';
 import { DonationIntakeId } from '../../domain/donation-intake-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
-import { Category } from '../../domain/offer-enums';
 import { DonationIntakeStatus } from '../../domain/donation-intake-enums';
 import { IntakeLineSnapshot } from '../../domain/intake-line';
+import {
+  rowToSupplyLineSnapshot,
+  supplyLineToColumns,
+} from '../../../supplies/infrastructure/drizzle/supply-line-columns';
 import { DonationIntakeRepository } from '../../domain/ports/donation-intake.repository';
 import {
   donationIntakeLinesTable,
@@ -25,11 +28,7 @@ function linesToSnapshot(lines: LineRow[]): IntakeLineSnapshot[] {
     .map((line) => ({
       id: line.id,
       sortOrder: line.sortOrder,
-      name: line.name,
-      quantity: line.quantity,
-      unit: line.unit ?? null,
-      category: line.category as Category,
-      presentation: line.presentation ?? null,
+      ...rowToSupplyLineSnapshot(line),
     }));
 }
 
@@ -110,12 +109,8 @@ export class DrizzleDonationIntakeRepository implements DonationIntakeRepository
           s.lines.map((line) => ({
             id: line.id,
             intakeId: s.id,
-            name: line.name,
-            quantity: line.quantity,
-            unit: line.unit,
-            category: line.category,
-            presentation: line.presentation ?? null,
             sortOrder: line.sortOrder,
+            ...supplyLineToColumns(line),
           })),
         );
       }

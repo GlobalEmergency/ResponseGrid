@@ -1,20 +1,19 @@
 import {
-  IsEnum,
+  ArrayMinSize,
+  IsArray,
   IsLatitude,
   IsLongitude,
   IsNotEmpty,
   IsOptional,
-  IsPositive,
   IsString,
   IsUUID,
   MinLength,
   MaxLength,
   ValidateNested,
-  IsInt,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Category } from '../../domain/offer-enums';
+import { SupplyLineDto } from '../../../supplies/infrastructure/http/supply-line.dto';
 
 export class OfferLocationDto {
   @ApiProperty({ example: '123 Main Street, Caracas, Venezuela' })
@@ -32,30 +31,15 @@ export class OfferLocationDto {
 }
 
 export class SubmitOfferDto {
-  @ApiProperty({ enum: Category, example: Category.Food })
-  @IsEnum(Category)
-  category!: Category;
-
   @ApiProperty({
-    example: 'Rice bags 25kg',
-    description: 'Description of the item being offered',
+    type: [SupplyLineDto],
+    description: 'Supply lines offered (at least one)',
   })
-  @IsString()
-  @IsNotEmpty()
-  description!: string;
-
-  @ApiProperty({
-    example: 50,
-    description: 'Quantity offered (positive integer)',
-  })
-  @IsInt()
-  @IsPositive()
-  quantity!: number;
-
-  @ApiPropertyOptional({ example: 'bags', description: 'Unit of measurement' })
-  @IsOptional()
-  @IsString()
-  unit?: string;
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => SupplyLineDto)
+  items!: SupplyLineDto[];
 
   @ApiProperty({ type: OfferLocationDto })
   @ValidateNested()
@@ -115,7 +99,7 @@ export class EditOfferDto {
     description: 'Motivo de la edición (obligatorio, para trazabilidad)',
     minLength: 3,
     maxLength: 1000,
-    example: 'Se corrige la cantidad y se completa la descripción',
+    example: 'Se corrigen las líneas de la oferta',
   })
   @IsString()
   @IsNotEmpty()
@@ -124,32 +108,16 @@ export class EditOfferDto {
   reason!: string;
 
   @ApiPropertyOptional({
-    description: 'Nueva descripción (omitir para no cambiarla)',
-    minLength: 2,
-  })
-  @IsOptional()
-  @IsString()
-  @MinLength(2)
-  description?: string;
-
-  @ApiPropertyOptional({
-    example: 20,
-    description: 'Nueva cantidad (entero positivo). Omitir para no cambiarla.',
-  })
-  @IsOptional()
-  @IsInt()
-  @IsPositive()
-  quantity?: number;
-
-  @ApiPropertyOptional({
+    type: [SupplyLineDto],
     description:
-      'Nueva unidad. Cadena vacía la borra. Omitir para no cambiarla.',
-    nullable: true,
-    type: String,
+      'Nuevas líneas de la oferta (reemplazan la lista). Omitir para no cambiarlas.',
   })
   @IsOptional()
-  @IsString()
-  unit?: string;
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => SupplyLineDto)
+  items?: SupplyLineDto[];
 
   @ApiPropertyOptional({
     description:

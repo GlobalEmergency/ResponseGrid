@@ -32,9 +32,6 @@ export interface EditResourceInput {
 }
 export interface EditOfferInput {
   reason: string;
-  description?: string;
-  quantity?: number;
-  unit?: string;
   notes?: string;
 }
 export interface EditReportInput {
@@ -641,11 +638,6 @@ export async function editOffer(
     params: { path: { offerId } },
     body: {
       reason: input.reason.trim(),
-      ...(input.description !== undefined
-        ? { description: input.description }
-        : {}),
-      ...(input.quantity !== undefined ? { quantity: input.quantity } : {}),
-      ...(input.unit !== undefined ? { unit: input.unit } : {}),
       ...(input.notes !== undefined ? { notes: input.notes } : {}),
     },
     headers: authHeaders(token),

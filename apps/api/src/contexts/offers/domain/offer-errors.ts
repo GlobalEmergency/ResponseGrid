@@ -27,18 +27,10 @@ export class OfferNotEditableError extends Error {
   }
 }
 
-/** Raised when an edit would leave the offer with an empty description. */
-export class OfferDescriptionRequiredError extends Error {
+/** Raised when an offer would be left without any supply line. */
+export class OfferItemsRequiredError extends Error {
   constructor() {
-    super('An offer must keep a non-empty description');
-    this.name = 'OfferDescriptionRequiredError';
-  }
-}
-
-/** Raised when an edit would set the offer quantity to zero or a negative value. */
-export class OfferQuantityInvalidError extends Error {
-  constructor() {
-    super('Offer quantity must be greater than 0');
-    this.name = 'OfferQuantityInvalidError';
+    super('An offer must have at least one supply line');
+    this.name = 'OfferItemsRequiredError';
   }
 }

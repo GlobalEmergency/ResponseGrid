@@ -72,6 +72,19 @@ describe('ROLE_CATALOG', () => {
     );
   });
 
+  it('wires the trackable-container permissions (#140)', () => {
+    const coordinator = new Set(permissionsForRole('emergency_coordinator'));
+    expect(coordinator.has('container:manage')).toBe(true);
+    expect(coordinator.has('container:read')).toBe(true);
+    // the hub manager manages logistics packaging too
+    const hubManager = new Set(permissionsForRole('hub_manager'));
+    expect(hubManager.has('container:manage')).toBe(true);
+    // the verifier reads but does not manage
+    const verifier = new Set(permissionsForRole('emergency_verifier'));
+    expect(verifier.has('container:read')).toBe(true);
+    expect(verifier.has('container:manage')).toBe(false);
+  });
+
   it('every role only references permissions that exist in the catalog', () => {
     const valid = new Set<string>(ALL_PERMISSIONS);
     for (const role of Object.values(ROLE_CATALOG)) {

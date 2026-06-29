@@ -228,6 +228,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin global list of ALL users, enriched with a roles summary and grant count (user:read — platform admin only, PII) */
+        get: operations["UsersController_listAdmin"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin detail of one user: grants by scope (with resolved names), organizations and recent activity (user:read — platform admin only, PII) */
+        get: operations["UsersController_detail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/notifications/mine": {
         parameters: {
             query?: never;
@@ -1360,6 +1394,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/resources/{resourceId}/intake-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the public deep link for pre-registering at this acopio */
+        get: operations["DonationIntakesController_getIntakeLink"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/resources/{resourceId}/intake-qr": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Generate a QR code PNG for the intake deep link of this acopio */
+        get: operations["DonationIntakesController_getIntakeQr"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/resources/{resourceId}/donation-intakes/pending": {
         parameters: {
             query?: never;
@@ -2096,6 +2164,142 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/supplies/containers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a trackable container (palet/caja/lote) (coordinator) */
+        post: operations["ContainerController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/supplies/containers/{id}/lines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a supply line to a container (coordinator) */
+        post: operations["ContainerController_addLine"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/supplies/containers/{id}/lines/{index}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove the supply line at an index from a container (coordinator) */
+        delete: operations["ContainerController_removeLine"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/supplies/containers/{id}/nest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Nest a container under a parent, or un-nest it (coordinator) */
+        post: operations["ContainerController_nest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/supplies/containers/{id}/seal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Seal (precintar) a container (coordinator) */
+        post: operations["ContainerController_seal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/supplies/containers/{id}/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Move a container to a holder (resource ↔ shipment) (coordinator) */
+        post: operations["ContainerController_move"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/supplies/containers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a container tree with aggregated weight/volume (coordinator/verifier) */
+        get: operations["ContainerController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/supplies/containers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List containers for an emergency (coordinator/verifier) */
+        get: operations["ContainerController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2256,6 +2460,65 @@ export interface components {
             id: string;
             email: string;
             name: string;
+        };
+        UserAdminListItemDto: {
+            /** Format: uuid */
+            id: string;
+            email: string;
+            name: string;
+            isAdmin: boolean;
+            /** @description ISO 8601 registration date */
+            createdAt: string;
+            /** @description ISO 8601 last login, or null if never logged in */
+            lastLoginAt: string | null;
+            /** @description Distinct roles the user holds across every scope */
+            roles: string[];
+            /** @description Number of active grants held */
+            grantCount: number;
+        };
+        UserGrantDto: {
+            /** Format: uuid */
+            id: string;
+            roleId: string;
+            scopeType: string;
+            scopeId: string | null;
+            /** @description Display name of the scope (org/emergency/group), when resolvable */
+            scopeName: string | null;
+            grantedByPrincipalId: string | null;
+            grantedAt: string;
+            expiresAt: string | null;
+        };
+        UserOrganizationDto: {
+            /** Format: uuid */
+            organizationId: string;
+            organizationName: string;
+            role: string;
+        };
+        UserActivityDto: {
+            /** Format: uuid */
+            id: string;
+            action: string;
+            entityType: string | null;
+            entityId: string | null;
+            emergencyId: string | null;
+            method: string;
+            path: string;
+            statusCode: number;
+            /** @description ISO 8601 timestamp */
+            createdAt: string;
+        };
+        UserAdminDetailDto: {
+            /** Format: uuid */
+            id: string;
+            email: string;
+            name: string;
+            isAdmin: boolean;
+            /** @description ISO 8601 registration date */
+            createdAt: string;
+            lastLoginAt: string | null;
+            grants: components["schemas"]["UserGrantDto"][];
+            organizations: components["schemas"]["UserOrganizationDto"][];
+            activity: components["schemas"]["UserActivityDto"][];
         };
         NotificationDto: {
             id: string;
@@ -3482,26 +3745,8 @@ export interface components {
             longitude: number;
         };
         SubmitOfferDto: {
-            /**
-             * @example food
-             * @enum {string}
-             */
-            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
-            /**
-             * @description Description of the item being offered
-             * @example Rice bags 25kg
-             */
-            description: string;
-            /**
-             * @description Quantity offered (positive integer)
-             * @example 50
-             */
-            quantity: number;
-            /**
-             * @description Unit of measurement
-             * @example bags
-             */
-            unit?: string;
+            /** @description Supply lines offered (at least one) */
+            items: components["schemas"]["SupplyLineDto"][];
             location: components["schemas"]["OfferLocationDto"];
             /**
              * Format: uuid
@@ -3543,17 +3788,7 @@ export interface components {
             donorUserId: string;
             /** Format: uuid */
             donorOrganizationId?: string | null;
-            /**
-             * @example food
-             * @enum {string}
-             */
-            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
-            /** @example Rice bags 25kg */
-            description: string;
-            /** @example 50 */
-            quantity: number;
-            /** @example bags */
-            unit?: string | null;
+            items: components["schemas"]["SupplyLineResponseDto"][];
             location: components["schemas"]["OfferLocationResponseDto"];
             /** Format: uuid */
             targetNeedId?: string | null;
@@ -3581,18 +3816,11 @@ export interface components {
         EditOfferDto: {
             /**
              * @description Motivo de la edición (obligatorio, para trazabilidad)
-             * @example Se corrige la cantidad y se completa la descripción
+             * @example Se corrigen las líneas de la oferta
              */
             reason: string;
-            /** @description Nueva descripción (omitir para no cambiarla) */
-            description?: string;
-            /**
-             * @description Nueva cantidad (entero positivo). Omitir para no cambiarla.
-             * @example 20
-             */
-            quantity?: number;
-            /** @description Nueva unidad. Cadena vacía la borra. Omitir para no cambiarla. */
-            unit?: string | null;
+            /** @description Nuevas líneas de la oferta (reemplazan la lista). Omitir para no cambiarlas. */
+            items?: components["schemas"]["SupplyLineDto"][];
             /** @description Nuevas notas. Cadena vacía las borra. Omitir para no cambiarlas. */
             notes?: string | null;
         };
@@ -3726,6 +3954,16 @@ export interface components {
             itemCount: number;
             /** Format: date-time */
             createdAt: string;
+        };
+        IntakeDeepLinkDto: {
+            /** @example http://localhost:3001/e/mexico-demo/donar-acopio?resourceId=33333333-3333-4333-8333-333333333331 */
+            url: string;
+            /** @example Acopio CDMX Norte */
+            resourceName: string;
+            /** @example mexico-demo */
+            slug: string;
+            /** Format: uuid */
+            resourceId: string;
         };
         ReceiveDonationIntakeDto: {
             volunteerNotes?: string | null;
@@ -4339,6 +4577,148 @@ export interface components {
              */
             sort: number;
         };
+        ContainerHolderDto: {
+            /**
+             * @example resource
+             * @enum {string}
+             */
+            type: "resource" | "shipment";
+            /**
+             * Format: uuid
+             * @description Resource node or shipment id (polymorphic, no FK)
+             */
+            id: string;
+        };
+        CreateContainerDto: {
+            /**
+             * Format: uuid
+             * @description Emergency this container serves
+             */
+            emergencyId: string;
+            /**
+             * @example pallet
+             * @enum {string}
+             */
+            type: "pallet" | "box" | "lote";
+            /** @description Optional initial loose supply lines */
+            lines?: components["schemas"]["SupplyLineDto"][];
+            /**
+             * @description Declared gross weight in kg (positive)
+             * @example 120
+             */
+            grossWeightKg?: number;
+            /**
+             * @description Declared gross volume in m³ (positive)
+             * @example 1.2
+             */
+            grossVolumeM3?: number;
+            /** @description Optional initial holder (e.g. the hub it is created at) */
+            holder?: components["schemas"]["ContainerHolderDto"];
+        };
+        CreateContainerResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Generated trackable code
+             * @example PAL-0001
+             */
+            code: string;
+        };
+        NestContainerDto: {
+            /**
+             * Format: uuid
+             * @description New parent container, or null to un-nest (make it top-level)
+             */
+            parentContainerId?: string | null;
+        };
+        MoveContainerDto: {
+            /** @description New holder (resource ↔ shipment), or null to detach */
+            holder?: components["schemas"]["ContainerHolderDto"] | null;
+        };
+        ContainerTreeViewDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example PAL-0001 */
+            code: string;
+            /**
+             * @example pallet
+             * @enum {string}
+             */
+            type: "pallet" | "box" | "lote";
+            /** Format: uuid */
+            emergencyId: string;
+            /** Format: uuid */
+            parentContainerId?: string | null;
+            lines: components["schemas"]["SupplyLineResponseDto"][];
+            /** @example 120 */
+            grossWeightKg?: number | null;
+            /** @example 1.2 */
+            grossVolumeM3?: number | null;
+            /**
+             * @example resource
+             * @enum {string|null}
+             */
+            holderType?: "resource" | "shipment" | null;
+            /** Format: uuid */
+            holderId?: string | null;
+            /**
+             * @example open
+             * @enum {string}
+             */
+            status: "open" | "sealed";
+            /** @example 2026-07-01T00:00:00.000Z */
+            createdAt: string;
+            /** @example 2026-07-01T00:00:00.000Z */
+            updatedAt: string;
+            /** @description Direct children (recursive) */
+            children: components["schemas"]["ContainerTreeViewDto"][];
+            /**
+             * @description Aggregated weight (own + Σ children), null if none declared
+             * @example 145
+             */
+            totalWeightKg?: number | null;
+            /**
+             * @description Aggregated volume (own + Σ children), null if none declared
+             * @example 2.5
+             */
+            totalVolumeM3?: number | null;
+        };
+        ContainerViewDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example PAL-0001 */
+            code: string;
+            /**
+             * @example pallet
+             * @enum {string}
+             */
+            type: "pallet" | "box" | "lote";
+            /** Format: uuid */
+            emergencyId: string;
+            /** Format: uuid */
+            parentContainerId?: string | null;
+            lines: components["schemas"]["SupplyLineResponseDto"][];
+            /** @example 120 */
+            grossWeightKg?: number | null;
+            /** @example 1.2 */
+            grossVolumeM3?: number | null;
+            /**
+             * @example resource
+             * @enum {string|null}
+             */
+            holderType?: "resource" | "shipment" | null;
+            /** Format: uuid */
+            holderId?: string | null;
+            /**
+             * @example open
+             * @enum {string}
+             */
+            status: "open" | "sealed";
+            /** @example 2026-07-01T00:00:00.000Z */
+            createdAt: string;
+            /** @example 2026-07-01T00:00:00.000Z */
+            updatedAt: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -4902,6 +5282,81 @@ export interface operations {
                 content?: never;
             };
             /** @description No user with that email */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_listAdmin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserAdminListItemDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing user:read permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserAdminDetailDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing user:read permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description User not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7925,6 +8380,105 @@ export interface operations {
             };
         };
     };
+    DonationIntakesController_getIntakeLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IntakeDeepLinkDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing intake:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource is not a published collection point */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DonationIntakesController_getIntakeQr: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PNG image */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": string;
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing intake:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource is not a published collection point */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     DonationIntakesController_listPending: {
         parameters: {
             query?: never;
@@ -9896,6 +10450,412 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CategoryDto"][];
                 };
+            };
+        };
+    };
+    ContainerController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateContainerDto"];
+            };
+        };
+        responses: {
+            /** @description Container created (open), with a generated code */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateContainerResponseDto"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a coordinator of the emergency */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContainerController_addLine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Container UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SupplyLineDto"];
+            };
+        };
+        responses: {
+            /** @description Line added */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a coordinator of the emergency */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Container not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Container is sealed (lines immutable) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContainerController_removeLine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Container UUID */
+                id: string;
+                /** @description Zero-based line index */
+                index: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Line removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a coordinator of the emergency */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Container not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Container is sealed (lines immutable) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContainerController_nest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Container UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NestContainerDto"];
+            };
+        };
+        responses: {
+            /** @description Container re-parented */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a coordinator of the emergency */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Container or parent not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Would create a cycle, or parent is a different emergency */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContainerController_seal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Container UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Container sealed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a coordinator of the emergency */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Container not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Container is already sealed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContainerController_move: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Container UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MoveContainerDto"];
+            };
+        };
+        responses: {
+            /** @description Container moved */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a coordinator of the emergency */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Container not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContainerController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Container UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Container tree */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContainerTreeViewDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a coordinator/verifier of the emergency */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Container not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContainerController_list: {
+        parameters: {
+            query?: {
+                type?: "pallet" | "box" | "lote";
+                status?: "open" | "sealed";
+                holderType?: "resource" | "shipment";
+                holderId?: string;
+                /** @description Only top-level containers (the roots of the trees) */
+                topLevelOnly?: boolean;
+            };
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Containers */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContainerViewDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing container:read permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

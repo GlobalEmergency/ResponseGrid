@@ -5,6 +5,11 @@ import { getT } from '@/i18n/server';
 import { MATERIAL_CATEGORIES } from '@/lib/categories';
 import { parseSupplyLines } from '@/lib/supply-lines';
 
+/** Narrow a free string to a known material category slug (single source). */
+function isMaterialCategory(v: string): boolean {
+  return (MATERIAL_CATEGORIES as readonly string[]).includes(v);
+}
+
 export type PreRegState =
   | { status: 'idle' }
   | { status: 'success'; id: string; code: string }
@@ -46,7 +51,10 @@ export async function submitPreRegistration(
     return { status: 'error', message: tp.err_contact_required };
   }
 
-  const items = parseSupplyLines(formData.get('items'), MATERIAL_CATEGORIES);
+  const items = parseSupplyLines(formData.get('items'), {
+    isValidCategory: isMaterialCategory,
+    allowEmpty: true,
+  });
   if (items === null) {
     return { status: 'error', message: tp.err_invalid_items };
   }

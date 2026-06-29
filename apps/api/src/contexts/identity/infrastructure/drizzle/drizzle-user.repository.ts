@@ -47,4 +47,11 @@ export class DrizzleUserRepository implements UserRepository {
       .where(eq(usersTable.id, id.value));
     return rows[0] ? User.fromSnapshot(rowToSnapshot(rows[0])) : null;
   }
+
+  async recordLogin(id: UserId, at: Date): Promise<void> {
+    await this.db
+      .update(usersTable)
+      .set({ lastLoginAt: at })
+      .where(eq(usersTable.id, id.value));
+  }
 }

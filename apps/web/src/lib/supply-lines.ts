@@ -1,26 +1,24 @@
 import type { components } from '@reliefhub/api-client';
 
-export type SupplyLine = components['schemas']['SupplyLineDto'];
+type SupplyLineDto = components['schemas']['SupplyLineDto'];
 
 /**
- * Parse the supply lines serialized by `InventoryField` (a JSON array carried
- * in the hidden `items` input) into typed `SupplyLineDto[]`.
+ * Parse the supply lines serialized by a SupplyLine editor (a JSON array in a
+ * hidden `items` input) into the typed request shape. Returns `null` on a
+ * malformed/tampered payload so the caller can surface a validation error.
  *
- * Returns `null` when the payload is malformed (tampered) so the caller can
- * surface a validation error; an absent or empty payload yields `[]`.
- *
- * Framework-free and dependency-free on purpose (only a *type* import, which is
- * erased at runtime) so it is unit-testable under `node --test`. The canonical
- * category list is injected via `validCategories` rather than imported, keeping
- * the single source of truth (`lib/categories`) in the caller; when omitted the
- * function validates shape only and defers category validation to the API.
+ * - `isValidCategory` narrows each category against the allowed catalogue
+ *   (`ALL_CATEGORIES` for needs, `MATERIAL_CATEGORIES` for offers/inventory).
+ * - `allowEmpty` decides whether an absent/empty list is valid (`[]`, e.g.
+ *   optional resource inventory) or an error (`null`, e.g. a need needs ≥1 item).
  */
 export function parseSupplyLines(
-  raw: unknown,
-  validCategories?: readonly string[],
-): SupplyLine[] | null {
-  if (typeof raw !== 'string' || raw.trim() === '') return [];
-
+  raw: FormDataEntryValue | null,
+  opts: { isValidCategory: (c: string) => boolean; allowEmpty: boolean },
+): SupplyLineDto[] | null {
+  if (typeof raw !== 'string' || raw.trim() === '') {
+    return opts.allowEmpty ? [] : null;
+  }
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
@@ -28,8 +26,9 @@ export function parseSupplyLines(
     return null;
   }
   if (!Array.isArray(parsed)) return null;
+  if (parsed.length === 0) return opts.allowEmpty ? [] : null;
 
-  const items: SupplyLine[] = [];
+  const items: SupplyLineDto[] = [];
   for (const entry of parsed) {
     if (typeof entry !== 'object' || entry === null) return null;
     const { name, quantity, unit, category } = entry as Record<string, unknown>;
@@ -41,18 +40,43 @@ export function parseSupplyLines(
     ) {
       return null;
     }
-    if (typeof category !== 'string' || category.trim() === '') return null;
-    if (validCategories !== undefined && !validCategories.includes(category)) {
+    if (typeof category !== 'string' || !opts.isValidCategory(category)) {
       return null;
     }
     items.push({
       name: name.trim(),
       quantity,
-      category: category as SupplyLine['category'],
+      category: category as SupplyLineDto['category'],
       ...(typeof unit === 'string' && unit.trim() !== ''
         ? { unit: unit.trim() }
         : {}),
     });
   }
   return items;
+}
+
+/** Short title for a list of supply lines: the first name, "+N" when more. */
+export function offerTitle(items: readonly { name: string }[]): string {
+  if (items.length === 0) return '—';
+  if (items.length === 1) return items[0].name;
+  return `${items[0].name} +${items.length - 1}`;
+}
+
+/** "qty unit" (unit optional) for a supply line. */
+export function quantityLabel(item: {
+  quantity: number;
+  unit?: string | null;
+}): string {
+  const unit =
+    typeof item.unit === 'string' && item.unit !== '' ? ` ${item.unit}` : '';
+  return `${item.quantity}${unit}`;
+}
+
+/** "name · qty unit" for a single supply line. */
+export function lineSummary(item: {
+  name: string;
+  quantity: number;
+  unit?: string | null;
+}): string {
+  return `${item.name} · ${quantityLabel(item)}`;
 }

@@ -6,8 +6,8 @@ import {
   doublePrecision,
   jsonb,
   boolean,
-  integer,
 } from 'drizzle-orm/pg-core';
+import { supplyLineColumns } from '../../../supplies/infrastructure/drizzle/supply-line-columns';
 
 export const resourcesTable = pgTable('resources', {
   id: uuid('id').primaryKey(),
@@ -76,9 +76,5 @@ export const resourceItemsTable = pgTable('resource_items', {
   resourceId: uuid('resource_id')
     .notNull()
     .references(() => resourcesTable.id, { onDelete: 'cascade' }),
-  name: text('name').notNull(),
-  quantity: integer('quantity').notNull(),
-  unit: text('unit'),
-  category: text('category').notNull(),
-  presentation: text('presentation'),
+  ...supplyLineColumns(),
 });

@@ -1,15 +1,13 @@
 import { DonationOffer } from '../domain/donation-offer';
 import { LocationProps } from '../../../shared/domain/location';
+import { SupplyLineSnapshot } from '../../supplies/domain/supply-line';
 
 export interface OfferView {
   id: string;
   emergencyId: string;
   donorUserId: string;
   donorOrganizationId: string | null;
-  category: string;
-  description: string;
-  quantity: number;
-  unit: string | null;
+  items: SupplyLineSnapshot[];
   location: LocationProps;
   targetNeedId: string | null;
   matchedNeedId: string | null;
@@ -25,10 +23,7 @@ export function toOfferView(o: DonationOffer): OfferView {
     emergencyId: o.emergencyId.value,
     donorUserId: o.donorUserId,
     donorOrganizationId: o.donorOrganizationId,
-    category: o.category,
-    description: o.description,
-    quantity: o.quantity,
-    unit: o.unit,
+    items: o.items.map((i) => i.toSnapshot()),
     location: o.location.toPlain(),
     targetNeedId: o.targetNeedId,
     matchedNeedId: o.matchedNeedId,

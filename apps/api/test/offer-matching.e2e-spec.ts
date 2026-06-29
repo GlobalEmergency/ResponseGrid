@@ -30,10 +30,9 @@ function bodyId(res: { body: unknown }): string {
 }
 
 const baseOfferBody = {
-  category: 'food',
-  description: 'Rice bags 25kg',
-  quantity: 50,
-  unit: 'bags',
+  items: [
+    { name: 'Rice bags 25kg', quantity: 50, unit: 'bags', category: 'food' },
+  ],
   location: {
     address: 'Av. Libertador, Caracas',
     latitude: 10.4806,
@@ -348,8 +347,14 @@ describe('Offer matching flow (e2e)', () => {
       .set('Authorization', `Bearer ${donorToken}`)
       .send({
         ...baseOfferBody,
-        description: 'Food for suggest',
-        category: 'food',
+        items: [
+          {
+            name: 'Food for suggest',
+            quantity: 50,
+            unit: 'bags',
+            category: 'food',
+          },
+        ],
       })
       .expect(201);
     const foodOfferId = bodyId(foodOfferRes);
@@ -359,8 +364,14 @@ describe('Offer matching flow (e2e)', () => {
       .set('Authorization', `Bearer ${donorToken}`)
       .send({
         ...baseOfferBody,
-        description: 'Water for suggest',
-        category: 'water',
+        items: [
+          {
+            name: 'Water for suggest',
+            quantity: 50,
+            unit: 'liters',
+            category: 'water',
+          },
+        ],
       })
       .expect(201);
 
@@ -371,10 +382,12 @@ describe('Offer matching flow (e2e)', () => {
 
     const suggestions = suggestRes.body as Array<{
       id: string;
-      category: string;
+      items: Array<{ category: string }>;
     }>;
     expect(suggestions.find((o) => o.id === foodOfferId)).toBeDefined();
-    expect(suggestions.every((o) => o.category === 'food')).toBe(true);
+    expect(
+      suggestions.every((o) => o.items.some((i) => i.category === 'food')),
+    ).toBe(true);
   });
 
   it('cancel by owner → 204; cancel already fulfilled → 409', async () => {
@@ -382,7 +395,7 @@ describe('Offer matching flow (e2e)', () => {
     const offerRes = await request(server)
       .post(`/emergencies/${EM}/offers`)
       .set('Authorization', `Bearer ${donorToken}`)
-      .send({ ...baseOfferBody, description: 'To be cancelled' })
+      .send(baseOfferBody)
       .expect(201);
     const offerId = bodyId(offerRes);
 
@@ -395,7 +408,7 @@ describe('Offer matching flow (e2e)', () => {
     const offerRes2 = await request(server)
       .post(`/emergencies/${EM}/offers`)
       .set('Authorization', `Bearer ${donorToken}`)
-      .send({ ...baseOfferBody, description: 'Already fulfilled' })
+      .send(baseOfferBody)
       .expect(201);
     const offerId2 = bodyId(offerRes2);
 
