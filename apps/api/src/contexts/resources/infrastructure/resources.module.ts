@@ -22,6 +22,7 @@ import { PublishResource } from '../application/publish-resource';
 import { EditResource } from '../application/edit-resource';
 import { DiscardResource } from '../application/discard-resource';
 import { UpdateResourcePublicStatus } from '../application/update-resource-public-status';
+import { RecordInventoryEntry } from '../application/record-inventory-entry';
 import { ReceiveDonationIntoInventory } from '../application/receive-donation-into-inventory';
 import { DonationEventsWorker } from './donation-events.worker';
 import {
@@ -302,6 +303,14 @@ const donationEventsWorkerProvider = {
     new DonationEventsWorker(receive),
 };
 
+// Manual inventory entry (#9): an operator records received supply lines into a
+// point's stock directly, converging on the same receiveInventory sink.
+const recordInventoryEntryProvider = {
+  provide: RecordInventoryEntry,
+  inject: [RESOURCE_REPOSITORY],
+  useFactory: (repo: ResourceRepository) => new RecordInventoryEntry(repo),
+};
+
 @Module({
   imports: [DatabaseModule, IdentityModule, NotificationsModule],
   controllers: [
@@ -342,6 +351,7 @@ const donationEventsWorkerProvider = {
     getResourceAdminDetailProvider,
     receiveDonationIntoInventoryProvider,
     donationEventsWorkerProvider,
+    recordInventoryEntryProvider,
   ],
 })
 export class ResourcesModule implements OnModuleDestroy {

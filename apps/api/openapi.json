@@ -872,6 +872,59 @@
         ]
       }
     },
+    "/resources/{resourceId}/inventory-entries": {
+      "post": {
+        "operationId": "ResourcesController_recordInventoryEntryAction",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "Resource UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordInventoryEntryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Inventory entry recorded"
+          },
+          "400": {
+            "description": "Invalid request body or UUID"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing intake:receive for this point"
+          },
+          "404": {
+            "description": "Resource not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record a manual inventory entry into a point stock (operator/coordinator) — #9",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
     "/resources/{resourceId}/verify": {
       "post": {
         "operationId": "ResourcesController_verifyResource",
@@ -8497,6 +8550,21 @@
           "id"
         ]
       },
+      "RecordInventoryEntryDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Supply lines received into the point stock (at least one)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyLineDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
       "VerifyResourceDto": {
         "type": "object",
         "properties": {}
@@ -10824,6 +10892,10 @@
           "contactEmail": {
             "type": "string",
             "example": "contact@org.example"
+          },
+          "contactPhone": {
+            "type": "string",
+            "example": "+58 412-1234567"
           }
         },
         "required": [
@@ -10905,6 +10977,11 @@
             "nullable": true,
             "example": "contact@org.example"
           },
+          "contactPhone": {
+            "type": "object",
+            "nullable": true,
+            "example": "+58 412-1234567"
+          },
           "verificationLevel": {
             "type": "string",
             "example": "unverified"
@@ -10929,6 +11006,7 @@
           "type",
           "taxId",
           "contactEmail",
+          "contactPhone",
           "verificationLevel",
           "memberCount",
           "accreditationStatus"
@@ -11058,6 +11136,10 @@
             "type": "object",
             "nullable": true
           },
+          "contactPhone": {
+            "type": "object",
+            "nullable": true
+          },
           "verificationLevel": {
             "type": "string",
             "example": "unverified"
@@ -11107,6 +11189,7 @@
           "type",
           "taxId",
           "contactEmail",
+          "contactPhone",
           "verificationLevel",
           "createdAt",
           "accreditationStatus",

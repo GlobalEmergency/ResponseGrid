@@ -11,6 +11,7 @@ import {
   MaxLength,
   ValidateNested,
   IsArray,
+  ArrayNotEmpty,
   IsBoolean,
   IsUUID,
 } from 'class-validator';
@@ -170,6 +171,24 @@ export class RegisterResourceDto {
  * accreditation status. This DTO is intentionally empty.
  */
 export class VerifyResourceDto {}
+
+/**
+ * Body for a manual inventory entry (#9): the supply lines received into a
+ * point's stock. Reuses the canonical {@link SupplyLineDto}; lines merge by
+ * name·category·unit·presentation into the resource inventory (same sink the
+ * donation reception feeds, #129).
+ */
+export class RecordInventoryEntryDto {
+  @ApiProperty({
+    type: [SupplyLineDto],
+    description: 'Supply lines received into the point stock (at least one)',
+  })
+  @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => SupplyLineDto)
+  items!: SupplyLineDto[];
+}
 
 export class UpdateResourcePublicStatusDto {
   @ApiProperty({

@@ -35,6 +35,7 @@ import {
   EditResourceCommand,
 } from '../../application/edit-resource';
 import { DiscardResource } from '../../application/discard-resource';
+import { RecordInventoryEntry } from '../../application/record-inventory-entry';
 import { ReportResourceValidity } from '../../application/report-resource-validity';
 import { ResolveResourceDispute } from '../../application/resolve-resource-dispute';
 import { GetResourceValidityReports } from '../../application/get-resource-validity-reports';
@@ -46,6 +47,7 @@ import {
   UpdateResourcePublicStatusDto,
   EditResourceDto,
   DiscardResourceDto,
+  RecordInventoryEntryDto,
   ReportResourceValidityDto,
   ResolveResourceDisputeDto,
 } from './dto';
@@ -75,6 +77,7 @@ export class ResourcesController {
     private readonly getMyResources: GetMyResources,
     private readonly editResource: EditResource,
     private readonly discardResource: DiscardResource,
+    private readonly recordInventoryEntry: RecordInventoryEntry,
     private readonly reportValidity: ReportResourceValidity,
     private readonly resolveDispute: ResolveResourceDispute,
     private readonly validityReports: GetResourceValidityReports,
@@ -122,6 +125,43 @@ export class ResourcesController {
       isFinalRecipient: dto.isFinalRecipient ?? false,
       recipientType: dto.recipientType ?? null,
       items: (dto.items ?? []).map((i) => ({
+        name: i.name,
+        quantity: i.quantity,
+        unit: i.unit ?? null,
+        category: i.category,
+        presentation: i.presentation ?? null,
+      })),
+    });
+  }
+
+  @Post('resources/:resourceId/inventory-entries')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('intake:receive')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Record a manual inventory entry into a point stock (operator/coordinator) — #9',
+  })
+  @ApiParam({
+    name: 'resourceId',
+    description: 'Resource UUID',
+    format: 'uuid',
+  })
+  @ApiNoContentResponse({ description: 'Inventory entry recorded' })
+  @ApiNotFoundResponse({ description: 'Resource not found' })
+  @ApiBadRequestResponse({ description: 'Invalid request body or UUID' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({
+    description: 'Missing intake:receive for this point',
+  })
+  async recordInventoryEntryAction(
+    @Param('resourceId', ParseUUIDPipe) resourceId: string,
+    @Body() dto: RecordInventoryEntryDto,
+  ): Promise<void> {
+    await this.recordInventoryEntry.execute({
+      resourceId,
+      lines: dto.items.map((i) => ({
         name: i.name,
         quantity: i.quantity,
         unit: i.unit ?? null,
