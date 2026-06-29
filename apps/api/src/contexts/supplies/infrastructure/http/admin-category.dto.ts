@@ -67,14 +67,6 @@ export class CreateCategoryDto {
 }
 
 export class UpdateCategoryDto {
-  @ApiPropertyOptional({ example: 'baby_food' })
-  @IsOptional()
-  @IsString()
-  @Matches(CATEGORY_SLUG_PATTERN, {
-    message: 'slug must use lowercase letters, numbers or underscores',
-  })
-  slug?: string;
-
   @ApiPropertyOptional({ example: 'Alimentos para bebé' })
   @IsOptional()
   @IsString()

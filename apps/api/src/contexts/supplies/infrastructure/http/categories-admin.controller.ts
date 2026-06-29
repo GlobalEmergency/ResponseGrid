@@ -33,7 +33,7 @@ import {
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
 import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
 import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
-import { Category } from '../../domain/category';
+import { isCoreCategory } from '../../domain/category';
 import { CategoryDefinition } from '../../domain/category-definition';
 import { CreateCategory } from '../../application/create-category';
 import {
@@ -44,7 +44,10 @@ import {
   CategoryValidationError,
 } from '../../application/category-admin.errors';
 import { ListCategories } from '../../application/list-categories';
-import { UpdateCategory } from '../../application/update-category';
+import {
+  UpdateCategory,
+  UpdateCategoryCommand,
+} from '../../application/update-category';
 import {
   CategoryAdminDto,
   CreateCategoryDto,
@@ -53,10 +56,10 @@ import {
 import { localizedCategoryText, resolveLocale } from './locale';
 import { CategoryWriteInput } from '../../domain/ports/category.repository';
 
-@ApiTags('categories')
+@ApiTags('categories-admin')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, PermissionGuard)
-@Controller('categories/admin')
+@Controller('admin/categories')
 export class CategoriesAdminController {
   constructor(
     private readonly listCategories: ListCategories,
@@ -152,7 +155,7 @@ export class CategoriesAdminController {
   @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
   @ApiForbiddenResponse({ description: 'Missing catalogue:manage permission' })
   async delete(@Param('slug') slug: string): Promise<void> {
-    if (Object.values(Category).includes(slug as Category)) {
+    if (isCoreCategory(slug)) {
       throw new BadRequestException(
         `Core category slug cannot be deleted: ${slug}`,
       );
@@ -197,9 +200,8 @@ export class CategoriesAdminController {
     };
   }
 
-  private toUpdateCommand(dto: UpdateCategoryDto) {
+  private toUpdateCommand(dto: UpdateCategoryDto): UpdateCategoryCommand {
     return {
-      slug: dto.slug,
       labelEs: dto.labelEs,
       labelEn: dto.labelEn,
       parentSlug: dto.parentSlug,

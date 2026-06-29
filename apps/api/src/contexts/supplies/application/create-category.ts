@@ -39,20 +39,12 @@ export class CreateCategory {
       }
     }
 
-    await this.repo.createCategory({
+    return await this.repo.createCategory({
       ...cmd,
       slug,
       parentSlug: cmd.parentSlug,
       archivedAt: cmd.archivedAt ?? null,
       translations: cmd.translations ?? [],
     });
-
-    const created = await this.repo.findBySlug(slug, { includeArchived: true });
-    if (!created) {
-      throw new CategoryValidationError(
-        'Category was created but cannot be reloaded',
-      );
-    }
-    return created;
   }
 }

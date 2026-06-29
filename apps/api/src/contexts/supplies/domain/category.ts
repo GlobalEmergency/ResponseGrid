@@ -24,3 +24,7 @@ export enum Category {
   MedicalSupplies = 'medical_supplies',
   MedicalPersonnel = 'medical_personnel',
 }
+
+export function isCoreCategory(slug: string): boolean {
+  return Object.values(Category).includes(slug as Category);
+}
