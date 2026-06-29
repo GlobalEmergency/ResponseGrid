@@ -1,18 +1,14 @@
 import type { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { getToken } from '@/lib/auth';
-import { api } from '@/lib/api';
-import { OrgSelector } from '@/components/molecules/org-selector';
-import { LocationPicker } from '@/components/organisms/location-picker';
-import { submitOffer } from './actions';
-import { DonarForm } from './donar-form';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { HelpActionRow } from '@/components/molecules/help-action-row';
 import { getT } from '@/i18n/server';
+
+export const dynamic = 'force-dynamic';
 
 type Props = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -25,49 +21,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: t.donar.meta_title.replace('{emergencyName}', emergency.name),
-    description: t.donar.meta_description.replace('{emergencyName}', emergency.name),
+    title: t.donar.choose_meta_title.replace('{emergencyName}', emergency.name),
+    description: t.donar.meta_description.replace(
+      '{emergencyName}',
+      emergency.name,
+    ),
   };
 }
 
-export default async function DonarPage({ params, searchParams }: Props) {
+/**
+ * Donation hub (#130): the entry point for donating splits the two distinct
+ * intents that used to be conflated — bringing material to a specific point
+ * (pre-registration, with a code/QR) vs. offering material for the coordination
+ * team to handle. Public: choosing doesn't require login.
+ */
+export default async function DonarSelectorPage({ params }: Props) {
   const { slug } = await params;
-  const resolvedSearchParams = await searchParams;
   const { t } = await getT();
-
-  const token = await getToken();
-  if (!token) {
-    redirect(`/login?next=/e/${slug}/donar`);
-  }
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
     notFound();
   }
 
-  // Resolve optional ?needId= query param
-  const rawNeedId =
-    typeof resolvedSearchParams.needId === 'string'
-      ? resolvedSearchParams.needId.trim()
-      : undefined;
-
-  // If a needId is provided, try to resolve the need title from the public list
-  let targetNeedTitle: string | undefined;
-  if (rawNeedId !== undefined && rawNeedId !== '') {
-    const { data: needs } = await api.GET(
-      '/emergencies/{emergencyId}/public/needs',
-      { params: { path: { emergencyId: emergency.id } } },
-    );
-    const matched = (needs ?? []).find((n) => n.id === rawNeedId);
-    if (matched !== undefined) {
-      targetNeedTitle = matched.title;
-    }
-  }
-
-  const targetNeedId =
-    targetNeedTitle !== undefined ? rawNeedId : undefined;
-
-  const boundAction = submitOffer.bind(null, emergency.id);
+  const td = t.donar;
 
   return (
     <main className="flex-1 bg-surface">
@@ -75,19 +52,22 @@ export default async function DonarPage({ params, searchParams }: Props) {
         <PageHeaderBand
           backHref={`/e/${slug}`}
           backLabel={t.common.back_to_emergency}
-          title={t.donar.page_title}
-          subtitle={t.donar.page_subtitle.replace('{emergencyName}', emergency.name)}
+          title={td.choose_title}
+          subtitle={td.choose_subtitle}
         />
-        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
-          <DonarForm
-            action={boundAction}
-            slug={slug}
-            targetNeedTitle={targetNeedTitle}
-            targetNeedId={targetNeedId}
-            locationPicker={<LocationPicker />}
-            orgSelector={<OrgSelector />}
-            t={t.donar}
-            backToEmergencyLabel={t.common.back_to_emergency}
+        <div className="flex flex-col gap-3 px-4 pb-12 pt-6">
+          <HelpActionRow
+            href={`/e/${slug}/pre-registro`}
+            icon="📦"
+            title={td.choose_deliver_title}
+            subtitle={td.choose_deliver_subtitle}
+            variant="primary"
+          />
+          <HelpActionRow
+            href={`/e/${slug}/donar/ofrecer`}
+            icon="🤝"
+            title={td.choose_offer_title}
+            subtitle={td.choose_offer_subtitle}
           />
         </div>
       </div>

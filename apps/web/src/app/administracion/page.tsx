@@ -177,6 +177,12 @@ function ScopeCard({
             Organizaciones (global) →
           </Link>
           <Link
+            href="/admin/centros"
+            className="text-xs font-medium text-gray-500 underline underline-offset-2 hover:text-gray-900"
+          >
+            Centros / recursos (global) →
+          </Link>
+          <Link
             href="/admin/api-keys"
             className="text-xs font-medium text-gray-500 underline underline-offset-2 hover:text-gray-900"
           >

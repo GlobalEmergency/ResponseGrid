@@ -45,12 +45,20 @@ export class CreateDonationIntakeDto {
   @Validate(DonorContactRequiredConstraint)
   donorName!: string;
 
-  @ApiPropertyOptional({ example: '+52 55 1234 5678', nullable: true })
+  @ApiPropertyOptional({
+    example: '+52 55 1234 5678',
+    nullable: true,
+    type: String,
+  })
   @IsOptional()
   @IsString()
   donorPhone?: string | null;
 
-  @ApiPropertyOptional({ example: 'maria@example.com', nullable: true })
+  @ApiPropertyOptional({
+    example: 'maria@example.com',
+    nullable: true,
+    type: String,
+  })
   @IsOptional()
   @IsString()
   donorEmail?: string | null;
@@ -64,12 +72,20 @@ export class CreateDonationIntakeDto {
 }
 
 export class LookupDonorByContactDto {
-  @ApiPropertyOptional({ example: '+52 55 1234 5678', nullable: true })
+  @ApiPropertyOptional({
+    example: '+52 55 1234 5678',
+    nullable: true,
+    type: String,
+  })
   @IsOptional()
   @IsString()
   donorPhone?: string | null;
 
-  @ApiPropertyOptional({ example: 'maria@example.com', nullable: true })
+  @ApiPropertyOptional({
+    example: 'maria@example.com',
+    nullable: true,
+    type: String,
+  })
   @IsOptional()
   @IsString()
   @Validate(DonorContactRequiredConstraint)
@@ -88,12 +104,20 @@ export class UpdateDonationIntakeDto {
   @Validate(DonorContactRequiredConstraint)
   donorName!: string;
 
-  @ApiPropertyOptional({ example: '+52 55 1234 5678', nullable: true })
+  @ApiPropertyOptional({
+    example: '+52 55 1234 5678',
+    nullable: true,
+    type: String,
+  })
   @IsOptional()
   @IsString()
   donorPhone?: string | null;
 
-  @ApiPropertyOptional({ example: 'maria@example.com', nullable: true })
+  @ApiPropertyOptional({
+    example: 'maria@example.com',
+    nullable: true,
+    type: String,
+  })
   @IsOptional()
   @IsString()
   donorEmail?: string | null;

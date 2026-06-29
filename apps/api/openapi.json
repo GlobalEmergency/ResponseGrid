@@ -1800,6 +1800,180 @@
         ]
       }
     },
+    "/resources": {
+      "get": {
+        "operationId": "AdminResourcesController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (1-based)",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page (max 100)",
+            "schema": {
+              "default": 50,
+              "example": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "emergencyId",
+            "required": false,
+            "in": "query",
+            "description": "Restrict to one emergency. Omit for a global, cross-emergency list.",
+            "schema": {
+              "format": "uuid",
+              "example": "11111111-1111-4111-8111-111111111111",
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "Filter by resource type",
+            "schema": {
+              "example": "collection_point",
+              "type": "string",
+              "enum": [
+                "collection_point",
+                "delivery_point",
+                "collection_and_delivery",
+                "warehouse",
+                "transport",
+                "supplier",
+                "venue"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by operational status (includes hidden/closed — admin only)",
+            "schema": {
+              "example": "hidden",
+              "type": "string",
+              "enum": [
+                "hidden",
+                "active",
+                "saturated",
+                "paused",
+                "closed"
+              ]
+            }
+          },
+          {
+            "name": "verification",
+            "required": false,
+            "in": "query",
+            "description": "Filter by verification level",
+            "schema": {
+              "example": "unverified",
+              "type": "string",
+              "enum": [
+                "unverified",
+                "verified",
+                "official",
+                "rejected"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Full-text search matched against name, address and city (case-insensitive, max 100 chars)",
+            "schema": {
+              "example": "cruz roja",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedAdminResourcesDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing resource:read at platform"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Admin global list of ALL resources — every emergency, status and verification level (resource:read at platform scope — admin only)",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
+    "/resources/{id}": {
+      "get": {
+        "operationId": "AdminResourcesController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceAdminDetailDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing resource:read at platform"
+          },
+          "404": {
+            "description": "Resource not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Admin detail of one resource of ANY status, with declared inventory and citizen validity reports (resource:read at platform scope — admin only)",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
     "/recipient-types": {
       "get": {
         "operationId": "RecipientTypesController_list",
@@ -9194,6 +9368,407 @@
           "disputed",
           "disputedAt",
           "inventoryCategories"
+        ]
+      },
+      "ResourceAdminViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "collection_point",
+              "delivery_point",
+              "collection_and_delivery",
+              "warehouse",
+              "transport",
+              "supplier",
+              "venue"
+            ],
+            "example": "collection_point"
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "origin",
+              "intermediate",
+              "destination"
+            ],
+            "example": "origin"
+          },
+          "name": {
+            "type": "string",
+            "example": "Cruz Roja Madrid"
+          },
+          "description": {
+            "type": "string",
+            "example": "Centro de acopio principal",
+            "nullable": true
+          },
+          "location": {
+            "$ref": "#/components/schemas/LocationViewDto"
+          },
+          "verificationLevel": {
+            "type": "string",
+            "enum": [
+              "unverified",
+              "verified",
+              "official",
+              "rejected"
+            ],
+            "example": "verified"
+          },
+          "publicStatus": {
+            "type": "string",
+            "enum": [
+              "hidden",
+              "active",
+              "saturated",
+              "paused",
+              "closed"
+            ],
+            "example": "active"
+          },
+          "ownerOrganizationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "accepts": {
+            "example": [
+              "water",
+              "food"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contact": {
+            "type": "string",
+            "example": "+58 212 555 0000",
+            "nullable": true
+          },
+          "schedule": {
+            "type": "string",
+            "example": "Lun-Vie 08-18",
+            "nullable": true
+          },
+          "manager": {
+            "type": "string",
+            "example": "Juan Pérez",
+            "nullable": true
+          },
+          "sourceName": {
+            "type": "string",
+            "example": "acopiove.org",
+            "nullable": true
+          },
+          "externalUpdatedAt": {
+            "type": "string",
+            "example": "2026-06-27T00:00:00.000Z",
+            "description": "ISO 8601 date string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "example": "Venezuela",
+            "description": "Country string as stored by the ingestion source (e.g. full Spanish name \"Venezuela\"). NOT guaranteed to be an ISO 3166-1 alpha-2 code — value depends on the source `pais` field.",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "example": "Caracas",
+            "nullable": true
+          },
+          "isFinalRecipient": {
+            "type": "boolean",
+            "example": false,
+            "description": "Whether this resource is a final recipient of aid"
+          },
+          "recipientType": {
+            "type": "string",
+            "example": "hospital",
+            "nullable": true,
+            "description": "Recipient type slug (see the emergency recipient-type taxonomy)"
+          },
+          "disputed": {
+            "type": "boolean",
+            "example": false,
+            "description": "Whether enough citizens have reported this point as invalid; it stays visible with an \"in review\" warning until a coordinator resolves it."
+          },
+          "disputedAt": {
+            "type": "string",
+            "example": "2026-06-28T12:00:00.000Z",
+            "nullable": true,
+            "description": "When the point was flagged as disputed (ISO 8601), or null"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "11111111-1111-4111-8111-111111111111",
+            "description": "Emergency this resource belongs to"
+          },
+          "emergencyName": {
+            "type": "string",
+            "example": "Terremoto Venezuela 2026",
+            "nullable": true,
+            "description": "Resolved emergency name, or null when it could not be found"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "stage",
+          "name",
+          "description",
+          "location",
+          "verificationLevel",
+          "publicStatus",
+          "ownerOrganizationId",
+          "accepts",
+          "contact",
+          "schedule",
+          "manager",
+          "sourceName",
+          "externalUpdatedAt",
+          "country",
+          "city",
+          "isFinalRecipient",
+          "recipientType",
+          "disputed",
+          "disputedAt",
+          "emergencyId",
+          "emergencyName"
+        ]
+      },
+      "PagedAdminResourcesDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResourceAdminViewDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "example": 123
+          },
+          "page": {
+            "type": "number",
+            "example": 1
+          },
+          "limit": {
+            "type": "number",
+            "example": 50
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "limit"
+        ]
+      },
+      "ResourceAdminDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "collection_point",
+              "delivery_point",
+              "collection_and_delivery",
+              "warehouse",
+              "transport",
+              "supplier",
+              "venue"
+            ],
+            "example": "collection_point"
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "origin",
+              "intermediate",
+              "destination"
+            ],
+            "example": "origin"
+          },
+          "name": {
+            "type": "string",
+            "example": "Cruz Roja Madrid"
+          },
+          "description": {
+            "type": "string",
+            "example": "Centro de acopio principal",
+            "nullable": true
+          },
+          "location": {
+            "$ref": "#/components/schemas/LocationViewDto"
+          },
+          "verificationLevel": {
+            "type": "string",
+            "enum": [
+              "unverified",
+              "verified",
+              "official",
+              "rejected"
+            ],
+            "example": "verified"
+          },
+          "publicStatus": {
+            "type": "string",
+            "enum": [
+              "hidden",
+              "active",
+              "saturated",
+              "paused",
+              "closed"
+            ],
+            "example": "active"
+          },
+          "ownerOrganizationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "accepts": {
+            "example": [
+              "water",
+              "food"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contact": {
+            "type": "string",
+            "example": "+58 212 555 0000",
+            "nullable": true
+          },
+          "schedule": {
+            "type": "string",
+            "example": "Lun-Vie 08-18",
+            "nullable": true
+          },
+          "manager": {
+            "type": "string",
+            "example": "Juan Pérez",
+            "nullable": true
+          },
+          "sourceName": {
+            "type": "string",
+            "example": "acopiove.org",
+            "nullable": true
+          },
+          "externalUpdatedAt": {
+            "type": "string",
+            "example": "2026-06-27T00:00:00.000Z",
+            "description": "ISO 8601 date string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "example": "Venezuela",
+            "description": "Country string as stored by the ingestion source (e.g. full Spanish name \"Venezuela\"). NOT guaranteed to be an ISO 3166-1 alpha-2 code — value depends on the source `pais` field.",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "example": "Caracas",
+            "nullable": true
+          },
+          "isFinalRecipient": {
+            "type": "boolean",
+            "example": false,
+            "description": "Whether this resource is a final recipient of aid"
+          },
+          "recipientType": {
+            "type": "string",
+            "example": "hospital",
+            "nullable": true,
+            "description": "Recipient type slug (see the emergency recipient-type taxonomy)"
+          },
+          "disputed": {
+            "type": "boolean",
+            "example": false,
+            "description": "Whether enough citizens have reported this point as invalid; it stays visible with an \"in review\" warning until a coordinator resolves it."
+          },
+          "disputedAt": {
+            "type": "string",
+            "example": "2026-06-28T12:00:00.000Z",
+            "nullable": true,
+            "description": "When the point was flagged as disputed (ISO 8601), or null"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "11111111-1111-4111-8111-111111111111",
+            "description": "Emergency this resource belongs to"
+          },
+          "emergencyName": {
+            "type": "string",
+            "example": "Terremoto Venezuela 2026",
+            "nullable": true,
+            "description": "Resolved emergency name, or null when it could not be found"
+          },
+          "inventoryCategories": {
+            "example": [
+              "water",
+              "hygiene"
+            ],
+            "description": "Distinct categories of material this place has declared",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "validityReports": {
+            "description": "Citizen validity reports for this resource (open + resolved)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidityReportDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "stage",
+          "name",
+          "description",
+          "location",
+          "verificationLevel",
+          "publicStatus",
+          "ownerOrganizationId",
+          "accepts",
+          "contact",
+          "schedule",
+          "manager",
+          "sourceName",
+          "externalUpdatedAt",
+          "country",
+          "city",
+          "isFinalRecipient",
+          "recipientType",
+          "disputed",
+          "disputedAt",
+          "emergencyId",
+          "emergencyName",
+          "inventoryCategories",
+          "validityReports"
         ]
       },
       "RecipientTypeDto": {

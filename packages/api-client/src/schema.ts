@@ -586,6 +586,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/resources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin global list of ALL resources — every emergency, status and verification level (resource:read at platform scope — admin only) */
+        get: operations["AdminResourcesController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/resources/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin detail of one resource of ANY status, with declared inventory and citizen validity reports (resource:read at platform scope — admin only) */
+        get: operations["AdminResourcesController_detail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/recipient-types": {
         parameters: {
             query?: never;
@@ -3068,6 +3102,209 @@ export interface components {
              */
             inventoryCategories: string[];
         };
+        ResourceAdminViewDto: {
+            /**
+             * Format: uuid
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            id: string;
+            /**
+             * @example collection_point
+             * @enum {string}
+             */
+            type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
+            /**
+             * @example origin
+             * @enum {string}
+             */
+            stage: "origin" | "intermediate" | "destination";
+            /** @example Cruz Roja Madrid */
+            name: string;
+            /** @example Centro de acopio principal */
+            description: string | null;
+            location: components["schemas"]["LocationViewDto"];
+            /**
+             * @example verified
+             * @enum {string}
+             */
+            verificationLevel: "unverified" | "verified" | "official" | "rejected";
+            /**
+             * @example active
+             * @enum {string}
+             */
+            publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed";
+            /** Format: uuid */
+            ownerOrganizationId: string | null;
+            /**
+             * @example [
+             *       "water",
+             *       "food"
+             *     ]
+             */
+            accepts: string[];
+            /** @example +58 212 555 0000 */
+            contact: string | null;
+            /** @example Lun-Vie 08-18 */
+            schedule: string | null;
+            /** @example Juan Pérez */
+            manager: string | null;
+            /** @example acopiove.org */
+            sourceName: string | null;
+            /**
+             * @description ISO 8601 date string
+             * @example 2026-06-27T00:00:00.000Z
+             */
+            externalUpdatedAt: string | null;
+            /**
+             * @description Country string as stored by the ingestion source (e.g. full Spanish name "Venezuela"). NOT guaranteed to be an ISO 3166-1 alpha-2 code — value depends on the source `pais` field.
+             * @example Venezuela
+             */
+            country: string | null;
+            /** @example Caracas */
+            city: string | null;
+            /**
+             * @description Whether this resource is a final recipient of aid
+             * @example false
+             */
+            isFinalRecipient: boolean;
+            /**
+             * @description Recipient type slug (see the emergency recipient-type taxonomy)
+             * @example hospital
+             */
+            recipientType: string | null;
+            /**
+             * @description Whether enough citizens have reported this point as invalid; it stays visible with an "in review" warning until a coordinator resolves it.
+             * @example false
+             */
+            disputed: boolean;
+            /**
+             * @description When the point was flagged as disputed (ISO 8601), or null
+             * @example 2026-06-28T12:00:00.000Z
+             */
+            disputedAt: string | null;
+            /**
+             * Format: uuid
+             * @description Emergency this resource belongs to
+             * @example 11111111-1111-4111-8111-111111111111
+             */
+            emergencyId: string;
+            /**
+             * @description Resolved emergency name, or null when it could not be found
+             * @example Terremoto Venezuela 2026
+             */
+            emergencyName: string | null;
+        };
+        PagedAdminResourcesDto: {
+            items: components["schemas"]["ResourceAdminViewDto"][];
+            /** @example 123 */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 50 */
+            limit: number;
+        };
+        ResourceAdminDetailDto: {
+            /**
+             * Format: uuid
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            id: string;
+            /**
+             * @example collection_point
+             * @enum {string}
+             */
+            type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
+            /**
+             * @example origin
+             * @enum {string}
+             */
+            stage: "origin" | "intermediate" | "destination";
+            /** @example Cruz Roja Madrid */
+            name: string;
+            /** @example Centro de acopio principal */
+            description: string | null;
+            location: components["schemas"]["LocationViewDto"];
+            /**
+             * @example verified
+             * @enum {string}
+             */
+            verificationLevel: "unverified" | "verified" | "official" | "rejected";
+            /**
+             * @example active
+             * @enum {string}
+             */
+            publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed";
+            /** Format: uuid */
+            ownerOrganizationId: string | null;
+            /**
+             * @example [
+             *       "water",
+             *       "food"
+             *     ]
+             */
+            accepts: string[];
+            /** @example +58 212 555 0000 */
+            contact: string | null;
+            /** @example Lun-Vie 08-18 */
+            schedule: string | null;
+            /** @example Juan Pérez */
+            manager: string | null;
+            /** @example acopiove.org */
+            sourceName: string | null;
+            /**
+             * @description ISO 8601 date string
+             * @example 2026-06-27T00:00:00.000Z
+             */
+            externalUpdatedAt: string | null;
+            /**
+             * @description Country string as stored by the ingestion source (e.g. full Spanish name "Venezuela"). NOT guaranteed to be an ISO 3166-1 alpha-2 code — value depends on the source `pais` field.
+             * @example Venezuela
+             */
+            country: string | null;
+            /** @example Caracas */
+            city: string | null;
+            /**
+             * @description Whether this resource is a final recipient of aid
+             * @example false
+             */
+            isFinalRecipient: boolean;
+            /**
+             * @description Recipient type slug (see the emergency recipient-type taxonomy)
+             * @example hospital
+             */
+            recipientType: string | null;
+            /**
+             * @description Whether enough citizens have reported this point as invalid; it stays visible with an "in review" warning until a coordinator resolves it.
+             * @example false
+             */
+            disputed: boolean;
+            /**
+             * @description When the point was flagged as disputed (ISO 8601), or null
+             * @example 2026-06-28T12:00:00.000Z
+             */
+            disputedAt: string | null;
+            /**
+             * Format: uuid
+             * @description Emergency this resource belongs to
+             * @example 11111111-1111-4111-8111-111111111111
+             */
+            emergencyId: string;
+            /**
+             * @description Resolved emergency name, or null when it could not be found
+             * @example Terremoto Venezuela 2026
+             */
+            emergencyName: string | null;
+            /**
+             * @description Distinct categories of material this place has declared
+             * @example [
+             *       "water",
+             *       "hygiene"
+             *     ]
+             */
+            inventoryCategories: string[];
+            /** @description Citizen validity reports for this resource (open + resolved) */
+            validityReports: components["schemas"]["ValidityReportDto"][];
+        };
         RecipientTypeDto: {
             /** @example hospital */
             slug: string;
@@ -3840,9 +4077,9 @@ export interface components {
             /** @example María López */
             donorName: string;
             /** @example +52 55 1234 5678 */
-            donorPhone?: Record<string, never> | null;
+            donorPhone?: string | null;
             /** @example maria@example.com */
-            donorEmail?: Record<string, never> | null;
+            donorEmail?: string | null;
             items: components["schemas"]["SupplyLineDto"][];
         };
         CreateDonationIntakeResponseDto: {
@@ -3858,9 +4095,9 @@ export interface components {
         };
         LookupDonorByContactDto: {
             /** @example +52 55 1234 5678 */
-            donorPhone?: Record<string, never> | null;
+            donorPhone?: string | null;
             /** @example maria@example.com */
-            donorEmail?: Record<string, never> | null;
+            donorEmail?: string | null;
         };
         PendingIntakeSummaryDto: {
             /** Format: uuid */
@@ -3885,9 +4122,9 @@ export interface components {
             /** @example María López */
             donorName: string;
             /** @example +52 55 1234 5678 */
-            donorPhone?: Record<string, never> | null;
+            donorPhone?: string | null;
             /** @example maria@example.com */
-            donorEmail?: Record<string, never> | null;
+            donorEmail?: string | null;
             items: components["schemas"]["SupplyLineDto"][];
         };
         IntakeLineViewDto: {
@@ -6158,6 +6395,96 @@ export interface operations {
                 };
             };
             /** @description Resource not found or not public */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminResourcesController_list: {
+        parameters: {
+            query?: {
+                /** @description Page number (1-based) */
+                page?: number;
+                /** @description Items per page (max 100) */
+                limit?: number;
+                /** @description Restrict to one emergency. Omit for a global, cross-emergency list. */
+                emergencyId?: string;
+                /** @description Filter by resource type */
+                type?: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
+                /** @description Filter by operational status (includes hidden/closed — admin only) */
+                status?: "hidden" | "active" | "saturated" | "paused" | "closed";
+                /** @description Filter by verification level */
+                verification?: "unverified" | "verified" | "official" | "rejected";
+                /** @description Full-text search matched against name, address and city (case-insensitive, max 100 chars) */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PagedAdminResourcesDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing resource:read at platform */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminResourcesController_detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceAdminDetailDto"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing resource:read at platform */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;

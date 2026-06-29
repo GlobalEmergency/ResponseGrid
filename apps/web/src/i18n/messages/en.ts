@@ -131,7 +131,8 @@ export const en = {
     metric_tile_queue: 'In queue',
 
     // "How do you want to help?" subtitles
-    help_offer_subtitle: 'Warehouse · transport · space',
+    help_donate_subtitle: 'Offer it or pre-register it at a point',
+    help_offer_subtitle: 'Collection point · warehouse · space',
     help_volunteer_subtitle: 'Availability and skills',
     help_petition_subtitle: 'Request validated supplies',
     help_transport_subtitle: 'Road · sea · air',
@@ -164,7 +165,7 @@ export const en = {
     ],
 
     actions_heading: 'How do you want to help?',
-    action_offer_resource: 'Offer a resource',
+    action_offer_resource: 'Register a logistics point',
     action_submit_petition: 'Submit a request',
     action_donate: 'Donate supplies',
     action_volunteer: 'Sign up as a volunteer',
@@ -314,6 +315,8 @@ export const en = {
     needs_empty: 'This recipient has no published needs.',
     inventory_heading: 'Available materials',
     inventory_empty: 'This point has not declared available materials.',
+    prereg_cta: 'Pre-register what I’ll bring',
+    prereg_cta_hint: 'Declare your delivery and get a code to speed up the desk.',
   },
 
   resource_list: {
@@ -383,10 +386,10 @@ export const en = {
   draft_restored: 'Draft restored',
 
   registrar: {
-    page_title: 'Offer a resource',
-    page_subtitle: '{emergencyName} · Fill in the form. We will validate you before activating.',
-    meta_title: 'Offer a resource — {emergencyName} · ResponseGrid',
-    meta_description: 'Register as an available resource for {emergencyName}.',
+    page_title: 'Register a logistics point',
+    page_subtitle: '{emergencyName} · Register a collection point, warehouse, space or hub. We will validate it before activating.',
+    meta_title: 'Register a logistics point — {emergencyName} · ResponseGrid',
+    meta_description: 'Register a logistics point (collection, warehouse, space) for {emergencyName}.',
 
     type_label: 'Resource type',
     stage_label: 'Stage',
@@ -501,6 +504,16 @@ export const en = {
     meta_title: 'Donate supplies — {emergencyName} · ResponseGrid',
     meta_description: 'Offer aid supplies for {emergencyName}.',
 
+    // Donation selector (#130): bring it to a point vs offer supplies
+    choose_title: 'How do you want to donate?',
+    choose_subtitle: 'Choose how you’ll get your supplies there.',
+    choose_meta_title: 'Donate supplies — {emergencyName} · ResponseGrid',
+    choose_deliver_title: 'I’ll bring it to a point',
+    choose_deliver_subtitle:
+      'Choose the point and pre-register your delivery — you get a code/QR for the desk',
+    choose_offer_title: 'Offer supplies',
+    choose_offer_subtitle: 'Describe it and the coordination team handles it',
+
     directed_offer_label: 'Offering for:',
     category_label: 'Supply category',
     description_label: 'Supply description',
@@ -528,6 +541,86 @@ export const en = {
     err_invalid_quantity: 'Quantity must be a positive whole number.',
     err_location_required: 'Select a location.',
     err_submit_failed: 'Couldn’t submit the offer. Please try again.',
+  },
+
+  // ── Citizen delivery pre-registration (#130) ──────────────────────────────
+  prereg: {
+    page_title: 'Pre-register my delivery',
+    page_subtitle:
+      '{pointName} · List what you’ll bring and get your code for the desk.',
+    meta_title: 'Pre-register delivery — {emergencyName} · ResponseGrid',
+    meta_description:
+      'Pre-register the supplies you’ll bring to a collection point of {emergencyName} and get your receipt.',
+
+    point_label: 'Collection point',
+
+    // Step 1 — choosing the delivery point
+    pick_title: 'Which point will you bring it to?',
+    pick_hint: 'Search and choose the collection point where you’ll deliver your supplies.',
+    pick_search_label: 'Search point',
+    pick_search_placeholder: 'Name or city…',
+    pick_search_button: 'Search',
+    pick_results_empty: 'No matching collection points found. Try another search.',
+    pick_all_hint: 'Active collection points. Use the search to narrow by name or city.',
+    pick_select: 'Pre-register here',
+    back_to_pick: 'Choose another point',
+
+    no_point_title: 'Choose a collection point first',
+    no_point_body:
+      'Open a collection point’s page and tap “Pre-register what I’ll bring”.',
+    no_point_cta: 'See the emergency’s points',
+    not_eligible_title: 'This point doesn’t accept pre-registration',
+    not_eligible_body:
+      'Only active collection points accept delivery pre-registration. Please choose another point.',
+
+    donor_name_label: 'Your name',
+    donor_name_placeholder: 'e.g. María López',
+    contact_heading: 'How to reach you',
+    contact_hint:
+      'Provide at least one contact detail. Only the point sees it to locate your delivery.',
+    email_label: 'Email',
+    email_placeholder: 'maria@example.com',
+    phone_label: 'Phone',
+    phone_placeholder: '+52 55 1234 5678',
+
+    // Line editor (reuses InventoryField)
+    lines: {
+      inventory_heading: 'What will you bring?',
+      inventory_hint:
+        'Add the supplies you’ll deliver. You can adjust quantities at the point.',
+      inventory_add: '+ Add supply',
+      inventory_empty: 'Add at least one supply.',
+      item_number: 'Supply {n}',
+      item_remove: 'Remove supply {n}',
+      item_remove_label: 'Remove',
+      item_name_label: 'Supply / product',
+      item_name_placeholder: 'e.g. Bottled water',
+      item_quantity_label: 'Quantity',
+      item_unit_label: 'Unit',
+      item_unit_opt: '(opt.)',
+      item_unit_placeholder: 'boxes, litres…',
+      item_category_label: 'Category',
+    },
+
+    submit: 'Generate my code',
+    submitting: 'Generating…',
+
+    // Receipt
+    success_title: 'Pre-registration ready!',
+    success_body: 'Show this code at {pointName} when you deliver your supplies.',
+    code_label: 'Your delivery code',
+    qr_alt: 'QR code of your pre-registration',
+    success_register_another: 'Pre-register another delivery',
+
+    // server-action messages
+    err_name_required: 'Enter your name.',
+    err_contact_required: 'Enter at least an email or a phone.',
+    err_items_required: 'Add at least one supply.',
+    err_invalid_items:
+      'Check the supplies: each line needs a name, quantity and category.',
+    err_submit_failed: 'Couldn’t complete the pre-registration. Please try again.',
+    err_not_accepting: 'This point isn’t accepting pre-registrations right now.',
+    err_too_many: 'Too many attempts. Please wait a moment and try again.',
   },
 
   // ── Offer transport (#105) ────────────────────────────────────────────────
@@ -1475,6 +1568,77 @@ export const en = {
     users_detail_activity_heading: 'Recent activity ({count})',
     users_detail_activity_empty: 'No recent activity recorded.',
     users_link: 'Users (global) →',
+
+    // ── Centers / resources (#177) ──────────────────────────────────────────
+    centros_meta_title: 'Centers / resources — Admin · ResponseGrid',
+    centros_meta_description:
+      'Global list of all centers and resources, in any status and emergency. Admins only.',
+    centros_back: '← Administration',
+    centros_title: 'Centers / resources',
+    centros_subtitle:
+      'All centers and resources across every emergency, in any status and verification level. Admins only.',
+    centros_list_heading: 'Centers ({count})',
+    centros_search_label: 'Search center',
+    centros_search_ph: 'Search by name, address or city…',
+    centros_empty_title: 'No centers registered.',
+    centros_empty_description: 'Registered centers will appear here.',
+    centros_no_results_title: 'No results.',
+    centros_no_results_description: 'No center matches the filters.',
+    centros_filter_type_label: 'Type',
+    centros_filter_status_label: 'Status',
+    centros_filter_emergency_label: 'Emergency',
+    centros_filter_all: 'All',
+    centros_filter_all_f: 'All',
+    centros_emergency_label: 'Emergency:',
+    centros_emergency_unknown: 'Unknown emergency',
+    centros_address_label: 'Address:',
+    centros_city_label: 'City:',
+    // Resource types
+    centros_type_collection_point: 'Collection point',
+    centros_type_delivery_point: 'Delivery point',
+    centros_type_collection_and_delivery: 'Collection & delivery',
+    centros_type_warehouse: 'Warehouse',
+    centros_type_transport: 'Transport',
+    centros_type_supplier: 'Supplier',
+    centros_type_venue: 'Venue',
+    // Operational (public) status
+    centros_status_hidden: 'Hidden',
+    centros_status_active: 'Active',
+    centros_status_saturated: 'Saturated',
+    centros_status_paused: 'Paused',
+    centros_status_closed: 'Closed',
+    // Verification level
+    centros_verif_unverified: 'Unverified',
+    centros_verif_verified: 'Verified',
+    centros_verif_official: 'Official',
+    centros_verif_rejected: 'Rejected',
+    // Detail
+    centros_detail_meta_title: 'Center — Admin · ResponseGrid',
+    centros_detail_back: '← Centers',
+    centros_detail_not_found: 'Center not found.',
+    centros_detail_info_heading: 'Information',
+    centros_detail_contact_label: 'Contact:',
+    centros_detail_schedule_label: 'Schedule:',
+    centros_detail_manager_label: 'Manager:',
+    centros_detail_stage_label: 'Stage:',
+    centros_detail_created_label: 'Created:',
+    centros_detail_source_label: 'Source:',
+    centros_detail_recipient_label: 'Final recipient',
+    centros_detail_recipient_type_label: 'Recipient type:',
+    centros_detail_none: '—',
+    centros_detail_stage_origin: 'Origin',
+    centros_detail_stage_intermediate: 'Intermediate',
+    centros_detail_stage_destination: 'Destination',
+    centros_detail_inventory_heading: 'Declared inventory ({count})',
+    centros_detail_inventory_empty: 'This center has not declared any inventory.',
+    centros_detail_inventory_note:
+      'Declared material categories (no quantities, for privacy).',
+    centros_detail_reports_heading: 'Validity reports ({count})',
+    centros_detail_reports_empty: 'No validity reports.',
+    centros_detail_report_status_open: 'Open',
+    centros_detail_report_status_accepted: 'Accepted',
+    centros_detail_report_status_dismissed: 'Dismissed',
+    centros_link: 'Centers / resources (global) →',
   },
 
   templates: {

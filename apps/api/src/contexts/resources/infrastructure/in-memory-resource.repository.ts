@@ -1,8 +1,15 @@
-import { ResourceRepository } from '../domain/ports/resource.repository';
+import {
+  ResourceRepository,
+  ResourceWithEmergency,
+} from '../domain/ports/resource.repository';
 import { Resource } from '../domain/resource';
 import { ResourceId } from '../domain/resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { VerificationLevel, PublicStatus } from '../domain/resource-enums';
+import {
+  VerificationLevel,
+  PublicStatus,
+  ResourceType,
+} from '../domain/resource-enums';
 
 function haversineMeters(
   lat1: number,
@@ -140,6 +147,65 @@ export class InMemoryResourceRepository implements ResourceRepository {
       )
       .map((s) => Resource.fromSnapshot(s));
     return Promise.resolve(result);
+  }
+
+  findAllPaged(q: {
+    page: number;
+    limit: number;
+    emergencyId?: EmergencyId;
+    type?: ResourceType;
+    status?: PublicStatus;
+    verification?: VerificationLevel;
+    q?: string;
+  }): Promise<{ items: ResourceWithEmergency[]; total: number }> {
+    // Admin read: no status/verification gate; every filter optional.
+    let all = [...this.store.values()];
+    if (q.emergencyId) {
+      all = all.filter((s) => s.emergencyId === q.emergencyId!.value);
+    }
+    if (q.type) {
+      all = all.filter((s) => s.type === q.type);
+    }
+    if (q.status) {
+      all = all.filter((s) => s.publicStatus === q.status);
+    }
+    if (q.verification) {
+      all = all.filter((s) => s.verificationLevel === q.verification);
+    }
+    if (q.q) {
+      const term = q.q.toLowerCase();
+      all = all.filter(
+        (s) =>
+          s.name.toLowerCase().includes(term) ||
+          s.location.address.toLowerCase().includes(term) ||
+          (s.city != null && s.city.toLowerCase().includes(term)),
+      );
+    }
+    // Newest first, then id — mirrors the Drizzle ORDER BY.
+    all.sort((a, b) => {
+      const at = a.createdAt.getTime();
+      const bt = b.createdAt.getTime();
+      if (at !== bt) return bt - at;
+      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+    });
+    const total = all.length;
+    const offset = (q.page - 1) * q.limit;
+    const items = all.slice(offset, offset + q.limit).map((s) => ({
+      resource: Resource.fromSnapshot(s),
+      // The in-memory repo has no emergencies store; the Drizzle int-spec
+      // exercises real name resolution.
+      emergencyName: null,
+    }));
+    return Promise.resolve({ items, total });
+  }
+
+  findByIdForAdmin(id: ResourceId): Promise<ResourceWithEmergency | null> {
+    const snap = this.store.get(id.value);
+    return Promise.resolve(
+      snap
+        ? { resource: Resource.fromSnapshot(snap), emergencyName: null }
+        : null,
+    );
   }
 
   findVisibleByEmergency(emergencyId: EmergencyId): Promise<Resource[]> {

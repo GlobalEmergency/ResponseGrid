@@ -84,7 +84,7 @@ export function DonarForm({
     return (
       <FormSuccessScreen
         message={t.success_message}
-        primaryHref={`/e/${slug}/donar`}
+        primaryHref={`/e/${slug}/donar/ofrecer`}
         primaryLabel={t.success_donate_again}
         secondaryHref={`/e/${slug}`}
         secondaryLabel={backToEmergencyLabel}
