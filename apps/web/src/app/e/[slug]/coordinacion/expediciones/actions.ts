@@ -12,7 +12,7 @@ export type ActionResult =
   | { status: 'success' }
   | { status: 'error'; message: string };
 
-type ShipmentItemInput = components['schemas']['ShipmentItemDto'];
+type ShipmentItemInput = components['schemas']['SupplyLineDto'];
 type CapacityView = components['schemas']['CapacityViewDto'];
 
 /** Result of fetching ranked capacity suggestions for a shipment (#107). */

@@ -2051,6 +2051,7 @@ export const en = {
     ship_item_quantity_placeholder: 'Quantity',
     ship_item_unit_label: 'Unit',
     ship_item_unit_placeholder: 'Unit',
+    ship_item_category_label: 'Category',
     ship_item_add: '+ Add item',
     ship_item_remove: 'Remove',
     ship_manifest_placeholder: 'Manifest notes: fragile cargo, instructions…',

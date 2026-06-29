@@ -5,9 +5,11 @@ import {
 import { AssignCapacityToShipment } from './assign-capacity-to-shipment';
 import { CreateShipment } from './create-shipment';
 import { InMemoryShipmentRepository } from '../infrastructure/in-memory-shipment.repository';
+import { FakeShipmentContainerPort } from '../infrastructure/fake-shipment-container-port';
 import { LogisticsEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { ShipmentId } from '../domain/shipment-id';
 import { CarrierType, ShipmentStatus } from '../domain/shipment-enums';
+import { Category } from '../../supplies/domain/category';
 import { ShipmentNotFoundError } from './shipment-not-found.error';
 import { InvalidShipmentTransitionError } from '../domain/shipment-errors';
 
@@ -28,15 +30,20 @@ async function seedAssigned(
   repo: InMemoryShipmentRepository,
   carrierId: string | null,
 ): Promise<string> {
-  const { id } = await new CreateShipment(repo, new FakeStatusReader()).execute(
-    {
-      emergencyId: EM,
-      originResourceId: ORIGIN,
-      destinationResourceId: DEST,
-      items: [{ description: 'agua', quantity: 5 }],
-      manifest: null,
-    },
-  );
+  const { id } = await new CreateShipment(
+    repo,
+    new FakeStatusReader(),
+    new FakeShipmentContainerPort(),
+  ).execute({
+    emergencyId: EM,
+    originResourceId: ORIGIN,
+    destinationResourceId: DEST,
+    items: [
+      { name: 'agua', quantity: 5, unit: null, category: Category.Water },
+    ],
+    containerIds: [],
+    manifest: null,
+  });
   await new AssignCapacityToShipment(repo).execute({
     shipmentId: id,
     assignedCapacityId: CAPACITY,
@@ -108,11 +115,15 @@ describe('MarkShipmentInTransit', () => {
     const { id } = await new CreateShipment(
       repo,
       new FakeStatusReader(),
+      new FakeShipmentContainerPort(),
     ).execute({
       emergencyId: EM,
       originResourceId: ORIGIN,
       destinationResourceId: DEST,
-      items: [{ description: 'agua', quantity: 5 }],
+      items: [
+        { name: 'agua', quantity: 5, unit: null, category: Category.Water },
+      ],
+      containerIds: [],
       manifest: null,
     });
     const useCase = new MarkShipmentInTransit(repo);

@@ -1,5 +1,6 @@
 import { ShipmentRepository } from '../domain/ports/shipment.repository';
 import { ShipmentEventBus } from '../domain/ports/shipment-event-bus';
+import { ShipmentContainerPort } from '../domain/ports/shipment-container-port';
 import { ShipmentId } from '../domain/shipment-id';
 import { ShipmentNotFoundError } from './shipment-not-found.error';
 import { ShipmentActionUnauthorizedError } from './mark-shipment-in-transit';
@@ -16,6 +17,7 @@ export class ConfirmShipmentDelivery {
   constructor(
     private readonly repo: ShipmentRepository,
     private readonly bus: ShipmentEventBus,
+    private readonly containerPort: ShipmentContainerPort,
   ) {}
 
   async execute(cmd: ConfirmShipmentDeliveryCommand): Promise<void> {
@@ -30,6 +32,18 @@ export class ConfirmShipmentDelivery {
     }
 
     shipment.confirmDelivery();
+
+    // The cargo arrives: its containers become the destination node's
+    // inventory (holder = destination resource). Done before persisting the
+    // Delivered status so a move failure leaves the shipment in transit to retry.
+    if (shipment.containerIds.length > 0) {
+      await this.containerPort.moveContainersToResource({
+        emergencyId: shipment.emergencyId.value,
+        containerIds: shipment.containerIds,
+        resourceId: shipment.destinationResourceId,
+      });
+    }
+
     await this.repo.save(shipment);
     await this.bus.publish(shipment.pullDomainEvents());
   }

@@ -1,11 +1,12 @@
 import { Shipment } from '../domain/shipment';
-import { ShipmentItemSnapshot } from '../domain/shipment-item';
+import { SupplyLineSnapshot } from '../../supplies/domain/supply-line';
 
 export interface ShipmentItemView {
-  description: string;
-  quantity: number | null;
+  name: string;
+  quantity: number;
   unit: string | null;
-  category: string | null;
+  category: string;
+  presentation: string | null;
 }
 
 export interface ShipmentView {
@@ -14,6 +15,7 @@ export interface ShipmentView {
   originResourceId: string;
   destinationResourceId: string;
   items: ShipmentItemView[];
+  containerIds: string[];
   assignedCapacityId: string | null;
   carrierType: string | null;
   carrierId: string | null;
@@ -23,12 +25,13 @@ export interface ShipmentView {
   updatedAt: string;
 }
 
-function toItemView(i: ShipmentItemSnapshot): ShipmentItemView {
+function toItemView(i: SupplyLineSnapshot): ShipmentItemView {
   return {
-    description: i.description,
+    name: i.name,
     quantity: i.quantity,
     unit: i.unit,
     category: i.category,
+    presentation: i.presentation ?? null,
   };
 }
 
@@ -40,6 +43,7 @@ export function toShipmentView(s: Shipment): ShipmentView {
     originResourceId: snap.originResourceId,
     destinationResourceId: snap.destinationResourceId,
     items: snap.items.map(toItemView),
+    containerIds: snap.containerIds,
     assignedCapacityId: snap.assignedCapacityId,
     carrierType: snap.carrierType,
     carrierId: snap.carrierId,

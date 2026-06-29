@@ -7,7 +7,7 @@ import {
   jsonb,
 } from 'drizzle-orm/pg-core';
 import { CoverageProps } from '../../domain/coverage';
-import { ShipmentItemSnapshot } from '../../domain/shipment-item';
+import { SupplyLineSnapshot } from '../../../supplies/domain/supply-line';
 
 export const transportCapacitiesTable = pgTable('transport_capacities', {
   id: uuid('id').primaryKey(),
@@ -38,8 +38,11 @@ export const shipmentsTable = pgTable('shipments', {
   // Route between two resource nodes (no FK — cross-context to resources).
   originResourceId: uuid('origin_resource_id').notNull(),
   destinationResourceId: uuid('destination_resource_id').notNull(),
-  // Cargo manifest lines (what/how much moves) stored as JSONB.
-  items: jsonb('items').$type<ShipmentItemSnapshot[]>().notNull(),
+  // Loose cargo lines (canonical SupplyLine, #141) stored as JSONB.
+  items: jsonb('items').$type<SupplyLineSnapshot[]>().notNull(),
+  // Trackable containers (#140/#141) loaded onto the expedition. No FK —
+  // cross-context to supplies; the holder lives on the Container aggregate.
+  containerIds: uuid('container_ids').array().notNull(),
   // Optional ref to a TransportCapacity (#105). No FK (assigned late, nullable).
   assignedCapacityId: uuid('assigned_capacity_id'),
   // Optional polymorphic carrier (no FK): 'volunteer' | 'organization'. Null on

@@ -185,12 +185,14 @@ export class ShipmentController {
       emergencyId: dto.emergencyId,
       originResourceId: dto.originResourceId,
       destinationResourceId: dto.destinationResourceId,
-      items: dto.items.map((i) => ({
-        description: i.description,
-        quantity: i.quantity ?? null,
+      items: (dto.items ?? []).map((i) => ({
+        name: i.name,
+        quantity: i.quantity,
         unit: i.unit ?? null,
-        category: i.category ?? null,
+        category: i.category,
+        presentation: i.presentation ?? null,
       })),
+      containerIds: dto.containerIds ?? [],
       manifest: dto.manifest ?? null,
     });
   }

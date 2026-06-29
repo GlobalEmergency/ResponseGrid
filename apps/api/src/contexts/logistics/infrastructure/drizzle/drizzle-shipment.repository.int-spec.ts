@@ -4,7 +4,7 @@ import { DrizzleShipmentRepository } from './drizzle-shipment.repository';
 import { DrizzleShipmentAuthorizationLookup } from './drizzle-shipment-authorization-lookup';
 import { Shipment } from '../../domain/shipment';
 import { ShipmentId } from '../../domain/shipment-id';
-import { ShipmentItem } from '../../domain/shipment-item';
+import { SupplyLine } from '../../../supplies/domain/supply-line';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import { CarrierType, ShipmentStatus } from '../../domain/shipment-enums';
 import { Category } from '../../../supplies/domain/category';
@@ -19,10 +19,13 @@ const ORIGIN = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
 const DEST = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
 const CAPACITY = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
 const CARRIER_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+const CONTAINER_A = '11111111-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+const CONTAINER_B = '22222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 
 function makeShipment(opts?: {
   emergencyId?: string;
-  items?: ShipmentItem[];
+  items?: SupplyLine[];
+  containerIds?: string[];
   manifest?: string | null;
 }): Shipment {
   return Shipment.create({
@@ -31,13 +34,14 @@ function makeShipment(opts?: {
     originResourceId: ORIGIN,
     destinationResourceId: DEST,
     items: opts?.items ?? [
-      ShipmentItem.create({
-        description: 'agua',
+      SupplyLine.create({
+        name: 'agua',
         quantity: 5,
         unit: 'cajas',
         category: Category.Food,
       }),
     ],
+    containerIds: opts?.containerIds ?? [],
     manifest: opts?.manifest ?? 'Manifiesto',
   });
 }
@@ -62,12 +66,23 @@ describe('DrizzleShipmentRepository (integration)', () => {
     await db.delete(shipmentsTable);
   });
 
-  it('round-trips a planned shipment (jsonb items, no carrier) through Postgres', async () => {
+  it('round-trips a planned shipment (jsonb SupplyLine items + container ids) through Postgres', async () => {
     const s = makeShipment({
       items: [
-        ShipmentItem.create({ description: 'mantas', quantity: 20 }),
-        ShipmentItem.create({ description: 'varios' }),
+        SupplyLine.create({
+          name: 'mantas',
+          quantity: 20,
+          unit: null,
+          category: Category.Clothing,
+        }),
+        SupplyLine.create({
+          name: 'varios',
+          quantity: 1,
+          unit: null,
+          category: Category.Other,
+        }),
       ],
+      containerIds: [CONTAINER_A, CONTAINER_B],
     });
     await repo.save(s);
     const found = await repo.findById(s.id);
@@ -78,13 +93,23 @@ describe('DrizzleShipmentRepository (integration)', () => {
     expect(found!.originResourceId).toBe(ORIGIN);
     expect(found!.destinationResourceId).toBe(DEST);
     expect(found!.items).toHaveLength(2);
-    expect(found!.items[0].description).toBe('mantas');
+    expect(found!.items[0].name).toBe('mantas');
     expect(found!.items[0].quantity).toBe(20);
-    expect(found!.items[1].quantity).toBeNull();
+    expect(found!.items[1].name).toBe('varios');
+    expect(found!.containerIds).toEqual([CONTAINER_A, CONTAINER_B]);
     expect(found!.assignedCapacityId).toBeNull();
     expect(found!.carrier).toBeNull();
     // createdAt comes back as a real Date (typed query builder).
     expect(found!.createdAt).toBeInstanceOf(Date);
+  });
+
+  it('round-trips a containers-only shipment (empty loose lines)', async () => {
+    const s = makeShipment({ items: [], containerIds: [CONTAINER_A] });
+    await repo.save(s);
+    const found = await repo.findById(s.id);
+
+    expect(found!.items).toHaveLength(0);
+    expect(found!.containerIds).toEqual([CONTAINER_A]);
   });
 
   it('persists assignment via upsert (capacity + carrier + status)', async () => {

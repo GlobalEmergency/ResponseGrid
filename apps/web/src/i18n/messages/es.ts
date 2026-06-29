@@ -2083,6 +2083,7 @@ export const es = {
     ship_item_quantity_placeholder: 'Cantidad',
     ship_item_unit_label: 'Unidad',
     ship_item_unit_placeholder: 'Unidad',
+    ship_item_category_label: 'Categoría',
     ship_item_add: '+ Añadir artículo',
     ship_item_remove: 'Quitar',
     ship_manifest_placeholder: 'Notas del manifiesto: carga frágil, instrucciones…',

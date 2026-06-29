@@ -1,10 +1,7 @@
 import {
-  ArrayNotEmpty,
   IsArray,
   IsEnum,
-  IsNotEmpty,
   IsOptional,
-  IsPositive,
   IsString,
   IsUUID,
   ValidateNested,
@@ -12,38 +9,7 @@ import {
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CarrierType, ShipmentStatus } from '../../domain/shipment-enums';
-import { Category } from '../../../supplies/domain/category';
-
-export class ShipmentItemDto {
-  @ApiProperty({ example: '5 cajas de agua', description: 'What moves' })
-  @IsString()
-  @IsNotEmpty()
-  description!: string;
-
-  @ApiPropertyOptional({
-    example: 5,
-    description: 'How much (positive). Optional — cargo is often loose.',
-    nullable: true,
-    type: Number,
-  })
-  @IsOptional()
-  @IsPositive()
-  quantity?: number;
-
-  @ApiPropertyOptional({ example: 'cajas', nullable: true, type: String })
-  @IsOptional()
-  @IsString()
-  unit?: string;
-
-  @ApiPropertyOptional({
-    enum: Category,
-    example: Category.Food,
-    description: 'Shared category taxonomy (optional — cargo may be loose)',
-  })
-  @IsOptional()
-  @IsEnum(Category)
-  category?: Category;
-}
+import { SupplyLineDto } from '../../../supplies/infrastructure/http/supply-line.dto';
 
 export class CreateShipmentDto {
   @ApiProperty({
@@ -67,15 +33,27 @@ export class CreateShipmentDto {
   @IsUUID()
   destinationResourceId!: string;
 
-  @ApiProperty({
-    type: [ShipmentItemDto],
-    description: 'Cargo manifest lines (at least one)',
+  @ApiPropertyOptional({
+    type: [SupplyLineDto],
+    description:
+      'Loose cargo lines (canonical SupplyLine). Optional when containers are loaded — a shipment must carry at least lines or containers.',
   })
+  @IsOptional()
   @IsArray()
-  @ArrayNotEmpty()
   @ValidateNested({ each: true })
-  @Type(() => ShipmentItemDto)
-  items!: ShipmentItemDto[];
+  @Type(() => SupplyLineDto)
+  items?: SupplyLineDto[];
+
+  @ApiPropertyOptional({
+    type: [String],
+    format: 'uuid',
+    description:
+      'Trackable containers (#140) loaded onto the expedition. Optional when loose lines are provided.',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('all', { each: true })
+  containerIds?: string[];
 
   @ApiPropertyOptional({
     example: 'Carga frágil, manipular con cuidado',

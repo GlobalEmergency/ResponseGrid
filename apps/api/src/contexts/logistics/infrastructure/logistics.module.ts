@@ -54,6 +54,16 @@ import { BullMqShipmentEventBus } from './bullmq-shipment-event-bus';
 import { IdentityModule } from '../../identity/infrastructure/identity.module';
 // MEMBERSHIP_REPOSITORY is exported by IdentityModule and consumed by the
 // controllers via @Inject — no factory needed here.
+import { SuppliesModule } from '../../supplies/supplies.module';
+import {
+  CONTAINER_REPOSITORY,
+  ContainerRepository,
+} from '../../supplies/domain/ports/container.repository';
+import {
+  SHIPMENT_CONTAINER_PORT,
+  ShipmentContainerPort,
+} from '../domain/ports/shipment-container-port';
+import { SuppliesShipmentContainerAdapter } from './supplies-shipment-container.adapter';
 
 export const SHIPMENT_EVENT_QUEUE = Symbol('ShipmentEventQueue');
 
@@ -142,13 +152,25 @@ const listCapacitiesProvider = {
   useFactory: (repo: TransportCapacityRepository) => new ListCapacities(repo),
 };
 
+const shipmentContainerPortProvider = {
+  provide: SHIPMENT_CONTAINER_PORT,
+  inject: [CONTAINER_REPOSITORY],
+  useFactory: (containers: ContainerRepository): ShipmentContainerPort =>
+    new SuppliesShipmentContainerAdapter(containers),
+};
+
 const createShipmentProvider = {
   provide: CreateShipment,
-  inject: [SHIPMENT_REPOSITORY, LOGISTICS_EMERGENCY_STATUS_READER],
+  inject: [
+    SHIPMENT_REPOSITORY,
+    LOGISTICS_EMERGENCY_STATUS_READER,
+    SHIPMENT_CONTAINER_PORT,
+  ],
   useFactory: (
     repo: ShipmentRepository,
     statusReader: LogisticsEmergencyStatusReader,
-  ) => new CreateShipment(repo, statusReader),
+    containerPort: ShipmentContainerPort,
+  ) => new CreateShipment(repo, statusReader, containerPort),
 };
 
 const assignCapacityToShipmentProvider = {
@@ -165,15 +187,21 @@ const markShipmentInTransitProvider = {
 
 const confirmShipmentDeliveryProvider = {
   provide: ConfirmShipmentDelivery,
-  inject: [SHIPMENT_REPOSITORY, SHIPMENT_EVENT_BUS],
-  useFactory: (repo: ShipmentRepository, bus: ShipmentEventBus) =>
-    new ConfirmShipmentDelivery(repo, bus),
+  inject: [SHIPMENT_REPOSITORY, SHIPMENT_EVENT_BUS, SHIPMENT_CONTAINER_PORT],
+  useFactory: (
+    repo: ShipmentRepository,
+    bus: ShipmentEventBus,
+    containerPort: ShipmentContainerPort,
+  ) => new ConfirmShipmentDelivery(repo, bus, containerPort),
 };
 
 const cancelShipmentProvider = {
   provide: CancelShipment,
-  inject: [SHIPMENT_REPOSITORY],
-  useFactory: (repo: ShipmentRepository) => new CancelShipment(repo),
+  inject: [SHIPMENT_REPOSITORY, SHIPMENT_CONTAINER_PORT],
+  useFactory: (
+    repo: ShipmentRepository,
+    containerPort: ShipmentContainerPort,
+  ) => new CancelShipment(repo, containerPort),
 };
 
 const listShipmentsProvider = {
@@ -208,7 +236,7 @@ const suggestCapacitiesForShipmentProvider = {
 };
 
 @Module({
-  imports: [DatabaseModule, IdentityModule],
+  imports: [DatabaseModule, IdentityModule, SuppliesModule],
   controllers: [LogisticsController, ShipmentController],
   providers: [
     eventQueueProvider,
@@ -219,6 +247,7 @@ const suggestCapacitiesForShipmentProvider = {
     emergencyStatusReaderProvider,
     capacityEmergencyLookupProvider,
     resourceLocationLookupProvider,
+    shipmentContainerPortProvider,
     publishCapacityProvider,
     withdrawCapacityProvider,
     listCapacitiesProvider,

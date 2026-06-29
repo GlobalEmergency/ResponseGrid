@@ -1,6 +1,7 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ShipmentController } from './shipment.controller';
 import { CreateShipmentDto, AssignCapacityToShipmentDto } from './shipment-dto';
+import { Category } from '../../../supplies/domain/category';
 import { CreateShipment } from '../../application/create-shipment';
 import { AssignCapacityToShipment } from '../../application/assign-capacity-to-shipment';
 import { MarkShipmentInTransit } from '../../application/mark-shipment-in-transit';
@@ -35,7 +36,7 @@ function createDto(): CreateShipmentDto {
     emergencyId: EM,
     originResourceId: '22222222-2222-4222-8222-222222222222',
     destinationResourceId: '33333333-3333-4333-8333-333333333333',
-    items: [{ description: 'agua' }],
+    items: [{ name: 'agua', quantity: 1, category: Category.Water }],
   };
 }
 
