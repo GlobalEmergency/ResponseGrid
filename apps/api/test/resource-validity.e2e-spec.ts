@@ -6,7 +6,10 @@ import { inArray } from 'drizzle-orm';
 import { AppModule } from '../src/app.module';
 import { DomainExceptionFilter } from '../src/contexts/resources/infrastructure/http/domain-exception.filter';
 import { createDb } from '../src/shared/db';
-import { resourcesTable } from '../src/contexts/resources/infrastructure/drizzle/schema';
+import {
+  resourcesTable,
+  resourceValidityReportsTable,
+} from '../src/contexts/resources/infrastructure/drizzle/schema';
 import {
   usersTable,
   membershipsTable,
@@ -201,6 +204,37 @@ describe('Resource validity reports (e2e)', () => {
     expect(entry).toBeDefined();
     expect(entry?.distinctReporters).toBe(3);
     expect(entry?.byReason).toEqual({ closed: 2, moved: 1 });
+  });
+
+  it('ignores expired reports in the disputed queue', async () => {
+    const id = await createPublishedResource('Punto caducado');
+    await report(id, CIT1_ID).expect(201);
+    await report(id, CIT2_ID).expect(201);
+    await report(id, CIT3_ID).expect(201);
+
+    const { db, pool } = createDb(
+      process.env.DATABASE_URL ??
+        'postgres://reliefhub:reliefhub@localhost:5433/reliefhub',
+    );
+    try {
+      await db
+        .update(resourceValidityReportsTable)
+        .set({
+          createdAt: new Date('2025-01-01T00:00:00.000Z'),
+        })
+        .where(inArray(resourceValidityReportsTable.resourceId, [id]));
+    } finally {
+      await pool.end();
+    }
+
+    const res = await request(server)
+      .get(`/emergencies/${EM}/coordination/disputed`)
+      .set('Authorization', `Bearer ${tok[COORD_ID]}`)
+      .expect(200);
+    const entry = (res.body as Array<{ resource: { id: string } }>).find(
+      (d) => d.resource.id === id,
+    );
+    expect(entry).toBeUndefined();
   });
 
   it('a non-coordinator cannot read the disputed queue or resolve (403)', async () => {

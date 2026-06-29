@@ -41,6 +41,30 @@ describe('SupplyLine', () => {
     expect(line.presentation).toBe('EV/ampolla');
   });
 
+  it('keeps the expiresAt date when provided', () => {
+    const line = SupplyLine.create({
+      name: 'Yogur',
+      quantity: 12,
+      unit: 'unidades',
+      category: Category.Food,
+      expiresAt: '2026-07-01',
+    });
+
+    expect(line.expiresAt).toBe('2026-07-01');
+  });
+
+  it('throws when expiresAt is not a YYYY-MM-DD date', () => {
+    expect(() =>
+      SupplyLine.create({
+        name: 'Yogur',
+        quantity: 12,
+        unit: 'unidades',
+        category: Category.Food,
+        expiresAt: '2026-07-01T12:00:00Z',
+      }),
+    ).toThrow(SupplyLineValidationError);
+  });
+
   it('throws when the name is empty', () => {
     expect(() =>
       SupplyLine.create({
@@ -66,13 +90,14 @@ describe('SupplyLine', () => {
     },
   );
 
-  it('round-trips through a snapshot (including presentation)', () => {
+  it('round-trips through a snapshot (including presentation and expiresAt)', () => {
     const line = SupplyLine.create({
       name: 'Budesonida',
       quantity: 5,
       unit: null,
       category: Category.Medicines,
       presentation: 'inhalador',
+      expiresAt: '2026-07-01',
     });
 
     const restored = SupplyLine.fromSnapshot(line.toSnapshot());

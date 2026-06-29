@@ -162,12 +162,14 @@ describe('DrizzleNeedRepository (integration)', () => {
           unit: 'amp',
           category: Category.Medicines,
           presentation: 'EV/ampolla',
+          expiresAt: '2026-07-01',
         }),
       ],
     });
     await repo.save(need);
     const found = await repo.findById(need.id);
     expect(found!.items[0].presentation).toBe('EV/ampolla');
+    expect(found!.items[0].expiresAt).toBe('2026-07-01');
   });
 
   it('round-trips need with multiple items', async () => {

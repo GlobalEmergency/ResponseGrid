@@ -225,6 +225,9 @@ export function NeedDetail({
                   {item.presentation != null && item.presentation !== ''
                     ? ` · ${item.presentation}`
                     : ''}
+                  {item.expiresAt != null && item.expiresAt !== ''
+                    ? ` · ${item.expiresAt}`
+                    : ''}
                 </span>
               </li>
             ))}

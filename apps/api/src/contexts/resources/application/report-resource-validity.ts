@@ -23,6 +23,8 @@ export interface ReportResourceValidityCommand {
 
 /** Distinct citizen reports that flip a resource to `disputed`. */
 export const DEFAULT_DISPUTE_THRESHOLD = 3;
+/** Reports older than this are ignored when counting dispute votes. */
+export const FRESHNESS_WINDOW_DAYS = 45;
 
 /**
  * A logged-in citizen reports that a published point is no longer valid. We
@@ -80,9 +82,13 @@ export class ReportResourceValidity {
     }
     await this.reports.save(report);
 
-    const distinct = await this.reports.countOpenByResource(cmd.resourceId);
-    let disputed = resource.disputed;
-    if (distinct >= this.threshold && !disputed) {
+    const open = await this.reports.findOpenByResource(cmd.resourceId);
+    const cutoff = new Date(
+      Date.now() - FRESHNESS_WINDOW_DAYS * 24 * 60 * 60 * 1000,
+    );
+    const freshDistinct = open.filter((r) => r.createdAt >= cutoff).length;
+    let disputed = freshDistinct >= this.threshold;
+    if (disputed && !resource.disputed) {
       // Re-read so the flag decision uses the current persisted state, not the
       // snapshot loaded before this report was saved — two citizens crossing
       // the threshold at once must not each emit a ResourceDisputed event.
