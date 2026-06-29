@@ -93,5 +93,5 @@ export class SupplyLineResponseDto {
     description:
       'Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD).',
   })
-  expiresAt!: string | null;
+  expiresAt?: string | null;
 }
