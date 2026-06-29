@@ -23,7 +23,7 @@ import { DetailField, DetailSection } from '@/components/molecules/detail-field'
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
 import { categoryLabel } from '@/lib/categories';
-import { offerTitle, lineSummary } from '@/lib/offers';
+import { offerTitle, lineSummary } from '@/lib/supply-lines';
 
 type OfferViewDto = components['schemas']['OfferViewDto'];
 type NeedViewDto = components['schemas']['NeedViewDto'];

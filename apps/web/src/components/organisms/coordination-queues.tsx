@@ -24,7 +24,7 @@ import { OfferDetail } from '@/components/organisms/offer-detail';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
 import { categoryLabel } from '@/lib/categories';
-import { offerTitle } from '@/lib/offers';
+import { offerTitle } from '@/lib/supply-lines';
 
 type NeedView = components['schemas']['NeedViewDto'];
 type ResourceView = components['schemas']['ResourceViewDto'];
