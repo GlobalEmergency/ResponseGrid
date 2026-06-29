@@ -7,6 +7,7 @@ export interface SupplyLineRowValue {
   quantity: number;
   unit: string;
   category: string;
+  expiresAt?: string;
 }
 
 /** Per-row label strings (built from each form's i18n; same keys everywhere). */
@@ -23,6 +24,8 @@ export interface SupplyLineRowLabels {
   unitOpt: string;
   unitPlaceholder: string;
   categoryLabel: string;
+  expiryLabel?: string;
+  expiryOpt?: string;
 }
 
 interface SupplyLineRowFieldsProps {
@@ -80,6 +83,7 @@ export function SupplyLineRowFields({
         )}
       </div>
 
+      {/* Nombre del insumo */}
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor={`${idPrefix}-name-${rowId}`}
@@ -99,6 +103,7 @@ export function SupplyLineRowFields({
       </div>
 
       <div className="grid grid-cols-2 gap-3">
+        {/* Cantidad */}
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor={`${idPrefix}-qty-${rowId}`}
@@ -122,6 +127,7 @@ export function SupplyLineRowFields({
           />
         </div>
 
+        {/* Unidad */}
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor={`${idPrefix}-unit-${rowId}`}
@@ -141,6 +147,28 @@ export function SupplyLineRowFields({
         </div>
       </div>
 
+      {labels.expiryLabel != null && labels.expiryOpt != null && (
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor={`${idPrefix}-exp-${rowId}`}
+            className="text-sm font-medium text-ink-soft"
+          >
+            {labels.expiryLabel}{' '}
+            <span className="text-muted-soft font-normal">
+              {labels.expiryOpt}
+            </span>
+          </label>
+          <input
+            id={`${idPrefix}-exp-${rowId}`}
+            type="date"
+            value={value.expiresAt ?? ''}
+            onChange={(e) => onChange({ expiresAt: e.target.value })}
+            className="w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
+          />
+        </div>
+      )}
+
+      {/* Categoría */}
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor={`${idPrefix}-cat-${rowId}`}
