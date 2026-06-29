@@ -39,6 +39,9 @@ import { ConfirmIntakeReception } from '../../application/confirm-intake-recepti
 import { RejectIntake } from '../../application/reject-intake';
 import { MarkIntakeIncomplete } from '../../application/mark-intake-incomplete';
 import { GetIntakeDeepLink } from '../../application/get-intake-deep-link';
+import { GetDonationIntakeTracking } from '../../application/get-donation-intake-tracking';
+import { GetIncomingSummaryByResource } from '../../application/get-incoming-summary-by-resource';
+import { GetMyDonationIntakes } from '../../application/get-my-donation-intakes';
 import {
   CreateDonationIntakeDto,
   LookupDonorByContactDto,
@@ -54,6 +57,9 @@ import {
   DonationIntakeViewDto,
   DonationIntakeSearchHitDto,
   IntakeDeepLinkDto,
+  DonationIntakeTrackingDto,
+  IncomingSummaryDto,
+  MyDonationIntakeDto,
 } from './donation-intake-response.dto';
 import {
   JwtAuthGuard,
@@ -93,6 +99,9 @@ export class DonationIntakesController {
     private readonly rejectIntake: RejectIntake,
     private readonly markIntakeIncomplete: MarkIntakeIncomplete,
     private readonly getIntakeDeepLink: GetIntakeDeepLink,
+    private readonly getDonationIntakeTracking: GetDonationIntakeTracking,
+    private readonly getIncomingSummaryByResource: GetIncomingSummaryByResource,
+    private readonly getMyDonationIntakes: GetMyDonationIntakes,
   ) {}
 
   @Post('emergencies/:emergencyId/donation-intakes')
@@ -149,6 +158,51 @@ export class DonationIntakesController {
       donorPhone: dto.donorPhone ?? null,
       donorEmail: dto.donorEmail ?? null,
     });
+  }
+
+  @Get('emergencies/:emergencyId/donation-intakes/by-code/:code')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ intake: { ttl: 60_000, limit: 10 } })
+  @ApiOperation({ summary: 'Track a donation by its code (public, no PII)' })
+  @ApiParam({ name: 'emergencyId', format: 'uuid' })
+  @ApiParam({ name: 'code', example: 'ACO-7F3K' })
+  @ApiOkResponse({ type: DonationIntakeTrackingDto })
+  @ApiNotFoundResponse({ description: 'No donation with that code' })
+  @ApiTooManyRequestsResponse({ description: 'Rate limit exceeded' })
+  async trackByCode(
+    @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
+    @Param('code') code: string,
+  ): Promise<DonationIntakeTrackingDto> {
+    return this.getDonationIntakeTracking.execute(emergencyId, code);
+  }
+
+  @Get('resources/:resourceId/donation-intakes/incoming-summary')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('intake:read')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Aggregated forecast of incoming material for a collection point',
+  })
+  @ApiParam({ name: 'resourceId', format: 'uuid' })
+  @ApiOkResponse({ type: IncomingSummaryDto })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Missing intake:read' })
+  async incomingSummary(
+    @Param('resourceId', ParseUUIDPipe) resourceId: string,
+  ): Promise<IncomingSummaryDto> {
+    return this.getIncomingSummaryByResource.execute(resourceId);
+  }
+
+  @Get('me/donation-intakes')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "List the authenticated donor's own donations" })
+  @ApiOkResponse({ type: [MyDonationIntakeDto] })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  async myDonations(
+    @Request() req: AuthedRequest,
+  ): Promise<MyDonationIntakeDto[]> {
+    return this.getMyDonationIntakes.execute(req.user.id);
   }
 
   @Patch('donation-intakes/:intakeId')
