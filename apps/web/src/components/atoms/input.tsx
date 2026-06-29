@@ -6,9 +6,7 @@ const INPUT_BASE =
   'w-full rounded-lg border border-line bg-white py-3 text-base text-ink placeholder:text-muted-soft focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  /** Extra class names merged on top of the base style. */
   className?: string;
-  /** Optional leading icon rendered inside the field (e.g. a search glyph). */
   icon?: ReactNode;
 }
 

@@ -44,7 +44,6 @@ export default async function LoginPage({ searchParams }: Props) {
               </div>
             )}
 
-            {/* Login form */}
             <LoginForm next={next} t={t.login} />
           </Card>
         </div>

@@ -21,10 +21,6 @@ interface SkillTagProps {
   skill: string;
 }
 
-/**
- * Pastilla de skill de voluntario. Acepta cualquier string del enum VolunteerSkill.
- * Si el valor no es reconocido se muestra tal cual.
- */
 export function SkillTag({ skill }: SkillTagProps) {
   const label = SKILL_LABELS[skill as SkillValue] ?? skill;
   return (

@@ -32,7 +32,6 @@ export function CentrosList({ resources, ta }: CentrosListProps) {
   const [status, setStatus] = useState('');
   const [emergency, setEmergency] = useState('');
 
-  // Emergency options derived from the data (id → name), sorted by name.
   const emergencies = useMemo(() => {
     const byId = new Map<string, string>();
     for (const r of resources) {
@@ -78,7 +77,6 @@ export function CentrosList({ resources, ta }: CentrosListProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* ── Search ──────────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="centro-search"
@@ -98,7 +96,6 @@ export function CentrosList({ resources, ta }: CentrosListProps) {
         />
       </div>
 
-      {/* ── Filters (mobile-first: stack, then 3-up) ────────────────────── */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="flex flex-col gap-1.5">
           <label

@@ -1,9 +1,5 @@
 'use client';
 
-/**
- * Discrete notice shown when a form draft has been restored from localStorage.
- * Atom — no interactivity; purely informational.
- */
 export function DraftRestoredBanner() {
   return (
     <div

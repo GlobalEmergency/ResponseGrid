@@ -1,12 +1,7 @@
 'use client';
 
-/**
- * NavDrawer — the mobile top bar (brand + hamburger) and the slide-in drawer it
- * toggles. The nav content, brand and account block are passed in pre-rendered
- * by the server shell (the same nodes the desktop sidebar uses). The drawer
- * closes on Escape, backdrop click, the close button, and on any click inside
- * the nav (which covers link taps). Hidden at lg+.
- */
+// The nav content, brand and account block are passed in pre-rendered by the
+// server shell (the same nodes the desktop sidebar uses).
 import { useState, useEffect, type ReactNode } from 'react';
 
 interface NavDrawerProps {
@@ -40,7 +35,6 @@ export function NavDrawer({
 
   return (
     <div className="lg:hidden">
-      {/* Top bar */}
       <div className="flex items-center justify-between bg-navy px-4 py-3 text-white">
         {brand}
         <button
@@ -58,7 +52,6 @@ export function NavDrawer({
         </button>
       </div>
 
-      {/* Backdrop + sliding panel */}
       {open ? (
         <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={navAriaLabel}>
           <button

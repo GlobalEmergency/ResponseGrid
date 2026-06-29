@@ -14,9 +14,6 @@ export type ActionResult =
   | { status: 'success' }
   | { status: 'error'; message: string };
 
-/**
- * Fetch resources owned by the authenticated user for a given emergency.
- */
 export async function fetchMyResources(
   emergencyId: string,
   slug: string,
@@ -46,10 +43,6 @@ export async function fetchMyResources(
   return data;
 }
 
-/**
- * Update the publicStatus of a resource the authenticated user owns.
- * Calls POST /resources/{resourceId}/status (owner or coordinator).
- */
 export async function updateResourceStatus(
   resourceId: string,
   status: PublicStatus,

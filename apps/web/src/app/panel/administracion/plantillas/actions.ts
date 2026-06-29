@@ -14,8 +14,6 @@ export type TemplateActionResult =
 
 export type TemplateViewDto = components['schemas']['TemplateViewDto'];
 
-// ── List ────────────────────────────────────────────────────────────────────
-
 export async function fetchTemplates(): Promise<TemplateViewDto[]> {
   const token = await getToken();
   if (!token) return [];
@@ -28,8 +26,6 @@ export async function fetchTemplates(): Promise<TemplateViewDto[]> {
 
   return data ?? [];
 }
-
-// ── Create ──────────────────────────────────────────────────────────────────
 
 export async function createTemplateAction(
   _prev: TemplateActionResult,
@@ -90,8 +86,6 @@ export async function createTemplateAction(
   return { status: 'success', message: t.templates.ok_created };
 }
 
-// ── Delete ──────────────────────────────────────────────────────────────────
-
 export async function deleteTemplateAction(id: string): Promise<TemplateActionResult> {
   const token = await getToken();
   if (!token) {
@@ -122,8 +116,6 @@ export async function deleteTemplateAction(id: string): Promise<TemplateActionRe
   revalidatePath('/panel/administracion/plantillas');
   return { status: 'success' };
 }
-
-// ── Create from template ────────────────────────────────────────────────────
 
 export type CreateFromTemplateResult =
   | { status: 'idle' }

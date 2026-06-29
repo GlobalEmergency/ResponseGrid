@@ -57,10 +57,6 @@ export interface OrganizationDetail {
   emergencyIds: string[];
 }
 
-/**
- * Fetch the admin global list of organizations (GET /organizations/admin).
- * On 401 the session is cleared and the user is redirected to login.
- */
 export async function fetchOrganizations(): Promise<OrganizationListItem[]> {
   const token = await getToken();
   if (!token) redirect('/login?next=/panel/administracion/organizaciones');
@@ -80,10 +76,7 @@ export async function fetchOrganizations(): Promise<OrganizationListItem[]> {
   return (data ?? []) as OrganizationListItem[];
 }
 
-/**
- * Fetch one organization's admin detail (GET /organizations/:id).
- * Returns null on 404 so the page can render a not-found state.
- */
+// Returns null on 404 so the page can render a not-found state.
 export async function fetchOrganizationDetail(
   id: string,
 ): Promise<OrganizationDetail | null> {

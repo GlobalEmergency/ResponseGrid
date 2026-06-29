@@ -35,7 +35,6 @@ export function VolunteerSuggestionCard({
           : 'border-line bg-white hover:border-line'
       }`}
     >
-      {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-0.5">
           <h4 className="text-base font-bold text-ink leading-tight">
@@ -55,7 +54,6 @@ export function VolunteerSuggestionCard({
           </div>
         </div>
 
-        {/* Toggle button */}
         <button
           type="button"
           onClick={() => onToggle(volunteer.volunteerId)}
@@ -75,7 +73,6 @@ export function VolunteerSuggestionCard({
         </button>
       </div>
 
-      {/* Skills */}
       {volunteer.skills.length > 0 && (
         <div className="flex flex-wrap gap-1.5" aria-label={tc.volunteer_skills_label}>
           {volunteer.skills.map((skill) => (

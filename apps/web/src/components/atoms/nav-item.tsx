@@ -1,10 +1,7 @@
 'use client';
 
-/**
- * NavItem — a single sidebar/drawer link with active-route highlighting.
- * Labels arrive pre-resolved (the server shell resolves i18n + dynamic names),
- * so this atom only needs the current path. Styled for the navy sidebar.
- */
+// Labels arrive pre-resolved (the server shell resolves i18n + dynamic names),
+// so this atom only needs the current path.
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 

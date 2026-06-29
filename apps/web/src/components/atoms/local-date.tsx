@@ -33,17 +33,13 @@ import {
 } from '@/lib/format-date';
 
 interface LocalDateProps {
-  /** ISO 8601 timestamp string. */
   iso: string;
-  /** Include the time component (date + 24h time). Default: date only. */
   withTime?: boolean;
   /**
-   * Custom `Intl.DateTimeFormatOptions` for sites with a bespoke format. When
-   * set it takes precedence over `withTime`; any `timeZone` is ignored for the
-   * post-hydration local render. Omit for the standard date / date+time presets.
+   * When set it takes precedence over `withTime`; any `timeZone` is ignored for
+   * the post-hydration local render.
    */
   opts?: Intl.DateTimeFormatOptions;
-  /** Optional CSS classes forwarded to the <time> element. */
   className?: string;
 }
 

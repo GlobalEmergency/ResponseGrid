@@ -38,7 +38,6 @@ const VALID_CAP_STATUSES: CapacityStatus[] = [
   'withdrawn',
 ];
 
-// Resources usable as shipment origin/destination — collection/warehouse nodes.
 const RESOURCE_PAGE_SIZE = 100;
 
 type Props = {
@@ -99,7 +98,6 @@ export default async function CoordinacionExpedicionesPage({
 
   const canCreate = access.permissions.has('shipment:create');
 
-  // --- Parse filter params ----------------------------------------------
   const rawStatus =
     typeof resolvedSearchParams.status === 'string'
       ? resolvedSearchParams.status
@@ -134,7 +132,6 @@ export default async function CoordinacionExpedicionesPage({
     }
   };
 
-  // --- Fetch shipments + capacities + resources (for names/selects) -----
   const [shipments, capacities, resourcesPage] = await Promise.all([
     api
       .GET('/emergencies/{emergencyId}/logistics/shipments', {
@@ -164,7 +161,7 @@ export default async function CoordinacionExpedicionesPage({
         await onUnauthorized(r.response.status);
         return r.data ?? [];
       }),
-    // ponytail: origen/destino se eligen de un <select> poblado con la lista
+    // origen/destino se eligen de un <select> poblado con la lista
     // pública de recursos (sin map-resource-picker). Tomamos la primera página
     // (límite 100); paginación de recursos en el selector queda fuera de v1.
     api
@@ -181,7 +178,6 @@ export default async function CoordinacionExpedicionesPage({
   for (const r of resourcesPage) resourceNames[r.id] = r.name;
   const resourceOptions = resourcesPage.map((r) => ({ id: r.id, name: r.name }));
 
-  // Available capacities the coordinator can assign from a shipment drawer.
   const assignableCapacities = capacities.filter((c) => c.status === 'available');
 
   const isShipmentsFiltered = status !== undefined;
@@ -224,7 +220,6 @@ export default async function CoordinacionExpedicionesPage({
         />
       </div>
 
-      {/* ── Capacidades disponibles (read-only, #105) ──────────────────── */}
       <div className="flex flex-col gap-5 border-t border-line pt-6">
         <h2 className="text-xl font-bold text-ink">{tc.cap_heading}</h2>
         <p className="text-sm text-muted">{tc.cap_subtitle}</p>

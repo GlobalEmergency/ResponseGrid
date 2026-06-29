@@ -47,7 +47,6 @@ export function ExpiredNeedCard({ need, slug }: ExpiredNeedCardProps) {
       aria-label={tc.expired_card_label.replace('{title}', need.title)}
       className="flex flex-col gap-4 rounded-lg border-2 border-line bg-surface p-5 opacity-75"
     >
-      {/* Header */}
       <div className="flex flex-col gap-1">
         <h2 className="text-xl font-bold text-ink-soft leading-tight break-words">
           {need.title}
@@ -72,12 +71,10 @@ export function ExpiredNeedCard({ need, slug }: ExpiredNeedCardProps) {
         </div>
       </div>
 
-      {/* Error message */}
       {state.status === 'error' && (
         <ErrorMessage message={state.message ?? tc.error_unknown} />
       )}
 
-      {/* Renew form */}
       <form action={formAction}>
         <Button type="submit" disabled={pending} fullWidth>
           {pending ? tc.expired_renewing : tc.expired_renew}

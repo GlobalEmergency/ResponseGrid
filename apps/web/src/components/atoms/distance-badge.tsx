@@ -3,16 +3,10 @@ import type { Locale } from '@/i18n';
 interface DistanceBadgeProps {
   distanceMeters: number;
   locale: Locale;
-  /** i18n prefix word, defaults to "a" */
   label?: string;
 }
 
-/**
- * DistanceBadge — shows a human-friendly distance from the citizen's queried location.
- *
- * - <1000 m → "a 850 m"
- * - ≥1000 m → "a 2,3 km" (es) / "a 2.3 km" (en)
- */
+// <1000 m → "a 850 m"; ≥1000 m → "a 2,3 km" (es) / "a 2.3 km" (en).
 export function DistanceBadge({ distanceMeters, locale, label = 'a' }: DistanceBadgeProps) {
   let text: string;
 

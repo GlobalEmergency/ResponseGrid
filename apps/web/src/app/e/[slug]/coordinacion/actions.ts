@@ -40,9 +40,6 @@ export interface EditReportInput {
   priority?: ReportPriority;
 }
 
-/**
- * Matches an open offer to a need (coordinator only).
- */
 export async function matchOffer(
   offerId: string,
   needId: string,
@@ -82,9 +79,6 @@ export async function matchOffer(
   return { status: 'success' };
 }
 
-/**
- * Marks a matched offer as fulfilled (coordinator only).
- */
 export async function fulfillOffer(
   offerId: string,
   slug: string,
@@ -119,9 +113,6 @@ export async function fulfillOffer(
   return { status: 'success' };
 }
 
-/**
- * Cancels an offer (coordinator only in this context).
- */
 export async function cancelOffer(
   offerId: string,
   slug: string,
@@ -161,13 +152,6 @@ export type ActionResult =
   | { status: 'success' }
   | { status: 'error'; message: string };
 
-/**
- * Verifies a resource and immediately publishes it.
- * The verification level is derived server-side by the backend — no level
- * is sent in the request body.
- * The token is read server-side from the httpOnly cookie — never exposed to
- * the client.
- */
 export async function verifyAndPublish(
   resourceId: string,
   slug: string,
@@ -232,9 +216,6 @@ export async function verifyAndPublish(
   return { status: 'success' };
 }
 
-/**
- * Validates a pending need (moves it to "validated" state so it appears publicly).
- */
 export async function validateNeed(
   needId: string,
   slug: string,
@@ -305,16 +286,12 @@ export async function renewNeed(
   return { status: 'success' };
 }
 
-/**
- * Clears the auth cookie and redirects to the login page.
- */
 export async function logout(): Promise<never> {
   await clearToken();
   redirect('/login');
 }
 
 /**
- * Pauses intake for the given emergency (coordinator only).
  * Returns an ActionResult — does not redirect, so the coordinator stays on
  * the page and sees the outcome.
  */
@@ -353,9 +330,6 @@ export async function pauseEmergency(
   return { status: 'success' };
 }
 
-/**
- * Resumes intake for a paused emergency (coordinator only).
- */
 export async function resumeEmergency(
   emergencyId: string,
   slug: string,
@@ -752,9 +726,6 @@ export async function discardReport(
   return { status: 'success' };
 }
 
-/**
- * Updates the official announcement for an emergency (coordinator only).
- */
 export async function publishAnnouncement(
   emergencyId: string,
   slug: string,

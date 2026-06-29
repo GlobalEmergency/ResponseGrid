@@ -1,8 +1,3 @@
-/**
- * AccountNav — secondary account/coordination links for the home page.
- * Previously lived inside the home footer; now an in-page nav so the page keeps
- * a single (global) footer. Admin links surface only for admins.
- */
 import Link from 'next/link';
 import type { Messages } from '@/i18n/messages/es';
 

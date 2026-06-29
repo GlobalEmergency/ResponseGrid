@@ -27,7 +27,6 @@ export default async function SignupPage({ searchParams }: Props) {
         <PageHeaderBand title={t.signup.title} subtitle={t.signup.subtitle} />
         <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">
           <Card className="p-5 lg:p-7">
-            {/* Signup form */}
             <SignupForm next={next} t={t.signup} />
           </Card>
         </div>

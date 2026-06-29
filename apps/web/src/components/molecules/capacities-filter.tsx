@@ -1,10 +1,5 @@
 'use client';
 
-/**
- * Lean mode + status filter for the read-only "Capacidades disponibles" panel.
- * Drives the `capMode` and `capStatus` search params; the expediciones page
- * applies them to the fetched capacities. Mirrors {@link OffersFilter}.
- */
 import type { ChangeEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Select } from '@/components/atoms/select';

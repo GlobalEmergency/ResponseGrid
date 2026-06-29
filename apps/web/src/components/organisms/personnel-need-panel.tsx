@@ -95,7 +95,6 @@ export function PersonnelNeedPanel({
       aria-label={tc.personnel_panel_label.replace('{title}', need.title)}
       className="flex flex-col gap-4 rounded-lg border-2 border-info-line bg-info-soft p-4"
     >
-      {/* Need summary */}
       <div className="flex flex-col gap-1">
         <p className="text-xs font-semibold text-info uppercase tracking-wide">
           {tc.personnel_need_heading}
@@ -113,7 +112,6 @@ export function PersonnelNeedPanel({
         </div>
       </div>
 
-      {/* Volunteer suggestions */}
       <div className="flex flex-col gap-2">
         <p className="text-sm font-semibold text-ink">
           {tc.personnel_suggestions_heading}
@@ -139,10 +137,8 @@ export function PersonnelNeedPanel({
         )}
       </div>
 
-      {/* Error */}
       {error !== null && <ErrorMessage message={error} />}
 
-      {/* Create task button */}
       <button
         type="button"
         onClick={handleCreateTask}

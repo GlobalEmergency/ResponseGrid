@@ -1,15 +1,8 @@
 'use client';
 
-/**
- * EmergencyExplorer — segmented control that swaps between the "Puntos activos"
- * and "Necesidades validadas" lists so the landing shows ONE list at a time
- * instead of stacking every list vertically.
- *
- * Both lists are passed in as slots (already-configured client components) and
- * kept mounted: the inactive one is hidden with the `hidden` attribute so its
- * internal state (pagination, "near me", filters) survives a tab switch with no
- * refetch.
- */
+// Both lists stay mounted; the inactive one is hidden with the `hidden`
+// attribute so its internal state (pagination, "near me", filters) survives a
+// tab switch with no refetch.
 
 import { useId, useState, type ReactNode } from 'react';
 
@@ -22,9 +15,7 @@ interface EmergencyExplorerProps {
   needsCount: number;
   pointsSlot: ReactNode;
   needsSlot: ReactNode;
-  /** Which tab is selected on first render. */
   initialTab?: Tab;
-  /** Accessible label for the whole tablist. */
   ariaLabel: string;
 }
 

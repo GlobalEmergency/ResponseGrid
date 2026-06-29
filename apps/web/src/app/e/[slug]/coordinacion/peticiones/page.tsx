@@ -79,7 +79,6 @@ export default async function CoordinacionPeticionesPage({
     redirect(`/e/${slug}/coordinacion`);
   }
 
-  // --- Parse filter / search params -------------------------------------
   const rawCategory =
     typeof resolvedSearchParams.category === 'string' ? resolvedSearchParams.category : undefined;
   const rawPriority =
@@ -106,7 +105,6 @@ export default async function CoordinacionPeticionesPage({
     }
   };
 
-  // --- Fetch the validation queue + (coordinator) the expired list ------
   const [needsQueue, expiredNeeds] = await Promise.all([
     api
       .GET('/emergencies/{emergencyId}/needs/queue', {

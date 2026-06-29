@@ -1,9 +1,3 @@
-/**
- * DashboardLayout — shared server layout for authenticated/role areas. Loads the
- * nav context (cached), redirects anonymous users to /login, builds + resolves
- * the role-aware menu and renders the AppShell around the page. Section layouts
- * delegate to this; the coordinación layout passes an emergencyContext banner.
- */
 import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { getT } from '@/i18n/server';

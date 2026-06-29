@@ -7,12 +7,8 @@ import { getMessages } from '@/i18n';
 const selectClass =
   'rounded-lg border-2 border-line bg-white px-3 py-1.5 text-sm text-ink focus:border-navy focus:outline-none';
 
-/**
- * AuditFilter — client component that drives `entityType` and
- * `emergencyId` searchParams filters for the audit log page.
- * Uses router.replace so the Server Component page re-renders with
- * updated params without a full navigation.
- */
+// Uses router.replace so the Server Component page re-renders with updated
+// params without a full navigation.
 export function AuditFilter() {
   const ta = getMessages(useLocale()).admin;
   const router = useRouter();

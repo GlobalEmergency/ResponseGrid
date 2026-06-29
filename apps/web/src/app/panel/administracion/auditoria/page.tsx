@@ -31,13 +31,11 @@ interface PageProps {
 const PAGE_LIMIT = 50;
 
 export default async function AuditoriaPage({ searchParams }: PageProps) {
-  // ── Auth guard ──────────────────────────────────────────────────────────
   const token = await getToken();
   if (!token) {
     redirect('/login?next=/panel/administracion/auditoria');
   }
 
-  // ── Admin check via GET /auth/me ────────────────────────────────────────
   const { data: me, response: meResponse } = await api.GET('/auth/me', {
     headers: authHeaders(token),
   });
@@ -50,13 +48,11 @@ export default async function AuditoriaPage({ searchParams }: PageProps) {
     redirect('/');
   }
 
-  // ── Resolve searchParams ─────────────────────────────────────────────────
   const params = await searchParams;
   const entityType = params.entityType ?? '';
   const emergencyId = params.emergencyId ?? '';
   const offset = Number(params.offset ?? '0');
 
-  // ── Fetch audit entries ──────────────────────────────────────────────────
   const { entries, total } = await fetchAuditEntries({
     ...(entityType ? { entityType } : {}),
     ...(emergencyId ? { emergencyId } : {}),
@@ -93,12 +89,10 @@ export default async function AuditoriaPage({ searchParams }: PageProps) {
           </p>
         )}
 
-        {/* ── FILTROS ─────────────────────────────────────────────────── */}
         <section aria-label={ta.audit_filters_aria}>
           <AuditFilter />
         </section>
 
-        {/* ── LISTADO ─────────────────────────────────────────────────── */}
         <section aria-labelledby="audit-heading" className="flex flex-col gap-4">
           <h2 id="audit-heading" className="text-xl font-bold text-ink">
             {ta.audit_recent_heading}
@@ -115,14 +109,12 @@ export default async function AuditoriaPage({ searchParams }: PageProps) {
             />
           ) : (
             <>
-              {/* ── Mobile: stacked cards ──────────────────────────────── */}
               <ul className="flex flex-col gap-3 md:hidden" role="list">
                 {entries.map((entry) => (
                   <AuditEntryCard key={entry.id} entry={entry} />
                 ))}
               </ul>
 
-              {/* ── Desktop: table ─────────────────────────────────────── */}
               <div className="hidden md:block overflow-x-auto rounded-lg border-2 border-navy">
                 <table className="w-full text-left border-collapse">
                   <thead>
@@ -155,7 +147,6 @@ export default async function AuditoriaPage({ searchParams }: PageProps) {
                 </table>
               </div>
 
-              {/* ── Pagination ─────────────────────────────────────────── */}
               {(hasPrev || hasNext) && (
                 <nav
                   aria-label={ta.audit_pagination_aria}

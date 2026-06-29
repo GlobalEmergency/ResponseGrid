@@ -46,9 +46,6 @@ export async function markNotificationReadAction(
   return { status: 'success' };
 }
 
-/**
- * Mark all notifications for the authenticated user as read.
- */
 export async function markAllNotificationsReadAction(): Promise<NotificationActionResult> {
   const token = await getToken();
   if (!token) {

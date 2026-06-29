@@ -25,12 +25,8 @@ interface CapacitiesPanelProps {
   emptyDescription: string;
 }
 
-/**
- * Read-only "Capacidades disponibles" panel (#105's coordinator-visible view):
- * each capacity card shows mode, capacity (peso/volumen), coverage area, window
- * and status. No actions — coordination assigns capacities from the shipment
- * detail drawer, not here.
- */
+// No actions here — coordination assigns capacities from the shipment detail
+// drawer, not this read-only panel.
 export function CapacitiesPanel({
   capacities,
   tc,

@@ -1,13 +1,3 @@
-/**
- * Derives, from a principal's effective grants and the role catalog, the set of
- * scopes they can ADMINISTER and what they can do in each. Pure and
- * framework-free so it works in Server and Client Components and is unit-tested.
- *
- * This is the heart of the role-aware admin hub: instead of special-casing each
- * role, we read the permissions each grant confers and group management
- * capabilities by scope (docs/features/13 §3, §5).
- */
-
 /** Permissions that make a principal an administrator of a scope. */
 export const MANAGEMENT_PERMISSIONS = [
   'role:grant',

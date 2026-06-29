@@ -1,10 +1,5 @@
 import Link from 'next/link';
 
-/**
- * Hub entry for one coordination section: a full-width tap target with the
- * section name, an optional pending-count pill and a trailing arrow. Used by the
- * coordination landing to route into each section (Recursos, Peticiones…).
- */
 interface CoordinationSectionLinkProps {
   href: string;
   label: string;

@@ -1,13 +1,5 @@
 'use client';
 
-/**
- * OrgSelectorField — client part of the OrgSelector.
- *
- * Renders the "on whose behalf?" `<select name="organizationId">` plus a
- * "create organization" trigger that opens a modal. A freshly created org is
- * appended to the list and auto-selected, so it is submitted with the parent
- * form. The list is seeded server-side via `initialOrgs`.
- */
 import { useState } from 'react';
 import { getMessages } from '@/i18n';
 import { useLocale } from '@/i18n/locale-context';

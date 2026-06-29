@@ -1,10 +1,3 @@
-/**
- * EmergencyQuickLinks — in-page quick access for the emergency landing.
- *
- * Was previously a second <footer>; now a plain nav section so the page keeps a
- * single (global) footer. Surfaces authenticated self-service links and the
- * coordination entry, and points the trust line at the public verify guide.
- */
 import Link from 'next/link';
 import type { Messages } from '@/i18n/messages/es';
 

@@ -46,13 +46,11 @@ export default async function DonarPage({ params, searchParams }: Props) {
     notFound();
   }
 
-  // Resolve optional ?needId= query param
   const rawNeedId =
     typeof resolvedSearchParams.needId === 'string'
       ? resolvedSearchParams.needId.trim()
       : undefined;
 
-  // If a needId is provided, try to resolve the need title from the public list
   let targetNeedTitle: string | undefined;
   if (rawNeedId !== undefined && rawNeedId !== '') {
     const { data: needs } = await api.GET(

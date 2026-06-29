@@ -1,7 +1,3 @@
-/**
- * PrivacyNote — Prominent callout reminding users that data is private
- * and only accessible to authorised emergency personnel.
- */
 export function PrivacyNote() {
   return (
     <div

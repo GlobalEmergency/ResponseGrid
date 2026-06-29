@@ -1,24 +1,17 @@
 'use client';
 
-/**
- * Sub-navigation for the administration area (`/panel/administracion`). Platform
- * admins get the global management tools; scope-only admins (org/group/emergency)
- * see just the hub, so the tab bar is hidden for them. Delegates rendering to the
- * shared {@link SectionTabs}.
- */
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
 import { SectionTabs, type SectionTab } from '@/components/organisms/section-tabs';
 
 interface AdminTabsProps {
-  /** Platform admins get the global tools; scope admins see only the hub. */
   isPlatformAdmin: boolean;
 }
 
 export function AdminTabs({ isPlatformAdmin }: AdminTabsProps) {
   const tn = getMessages(useLocale()).nav;
 
-  // Scope-only admins have no global tools to navigate — the hub stands alone.
+  // Scope-only admins reach just the hub — no global tools to tab between.
   if (!isPlatformAdmin) return null;
 
   const base = '/panel/administracion';

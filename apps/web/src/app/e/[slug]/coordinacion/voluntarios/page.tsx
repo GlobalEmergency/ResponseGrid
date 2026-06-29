@@ -11,7 +11,6 @@ import { EmptyState } from '@/components/molecules/empty-state';
 import { getT } from '@/i18n/server';
 import type { components } from '@reliefhub/api-client';
 
-// Always fetch live data — never serve a stale cached page.
 export const dynamic = 'force-dynamic';
 
 type VolunteerStatus = components['schemas']['VolunteerViewDto']['status'];
@@ -39,13 +38,11 @@ export default async function CoordinacionVoluntariosPage({ params, searchParams
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
 
-  // --- Auth guard ---
   const token = await getToken();
   if (token === null) {
     redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
   }
 
-  // --- Emergency resolution ---
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
     notFound();
@@ -54,7 +51,6 @@ export default async function CoordinacionVoluntariosPage({ params, searchParams
   const emergencyId = emergency.id;
   const headers = authHeaders(token);
 
-  // --- Parse roster filter params ---
   const VALID_SKILLS: VolunteerSkill[] = ['driving', 'medical', 'logistics', 'cooking', 'languages', 'admin', 'general'];
   const VALID_AVAILABILITIES: VolunteerAvailability[] = ['immediate', 'this_week', 'flexible'];
   const VALID_VEHICLES: VolunteerVehicle[] = ['none', 'car', 'van', 'truck'];
@@ -70,7 +66,6 @@ export default async function CoordinacionVoluntariosPage({ params, searchParams
   const vehicleFilter = VALID_VEHICLES.includes(rawVehicle as VolunteerVehicle) ? rawVehicle as VolunteerVehicle : undefined;
   const statusFilter = VALID_STATUSES.includes(rawStatus as VolunteerStatus) ? rawStatus as VolunteerStatus : undefined;
 
-  // --- Fetch roster and tasks in parallel ---
   const [rosterResult, tasksResult] = await Promise.all([
     api.GET('/emergencies/{emergencyId}/volunteers', {
       params: {
@@ -90,13 +85,11 @@ export default async function CoordinacionVoluntariosPage({ params, searchParams
     }),
   ]);
 
-  // Handle 401 — token expired
   if (rosterResult.response.status === 401 || tasksResult.response.status === 401) {
     await clearToken();
     redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
   }
 
-  // Handle 403 — not a coordinator for this emergency
   if (rosterResult.response.status === 403 || tasksResult.response.status === 403) {
     redirect(`/e/${slug}/coordinacion`);
   }
@@ -116,7 +109,6 @@ export default async function CoordinacionVoluntariosPage({ params, searchParams
 
   return (
     <>
-      {/* ── ROSTER DE VOLUNTARIOS ────────────────────────────────── */}
       <section aria-labelledby="roster-heading" className="flex flex-col gap-4">
         <h2 id="roster-heading" className="text-xl font-bold text-ink">
           {tc.roster_heading}
@@ -142,16 +134,13 @@ export default async function CoordinacionVoluntariosPage({ params, searchParams
 
       <hr className="border-line" />
 
-      {/* ── TAREAS ───────────────────────────────────────────────── */}
       <section aria-labelledby="tasks-heading" className="flex flex-col gap-6">
         <h2 id="tasks-heading" className="text-xl font-bold text-ink">
           {tc.tasks_heading}
         </h2>
 
-        {/* Create task form */}
         <CreateTaskForm emergencyId={emergencyId} slug={slug} />
 
-        {/* Task list */}
         {tasks.length === 0 ? (
           <EmptyState
             title={tc.tasks_empty_title}

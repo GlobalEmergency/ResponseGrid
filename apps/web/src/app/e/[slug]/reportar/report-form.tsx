@@ -58,7 +58,6 @@ export function ReportForm({
     draftSetters,
   );
 
-  // Clear draft on successful submit
   useEffect(() => {
     if (state.status === 'success') clearDraft();
   }, [state.status, clearDraft]);
@@ -108,7 +107,6 @@ export function ReportForm({
         <ErrorMessage message={state.message ?? t.error_fallback} />
       )}
 
-      {/* Tipo */}
       <FormField
         htmlFor="type"
         label={<>{t.type_label} <span aria-hidden="true">*</span></>}
@@ -127,7 +125,6 @@ export function ReportForm({
         </Select>
       </FormField>
 
-      {/* Prioridad */}
       <FormField
         htmlFor="priority"
         label={<>{t.priority_label} <span aria-hidden="true">*</span></>}
@@ -146,7 +143,6 @@ export function ReportForm({
         </Select>
       </FormField>
 
-      {/* Nota */}
       <FormField
         htmlFor="note"
         label={<>{t.note_label} <span aria-hidden="true">*</span></>}
@@ -162,7 +158,6 @@ export function ReportForm({
         />
       </FormField>
 
-      {/* Punto relacionado */}
       {myResources.length > 0 && (
         <FormField
           htmlFor="resourceId"
@@ -187,10 +182,8 @@ export function ReportForm({
         <input type="hidden" name="resourceId" value={prefilledResourceId} />
       )}
 
-      {/* Fotos */}
       <PhotoUploader onUrlsChange={handlePhotoUrlsChange} />
 
-      {/* Submit */}
       <Button type="submit" disabled={pending} fullWidth>
         {pending ? t.submitting : t.submit}
       </Button>

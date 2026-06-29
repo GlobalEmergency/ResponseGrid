@@ -31,7 +31,6 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function CentroDetailPage({ params }: Props) {
   const { id } = await params;
 
-  // ── Auth guard ──────────────────────────────────────────────────────────
   const token = await getToken();
   if (!token) redirect(`/login?next=/panel/administracion/centros/${id}`);
 
@@ -72,7 +71,6 @@ export default async function CentroDetailPage({ params }: Props) {
         backLabel={ta.centros_detail_back}
       />
       <div className="flex flex-col gap-8">
-        {/* ── Resumen ─────────────────────────────────────────────────── */}
           <section className="flex flex-col gap-3 rounded-lg border border-line bg-white p-4">
             <div className="flex flex-wrap items-center gap-2">
               <span
@@ -177,7 +175,6 @@ export default async function CentroDetailPage({ params }: Props) {
             </dl>
           </section>
 
-          {/* ── Inventario declarado ────────────────────────────────────── */}
           <section
             aria-labelledby="inventory-heading"
             className="flex flex-col gap-3"
@@ -212,7 +209,6 @@ export default async function CentroDetailPage({ params }: Props) {
             )}
           </section>
 
-          {/* ── Reportes de validez ─────────────────────────────────────── */}
           <section
             aria-labelledby="reports-heading"
             className="flex flex-col gap-3"

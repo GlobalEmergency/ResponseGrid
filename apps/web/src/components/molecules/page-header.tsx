@@ -4,24 +4,12 @@ import Link from 'next/link';
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
-  /** Optional back link, rendered above the title. */
   backHref?: string;
   backLabel?: string;
-  /** Right-aligned action slot (buttons, etc.). */
   actions?: ReactNode;
-  /** Below the title — role badges, status chips, etc. */
   badges?: ReactNode;
 }
 
-/**
- * PageHeader — the standard in-shell page header: a navy display title, an
- * optional subtitle and back link, plus a right-aligned actions slot and an
- * optional badges row. Used across the dashboard/panel areas; the navy
- * HeaderBandShell is reserved for standalone public pages. Replaces the ad-hoc
- * inline `<header>` blocks that each page used to define.
- *
- * Server component — no 'use client'.
- */
 export function PageHeader({
   title,
   subtitle,

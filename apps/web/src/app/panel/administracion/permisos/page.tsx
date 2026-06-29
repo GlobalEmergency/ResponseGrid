@@ -47,7 +47,6 @@ export default async function PermisosPage({ searchParams }: Props) {
         subtitle="Concede y revoca roles a usuarios y cuentas de servicio. Solo administradores."
       />
 
-      {/* ── Look up a principal's grants ───────────────────────────────── */}
       <section className="flex flex-col gap-4">
         <h2 className="text-xl font-bold text-ink">
           Consultar roles de un principal
@@ -118,7 +117,6 @@ export default async function PermisosPage({ searchParams }: Props) {
 
       <hr className="border-line" />
 
-      {/* ── Grant a role ───────────────────────────────────────────────── */}
       <section className="flex flex-col gap-4">
         <h2 className="text-xl font-bold text-ink">Conceder un rol</h2>
         <p className="text-xs text-amber-700 bg-amber-50 border border-amber-300 rounded px-3 py-2">
@@ -130,7 +128,6 @@ export default async function PermisosPage({ searchParams }: Props) {
 
       <hr className="border-line" />
 
-      {/* ── Role catalog reference ─────────────────────────────────────── */}
       <section className="flex flex-col gap-4">
         <h2 className="text-xl font-bold text-ink">
           Catálogo de roles ({roles.length})

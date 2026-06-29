@@ -15,10 +15,6 @@ export type CheckActionResult =
   | { status: 'success' }
   | { status: 'error'; message: string };
 
-/**
- * Fetch the authenticated user's volunteer profile for the given emergency.
- * Returns null when not registered (404) or on network error.
- */
 export async function fetchMyVolunteerProfile(
   emergencyId: string,
   slug: string,
@@ -48,9 +44,6 @@ export async function fetchMyVolunteerProfile(
   return data;
 }
 
-/**
- * Fetch tasks assigned to the authenticated volunteer for the given emergency.
- */
 export async function fetchMyTasks(
   emergencyId: string,
   slug: string,
@@ -76,9 +69,6 @@ export async function fetchMyTasks(
   return data ?? [];
 }
 
-/**
- * Check in a volunteer to a task.
- */
 export async function checkInTask(
   taskId: string,
   volunteerId: string,
@@ -114,9 +104,6 @@ export async function checkInTask(
   return { status: 'success' };
 }
 
-/**
- * Check out a volunteer from a task.
- */
 export async function checkOutTask(
   taskId: string,
   volunteerId: string,

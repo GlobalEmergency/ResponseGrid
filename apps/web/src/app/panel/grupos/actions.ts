@@ -44,7 +44,6 @@ export async function fetchMyGroups(): Promise<MyGroup[]> {
   return (data ?? []) as MyGroup[];
 }
 
-/** A group's basic info, or null if not found. */
 export async function fetchGroup(groupId: string): Promise<GroupInfo | null> {
   const token = await getToken();
   if (!token) return null;

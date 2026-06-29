@@ -1,8 +1,5 @@
 'use client';
 
-/**
- * NavGroup — an optional heading + a list of NavItems, for the app shell.
- */
 import { NavItem, type ResolvedNavItem } from '@/components/atoms/nav-item';
 
 export interface ResolvedNavGroup {

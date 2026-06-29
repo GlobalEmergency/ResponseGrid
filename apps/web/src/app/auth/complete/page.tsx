@@ -35,7 +35,6 @@ export default function AuthCompletePage() {
       return;
     }
 
-    // Call the Server Action — it sets the cookie and redirects to `next` (or /).
     void completeOAuthAction(token, next ?? undefined);
   }, []);
 

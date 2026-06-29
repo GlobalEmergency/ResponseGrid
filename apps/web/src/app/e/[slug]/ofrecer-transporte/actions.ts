@@ -19,7 +19,7 @@ function isMode(value: unknown): value is CapacityMode {
   return VALID_MODES.includes(value as CapacityMode);
 }
 
-// ponytail: restricciones libres v1 — lista cerrada de checkboxes en la UI; el
+// restricciones libres v1 — lista cerrada de checkboxes en la UI; el
 // API acepta string[] arbitrario, así que sólo dejamos pasar las tres conocidas.
 const VALID_CONSTRAINTS = ['refrigerated', 'hazmat', 'fragile'] as const;
 
@@ -116,7 +116,7 @@ export async function submitCapacity(
     headers: authHeaders(token),
     body: {
       emergencyId,
-      // ponytail: el proveedor es siempre el ciudadano autenticado (volunteer);
+      // el proveedor es siempre el ciudadano autenticado (volunteer);
       // sin selector de proveedor ni org-as-provider en esta pantalla (#105).
       provider: { type: 'volunteer', id: providerId },
       mode: rawMode,
@@ -124,7 +124,7 @@ export async function submitCapacity(
         ...(weightKg !== undefined ? { weightKg } : {}),
         ...(volumeM3 !== undefined ? { volumeM3 } : {}),
       },
-      // ponytail: área libre v1; corredor por coords/resource-picking diferido —
+      // área libre v1; corredor por coords/resource-picking diferido —
       // el matching #107 admite áreas (rankea más abajo).
       coverage: { kind: 'area', area: coverageArea },
       ...(window !== undefined ? { window } : {}),

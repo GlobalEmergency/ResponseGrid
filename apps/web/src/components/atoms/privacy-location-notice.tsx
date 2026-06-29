@@ -1,12 +1,4 @@
-/**
- * PrivacyLocationNotice — Atom (F09 · Privacidad de ubicación)
- *
- * Renders a discrete notice when a need has approximate coordinates.
- * Only shows when `locationSensitivity === 'approximate'`.
- */
-
 interface PrivacyLocationNoticeProps {
-  /** Translated message text from i18n. */
   text: string;
 }
 

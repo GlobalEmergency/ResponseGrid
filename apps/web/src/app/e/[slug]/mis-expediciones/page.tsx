@@ -31,7 +31,6 @@ export default async function MisExpedicionesPage({ params }: Props) {
   const { t } = await getT();
   const ta = t.account;
 
-  // --- Auth guard -----------------------------------------------------------
   const token = await getToken();
   if (token === null) {
     redirect(`/login?next=/e/${slug}/mis-expediciones`);
@@ -45,7 +44,6 @@ export default async function MisExpedicionesPage({ params }: Props) {
   const emergencyId = emergency.id;
   const headers = authHeaders(token);
 
-  // --- Fetch my shipments + resource names in parallel ----------------------
   const [shipments, resourcesPage] = await Promise.all([
     api
       .GET('/logistics/shipments/mine', {

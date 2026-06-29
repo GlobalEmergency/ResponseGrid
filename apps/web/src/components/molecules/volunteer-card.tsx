@@ -82,7 +82,6 @@ export function VolunteerCard({ volunteer, slug }: VolunteerCardProps) {
       aria-label={tc.volunteer_card_label.replace('{name}', volunteer.name)}
       className="flex flex-col gap-3 rounded-lg border-2 border-line bg-white p-4"
     >
-      {/* Header */}
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex flex-col gap-0.5">
           <h3 className="text-base font-bold text-ink leading-tight">{volunteer.name}</h3>
@@ -93,7 +92,6 @@ export function VolunteerCard({ volunteer, slug }: VolunteerCardProps) {
         </span>
       </div>
 
-      {/* Skills */}
       {volunteer.skills.length > 0 && (
         <div className="flex flex-wrap gap-1.5" aria-label={tc.volunteer_skills_label}>
           {volunteer.skills.map((skill) => (
@@ -104,7 +102,6 @@ export function VolunteerCard({ volunteer, slug }: VolunteerCardProps) {
         </div>
       )}
 
-      {/* Meta row */}
       <div className="flex flex-wrap gap-3 text-xs text-muted">
         <span>
           <span className="font-medium">{tc.volunteer_availability_label}:</span>{' '}
@@ -117,10 +114,8 @@ export function VolunteerCard({ volunteer, slug }: VolunteerCardProps) {
         </span>
       </div>
 
-      {/* Error */}
       {state.status === 'error' && <ErrorMessage message={state.message} />}
 
-      {/* Status change form */}
       <form action={formAction} className="flex items-center gap-2 flex-wrap">
         <label htmlFor={`status-${volunteer.id}`} className="text-xs font-semibold text-ink-soft uppercase tracking-wide">
           {tc.volunteer_change_status_label}:

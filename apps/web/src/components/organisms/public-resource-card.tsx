@@ -26,14 +26,6 @@ interface PublicResourceCardProps {
   slug?: string;
 }
 
-/**
- * PublicResourceCard — a verified logistics point (Banda oficial look):
- * trust + operational pills on top, name, then "type · stage · city, country".
- *
- * Carries the rich data layer: accepts chips (via `lib/categories`), a meta row
- * (contact / schedule / manager / source) and a freshness indicator. Every
- * extra field is null-guarded so the card degrades gracefully.
- */
 export function PublicResourceCard({
   resource,
   t,
@@ -78,7 +70,6 @@ export function PublicResourceCard({
       aria-label={t.aria_label.replace('{name}', resource.name)}
       className="flex flex-col gap-1.5 p-4"
     >
-      {/* ── Trust + operational pills ───────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-2">
         <VerificationBadge level={resource.verificationLevel} t={tVerification} />
         <StatusLight status={resource.publicStatus} t={tStatusLight} />
@@ -100,7 +91,6 @@ export function PublicResourceCard({
         )}
       </div>
 
-      {/* ── Name ────────────────────────────────────────────────────────── */}
       <h3 className="text-[15px] font-bold leading-tight text-ink">
         {slug != null ? (
           <Link
@@ -114,10 +104,8 @@ export function PublicResourceCard({
         )}
       </h3>
 
-      {/* ── Subtitle: type · stage · city, country ──────────────────────── */}
       <p className="text-[12.5px] text-muted">{subtitle}</p>
 
-      {/* ── Accepts chips ───────────────────────────────────────────────── */}
       {(resource.accepts ?? []).length > 0 && (
         <div className="mt-0.5 flex flex-wrap gap-1" role="list" aria-label={t.accepts_label}>
           {(resource.accepts ?? []).map((slug) => (
@@ -132,7 +120,6 @@ export function PublicResourceCard({
         </div>
       )}
 
-      {/* ── Meta row: contact / schedule / manager ──────────────────────── */}
       {/* sourceName is intentionally NOT rendered — ResponseGrid is the
           source of truth; external provenance is internal metadata only. */}
       {(resource.contact != null ||
@@ -164,14 +151,12 @@ export function PublicResourceCard({
         </dl>
       )}
 
-      {/* ── Sin contacto oficial (#64) ──────────────────────────────────── */}
       {resource.contact == null && (
         <p className="text-xs italic text-muted-soft">
           {t.no_official_contact}
         </p>
       )}
 
-      {/* ── Freshness indicator ─────────────────────────────────────────── */}
       {resource.externalUpdatedAt != null && (
         <FreshnessIndicator lastVerifiedAt={resource.externalUpdatedAt} />
       )}

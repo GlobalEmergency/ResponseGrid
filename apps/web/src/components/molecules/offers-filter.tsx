@@ -1,10 +1,5 @@
 'use client';
 
-/**
- * Category + status filter for the coordination Offers queue. Drives the
- * `category` and `status` search params; the page applies them to the fetched
- * offers. Mirrors {@link NeedsFilter}'s URL-sync approach.
- */
 import type { ChangeEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Select } from '@/components/atoms/select';

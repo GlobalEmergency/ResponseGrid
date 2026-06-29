@@ -24,7 +24,6 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function UsuarioDetailPage({ params }: Props) {
   const { id } = await params;
 
-  // ── Auth guard ──────────────────────────────────────────────────────────
   const token = await getToken();
   if (!token) redirect(`/login?next=/panel/administracion/usuarios/${id}`);
 
@@ -62,7 +61,6 @@ export default async function UsuarioDetailPage({ params }: Props) {
         backLabel={ta.users_detail_back}
       />
       <div className="flex flex-col gap-8">
-        {/* ── Resumen ─────────────────────────────────────────────────── */}
         <Card className="flex flex-col gap-3 border-navy p-4">
           {user.isAdmin && (
             <div className="flex flex-wrap items-center gap-2">
@@ -105,7 +103,6 @@ export default async function UsuarioDetailPage({ params }: Props) {
           </dl>
         </Card>
 
-        {/* ── Roles / grants por ámbito ───────────────────────────────── */}
         <section aria-labelledby="grants-heading" className="flex flex-col gap-3">
           <h2 id="grants-heading" className="text-lg font-bold text-ink">
             {ta.users_detail_grants_heading.replace(
@@ -159,7 +156,6 @@ export default async function UsuarioDetailPage({ params }: Props) {
           )}
         </section>
 
-        {/* ── Organizaciones ──────────────────────────────────────────── */}
         <section aria-labelledby="orgs-heading" className="flex flex-col gap-3">
           <h2 id="orgs-heading" className="text-lg font-bold text-ink">
             {ta.users_detail_orgs_heading.replace(
@@ -194,7 +190,6 @@ export default async function UsuarioDetailPage({ params }: Props) {
           )}
         </section>
 
-        {/* ── Actividad reciente ──────────────────────────────────────── */}
         <section
           aria-labelledby="activity-heading"
           className="flex flex-col gap-3"

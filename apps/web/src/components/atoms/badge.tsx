@@ -42,7 +42,6 @@ const VARIANT_CLASSES: Record<BadgeVariant, string> = {
     'inline-flex items-center rounded-full border border-success bg-success-soft px-2.5 py-0.5 text-xs font-semibold text-success',
   'offer-cancelled':
     'inline-flex items-center rounded-full border border-line bg-surface-alt px-2.5 py-0.5 text-xs font-semibold text-muted',
-  // Need-priority pills (Banda oficial brand)
   'priority-urgent':
     'inline-flex items-center rounded-full bg-danger-soft px-2 py-0.5 text-[10.5px] font-extrabold uppercase tracking-[0.05em] text-danger',
   'priority-high':
