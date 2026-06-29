@@ -81,6 +81,7 @@ export class AuthController {
       email: dto.email,
       password: dto.password,
       name: dto.name,
+      phone: dto.phone,
     });
   }
 

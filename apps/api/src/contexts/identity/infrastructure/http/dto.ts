@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class LoginDto {
@@ -30,6 +30,17 @@ export class RegisterDto {
   @ApiProperty({ example: 'Jane Doe' })
   @IsString()
   name!: string;
+
+  @ApiProperty({
+    example: '+58 412 555 0101',
+    required: false,
+    nullable: true,
+    type: String,
+    description: 'Teléfono de contacto opcional',
+  })
+  @IsOptional()
+  @IsString()
+  phone?: string;
 }
 
 export class RegisterResponseDto {
@@ -92,4 +103,22 @@ export class MeResponseDto {
     description: 'The effective role grants (role @ scope) for this user',
   })
   grants!: MeGrantDto[];
+}
+
+export class UpdateProfileDto {
+  @ApiProperty({
+    example: '+58 412 555 0101',
+    required: false,
+    nullable: true,
+    type: String,
+    description: 'Nuevo teléfono. null para borrar.',
+  })
+  @IsOptional()
+  @IsString()
+  phone?: string | null;
+
+  @ApiProperty({ example: 'Nuevo Nombre', required: false })
+  @IsOptional()
+  @IsString()
+  name?: string;
 }

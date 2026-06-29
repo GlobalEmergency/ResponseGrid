@@ -136,4 +136,37 @@ describe('RegisterUser', () => {
     expect(found?.passwordHash).not.toBe('mysecret');
     expect(found?.passwordHash).toBe('hashed:mysecret');
   });
+
+  it('persiste el teléfono cuando se pasa en el registro', async () => {
+    const repo = new InMemoryUserRepository();
+    const useCase = new RegisterUser(repo, hasher, tokenService);
+
+    await useCase.execute({
+      email: 'phone@reliefhub.org',
+      password: 'password123',
+      name: 'Phone User',
+      phone: '+58 412 555 0101',
+    });
+
+    const found = await repo.findByEmail(
+      Email.fromString('phone@reliefhub.org'),
+    );
+    expect(found?.phone).toBe('+58 412 555 0101');
+  });
+
+  it('phone es null cuando no se pasa en el registro', async () => {
+    const repo = new InMemoryUserRepository();
+    const useCase = new RegisterUser(repo, hasher, tokenService);
+
+    await useCase.execute({
+      email: 'nophone@reliefhub.org',
+      password: 'password123',
+      name: 'No Phone',
+    });
+
+    const found = await repo.findByEmail(
+      Email.fromString('nophone@reliefhub.org'),
+    );
+    expect(found?.phone).toBeNull();
+  });
 });
