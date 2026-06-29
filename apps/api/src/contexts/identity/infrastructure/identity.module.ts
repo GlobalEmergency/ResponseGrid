@@ -25,6 +25,7 @@ import { ListServiceAccountsByOrg } from '../application/list-service-accounts-b
 import { ListUsersAdmin } from '../application/list-users-admin';
 import { GetUserAdminDetail } from '../application/get-user-admin-detail';
 import { EnsureDonorAccount } from '../application/ensure-donor-account';
+import { UpdateProfile } from '../application/update-profile';
 import {
   SET_PASSWORD_INVITER,
   SetPasswordInviter,
@@ -414,6 +415,12 @@ const ensureDonorAccountProvider = {
     new EnsureDonorAccount(users, inviter),
 };
 
+const updateProfileProvider = {
+  provide: UpdateProfile,
+  inject: [USER_REPOSITORY],
+  useFactory: (userRepo: UserRepository) => new UpdateProfile(userRepo),
+};
+
 @Module({
   imports: [
     DatabaseModule,
@@ -447,6 +454,7 @@ const ensureDonorAccountProvider = {
     authenticateWithProviderProvider,
     setPasswordInviterProvider,
     ensureDonorAccountProvider,
+    updateProfileProvider,
     grantRoleProvider,
     revokeGrantProvider,
     findUserByEmailProvider,

@@ -10,7 +10,7 @@ export interface RegisterUserCommand {
   email: string;
   password: string;
   name: string;
-  phone?: string;
+  phone?: string | undefined;
 }
 
 export class RegisterUser {

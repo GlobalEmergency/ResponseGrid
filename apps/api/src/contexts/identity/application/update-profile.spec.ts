@@ -59,7 +59,10 @@ describe('UpdateProfile', () => {
     const useCase = new UpdateProfile(repo);
 
     await expect(
-      useCase.execute({ userId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', phone: '+1 555 0101' }),
+      useCase.execute({
+        userId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        phone: '+1 555 0101',
+      }),
     ).rejects.toThrow('User not found');
   });
 });

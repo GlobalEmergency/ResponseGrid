@@ -4,8 +4,8 @@ import { User } from '../domain/user';
 
 export interface UpdateProfileCommand {
   userId: string;
-  phone?: string | null;
-  name?: string;
+  phone?: string | null | undefined;
+  name?: string | undefined;
 }
 
 export interface UpdateProfileResult {
