@@ -119,7 +119,7 @@ describe('GrantRole (delegation with attenuation)', () => {
 
   it('a principal without role:grant cannot delegate', async () => {
     const actor = actorWith({
-      roleId: 'emergency_coordinator',
+      roleId: 'emergency_verifier',
       scope: ScopeRef.emergency('e1'),
     });
     await expect(
