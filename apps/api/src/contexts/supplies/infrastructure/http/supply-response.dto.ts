@@ -1,6 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import type { SupplyStatus } from '../../domain/supply';
 
+/**
+ * Proyección PÚBLICA de un insumo. Solo expone datos publicables: NO incluye
+ * campos de gestión interna (`status`, `registrationNotes`), que viven en la
+ * API interna. El catálogo público solo sirve insumos activos.
+ */
 export class SupplyDto {
   @ApiProperty({
     format: 'uuid',
@@ -54,16 +58,6 @@ export class SupplyDto {
     description: 'Parent supply id when this item is a variant',
   })
   variantOfId!: string | null;
-
-  @ApiProperty({ enum: ['active', 'archived'], example: 'active' })
-  status!: SupplyStatus;
-
-  @ApiPropertyOptional({
-    example: '⚠️ Anotar volumen real en Obs si difiere',
-    nullable: true,
-    type: String,
-  })
-  registrationNotes!: string | null;
 
   @ApiProperty({
     type: [String],

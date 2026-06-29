@@ -1,8 +1,8 @@
 import { SuppliesController } from './supplies.controller';
-import { SupplyCatalogRecord } from '../../domain/ports/supply.repository';
+import { PublicSupplyRecord } from '../../domain/ports/supply-catalog.read-model';
 
 describe('SuppliesController', () => {
-  const record: SupplyCatalogRecord = {
+  const record: PublicSupplyRecord = {
     id: '11111111-1111-4111-8111-111111111111',
     code: 'INS-0001',
     nameEs: 'Agua potable',
@@ -13,8 +13,6 @@ describe('SuppliesController', () => {
     defaultUnit: 'und',
     attributes: { size: '18L' },
     variantOfId: null,
-    status: 'active',
-    registrationNotes: null,
     aliases: ['agua embotellada'],
   };
 
@@ -31,9 +29,9 @@ describe('SuppliesController', () => {
     const [listItem, detailItem] = await Promise.all([
       controller.list(
         { q: 'agua', locale: 'en', limit: 20, offset: 0 },
-        'en-US',
+        { 'accept-language': 'en-US' },
       ),
-      controller.get(record.id, 'es', 'es-VE'),
+      controller.get(record.id, 'es', { 'accept-language': 'es-VE' }),
     ]);
 
     expect(listItem[0]?.name).toBe('Drinking water');

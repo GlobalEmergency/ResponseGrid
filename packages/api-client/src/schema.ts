@@ -4755,13 +4755,6 @@ export interface components {
              */
             variantOfId?: string | null;
             /**
-             * @example active
-             * @enum {string}
-             */
-            status: "active" | "archived";
-            /** @example ⚠️ Anotar volumen real en Obs si difiere */
-            registrationNotes?: string | null;
-            /**
              * @description Known aliases for the canonical supply
              * @example [
              *       "Agua embotellada",
@@ -9950,8 +9943,7 @@ export interface operations {
                 /** @description Preferred locale */
                 locale?: string;
             };
-            header: {
-                "accept-language": string;
+            header?: {
                 /** @description Fallback locale header (es or en) */
                 "Accept-Language"?: string;
             };
@@ -9985,8 +9977,7 @@ export interface operations {
                 /** @description How many items to skip */
                 offset?: number;
             };
-            header: {
-                "accept-language": string;
+            header?: {
                 /** @description Fallback locale header (es or en) */
                 "Accept-Language"?: string;
             };
@@ -10010,10 +10001,9 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Preferred locale */
-                locale?: string;
+                locale?: unknown;
             };
-            header: {
-                "accept-language": string;
+            header?: {
                 /** @description Fallback locale header (es or en) */
                 "Accept-Language"?: string;
             };

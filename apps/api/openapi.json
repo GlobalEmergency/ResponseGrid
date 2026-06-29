@@ -5651,14 +5651,6 @@
             }
           },
           {
-            "name": "accept-language",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "Accept-Language",
             "in": "header",
             "description": "Fallback locale header (es or en)",
@@ -5747,14 +5739,6 @@
             }
           },
           {
-            "name": "accept-language",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "Accept-Language",
             "in": "header",
             "description": "Fallback locale header (es or en)",
@@ -5802,17 +5786,7 @@
             "required": false,
             "in": "query",
             "description": "Preferred locale",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "accept-language",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
+            "schema": {}
           },
           {
             "name": "Accept-Language",
@@ -13228,19 +13202,6 @@
             "example": null,
             "description": "Parent supply id when this item is a variant"
           },
-          "status": {
-            "type": "string",
-            "enum": [
-              "active",
-              "archived"
-            ],
-            "example": "active"
-          },
-          "registrationNotes": {
-            "type": "string",
-            "example": "⚠️ Anotar volumen real en Obs si difiere",
-            "nullable": true
-          },
           "aliases": {
             "example": [
               "Agua embotellada",
@@ -13262,7 +13223,6 @@
           "categoryLabel",
           "categoryLabelEs",
           "attributes",
-          "status",
           "aliases"
         ]
       },

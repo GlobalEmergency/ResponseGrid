@@ -32,9 +32,9 @@ export class CategoriesController {
   @ApiOkResponse({ description: 'The category taxonomy', type: [CategoryDto] })
   async list(
     @Query('locale') localeParam?: string,
-    @Headers('accept-language') acceptLanguage?: string,
+    @Headers() headers: Record<string, string> = {},
   ): Promise<CategoryDto[]> {
-    const locale = resolveLocale(localeParam, acceptLanguage);
+    const locale = resolveLocale(localeParam, headers['accept-language']);
     const categories = await this.listCategories.execute();
     return categories.map((category) => ({
       slug: category.slug,

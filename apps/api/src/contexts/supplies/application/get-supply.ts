@@ -1,13 +1,12 @@
 import {
-  SupplyCatalogRecord,
-  SupplyRepository,
-} from '../domain/ports/supply.repository';
+  PublicSupplyRecord,
+  SupplyCatalogReadModel,
+} from '../domain/ports/supply-catalog.read-model';
 
 export class GetSupply {
-  constructor(private readonly repo: SupplyRepository) {}
+  constructor(private readonly catalog: SupplyCatalogReadModel) {}
 
-  async execute(id: string): Promise<SupplyCatalogRecord | null> {
-    const catalog = await this.repo.loadCatalog();
-    return catalog.find((record) => record.id === id) ?? null;
+  execute(id: string): Promise<PublicSupplyRecord | null> {
+    return this.catalog.findActiveById(id);
   }
 }

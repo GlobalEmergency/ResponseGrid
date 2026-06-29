@@ -19,8 +19,8 @@ describe('CategoriesController', () => {
     });
 
     const [en, es] = await Promise.all([
-      controller.list('en', 'en-US,en;q=0.9'),
-      controller.list('es', 'es-VE,es;q=0.9'),
+      controller.list('en', { 'accept-language': 'en-US,en;q=0.9' }),
+      controller.list('es', { 'accept-language': 'es-VE,es;q=0.9' }),
     ]);
 
     expect(en[0]?.label).toBe('Food');

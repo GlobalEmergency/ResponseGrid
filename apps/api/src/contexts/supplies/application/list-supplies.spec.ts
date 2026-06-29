@@ -1,11 +1,11 @@
 import { ListSupplies } from './list-supplies';
 import {
-  SupplyCatalogRecord,
-  SupplyRepository,
-} from '../domain/ports/supply.repository';
+  PublicSupplyRecord,
+  SupplyCatalogReadModel,
+} from '../domain/ports/supply-catalog.read-model';
 
 describe('ListSupplies', () => {
-  const catalog: SupplyCatalogRecord[] = [
+  const catalog: PublicSupplyRecord[] = [
     {
       id: '11111111-1111-4111-8111-111111111111',
       code: 'INS-0001',
@@ -17,8 +17,6 @@ describe('ListSupplies', () => {
       defaultUnit: 'und',
       attributes: {},
       variantOfId: null,
-      status: 'active',
-      registrationNotes: null,
       aliases: ['agua embotellada'],
     },
     {
@@ -32,20 +30,20 @@ describe('ListSupplies', () => {
       defaultUnit: 'und',
       attributes: {},
       variantOfId: null,
-      status: 'active',
-      registrationNotes: null,
       aliases: ['advil'],
     },
   ];
 
-  function repo(): SupplyRepository {
+  function readModel(): SupplyCatalogReadModel {
     return {
-      loadCatalog: () => Promise.resolve(catalog),
+      listActive: () => Promise.resolve(catalog),
+      findActiveById: (id) =>
+        Promise.resolve(catalog.find((record) => record.id === id) ?? null),
     };
   }
 
   it('resuelve un alias exacto y pone ese insumo primero', async () => {
-    const result = await new ListSupplies(repo()).execute({
+    const result = await new ListSupplies(readModel()).execute({
       q: 'advil',
       locale: 'en',
       limit: 20,
@@ -56,7 +54,7 @@ describe('ListSupplies', () => {
   });
 
   it('filtra por categoria y pagina el resultado', async () => {
-    const result = await new ListSupplies(repo()).execute({
+    const result = await new ListSupplies(readModel()).execute({
       categorySlug: 'food',
       locale: 'es',
       limit: 1,

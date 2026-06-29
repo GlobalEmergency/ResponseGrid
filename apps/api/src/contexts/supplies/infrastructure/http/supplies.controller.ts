@@ -15,6 +15,7 @@ import {
 } from '@nestjs/swagger';
 import { GetSupply } from '../../application/get-supply';
 import { ListSupplies } from '../../application/list-supplies';
+import { PublicSupplyRecord } from '../../domain/ports/supply-catalog.read-model';
 import { localizedText, resolveLocale } from './locale';
 import { SuppliesQueryDto } from './supplies-query.dto';
 import { SupplyDto } from './supply-response.dto';
@@ -61,9 +62,9 @@ export class SuppliesController {
   @ApiOkResponse({ description: 'Matched supplies', type: [SupplyDto] })
   async list(
     @Query() query: SuppliesQueryDto,
-    @Headers('accept-language') acceptLanguage?: string,
+    @Headers() headers: Record<string, string>,
   ): Promise<SupplyDto[]> {
-    const locale = resolveLocale(query.locale, acceptLanguage);
+    const locale = resolveLocale(query.locale, headers['accept-language']);
     const catalog = await this.listSupplies.execute({
       q: query.q,
       categorySlug: query.categorySlug,
@@ -89,10 +90,10 @@ export class SuppliesController {
   @ApiOkResponse({ description: 'Supply detail', type: SupplyDto })
   async get(
     @Param('id') id: string,
-    @Query('locale') localeParam?: string,
-    @Headers('accept-language') acceptLanguage?: string,
+    @Query('locale') localeParam: string | undefined,
+    @Headers() headers: Record<string, string>,
   ): Promise<SupplyDto> {
-    const locale = resolveLocale(localeParam, acceptLanguage);
+    const locale = resolveLocale(localeParam, headers['accept-language']);
     const record = await this.getSupply.execute(id);
     if (!record) {
       throw new NotFoundException(`Supply ${id} not found`);
@@ -100,24 +101,7 @@ export class SuppliesController {
     return this.toDto(record, locale);
   }
 
-  private toDto(
-    record: {
-      id: string;
-      code: string;
-      nameEs: string;
-      nameEn: string | null;
-      categorySlug: string;
-      categoryLabelEs: string;
-      categoryLabelEn: string;
-      defaultUnit: string | null;
-      attributes: Record<string, unknown>;
-      variantOfId: string | null;
-      status: 'active' | 'archived';
-      registrationNotes: string | null;
-      aliases: string[];
-    },
-    locale: string,
-  ): SupplyDto {
+  private toDto(record: PublicSupplyRecord, locale: string): SupplyDto {
     return {
       id: record.id,
       code: record.code,
@@ -135,8 +119,6 @@ export class SuppliesController {
       defaultUnit: record.defaultUnit,
       attributes: record.attributes,
       variantOfId: record.variantOfId,
-      status: record.status,
-      registrationNotes: record.registrationNotes,
       aliases: record.aliases,
     };
   }

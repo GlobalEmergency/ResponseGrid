@@ -3,9 +3,9 @@ import { SupplyAlias } from '../domain/supply-alias';
 import { normalizeSupplyText } from '../domain/supply-normalize';
 import { SupplyResolver } from '../domain/supply-resolver';
 import {
-  SupplyCatalogRecord,
-  SupplyRepository,
-} from '../domain/ports/supply.repository';
+  PublicSupplyRecord,
+  SupplyCatalogReadModel,
+} from '../domain/ports/supply-catalog.read-model';
 
 export interface SupplyCatalogQuery {
   q?: string | undefined;
@@ -15,39 +15,32 @@ export interface SupplyCatalogQuery {
   offset: number;
 }
 
+/**
+ * Índice de resolución exacta (nombre canónico es/en, código y alias). Los
+ * registros ya son `active`, así que los campos de gestión del agregado se
+ * rellenan con placeholders neutros: el resolver solo lee id/nombre/código.
+ */
 function toSupplyResolver(
-  records: readonly SupplyCatalogRecord[],
+  records: readonly PublicSupplyRecord[],
 ): SupplyResolver {
-  const supplies = records.flatMap((record) => {
-    const base = Supply.fromSnapshot({
+  const make = (record: PublicSupplyRecord, name: string): Supply =>
+    Supply.fromSnapshot({
       id: record.id,
       code: record.code,
-      name: record.nameEs,
+      name,
       categorySlug: record.categorySlug,
       defaultUnit: record.defaultUnit,
       attributes: record.attributes,
       variantOfId: record.variantOfId,
-      status: record.status,
-      registrationNotes: record.registrationNotes,
+      status: 'active',
+      registrationNotes: null,
     });
-    if (!record.nameEn) {
-      return [base];
-    }
-    return [
-      base,
-      Supply.fromSnapshot({
-        id: record.id,
-        code: record.code,
-        name: record.nameEn,
-        categorySlug: record.categorySlug,
-        defaultUnit: record.defaultUnit,
-        attributes: record.attributes,
-        variantOfId: record.variantOfId,
-        status: record.status,
-        registrationNotes: record.registrationNotes,
-      }),
-    ];
-  });
+
+  const supplies = records.flatMap((record) =>
+    record.nameEn
+      ? [make(record, record.nameEs), make(record, record.nameEn)]
+      : [make(record, record.nameEs)],
+  );
   const aliases = records.flatMap((record) =>
     record.aliases.map((alias) =>
       SupplyAlias.create({ alias, supplyId: record.id }),
@@ -57,16 +50,16 @@ function toSupplyResolver(
 }
 
 export class ListSupplies {
-  constructor(private readonly repo: SupplyRepository) {}
+  constructor(private readonly catalog: SupplyCatalogReadModel) {}
 
-  async execute(query: SupplyCatalogQuery): Promise<SupplyCatalogRecord[]> {
-    const catalog = await this.repo.loadCatalog();
+  async execute(query: SupplyCatalogQuery): Promise<PublicSupplyRecord[]> {
+    const records = await this.catalog.listActive();
     const resolvedLocale = query.locale === 'en' ? 'en' : 'es';
-    const resolver = toSupplyResolver(catalog);
+    const resolver = toSupplyResolver(records);
     const normalizedQuery = query.q ? normalizeSupplyText(query.q) : '';
     const exactMatchId = query.q ? resolver.resolve(query.q) : null;
 
-    const filtered = catalog.filter((record) => {
+    const filtered = records.filter((record) => {
       if (query.categorySlug && record.categorySlug !== query.categorySlug) {
         return false;
       }
@@ -83,7 +76,7 @@ export class ListSupplies {
           record.nameEn ?? '',
           record.categorySlug,
           record.categoryLabelEs,
-          record.categoryLabelEn,
+          record.categoryLabelEn ?? '',
           ...record.aliases,
         ].join(' '),
       );

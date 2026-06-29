@@ -10,6 +10,10 @@ import {
   SupplyRepository,
 } from './domain/ports/supply.repository';
 import {
+  SUPPLY_CATALOG_READ_MODEL,
+  SupplyCatalogReadModel,
+} from './domain/ports/supply-catalog.read-model';
+import {
   CONTAINER_REPOSITORY,
   ContainerRepository,
 } from './domain/ports/container.repository';
@@ -19,6 +23,7 @@ import {
 } from './domain/ports/container-authorization-lookup';
 import { DrizzleCategoryRepository } from './infrastructure/drizzle/drizzle-category.repository';
 import { DrizzleSupplyRepository } from './infrastructure/drizzle/drizzle-supply.repository';
+import { DrizzleSupplyCatalogReadModel } from './infrastructure/drizzle/drizzle-supply-catalog.read-model';
 import { DrizzleContainerRepository } from './infrastructure/drizzle/drizzle-container.repository';
 import { DrizzleContainerAuthorizationLookup } from './infrastructure/drizzle/drizzle-container-authorization-lookup';
 import { ListCategories } from './application/list-categories';
@@ -49,6 +54,13 @@ const supplyRepositoryProvider = {
   useFactory: (db: Db): SupplyRepository => new DrizzleSupplyRepository(db),
 };
 
+const supplyCatalogReadModelProvider = {
+  provide: SUPPLY_CATALOG_READ_MODEL,
+  inject: [DB],
+  useFactory: (db: Db): SupplyCatalogReadModel =>
+    new DrizzleSupplyCatalogReadModel(db),
+};
+
 const containerRepositoryProvider = {
   provide: CONTAINER_REPOSITORY,
   inject: [DB],
@@ -72,14 +84,15 @@ const listCategoriesProvider = {
 
 const listSuppliesProvider = {
   provide: ListSupplies,
-  inject: [SUPPLY_REPOSITORY],
-  useFactory: (repo: SupplyRepository) => new ListSupplies(repo),
+  inject: [SUPPLY_CATALOG_READ_MODEL],
+  useFactory: (readModel: SupplyCatalogReadModel) =>
+    new ListSupplies(readModel),
 };
 
 const getSupplyProvider = {
   provide: GetSupply,
-  inject: [SUPPLY_REPOSITORY],
-  useFactory: (repo: SupplyRepository) => new GetSupply(repo),
+  inject: [SUPPLY_CATALOG_READ_MODEL],
+  useFactory: (readModel: SupplyCatalogReadModel) => new GetSupply(readModel),
 };
 
 const createContainerProvider = {
@@ -142,6 +155,7 @@ const listContainersProvider = {
   providers: [
     categoryRepositoryProvider,
     supplyRepositoryProvider,
+    supplyCatalogReadModelProvider,
     containerRepositoryProvider,
     containerAuthorizationLookupProvider,
     listCategoriesProvider,
