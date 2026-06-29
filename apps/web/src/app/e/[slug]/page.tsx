@@ -3,11 +3,13 @@ import { notFound } from 'next/navigation';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { getToken } from '@/lib/auth';
+import { type ResourceViewDto } from '@/lib/group-by-country';
 import { OfficialHeaderBand } from '@/components/organisms/official-header-band';
 import { ResourceList } from '@/components/organisms/resource-list';
 import { EmergencyMapWrapper } from '@/components/organisms/emergency-map-wrapper';
 import { NeedsFilter } from '@/components/molecules/needs-filter';
 import { MetricCard } from '@/components/molecules/metric-card';
+import { Card } from '@/components/atoms/card';
 import { StatusBanner } from '@/components/molecules/status-banner';
 import { AnnouncementCard } from '@/components/molecules/announcement-card';
 import { HelpActionRow } from '@/components/molecules/help-action-row';
@@ -49,7 +51,6 @@ const VALID_PRIORITIES = ['low', 'medium', 'high', 'urgent'] as const;
 
 type NeedCategory = typeof VALID_CATEGORIES[number];
 type Priority = typeof VALID_PRIORITIES[number];
-
 export default async function EmergencyPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
@@ -100,19 +101,15 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
     }),
   ]);
 
-  const activeResources = resourcesPage?.items ?? [];
+  const activeResources = (resourcesPage?.items ?? []) as ResourceViewDto[];
   const resourcesTotal = resourcesPage?.total ?? 0;
-  // Facets: the schema types byCategory/byCountry as Record<string, never> due
-  // to OpenAPI's additionalProperties representation, but at runtime they are
-  // Record<string, number>. We cast here and default to empty objects.
   const facetsByCategory = (facets?.byCategory ?? {}) as Record<string, number>;
   const facetsByCountry = (facets?.byCountry ?? {}) as Record<string, number>;
   const validatedNeeds = needs ?? [];
+  const officialContacts = activeResources
+    .filter((resource: ResourceViewDto) => resource.verificationLevel === 'official' && resource.contact != null)
+    .slice(0, 3);
 
-  // Build map points from the SSR-fetched resources (page 1) and needs (all)
-  // that have valid coordinates. EmergencyMapWrapper re-fetches ALL resource
-  // points client-side and merges them with these needs, so the map is never
-  // limited to the first page even though the list paginates.
   const mapPoints: MapPoint[] = [
     ...activeResources
       .filter((r) => r.location.latitude !== 0 && r.location.longitude !== 0)
@@ -142,12 +139,11 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
   ];
 
   const te = t.emergency;
-  const dontList = emergency.dontBringList.length > 0 ? emergency.dontBringList : te.dont_bring_items;
+  const dontList: string[] =
+    emergency.dontBringList.length > 0 ? emergency.dontBringList : te.dont_bring_items;
   const sectionTitle = 'font-display text-base font-bold text-navy';
   const announcement = typeof emergency.announcement === 'string' ? emergency.announcement : null;
 
-  // The explorer opens on whichever list the citizen is most likely acting on:
-  // if they arrived with a needs filter applied, start on the needs tab.
   const initialTab: 'points' | 'needs' =
     category !== undefined || priority !== undefined ? 'needs' : 'points';
 
@@ -206,18 +202,12 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
         te={te}
       />
 
-      {/* Aviso de estado (sólo en pausa/cerrada) — ancho completo, prominente */}
       {!isActive && (
         <div className="px-4 pt-4 lg:px-8">
           <StatusBanner status={emergency.status} t={t.status_banner} />
         </div>
       )}
 
-      {/*
-        Layout dashboard: en escritorio el mapa es protagonista — columna izquierda
-        fija (sticky, alto de viewport) — y el panel de acciones/listas hace scroll
-        a la derecha. En móvil el mapa es un "hero" arriba y el panel va debajo.
-      */}
       <div className="lg:flex lg:items-start">
         <section
           aria-labelledby="map-heading"
@@ -247,6 +237,91 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
               updatedAt={emergency.updatedAt}
               t={t.announcement}
             />
+          )}
+
+          <section aria-labelledby="quick-access-heading" className="flex flex-col gap-3">
+            <h2 id="quick-access-heading" className={sectionTitle}>
+              {te.quick_access_heading}
+            </h2>
+            <div className="grid gap-2.5 lg:grid-cols-3">
+              <Card as="div" className="flex flex-col gap-3 p-4">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-accent">
+                    {te.quick_access_card_label}
+                  </p>
+                  <h3 className="mt-1 text-[15px] font-bold text-ink">
+                    {te.actions_heading}
+                  </h3>
+                  <p className="mt-1 text-xs text-muted">{te.quick_access_help_intro}</p>
+                </div>
+                <HelpActionRow
+                  href="#actions-heading"
+                  icon="🧭"
+                  title={te.quick_access_help_cta}
+                />
+              </Card>
+
+              <Card as="div" className="flex flex-col gap-3 p-4">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-accent">
+                    {te.quick_access_card_label}
+                  </p>
+                  <h3 className="mt-1 text-[15px] font-bold text-ink">
+                    {te.explore_heading}
+                  </h3>
+                  <p className="mt-1 text-xs text-muted">{te.quick_access_where_intro}</p>
+                </div>
+                <HelpActionRow
+                  href="#explore-heading"
+                  icon="📍"
+                  title={te.quick_access_where_cta}
+                />
+              </Card>
+
+              <Card as="div" className="flex flex-col gap-3 p-4">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-accent">
+                    {te.quick_access_card_label}
+                  </p>
+                  <h3 className="mt-1 text-[15px] font-bold text-ink">
+                    {te.quick_access_call_heading}
+                  </h3>
+                  <p className="mt-1 text-xs text-muted">{te.quick_access_call_intro}</p>
+                </div>
+
+                {officialContacts.length > 0 ? (
+                  <ul className="flex flex-col gap-2" role="list">
+                    {officialContacts.map((resource) => (
+                      <li key={resource.id} className="rounded-[13px] border border-line bg-surface-alt px-3 py-2">
+                        <p className="text-xs font-semibold text-navy">{resource.name}</p>
+                        <p className="text-[12.5px] text-muted">
+                          {t.resource_card.meta_contact_official} {resource.contact}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-xs italic text-muted-soft">
+                    {te.quick_access_no_official_contact}
+                  </p>
+                )}
+              </Card>
+            </div>
+          </section>
+
+          {metrics !== undefined && (
+            <section aria-labelledby="metrics-heading" className="flex flex-col gap-2.5">
+              <div>
+                <h2 id="metrics-heading" className={sectionTitle}>{te.metrics_heading}</h2>
+                <p className="mt-0.5 text-[12.5px] text-muted">{te.metrics_caption}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                <MetricCard value={metrics.needs.open} label={te.metric_tile_open} tone="navy" />
+                <MetricCard value={metrics.resources.active} label={te.metric_tile_points} tone="navy" />
+                <MetricCard value={metrics.needs.closed} label={te.metric_tile_covered} tone="success" />
+                <MetricCard value={metrics.resources.pending} label={te.metric_tile_queue} tone="accent" />
+              </div>
+            </section>
           )}
 
           <section aria-labelledby="actions-heading" className="flex flex-col gap-3">
@@ -292,25 +367,6 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
             )}
           </section>
 
-          {/* Métricas (fila de KPIs) — cifras GLOBALES del operativo, distintas
-              de lo realmente visible en el mapa (que se muestra en las pestañas). */}
-          {metrics !== undefined && (
-            <section aria-labelledby="metrics-heading" className="flex flex-col gap-2.5">
-              <div>
-                <h2 id="metrics-heading" className={sectionTitle}>{te.metrics_heading}</h2>
-                <p className="mt-0.5 text-[12.5px] text-muted">{te.metrics_caption}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-                <MetricCard value={metrics.needs.open} label={te.metric_tile_open} tone="navy" />
-                <MetricCard value={metrics.resources.active} label={te.metric_tile_points} tone="navy" />
-                <MetricCard value={metrics.needs.closed} label={te.metric_tile_covered} tone="success" />
-                <MetricCard value={metrics.resources.pending} label={te.metric_tile_queue} tone="accent" />
-              </div>
-            </section>
-          )}
-
-          {/* Explorador segmentado: Puntos | Necesidades — lo que se ve en el
-              mapa (una lista a la vez). Sus contadores reflejan lo visible. */}
           <section aria-labelledby="explore-heading" className="flex flex-col gap-3">
             <h2 id="explore-heading" className={sectionTitle}>{te.explore_heading}</h2>
             <EmergencyExplorer
@@ -325,7 +381,6 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
             />
           </section>
 
-          {/* Qué NO hacer ahora — colapsable para no robar protagonismo */}
           <details className="group rounded-card border border-line bg-surface-alt px-4 py-3.5 open:pb-4">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
               <span className="flex flex-col">

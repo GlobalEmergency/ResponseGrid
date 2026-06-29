@@ -38,6 +38,7 @@ function makeIntake(code: string) {
           quantity: 4,
           unit: 'sacos',
           presentation: null,
+          expiresAt: '2026-07-01',
         },
       },
     ],
@@ -73,6 +74,7 @@ describe('DrizzleDonationIntakeRepository (integration)', () => {
     expect(found.intakeCode).toBe('ACO-TEST');
     expect(found.lines).toHaveLength(1);
     expect(found.lines[0]?.supplyLine.name).toBe('Harina');
+    expect(found.lines[0]?.supplyLine.expiresAt).toBe('2026-07-01');
   });
 
   it('updates lines on save (replace)', async () => {
@@ -93,6 +95,7 @@ describe('DrizzleDonationIntakeRepository (integration)', () => {
             quantity: 2,
             unit: null,
             presentation: null,
+            expiresAt: '2026-07-02',
           },
         },
         {
@@ -103,6 +106,7 @@ describe('DrizzleDonationIntakeRepository (integration)', () => {
             quantity: 1,
             unit: null,
             presentation: null,
+            expiresAt: null,
           },
         },
       ],
@@ -114,6 +118,7 @@ describe('DrizzleDonationIntakeRepository (integration)', () => {
     if (!found) return;
     expect(found.donorEmail).toBe('pedro@test.com');
     expect(found.lines).toHaveLength(2);
+    expect(found.lines[0]?.supplyLine.expiresAt).toBe('2026-07-02');
   });
 
   it('searches by phone partial and exact code', async () => {

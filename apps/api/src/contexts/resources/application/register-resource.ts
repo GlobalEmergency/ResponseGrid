@@ -39,6 +39,7 @@ export interface RegisterResourceCommand {
     unit?: string | null;
     category: Category;
     presentation?: string | null;
+    expiresAt?: string | null;
   }>;
 }
 
@@ -84,6 +85,7 @@ export class RegisterResource {
           unit: i.unit ?? null,
           category: i.category,
           presentation: i.presentation ?? null,
+          expiresAt: i.expiresAt ?? null,
         }),
       ),
     });

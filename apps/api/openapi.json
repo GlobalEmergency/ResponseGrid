@@ -8616,6 +8616,12 @@
             "type": "string",
             "example": "ampolla",
             "description": "Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe… Optional, free-form (#61)."
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-07-01",
+            "description": "Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD)."
           }
         },
         "required": [
@@ -10554,6 +10560,13 @@
             "example": "ampolla",
             "nullable": true,
             "description": "Presentation / route of administration (ampolla, EV, inhalador…) — #61."
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "example": "2026-07-01",
+            "description": "Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD)."
           }
         },
         "required": [

@@ -31,7 +31,10 @@ export function parseSupplyLines(
   const items: SupplyLineDto[] = [];
   for (const entry of parsed) {
     if (typeof entry !== 'object' || entry === null) return null;
-    const { name, quantity, unit, category } = entry as Record<string, unknown>;
+    const { name, quantity, unit, category, expiresAt } = entry as Record<
+      string,
+      unknown
+    >;
     if (typeof name !== 'string' || name.trim() === '') return null;
     if (
       typeof quantity !== 'number' ||
@@ -43,12 +46,22 @@ export function parseSupplyLines(
     if (typeof category !== 'string' || !opts.isValidCategory(category)) {
       return null;
     }
+    if (
+      expiresAt !== undefined &&
+      expiresAt !== null &&
+      (typeof expiresAt !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(expiresAt))
+    ) {
+      return null;
+    }
     items.push({
       name: name.trim(),
       quantity,
       category: category as SupplyLineDto['category'],
       ...(typeof unit === 'string' && unit.trim() !== ''
         ? { unit: unit.trim() }
+        : {}),
+      ...(typeof expiresAt === 'string' && expiresAt !== ''
+        ? { expiresAt }
         : {}),
     });
   }

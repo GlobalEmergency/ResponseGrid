@@ -78,6 +78,7 @@ describe('Resource', () => {
       unit: 'litros',
       category: Category.Water,
       presentation: null,
+      expiresAt: null,
     });
   });
 

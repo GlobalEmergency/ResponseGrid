@@ -42,6 +42,7 @@ export class IntakeLine {
         unit: s.unit,
         category: s.category,
         presentation: s.presentation ?? null,
+        expiresAt: s.expiresAt ?? null,
       }),
     );
   }
