@@ -29,15 +29,22 @@ El fichero persiste en disco, así que el reboot por systemd (`docker compose up
 mantiene la versión correcta sin recalcular nada. `deploy/.env.version` está
 gitignorado (`.env.*`).
 
-## Pipeline de logs — GeoIP
+## Pipeline de logs (GeoIP + Error Tracking)
 
-Pipeline **`ResponseGrid API`** (filtro `service:responsegrid-api`) con un único
-processor **GeoIP Parser** que enriquece `network.client.ip` →
-`network.client.geoip` (país, ciudad, ASN, coordenadas, timezone). Habilita los
-facets `@network.client.geoip.*` y el mapa geográfico de Logs. Solo afecta a
-logs ingeridos **después** de crearlo (no retroactivo).
+Pipeline **`ResponseGrid API`** (filtro `service:responsegrid-api`) con dos
+processors:
 
-Se gestiona por API (no vive en el repo). Crear/recrear:
+1. **GeoIP Parser** — enriquece `network.client.ip` → `network.client.geoip`
+   (país, ciudad, ASN, coordenadas, timezone). Habilita los facets
+   `@network.client.geoip.*` y el mapa geográfico de Logs.
+2. **Attribute Remapper `stack` → `error.stack`** — Nest emite el stack de los
+   errores en el campo `stack` (JSON); Error Tracking necesita `error.stack`
+   para fingerprintear y **agrupar** los errores (deriva `error.kind`/
+   `error.message` del propio stack). Solo los logs de error llevan `stack`, así
+   que no afecta al resto.
+
+Solo aplica a logs ingeridos **después** de configurarlo (no retroactivo). Se
+gestiona por API (no vive en el repo). Crear/recrear:
 
 ```bash
 curl -X POST "https://api.datadoghq.eu/api/v1/logs/config/pipelines" \
@@ -45,9 +52,14 @@ curl -X POST "https://api.datadoghq.eu/api/v1/logs/config/pipelines" \
   -H "Content-Type: application/json" -d '{
     "name":"ResponseGrid API","is_enabled":true,
     "filter":{"query":"service:responsegrid-api"},
-    "processors":[{"type":"geo-ip-parser","name":"GeoIP de network.client.ip",
-      "is_enabled":true,"sources":["network.client.ip"],
-      "target":"network.client.geoip"}]}'
+    "processors":[
+      {"type":"geo-ip-parser","name":"GeoIP de network.client.ip",
+       "is_enabled":true,"sources":["network.client.ip"],
+       "target":"network.client.geoip"},
+      {"type":"attribute-remapper","name":"stack -> error.stack (Error Tracking)",
+       "is_enabled":true,"sources":["stack"],"source_type":"attribute",
+       "target":"error.stack","target_type":"attribute",
+       "preserve_source":false,"override_on_conflict":false}]}'
 ```
 
 ## Decisiones (caja pequeña)
