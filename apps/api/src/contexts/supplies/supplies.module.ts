@@ -6,6 +6,10 @@ import {
   CategoryRepository,
 } from './domain/ports/category.repository';
 import {
+  SUPPLY_REPOSITORY,
+  SupplyRepository,
+} from './domain/ports/supply.repository';
+import {
   CONTAINER_REPOSITORY,
   ContainerRepository,
 } from './domain/ports/container.repository';
@@ -14,9 +18,12 @@ import {
   ContainerAuthorizationLookup,
 } from './domain/ports/container-authorization-lookup';
 import { DrizzleCategoryRepository } from './infrastructure/drizzle/drizzle-category.repository';
+import { DrizzleSupplyRepository } from './infrastructure/drizzle/drizzle-supply.repository';
 import { DrizzleContainerRepository } from './infrastructure/drizzle/drizzle-container.repository';
 import { DrizzleContainerAuthorizationLookup } from './infrastructure/drizzle/drizzle-container-authorization-lookup';
 import { ListCategories } from './application/list-categories';
+import { ListSupplies } from './application/list-supplies';
+import { GetSupply } from './application/get-supply';
 import { CreateContainer } from './application/create-container';
 import { AddLineToContainer } from './application/add-line-to-container';
 import { RemoveLineFromContainer } from './application/remove-line-from-container';
@@ -26,6 +33,7 @@ import { MoveContainer } from './application/move-container';
 import { GetContainer } from './application/get-container';
 import { ListContainers } from './application/list-containers';
 import { CategoriesController } from './infrastructure/http/categories.controller';
+import { SuppliesController } from './infrastructure/http/supplies.controller';
 import { ContainerController } from './infrastructure/http/containers.controller';
 import { IdentityModule } from '../identity/infrastructure/identity.module';
 
@@ -33,6 +41,12 @@ const categoryRepositoryProvider = {
   provide: CATEGORY_REPOSITORY,
   inject: [DB],
   useFactory: (db: Db): CategoryRepository => new DrizzleCategoryRepository(db),
+};
+
+const supplyRepositoryProvider = {
+  provide: SUPPLY_REPOSITORY,
+  inject: [DB],
+  useFactory: (db: Db): SupplyRepository => new DrizzleSupplyRepository(db),
 };
 
 const containerRepositoryProvider = {
@@ -54,6 +68,18 @@ const listCategoriesProvider = {
   inject: [CATEGORY_REPOSITORY],
   useFactory: (repo: CategoryRepository): ListCategories =>
     new ListCategories(repo),
+};
+
+const listSuppliesProvider = {
+  provide: ListSupplies,
+  inject: [SUPPLY_REPOSITORY],
+  useFactory: (repo: SupplyRepository) => new ListSupplies(repo),
+};
+
+const getSupplyProvider = {
+  provide: GetSupply,
+  inject: [SUPPLY_REPOSITORY],
+  useFactory: (repo: SupplyRepository) => new GetSupply(repo),
 };
 
 const createContainerProvider = {
@@ -112,12 +138,15 @@ const listContainersProvider = {
  */
 @Module({
   imports: [DatabaseModule, IdentityModule],
-  controllers: [CategoriesController, ContainerController],
+  controllers: [CategoriesController, SuppliesController, ContainerController],
   providers: [
     categoryRepositoryProvider,
+    supplyRepositoryProvider,
     containerRepositoryProvider,
     containerAuthorizationLookupProvider,
     listCategoriesProvider,
+    listSuppliesProvider,
+    getSupplyProvider,
     createContainerProvider,
     addLineToContainerProvider,
     removeLineFromContainerProvider,
@@ -127,6 +156,6 @@ const listContainersProvider = {
     getContainerProvider,
     listContainersProvider,
   ],
-  exports: [CATEGORY_REPOSITORY, CONTAINER_REPOSITORY],
+  exports: [CATEGORY_REPOSITORY, SUPPLY_REPOSITORY, CONTAINER_REPOSITORY],
 })
 export class SuppliesModule {}
