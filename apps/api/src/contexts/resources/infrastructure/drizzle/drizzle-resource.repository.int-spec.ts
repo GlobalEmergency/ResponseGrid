@@ -1,6 +1,7 @@
 import { eq, sql } from 'drizzle-orm';
 import { createDb, Db } from '../../../../shared/db';
 import { resourcesTable } from './schema';
+import { emergenciesTable } from '../../../emergencies/infrastructure/drizzle/schema';
 import { DrizzleResourceRepository } from './drizzle-resource.repository';
 import { Resource } from '../../domain/resource';
 import { SupplyLine } from '../../../supplies/domain/supply-line';
@@ -1486,5 +1487,251 @@ describe('DrizzleResourceRepository (integration)', () => {
     }
     expect(threw).toBe(true);
     expect(errorDetail).toMatch(/resources_source_ext_both_or_neither/);
+  });
+
+  // ── Admin reads (#177): all statuses + levels, cross-emergency ──────────────
+  describe('admin reads (findAllPaged / findByIdForAdmin)', () => {
+    const EM2 = '44444444-4444-4444-8444-444444444444';
+
+    /** Persist a resource in a given emergency, status and verification level. */
+    async function seed(props: {
+      emergencyId: string;
+      name: string;
+      type?: ResourceType;
+      status: PublicStatus;
+      verification: VerificationLevel;
+    }): Promise<string> {
+      const r = Resource.fromSnapshot({
+        id: ResourceId.create().value,
+        emergencyId: props.emergencyId,
+        type: props.type ?? ResourceType.CollectionPoint,
+        stage: ResourceStage.Origin,
+        name: props.name,
+        description: null,
+        location: {
+          address: 'Calle Test 1, Sevilla',
+          latitude: 37.3886,
+          longitude: -5.9823,
+        },
+        ownerUserId: OWNER_ID,
+        ownerOrganizationId: null,
+        verificationLevel: props.verification,
+        publicStatus: props.status,
+        createdAt: new Date(),
+        contact: null,
+        schedule: null,
+        manager: null,
+        accepts: [],
+        country: null,
+        city: null,
+        provenance: null,
+        isFinalRecipient: false,
+        recipientType: null,
+        disputed: false,
+        disputedAt: null,
+        items: [],
+      });
+      await repo.save(r);
+      return r.id.value;
+    }
+
+    beforeAll(async () => {
+      await db
+        .insert(emergenciesTable)
+        .values({
+          id: EM2,
+          name: 'Inundación Test',
+          slug: 'inundacion-test-177',
+          country: 'ES',
+          status: 'active',
+          createdAt: new Date(),
+        })
+        .onConflictDoNothing();
+    });
+
+    it('returns resources of ALL statuses and levels across emergencies', async () => {
+      await seed({
+        emergencyId: EM,
+        name: 'Oculto sin verificar',
+        status: PublicStatus.Hidden,
+        verification: VerificationLevel.Unverified,
+      });
+      await seed({
+        emergencyId: EM,
+        name: 'Cerrado oficial',
+        status: PublicStatus.Closed,
+        verification: VerificationLevel.Official,
+      });
+      await seed({
+        emergencyId: EM2,
+        name: 'Activo verificado otra emergencia',
+        status: PublicStatus.Active,
+        verification: VerificationLevel.Verified,
+      });
+
+      const { items, total } = await repo.findAllPaged({ page: 1, limit: 50 });
+
+      expect(total).toBe(3);
+      const names = items.map((i) => i.resource.name);
+      expect(names).toEqual(
+        expect.arrayContaining([
+          'Oculto sin verificar',
+          'Cerrado oficial',
+          'Activo verificado otra emergencia',
+        ]),
+      );
+    });
+
+    it('resolves the emergency name via the join', async () => {
+      await seed({
+        emergencyId: EM2,
+        name: 'Punto en inundación',
+        status: PublicStatus.Hidden,
+        verification: VerificationLevel.Unverified,
+      });
+
+      const { items } = await repo.findAllPaged({
+        page: 1,
+        limit: 50,
+        emergencyId: EmergencyId.fromString(EM2),
+      });
+
+      expect(items).toHaveLength(1);
+      expect(items[0]?.emergencyName).toBe('Inundación Test');
+    });
+
+    it('filters by emergency, status and verification', async () => {
+      await seed({
+        emergencyId: EM,
+        name: 'EM activo verificado',
+        status: PublicStatus.Active,
+        verification: VerificationLevel.Verified,
+      });
+      await seed({
+        emergencyId: EM,
+        name: 'EM cerrado verificado',
+        status: PublicStatus.Closed,
+        verification: VerificationLevel.Verified,
+      });
+      await seed({
+        emergencyId: EM2,
+        name: 'EM2 activo verificado',
+        status: PublicStatus.Active,
+        verification: VerificationLevel.Verified,
+      });
+
+      const { items, total } = await repo.findAllPaged({
+        page: 1,
+        limit: 50,
+        emergencyId: EmergencyId.fromString(EM),
+        status: PublicStatus.Active,
+        verification: VerificationLevel.Verified,
+      });
+
+      expect(total).toBe(1);
+      expect(items[0]?.resource.name).toBe('EM activo verificado');
+    });
+
+    it('filters by free-text q over name', async () => {
+      await seed({
+        emergencyId: EM,
+        name: 'Cruz Roja Centro',
+        status: PublicStatus.Hidden,
+        verification: VerificationLevel.Unverified,
+      });
+      await seed({
+        emergencyId: EM,
+        name: 'Cáritas Norte',
+        status: PublicStatus.Hidden,
+        verification: VerificationLevel.Unverified,
+      });
+
+      const { items, total } = await repo.findAllPaged({
+        page: 1,
+        limit: 50,
+        q: 'cruz',
+      });
+
+      expect(total).toBe(1);
+      expect(items[0]?.resource.name).toBe('Cruz Roja Centro');
+    });
+
+    it('paginates with a stable order', async () => {
+      for (let i = 0; i < 5; i++) {
+        await seed({
+          emergencyId: EM,
+          name: `Punto ${i}`,
+          status: PublicStatus.Hidden,
+          verification: VerificationLevel.Unverified,
+        });
+      }
+
+      const page1 = await repo.findAllPaged({ page: 1, limit: 2 });
+      const page2 = await repo.findAllPaged({ page: 2, limit: 2 });
+
+      expect(page1.total).toBe(5);
+      expect(page1.items).toHaveLength(2);
+      expect(page2.items).toHaveLength(2);
+      const ids1 = page1.items.map((i) => i.resource.id.value);
+      const ids2 = page2.items.map((i) => i.resource.id.value);
+      // No overlap between pages.
+      expect(ids1.filter((id) => ids2.includes(id))).toHaveLength(0);
+    });
+
+    it('findByIdForAdmin returns a hidden resource with its emergency name + inventory', async () => {
+      const withItems = Resource.fromSnapshot({
+        id: ResourceId.create().value,
+        emergencyId: EM2,
+        type: ResourceType.Warehouse,
+        stage: ResourceStage.Origin,
+        name: 'Almacén oculto con stock',
+        description: null,
+        location: {
+          address: 'Calle Test 1, Sevilla',
+          latitude: 37.3886,
+          longitude: -5.9823,
+        },
+        ownerUserId: OWNER_ID,
+        ownerOrganizationId: null,
+        verificationLevel: VerificationLevel.Unverified,
+        publicStatus: PublicStatus.Hidden,
+        createdAt: new Date(),
+        contact: null,
+        schedule: null,
+        manager: null,
+        accepts: [],
+        country: null,
+        city: null,
+        provenance: null,
+        isFinalRecipient: false,
+        recipientType: null,
+        disputed: false,
+        disputedAt: null,
+        items: [
+          SupplyLine.create({
+            name: 'Agua',
+            quantity: 100,
+            unit: 'L',
+            category: Category.Water,
+          }).toSnapshot(),
+        ],
+      });
+      await repo.save(withItems);
+
+      const found = await repo.findByIdForAdmin(withItems.id);
+
+      expect(found).not.toBeNull();
+      expect(found?.resource.publicStatus).toBe(PublicStatus.Hidden);
+      expect(found?.emergencyName).toBe('Inundación Test');
+      expect(found?.resource.items).toHaveLength(1);
+      expect(found?.resource.items[0]?.toSnapshot().category).toBe(
+        Category.Water,
+      );
+    });
+
+    it('findByIdForAdmin returns null for an unknown id', async () => {
+      const found = await repo.findByIdForAdmin(ResourceId.create());
+      expect(found).toBeNull();
+    });
   });
 });

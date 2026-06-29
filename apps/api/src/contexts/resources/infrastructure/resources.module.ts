@@ -6,8 +6,11 @@ import { Db } from '../../../shared/db';
 import { ResourcesController } from './http/resources.controller';
 import { CoordinationController } from './http/coordination.controller';
 import { PublicController } from './http/public.controller';
+import { AdminResourcesController } from './http/admin.controller';
 import { RegisterResource } from '../application/register-resource';
 import { GetCoordinationQueue } from '../application/get-coordination-queue';
+import { ListResourcesAdmin } from '../application/list-resources-admin';
+import { GetResourceAdminDetail } from '../application/get-resource-admin-detail';
 import { GetPublicResources } from '../application/get-public-resources';
 import { GetResourceFacets } from '../application/get-resource-facets';
 import { GetNearbyResources } from '../application/get-nearby-resources';
@@ -266,12 +269,28 @@ const getResourceValidityReportsProvider = {
     new GetResourceValidityReports(validityRepo),
 };
 
+const listResourcesAdminProvider = {
+  provide: ListResourcesAdmin,
+  inject: [RESOURCE_REPOSITORY],
+  useFactory: (repo: ResourceRepository) => new ListResourcesAdmin(repo),
+};
+
+const getResourceAdminDetailProvider = {
+  provide: GetResourceAdminDetail,
+  inject: [RESOURCE_REPOSITORY, RESOURCE_VALIDITY_REPORT_REPOSITORY],
+  useFactory: (
+    repo: ResourceRepository,
+    validityRepo: ResourceValidityReportRepository,
+  ) => new GetResourceAdminDetail(repo, validityRepo),
+};
+
 @Module({
   imports: [DatabaseModule, IdentityModule, NotificationsModule],
   controllers: [
     ResourcesController,
     CoordinationController,
     PublicController,
+    AdminResourcesController,
     RecipientTypesController,
   ],
   providers: [
@@ -301,6 +320,8 @@ const getResourceValidityReportsProvider = {
     resolveResourceDisputeProvider,
     getDisputedResourcesProvider,
     getResourceValidityReportsProvider,
+    listResourcesAdminProvider,
+    getResourceAdminDetailProvider,
   ],
 })
 export class ResourcesModule implements OnModuleDestroy {

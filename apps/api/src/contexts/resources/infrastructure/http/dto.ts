@@ -12,10 +12,16 @@ import {
   ValidateNested,
   IsArray,
   IsBoolean,
+  IsUUID,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
+import {
+  ResourceType,
+  ResourceStage,
+  PublicStatus,
+  VerificationLevel,
+} from '../../domain/resource-enums';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ResourceType, ResourceStage } from '../../domain/resource-enums';
 import { ValidityReason } from '../../domain/resource-validity-report';
 import { SupplyLineDto } from '../../../supplies/infrastructure/http/supply-line.dto';
 
@@ -305,6 +311,82 @@ export class CoordinationQueueQueryDto {
   @ApiPropertyOptional({
     description:
       'Full-text search string matched against name, address, and city (case-insensitive, max 100 chars)',
+    example: 'cruz roja',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  q?: string;
+}
+
+export class AdminResourcesQueryDto {
+  @ApiPropertyOptional({
+    description: 'Page number (1-based)',
+    example: 1,
+    default: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number;
+
+  @ApiPropertyOptional({
+    description: 'Items per page (max 100)',
+    example: 50,
+    default: 50,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
+  @ApiPropertyOptional({
+    description:
+      'Restrict to one emergency. Omit for a global, cross-emergency list.',
+    format: 'uuid',
+    example: '11111111-1111-4111-8111-111111111111',
+  })
+  @IsOptional()
+  @IsUUID()
+  emergencyId?: string;
+
+  @ApiPropertyOptional({
+    enum: ResourceType,
+    description: 'Filter by resource type',
+    example: ResourceType.CollectionPoint,
+  })
+  @IsOptional()
+  @IsEnum(ResourceType)
+  type?: ResourceType;
+
+  @ApiPropertyOptional({
+    enum: PublicStatus,
+    description:
+      'Filter by operational status (includes hidden/closed — admin only)',
+    example: PublicStatus.Hidden,
+  })
+  @IsOptional()
+  @IsEnum(PublicStatus)
+  status?: PublicStatus;
+
+  @ApiPropertyOptional({
+    enum: VerificationLevel,
+    description: 'Filter by verification level',
+    example: VerificationLevel.Unverified,
+  })
+  @IsOptional()
+  @IsEnum(VerificationLevel)
+  verification?: VerificationLevel;
+
+  @ApiPropertyOptional({
+    description:
+      'Full-text search matched against name, address and city (case-insensitive, max 100 chars)',
     example: 'cruz roja',
   })
   @IsOptional()

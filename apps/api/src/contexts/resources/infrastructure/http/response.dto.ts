@@ -254,6 +254,64 @@ export class ValidityReportDto {
   resolvedAt!: string | null;
 }
 
+/**
+ * Admin list row (#177): the base resource view plus the owning emergency
+ * (id + resolved name), so the platform-admin console — which is cross-emergency
+ * — can label and group rows. Reuses ResourceViewDto rather than a parallel
+ * shape.
+ */
+export class ResourceAdminViewDto extends ResourceViewDto {
+  @ApiProperty({
+    format: 'uuid',
+    example: '11111111-1111-4111-8111-111111111111',
+    description: 'Emergency this resource belongs to',
+  })
+  emergencyId!: string;
+
+  @ApiProperty({
+    example: 'Terremoto Venezuela 2026',
+    nullable: true,
+    type: String,
+    description: 'Resolved emergency name, or null when it could not be found',
+  })
+  emergencyName!: string | null;
+}
+
+export class PagedAdminResourcesDto {
+  @ApiProperty({ type: [ResourceAdminViewDto] })
+  items!: ResourceAdminViewDto[];
+
+  @ApiProperty({ example: 123 })
+  total!: number;
+
+  @ApiProperty({ example: 1 })
+  page!: number;
+
+  @ApiProperty({ example: 50 })
+  limit!: number;
+}
+
+/**
+ * Admin detail (#177): the admin view + the aggregated declared inventory
+ * (distinct categories) + every citizen validity report (open + resolved).
+ * Works for a resource of ANY status — the platform admin can inspect it whether
+ * or not it is published.
+ */
+export class ResourceAdminDetailDto extends ResourceAdminViewDto {
+  @ApiProperty({
+    type: [String],
+    example: ['water', 'hygiene'],
+    description: 'Distinct categories of material this place has declared',
+  })
+  inventoryCategories!: string[];
+
+  @ApiProperty({
+    type: [ValidityReportDto],
+    description: 'Citizen validity reports for this resource (open + resolved)',
+  })
+  validityReports!: ValidityReportDto[];
+}
+
 export class DisputedResourceDto {
   @ApiProperty({ type: ResourceViewDto })
   resource!: ResourceViewDto;
