@@ -1202,10 +1202,13 @@ export const en = {
     f_taxid: 'Tax ID',
     f_email: 'Contact email',
     f_email_ph: 'contact@org.org',
+    f_phone: 'Contact phone',
+    f_phone_ph: '+58 412-1234567',
     creating: 'Creating…',
 
     // server-action messages
     err_name_type_required: 'Name and type are required.',
+    err_contact_required: 'Contact phone and email are required.',
     err_create_failed: 'Couldn’t create the organization. Please try again.',
     err_email_required: 'Email is required.',
     err_owner_only: 'Only the owner can manage members.',
@@ -1484,6 +1487,7 @@ export const en = {
     orgs_type_label: 'Type:',
     orgs_taxid_label: 'Tax ID:',
     orgs_contact_label: 'Contact:',
+    orgs_phone_label: 'Phone:',
     orgs_members_label: 'Members:',
     orgs_members_count: '{count} members',
     orgs_none: '—',

@@ -29,7 +29,7 @@ export function OrganizationsList({
     const q = query.trim().toLowerCase();
     if (!q) return organizations;
     return organizations.filter((o) => {
-      const haystack = [o.name, o.taxId ?? '', o.contactEmail ?? '']
+      const haystack = [o.name, o.taxId ?? '', o.contactEmail ?? '', o.contactPhone ?? '']
         .join(' ')
         .toLowerCase();
       return haystack.includes(q);
@@ -113,6 +113,14 @@ export function OrganizationsList({
                         {ta.orgs_contact_label}
                       </dt>
                       <dd className="break-all">{org.contactEmail}</dd>
+                    </div>
+                  )}
+                  {org.contactPhone && (
+                    <div className="flex flex-wrap gap-x-1.5">
+                      <dt className="font-semibold text-gray-500">
+                        {ta.orgs_phone_label}
+                      </dt>
+                      <dd className="break-all">{org.contactPhone}</dd>
                     </div>
                   )}
                   <div className="flex flex-wrap gap-x-1.5">

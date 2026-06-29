@@ -111,6 +111,12 @@ export default async function OrganizacionDetailPage({ params }: Props) {
               </div>
               <div className="flex flex-wrap gap-x-1.5">
                 <dt className="font-semibold text-gray-500">
+                  {ta.orgs_phone_label}
+                </dt>
+                <dd className="break-all">{org.contactPhone ?? ta.orgs_none}</dd>
+              </div>
+              <div className="flex flex-wrap gap-x-1.5">
+                <dt className="font-semibold text-gray-500">
                   {ta.orgs_detail_created_label}
                 </dt>
                 <dd>

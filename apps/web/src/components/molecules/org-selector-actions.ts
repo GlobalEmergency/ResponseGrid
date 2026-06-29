@@ -51,6 +51,7 @@ export async function createOrganizationInline(input: {
   type: string;
   taxId?: string;
   contactEmail?: string;
+  contactPhone?: string;
 }): Promise<CreateOrgInlineResult> {
   const token = await getToken();
   const { t } = await getT();
@@ -63,9 +64,15 @@ export async function createOrganizationInline(input: {
   const type = input.type.trim();
   const taxId = input.taxId?.trim() || undefined;
   const contactEmail = input.contactEmail?.trim() || undefined;
+  const contactPhone = input.contactPhone?.trim() || undefined;
 
   if (!name || !isOrgType(type)) {
     return { ok: false, message: t.organizaciones.err_name_type_required };
+  }
+
+  // Contact phone and email are essential contact data for a new organization.
+  if (!contactEmail || !contactPhone) {
+    return { ok: false, message: t.organizaciones.err_contact_required };
   }
 
   const { data, error } = await api.POST('/organizations', {
@@ -73,8 +80,9 @@ export async function createOrganizationInline(input: {
     body: {
       name,
       type,
+      contactEmail,
+      contactPhone,
       ...(taxId !== undefined ? { taxId } : {}),
-      ...(contactEmail !== undefined ? { contactEmail } : {}),
     },
   });
 

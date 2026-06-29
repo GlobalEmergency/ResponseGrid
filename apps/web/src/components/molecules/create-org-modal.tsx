@@ -38,6 +38,7 @@ export function CreateOrgModal({ open, onClose, onCreated }: CreateOrgModalProps
   const [type, setType] = useState('');
   const [taxId, setTaxId] = useState('');
   const [contactEmail, setContactEmail] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -55,6 +56,7 @@ export function CreateOrgModal({ open, onClose, onCreated }: CreateOrgModalProps
     setType('');
     setTaxId('');
     setContactEmail('');
+    setContactPhone('');
     setError(null);
     setPending(false);
   }
@@ -74,12 +76,18 @@ export function CreateOrgModal({ open, onClose, onCreated }: CreateOrgModalProps
       return;
     }
 
+    if (!contactEmail.trim() || !contactPhone.trim()) {
+      setError(to.err_contact_required);
+      return;
+    }
+
     setPending(true);
     const result = await createOrganizationInline({
       name,
       type,
       taxId: taxId.trim() || undefined,
-      contactEmail: contactEmail.trim() || undefined,
+      contactEmail: contactEmail.trim(),
+      contactPhone: contactPhone.trim(),
     });
 
     if (!result.ok) {
@@ -160,16 +168,32 @@ export function CreateOrgModal({ open, onClose, onCreated }: CreateOrgModalProps
         {/* Contact email */}
         <div className="flex flex-col gap-1.5">
           <label htmlFor="modal-org-email" className="text-sm font-semibold text-ink">
-            {to.f_email}
-            <span className="ml-1 text-xs font-normal text-muted">{m.common.optional}</span>
+            {to.f_email} <span aria-hidden="true">*</span>
           </label>
           <Input
             id="modal-org-email"
             name="contactEmail"
             type="email"
+            required
             value={contactEmail}
             onChange={(e) => setContactEmail(e.target.value)}
             placeholder={to.f_email_ph}
+          />
+        </div>
+
+        {/* Contact phone */}
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="modal-org-phone" className="text-sm font-semibold text-ink">
+            {to.f_phone} <span aria-hidden="true">*</span>
+          </label>
+          <Input
+            id="modal-org-phone"
+            name="contactPhone"
+            type="tel"
+            required
+            value={contactPhone}
+            onChange={(e) => setContactPhone(e.target.value)}
+            placeholder={to.f_phone_ph}
           />
         </div>
 

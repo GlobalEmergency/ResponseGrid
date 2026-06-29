@@ -44,6 +44,7 @@ describe('DrizzleOrganizationRepository (integration)', () => {
       type: OrganizationType.Ngo,
       taxId: 'ES-12345678',
       contactEmail: 'info@cruzroja.es',
+      contactPhone: '+58 412-1234567',
     });
     await orgRepo.save(org);
     const found = await orgRepo.findById(org.id);
@@ -51,6 +52,7 @@ describe('DrizzleOrganizationRepository (integration)', () => {
     expect(found?.type).toBe(OrganizationType.Ngo);
     expect(found?.taxId).toBe('ES-12345678');
     expect(found?.contactEmail).toBe('info@cruzroja.es');
+    expect(found?.contactPhone).toBe('+58 412-1234567');
     expect(found?.verificationLevel).toBe(VerificationLevel.Unverified);
   });
 
@@ -61,6 +63,7 @@ describe('DrizzleOrganizationRepository (integration)', () => {
       type: OrganizationType.Ngo,
       taxId: null,
       contactEmail: null,
+      contactPhone: null,
     });
     const org2 = Organization.create({
       id: OrganizationId.create(),
@@ -68,6 +71,7 @@ describe('DrizzleOrganizationRepository (integration)', () => {
       type: OrganizationType.Company,
       taxId: null,
       contactEmail: null,
+      contactPhone: null,
     });
     await orgRepo.save(org1);
     await orgRepo.save(org2);
@@ -112,6 +116,7 @@ describe('DrizzleOrganizationMemberRepository (integration)', () => {
       type: OrganizationType.Ngo,
       taxId: null,
       contactEmail: null,
+      contactPhone: null,
     });
     await orgRepo.save(org);
 
@@ -128,6 +133,7 @@ describe('DrizzleOrganizationMemberRepository (integration)', () => {
       type: OrganizationType.Ngo,
       taxId: null,
       contactEmail: null,
+      contactPhone: null,
     });
     const org2 = Organization.create({
       id: OrganizationId.create(),
@@ -135,6 +141,7 @@ describe('DrizzleOrganizationMemberRepository (integration)', () => {
       type: OrganizationType.Company,
       taxId: null,
       contactEmail: null,
+      contactPhone: null,
     });
     await orgRepo.save(org1);
     await orgRepo.save(org2);
@@ -153,6 +160,7 @@ describe('DrizzleOrganizationMemberRepository (integration)', () => {
       type: OrganizationType.Other,
       taxId: null,
       contactEmail: null,
+      contactPhone: null,
     });
     await orgRepo.save(org);
 

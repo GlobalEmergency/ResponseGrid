@@ -18,6 +18,7 @@ describe('CreateOrganization', () => {
       type: OrganizationType.Ngo,
       taxId: null,
       contactEmail: null,
+      contactPhone: null,
       creatorUserId: 'aaaaaaaa-0000-4000-8000-000000000001',
     });
 
@@ -40,6 +41,7 @@ describe('CreateOrganization', () => {
       type: OrganizationType.PublicAdmin,
       taxId: null,
       contactEmail: null,
+      contactPhone: null,
       creatorUserId,
     });
 
@@ -50,7 +52,7 @@ describe('CreateOrganization', () => {
     expect(role).toBe(OrganizationRole.Owner);
   });
 
-  it('stores optional taxId and contactEmail', async () => {
+  it('stores optional taxId, contactEmail and contactPhone', async () => {
     const orgRepo = new InMemoryOrganizationRepository();
     const memberRepo = new InMemoryOrganizationMemberRepository(orgRepo);
     const useCase = new CreateOrganization(orgRepo, memberRepo);
@@ -60,12 +62,14 @@ describe('CreateOrganization', () => {
       type: OrganizationType.Company,
       taxId: 'ES-12345678',
       contactEmail: 'info@acme.example',
+      contactPhone: '+58 412-1234567',
       creatorUserId: 'cccccccc-0000-4000-8000-000000000001',
     });
 
     const saved = await orgRepo.findById(OrganizationId.fromString(id));
     expect(saved?.taxId).toBe('ES-12345678');
     expect(saved?.contactEmail).toBe('info@acme.example');
+    expect(saved?.contactPhone).toBe('+58 412-1234567');
   });
 
   it('sets verificationLevel to Unverified on creation', async () => {
@@ -78,6 +82,7 @@ describe('CreateOrganization', () => {
       type: OrganizationType.Association,
       taxId: null,
       contactEmail: null,
+      contactPhone: null,
       creatorUserId: 'dddddddd-0000-4000-8000-000000000001',
     });
 
@@ -95,6 +100,7 @@ describe('CreateOrganization', () => {
       type: OrganizationType.TransportOperator,
       taxId: null,
       contactEmail: null,
+      contactPhone: null,
       creatorUserId: 'eeeeeeee-0000-4000-8000-000000000001',
     });
 

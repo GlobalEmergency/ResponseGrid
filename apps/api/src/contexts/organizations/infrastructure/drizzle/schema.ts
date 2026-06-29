@@ -6,6 +6,7 @@ export const organizationsTable = pgTable('organizations', {
   type: text('type').notNull(),
   taxId: text('tax_id'),
   contactEmail: text('contact_email'),
+  contactPhone: text('contact_phone'),
   verificationLevel: text('verification_level').notNull().default('unverified'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });

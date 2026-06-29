@@ -17,6 +17,7 @@ function rowToSnapshot(row: OrgRow): OrganizationSnapshot {
     type: row.type,
     taxId: row.taxId,
     contactEmail: row.contactEmail,
+    contactPhone: row.contactPhone,
     verificationLevel: row.verificationLevel,
     createdAt: row.createdAt,
   };

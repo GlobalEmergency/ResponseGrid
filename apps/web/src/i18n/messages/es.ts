@@ -1235,10 +1235,13 @@ export const es = {
     f_taxid: 'NIF / CIF',
     f_email: 'Email de contacto',
     f_email_ph: 'contacto@org.es',
+    f_phone: 'Teléfono de contacto',
+    f_phone_ph: '+58 412-1234567',
     creating: 'Creando…',
 
     // server-action messages
     err_name_type_required: 'El nombre y el tipo son obligatorios.',
+    err_contact_required: 'El teléfono y el email de contacto son obligatorios.',
     err_create_failed: 'Error al crear la organización. Inténtalo de nuevo.',
     err_email_required: 'El email es obligatorio.',
     err_owner_only: 'Solo el propietario puede gestionar miembros.',
@@ -1517,6 +1520,7 @@ export const es = {
     orgs_type_label: 'Tipo:',
     orgs_taxid_label: 'NIF/CIF:',
     orgs_contact_label: 'Contacto:',
+    orgs_phone_label: 'Teléfono:',
     orgs_members_label: 'Miembros:',
     orgs_members_count: '{count} miembros',
     orgs_none: '—',
