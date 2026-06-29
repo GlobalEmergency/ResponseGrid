@@ -4,8 +4,10 @@ import { Db } from '../../../../shared/db';
 import { resourcesTable, resourceItemsTable } from './schema';
 import { ResourceRepository } from '../../domain/ports/resource.repository';
 import { Resource, ResourceSnapshot, Provenance } from '../../domain/resource';
-import { SupplyLineSnapshot } from '../../../supplies/domain/supply-line';
-import { Category } from '../../../supplies/domain/category';
+import {
+  rowToSupplyLineSnapshot,
+  supplyLineToColumns,
+} from '../../../supplies/infrastructure/drizzle/supply-line-columns';
 import { ResourceId } from '../../domain/resource-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import {
@@ -18,14 +20,8 @@ import {
 type Row = typeof resourcesTable.$inferSelect;
 type ItemsRow = typeof resourceItemsTable.$inferSelect;
 
-function itemsToSnapshots(items: ItemsRow[]): SupplyLineSnapshot[] {
-  return items.map((i) => ({
-    name: i.name,
-    quantity: i.quantity,
-    unit: i.unit ?? null,
-    category: i.category as Category,
-    presentation: i.presentation ?? null,
-  }));
+function itemsToSnapshots(items: ItemsRow[]) {
+  return items.map(rowToSupplyLineSnapshot);
 }
 
 /** Operational statuses a resource must be in to appear in any public read. */
@@ -291,11 +287,7 @@ export class DrizzleResourceRepository implements ResourceRepository {
           s.items.map((item) => ({
             id: randomUUID(),
             resourceId: s.id,
-            name: item.name,
-            quantity: item.quantity,
-            unit: item.unit,
-            category: item.category,
-            presentation: item.presentation ?? null,
+            ...supplyLineToColumns(item),
           })),
         );
       }

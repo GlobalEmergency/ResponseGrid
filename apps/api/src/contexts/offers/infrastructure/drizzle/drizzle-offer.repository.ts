@@ -9,7 +9,11 @@ import {
 } from '../../domain/donation-offer';
 import { OfferId } from '../../domain/offer-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
-import { Category, OfferStatus } from '../../domain/offer-enums';
+import { OfferStatus } from '../../domain/offer-enums';
+import {
+  rowToSupplyLineSnapshot,
+  supplyLineToColumns,
+} from '../../../supplies/infrastructure/drizzle/supply-line-columns';
 
 type OfferRow = typeof offersTable.$inferSelect;
 type OfferItemRow = typeof offerItemsTable.$inferSelect;
@@ -23,13 +27,7 @@ function rowToSnapshot(
     emergencyId: row.emergencyId,
     donorUserId: row.donorUserId,
     donorOrganizationId: row.donorOrganizationId ?? null,
-    items: items.map((i) => ({
-      name: i.name,
-      quantity: i.quantity,
-      unit: i.unit ?? null,
-      category: i.category as Category,
-      presentation: i.presentation ?? null,
-    })),
+    items: items.map(rowToSupplyLineSnapshot),
     location: {
       address: row.address,
       latitude: row.latitude,
@@ -112,11 +110,7 @@ export class DrizzleOfferRepository implements OfferRepository {
           s.items.map((item) => ({
             id: randomUUID(),
             offerId: s.id,
-            name: item.name,
-            quantity: item.quantity,
-            unit: item.unit,
-            category: item.category,
-            presentation: item.presentation ?? null,
+            ...supplyLineToColumns(item),
           })),
         );
       }

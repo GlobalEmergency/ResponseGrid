@@ -3,9 +3,9 @@ import {
   uuid,
   text,
   timestamp,
-  integer,
   doublePrecision,
 } from 'drizzle-orm/pg-core';
+import { supplyLineColumns } from '../../../supplies/infrastructure/drizzle/supply-line-columns';
 
 export const offersTable = pgTable('offers', {
   id: uuid('id').primaryKey(),
@@ -33,9 +33,5 @@ export const offerItemsTable = pgTable('offer_items', {
   offerId: uuid('offer_id')
     .notNull()
     .references(() => offersTable.id, { onDelete: 'cascade' }),
-  name: text('name').notNull(),
-  quantity: integer('quantity').notNull(),
-  unit: text('unit'),
-  category: text('category').notNull(),
-  presentation: text('presentation'),
+  ...supplyLineColumns(),
 });

@@ -24,13 +24,11 @@ import {
 import { Need, NeedSnapshot } from '../../domain/need';
 import { NeedId } from '../../domain/need-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
+import { Priority, NeedStatus, PersonnelSkill } from '../../domain/need-enums';
 import {
-  Priority,
-  Category,
-  NeedStatus,
-  PersonnelSkill,
-} from '../../domain/need-enums';
-import { SupplyLineSnapshot } from '../../../supplies/domain/supply-line';
+  rowToSupplyLineSnapshot,
+  supplyLineToColumns,
+} from '../../../supplies/infrastructure/drizzle/supply-line-columns';
 import { LocationSensitivity } from '../../../../shared/domain/location-sensitivity';
 
 type NeedsRow = typeof needsTable.$inferSelect;
@@ -53,15 +51,7 @@ function rowToSnapshot(row: NeedsRow, items: ItemsRow[]): NeedSnapshot {
     managingOrganizationId: row.managingOrganizationId ?? null,
     locationSensitivity: (row.locationSensitivity ??
       LocationSensitivity.Public) as LocationSensitivity,
-    items: items.map(
-      (i): SupplyLineSnapshot => ({
-        name: i.name,
-        quantity: i.quantity,
-        unit: i.unit ?? null,
-        category: i.category as Category,
-        presentation: i.presentation ?? null,
-      }),
-    ),
+    items: items.map(rowToSupplyLineSnapshot),
     status: row.status as NeedStatus,
     createdAt: row.createdAt,
     expiresAt: row.expiresAt ?? null,
@@ -125,11 +115,7 @@ export class DrizzleNeedRepository implements NeedRepository {
           s.items.map((item) => ({
             id: randomUUID(),
             needId: s.id,
-            name: item.name,
-            quantity: item.quantity,
-            unit: item.unit,
-            category: item.category,
-            presentation: item.presentation ?? null,
+            ...supplyLineToColumns(item),
           })),
         );
       }
