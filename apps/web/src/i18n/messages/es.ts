@@ -651,6 +651,69 @@ export const es = {
     err_too_many: 'Demasiados intentos. Espera un momento y vuelve a probar.',
   },
 
+  // ── Consola de recepción del operador (#129) ──────────────────────────────
+  recepcion: {
+    meta_title: 'Recepción de donaciones — {emergencyName} · ResponseGrid',
+    meta_description:
+      'Consola del punto de acopio: localiza el pre-registro y confirma la entrega.',
+    page_title: 'Recepción de donaciones',
+    page_subtitle:
+      'Localiza el pre-registro por código, correo o teléfono y confírmalo en el mostrador.',
+
+    // Entrada desde el hub de coordinación
+    hub_label: 'Recepción de donaciones',
+    hub_description: 'Confirma las entregas pre-registradas en el mostrador',
+
+    no_points_note:
+      'No gestionas ningún punto de recogida en esta emergencia, pero puedes buscar una entrega por su código.',
+
+    // Buscador
+    search_label: 'Buscar entrega',
+    search_placeholder: 'Código (ACO-…), correo o teléfono',
+    search_button: 'Buscar',
+    search_results_heading: 'Resultados',
+    search_empty: 'No hay entregas que coincidan con la búsqueda.',
+
+    // Pendientes
+    pending_heading: 'Entregas pendientes en tu punto',
+    pending_empty: 'No hay entregas pendientes ahora mismo.',
+    new_intake_cta: 'Registrar una entrega nueva',
+
+    // Item de lista
+    item_lines: '{n} líneas',
+    item_select: 'Ver / recibir',
+    point_label: 'Punto',
+
+    // Estados
+    status_pending: 'Pendiente',
+    status_received: 'Recibida',
+    status_rejected: 'Rechazada',
+    status_incomplete: 'Incompleta',
+
+    // Detalle
+    back_to_list: 'Volver a recepción',
+    detail_subtitle: 'Entrega {code}',
+    donor_heading: 'Donante',
+    contact_heading: 'Contacto',
+    lines_heading: 'Material declarado',
+    no_contact: 'Sin contacto',
+    received_meta: 'Recibida',
+    already_processed: 'Esta entrega ya ha sido procesada.',
+
+    // Acciones
+    notes_label: 'Notas (opcional)',
+    notes_placeholder: 'Observaciones de la recepción…',
+    receive_button: 'Confirmar recepción',
+    receiving: 'Confirmando…',
+    reject_button: 'Rechazar',
+    rejecting: 'Rechazando…',
+    incomplete_button: 'Marcar incompleta',
+    marking_incomplete: 'Guardando…',
+
+    err_action_failed: 'No se pudo completar la acción. Inténtalo de nuevo.',
+    err_already_processed: 'La entrega ya había sido procesada.',
+  },
+
   // ── Ofrecer transporte (#105) ─────────────────────────────────────────────
   ofrecerTransporte: {
     page_title: 'Ofrezco transporte',

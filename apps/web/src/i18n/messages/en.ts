@@ -623,6 +623,69 @@ export const en = {
     err_too_many: 'Too many attempts. Please wait a moment and try again.',
   },
 
+  // ── Operator reception console (#129) ─────────────────────────────────────
+  recepcion: {
+    meta_title: 'Donation reception — {emergencyName} · ResponseGrid',
+    meta_description:
+      'Collection-point console: find the pre-registration and confirm the delivery.',
+    page_title: 'Donation reception',
+    page_subtitle:
+      'Find the pre-registration by code, email or phone and confirm it at the desk.',
+
+    // Entry from the coordination hub
+    hub_label: 'Donation reception',
+    hub_description: 'Confirm pre-registered deliveries at the desk',
+
+    no_points_note:
+      'You don’t manage any collection point in this emergency, but you can search a delivery by its code.',
+
+    // Search
+    search_label: 'Search delivery',
+    search_placeholder: 'Code (ACO-…), email or phone',
+    search_button: 'Search',
+    search_results_heading: 'Results',
+    search_empty: 'No deliveries match your search.',
+
+    // Pending
+    pending_heading: 'Pending deliveries at your point',
+    pending_empty: 'No pending deliveries right now.',
+    new_intake_cta: 'Register a new delivery',
+
+    // List item
+    item_lines: '{n} lines',
+    item_select: 'View / receive',
+    point_label: 'Point',
+
+    // Statuses
+    status_pending: 'Pending',
+    status_received: 'Received',
+    status_rejected: 'Rejected',
+    status_incomplete: 'Incomplete',
+
+    // Detail
+    back_to_list: 'Back to reception',
+    detail_subtitle: 'Delivery {code}',
+    donor_heading: 'Donor',
+    contact_heading: 'Contact',
+    lines_heading: 'Declared supplies',
+    no_contact: 'No contact',
+    received_meta: 'Received',
+    already_processed: 'This delivery has already been processed.',
+
+    // Actions
+    notes_label: 'Notes (optional)',
+    notes_placeholder: 'Reception remarks…',
+    receive_button: 'Confirm reception',
+    receiving: 'Confirming…',
+    reject_button: 'Reject',
+    rejecting: 'Rejecting…',
+    incomplete_button: 'Mark incomplete',
+    marking_incomplete: 'Saving…',
+
+    err_action_failed: 'Couldn’t complete the action. Please try again.',
+    err_already_processed: 'The delivery had already been processed.',
+  },
+
   // ── Offer transport (#105) ────────────────────────────────────────────────
   ofrecerTransporte: {
     page_title: 'I can offer transport',
