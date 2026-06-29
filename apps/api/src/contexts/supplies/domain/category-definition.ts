@@ -4,6 +4,11 @@
  * sort order. Backed by the `categories` table. The slug is a plain string so
  * the schema can carry both core categories and finer subcategories.
  */
+export interface CategoryTranslation {
+  locale: string;
+  label: string;
+}
+
 export interface CategoryDefinition {
   slug: string;
   labelEs: string;
@@ -11,4 +16,6 @@ export interface CategoryDefinition {
   parentSlug: string | null;
   vertical: string;
   sort: number;
+  archivedAt: Date | null;
+  translations: readonly CategoryTranslation[];
 }

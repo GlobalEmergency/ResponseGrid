@@ -17,6 +17,8 @@ import { DrizzleCategoryRepository } from './infrastructure/drizzle/drizzle-cate
 import { DrizzleContainerRepository } from './infrastructure/drizzle/drizzle-container.repository';
 import { DrizzleContainerAuthorizationLookup } from './infrastructure/drizzle/drizzle-container-authorization-lookup';
 import { ListCategories } from './application/list-categories';
+import { CreateCategory } from './application/create-category';
+import { UpdateCategory } from './application/update-category';
 import { CreateContainer } from './application/create-container';
 import { AddLineToContainer } from './application/add-line-to-container';
 import { RemoveLineFromContainer } from './application/remove-line-from-container';
@@ -26,6 +28,7 @@ import { MoveContainer } from './application/move-container';
 import { GetContainer } from './application/get-container';
 import { ListContainers } from './application/list-containers';
 import { CategoriesController } from './infrastructure/http/categories.controller';
+import { CategoriesAdminController } from './infrastructure/http/categories-admin.controller';
 import { ContainerController } from './infrastructure/http/containers.controller';
 import { IdentityModule } from '../identity/infrastructure/identity.module';
 
@@ -54,6 +57,20 @@ const listCategoriesProvider = {
   inject: [CATEGORY_REPOSITORY],
   useFactory: (repo: CategoryRepository): ListCategories =>
     new ListCategories(repo),
+};
+
+const createCategoryProvider = {
+  provide: CreateCategory,
+  inject: [CATEGORY_REPOSITORY],
+  useFactory: (repo: CategoryRepository): CreateCategory =>
+    new CreateCategory(repo),
+};
+
+const updateCategoryProvider = {
+  provide: UpdateCategory,
+  inject: [CATEGORY_REPOSITORY],
+  useFactory: (repo: CategoryRepository): UpdateCategory =>
+    new UpdateCategory(repo),
 };
 
 const createContainerProvider = {
@@ -112,12 +129,18 @@ const listContainersProvider = {
  */
 @Module({
   imports: [DatabaseModule, IdentityModule],
-  controllers: [CategoriesController, ContainerController],
+  controllers: [
+    CategoriesController,
+    CategoriesAdminController,
+    ContainerController,
+  ],
   providers: [
     categoryRepositoryProvider,
     containerRepositoryProvider,
     containerAuthorizationLookupProvider,
     listCategoriesProvider,
+    createCategoryProvider,
+    updateCategoryProvider,
     createContainerProvider,
     addLineToContainerProvider,
     removeLineFromContainerProvider,

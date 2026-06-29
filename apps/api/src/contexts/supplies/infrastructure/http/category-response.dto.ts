@@ -8,6 +8,9 @@ export class CategoryDto {
   @ApiProperty({ example: 'medicines' })
   slug!: string;
 
+  @ApiProperty({ example: 'Medicamentos', description: 'Localized label' })
+  label!: string;
+
   @ApiProperty({ example: 'Medicamentos' })
   labelEs!: string;
 

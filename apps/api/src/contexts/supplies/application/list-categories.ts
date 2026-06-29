@@ -9,7 +9,9 @@ import { CategoryDefinition } from '../domain/category-definition';
 export class ListCategories {
   constructor(private readonly repo: CategoryRepository) {}
 
-  execute(): Promise<CategoryDefinition[]> {
-    return this.repo.listCategories();
+  execute(options?: {
+    includeArchived?: boolean;
+  }): Promise<CategoryDefinition[]> {
+    return this.repo.listCategories(options);
   }
 }
