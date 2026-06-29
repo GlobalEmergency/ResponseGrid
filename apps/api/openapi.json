@@ -10757,38 +10757,12 @@
       "SubmitOfferDto": {
         "type": "object",
         "properties": {
-          "category": {
-            "type": "string",
-            "enum": [
-              "food",
-              "water",
-              "hygiene",
-              "clothing",
-              "medical",
-              "shelter",
-              "tools",
-              "other",
-              "medicines",
-              "medical_equipment",
-              "medical_supplies",
-              "medical_personnel"
-            ],
-            "example": "food"
-          },
-          "description": {
-            "type": "string",
-            "example": "Rice bags 25kg",
-            "description": "Description of the item being offered"
-          },
-          "quantity": {
-            "type": "number",
-            "example": 50,
-            "description": "Quantity offered (positive integer)"
-          },
-          "unit": {
-            "type": "string",
-            "example": "bags",
-            "description": "Unit of measurement"
+          "items": {
+            "description": "Supply lines offered (at least one)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyLineDto"
+            }
           },
           "location": {
             "$ref": "#/components/schemas/OfferLocationDto"
@@ -10810,9 +10784,7 @@
           }
         },
         "required": [
-          "category",
-          "description",
-          "quantity",
+          "items",
           "location"
         ]
       },
@@ -10871,36 +10843,11 @@
             "format": "uuid",
             "nullable": true
           },
-          "category": {
-            "type": "string",
-            "enum": [
-              "food",
-              "water",
-              "hygiene",
-              "clothing",
-              "medical",
-              "shelter",
-              "tools",
-              "other",
-              "medicines",
-              "medical_equipment",
-              "medical_supplies",
-              "medical_personnel"
-            ],
-            "example": "food"
-          },
-          "description": {
-            "type": "string",
-            "example": "Rice bags 25kg"
-          },
-          "quantity": {
-            "type": "number",
-            "example": 50
-          },
-          "unit": {
-            "type": "string",
-            "example": "bags",
-            "nullable": true
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyLineResponseDto"
+            }
           },
           "location": {
             "$ref": "#/components/schemas/OfferLocationResponseDto"
@@ -10943,9 +10890,7 @@
           "id",
           "emergencyId",
           "donorUserId",
-          "category",
-          "description",
-          "quantity",
+          "items",
           "location",
           "status",
           "createdAt",
@@ -10973,22 +10918,14 @@
             "description": "Motivo de la edición (obligatorio, para trazabilidad)",
             "minLength": 3,
             "maxLength": 1000,
-            "example": "Se corrige la cantidad y se completa la descripción"
+            "example": "Se corrigen las líneas de la oferta"
           },
-          "description": {
-            "type": "string",
-            "description": "Nueva descripción (omitir para no cambiarla)",
-            "minLength": 2
-          },
-          "quantity": {
-            "type": "number",
-            "example": 20,
-            "description": "Nueva cantidad (entero positivo). Omitir para no cambiarla."
-          },
-          "unit": {
-            "type": "string",
-            "description": "Nueva unidad. Cadena vacía la borra. Omitir para no cambiarla.",
-            "nullable": true
+          "items": {
+            "description": "Nuevas líneas de la oferta (reemplazan la lista). Omitir para no cambiarlas.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyLineDto"
+            }
           },
           "notes": {
             "type": "string",

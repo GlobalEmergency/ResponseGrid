@@ -6,6 +6,7 @@ import { DonationOffer } from '../domain/donation-offer';
 import { OfferId } from '../domain/offer-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Category } from '../domain/offer-enums';
+import { SupplyLine } from '../../supplies/domain/supply-line';
 import { Location } from '../../../shared/domain/location';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 
@@ -33,14 +34,19 @@ export interface SubmitOfferLocationCommand {
   longitude: number;
 }
 
+export interface SubmitOfferItemCommand {
+  name: string;
+  quantity: number;
+  unit: string | null;
+  category: Category;
+  presentation: string | null;
+}
+
 export interface SubmitOfferCommand {
   emergencyId: string;
   donorUserId: string;
   donorOrganizationId: string | null;
-  category: Category;
-  description: string;
-  quantity: number;
-  unit: string | null;
+  items: SubmitOfferItemCommand[];
   location: SubmitOfferLocationCommand;
   targetNeedId: string | null;
   notes: string | null;
@@ -84,15 +90,22 @@ export class SubmitOffer {
       longitude: cmd.location.longitude,
     });
 
+    const items = cmd.items.map((i) =>
+      SupplyLine.create({
+        name: i.name,
+        quantity: i.quantity,
+        unit: i.unit,
+        category: i.category,
+        presentation: i.presentation,
+      }),
+    );
+
     const offer = DonationOffer.create({
       id: OfferId.create(),
       emergencyId: EmergencyId.fromString(cmd.emergencyId),
       donorUserId: cmd.donorUserId,
       donorOrganizationId: cmd.donorOrganizationId,
-      category: cmd.category,
-      description: cmd.description,
-      quantity: cmd.quantity,
-      unit: cmd.unit,
+      items,
       location,
       targetNeedId: cmd.targetNeedId,
       notes: cmd.notes,

@@ -1,18 +1,37 @@
 import { OfferRepository } from '../domain/ports/offer.repository';
 import { OfferId } from '../domain/offer-id';
 import { EditOfferProps } from '../domain/donation-offer';
+import { Category } from '../domain/offer-enums';
+import {
+  SupplyLine,
+  SupplyLineSnapshot,
+} from '../../supplies/domain/supply-line';
 import { OfferNotFoundError } from './offer-not-found.error';
 import {
   MutationAuditResult,
   diffFields,
 } from '../../../shared/domain/mutation-audit';
 
+export interface EditOfferItemCommand {
+  name: string;
+  quantity: number;
+  unit: string | null;
+  category: Category;
+  presentation: string | null;
+}
+
 export interface EditOfferCommand {
   offerId: string;
-  description?: string;
-  quantity?: number;
-  unit?: string | null;
+  /** Replaces the whole list of supply lines when provided. */
+  items?: EditOfferItemCommand[];
   notes?: string | null;
+}
+
+/** Stable string form of the lines so the audit diff compares by value. */
+function serializeItems(
+  items: readonly { toSnapshot(): SupplyLineSnapshot }[],
+) {
+  return JSON.stringify(items.map((i) => i.toSnapshot()));
 }
 
 /**
@@ -28,23 +47,27 @@ export class EditOffer {
     if (!offer) throw new OfferNotFoundError(cmd.offerId);
 
     const before = {
-      description: offer.description,
-      quantity: offer.quantity,
-      unit: offer.unit,
+      items: serializeItems(offer.items),
       notes: offer.notes,
     };
 
     const edit: EditOfferProps = {};
-    if (cmd.description !== undefined) edit.description = cmd.description;
-    if (cmd.quantity !== undefined) edit.quantity = cmd.quantity;
-    if (cmd.unit !== undefined) edit.unit = cmd.unit;
+    if (cmd.items !== undefined) {
+      edit.items = cmd.items.map((i) =>
+        SupplyLine.create({
+          name: i.name,
+          quantity: i.quantity,
+          unit: i.unit,
+          category: i.category,
+          presentation: i.presentation,
+        }),
+      );
+    }
     if (cmd.notes !== undefined) edit.notes = cmd.notes;
     offer.edit(edit);
 
     const after = {
-      description: offer.description,
-      quantity: offer.quantity,
-      unit: offer.unit,
+      items: serializeItems(offer.items),
       notes: offer.notes,
     };
 

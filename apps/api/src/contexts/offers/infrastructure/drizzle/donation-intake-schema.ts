@@ -1,4 +1,5 @@
 import { pgTable, uuid, text, timestamp, integer } from 'drizzle-orm/pg-core';
+import { supplyLineColumns } from '../../../supplies/infrastructure/drizzle/supply-line-columns';
 
 export const donationIntakesTable = pgTable('donation_intakes', {
   id: uuid('id').primaryKey(),
@@ -24,10 +25,6 @@ export const donationIntakeLinesTable = pgTable('donation_intake_lines', {
   intakeId: uuid('intake_id')
     .notNull()
     .references(() => donationIntakesTable.id, { onDelete: 'cascade' }),
-  name: text('name').notNull(),
-  quantity: integer('quantity').notNull(),
-  unit: text('unit'),
-  category: text('category').notNull(),
-  presentation: text('presentation'),
+  ...supplyLineColumns(),
   sortOrder: integer('sort_order').notNull().default(0),
 });
