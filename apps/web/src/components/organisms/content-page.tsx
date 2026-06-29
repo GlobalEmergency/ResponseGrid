@@ -1,9 +1,3 @@
-/**
- * ContentPage — shared chrome for the static content/marketing pages
- * (/sobre, /como-funciona, /transparencia, /verificar). Renders the branded
- * header band, a hero (overline + H1 + lead + illustration) and a closing CTA.
- * The global footer comes from the root layout. Server component.
- */
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { SiteHeaderBand } from '@/components/organisms/site-header-band';
@@ -28,11 +22,10 @@ interface ContentPageProps {
 export function ContentPage({ overline, h1, lead, illustration, children, cta }: ContentPageProps) {
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-md bg-surface lg:max-w-5xl">
+      <div className="mx-auto w-full max-w-3xl bg-surface">
         <SiteHeaderBand />
 
         <article className="px-5 pb-16 pt-8 lg:px-8 lg:pt-10">
-          {/* Hero */}
           <header className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
             <div>
               <p className="font-display text-xs font-bold uppercase tracking-[0.14em] text-accent">{overline}</p>
@@ -44,10 +37,8 @@ export function ContentPage({ overline, h1, lead, illustration, children, cta }:
             <div aria-hidden="true">{illustration}</div>
           </header>
 
-          {/* Sections */}
           <div className="mt-12 flex flex-col gap-10 lg:mt-16">{children}</div>
 
-          {/* CTA */}
           <section className="mt-12 rounded-card border border-line bg-surface-alt px-6 py-8 text-center lg:mt-16">
             <h2 className="font-display text-xl font-bold text-navy">{cta.heading}</h2>
             <p className="mx-auto mt-2 max-w-md text-[14.5px] leading-[1.55] text-muted">{cta.body}</p>
@@ -80,7 +71,6 @@ interface ContentSectionProps {
   children: ReactNode;
 }
 
-/** A titled prose block. */
 export function ContentSection({ heading, children }: ContentSectionProps) {
   return (
     <section className="max-w-2xl">

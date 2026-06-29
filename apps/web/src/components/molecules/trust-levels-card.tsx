@@ -1,7 +1,3 @@
-/**
- * TrustLevelsCard — "La confianza es el producto": explains each verification
- * level next to the very badge users will see across the platform.
- */
 import { Card } from '@/components/atoms/card';
 import { SectionHeading } from '@/components/atoms/section-heading';
 import { VerificationBadge, type VerificationLevel } from '@/components/atoms/verification-badge';

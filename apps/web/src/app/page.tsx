@@ -26,7 +26,6 @@ export default async function HomePage() {
   const { t } = await getT();
   const { data: emergencies } = await api.GET('/emergencies');
 
-  // Fetch notification unread count and admin status when authenticated.
   const token = await getToken();
   let notificationUnreadCount = 0;
   let isAdmin = false;
@@ -54,7 +53,7 @@ export default async function HomePage() {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-md bg-surface lg:max-w-5xl">
+      <div className="mx-auto w-full max-w-3xl bg-surface">
         <SiteHeaderBand />
 
         <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">

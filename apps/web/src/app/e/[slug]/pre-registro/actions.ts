@@ -7,7 +7,6 @@ import { getMe } from '@/lib/navigation-data';
 import { MATERIAL_CATEGORIES } from '@/lib/categories';
 import { parseSupplyLines } from '@/lib/supply-lines';
 
-/** Narrow a free string to a known material category slug (single source). */
 function isMaterialCategory(v: string): boolean {
   return (MATERIAL_CATEGORIES as readonly string[]).includes(v);
 }

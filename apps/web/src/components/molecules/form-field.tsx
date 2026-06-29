@@ -13,12 +13,6 @@ interface FormFieldProps {
   labelAs?: 'label' | 'p';
 }
 
-/**
- * FormField — Label + control + optional error message.
- *
- * Encapsulates the `flex flex-col gap-2` wrapper + label style that repeats
- * in every form field across the app.
- */
 export function FormField({
   htmlFor,
   label,

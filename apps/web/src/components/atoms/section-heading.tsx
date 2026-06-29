@@ -16,10 +16,6 @@ interface SectionHeadingProps {
   className?: string;
 }
 
-/**
- * SectionHeading — the Archivo / navy / bold section title used across the app.
- * Keeps heading typography consistent and themeable from one place.
- */
 export function SectionHeading({
   children,
   as: As = 'h2',

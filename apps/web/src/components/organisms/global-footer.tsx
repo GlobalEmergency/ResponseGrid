@@ -1,11 +1,3 @@
-/**
- * GlobalFooter — the real, site-wide footer. Rendered once in the root layout
- * so every page closes with a consistent footer anchored to the bottom of the
- * viewport (the sticky-footer pattern: each page <main> is flex-1).
- *
- * Carries the Global Emergency attribution, site navigation, resource pages and
- * the shared legal links (privacy / terms on the org site).
- */
 import Link from 'next/link';
 import { BrandLogo } from '@/components/molecules/brand-logo';
 import { LanguageSwitcher } from '@/components/molecules/language-switcher';
@@ -26,7 +18,7 @@ export function GlobalFooter({ tf }: GlobalFooterProps) {
   const nav = [
     { href: '/', label: tf.nav_home },
     { href: '/#emergencias', label: tf.nav_emergencies },
-    { href: '/organizaciones', label: tf.nav_orgs },
+    { href: '/panel/organizaciones', label: tf.nav_orgs },
     { href: '/login', label: tf.nav_coordination },
   ];
   const resources = [
@@ -41,7 +33,6 @@ export function GlobalFooter({ tf }: GlobalFooterProps) {
     <footer aria-label={tf.aria_label} className="mt-auto bg-navy text-white">
       <div className="mx-auto w-full max-w-6xl px-5 py-10 lg:px-8 lg:py-12">
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Brand + attribution */}
           <div className="col-span-2 lg:col-span-1">
             <BrandLogo size={26} wordmarkClassName="text-base text-white" />
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/70">{tf.tagline}</p>
@@ -58,7 +49,6 @@ export function GlobalFooter({ tf }: GlobalFooterProps) {
             </p>
           </div>
 
-          {/* Navigation */}
           <nav aria-label={tf.nav_heading} className="flex flex-col gap-2.5">
             <h2 className={colHeading}>{tf.nav_heading}</h2>
             {nav.map((l) => (
@@ -68,7 +58,6 @@ export function GlobalFooter({ tf }: GlobalFooterProps) {
             ))}
           </nav>
 
-          {/* Resources */}
           <nav aria-label={tf.resources_heading} className="flex flex-col gap-2.5">
             <h2 className={colHeading}>{tf.resources_heading}</h2>
             {resources.map((l) => (
@@ -78,7 +67,6 @@ export function GlobalFooter({ tf }: GlobalFooterProps) {
             ))}
           </nav>
 
-          {/* Legal */}
           <nav aria-label={tf.legal_heading} className="flex flex-col gap-2.5">
             <h2 className={colHeading}>{tf.legal_heading}</h2>
             <a href={GLOBAL_EMERGENCY.privacy} target="_blank" rel="noopener noreferrer" className={linkClass}>
@@ -90,7 +78,6 @@ export function GlobalFooter({ tf }: GlobalFooterProps) {
           </nav>
         </div>
 
-        {/* Bottom bar */}
         <div className="mt-10 flex flex-col items-start gap-4 border-t border-white/15 pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-white/60">
             {tf.copyright.replace('{year}', String(year))} · {tf.built_by}

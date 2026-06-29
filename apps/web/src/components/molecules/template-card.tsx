@@ -10,10 +10,6 @@ interface TemplateCardProps {
   actions?: ReactNode;
 }
 
-/**
- * TemplateCard — displays a summary of an emergency template.
- * Actions slot accepts delete/edit controls (optional). Server component.
- */
 export async function TemplateCard({
   name,
   description,

@@ -1,22 +1,5 @@
 'use client';
 
-/**
- * ResourceFilterBar — molecule for filtering the resource list.
- *
- * Provides:
- *  - Category <select> populated from facets.byCategory (with counts).
- *  - Country <select> populated from facets.byCountry (with counts).
- *  - Text search input (client-side, does not trigger re-fetch).
- *  - Active-filter chips with "×" dismiss buttons.
- *
- * Every control is a full-width field of identical height (Select / Input atoms
- * wrapped in FilterField) so the whole bar reads as one tidy form.
- *
- * Filter changes for category/country bubble up via callbacks so the parent
- * can reset the list and re-fetch page 1 with the new params.
- * Search text bubbles up via onSearchChange for client-side filtering.
- */
-
 import type { Messages } from '@/i18n/messages/es';
 import type { Locale } from '@/i18n';
 import { categoryLabel } from '@/lib/categories';

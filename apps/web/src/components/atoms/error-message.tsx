@@ -2,10 +2,6 @@ interface ErrorMessageProps {
   message: string;
 }
 
-/**
- * Inline form error banner — aria-live assertive, role alert.
- * Used in all forms that wire a Server Action with useActionState.
- */
 export function ErrorMessage({ message }: ErrorMessageProps) {
   return (
     <p

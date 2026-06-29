@@ -97,7 +97,6 @@ export function OfrecerTransporteForm({
 
       <p className="text-sm text-muted">{t.intro}</p>
 
-      {/* Modo de transporte — segmentado (radios) */}
       <fieldset className="flex flex-col gap-2">
         <legend className="text-sm font-semibold text-ink uppercase tracking-wide">
           {t.mode_label} <span aria-hidden="true">*</span>
@@ -129,7 +128,6 @@ export function OfrecerTransporteForm({
         </div>
       </fieldset>
 
-      {/* Capacidad — peso y/o volumen */}
       <fieldset className="flex flex-col gap-2">
         <legend className="text-sm font-semibold text-ink uppercase tracking-wide">
           {t.capacity_legend} <span aria-hidden="true">*</span>
@@ -169,7 +167,6 @@ export function OfrecerTransporteForm({
         </div>
       </fieldset>
 
-      {/* Cobertura — área/ruta libre */}
       <FormField
         htmlFor="coverageArea"
         label={<>{t.coverage_label} <span aria-hidden="true">*</span></>}
@@ -185,7 +182,6 @@ export function OfrecerTransporteForm({
         />
       </FormField>
 
-      {/* Ventana de disponibilidad (opcional) */}
       <fieldset className="flex flex-col gap-2">
         <legend className="text-sm font-semibold text-ink uppercase tracking-wide">
           {t.window_legend}{' '}
@@ -209,7 +205,6 @@ export function OfrecerTransporteForm({
         </div>
       </fieldset>
 
-      {/* Restricciones (opcional) */}
       <fieldset className="flex flex-col gap-2">
         <legend className="text-sm font-semibold text-ink uppercase tracking-wide">
           {t.constraints_legend}{' '}
@@ -232,7 +227,6 @@ export function OfrecerTransporteForm({
         </div>
       </fieldset>
 
-      {/* Notas (opcional) */}
       <FormField
         htmlFor="notes"
         label={

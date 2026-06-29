@@ -24,11 +24,7 @@ type ValidityReport = components['schemas']['ValidityReportDto'];
 const INPUT_CLASS =
   'w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink focus:border-navy focus:outline-none';
 
-/**
- * Coordination queue of resources flagged "disputed" by citizens. Each card
- * shows the reason breakdown and lets a coordinator confirm closure, mark the
- * point invalid or dismiss the reports — each requiring a reason (audit trail).
- */
+// Each resolution requires a reason, recorded in the audit trail.
 export function DisputedQueue({
   items,
   slug,

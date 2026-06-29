@@ -1,8 +1,3 @@
-/**
- * OfficialHeaderBand — the navy "Banda oficial" header for an emergency landing.
- * Accent overline, emergency name (H1), and an operational-status pill with the
- * last-updated time. Built on the shared HeaderBandShell.
- */
 import { HeaderBandShell } from '@/components/molecules/header-band-shell';
 import { HeaderAccountEntry } from '@/components/molecules/header-account-entry';
 import { EmergencyHeaderMenu } from '@/components/molecules/emergency-header-menu';

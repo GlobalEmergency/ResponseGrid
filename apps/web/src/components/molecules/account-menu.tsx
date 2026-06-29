@@ -1,10 +1,5 @@
 'use client';
 
-/**
- * AccountMenu — user chip + language switch + logout, pinned to the bottom of
- * the app shell. Rendered on the navy sidebar (and inside the mobile drawer).
- * Receives the principal as plain props; labels are pre-resolved by the shell.
- */
 import { logoutAction } from '@/app/actions';
 import { LanguageSwitcher } from '@/components/molecules/language-switcher';
 

@@ -45,7 +45,6 @@ export function PersonnelNeedFields() {
         {tc.personnel_fields_heading}
       </p>
 
-      {/* Habilidad requerida */}
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="personnel-skill"
@@ -70,7 +69,6 @@ export function PersonnelNeedFields() {
         </select>
       </div>
 
-      {/* Especialidad (texto libre) */}
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="personnel-specialty"
@@ -90,7 +88,6 @@ export function PersonnelNeedFields() {
         />
       </div>
 
-      {/* Personas necesarias */}
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="personnel-count"

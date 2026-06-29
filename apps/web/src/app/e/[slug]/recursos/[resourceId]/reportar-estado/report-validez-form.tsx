@@ -77,7 +77,6 @@ export function ReportValidezForm({
         <ErrorMessage message={state.message ?? t.error_fallback} />
       )}
 
-      {/* Motivo */}
       <FormField
         htmlFor="reason"
         label={
@@ -104,7 +103,6 @@ export function ReportValidezForm({
         </Select>
       </FormField>
 
-      {/* Nota (opcional) */}
       <FormField htmlFor="note" label={t.note_label}>
         <Textarea
           id="note"
@@ -114,7 +112,6 @@ export function ReportValidezForm({
         />
       </FormField>
 
-      {/* Fotos (opcional) */}
       <PhotoUploader onUrlsChange={handlePhotoUrlsChange} />
 
       <Button type="submit" disabled={pending} fullWidth>

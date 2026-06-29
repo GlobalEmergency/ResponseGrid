@@ -1,8 +1,3 @@
-/**
- * AccountNav — secondary account/coordination links for the home page.
- * Previously lived inside the home footer; now an in-page nav so the page keeps
- * a single (global) footer. Admin links surface only for admins.
- */
 import Link from 'next/link';
 import type { Messages } from '@/i18n/messages/es';
 
@@ -33,15 +28,15 @@ export function AccountNav({
       <span className="mr-1 text-[11px] font-semibold uppercase tracking-wide text-muted-soft">
         {t.account_heading}
       </span>
-      <Link href="/organizaciones" className={linkClass}>{t.my_orgs}</Link>
+      <Link href="/panel/organizaciones" className={linkClass}>{t.my_orgs}</Link>
       {authed && canAdminister && (
-        <Link href="/administracion" className={linkClass}>{t.administration}</Link>
+        <Link href="/panel/administracion" className={linkClass}>{t.administration}</Link>
       )}
       {authed && (
         <>
-          <Link href="/grupos" className={linkClass}>{t.groups}</Link>
-          <Link href="/mis-permisos" className={linkClass}>{t.my_permissions}</Link>
-          <Link href="/notificaciones" className={linkClass}>
+          <Link href="/panel/grupos" className={linkClass}>{t.groups}</Link>
+          <Link href="/panel/mis-permisos" className={linkClass}>{t.my_permissions}</Link>
+          <Link href="/panel/notificaciones" className={linkClass}>
             {notificationUnreadCount > 0
               ? t.notifications_with_count.replace('{count}', String(notificationUnreadCount))
               : t.notifications}
@@ -51,11 +46,11 @@ export function AccountNav({
       <Link href="/login" className={linkClass}>{t.coordination_access}</Link>
       {isAdmin && (
         <>
-          <Link href="/admin/acreditaciones" className={linkClass}>{t.admin}</Link>
-          <Link href="/admin/permisos" className={linkClass}>{t.admin_permissions}</Link>
-          <Link href="/admin/api-keys" className={linkClass}>{t.admin_api_keys}</Link>
-          <Link href="/admin/templates" className={linkClass}>{t.templates}</Link>
-          <Link href="/admin/auditoria" className={linkClass}>{t.audit}</Link>
+          <Link href="/panel/administracion/acreditaciones" className={linkClass}>{t.admin}</Link>
+          <Link href="/panel/administracion/permisos" className={linkClass}>{t.admin_permissions}</Link>
+          <Link href="/panel/administracion/api-keys" className={linkClass}>{t.admin_api_keys}</Link>
+          <Link href="/panel/administracion/plantillas" className={linkClass}>{t.templates}</Link>
+          <Link href="/panel/administracion/auditoria" className={linkClass}>{t.audit}</Link>
         </>
       )}
     </nav>

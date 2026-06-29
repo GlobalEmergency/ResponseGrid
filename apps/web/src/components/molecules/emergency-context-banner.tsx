@@ -1,8 +1,3 @@
-/**
- * EmergencyContextBanner — a slim strip shown above coordination content so the
- * operator always knows which emergency they're in and can step back out to its
- * public landing. Server component (presentational).
- */
 import Link from 'next/link';
 
 interface EmergencyContextBannerProps {

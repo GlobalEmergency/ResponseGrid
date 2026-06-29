@@ -86,7 +86,6 @@ export default async function CoordinacionRecursosPage({
     redirect(`/e/${slug}/coordinacion`);
   }
 
-  // --- Parse search / filter / page params ------------------------------
   const rawQ =
     typeof resolvedSearchParams.q === 'string' ? resolvedSearchParams.q.trim() : '';
   const q = rawQ.slice(0, 100);
@@ -106,7 +105,6 @@ export default async function CoordinacionRecursosPage({
   const { t } = await getT();
   const tc = t.coord;
 
-  // --- Fetch the paged verification queue -------------------------------
   const result = await api.GET('/emergencies/{emergencyId}/coordination/queue', {
     params: {
       path: { emergencyId },

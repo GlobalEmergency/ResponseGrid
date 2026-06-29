@@ -1,8 +1,3 @@
-/**
- * EmergencyDirectoryCard — one active emergency in the public Home directory.
- * Status pill + freshness, name (H3), region, optional announcement excerpt and
- * an "enter the operation" affordance. The whole card links to /e/[slug].
- */
 import Link from 'next/link';
 import type { components } from '@reliefhub/api-client';
 import { RelativeTime } from '@/components/atoms/relative-time';

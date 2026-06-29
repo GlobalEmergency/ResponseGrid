@@ -1,15 +1,5 @@
-/**
- * BrandMark — the ResponseGrid logo glyph.
- *
- * Based on the Global Emergency civil-protection emblem (orange disc + a
- * white-bordered navy triangle) with a ResponseGrid twist: glowing nodes at the
- * triangle's three vertices, evoking a connected grid of response points.
- *
- * Pure multicolour SVG so it reads on both navy bands and light surfaces. Also
- * rendered by next/og (Satori) for the favicon, apple-icon and PWA icons.
- */
+// Also rendered by next/og (Satori) for the favicon, apple-icon and PWA icons.
 interface BrandMarkProps {
-  /** Square side length in px. */
   size?: number;
   className?: string;
   /** When set, the glyph is exposed to assistive tech with this label. */

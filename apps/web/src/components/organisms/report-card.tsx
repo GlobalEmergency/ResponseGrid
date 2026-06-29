@@ -130,7 +130,6 @@ export function ReportCard({ report, slug }: ReportCardProps) {
       aria-label={tc.report_card_label.replace('{type}', TYPE_LABELS[report.type] ?? report.type)}
       className="flex flex-col gap-4 rounded-lg border-2 border-navy bg-white p-5"
     >
-      {/* Header row */}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-bold text-ink">
           {TYPE_LABELS[report.type] ?? report.type}
@@ -142,12 +141,10 @@ export function ReportCard({ report, slug }: ReportCardProps) {
         <span className={statusClass}>{statusLabel}</span>
       </div>
 
-      {/* Note */}
       <p className="text-sm text-ink leading-relaxed whitespace-pre-wrap">
         {report.note}
       </p>
 
-      {/* Photo thumbnails */}
       {report.photoUrls != null && report.photoUrls.length > 0 && (
         <ul className="flex flex-wrap gap-2" aria-label={tc.report_photos_label}>
           {report.photoUrls.filter((u) => u !== '').map((urlOrKey) => {
@@ -179,7 +176,6 @@ export function ReportCard({ report, slug }: ReportCardProps) {
         </ul>
       )}
 
-      {/* Meta info */}
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
         {report.resourceName != null && (
           <span>{tc.report_point_label}: {report.resourceName}</span>
@@ -192,7 +188,6 @@ export function ReportCard({ report, slug }: ReportCardProps) {
         )}
       </div>
 
-      {/* Review action */}
       {!isReviewed && (
         <form action={reviewFormAction}>
           {reviewState.status === 'error' && (

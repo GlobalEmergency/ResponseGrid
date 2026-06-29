@@ -39,13 +39,11 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
 
-  // --- Auth guard ---
   const token = await getToken();
   if (token === null) {
     redirect(`/login?next=/e/${slug}/coordinacion/reportes`);
   }
 
-  // --- Emergency resolution ---
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
     notFound();
@@ -54,7 +52,6 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
   const emergencyId = emergency.id;
   const headers = authHeaders(token);
 
-  // --- Parse and validate filter params ---
   const rawStatus = typeof resolvedSearchParams.status === 'string' ? resolvedSearchParams.status : undefined;
   const rawPriority = typeof resolvedSearchParams.priority === 'string' ? resolvedSearchParams.priority : undefined;
   const rawResourceId = typeof resolvedSearchParams.resourceId === 'string' ? resolvedSearchParams.resourceId : undefined;
@@ -74,7 +71,6 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
     ? rawResourceId.trim()
     : undefined;
 
-  // --- Fetch reports ---
   // Use the body openapi-fetch already parsed (`data`); calling response.json()
   // a second time throws "Body has already been read".
   let reports: FieldReport[] = [];
@@ -133,14 +129,12 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
 
   return (
     <>
-      {/* ── FILTROS ─────────────────────────────────────────────────── */}
       <section aria-labelledby="filters-heading" className="flex flex-col gap-3">
         <h2 id="filters-heading" className="text-sm font-semibold text-ink uppercase tracking-wide">
           {tc.reports_filter_heading}
         </h2>
 
         <div className="flex flex-wrap gap-2">
-          {/* Status filter */}
           <div className="flex gap-1">
             <Link
               href={baseUrl}
@@ -169,7 +163,6 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
             ))}
           </div>
 
-          {/* Priority filter */}
           <div className="flex gap-1">
             {VALID_PRIORITIES.map((p) => (
               <Link
@@ -188,7 +181,6 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
           </div>
         </div>
 
-        {/* Clear filters */}
         {(statusFilter !== undefined || priorityFilter !== undefined) && (
           <Link
             href={baseUrl}
@@ -201,7 +193,6 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
 
       <hr className="border-line" />
 
-      {/* ── LISTA DE PARTES ─────────────────────────────────────────── */}
       <section aria-labelledby="reports-heading" className="flex flex-col gap-4">
         <h2 id="reports-heading" className="text-xl font-bold text-ink">
           {tc.reports_received_heading}

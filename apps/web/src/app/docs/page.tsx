@@ -340,7 +340,6 @@ for (const p of items) {
         <SiteHeaderBand />
 
         <div className="px-5 pb-16 pt-8 lg:px-8 lg:pt-10">
-          {/* Hero */}
           <header className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
             <div>
               <p className="font-display text-xs font-bold uppercase tracking-[0.14em] text-accent">
@@ -392,7 +391,6 @@ for (const p of items) {
             </aside>
 
             <div className="flex min-w-0 flex-col gap-12">
-              {/* Overview */}
               <Section id="intro" title={d.intro_heading}>
                 <Lead>{d.intro_p1}</Lead>
                 <Lead>{d.intro_p2}</Lead>
@@ -421,7 +419,6 @@ for (const p of items) {
                 </dl>
               </Section>
 
-              {/* Concepts */}
               <Section id="concepts" title={d.concepts_heading}>
                 <Lead>{d.concepts_intro}</Lead>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -432,7 +429,6 @@ for (const p of items) {
                 </div>
               </Section>
 
-              {/* Authentication */}
               <Section id="auth" title={d.auth_heading}>
                 <Lead>{d.auth_intro}</Lead>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -443,7 +439,6 @@ for (const p of items) {
                 <Callout tone="warn">{d.auth_note}</Callout>
               </Section>
 
-              {/* Quickstart */}
               <Section id="quickstart" title={d.qs_heading}>
                 <Lead>{d.qs_intro}</Lead>
                 <ol className="ml-4 list-decimal space-y-1.5 text-[14.5px] leading-[1.6] text-ink-soft marker:font-bold marker:text-accent">
@@ -456,7 +451,6 @@ for (const p of items) {
                 <Callout>{d.qs_note}</Callout>
               </Section>
 
-              {/* List emergencies */}
               <Section id="emergencies" title={d.e_heading}>
                 <Endpoint method="GET" path="/emergencies" />
                 <Lead>{d.e_intro}</Lead>
@@ -505,7 +499,6 @@ for (const p of items) {
                 <CodeBlock copyLabel={d.copy} copiedLabel={d.copied} code={facetsJson} lang="JSON" />
               </Section>
 
-              {/* Needs (read) */}
               <Section id="needs" title={d.n_heading}>
                 <Endpoint method="GET" path="/emergencies/{emergencyId}/public/needs" />
                 <Lead>{d.n_intro}</Lead>
@@ -515,7 +508,6 @@ for (const p of items) {
                 <Callout tone="warn">{d.n_privacy}</Callout>
               </Section>
 
-              {/* States & categories */}
               <Section id="enums" title={d.enums_heading}>
                 <Lead>{d.enums_intro}</Lead>
 
@@ -584,7 +576,6 @@ for (const p of items) {
                 <Chips items={['low', 'medium', 'high', 'urgent']} />
               </Section>
 
-              {/* Contribute data (writes) */}
               <Section id="write" title={d.w_heading}>
                 <Lead>{d.w_intro}</Lead>
                 <Callout tone="warn">{d.w_moderation_note}</Callout>
@@ -609,7 +600,6 @@ for (const p of items) {
                 <CodeBlock copyLabel={d.copy} copiedLabel={d.copied} code={curlCreateResource} lang="cURL" />
               </Section>
 
-              {/* Best practices */}
               <Section id="practices" title={d.bp_heading}>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Card title={d.bp_cache_t}>{d.bp_cache_b}</Card>
@@ -620,7 +610,6 @@ for (const p of items) {
                 </div>
               </Section>
 
-              {/* License & attribution */}
               <Section id="license" title={d.license_heading}>
                 <Lead>{d.license_intro}</Lead>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -640,7 +629,6 @@ for (const p of items) {
                 </a>
               </Section>
 
-              {/* Reference & links */}
               <Section id="links" title={d.links_heading}>
                 <div className="flex flex-col gap-3">
                   <a
@@ -671,7 +659,6 @@ for (const p of items) {
                 </div>
               </Section>
 
-              {/* CTA */}
               <section className="rounded-card border border-line bg-surface-alt px-6 py-8 text-center">
                 <h2 className="font-display text-xl font-bold text-navy">{d.cta_heading}</h2>
                 <p className="mx-auto mt-2 max-w-md text-[14.5px] leading-[1.55] text-muted">{d.cta_body}</p>

@@ -100,7 +100,7 @@ export default async function IntakeDetailPage({ params }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-md">
+      <div className="mx-auto w-full max-w-3xl">
         <PageHeaderBand
           backHref={`/e/${slug}/recepcion`}
           backLabel={tr.back_to_list}

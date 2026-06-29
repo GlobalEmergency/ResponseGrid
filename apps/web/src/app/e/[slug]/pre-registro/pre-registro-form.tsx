@@ -116,7 +116,6 @@ export function PreRegistroForm({
         </p>
       )}
 
-      {/* Tu nombre */}
       <FormField
         htmlFor="donorName"
         label={
@@ -139,7 +138,6 @@ export function PreRegistroForm({
         />
       </FormField>
 
-      {/* Contacto (al menos uno) */}
       <fieldset className="flex flex-col gap-4 rounded-lg border-2 border-line p-4">
         <legend className="px-1 text-sm font-semibold uppercase tracking-wide text-ink">
           {t.contact_heading}
@@ -177,10 +175,8 @@ export function PreRegistroForm({
         </FormField>
       </fieldset>
 
-      {/* Qué vas a llevar (líneas de material) */}
       <InventoryField t={t.lines} locale={locale} startWithOneRow />
 
-      {/* Submit */}
       <Button type="submit" disabled={pending} fullWidth>
         {pending ? t.submitting : t.submit}
       </Button>

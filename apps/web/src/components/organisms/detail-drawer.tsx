@@ -67,7 +67,6 @@ export function DetailDrawer({
       aria-modal="true"
       aria-label={ariaLabel ?? title}
     >
-      {/* Backdrop */}
       <button
         type="button"
         aria-label={tc.drawer_close}
@@ -75,7 +74,6 @@ export function DetailDrawer({
         className="absolute inset-0 bg-black/50"
       />
 
-      {/* Panel: bottom sheet on mobile, right panel on desktop */}
       <div
         className={[
           'absolute bg-white shadow-xl',
@@ -85,7 +83,6 @@ export function DetailDrawer({
           'sm:inset-y-0 sm:right-0 sm:left-auto sm:max-h-none sm:w-[30rem] sm:max-w-full sm:rounded-t-none',
         ].join(' ')}
       >
-        {/* Header (sticky) */}
         <div className="flex items-start justify-between gap-3 border-b border-line px-5 py-4">
           <div className="flex min-w-0 flex-col gap-2">
             <h2 className="text-lg font-bold leading-tight text-ink break-words">
@@ -119,10 +116,8 @@ export function DetailDrawer({
           </button>
         </div>
 
-        {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto px-5 py-4">{children}</div>
 
-        {/* Sticky footer (actions) */}
         {footer != null && (
           <div className="sticky bottom-0 border-t border-line bg-white px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
             {footer}

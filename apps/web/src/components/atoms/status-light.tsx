@@ -26,13 +26,7 @@ const LABEL_KEY: Record<PublicStatus, keyof Messages['status_light']> = {
   hidden: 'hidden',
 };
 
-/**
- * StatusLight — compact operational-state indicator for a resource point.
- *
- * Renders as an inline flex row (dot + label) so it composes naturally
- * inside flex containers. Accessible via aria-label on the wrapper.
- * `t` is optional — falls back to Spanish when omitted (used in coordinator pages).
- */
+// `t` is optional — falls back to Spanish when omitted (used in coordinator pages).
 export function StatusLight({
   status,
   t = es.status_light,

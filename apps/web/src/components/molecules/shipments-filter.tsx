@@ -1,10 +1,5 @@
 'use client';
 
-/**
- * Status filter for the coordination Expediciones list. Drives the `status`
- * search param; the page passes it to the shipments endpoint. Mirrors
- * {@link OffersFilter}'s URL-sync approach.
- */
 import type { ChangeEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Select } from '@/components/atoms/select';

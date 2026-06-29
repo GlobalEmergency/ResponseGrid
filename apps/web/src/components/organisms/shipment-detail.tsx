@@ -106,7 +106,7 @@ export function ShipmentDetail({
 
   const [suggestions, setSuggestions] = useState<CapacityViewDto[] | null>(null);
   const [suggestionsError, setSuggestionsError] = useState<string | null>(null);
-  // ponytail: sugerencias primero, select manual tras un toggle.
+  // sugerencias primero, select manual tras un toggle.
   const [showAllManual, setShowAllManual] = useState(false);
   const [assigningId, setAssigningId] = useState<string | null>(null);
   const [, startAssign] = useTransition();

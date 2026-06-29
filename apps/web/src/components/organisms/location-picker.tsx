@@ -39,7 +39,6 @@ export function LocationPicker({ defaultValue }: LocationPickerProps) {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Debounced geocode fetch
   const fetchResults = useCallback(async (q: string) => {
     if (q.length < 3) {
       setResults([]);
@@ -64,7 +63,6 @@ export function LocationPicker({ defaultValue }: LocationPickerProps) {
 
   const handleInputChange = (value: string) => {
     setQuery(value);
-    // Clear previous selection when typing
     setSelected(null);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
@@ -79,7 +77,6 @@ export function LocationPicker({ defaultValue }: LocationPickerProps) {
     setResults([]);
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (
@@ -93,7 +90,6 @@ export function LocationPicker({ defaultValue }: LocationPickerProps) {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -102,7 +98,6 @@ export function LocationPicker({ defaultValue }: LocationPickerProps) {
 
   return (
     <div className="flex flex-col gap-3" ref={containerRef}>
-      {/* Search input */}
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="location-search"
@@ -135,7 +130,6 @@ export function LocationPicker({ defaultValue }: LocationPickerProps) {
           )}
         </div>
 
-        {/* Dropdown results */}
         {isOpen && results.length > 0 && (
           <ul
             id="location-results"
@@ -175,7 +169,6 @@ export function LocationPicker({ defaultValue }: LocationPickerProps) {
         value={selected?.longitude ?? ''}
       />
 
-      {/* Mini map — rendered only when a location is selected */}
       {selected !== null && (
         <div aria-label={t.map_showing.replace('{address}', selected.address)}>
           <LeafletMap

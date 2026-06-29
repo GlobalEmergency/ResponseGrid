@@ -6,6 +6,7 @@ import { getMe } from '@/lib/navigation-data';
 import { submitCapacity } from './actions';
 import { OfrecerTransporteForm } from './ofrecer-transporte-form';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { Card } from '@/components/atoms/card';
 import { getT } from '@/i18n/server';
 
 type Props = {
@@ -57,7 +58,7 @@ export default async function OfrecerTransportePage({ params }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-md">
+      <div className="mx-auto w-full max-w-3xl">
         <PageHeaderBand
           backHref={`/e/${slug}`}
           backLabel={t.common.back_to_emergency}
@@ -67,13 +68,15 @@ export default async function OfrecerTransportePage({ params }: Props) {
             emergency.name,
           )}
         />
-        <div className="flex flex-col gap-8 px-4 pb-12 pt-6">
-          <OfrecerTransporteForm
-            action={boundAction}
-            slug={slug}
-            t={t.ofrecerTransporte}
-            backToEmergencyLabel={t.common.back_to_emergency}
-          />
+        <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">
+          <Card className="p-5 lg:p-7">
+            <OfrecerTransporteForm
+              action={boundAction}
+              slug={slug}
+              t={t.ofrecerTransporte}
+              backToEmergencyLabel={t.common.back_to_emergency}
+            />
+          </Card>
         </div>
       </div>
     </main>

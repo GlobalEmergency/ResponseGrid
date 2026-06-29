@@ -14,10 +14,6 @@ type Props = {
   params: Promise<{ slug: string; resourceId: string }>;
 };
 
-/**
- * Public detail page for a single resource / final recipient: its ficha plus
- * the list of needs linked to it (1‑a‑N, via ?resourceId=). EPIC #59.
- */
 export default async function RecipientResourcePage({ params }: Props) {
   const { slug, resourceId } = await params;
   const emergency = await getEmergencyBySlug(slug);
@@ -58,7 +54,7 @@ export default async function RecipientResourcePage({ params }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-md bg-surface lg:max-w-3xl">
+      <div className="mx-auto w-full max-w-3xl bg-surface">
         <div className="flex flex-col gap-5 px-4 pb-12 pt-5 lg:gap-6 lg:px-8">
           <Link
             href={`/e/${slug}`}

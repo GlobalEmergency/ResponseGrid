@@ -1,9 +1,3 @@
-/**
- * AnnouncementCard — official coordinator communiqué (Banda oficial look).
- * Renders just the last-updated line when there is no announcement.
- * `t` is optional — falls back to Spanish when omitted.
- */
-
 import { Card } from '@/components/atoms/card';
 import { RelativeTime } from '@/components/atoms/relative-time';
 import type { Messages } from '@/i18n/messages/es';

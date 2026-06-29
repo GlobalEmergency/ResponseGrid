@@ -111,7 +111,7 @@ export function buildNavModel({
     groups.push({
       key: 'admin',
       items: [
-        { key: 'administracion', href: '/administracion', labelKey: 'administration' },
+        { key: 'administracion', href: '/panel/administracion', labelKey: 'administration' },
       ],
     });
   }
@@ -123,13 +123,13 @@ export function buildNavModel({
     items: [
       {
         key: 'notifications',
-        href: '/notificaciones',
+        href: '/panel/notificaciones',
         labelKey: 'notifications',
         badgeCount: notificationUnread,
       },
-      { key: 'groups', href: '/grupos', labelKey: 'my_groups' },
-      { key: 'orgs', href: '/organizaciones', labelKey: 'my_orgs' },
-      { key: 'permissions', href: '/mis-permisos', labelKey: 'my_permissions' },
+      { key: 'groups', href: '/panel/grupos', labelKey: 'my_groups' },
+      { key: 'orgs', href: '/panel/organizaciones', labelKey: 'my_orgs' },
+      { key: 'permissions', href: '/panel/mis-permisos', labelKey: 'my_permissions' },
     ],
   });
 

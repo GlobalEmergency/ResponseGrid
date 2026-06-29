@@ -1,14 +1,6 @@
-/**
- * RecipientTypeBadge — pill shown on a resource that is a "final recipient"
- * of aid (#60), displaying its localised recipient type. Colour comes from
- * `lib/recipient-types`; degrades gracefully for unknown/custom types.
- */
 interface RecipientTypeBadgeProps {
-  /** Localised type label, e.g. "Hospital" (or the raw slug if unknown). */
   label: string;
-  /** Tailwind colour classes from recipientTypeColor(). */
   colorClass: string;
-  /** Full aria label, e.g. "Destinatario final: Hospital". */
   ariaLabel: string;
 }
 

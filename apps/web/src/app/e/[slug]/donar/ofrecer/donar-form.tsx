@@ -23,9 +23,7 @@ type BoundAction = (prev: OfferState, formData: FormData) => Promise<OfferState>
 interface DonarFormProps {
   action: BoundAction;
   slug: string;
-  /** The need title if this is a directed offer, undefined otherwise. */
   targetNeedTitle?: string;
-  /** The need id if this is a directed offer, undefined otherwise. */
   targetNeedId?: string;
   locationPicker: ReactNode;
   orgSelector: ReactNode;
@@ -70,7 +68,6 @@ export function DonarForm({
   };
   const { clearDraft, wasRestored } = useFormDraft(draftKey, draftValues, draftSetters);
 
-  // Clear draft on successful submit
   useEffect(() => {
     if (state.status === 'success') clearDraft();
   }, [state.status, clearDraft]);
@@ -100,7 +97,6 @@ export function DonarForm({
         <ErrorMessage message={state.message ?? t.error_fallback} />
       )}
 
-      {/* Directed offer indicator */}
       {targetNeedTitle !== undefined && targetNeedId !== undefined && (
         <>
           <div
@@ -114,7 +110,6 @@ export function DonarForm({
         </>
       )}
 
-      {/* Categoría */}
       <FormField
         htmlFor="category"
         label={<>{t.category_label} <span aria-hidden="true">*</span></>}
@@ -137,7 +132,6 @@ export function DonarForm({
         </Select>
       </FormField>
 
-      {/* Descripción */}
       <FormField
         htmlFor="description"
         label={<>{t.description_label} <span aria-hidden="true">*</span></>}
@@ -154,7 +148,6 @@ export function DonarForm({
         />
       </FormField>
 
-      {/* Cantidad + Unidad */}
       <div className="flex gap-3">
         <div className="flex-1">
           <FormField
@@ -196,7 +189,6 @@ export function DonarForm({
         </div>
       </div>
 
-      {/* Ubicación */}
       <FormField
         htmlFor="location-search"
         label={<>{t.location_label} <span aria-hidden="true">*</span></>}
@@ -205,10 +197,8 @@ export function DonarForm({
         {locationPicker}
       </FormField>
 
-      {/* Organización */}
       {orgSelector}
 
-      {/* Notas */}
       <FormField
         htmlFor="notes"
         label={
@@ -228,7 +218,6 @@ export function DonarForm({
         />
       </FormField>
 
-      {/* Submit */}
       <Button type="submit" disabled={pending} fullWidth>
         {pending ? t.submitting : t.submit}
       </Button>

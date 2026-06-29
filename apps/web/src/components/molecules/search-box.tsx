@@ -1,11 +1,5 @@
 'use client';
 
-/**
- * URL-synced search box. Writes the trimmed query into a search param (default
- * `q`) with a short debounce so typing doesn't fire a navigation per keystroke,
- * and resets `page` to 1 whenever the query changes. Reads its labels from the
- * active locale so it stays framework-i18n-consistent without prop drilling.
- */
 import { useState, useEffect, useRef, type ChangeEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Input } from '@/components/atoms/input';

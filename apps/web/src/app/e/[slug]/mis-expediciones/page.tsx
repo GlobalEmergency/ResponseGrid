@@ -31,7 +31,6 @@ export default async function MisExpedicionesPage({ params }: Props) {
   const { t } = await getT();
   const ta = t.account;
 
-  // --- Auth guard -----------------------------------------------------------
   const token = await getToken();
   if (token === null) {
     redirect(`/login?next=/e/${slug}/mis-expediciones`);
@@ -45,7 +44,6 @@ export default async function MisExpedicionesPage({ params }: Props) {
   const emergencyId = emergency.id;
   const headers = authHeaders(token);
 
-  // --- Fetch my shipments + resource names in parallel ----------------------
   const [shipments, resourcesPage] = await Promise.all([
     api
       .GET('/logistics/shipments/mine', {
@@ -74,14 +72,14 @@ export default async function MisExpedicionesPage({ params }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-xl">
+      <div className="mx-auto w-full max-w-3xl">
         <PageHeaderBand
           backHref={`/e/${slug}`}
           backLabel={emergency.name}
           title={ta.ship_title}
           subtitle={ta.ship_subtitle}
         />
-        <div className="flex flex-col gap-6 px-4 pb-12 pt-6">
+        <div className="flex flex-col gap-6 px-5 pb-12 pt-6 lg:px-8">
           <ShipmentsList
             shipments={shipments}
             slug={slug}

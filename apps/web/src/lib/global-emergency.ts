@@ -9,10 +9,7 @@
  * @see https://globalemergency.online
  */
 export const GLOBAL_EMERGENCY = {
-  /** Umbrella organisation site. */
   site: 'https://globalemergency.online',
-  /** Shared privacy policy — "Política de privacidad". */
   privacy: 'https://globalemergency.online/privacidad',
-  /** Shared terms & conditions — "Términos y condiciones". */
   terms: 'https://globalemergency.online/terminos',
 } as const;

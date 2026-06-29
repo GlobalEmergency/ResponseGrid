@@ -80,7 +80,6 @@ export function SupplyLineRowFields({
         )}
       </div>
 
-      {/* Nombre del insumo */}
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor={`${idPrefix}-name-${rowId}`}
@@ -100,7 +99,6 @@ export function SupplyLineRowFields({
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        {/* Cantidad */}
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor={`${idPrefix}-qty-${rowId}`}
@@ -124,7 +122,6 @@ export function SupplyLineRowFields({
           />
         </div>
 
-        {/* Unidad */}
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor={`${idPrefix}-unit-${rowId}`}
@@ -144,7 +141,6 @@ export function SupplyLineRowFields({
         </div>
       </div>
 
-      {/* Categoría */}
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor={`${idPrefix}-cat-${rowId}`}
