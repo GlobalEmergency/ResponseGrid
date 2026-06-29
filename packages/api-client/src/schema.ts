@@ -1812,6 +1812,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/supplies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search the shared supply catalog (canonical names, aliases and codes) */
+        get: operations["SuppliesController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/supplies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a supply by id */
+        get: operations["SuppliesController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/supplies/containers": {
         parameters: {
             query?: never;
@@ -4719,6 +4753,11 @@ export interface components {
         CategoryDto: {
             /** @example medicines */
             slug: string;
+            /**
+             * @description Localized category label
+             * @example Medicamentos
+             */
+            label: string;
             /** @example Medicamentos */
             labelEs: string;
             /** @example Medicines */
@@ -4735,6 +4774,52 @@ export interface components {
              * @example 41
              */
             sort: number;
+        };
+        SupplyDto: {
+            /**
+             * Format: uuid
+             * @example cf8da6e3-7b91-52ff-8cf7-bbff50786c35
+             */
+            id: string;
+            /** @example INS-001 */
+            code: string;
+            /** @example Agua potable (botellón 18L) */
+            name: string;
+            /** @example Agua potable (botellón 18L) */
+            nameEs: string;
+            /** @example Water (18L jug) */
+            nameEn?: string | null;
+            /** @example food */
+            categorySlug: string;
+            /** @example Alimentos */
+            categoryLabel: string;
+            /** @example Alimentos */
+            categoryLabelEs: string;
+            /** @example Food */
+            categoryLabelEn?: string | null;
+            /** @example und */
+            defaultUnit?: string | null;
+            /**
+             * @description Structured attributes for variants and catalog metadata
+             * @example {
+             *       "size": "18L"
+             *     }
+             */
+            attributes: Record<string, never>;
+            /**
+             * Format: uuid
+             * @description Parent supply id when this item is a variant
+             * @example null
+             */
+            variantOfId?: string | null;
+            /**
+             * @description Known aliases for the canonical supply
+             * @example [
+             *       "Agua embotellada",
+             *       "botellón"
+             *     ]
+             */
+            aliases: string[];
         };
         ContainerHolderDto: {
             /**
@@ -9933,8 +10018,14 @@ export interface operations {
     };
     CategoriesController_list: {
         parameters: {
-            query?: never;
-            header?: never;
+            query?: {
+                /** @description Preferred locale */
+                locale?: string;
+            };
+            header?: {
+                /** @description Fallback locale header (es or en) */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9947,6 +10038,68 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CategoryDto"][];
+                };
+            };
+        };
+    };
+    SuppliesController_list: {
+        parameters: {
+            query?: {
+                /** @description Autocomplete term */
+                q?: string;
+                /** @description Filter by category slug */
+                categorySlug?: string;
+                /** @description Preferred locale */
+                locale?: string;
+                /** @description Max items to return */
+                limit?: number;
+                /** @description How many items to skip */
+                offset?: number;
+            };
+            header?: {
+                /** @description Fallback locale header (es or en) */
+                "Accept-Language"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Matched supplies */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupplyDto"][];
+                };
+            };
+        };
+    };
+    SuppliesController_get: {
+        parameters: {
+            query?: {
+                /** @description Preferred locale */
+                locale?: unknown;
+            };
+            header?: {
+                /** @description Fallback locale header (es or en) */
+                "Accept-Language"?: string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Supply detail */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupplyDto"];
                 };
             };
         };
