@@ -11540,12 +11540,12 @@
             "example": "María López"
           },
           "donorPhone": {
-            "type": "object",
+            "type": "string",
             "example": "+52 55 1234 5678",
             "nullable": true
           },
           "donorEmail": {
-            "type": "object",
+            "type": "string",
             "example": "maria@example.com",
             "nullable": true
           },
@@ -11594,12 +11594,12 @@
         "type": "object",
         "properties": {
           "donorPhone": {
-            "type": "object",
+            "type": "string",
             "example": "+52 55 1234 5678",
             "nullable": true
           },
           "donorEmail": {
-            "type": "object",
+            "type": "string",
             "example": "maria@example.com",
             "nullable": true
           }
@@ -11668,12 +11668,12 @@
             "example": "María López"
           },
           "donorPhone": {
-            "type": "object",
+            "type": "string",
             "example": "+52 55 1234 5678",
             "nullable": true
           },
           "donorEmail": {
-            "type": "object",
+            "type": "string",
             "example": "maria@example.com",
             "nullable": true
           },
