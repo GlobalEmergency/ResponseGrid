@@ -2,6 +2,9 @@
 -- alias normalizados y traducciones/i18n para categorías e insumos.
 -- Mantiene `categories` como jerarquía global ya existente (parent_slug) y
 -- añade tablas aparte para el contenido traducible.
+--
+-- Freshness date per supply line, shared by inventory / needs / donation
+-- intakes. Legacy-safe: nullable and backfilled as-is.
 
 CREATE TABLE IF NOT EXISTS "supplies" (
   "id" uuid PRIMARY KEY NOT NULL,
@@ -59,3 +62,16 @@ INSERT INTO "category_translations" ("category_slug", "locale", "label")
 SELECT "slug", 'en', "label_en"
 FROM "categories"
 ON CONFLICT DO NOTHING;
+--> statement-breakpoint
+
+ALTER TABLE "resource_items"
+  ADD COLUMN IF NOT EXISTS "expires_at" timestamp with time zone;
+
+ALTER TABLE "need_items"
+  ADD COLUMN IF NOT EXISTS "expires_at" timestamp with time zone;
+
+ALTER TABLE "donation_intake_lines"
+  ADD COLUMN IF NOT EXISTS "expires_at" timestamp with time zone;
+
+ALTER TABLE "offer_items"
+  ADD COLUMN IF NOT EXISTS "expires_at" timestamp with time zone;
