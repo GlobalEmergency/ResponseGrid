@@ -30,7 +30,7 @@ jobs:
       - name: Deploy on EC2 via SSM
         run: |
           set -euo pipefail
-          CMD='cd /opt/responsegrid && git fetch origin && git reset --hard origin/main && install -m 644 deploy/responsegrid.service /etc/systemd/system/responsegrid.service && systemctl daemon-reload && systemctl enable responsegrid.service && docker compose -f deploy/docker-compose.prod.yml up -d --build && docker compose -f deploy/docker-compose.prod.yml ps'
+          CMD='cd /opt/responsegrid && git fetch origin && git reset --hard origin/main && printf "DD_VERSION=%s\n" "$(git rev-parse --short HEAD)" > deploy/.env.version && install -m 644 deploy/responsegrid.service /etc/systemd/system/responsegrid.service && systemctl daemon-reload && systemctl enable responsegrid.service && docker compose -f deploy/docker-compose.prod.yml up -d --build && docker compose -f deploy/docker-compose.prod.yml ps'
           PARAMS=$(jq -n --arg c "$CMD" '{commands: [$c]}')
           CID=$(aws ssm send-command \
             --instance-ids i-0f5979080ad5da6e5 \

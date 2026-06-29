@@ -50,7 +50,7 @@ import {
   CreateCategoryDto,
   UpdateCategoryDto,
 } from './admin-category.dto';
-import { localizedText, resolveLocale } from './locale';
+import { localizedCategoryText, resolveLocale } from './locale';
 import { CategoryWriteInput } from '../../domain/ports/category.repository';
 
 @ApiTags('categories')
@@ -168,7 +168,7 @@ export class CategoriesAdminController {
   ): CategoryAdminDto {
     return {
       slug: category.slug,
-      label: localizedText(category, locale),
+      label: localizedCategoryText(category, locale),
       labelEs: category.labelEs,
       labelEn: category.labelEn,
       parentSlug: category.parentSlug,

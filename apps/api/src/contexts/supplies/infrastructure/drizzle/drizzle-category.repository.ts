@@ -210,10 +210,10 @@ export class DrizzleCategoryRepository implements CategoryRepository {
       .select()
       .from(categoryTranslationsTable)
       .where(
-        inArray(
-          categoryTranslationsTable.categorySlug,
-          categoryRows.map((row) => row.slug),
-        ),
+          inArray(
+            categoryTranslationsTable.categorySlug,
+            categoryRows.map((row) => row.slug),
+          ),
       );
 
     const translationMap = new Map<string, CategoryTranslationRow[]>();

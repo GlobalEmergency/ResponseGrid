@@ -5640,7 +5640,26 @@
     "/categories": {
       "get": {
         "operationId": "CategoriesController_list",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "description": "Preferred locale",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "description": "Fallback locale header (es or en)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "The category taxonomy",
@@ -5659,6 +5678,141 @@
         "summary": "List the shared category taxonomy (slug + labels + hierarchy)",
         "tags": [
           "categories"
+        ]
+      }
+    },
+    "/supplies": {
+      "get": {
+        "operationId": "SuppliesController_list",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Autocomplete term",
+            "schema": {
+              "example": "advil",
+              "type": "string"
+            }
+          },
+          {
+            "name": "categorySlug",
+            "required": false,
+            "in": "query",
+            "description": "Filter by category slug",
+            "schema": {
+              "example": "medical_supplies",
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "description": "Preferred locale",
+            "schema": {
+              "example": "en",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max items to return",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "How many items to skip",
+            "schema": {
+              "minimum": 0,
+              "example": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "description": "Fallback locale header (es or en)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matched supplies",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SupplyDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Search the shared supply catalog (canonical names, aliases and codes)",
+        "tags": [
+          "supplies"
+        ]
+      }
+    },
+    "/supplies/{id}": {
+      "get": {
+        "operationId": "SuppliesController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "description": "Preferred locale",
+            "schema": {}
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "description": "Fallback locale header (es or en)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Supply detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplyDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get a supply by id",
+        "tags": [
+          "supplies"
         ]
       }
     },
@@ -8619,8 +8773,8 @@
           },
           "expiresAt": {
             "type": "string",
-            "format": "date",
             "example": "2026-07-01",
+            "format": "date",
             "description": "Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD)."
           }
         },
@@ -10563,9 +10717,9 @@
           },
           "expiresAt": {
             "type": "string",
-            "format": "date",
-            "nullable": true,
             "example": "2026-07-01",
+            "nullable": true,
+            "format": "date",
             "description": "Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD)."
           }
         },
@@ -12180,6 +12334,13 @@
             "nullable": true,
             "description": "Presentation / route of administration (ampolla, EV, inhalador…) — #61."
           },
+          "expiresAt": {
+            "type": "string",
+            "example": "2026-07-01",
+            "nullable": true,
+            "format": "date",
+            "description": "Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD)."
+          },
           "id": {
             "type": "string",
             "format": "uuid"
@@ -12941,6 +13102,11 @@
             "type": "string",
             "example": "medicines"
           },
+          "label": {
+            "type": "string",
+            "example": "Medicamentos",
+            "description": "Localized category label"
+          },
           "labelEs": {
             "type": "string",
             "example": "Medicamentos"
@@ -12967,11 +13133,97 @@
         },
         "required": [
           "slug",
+          "label",
           "labelEs",
           "labelEn",
           "parentSlug",
           "vertical",
           "sort"
+        ]
+      },
+      "SupplyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "cf8da6e3-7b91-52ff-8cf7-bbff50786c35"
+          },
+          "code": {
+            "type": "string",
+            "example": "INS-001"
+          },
+          "name": {
+            "type": "string",
+            "example": "Agua potable (botellón 18L)"
+          },
+          "nameEs": {
+            "type": "string",
+            "example": "Agua potable (botellón 18L)"
+          },
+          "nameEn": {
+            "type": "string",
+            "example": "Water (18L jug)",
+            "nullable": true
+          },
+          "categorySlug": {
+            "type": "string",
+            "example": "food"
+          },
+          "categoryLabel": {
+            "type": "string",
+            "example": "Alimentos"
+          },
+          "categoryLabelEs": {
+            "type": "string",
+            "example": "Alimentos"
+          },
+          "categoryLabelEn": {
+            "type": "string",
+            "example": "Food",
+            "nullable": true
+          },
+          "defaultUnit": {
+            "type": "string",
+            "example": "und",
+            "nullable": true
+          },
+          "attributes": {
+            "type": "object",
+            "example": {
+              "size": "18L"
+            },
+            "description": "Structured attributes for variants and catalog metadata"
+          },
+          "variantOfId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "example": null,
+            "description": "Parent supply id when this item is a variant"
+          },
+          "aliases": {
+            "example": [
+              "Agua embotellada",
+              "botellón"
+            ],
+            "description": "Known aliases for the canonical supply",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "nameEs",
+          "categorySlug",
+          "categoryLabel",
+          "categoryLabelEs",
+          "attributes",
+          "aliases"
         ]
       },
       "ContainerHolderDto": {
