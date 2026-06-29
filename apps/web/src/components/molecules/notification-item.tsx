@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useTransition } from 'react';
-import { markNotificationReadAction } from '@/app/notificaciones/actions';
+import { markNotificationReadAction } from '@/app/panel/notificaciones/actions';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
 import { LocalDate } from '@/components/atoms/local-date';
