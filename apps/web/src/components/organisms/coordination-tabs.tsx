@@ -1,12 +1,5 @@
 'use client';
 
-/**
- * Sub-navigation for the coordination area. Renders one tab per section the
- * principal can act on (permission-gated by the flags the server resolves with
- * {@link resolveEmergencyAccess}). Builds the tab list and delegates rendering
- * to the shared {@link SectionTabs} (mobile-scroll / desktop-wrap pills with an
- * active state derived from the path).
- */
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
 import { SectionTabs, type SectionTab } from '@/components/organisms/section-tabs';
@@ -51,8 +44,7 @@ export function CoordinationTabs({ slug, access }: CoordinationTabsProps) {
     tabs.push({ href: `${base}/actividad`, label: tc.tab_activity });
   }
 
-  // A lone "overview" tab means the user has no actionable section — the hub
-  // already conveys that, so the sub-nav adds nothing.
+  // A lone overview tab adds nothing the hub doesn't already show.
   if (tabs.length <= 1) return null;
 
   return <SectionTabs tabs={tabs} ariaLabel={tc.tabs_aria} />;
