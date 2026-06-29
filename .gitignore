@@ -3,6 +3,7 @@
 /docs/*
 !/docs/features/
 !/docs/deploy/
+!/docs/DEFINITION_OF_DONE.md
 
 # Secretos / entorno — nunca al repo
 .env

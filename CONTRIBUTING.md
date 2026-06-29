@@ -38,3 +38,4 @@ Si un issue nuevo no encaja, triágialo antes de implementarlo.
 - `AGENTS.md` para reglas canónicas del repo
 - `README.md` para arquitectura y arranque local
 - `docs/features/` para el backlog funcional
+- `docs/DEFINITION_OF_DONE.md` — DoD compartida para features y épicas
