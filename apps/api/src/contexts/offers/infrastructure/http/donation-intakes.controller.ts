@@ -41,6 +41,7 @@ import { MarkIntakeIncomplete } from '../../application/mark-intake-incomplete';
 import { GetIntakeDeepLink } from '../../application/get-intake-deep-link';
 import { GetDonationIntakeTracking } from '../../application/get-donation-intake-tracking';
 import { GetIncomingSummaryByResource } from '../../application/get-incoming-summary-by-resource';
+import { GetMyDonationIntakes } from '../../application/get-my-donation-intakes';
 import {
   CreateDonationIntakeDto,
   LookupDonorByContactDto,
@@ -58,6 +59,7 @@ import {
   IntakeDeepLinkDto,
   DonationIntakeTrackingDto,
   IncomingSummaryDto,
+  MyDonationIntakeDto,
 } from './donation-intake-response.dto';
 import {
   JwtAuthGuard,
@@ -98,6 +100,7 @@ export class DonationIntakesController {
     private readonly getIntakeDeepLink: GetIntakeDeepLink,
     private readonly getDonationIntakeTracking: GetDonationIntakeTracking,
     private readonly getIncomingSummaryByResource: GetIncomingSummaryByResource,
+    private readonly getMyDonationIntakes: GetMyDonationIntakes,
   ) {}
 
   @Post('emergencies/:emergencyId/donation-intakes')
@@ -187,6 +190,18 @@ export class DonationIntakesController {
     @Param('resourceId', ParseUUIDPipe) resourceId: string,
   ): Promise<IncomingSummaryDto> {
     return this.getIncomingSummaryByResource.execute(resourceId);
+  }
+
+  @Get('me/donation-intakes')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "List the authenticated donor's own donations" })
+  @ApiOkResponse({ type: [MyDonationIntakeDto] })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  async myDonations(
+    @Request() req: AuthedRequest,
+  ): Promise<MyDonationIntakeDto[]> {
+    return this.getMyDonationIntakes.execute(req.user.id);
   }
 
   @Patch('donation-intakes/:intakeId')

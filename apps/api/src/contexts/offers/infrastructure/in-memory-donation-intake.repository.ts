@@ -74,6 +74,14 @@ export class InMemoryDonationIntakeRepository implements DonationIntakeRepositor
     return Promise.resolve(result);
   }
 
+  findByDonorUserId(donorUserId: string): Promise<DonationIntake[]> {
+    const result = [...this.store.values()]
+      .filter((s) => s.donorUserId === donorUserId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .map((s) => DonationIntake.fromSnapshot(s));
+    return Promise.resolve(result);
+  }
+
   findPendingByContact(
     emergencyId: EmergencyId,
     contactNormalized: string,

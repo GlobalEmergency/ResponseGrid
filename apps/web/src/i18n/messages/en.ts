@@ -720,6 +720,26 @@ export const en = {
     lines_heading: 'What you registered',
   },
 
+  // ── My donations (#168) ───────────────────────────────────────────────────
+  misDonaciones: {
+    meta_title: 'My donations · ResponseGrid',
+    meta_description:
+      'Track the status of the donations you have pre-registered with your account.',
+    page_title: 'My donations',
+    page_subtitle:
+      'The donations you registered with your account and their status.',
+    back_to_panel: 'Back to panel',
+    empty_title: 'You haven’t registered any donations yet',
+    empty_body:
+      'When you pre-register a delivery with your account, it will show up here so you can follow it.',
+    unknown_point: 'Collection point',
+    item_lines: '{n} lines',
+    status_pending: 'Awaiting delivery',
+    status_received: 'Received',
+    status_rejected: 'Rejected',
+    status_incomplete: 'Incomplete',
+  },
+
   // ── Offer transport (#105) ────────────────────────────────────────────────
   ofrecerTransporte: {
     page_title: 'I can offer transport',
@@ -2495,6 +2515,7 @@ export const en = {
     quick_actions_heading: 'Quick actions',
     qa_administration: 'Administration',
     qa_notifications: 'Notifications',
+    qa_my_donations: 'My donations',
     qa_explore: 'View emergencies',
   },
 } satisfies Messages;

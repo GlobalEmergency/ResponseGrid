@@ -14,6 +14,8 @@ export interface DonationIntakeRepository {
   existsCode(emergencyId: EmergencyId, intakeCode: string): Promise<boolean>;
   search(emergencyId: EmergencyId, query: string): Promise<DonationIntake[]>;
   findPendingByResource(resourceId: string): Promise<DonationIntake[]>;
+  /** A donor's own intakes across every emergency (newest first). */
+  findByDonorUserId(donorUserId: string): Promise<DonationIntake[]>;
   findPendingByContact(
     emergencyId: EmergencyId,
     contactNormalized: string,

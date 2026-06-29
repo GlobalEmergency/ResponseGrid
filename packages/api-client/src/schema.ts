@@ -1513,6 +1513,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/donation-intakes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the authenticated donor's own donations */
+        get: operations["DonationIntakesController_myDonations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/donation-intakes/{intakeId}/receive": {
         parameters: {
             query?: never;
@@ -4268,6 +4285,24 @@ export interface components {
             lines: components["schemas"]["IncomingSummaryLineDto"][];
             /** @example 5 */
             totalPendingIntakes: number;
+        };
+        MyDonationIntakeDto: {
+            /** @example ACO-7F3K */
+            intakeCode: string;
+            /** @enum {string} */
+            status: "pending" | "received" | "rejected" | "incomplete";
+            /** Format: uuid */
+            emergencyId: string;
+            /** @example terremoto-venezuela-2026 */
+            emergencySlug?: string | null;
+            /** @example Acopio CDMX Norte */
+            resourceName?: string | null;
+            /** @example 3 */
+            itemCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            receivedAt?: string | null;
         };
         IntakeDeepLinkDto: {
             /** @example http://localhost:3001/e/mexico-demo/pre-registro?resourceId=33333333-3333-4333-8333-333333333331 */
@@ -8725,6 +8760,32 @@ export interface operations {
             };
             /** @description Missing intake:read */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DonationIntakesController_myDonations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyDonationIntakeDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

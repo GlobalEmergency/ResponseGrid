@@ -208,3 +208,38 @@ export class IncomingSummaryDto {
   @ApiProperty({ example: 5 })
   totalPendingIntakes!: number;
 }
+
+/** One of the authenticated donor's own donations (#168, platform-level list). */
+export class MyDonationIntakeDto {
+  @ApiProperty({ example: 'ACO-7F3K' })
+  intakeCode!: string;
+
+  @ApiProperty({ enum: DonationIntakeStatus })
+  status!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  emergencyId!: string;
+
+  @ApiPropertyOptional({
+    example: 'terremoto-venezuela-2026',
+    nullable: true,
+    type: String,
+  })
+  emergencySlug!: string | null;
+
+  @ApiPropertyOptional({
+    example: 'Acopio CDMX Norte',
+    nullable: true,
+    type: String,
+  })
+  resourceName!: string | null;
+
+  @ApiProperty({ example: 3 })
+  itemCount!: number;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  createdAt!: Date;
+
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  receivedAt!: Date | null;
+}

@@ -748,6 +748,26 @@ export const es = {
     lines_heading: 'Lo que registraste',
   },
 
+  // ── Mis donaciones (#168) ─────────────────────────────────────────────────
+  misDonaciones: {
+    meta_title: 'Mis donaciones · ResponseGrid',
+    meta_description:
+      'Sigue el estado de las donaciones que has pre-registrado con tu cuenta.',
+    page_title: 'Mis donaciones',
+    page_subtitle:
+      'Las donaciones que has registrado con tu cuenta y su estado.',
+    back_to_panel: 'Volver al panel',
+    empty_title: 'Aún no has registrado donaciones',
+    empty_body:
+      'Cuando pre-registres una entrega con tu cuenta, aparecerá aquí para que sigas su recorrido.',
+    unknown_point: 'Punto de acopio',
+    item_lines: '{n} líneas',
+    status_pending: 'Pendiente de entrega',
+    status_received: 'Recibida',
+    status_rejected: 'Rechazada',
+    status_incomplete: 'Incompleta',
+  },
+
   // ── Ofrecer transporte (#105) ─────────────────────────────────────────────
   ofrecerTransporte: {
     page_title: 'Ofrezco transporte',
@@ -2532,6 +2552,7 @@ export const es = {
     quick_actions_heading: 'Accesos rápidos',
     qa_administration: 'Administración',
     qa_notifications: 'Notificaciones',
+    qa_my_donations: 'Mis donaciones',
     qa_explore: 'Ver emergencias',
   },
 };

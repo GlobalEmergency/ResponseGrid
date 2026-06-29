@@ -96,6 +96,7 @@ export default async function PanelPage() {
               }
             />
             <QuickAction href="/grupos" label={t.nav.my_groups} />
+            <QuickAction href="/mis-donaciones" label={tp.qa_my_donations} />
             <QuickAction href="/" label={tp.qa_explore} />
           </div>
         </section>

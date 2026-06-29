@@ -2,6 +2,7 @@
 
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
+import { getToken, authHeaders } from '@/lib/auth';
 import { MATERIAL_CATEGORIES } from '@/lib/categories';
 import { parseSupplyLines } from '@/lib/supply-lines';
 
@@ -62,10 +63,17 @@ export async function submitPreRegistration(
     return { status: 'error', message: tp.err_items_required };
   }
 
+  // Forward the session cookie if the donor is logged in: the endpoint uses an
+  // optional-JWT guard, so this links the intake to their user (donorUserId) and
+  // makes it show up under "Mis donaciones" — anonymous pre-registration still
+  // works (no token → no link, only the code/QR).
+  const token = await getToken();
+
   const { data, error, response } = await api.POST(
     '/emergencies/{emergencyId}/donation-intakes',
     {
       params: { path: { emergencyId } },
+      ...(token !== null ? { headers: authHeaders(token) } : {}),
       body: {
         targetResourceId: resourceId,
         donorName,
