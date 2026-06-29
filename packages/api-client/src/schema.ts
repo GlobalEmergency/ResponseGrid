@@ -2698,6 +2698,11 @@ export interface components {
              * @example ampolla
              */
             presentation?: string;
+            /**
+             * @description Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD).
+             * @example 2026-07-01
+             */
+            expiresAt?: string;
         };
         RegisterResourceDto: {
             /**
@@ -3636,6 +3641,11 @@ export interface components {
              * @example ampolla
              */
             presentation?: string | null;
+            /**
+             * @description Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD).
+             * @example 2026-07-01
+             */
+            expiresAt?: string | null;
         };
         NeedViewDto: {
             /**

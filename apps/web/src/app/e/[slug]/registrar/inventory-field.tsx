@@ -13,6 +13,7 @@ interface Item {
   quantity: number;
   unit: string;
   category: string;
+  expiresAt: string;
 }
 
 let nextId = 1;
@@ -24,6 +25,7 @@ function makeItem(): Item {
     quantity: 1,
     unit: '',
     category: MATERIAL_CATEGORIES[0],
+    expiresAt: '',
   };
 }
 
@@ -32,6 +34,10 @@ function makeItem(): Item {
  * registrar form (`Messages['registrar']`) and the citizen pre-registration
  * form (`Messages['prereg']['lines']`), so the same editor serves both surfaces
  * without coupling to one feature's message namespace.
+ *
+ * `item_expiry_label` and `item_expiry_opt` are optional — when omitted the
+ * expiry date row is hidden, so pre-registration forms that don't declare expiry
+ * still type-check without adding the keys to their message namespace.
  */
 export interface InventoryFieldLabels {
   inventory_heading: string;
@@ -48,6 +54,8 @@ export interface InventoryFieldLabels {
   item_unit_opt: string;
   item_unit_placeholder: string;
   item_category_label: string;
+  item_expiry_label?: string;
+  item_expiry_opt?: string;
 }
 
 interface InventoryFieldProps {
@@ -88,6 +96,8 @@ export function InventoryField({
     unitOpt: t.item_unit_opt,
     unitPlaceholder: t.item_unit_placeholder,
     categoryLabel: t.item_category_label,
+    expiryLabel: t.item_expiry_label,
+    expiryOpt: t.item_expiry_opt,
   };
 
   // Serialize only rows that have a name — empty rows are ignored so the field
@@ -95,11 +105,12 @@ export function InventoryField({
   const serialized = JSON.stringify(
     items
       .filter((i) => i.name.trim() !== '')
-      .map(({ name, quantity, unit, category }) => ({
+      .map(({ name, quantity, unit, category, expiresAt }) => ({
         name: name.trim(),
         quantity,
         ...(unit.trim() !== '' ? { unit: unit.trim() } : {}),
         category,
+        ...(expiresAt !== '' ? { expiresAt } : {}),
       })),
   );
 
@@ -129,7 +140,7 @@ export function InventoryField({
         <button
           type="button"
           onClick={addItem}
-          className="shrink-0 text-sm font-semibold text-ink underline underline-offset-2 hover:text-muted focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 rounded"
+          className="shrink-0 rounded text-sm font-semibold text-ink underline underline-offset-2 hover:text-muted focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
         >
           {t.inventory_add}
         </button>
@@ -158,6 +169,7 @@ export function InventoryField({
         ))
       )}
 
+      {/* Hidden input carries serialized items to the server action */}
       <input type="hidden" name="items" value={serialized} />
     </div>
   );

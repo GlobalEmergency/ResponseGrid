@@ -179,6 +179,16 @@ export const es = {
     actions_paused:
       'El alta de recursos y peticiones está en pausa. Consulta la información disponible y vuelve más tarde.',
 
+    quick_access_heading: 'Acceso rápido',
+    quick_access_card_label: 'Resumen',
+    quick_access_help_intro: 'Ve directo a la zona de acciones si quieres ayudar ahora mismo.',
+    quick_access_help_cta: 'Ver cómo ayudar',
+    quick_access_where_intro: 'Salta a los puntos verificados que ya están activos.',
+    quick_access_where_cta: 'Ver dónde ir',
+    quick_access_call_heading: 'A quién llamar',
+    quick_access_call_intro: 'Aquí aparecen primero los contactos oficiales de puntos verificados.',
+    quick_access_no_official_contact: 'Aún no hay contactos oficiales verificados publicados.',
+
     // Active points
     points_heading: 'Puntos activos',
     points_empty_title: 'Aún no hay puntos activos.',
@@ -458,6 +468,8 @@ export const es = {
     item_unit_label: 'Unidad',
     item_unit_opt: '(opt.)',
     item_unit_placeholder: 'cajas, litros…',
+    item_expiry_label: 'Caduca',
+    item_expiry_opt: '(opcional)',
     item_category_label: 'Categoría',
 
     // server-action messages

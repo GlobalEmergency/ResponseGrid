@@ -263,7 +263,13 @@ for (const p of items) {
     },
     "locationSensitivity": "approximate",
     "items": [
-      { "name": "Agua", "quantity": 100, "unit": "litros", "category": "water" }
+      {
+        "name": "Agua",
+        "quantity": 100,
+        "unit": "litros",
+        "category": "water",
+        "expiresAt": "2026-07-01"
+      }
     ],
     "createdAt": "2026-06-27T09:00:00.000Z",
     "expiresAt": "2026-06-29T09:00:00.000Z",

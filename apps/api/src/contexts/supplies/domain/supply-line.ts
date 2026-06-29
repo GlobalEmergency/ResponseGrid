@@ -14,7 +14,8 @@ import { Category } from './category';
  * that needs/offers/resources depend on — so categories and per-line parameters
  * stay consistent everywhere. `presentation` (route of administration:
  * ampolla/EV/inhalador…) is the integrated per-line parameter for the health
- * vertical (#61); it is optional and free-form.
+ * vertical (#61); it is optional and free-form. `expiresAt` is the optional
+ * per-line freshness date used by inventory and donation intake.
  *
  * For now a SupplyLine carries the supply's name inline (free text). It is
  * designed to later reference a catalog `Supply` by id (master data) without
@@ -26,6 +27,7 @@ export interface SupplyLineProps {
   unit: string | null;
   category: Category;
   presentation?: string | null;
+  expiresAt?: string | null;
 }
 
 export interface SupplyLineSnapshot {
@@ -35,6 +37,26 @@ export interface SupplyLineSnapshot {
   category: Category;
   /** Optional (legacy-safe) presentation / route of administration (#61). */
   presentation?: string | null;
+  /** Optional freshness date for the line, kept as an ISO date string. */
+  expiresAt?: string | null;
+}
+
+function normalizeDateOnly(value?: string | null): string | null {
+  if (value == null) return null;
+  const trimmed = value.trim();
+  if (trimmed === '') return null;
+  const errorMessage = 'SupplyLine expiresAt must be a valid YYYY-MM-DD date';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    throw new SupplyLineValidationError(errorMessage);
+  }
+  const parsed = new Date(`${trimmed}T00:00:00.000Z`);
+  if (
+    Number.isNaN(parsed.getTime()) ||
+    parsed.toISOString().slice(0, 10) !== trimmed
+  ) {
+    throw new SupplyLineValidationError(errorMessage);
+  }
+  return trimmed;
 }
 
 export class SupplyLineValidationError extends Error {
@@ -50,6 +72,7 @@ export class SupplyLine {
   readonly unit: string | null;
   readonly category: Category;
   readonly presentation: string | null;
+  readonly expiresAt: string | null;
 
   private constructor(props: SupplyLineProps) {
     this.name = props.name;
@@ -57,6 +80,7 @@ export class SupplyLine {
     this.unit = props.unit;
     this.category = props.category;
     this.presentation = props.presentation ?? null;
+    this.expiresAt = normalizeDateOnly(props.expiresAt);
   }
 
   static create(props: SupplyLineProps): SupplyLine {
@@ -74,6 +98,7 @@ export class SupplyLine {
       unit: props.unit ?? null,
       category: props.category,
       presentation: props.presentation ?? null,
+      expiresAt: normalizeDateOnly(props.expiresAt),
     });
   }
 
@@ -88,6 +113,7 @@ export class SupplyLine {
       unit: this.unit,
       category: this.category,
       presentation: this.presentation,
+      expiresAt: this.expiresAt,
     };
   }
 }
