@@ -24,6 +24,7 @@ import {
 import { DrizzleCategoryRepository } from './infrastructure/drizzle/drizzle-category.repository';
 import { DrizzleSupplyRepository } from './infrastructure/drizzle/drizzle-supply.repository';
 import { DrizzleSupplyCatalogReadModel } from './infrastructure/drizzle/drizzle-supply-catalog.read-model';
+import { CachingSupplyCatalogReadModel } from './infrastructure/caching-supply-catalog.read-model';
 import { DrizzleContainerRepository } from './infrastructure/drizzle/drizzle-container.repository';
 import { DrizzleContainerAuthorizationLookup } from './infrastructure/drizzle/drizzle-container-authorization-lookup';
 import { ListCategories } from './application/list-categories';
@@ -58,7 +59,7 @@ const supplyCatalogReadModelProvider = {
   provide: SUPPLY_CATALOG_READ_MODEL,
   inject: [DB],
   useFactory: (db: Db): SupplyCatalogReadModel =>
-    new DrizzleSupplyCatalogReadModel(db),
+    new CachingSupplyCatalogReadModel(new DrizzleSupplyCatalogReadModel(db)),
 };
 
 const containerRepositoryProvider = {
