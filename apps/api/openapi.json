@@ -6819,7 +6819,7 @@
           "404": {
             "description": "Container or parent not found"
           },
-          "409": {
+          "422": {
             "description": "Would create a cycle, or parent is a different emergency"
           }
         },

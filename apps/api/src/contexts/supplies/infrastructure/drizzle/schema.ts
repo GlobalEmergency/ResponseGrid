@@ -57,3 +57,17 @@ export const containersTable = pgTable('containers', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
 });
+
+/**
+ * Monotonic per-(emergency, type) allocator for container codes. An atomic
+ * upsert (`INSERT … ON CONFLICT (emergency_id, type) DO UPDATE SET
+ * last_value = last_value + 1 RETURNING last_value`) hands out the next value,
+ * so concurrent creates never mint the same code and a deleted container never
+ * frees its code for reuse — keeping `containers.code` unique per emergency.
+ * The composite primary key (emergency_id, type) lives in migration 0033.
+ */
+export const containerCodeSequencesTable = pgTable('container_code_sequences', {
+  emergencyId: uuid('emergency_id').notNull(),
+  type: text('type').notNull(),
+  lastValue: integer('last_value').notNull(),
+});

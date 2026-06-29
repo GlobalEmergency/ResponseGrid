@@ -32,17 +32,3 @@ export enum ContainerHolderType {
   Resource = 'resource',
   Shipment = 'shipment',
 }
-
-export function isContainerType(value: string): value is ContainerType {
-  return (Object.values(ContainerType) as string[]).includes(value);
-}
-
-export function isContainerStatus(value: string): value is ContainerStatus {
-  return (Object.values(ContainerStatus) as string[]).includes(value);
-}
-
-export function isContainerHolderType(
-  value: string,
-): value is ContainerHolderType {
-  return (Object.values(ContainerHolderType) as string[]).includes(value);
-}

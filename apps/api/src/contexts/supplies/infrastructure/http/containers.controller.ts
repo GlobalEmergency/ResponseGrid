@@ -28,6 +28,7 @@ import {
   ApiForbiddenResponse,
   ApiOkResponse,
   ApiConflictResponse,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import { CreateContainer } from '../../application/create-container';
 import { AddLineToContainer } from '../../application/add-line-to-container';
@@ -258,7 +259,7 @@ export class ContainerController {
   @ApiNoContentResponse({ description: 'Container re-parented' })
   @ApiBadRequestResponse({ description: 'Invalid request body' })
   @ApiNotFoundResponse({ description: 'Container or parent not found' })
-  @ApiConflictResponse({
+  @ApiUnprocessableEntityResponse({
     description: 'Would create a cycle, or parent is a different emergency',
   })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })

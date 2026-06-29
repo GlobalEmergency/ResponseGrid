@@ -9,6 +9,8 @@ import { ContainerType } from '../domain/container-enums';
 
 export class InMemoryContainerRepository implements ContainerRepository {
   private store = new Map<string, ContainerSnapshot>();
+  /** Monotonic per-(emergency, type) code counter; mirrors the DB sequence. */
+  private sequences = new Map<string, number>();
 
   save(container: Container): Promise<void> {
     this.store.set(container.id.value, container.toSnapshot());
@@ -50,9 +52,9 @@ export class InMemoryContainerRepository implements ContainerRepository {
   }
 
   nextSequence(emergencyId: EmergencyId, type: ContainerType): Promise<number> {
-    const count = [...this.store.values()].filter(
-      (s) => s.emergencyId === emergencyId.value && s.type === type,
-    ).length;
-    return Promise.resolve(count + 1);
+    const key = `${emergencyId.value}:${type}`;
+    const next = (this.sequences.get(key) ?? 0) + 1;
+    this.sequences.set(key, next);
+    return Promise.resolve(next);
   }
 }

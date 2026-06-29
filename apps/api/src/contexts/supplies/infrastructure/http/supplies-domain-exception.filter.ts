@@ -23,10 +23,16 @@ type DomainError =
   | SupplyLineValidationError;
 
 /**
- * Maps supplies/container domain errors to HTTP codes: not-found → 404; sealed
- * conflict and cycle/emergency-mismatch invariants → 409; the rest of the
- * validation errors → 422. Mirrors the per-context filters of resources,
- * needs, offers and logistics.
+ * Maps supplies domain errors to HTTP codes. The supplies context owns the
+ * SupplyLine value object, so its validation error is mapped here (→ 400)
+ * rather than in another context's filter.
+ *
+ * - not-found → 404
+ * - sealed (a state conflict: mutating/re-sealing a precintado container) → 409
+ * - cycle / cross-emergency nest / other container validation → 422
+ *   (matches how the codebase maps "wrong emergency", e.g. offers'
+ *   TargetNeedWrongEmergencyError → 422)
+ * - SupplyLineValidationError (e.g. a whitespace-only line name) → 400
  */
 @Catch(
   ContainerNotFoundError,
@@ -49,12 +55,11 @@ export class SuppliesDomainExceptionFilter implements ExceptionFilter {
     if (exception instanceof ContainerNotFoundError) {
       return HttpStatus.NOT_FOUND;
     }
-    if (
-      exception instanceof ContainerSealedError ||
-      exception instanceof ContainerCycleError ||
-      exception instanceof ContainerEmergencyMismatchError
-    ) {
+    if (exception instanceof ContainerSealedError) {
       return HttpStatus.CONFLICT;
+    }
+    if (exception instanceof SupplyLineValidationError) {
+      return HttpStatus.BAD_REQUEST;
     }
     return HttpStatus.UNPROCESSABLE_ENTITY;
   }

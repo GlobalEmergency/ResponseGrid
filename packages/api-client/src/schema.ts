@@ -10206,7 +10206,7 @@ export interface operations {
                 content?: never;
             };
             /** @description Would create a cycle, or parent is a different emergency */
-            409: {
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

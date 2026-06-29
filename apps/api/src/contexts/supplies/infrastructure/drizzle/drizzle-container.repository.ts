@@ -1,6 +1,6 @@
-import { and, asc, count, desc, eq, isNull, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, isNull, sql, type SQL } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
-import { containersTable } from './schema';
+import { containerCodeSequencesTable, containersTable } from './schema';
 import {
   ContainerRepository,
   ListContainersFilter,
@@ -121,19 +121,30 @@ export class DrizzleContainerRepository implements ContainerRepository {
     return rows.map((r) => Container.fromSnapshot(rowToSnapshot(r)));
   }
 
+  /**
+   * Atomically allocates the next code sequence for a (emergency, type) pair.
+   * The upsert increments and returns in a single statement, so concurrent
+   * creates never collide and a deleted container never frees its code (the
+   * sequence is monotonic, decoupled from the live row count).
+   */
   async nextSequence(
     emergencyId: EmergencyId,
     type: ContainerType,
   ): Promise<number> {
-    const rows = await this.db
-      .select({ value: count() })
-      .from(containersTable)
-      .where(
-        and(
-          eq(containersTable.emergencyId, emergencyId.value),
-          eq(containersTable.type, type),
-        ),
-      );
-    return (rows[0]?.value ?? 0) + 1;
+    const [row] = await this.db
+      .insert(containerCodeSequencesTable)
+      .values({ emergencyId: emergencyId.value, type, lastValue: 1 })
+      .onConflictDoUpdate({
+        target: [
+          containerCodeSequencesTable.emergencyId,
+          containerCodeSequencesTable.type,
+        ],
+        set: { lastValue: sql`${containerCodeSequencesTable.lastValue} + 1` },
+      })
+      .returning({ value: containerCodeSequencesTable.lastValue });
+    if (!row) {
+      throw new Error('Container code sequence allocation returned no row');
+    }
+    return row.value;
   }
 }

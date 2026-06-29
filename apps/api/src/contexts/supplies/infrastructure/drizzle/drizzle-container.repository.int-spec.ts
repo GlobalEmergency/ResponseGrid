@@ -1,5 +1,5 @@
 import { createDb, Db } from '../../../../shared/db';
-import { containersTable } from './schema';
+import { containerCodeSequencesTable, containersTable } from './schema';
 import { DrizzleContainerRepository } from './drizzle-container.repository';
 import { DrizzleContainerAuthorizationLookup } from './drizzle-container-authorization-lookup';
 import { Container } from '../../domain/container';
@@ -59,6 +59,7 @@ describe('DrizzleContainerRepository (integration)', () => {
 
   beforeEach(async () => {
     await db.delete(containersTable);
+    await db.delete(containerCodeSequencesTable);
   });
 
   it('round-trips a container (jsonb lines, holder, weight) through Postgres', async () => {
@@ -118,12 +119,12 @@ describe('DrizzleContainerRepository (integration)', () => {
     expect(children[0].id.value).toBe(box.id.value);
   });
 
-  it('nextSequence counts per (emergency, type)', async () => {
+  it('nextSequence allocates a monotonic per-(emergency, type) sequence, never reused', async () => {
     const em = EmergencyId.fromString(EM);
+    // increments on every call, independent of how many rows exist
     expect(await repo.nextSequence(em, ContainerType.Pallet)).toBe(1);
-    await repo.save(makeContainer({ code: 'PAL-0001' }));
     expect(await repo.nextSequence(em, ContainerType.Pallet)).toBe(2);
-    // a different type and a different emergency keep their own count
+    // a different type and a different emergency keep their own sequence
     expect(await repo.nextSequence(em, ContainerType.Box)).toBe(1);
     expect(
       await repo.nextSequence(
@@ -131,6 +132,11 @@ describe('DrizzleContainerRepository (integration)', () => {
         ContainerType.Pallet,
       ),
     ).toBe(1);
+    // deleting containers does NOT free a code for reuse — the sequence is
+    // monotonic, decoupled from the live row count.
+    await repo.save(makeContainer({ code: 'PAL-0003' }));
+    await db.delete(containersTable);
+    expect(await repo.nextSequence(em, ContainerType.Pallet)).toBe(3);
   });
 
   it('findByEmergency filters by type/status/holder/top-level, newest first', async () => {

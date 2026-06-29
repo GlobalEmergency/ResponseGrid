@@ -80,7 +80,7 @@ export class Container {
   ) {}
 
   static create(props: CreateContainerProps): Container {
-    const code = props.code?.trim() ?? '';
+    const code = props.code.trim();
     if (code.length === 0) {
       throw new ContainerValidationError('Container code must not be empty');
     }
@@ -158,10 +158,6 @@ export class Container {
 
   get status(): ContainerStatus {
     return this._status;
-  }
-
-  get isSealed(): boolean {
-    return this._status === ContainerStatus.Sealed;
   }
 
   get updatedAt(): Date {
