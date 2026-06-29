@@ -1,10 +1,12 @@
 import 'dotenv/config';
 import { ConsoleLogger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { configureHttpApp } from './shared/configure-http-app';
+import { httpLogger } from './shared/http/http-logger.middleware';
 
 /**
  * Validates that JWT_SECRET is strong enough in production.
@@ -26,11 +28,15 @@ async function bootstrap(): Promise<void> {
 
   // En producción emitimos logs JSON estructurados (sin colores ANSI) para que
   // Datadog los parsee en campos; en dev seguimos con el logger coloreado.
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     ...(process.env.NODE_ENV === 'production'
       ? { logger: new ConsoleLogger({ json: true }) }
       : {}),
   });
+
+  // Behind Caddy (single proxy hop): trust it so req.ip / X-Forwarded-For
+  // resolve the real client IP instead of the proxy's.
+  app.set('trust proxy', 1);
 
   // ── Security headers (Helmet) ──────────────────────────────────────────────
   // crossOriginResourcePolicy: 'cross-origin' is required so that the Next.js
@@ -57,6 +63,10 @@ async function bootstrap(): Promise<void> {
     origin: (process.env.FRONTEND_URL ?? 'http://localhost:3001').split(','),
     credentials: true,
   });
+
+  // One structured access-log line per request (method, status, latency, IP,
+  // user-agent…) correlated with its APM trace. See http-logger.middleware.ts.
+  app.use(httpLogger);
 
   configureHttpApp(app);
   app.enableShutdownHooks();

@@ -10,7 +10,8 @@ Corre como un servicio más del stack (`datadog` en `deploy/docker-compose.prod.
 - **Postgres** — conexiones, locks, tamaño de BD, transacciones (integración `postgres` por Autodiscovery; usuario de solo lectura `datadog` con rol `pg_monitor`).
 - **Redis** — memoria, ops, clientes (integración `redisdb` por Autodiscovery).
 - **Logs** — de **todos** los contenedores (API, Postgres, Redis, Caddy) → ver errores en vivo.
-- **APM / trazas** — peticiones de la API instrumentadas con `dd-trace`: latencia y errores por endpoint, con spans de Postgres y Redis. Correlación logs↔trazas (`DD_LOGS_INJECTION`).
+- **APM / trazas** — peticiones de la API instrumentadas con `dd-trace`: latencia y errores por endpoint, con spans de Postgres y Redis. Cada span lleva método, ruta, status, user-agent e **IP del cliente** (`DD_TRACE_CLIENT_IP_ENABLED`, leída del `X-Forwarded-For` de Caddy).
+- **Access logs** — una línea JSON por petición (middleware `http-logger.middleware.ts`): `method`, `path`, `statusCode`, `durationMs`, `ip`, `userAgent`, `referer`, `contentLength`, más `dd.trace_id`/`dd.span_id` para saltar del log a su traza APM. **No** registra bodies ni cabeceras de auth (contraseñas/PII). El IP real depende de `trust proxy` en `main.ts` (un único salto de Caddy).
 
 ## Decisiones (caja pequeña)
 

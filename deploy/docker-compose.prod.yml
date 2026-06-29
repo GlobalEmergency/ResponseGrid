@@ -71,6 +71,9 @@ services:
       - DD_ENV=prod
       - DD_SERVICE=responsegrid-api
       - DD_LOGS_INJECTION=true
+      # Tag the real client IP on request spans (read from X-Forwarded-For,
+      # set by Caddy) so APM can slice traffic by IP, not just the proxy's.
+      - DD_TRACE_CLIENT_IP_ENABLED=true
     depends_on:
       migrate:
         condition: service_completed_successfully
