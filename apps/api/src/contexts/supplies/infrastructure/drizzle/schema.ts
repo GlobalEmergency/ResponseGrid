@@ -56,6 +56,8 @@ export const suppliesTable = pgTable(
     id: uuid('id').primaryKey(),
     code: text('code').notNull(),
     name: text('name').notNull(),
+    status: text('status').notNull().default('active'),
+    registrationNotes: text('registration_notes'),
     categorySlug: text('category_slug')
       .notNull()
       .references(() => categoriesTable.slug),

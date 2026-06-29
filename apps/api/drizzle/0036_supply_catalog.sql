@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS "supplies" (
   "id" uuid PRIMARY KEY NOT NULL,
   "code" text NOT NULL,
   "name" text NOT NULL,
+  "status" text NOT NULL DEFAULT 'active',
+  "registration_notes" text,
   "category_slug" text NOT NULL REFERENCES "categories"("slug"),
   "default_unit" text,
   "attributes" jsonb NOT NULL DEFAULT '{}'::jsonb,
@@ -51,3 +53,9 @@ CREATE INDEX IF NOT EXISTS "supply_translations_locale_idx" ON "supply_translati
 --> statement-breakpoint
 
 CREATE INDEX IF NOT EXISTS "categories_parent_slug_idx" ON "categories" ("parent_slug");
+--> statement-breakpoint
+
+INSERT INTO "category_translations" ("category_slug", "locale", "label")
+SELECT "slug", 'en', "label_en"
+FROM "categories"
+ON CONFLICT DO NOTHING;
