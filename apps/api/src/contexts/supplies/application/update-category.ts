@@ -1,5 +1,6 @@
 import {
   CategoryNotFoundError,
+  CategoryParentNotFoundError,
   CategoryValidationError,
 } from './category-admin.errors';
 import { isCoreCategory } from '../domain/category';
@@ -41,6 +42,14 @@ export class UpdateCategory {
     }
     if (cmd.parentSlug !== undefined && cmd.parentSlug === current.slug) {
       throw new CategoryValidationError('A category cannot be its own parent');
+    }
+    if (cmd.parentSlug !== undefined && cmd.parentSlug !== null) {
+      const parent = await this.repo.findBySlug(cmd.parentSlug, {
+        includeArchived: false,
+      });
+      if (!parent) {
+        throw new CategoryParentNotFoundError(cmd.parentSlug);
+      }
     }
     if (cmd.archived === true && isCoreCategory(current.slug)) {
       throw new CategoryValidationError('Core categories cannot be archived');

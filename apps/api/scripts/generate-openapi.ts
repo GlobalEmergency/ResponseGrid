@@ -1,24 +1,53 @@
 /**
  * Generate OpenAPI spec — writes apps/api/openapi.json
  *
- * Prerequisites: Postgres on localhost:5433 and Redis on localhost:6380 must be running,
- * because ResourcesModule eagerly creates the DB pool and IORedis connection.
- * In the local stack this means: `docker compose up -d`.
- *
  * Usage (from repo root):
- *   DATABASE_URL=postgres://reliefhub:reliefhub@localhost:5433/reliefhub \
- *   REDIS_URL=redis://localhost:6380 \
  *   pnpm --filter api gen:openapi
  */
 import 'dotenv/config';
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'dummy-secret-for-openapi-generation-at-least-32-chars-long';
+process.env.REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6380';
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgres://reliefhub:reliefhub@localhost:5433/reliefhub';
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { NestFactory } from '@nestjs/core';
+import { Test } from '@nestjs/testing';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from '../src/app.module';
+import { DB, PG_POOL } from '../src/shared/database.module';
+import { EVENT_QUEUE } from '../src/contexts/needs/infrastructure/needs.module';
+import { SHIPMENT_EVENT_QUEUE } from '../src/contexts/logistics/infrastructure/logistics.module';
+
+const mockPgPool = {
+  end: () => Promise.resolve(),
+};
+const mockDb = {};
+const mockQueue = {
+  close: () => Promise.resolve(),
+};
+const mockRedis = {
+  quit: () => Promise.resolve(),
+};
+const mockEventQueue = {
+  queue: mockQueue,
+  connection: mockRedis,
+};
 
 async function generate(): Promise<void> {
-  const app = await NestFactory.create(AppModule, { logger: false });
+  const moduleRef = await Test.createTestingModule({
+    imports: [AppModule],
+  })
+    .overrideProvider(PG_POOL)
+    .useValue(mockPgPool)
+    .overrideProvider(DB)
+    .useValue(mockDb)
+    .overrideProvider(EVENT_QUEUE)
+    .useValue(mockEventQueue)
+    .overrideProvider(SHIPMENT_EVENT_QUEUE)
+    .useValue(mockEventQueue)
+    .compile();
+
+  const app = moduleRef.createNestApplication();
+  await app.init();
 
   const config = new DocumentBuilder()
     .setTitle('ResponseGrid API')
