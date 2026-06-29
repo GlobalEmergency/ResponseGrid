@@ -124,7 +124,7 @@ export class Resource {
     public readonly provenance: Provenance | null,
     public readonly isFinalRecipient: boolean,
     public readonly recipientType: string | null,
-    public readonly items: SupplyLine[],
+    private _items: SupplyLine[],
     private _disputed: boolean,
     private _disputedAt: Date | null,
   ) {}
@@ -226,6 +226,10 @@ export class Resource {
   get disputedAt(): Date | null {
     return this._disputedAt;
   }
+  /** Declared inventory the place holds for delivery (#28, #129). */
+  get items(): SupplyLine[] {
+    return this._items;
+  }
 
   verify(level: VerificationLevel, coordinatorId: string): void {
     if (level === VerificationLevel.Unverified) {
@@ -304,6 +308,37 @@ export class Resource {
       this._schedule =
         props.schedule === null ? null : props.schedule.trim() || null;
     }
+  }
+
+  /**
+   * Merge confirmed donation lines into the declared inventory: lines with the
+   * same identity (name + category + unit + presentation) sum their quantities;
+   * genuinely new lines are appended. Drives real-time stock when a
+   * pre-registered donation is received at the point (#129). Order is stable:
+   * existing lines keep their position (with updated quantity), new lines are
+   * appended in arrival order.
+   */
+  receiveInventory(lines: SupplyLine[]): void {
+    if (lines.length === 0) return;
+    const keyOf = (l: SupplyLine): string =>
+      JSON.stringify([l.name, l.category, l.unit, l.presentation]);
+    const byKey = new Map<string, SupplyLine>();
+    for (const item of this._items) byKey.set(keyOf(item), item);
+    for (const incoming of lines) {
+      const k = keyOf(incoming);
+      const current = byKey.get(k);
+      byKey.set(
+        k,
+        SupplyLine.create({
+          name: incoming.name,
+          quantity: (current?.quantity ?? 0) + incoming.quantity,
+          unit: incoming.unit,
+          category: incoming.category,
+          presentation: incoming.presentation,
+        }),
+      );
+    }
+    this._items = [...byKey.values()];
   }
 
   /**
