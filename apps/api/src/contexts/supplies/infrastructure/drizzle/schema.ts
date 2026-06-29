@@ -7,6 +7,9 @@ import {
   doublePrecision,
   timestamp,
   AnyPgColumn,
+  index,
+  primaryKey,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { SupplyLineSnapshot } from '../../domain/supply-line';
 
@@ -28,6 +31,80 @@ export const categoryAliasesTable = pgTable('category_aliases', {
     .notNull()
     .references(() => categoriesTable.slug),
 });
+
+export const categoryTranslationsTable = pgTable(
+  'category_translations',
+  {
+    categorySlug: text('category_slug')
+      .notNull()
+      .references(() => categoriesTable.slug, { onDelete: 'cascade' }),
+    locale: text('locale').notNull(),
+    label: text('label').notNull(),
+  },
+  (t) => [
+    primaryKey({
+      columns: [t.categorySlug, t.locale],
+      name: 'category_translations_category_slug_locale_pk',
+    }),
+    index('category_translations_locale_idx').on(t.locale),
+  ],
+);
+
+export const suppliesTable = pgTable(
+  'supplies',
+  {
+    id: uuid('id').primaryKey(),
+    code: text('code').notNull(),
+    name: text('name').notNull(),
+    status: text('status').notNull().default('active'),
+    registrationNotes: text('registration_notes'),
+    categorySlug: text('category_slug')
+      .notNull()
+      .references(() => categoriesTable.slug),
+    defaultUnit: text('default_unit'),
+    attributes: jsonb('attributes').notNull().default({}),
+    variantOfId: uuid('variant_of_id').references(
+      (): AnyPgColumn => suppliesTable.id,
+      { onDelete: 'set null' },
+    ),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+  },
+  (t) => [
+    uniqueIndex('supplies_code_uniq').on(t.code),
+    index('supplies_category_slug_idx').on(t.categorySlug),
+    index('supplies_variant_of_id_idx').on(t.variantOfId),
+  ],
+);
+
+export const supplyAliasesTable = pgTable(
+  'supply_aliases',
+  {
+    aliasNorm: text('alias_norm').primaryKey(),
+    supplyId: uuid('supply_id')
+      .notNull()
+      .references(() => suppliesTable.id, { onDelete: 'cascade' }),
+  },
+  (t) => [index('supply_aliases_supply_id_idx').on(t.supplyId)],
+);
+
+export const supplyTranslationsTable = pgTable(
+  'supply_translations',
+  {
+    supplyId: uuid('supply_id')
+      .notNull()
+      .references(() => suppliesTable.id, { onDelete: 'cascade' }),
+    locale: text('locale').notNull(),
+    name: text('name').notNull(),
+  },
+  (t) => [
+    primaryKey({
+      columns: [t.supplyId, t.locale],
+      name: 'supply_translations_supply_id_locale_pk',
+    }),
+    index('supply_translations_locale_idx').on(t.locale),
+  ],
+);
 
 /**
  * Trackable packaging units (palet/caja/lote) — #140. Composition is by
