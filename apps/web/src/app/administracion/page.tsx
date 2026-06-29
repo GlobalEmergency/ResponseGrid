@@ -165,6 +165,12 @@ function ScopeCard({
       {scope.scopeType === 'platform' && (
         <div className="flex flex-col gap-1">
           <Link
+            href="/admin/usuarios"
+            className="text-xs font-medium text-gray-500 underline underline-offset-2 hover:text-gray-900"
+          >
+            Usuarios (global) →
+          </Link>
+          <Link
             href="/admin/organizaciones"
             className="text-xs font-medium text-gray-500 underline underline-offset-2 hover:text-gray-900"
           >
