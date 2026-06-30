@@ -8,7 +8,7 @@ import {
 } from '@nestjs/swagger';
 import { ListCategories } from '../../application/list-categories';
 import { CategoryDto } from './category-response.dto';
-import { localizedText, resolveLocale } from './locale';
+import { localizedCategoryText, resolveLocale } from './locale';
 
 @ApiTags('categories')
 @Controller()
@@ -22,7 +22,8 @@ export class CategoriesController {
   @ApiHeader({
     name: 'Accept-Language',
     required: false,
-    description: 'Fallback locale header (es or en)',
+    description:
+      'Fallback locale header (es, en or a custom translation locale)',
   })
   @ApiQuery({
     name: 'locale',
@@ -38,7 +39,7 @@ export class CategoriesController {
     const categories = await this.listCategories.execute();
     return categories.map((category) => ({
       slug: category.slug,
-      label: localizedText(category.labelEs, category.labelEn, locale),
+      label: localizedCategoryText(category, locale),
       labelEs: category.labelEs,
       labelEn: category.labelEn,
       parentSlug: category.parentSlug,

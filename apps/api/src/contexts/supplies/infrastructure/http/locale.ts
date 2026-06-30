@@ -1,9 +1,11 @@
-const SUPPORTED_LOCALES = new Set(['es', 'en']);
+import { CategoryDefinition } from '../../domain/category-definition';
+
+export type CategoryLocale = string;
 
 export function resolveLocale(
   locale?: string | null,
   acceptLanguage?: string | null,
-): string {
+): CategoryLocale {
   const candidates = [locale, acceptLanguage?.split(',')[0], 'es'];
   for (const candidate of candidates) {
     if (!candidate) {
@@ -14,7 +16,7 @@ export function resolveLocale(
       .toLowerCase()
       .split(';')[0]
       .split('-')[0];
-    if (SUPPORTED_LOCALES.has(normalized)) {
+    if (normalized) {
       return normalized;
     }
   }
@@ -23,11 +25,27 @@ export function resolveLocale(
 
 export function localizedText(
   baseEs: string,
-  translated: string | null,
+  translated: string | null | undefined,
   locale: string,
 ): string {
   if (locale === 'en' && translated && translated.trim().length > 0) {
     return translated;
   }
   return baseEs;
+}
+
+export function localizedCategoryText(
+  category: CategoryDefinition,
+  locale: CategoryLocale,
+): string {
+  const translated = category.translations?.find(
+    (item) => item.locale === locale,
+  );
+  if (translated) {
+    return translated.label;
+  }
+  if (locale === 'en') {
+    return category.labelEn;
+  }
+  return category.labelEs;
 }

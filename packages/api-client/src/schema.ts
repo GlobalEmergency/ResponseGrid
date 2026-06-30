@@ -1812,6 +1812,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the full category taxonomy for admin (archived included) */
+        get: operations["CategoriesAdminController_list"];
+        put?: never;
+        /** Create a category or subcategory */
+        post: operations["CategoriesAdminController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/categories/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Archive a custom category (core slugs are protected) */
+        delete: operations["CategoriesAdminController_delete"];
+        options?: never;
+        head?: never;
+        /** Update a category, subcategory or archive flag */
+        patch: operations["CategoriesAdminController_update"];
+        trace?: never;
+    };
     "/supplies": {
         parameters: {
             query?: never;
@@ -4751,8 +4787,6 @@ export interface components {
             updatedAt: string;
         };
         CategoryDto: {
-            /** @example medicines */
-            slug: string;
             /**
              * @description Localized category label
              * @example Medicamentos
@@ -4774,6 +4808,81 @@ export interface components {
              * @example 41
              */
             sort: number;
+        };
+        CategoryTranslationDto: {
+            /** @example fr */
+            locale: string;
+            /** @example Nourriture */
+            label: string;
+        };
+        CategoryAdminDto: {
+            /** @example baby_food */
+            slug: string;
+            /**
+             * @description Localized label
+             * @example Alimentos para bebé
+             */
+            label: string;
+            /** @example Alimentos para bebé */
+            labelEs: string;
+            /** @example Baby food */
+            labelEn: string;
+            /**
+             * @description Parent category slug, or null for a top-level category
+             * @example food
+             */
+            parentSlug: string | null;
+            /** @example general */
+            vertical: string;
+            /** @example 140 */
+            sort: number;
+            /**
+             * @description Soft-archive timestamp
+             * @example null
+             */
+            archivedAt: Record<string, never> | null;
+            translations: components["schemas"]["CategoryTranslationDto"][];
+        };
+        CreateCategoryDto: {
+            /** @example baby_food */
+            slug: string;
+            /** @example Alimentos para bebé */
+            labelEs: string;
+            /** @example Baby food */
+            labelEn: string;
+            /**
+             * @description Parent category slug, or null for a top-level category
+             * @example food
+             */
+            parentSlug?: Record<string, never> | null;
+            /** @example general */
+            vertical: string;
+            /** @example 140 */
+            sort: number;
+            /** @description Additional locale labels to persist in category_translations */
+            translations?: components["schemas"]["CategoryTranslationDto"][];
+        };
+        UpdateCategoryDto: {
+            /** @example Alimentos para bebé */
+            labelEs?: string;
+            /** @example Baby food */
+            labelEn?: string;
+            /**
+             * @description Parent category slug, or null for a top-level category
+             * @example food
+             */
+            parentSlug?: Record<string, never> | null;
+            /** @example general */
+            vertical?: string;
+            /** @example 140 */
+            sort?: number;
+            /** @description Replace the category_translation rows with this set */
+            translations?: components["schemas"]["CategoryTranslationDto"][];
+            /**
+             * @description True to hide/archive the category, false to restore it
+             * @example false
+             */
+            archived?: boolean;
         };
         SupplyDto: {
             /**
@@ -10023,7 +10132,7 @@ export interface operations {
                 locale?: string;
             };
             header?: {
-                /** @description Fallback locale header (es or en) */
+                /** @description Fallback locale header (es, en or a custom translation locale) */
                 "Accept-Language"?: string;
             };
             path?: never;
@@ -10039,6 +10148,215 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CategoryDto"][];
                 };
+            };
+        };
+    };
+    CategoriesAdminController_list: {
+        parameters: {
+            query?: {
+                /** @description Preferred locale */
+                locale?: string;
+            };
+            header: {
+                "accept-language": string;
+                /** @description Fallback locale header (es, en or a custom translation locale) */
+                "Accept-Language"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryAdminDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing catalogue:manage permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CategoriesAdminController_create: {
+        parameters: {
+            query: {
+                locale: string;
+            };
+            header: {
+                "accept-language": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCategoryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryAdminDto"];
+                };
+            };
+            /** @description Invalid category payload */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing catalogue:manage permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Category slug already exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CategoriesAdminController_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Category slug to archive */
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Category archived */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Core category slug cannot be archived by delete */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing catalogue:manage permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Category not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CategoriesAdminController_update: {
+        parameters: {
+            query: {
+                locale: string;
+            };
+            header: {
+                "accept-language": string;
+            };
+            path: {
+                /** @description Current category slug */
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCategoryDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryAdminDto"];
+                };
+            };
+            /** @description Invalid category payload */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing catalogue:manage permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Category not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Category slug already exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

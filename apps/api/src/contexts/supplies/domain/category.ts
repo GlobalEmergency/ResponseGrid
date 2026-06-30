@@ -31,3 +31,7 @@ export enum Category {
   ToolsExtraction = 'tools_extraction',
   OtherPets = 'other_pets',
 }
+
+export function isCoreCategory(slug: string): boolean {
+  return Object.values(Category).includes(slug as Category);
+}
