@@ -550,11 +550,11 @@ export const es = {
       'Elige el punto y pre-registra tu entrega — obtienes un código/QR para el mostrador',
     choose_offer_title: 'Ofrecer material',
     choose_offer_subtitle:
-      'Lo describes y el equipo de coordinación lo gestiona',
+      'Busca el insumo y completa la oferta',
 
     directed_offer_label: 'Ofreces para:',
     category_label: 'Categoría del material',
-    description_label: 'Descripción del material',
+    description_label: 'Insumo / material',
     description_placeholder: 'Ej. Sacos de arroz de 25 kg',
     quantity_label: 'Cantidad',
     quantity_placeholder: '50',
@@ -575,7 +575,7 @@ export const es = {
 
     // server-action messages
     err_invalid_category: 'Categoría no válida.',
-    err_description_too_short: 'Describe el material (al menos 2 caracteres).',
+    err_description_too_short: 'Indica el insumo o material (al menos 2 caracteres).',
     err_invalid_quantity: 'La cantidad debe ser un número entero positivo.',
     err_location_required: 'Selecciona una ubicación.',
     err_submit_failed: 'Error al enviar la oferta. Inténtalo de nuevo.',
