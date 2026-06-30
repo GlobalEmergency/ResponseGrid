@@ -135,4 +135,64 @@ export class Supply {
       registrationNotes: this.registrationNotes,
     };
   }
+
+  /**
+   * Devuelve un nuevo `Supply` con los campos indicados sobreescritos,
+   * re-aplicando las invariantes de `create`. El agregado es inmutable: la
+   * gestión (edición admin, #222) produce instancias nuevas en vez de mutar.
+   * `id` y `code` no son editables (la identidad y el código asignado se
+   * conservan).
+   */
+  private withChanges(
+    changes: Partial<Omit<SupplyProps, 'id' | 'code'>>,
+  ): Supply {
+    return Supply.create({ ...this.toSnapshot(), ...changes });
+  }
+
+  rename(name: string): Supply {
+    return this.withChanges({ name });
+  }
+
+  recategorize(categorySlug: string): Supply {
+    return this.withChanges({ categorySlug });
+  }
+
+  setDefaultUnit(defaultUnit: string | null): Supply {
+    return this.withChanges({ defaultUnit });
+  }
+
+  setAttributes(attributes: Record<string, unknown>): Supply {
+    return this.withChanges({ attributes });
+  }
+
+  setRegistrationNotes(registrationNotes: string | null): Supply {
+    return this.withChanges({ registrationNotes });
+  }
+
+  setVariantOf(variantOfId: string | null): Supply {
+    return this.withChanges({ variantOfId });
+  }
+
+  archive(): Supply {
+    return this.withChanges({ status: 'archived' });
+  }
+
+  restore(): Supply {
+    return this.withChanges({ status: 'active' });
+  }
+}
+
+/**
+ * Formatea un número de secuencia como código canónico `INS-NNNN` (4 dígitos,
+ * la invariante que valida `Supply`). Puro: la secuencia la asigna el
+ * repositorio (infraestructura); esto sólo da formato, igual que
+ * `formatContainerCode`.
+ */
+export function formatSupplyCode(sequence: number): string {
+  if (!Number.isInteger(sequence) || sequence < 1) {
+    throw new SupplyValidationError(
+      'Supply code sequence must be a positive integer',
+    );
+  }
+  return `INS-${String(sequence).padStart(4, '0')}`;
 }
