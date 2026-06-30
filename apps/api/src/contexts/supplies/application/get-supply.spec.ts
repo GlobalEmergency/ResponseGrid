@@ -7,10 +7,10 @@ import {
 describe('GetSupply', () => {
   const record: PublicSupplyRecord = {
     id: '11111111-1111-4111-8111-111111111111',
-    code: 'INS-0001',
+    code: 'WAT-0001',
     nameEs: 'Agua potable',
     nameEn: 'Drinking water',
-    categorySlug: 'food',
+    categorySlug: 'water',
     categoryLabelEs: 'Alimentos',
     categoryLabelEn: 'Food',
     defaultUnit: 'und',

@@ -8,12 +8,12 @@ describe('ListSupplies', () => {
   const catalog: PublicSupplyRecord[] = [
     {
       id: '11111111-1111-4111-8111-111111111111',
-      code: 'INS-0001',
+      code: 'WAT-0001',
       nameEs: 'Agua potable',
       nameEn: 'Drinking water',
-      categorySlug: 'food',
-      categoryLabelEs: 'Alimentos',
-      categoryLabelEn: 'Food',
+      categorySlug: 'water',
+      categoryLabelEs: 'Agua',
+      categoryLabelEn: 'Water',
       defaultUnit: 'und',
       attributes: {},
       variantOfId: null,
@@ -21,7 +21,7 @@ describe('ListSupplies', () => {
     },
     {
       id: '22222222-2222-4222-8222-222222222222',
-      code: 'INS-0002',
+      code: 'HYG-0002',
       nameEs: 'Panal',
       nameEn: null,
       categorySlug: 'hygiene',
@@ -53,7 +53,7 @@ describe('ListSupplies', () => {
 
   it('filtra por categoria y pagina el resultado', async () => {
     const result = await new ListSupplies(readModel()).execute({
-      categorySlug: 'food',
+      categorySlug: 'water',
       locale: 'es',
       limit: 1,
       offset: 0,

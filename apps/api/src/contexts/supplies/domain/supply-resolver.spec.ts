@@ -5,14 +5,14 @@ import { SupplyResolver } from './supply-resolver';
 describe('SupplyResolver', () => {
   const water = Supply.create({
     id: '11111111-1111-4111-8111-111111111111',
-    code: 'INS-0001',
+    code: 'WAT-0001',
     name: 'Agua potable',
     categorySlug: 'water',
     defaultUnit: 'litros',
   });
   const diapers = Supply.create({
     id: '22222222-2222-4222-8222-222222222222',
-    code: 'INS-0002',
+    code: 'OTH-0002',
     name: 'Panal',
     categorySlug: 'other',
     defaultUnit: 'unidad',
@@ -41,7 +41,7 @@ describe('SupplyResolver', () => {
   it('resuelve el codigo canonico tambien', () => {
     const resolver = new SupplyResolver([water]);
 
-    expect(resolver.resolve('ins-0001')).toBe(water.id);
+    expect(resolver.resolve('wat-0001')).toBe(water.id);
   });
 
   it('devuelve null para un termino desconocido', () => {

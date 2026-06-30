@@ -75,9 +75,9 @@ export class Supply {
   static create(props: SupplyProps): Supply {
     const id = normalizeRequiredText(props.id, 'Supply id');
     const code = normalizeRequiredText(props.code, 'Supply code');
-    if (!/^INS-\d{4}$/.test(code)) {
+    if (!/^[A-Z]{3}-\d{4}$/.test(code)) {
       throw new SupplyValidationError(
-        'Supply code must match the INS-NNNN format',
+        'Supply code must match the XXX-NNNN format',
       );
     }
     const name = normalizeRequiredText(props.name, 'Supply name');
