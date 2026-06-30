@@ -42,6 +42,12 @@ const isTestEnv = process.env.NODE_ENV === 'test';
               ttl: 60_000,
               limit: 5,
             },
+            {
+              // validity reports: 20 per hour per IP (anti-abuse)
+              name: 'validity',
+              ttl: 3_600_000,
+              limit: 20,
+            },
           ],
     ),
     DatabaseModule,

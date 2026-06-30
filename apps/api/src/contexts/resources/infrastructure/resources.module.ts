@@ -247,7 +247,13 @@ const reportResourceValidityProvider = {
       Number.isFinite(rawCooldown) && rawCooldown > 0
         ? rawCooldown * 3_600_000
         : 0;
-    return new ReportResourceValidity(repo, validityRepo, bus, threshold, cooldownMs);
+    return new ReportResourceValidity(
+      repo,
+      validityRepo,
+      bus,
+      threshold,
+      cooldownMs,
+    );
   },
 };
 
