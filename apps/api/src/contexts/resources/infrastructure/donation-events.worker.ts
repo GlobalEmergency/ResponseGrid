@@ -1,8 +1,9 @@
 import { Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Worker, Job } from 'bullmq';
-import IORedis from 'ioredis';
+import IORedis, { type Redis as IORedisConnection } from 'ioredis';
 import { ReceiveDonationIntoInventory } from '../application/receive-donation-into-inventory';
 import { SupplyLineSnapshot } from '../../supplies/domain/supply-line';
+import { toBullMqConnection } from '../../../shared/bullmq-connection';
 
 interface DomainEventJobData {
   name: string;
@@ -28,7 +29,7 @@ const DONATION_RECEIVED = 'donation_intake.received';
 export class DonationEventsWorker implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DonationEventsWorker.name);
   private worker: Worker<DomainEventJobData> | null = null;
-  private connection: IORedis | null = null;
+  private connection: IORedisConnection | null = null;
 
   constructor(private readonly receive: ReceiveDonationIntoInventory) {}
 
@@ -40,7 +41,7 @@ export class DonationEventsWorker implements OnModuleInit, OnModuleDestroy {
     this.worker = new Worker<DomainEventJobData>(
       'domain-events',
       (job: Job<DomainEventJobData>) => this.handle(job),
-      { connection: this.connection },
+      { connection: toBullMqConnection(this.connection) },
     );
     this.worker.on('failed', (job, err) => {
       this.logger.error(

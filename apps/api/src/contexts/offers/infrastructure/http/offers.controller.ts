@@ -125,6 +125,7 @@ export class OffersController {
         quantity: i.quantity,
         unit: i.unit ?? null,
         category: i.category,
+        supplyId: i.supplyId ?? null,
         presentation: i.presentation ?? null,
       })),
       location: {
@@ -313,6 +314,7 @@ export class OffersController {
         quantity: i.quantity,
         unit: i.unit ?? null,
         category: i.category,
+        supplyId: i.supplyId ?? null,
         presentation: i.presentation ?? null,
       }));
     }

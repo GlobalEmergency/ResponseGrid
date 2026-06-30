@@ -10,6 +10,7 @@ export interface DonationIntakeLineView {
   quantity: number;
   unit: string | null;
   category: Category;
+  supplyId: string | null;
   presentation: string | null;
   expiresAt: string | null;
 }
@@ -60,6 +61,7 @@ export class GetDonationIntakeById {
         quantity: line.quantity,
         unit: line.unit,
         category: line.category,
+        supplyId: line.supplyId ?? null,
         presentation: line.presentation ?? null,
         expiresAt: line.expiresAt ?? null,
       })),

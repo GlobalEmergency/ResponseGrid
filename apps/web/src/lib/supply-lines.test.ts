@@ -42,6 +42,25 @@ test('omits a blank unit instead of sending an empty string', () => {
   ]);
 });
 
+test('preserves a soft supply link when present', () => {
+  const raw = JSON.stringify([
+    {
+      name: 'Agua',
+      quantity: 12,
+      category: 'water',
+      supplyId: ' 1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8 ',
+    },
+  ]);
+  assert.deepEqual(parseSupplyLines(raw, REQUIRED), [
+    {
+      name: 'Agua',
+      quantity: 12,
+      category: 'water',
+      supplyId: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
+    },
+  ]);
+});
+
 test('returns null on malformed JSON or a non-array root', () => {
   assert.equal(parseSupplyLines('{not json', REQUIRED), null);
   assert.equal(parseSupplyLines('{"a":1}', REQUIRED), null);

@@ -2694,6 +2694,11 @@ export interface components {
              */
             category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
             /**
+             * @description Optional soft link to the canonical supply master data.
+             * @example 1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8
+             */
+            supplyId?: string | null;
+            /**
              * @description Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe… Optional, free-form (#61).
              * @example ampolla
              */
@@ -3627,6 +3632,11 @@ export interface components {
         SupplyLineResponseDto: {
             /** @example Water bottles */
             name: string;
+            /**
+             * @description Optional soft link to the canonical supply master data.
+             * @example 1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8
+             */
+            supplyId: string | null;
             /** @example 100 */
             quantity: number;
             /** @example liters */
@@ -4293,6 +4303,11 @@ export interface components {
         IntakeLineViewDto: {
             /** @example Water bottles */
             name: string;
+            /**
+             * @description Optional soft link to the canonical supply master data.
+             * @example 1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8
+             */
+            supplyId: string | null;
             /** @example 100 */
             quantity: number;
             /** @example liters */

@@ -38,6 +38,7 @@ export interface RegisterResourceCommand {
     quantity: number;
     unit?: string | null;
     category: Category;
+    supplyId?: string | null;
     presentation?: string | null;
     expiresAt?: string | null;
   }>;
@@ -84,6 +85,7 @@ export class RegisterResource {
           quantity: i.quantity,
           unit: i.unit ?? null,
           category: i.category,
+          supplyId: i.supplyId ?? null,
           presentation: i.presentation ?? null,
           expiresAt: i.expiresAt ?? null,
         }),

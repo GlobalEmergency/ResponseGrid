@@ -36,14 +36,7 @@ export class IntakeLine {
     return new IntakeLine(
       s.id,
       s.sortOrder,
-      SupplyLine.fromSnapshot({
-        name: s.name,
-        quantity: s.quantity,
-        unit: s.unit,
-        category: s.category,
-        presentation: s.presentation ?? null,
-        expiresAt: s.expiresAt ?? null,
-      }),
+      SupplyLine.fromSnapshot(s),
     );
   }
 

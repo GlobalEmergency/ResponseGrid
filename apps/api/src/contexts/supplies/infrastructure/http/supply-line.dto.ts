@@ -4,6 +4,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsPositive,
+  IsUUID,
   IsString,
   Matches,
 } from 'class-validator';
@@ -22,6 +23,16 @@ export class SupplyLineDto {
   @IsString()
   @IsNotEmpty()
   name!: string;
+
+  @ApiPropertyOptional({
+    example: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
+    nullable: true,
+    type: String,
+    description: 'Optional soft link to the canonical supply master data.',
+  })
+  @IsOptional()
+  @IsUUID()
+  supplyId?: string | null;
 
   @ApiProperty({ example: 100, description: 'Quantity (positive integer)' })
   @IsInt()
@@ -66,6 +77,14 @@ export class SupplyLineDto {
 export class SupplyLineResponseDto {
   @ApiProperty({ example: 'Water bottles' })
   name!: string;
+
+  @ApiProperty({
+    example: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
+    nullable: true,
+    type: String,
+    description: 'Optional soft link to the canonical supply master data.',
+  })
+  supplyId!: string | null;
 
   @ApiProperty({ example: 100 })
   quantity!: number;

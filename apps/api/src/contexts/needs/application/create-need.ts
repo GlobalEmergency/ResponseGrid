@@ -17,6 +17,7 @@ export interface CreateNeedItemCommand {
   quantity: number;
   unit: string | null;
   category: Category;
+  supplyId?: string | null;
   /** Presentation / route of administration (#61). Optional. */
   presentation?: string | null;
   expiresAt?: string | null;
@@ -73,6 +74,7 @@ export class CreateNeed {
         quantity: i.quantity,
         unit: i.unit,
         category: i.category,
+        supplyId: i.supplyId ?? null,
         presentation: i.presentation ?? null,
         expiresAt: i.expiresAt ?? null,
       }),

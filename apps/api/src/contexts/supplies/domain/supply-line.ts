@@ -26,6 +26,7 @@ export interface SupplyLineProps {
   quantity: number;
   unit: string | null;
   category: Category;
+  supplyId?: string | null;
   presentation?: string | null;
   expiresAt?: string | null;
 }
@@ -35,10 +36,18 @@ export interface SupplyLineSnapshot {
   quantity: number;
   unit: string | null;
   category: Category;
+  /** Soft link to the canonical supply master data, or null when absent. */
+  supplyId: string | null;
   /** Optional (legacy-safe) presentation / route of administration (#61). */
   presentation?: string | null;
   /** Optional freshness date for the line, kept as an ISO date string. */
   expiresAt?: string | null;
+}
+
+function normalizeOptionalText(value?: string | null): string | null {
+  if (value == null) return null;
+  const trimmed = value.trim();
+  return trimmed === '' ? null : trimmed;
 }
 
 function normalizeDateOnly(value?: string | null): string | null {
@@ -71,6 +80,7 @@ export class SupplyLine {
   readonly quantity: number;
   readonly unit: string | null;
   readonly category: Category;
+  readonly supplyId: string | null;
   readonly presentation: string | null;
   readonly expiresAt: string | null;
 
@@ -79,6 +89,7 @@ export class SupplyLine {
     this.quantity = props.quantity;
     this.unit = props.unit;
     this.category = props.category;
+    this.supplyId = normalizeOptionalText(props.supplyId);
     this.presentation = props.presentation ?? null;
     this.expiresAt = normalizeDateOnly(props.expiresAt);
   }
@@ -97,8 +108,11 @@ export class SupplyLine {
       quantity: props.quantity,
       unit: props.unit ?? null,
       category: props.category,
-      presentation: props.presentation ?? null,
-      expiresAt: normalizeDateOnly(props.expiresAt),
+      ...(props.supplyId === undefined ? {} : { supplyId: props.supplyId }),
+      ...(props.presentation === undefined
+        ? {}
+        : { presentation: props.presentation }),
+      ...(props.expiresAt === undefined ? {} : { expiresAt: props.expiresAt }),
     });
   }
 
@@ -112,6 +126,7 @@ export class SupplyLine {
       quantity: this.quantity,
       unit: this.unit,
       category: this.category,
+      supplyId: this.supplyId,
       presentation: this.presentation,
       expiresAt: this.expiresAt,
     };

@@ -1,6 +1,6 @@
 import { Inject, Module, OnModuleDestroy } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import IORedis from 'ioredis';
+import IORedis, { type Redis as IORedisConnection } from 'ioredis';
 import { DB, DatabaseModule } from '../../../shared/database.module';
 import { Db } from '../../../shared/db';
 import { NeedsController } from './http/needs.controller';
@@ -45,12 +45,13 @@ import { VolunteerRepository } from '../../volunteers/domain/ports/volunteer.rep
 import { TaskRepository } from '../../volunteers/domain/ports/task.repository';
 import { DrizzleVolunteerRepository } from '../../volunteers/infrastructure/drizzle/drizzle-volunteer.repository';
 import { DrizzleTaskRepository } from '../../volunteers/infrastructure/drizzle/drizzle-task.repository';
+import { toBullMqConnection } from '../../../shared/bullmq-connection';
 
 export const EVENT_QUEUE = Symbol('NeedsEventQueue');
 
 interface EventQueue {
   queue: Queue;
-  connection: IORedis;
+  connection: IORedisConnection;
 }
 
 const eventQueueProvider = {
@@ -58,8 +59,12 @@ const eventQueueProvider = {
   useFactory: (): EventQueue => {
     const url = process.env.REDIS_URL;
     if (!url) throw new Error('REDIS_URL is required');
-    const connection = new IORedis(url, { maxRetriesPerRequest: null });
-    const queue = new Queue('domain-events', { connection });
+    const connection: IORedisConnection = new IORedis(url, {
+      maxRetriesPerRequest: null,
+    });
+    const queue = new Queue('domain-events', {
+      connection: toBullMqConnection(connection),
+    });
     return { queue, connection };
   },
 };
