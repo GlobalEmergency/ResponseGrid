@@ -9,5 +9,5 @@ import type { ConnectionOptions } from 'bullmq';
 export function toBullMqConnection(
   connection: IORedisConnection,
 ): ConnectionOptions {
-  return connection as unknown as ConnectionOptions;
+  return connection;
 }

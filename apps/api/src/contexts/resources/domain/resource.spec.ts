@@ -77,6 +77,7 @@ describe('Resource', () => {
       quantity: 100,
       unit: 'litros',
       category: Category.Water,
+      supplyId: null,
       presentation: null,
       expiresAt: null,
     });
