@@ -1,6 +1,8 @@
 import {
+  IsInt,
   IsNotEmpty,
   IsOptional,
+  IsPositive,
   IsString,
   IsUUID,
   Matches,
@@ -125,4 +127,19 @@ export class CreateEmergencyFromTemplateDto {
   @IsString()
   @MinLength(2)
   country!: string;
+}
+
+export class SetDisputeThresholdDto {
+  @ApiProperty({
+    example: 5,
+    nullable: true,
+    description:
+      'Número mínimo de reportantes distintos para marcar el punto como disputado. ' +
+      'Null elimina el umbral específico y vuelve al global (RESOURCE_DISPUTE_THRESHOLD / 3).',
+    type: Number,
+  })
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  threshold!: number | null;
 }

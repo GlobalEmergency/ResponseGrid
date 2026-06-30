@@ -2555,6 +2555,59 @@
         ]
       }
     },
+    "/emergencies/{emergencyId}/resource-dispute-threshold": {
+      "put": {
+        "operationId": "EmergenciesController_setResourceDisputeThreshold",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetDisputeThresholdDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Umbral actualizado"
+          },
+          "400": {
+            "description": "Invalid body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "emergency:configure permission required"
+          },
+          "404": {
+            "description": "Emergency not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Fijar (o limpiar) el umbral de disputa por reportes para una emergencia",
+        "tags": [
+          "emergencies"
+        ]
+      }
+    },
     "/emergencies/{emergencyId}/needs": {
       "post": {
         "description": "Open to any authenticated user (a citizen submits; a coordinator validates later). A trusted integration may also create on behalf of a third party with its service-account API key when it holds `need:create` and includes the `author` block (#235).",
@@ -10919,6 +10972,20 @@
         },
         "required": [
           "message"
+        ]
+      },
+      "SetDisputeThresholdDto": {
+        "type": "object",
+        "properties": {
+          "threshold": {
+            "type": "number",
+            "example": 5,
+            "nullable": true,
+            "description": "Número mínimo de reportantes distintos para marcar el punto como disputado. Null elimina el umbral específico y vuelve al global (RESOURCE_DISPUTE_THRESHOLD / 3)."
+          }
+        },
+        "required": [
+          "threshold"
         ]
       },
       "NeedLocationDto": {

@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { ResourceRepository } from '../domain/ports/resource.repository';
 import { ResourceValidityReportRepository } from '../domain/ports/resource-validity-report.repository';
 import { EventBus } from '../domain/ports/event-bus';
+import { EmergencyDisputeThresholdReader } from '../domain/ports/emergency-dispute-threshold-reader';
 import { ResourceId } from '../domain/resource-id';
 import {
   ResourceValidityReport,
@@ -38,6 +39,7 @@ export class ReportResourceValidity {
     private readonly reports: ResourceValidityReportRepository,
     private readonly bus: EventBus,
     private readonly threshold: number = DEFAULT_DISPUTE_THRESHOLD,
+    private readonly emergencyThresholds?: EmergencyDisputeThresholdReader,
   ) {}
 
   async execute(
@@ -87,7 +89,11 @@ export class ReportResourceValidity {
       Date.now() - FRESHNESS_WINDOW_DAYS * 24 * 60 * 60 * 1000,
     );
     const freshDistinct = open.filter((r) => r.createdAt >= cutoff).length;
-    let disputed = freshDistinct >= this.threshold;
+    const emergencyThreshold = this.emergencyThresholds
+      ? await this.emergencyThresholds.getThreshold(resource.emergencyId.value)
+      : null;
+    const effectiveThreshold = emergencyThreshold ?? this.threshold;
+    let disputed = freshDistinct >= effectiveThreshold;
     if (disputed && !resource.disputed) {
       // Re-read so the flag decision uses the current persisted state, not the
       // snapshot loaded before this report was saved — two citizens crossing

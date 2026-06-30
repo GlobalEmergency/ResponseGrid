@@ -35,6 +35,7 @@ import { PauseEmergency } from '../../application/pause-emergency';
 import { ResumeEmergency } from '../../application/resume-emergency';
 import { PublishAnnouncement } from '../../application/publish-announcement';
 import { CreateEmergencyFromTemplate } from '../../application/create-emergency-from-template';
+import { SetEmergencyDisputeThreshold } from '../../application/set-emergency-dispute-threshold';
 import {
   CreateEmergencyDto,
   CreateEmergencyFromTemplateDto,
@@ -42,6 +43,7 @@ import {
   EmergencyViewDto,
   MyEmergencyViewDto,
   PublishAnnouncementDto,
+  SetDisputeThresholdDto,
 } from './dto';
 import { EmergencyExceptionFilter } from './emergency-exception.filter';
 import {
@@ -64,6 +66,7 @@ export class EmergenciesController {
     private readonly resume: ResumeEmergency,
     private readonly publishAnnouncement: PublishAnnouncement,
     private readonly createFromTemplate: CreateEmergencyFromTemplate,
+    private readonly setDisputeThreshold: SetEmergencyDisputeThreshold,
   ) {}
 
   @Post()
@@ -238,6 +241,37 @@ export class EmergenciesController {
     await this.publishAnnouncement.execute({
       emergencyId,
       message: dto.message,
+    });
+  }
+
+  @Put(':emergencyId/resource-dispute-threshold')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('emergency:configure')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Fijar (o limpiar) el umbral de disputa por reportes para una emergencia',
+  })
+  @ApiParam({
+    name: 'emergencyId',
+    description: 'Emergency UUID',
+    format: 'uuid',
+  })
+  @ApiNoContentResponse({ description: 'Umbral actualizado' })
+  @ApiNotFoundResponse({ description: 'Emergency not found' })
+  @ApiBadRequestResponse({ description: 'Invalid body' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({
+    description: 'emergency:configure permission required',
+  })
+  async setResourceDisputeThreshold(
+    @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
+    @Body() dto: SetDisputeThresholdDto,
+  ): Promise<void> {
+    await this.setDisputeThreshold.execute({
+      emergencyId,
+      threshold: dto.threshold ?? null,
     });
   }
 }
