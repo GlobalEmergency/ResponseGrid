@@ -1,13 +1,11 @@
 import {
   BadRequestException,
-  ConflictException,
   Controller,
   Body,
   Delete,
   Get,
   Headers,
   HttpCode,
-  NotFoundException,
   Param,
   Patch,
   Post,
@@ -36,13 +34,6 @@ import { RequirePermission } from '../../../identity/infrastructure/http/require
 import { isCoreCategory } from '../../domain/category';
 import { CategoryDefinition } from '../../domain/category-definition';
 import { CreateCategory } from '../../application/create-category';
-import {
-  CategoryAlreadyExistsError,
-  CategoryImmutableSlugError,
-  CategoryNotFoundError,
-  CategoryParentNotFoundError,
-  CategoryValidationError,
-} from '../../application/category-admin.errors';
 import { ListCategories } from '../../application/list-categories';
 import {
   UpdateCategory,
@@ -111,9 +102,7 @@ export class CategoriesAdminController {
     @Headers('accept-language') acceptLanguage?: string,
   ): Promise<CategoryAdminDto> {
     const locale = resolveLocale(localeParam, acceptLanguage);
-    const created = await this.runCategoryCommand(() =>
-      this.createCategory.execute(this.toWriteInput(dto)),
-    );
+    const created = await this.createCategory.execute(this.toWriteInput(dto));
     return this.toDto(created, locale);
   }
 
@@ -134,8 +123,9 @@ export class CategoriesAdminController {
     @Headers('accept-language') acceptLanguage?: string,
   ): Promise<CategoryAdminDto> {
     const locale = resolveLocale(localeParam, acceptLanguage);
-    const updated = await this.runCategoryCommand(() =>
-      this.updateCategory.execute(slug, this.toUpdateCommand(dto)),
+    const updated = await this.updateCategory.execute(
+      slug,
+      this.toUpdateCommand(dto),
     );
     return this.toDto(updated, locale);
   }
@@ -160,9 +150,7 @@ export class CategoriesAdminController {
         `Core category slug cannot be deleted: ${slug}`,
       );
     }
-    await this.runCategoryCommand(() =>
-      this.updateCategory.execute(slug, { archived: true }),
-    );
+    await this.updateCategory.execute(slug, { archived: true });
   }
 
   private toDto(
@@ -210,30 +198,5 @@ export class CategoriesAdminController {
       archived: dto.archived,
       translations: dto.translations,
     };
-  }
-
-  private async runCategoryCommand<T>(fn: () => Promise<T>): Promise<T> {
-    try {
-      return await fn();
-    } catch (error) {
-      throw this.toHttpError(error);
-    }
-  }
-
-  private toHttpError(error: unknown): Error {
-    if (error instanceof CategoryNotFoundError) {
-      return new NotFoundException(error.message);
-    }
-    if (
-      error instanceof CategoryAlreadyExistsError ||
-      error instanceof CategoryParentNotFoundError ||
-      error instanceof CategoryImmutableSlugError ||
-      error instanceof CategoryValidationError
-    ) {
-      return error instanceof CategoryAlreadyExistsError
-        ? new ConflictException(error.message)
-        : new BadRequestException(error.message);
-    }
-    return error instanceof Error ? error : new Error('Unknown category error');
   }
 }
