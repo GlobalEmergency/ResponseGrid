@@ -1,5 +1,6 @@
 import { createDb, Db } from '../../../../shared/db';
 import { offersTable } from './schema';
+import { suppliesTable } from '../../../supplies/infrastructure/drizzle/schema';
 import { DrizzleOfferRepository } from './drizzle-offer.repository';
 import { DonationOffer } from '../../domain/donation-offer';
 import { OfferId } from '../../domain/offer-id';
@@ -37,6 +38,7 @@ function makeOffer(overrides?: { category?: Category; name?: string }) {
         unit: 'bags',
         category: overrides?.category ?? Category.Food,
         presentation: null,
+        supplyId: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
       }),
     ],
     location: makeLocation(),
@@ -62,6 +64,19 @@ describe('DrizzleOfferRepository (integration)', () => {
   beforeEach(async () => {
     // FK cascade removes offer_items with their offers.
     await db.delete(offersTable);
+    await db
+      .insert(suppliesTable)
+      .values([
+        {
+          id: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
+          code: 'TEST-0001',
+          name: 'Agua Test',
+          categorySlug: 'water',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ])
+      .onConflictDoNothing();
   });
 
   it('round-trips an offer (with its lines) through Postgres', async () => {
@@ -78,6 +93,9 @@ describe('DrizzleOfferRepository (integration)', () => {
     expect(found!.items[0].name).toBe('Rice bags');
     expect(found!.items[0].quantity).toBe(25);
     expect(found!.items[0].unit).toBe('bags');
+    expect(found!.items[0].supplyId).toBe(
+      '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
+    );
     expect(found!.location.address).toBe('Test St, Caracas');
     expect(found!.location.latitude).toBe(10.4806);
     expect(found!.targetNeedId).toBeNull();

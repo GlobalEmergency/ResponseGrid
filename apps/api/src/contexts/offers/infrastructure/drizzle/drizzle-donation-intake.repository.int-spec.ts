@@ -3,6 +3,7 @@ import {
   donationIntakeLinesTable,
   donationIntakesTable,
 } from './donation-intake-schema';
+import { suppliesTable } from '../../../supplies/infrastructure/drizzle/schema';
 import { DrizzleDonationIntakeRepository } from './drizzle-donation-intake.repository';
 import { DonationIntake } from '../../domain/donation-intake';
 import { DonationIntakeId } from '../../domain/donation-intake-id';
@@ -39,6 +40,7 @@ function makeIntake(code: string) {
           unit: 'sacos',
           presentation: null,
           expiresAt: '2026-07-01',
+          supplyId: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
         },
       },
     ],
@@ -62,6 +64,19 @@ describe('DrizzleDonationIntakeRepository (integration)', () => {
   beforeEach(async () => {
     await db.delete(donationIntakeLinesTable);
     await db.delete(donationIntakesTable);
+    await db
+      .insert(suppliesTable)
+      .values([
+        {
+          id: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
+          code: 'TEST-0001',
+          name: 'Agua Test',
+          categorySlug: 'water',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ])
+      .onConflictDoNothing();
   });
 
   it('round-trips an intake with lines through Postgres', async () => {
@@ -75,6 +90,9 @@ describe('DrizzleDonationIntakeRepository (integration)', () => {
     expect(found.lines).toHaveLength(1);
     expect(found.lines[0]?.supplyLine.name).toBe('Harina');
     expect(found.lines[0]?.supplyLine.expiresAt).toBe('2026-07-01');
+    expect(found.lines[0]?.supplyLine.supplyId).toBe(
+      '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
+    );
   });
 
   it('updates lines on save (replace)', async () => {
