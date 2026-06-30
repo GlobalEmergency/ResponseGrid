@@ -80,4 +80,43 @@ describe('CategoriesAdminController', () => {
       BadRequestException,
     );
   });
+
+  it('archiva una categoría no-núcleo vía DELETE', async () => {
+    const archived = { ...category, archivedAt: new Date().toISOString() };
+    const updateCategory = { execute: jest.fn().mockResolvedValue(archived) };
+    const controller = new CategoriesAdminController(
+      { execute: jest.fn() } as never,
+      { execute: jest.fn() } as never,
+      updateCategory as never,
+    );
+
+    await controller.delete('baby_food');
+
+    expect(updateCategory.execute).toHaveBeenCalledWith('baby_food', {
+      archived: true,
+    });
+  });
+
+  it('restaura una categoría archivada vía PATCH con archived: false', async () => {
+    const restored: CategoryDefinition = { ...category, archivedAt: null };
+    const updateCategory = { execute: jest.fn().mockResolvedValue(restored) };
+    const controller = new CategoriesAdminController(
+      { execute: jest.fn() } as never,
+      { execute: jest.fn() } as never,
+      updateCategory as never,
+    );
+
+    const result = await controller.update('baby_food', { archived: false });
+
+    expect(updateCategory.execute).toHaveBeenCalledWith('baby_food', {
+      labelEs: undefined,
+      labelEn: undefined,
+      parentSlug: undefined,
+      vertical: undefined,
+      sort: undefined,
+      archived: false,
+      translations: undefined,
+    });
+    expect(result.archivedAt).toBeNull();
+  });
 });

@@ -35,4 +35,23 @@ describe('CategoriesController', () => {
     expect(es[0]?.label).toBe('Alimentos');
     expect(fr[0]?.label).toBe('Nourriture');
   });
+
+  it('no expone archivedAt ni campos internos en la proyección pública', async () => {
+    const controller = new CategoriesController({
+      execute: () => Promise.resolve(categories),
+    });
+
+    const result = await controller.list('es', {});
+
+    expect(result[0]).not.toHaveProperty('archivedAt');
+    expect(result[0]).toEqual({
+      slug: 'food',
+      label: 'Alimentos',
+      labelEs: 'Alimentos',
+      labelEn: 'Food',
+      parentSlug: null,
+      vertical: 'general',
+      sort: 1,
+    });
+  });
 });
