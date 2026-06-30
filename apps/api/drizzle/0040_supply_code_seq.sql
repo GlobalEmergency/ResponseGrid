@@ -12,7 +12,7 @@ CREATE SEQUENCE IF NOT EXISTS "supply_code_seq";
 SELECT setval(
   'supply_code_seq',
   GREATEST(
-    (SELECT COALESCE(MAX(substring("code" FROM 5)::int), 0) FROM "supplies"),
+    (SELECT COALESCE(MAX(substring("code" FROM 5)::int), 0) FROM "supplies" WHERE "code" ~ '^INS-[0-9]+$'),
     1
   ),
   true

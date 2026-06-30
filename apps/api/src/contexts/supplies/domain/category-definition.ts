@@ -15,4 +15,5 @@ export interface CategoryDefinition {
   parentSlug: string | null;
   vertical: string;
   sort: number;
+  codePrefix: string | null;
 }

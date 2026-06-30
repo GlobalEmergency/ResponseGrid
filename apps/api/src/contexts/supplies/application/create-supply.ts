@@ -1,7 +1,12 @@
 import { randomUUID } from 'crypto';
-import { Supply } from '../domain/supply';
-import { VariantTargetNotFoundError } from '../domain/supply-errors';
+import { Supply, formatSupplyCode } from '../domain/supply';
+import {
+  VariantTargetNotFoundError,
+  CategoryNotFoundError,
+} from '../domain/supply-errors';
 import { SupplyRepository } from '../domain/ports/supply.repository';
+import { CategoryRepository } from '../domain/ports/category.repository';
+import { getCategoryPrefix } from '../domain/category';
 
 export interface CreateSupplyCommand {
   name: string;
@@ -15,11 +20,14 @@ export interface CreateSupplyCommand {
 
 /**
  * Alta de un insumo del catálogo maestro (#222). Asigna el siguiente código
- * canónico INS-NNNN (secuencia). Si es variante, exige que el insumo padre
- * exista.
+ * canónico XXX-NNNN (secuencia) según su categoría raíz. Si es variante, exige
+ * que el insumo padre exista. Valida que la categoría exista.
  */
 export class CreateSupply {
-  constructor(private readonly repo: SupplyRepository) {}
+  constructor(
+    private readonly repo: SupplyRepository,
+    private readonly categoryRepo: CategoryRepository,
+  ) {}
 
   async execute(
     cmd: CreateSupplyCommand,
@@ -32,7 +40,16 @@ export class CreateSupply {
       }
     }
 
-    const code = await this.repo.allocateCode();
+    const categories = await this.categoryRepo.listCategories();
+    const categoryExists = categories.some((c) => c.slug === cmd.categorySlug);
+    if (!categoryExists) {
+      throw new CategoryNotFoundError(cmd.categorySlug);
+    }
+
+    const prefix = getCategoryPrefix(cmd.categorySlug, categories);
+    const seq = await this.repo.nextSequenceValue();
+    const code = formatSupplyCode(prefix, seq);
+
     const supply = Supply.create({
       id: randomUUID(),
       code,

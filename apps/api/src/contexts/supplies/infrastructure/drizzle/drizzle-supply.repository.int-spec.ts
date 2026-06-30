@@ -63,12 +63,11 @@ describe('DrizzleSupplyRepository (integration)', () => {
     expect(found!.categorySlug).toBe('food');
   });
 
-  it('allocateCode devuelve INS-NNNN y es monótono', async () => {
-    const first = await repo.allocateCode();
-    const second = await repo.allocateCode();
-    expect(first).toMatch(/^INS-\d{4}$/);
-    expect(second).toMatch(/^INS-\d{4}$/);
-    expect(Number(second.slice(4))).toBe(Number(first.slice(4)) + 1);
+  it('nextSequenceValue devuelve números de secuencia monótonos', async () => {
+    const first = await repo.nextSequenceValue();
+    const second = await repo.nextSequenceValue();
+    expect(first).toBeGreaterThan(0);
+    expect(second).toBe(first + 1);
   });
 
   it('list filtra por estado, categoría y búsqueda libre', async () => {

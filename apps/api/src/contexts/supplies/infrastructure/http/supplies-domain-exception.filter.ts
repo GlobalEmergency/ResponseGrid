@@ -14,8 +14,10 @@ import {
 } from '../../domain/container-errors';
 import { SupplyLineValidationError } from '../../domain/supply-line';
 import { SupplyValidationError } from '../../domain/supply';
+import { SupplyAliasValidationError } from '../../domain/supply-alias';
 import {
   AliasConflictError,
+  CategoryNotFoundError,
   MergeIntoSelfError,
   SupplyCodeConflictError,
   SupplyNotFoundError,
@@ -30,9 +32,11 @@ type DomainError =
   | ContainerValidationError
   | SupplyLineValidationError
   | SupplyValidationError
+  | SupplyAliasValidationError
   | SupplyNotFoundError
   | SupplyCodeConflictError
   | VariantTargetNotFoundError
+  | CategoryNotFoundError
   | MergeIntoSelfError
   | AliasConflictError;
 
@@ -56,9 +60,11 @@ type DomainError =
   ContainerValidationError,
   SupplyLineValidationError,
   SupplyValidationError,
+  SupplyAliasValidationError,
   SupplyNotFoundError,
   SupplyCodeConflictError,
   VariantTargetNotFoundError,
+  CategoryNotFoundError,
   MergeIntoSelfError,
   AliasConflictError,
 )
@@ -75,7 +81,8 @@ export class SuppliesDomainExceptionFilter implements ExceptionFilter {
     if (
       exception instanceof ContainerNotFoundError ||
       exception instanceof SupplyNotFoundError ||
-      exception instanceof VariantTargetNotFoundError
+      exception instanceof VariantTargetNotFoundError ||
+      exception instanceof CategoryNotFoundError
     ) {
       return HttpStatus.NOT_FOUND;
     }
@@ -89,6 +96,7 @@ export class SuppliesDomainExceptionFilter implements ExceptionFilter {
     if (
       exception instanceof SupplyLineValidationError ||
       exception instanceof SupplyValidationError ||
+      exception instanceof SupplyAliasValidationError ||
       exception instanceof MergeIntoSelfError
     ) {
       return HttpStatus.BAD_REQUEST;

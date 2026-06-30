@@ -27,8 +27,8 @@ export interface SupplyRepository {
   findById(id: string): Promise<Supply | null>;
   findByCode(code: string): Promise<Supply | null>;
   save(supply: Supply): Promise<void>;
-  /** Asigna el siguiente código canónico INS-NNNN libre (secuencia). */
-  allocateCode(): Promise<string>;
+  /** Obtiene el siguiente valor de la secuencia para códigos de insumos. */
+  nextSequenceValue(): Promise<number>;
   /** Listado de gestión: incluye archivados; filtra por categoría/estado/búsqueda. */
   list(filter: SupplyListFilter): Promise<Supply[]>;
   listAliases(supplyId: string): Promise<SupplyAlias[]>;

@@ -39,3 +39,10 @@ export class AliasConflictError extends Error {
     this.name = 'AliasConflictError';
   }
 }
+
+export class CategoryNotFoundError extends Error {
+  constructor(slug: string) {
+    super(`Category not found: ${slug}`);
+    this.name = 'CategoryNotFoundError';
+  }
+}

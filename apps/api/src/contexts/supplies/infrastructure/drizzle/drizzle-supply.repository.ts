@@ -1,6 +1,6 @@
-import { and, asc, eq, ilike, or, sql, type SQL } from 'drizzle-orm';
+import { and, asc, eq, ilike, ne, or, sql, type SQL } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
-import { Supply, SupplyStatus, formatSupplyCode } from '../../domain/supply';
+import { Supply, SupplyStatus } from '../../domain/supply';
 import { SupplyAlias } from '../../domain/supply-alias';
 import { AliasConflictError } from '../../domain/supply-errors';
 import {
@@ -28,13 +28,13 @@ export class DrizzleSupplyRepository implements SupplyRepository {
   }
 
   async findByCode(code: string): Promise<Supply | null> {
-    // Búsqueda por código insensible a mayúsculas (los códigos canónicos son
-    // 'INS-NNNN', pero no asumimos el casing del llamante).
-    const normalized = code.trim().toLowerCase();
+    // Búsqueda por código normalizada a mayúsculas (los códigos canónicos son
+    // 'INS-NNNN', lo que permite usar el índice único).
+    const normalized = code.trim().toUpperCase();
     const [row] = await this.db
       .select()
       .from(suppliesTable)
-      .where(sql`lower(${suppliesTable.code}) = ${normalized}`)
+      .where(eq(suppliesTable.code, normalized))
       .limit(1);
     return row ? this.toSupply(row) : null;
   }
@@ -72,7 +72,7 @@ export class DrizzleSupplyRepository implements SupplyRepository {
       });
   }
 
-  async allocateCode(): Promise<string> {
+  async nextSequenceValue(): Promise<number> {
     // nextval devuelve bigint -> string; la secuencia se siembra por encima del
     // máximo sembrado en la migración 0040.
     const result = await this.db.execute<{ value: string }>(
@@ -82,7 +82,7 @@ export class DrizzleSupplyRepository implements SupplyRepository {
     if (!Number.isInteger(next) || next < 1) {
       throw new Error('Supply code sequence allocation returned no row');
     }
-    return formatSupplyCode(next);
+    return next;
   }
 
   async list(filter: SupplyListFilter): Promise<Supply[]> {
@@ -155,11 +155,26 @@ export class DrizzleSupplyRepository implements SupplyRepository {
         .update(supplyAliasesTable)
         .set({ supplyId: targetId })
         .where(eq(supplyAliasesTable.supplyId, sourceId));
-      // Repunta las variantes hijas de A a B.
+      // Repunta las variantes hijas de A a B (excluyendo al propio B si era hijo de A).
       await tx
         .update(suppliesTable)
         .set({ variantOfId: targetId, updatedAt: new Date() })
-        .where(eq(suppliesTable.variantOfId, sourceId));
+        .where(
+          and(
+            eq(suppliesTable.variantOfId, sourceId),
+            ne(suppliesTable.id, targetId),
+          ),
+        );
+      // Si B era variante de A, ahora B es el canónico y deja de ser variante (se vuelve raíz).
+      await tx
+        .update(suppliesTable)
+        .set({ variantOfId: null, updatedAt: new Date() })
+        .where(
+          and(
+            eq(suppliesTable.id, targetId),
+            eq(suppliesTable.variantOfId, sourceId),
+          ),
+        );
       // Archiva A (no se borra: preserva referencias legadas para #223/#226).
       await tx
         .update(suppliesTable)

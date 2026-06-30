@@ -116,14 +116,16 @@ const getSupplyProvider = {
 
 const createSupplyProvider = {
   provide: CreateSupply,
-  inject: [SUPPLY_REPOSITORY],
-  useFactory: (repo: SupplyRepository) => new CreateSupply(repo),
+  inject: [SUPPLY_REPOSITORY, CATEGORY_REPOSITORY],
+  useFactory: (repo: SupplyRepository, categoryRepo: CategoryRepository) =>
+    new CreateSupply(repo, categoryRepo),
 };
 
 const editSupplyProvider = {
   provide: EditSupply,
-  inject: [SUPPLY_REPOSITORY],
-  useFactory: (repo: SupplyRepository) => new EditSupply(repo),
+  inject: [SUPPLY_REPOSITORY, CATEGORY_REPOSITORY],
+  useFactory: (repo: SupplyRepository, categoryRepo: CategoryRepository) =>
+    new EditSupply(repo, categoryRepo),
 };
 
 const archiveSupplyProvider = {

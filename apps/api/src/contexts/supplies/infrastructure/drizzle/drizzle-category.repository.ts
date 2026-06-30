@@ -26,6 +26,7 @@ export class DrizzleCategoryRepository implements CategoryRepository {
         parentSlug: categoriesTable.parentSlug,
         vertical: categoriesTable.vertical,
         sort: categoriesTable.sort,
+        codePrefix: categoriesTable.codePrefix,
       })
       .from(categoriesTable)
       .orderBy(asc(categoriesTable.sort));
@@ -36,6 +37,7 @@ export class DrizzleCategoryRepository implements CategoryRepository {
       parentSlug: r.parentSlug ?? null,
       vertical: r.vertical,
       sort: r.sort,
+      codePrefix: r.codePrefix ?? null,
     }));
   }
 }

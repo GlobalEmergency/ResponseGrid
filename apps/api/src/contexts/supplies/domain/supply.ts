@@ -75,9 +75,9 @@ export class Supply {
   static create(props: SupplyProps): Supply {
     const id = normalizeRequiredText(props.id, 'Supply id');
     const code = normalizeRequiredText(props.code, 'Supply code');
-    if (!/^INS-\d{4}$/.test(code)) {
+    if (!/^[A-Z]{3}-\d{4}$/.test(code)) {
       throw new SupplyValidationError(
-        'Supply code must match the INS-NNNN format',
+        'Supply code must match the XXX-NNNN format (3-letter uppercase prefix and 4 digits)',
       );
     }
     const name = normalizeRequiredText(props.name, 'Supply name');
@@ -180,19 +180,40 @@ export class Supply {
   restore(): Supply {
     return this.withChanges({ status: 'active' });
   }
+
+  /**
+   * Actualiza el código de este insumo reemplazando el prefijo actual por uno nuevo,
+   * manteniendo el número secuencial intacto.
+   */
+  updateCodePrefix(newPrefix: string): Supply {
+    const parts = this.code.split('-');
+    const sequence = parts[1] ?? '0000';
+    const newCode = `${newPrefix}-${sequence}`;
+    if (newCode === this.code) {
+      return this;
+    }
+    return Supply.create({
+      ...this.toSnapshot(),
+      code: newCode,
+    });
+  }
 }
 
 /**
- * Formatea un número de secuencia como código canónico `INS-NNNN` (4 dígitos,
+ * Formatea un número de secuencia como código canónico `XXX-NNNN` (4 dígitos,
  * la invariante que valida `Supply`). Puro: la secuencia la asigna el
- * repositorio (infraestructura); esto sólo da formato, igual que
- * `formatContainerCode`.
+ * repositorio (infraestructura); esto sólo da formato.
  */
-export function formatSupplyCode(sequence: number): string {
+export function formatSupplyCode(prefix: string, sequence: number): string {
+  if (!/^[A-Z]{3}$/.test(prefix)) {
+    throw new SupplyValidationError(
+      'Supply code prefix must be a 3-letter uppercase string',
+    );
+  }
   if (!Number.isInteger(sequence) || sequence < 1) {
     throw new SupplyValidationError(
       'Supply code sequence must be a positive integer',
     );
   }
-  return `INS-${String(sequence).padStart(4, '0')}`;
+  return `${prefix}-${String(sequence).padStart(4, '0')}`;
 }
