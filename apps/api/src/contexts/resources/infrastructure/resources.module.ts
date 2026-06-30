@@ -242,7 +242,12 @@ const reportResourceValidityProvider = {
   ) => {
     const raw = Number(process.env.RESOURCE_DISPUTE_THRESHOLD);
     const threshold = Number.isFinite(raw) && raw > 0 ? raw : undefined;
-    return new ReportResourceValidity(repo, validityRepo, bus, threshold);
+    const rawCooldown = Number(process.env.RESOURCE_DISPUTE_COOLDOWN_HOURS);
+    const cooldownMs =
+      Number.isFinite(rawCooldown) && rawCooldown > 0
+        ? rawCooldown * 3_600_000
+        : 0;
+    return new ReportResourceValidity(repo, validityRepo, bus, threshold, cooldownMs);
   },
 };
 
