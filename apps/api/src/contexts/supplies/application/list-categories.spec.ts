@@ -10,6 +10,7 @@ const FOOD: CategoryDefinition = {
   parentSlug: null,
   vertical: 'general',
   sort: 10,
+  codePrefix: 'FOD',
   archivedAt: null,
   translations: [
     { locale: 'es', label: 'Alimentos' },

@@ -68,6 +68,7 @@ export class DrizzleCategoryRepository implements CategoryRepository {
       parentSlug: row.parentSlug ?? null,
       vertical: row.vertical,
       sort: row.sort,
+      codePrefix: row.codePrefix ?? null,
       archivedAt: row.archivedAt ?? null,
       translations: (translationsBySlug.get(row.slug) ?? []).sort((a, b) =>
         a.locale.localeCompare(b.locale),
@@ -110,6 +111,7 @@ export class DrizzleCategoryRepository implements CategoryRepository {
       parentSlug: row.parentSlug ?? null,
       vertical: row.vertical,
       sort: row.sort,
+      codePrefix: row.codePrefix ?? null,
       archivedAt: row.archivedAt ?? null,
       translations,
     };

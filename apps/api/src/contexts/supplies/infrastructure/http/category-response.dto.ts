@@ -30,4 +30,13 @@ export class CategoryDto {
 
   @ApiProperty({ example: 41, description: 'Display sort order' })
   sort!: number;
+
+  @ApiProperty({
+    example: 'MED',
+    nullable: true,
+    type: String,
+    description:
+      'Unique 3-letter prefix for supplies in this category, or null if inherited',
+  })
+  codePrefix!: string | null;
 }
