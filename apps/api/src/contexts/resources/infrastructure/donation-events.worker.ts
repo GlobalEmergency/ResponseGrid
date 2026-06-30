@@ -37,11 +37,12 @@ export class DonationEventsWorker implements OnModuleInit, OnModuleDestroy {
     const url = process.env.REDIS_URL;
     if (!url) throw new Error('REDIS_URL is required');
     // BullMQ workers need a dedicated connection with blocking commands enabled.
-    this.connection = new IORedis(url, { maxRetriesPerRequest: null });
+    const connection = new IORedis(url, { maxRetriesPerRequest: null });
+    this.connection = connection;
     this.worker = new Worker<DomainEventJobData>(
       'domain-events',
       (job: Job<DomainEventJobData>) => this.handle(job),
-      { connection: toBullMqConnection(this.connection) },
+      { connection: toBullMqConnection(connection) },
     );
     this.worker.on('failed', (job, err) => {
       this.logger.error(

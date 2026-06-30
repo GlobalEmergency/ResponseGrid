@@ -108,11 +108,9 @@ export class SupplyLine {
       quantity: props.quantity,
       unit: props.unit ?? null,
       category: props.category,
-      ...(props.supplyId === undefined ? {} : { supplyId: props.supplyId }),
-      ...(props.presentation === undefined
-        ? {}
-        : { presentation: props.presentation }),
-      ...(props.expiresAt === undefined ? {} : { expiresAt: props.expiresAt }),
+      supplyId: props.supplyId ?? null,
+      presentation: props.presentation ?? null,
+      expiresAt: props.expiresAt ?? null,
     });
   }
 
