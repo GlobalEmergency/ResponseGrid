@@ -526,11 +526,11 @@ export const en = {
     choose_deliver_subtitle:
       'Choose the point and pre-register your delivery — you get a code/QR for the desk',
     choose_offer_title: 'Offer supplies',
-    choose_offer_subtitle: 'Describe it and the coordination team handles it',
+    choose_offer_subtitle: 'Search the supply and complete the offer',
 
     directed_offer_label: 'Offering for:',
     category_label: 'Supply category',
-    description_label: 'Supply description',
+    description_label: 'Supply / item',
     description_placeholder: 'e.g. 25 kg rice bags',
     quantity_label: 'Quantity',
     quantity_placeholder: '50',
@@ -551,7 +551,7 @@ export const en = {
 
     // server-action messages
     err_invalid_category: 'Invalid category.',
-    err_description_too_short: 'Describe the item (at least 2 characters).',
+    err_description_too_short: 'Specify the supply or item (at least 2 characters).',
     err_invalid_quantity: 'Quantity must be a positive whole number.',
     err_location_required: 'Select a location.',
     err_submit_failed: 'Couldn’t submit the offer. Please try again.',

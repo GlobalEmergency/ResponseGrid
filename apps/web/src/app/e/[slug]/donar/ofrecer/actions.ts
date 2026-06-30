@@ -38,6 +38,7 @@ export async function submitOffer(
   const rawDescription = formData.get('description');
   const rawQuantity = formData.get('quantity');
   const rawUnit = formData.get('unit');
+  const rawSupplyId = formData.get('supplyId');
   const rawAddress = formData.get('address');
   const rawLatitude = formData.get('latitude');
   const rawLongitude = formData.get('longitude');
@@ -88,6 +89,11 @@ export async function submitOffer(
       ? rawNotes.trim()
       : undefined;
 
+  const supplyId =
+    typeof rawSupplyId === 'string' && rawSupplyId.trim() !== ''
+      ? rawSupplyId.trim()
+      : undefined;
+
   const donorOrganizationId =
     typeof rawOrgId === 'string' && rawOrgId.trim() !== ''
       ? rawOrgId.trim()
@@ -112,6 +118,7 @@ export async function submitOffer(
             quantity: quantityRaw,
             category: rawCategory,
             ...(unit !== undefined ? { unit } : {}),
+            ...(supplyId !== undefined ? { supplyId } : {}),
           },
         ],
         location: { address, latitude, longitude },

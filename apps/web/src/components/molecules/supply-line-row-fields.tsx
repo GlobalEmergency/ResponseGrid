@@ -1,9 +1,11 @@
 'use client';
 
 import { categoryLabel } from '@/lib/categories';
+import { SupplySelector } from '@/components/molecules/supply-selector';
 
 export interface SupplyLineRowValue {
   name: string;
+  supplyId: string | null;
   quantity: number;
   unit: string;
   category: string;
@@ -91,14 +93,13 @@ export function SupplyLineRowFields({
         >
           {labels.nameLabel} <span aria-hidden="true">*</span>
         </label>
-        <input
+        <SupplySelector
           id={`${idPrefix}-name-${rowId}`}
-          type="text"
-          required={required}
-          value={value.name}
-          onChange={(e) => onChange({ name: e.target.value })}
+          locale={locale}
           placeholder={labels.namePlaceholder}
-          className="w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink placeholder:text-muted-soft focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
+          required={required}
+          value={{ name: value.name, supplyId: value.supplyId }}
+          onChange={(patch) => onChange(patch)}
         />
       </div>
 

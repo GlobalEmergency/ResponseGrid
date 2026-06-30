@@ -14,6 +14,7 @@ import { DraftRestoredBanner } from '@/components/atoms/draft-restored-banner';
 import { useFormDraft } from '@/lib/use-form-draft';
 import { useLocale } from '@/i18n/locale-context';
 import { MATERIAL_CATEGORIES, categoryLabel } from '@/lib/categories';
+import { SupplySelector } from '@/components/molecules/supply-selector';
 import type { Messages } from '@/i18n/messages/es';
 
 const INITIAL_STATE: OfferState = { status: 'idle' };
@@ -49,6 +50,7 @@ export function DonarForm({
 
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
+  const [supplyId, setSupplyId] = useState('');
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('');
   const [notes, setNotes] = useState('');
@@ -58,10 +60,11 @@ export function DonarForm({
     ? `donar-${slug}-need-${targetNeedId}`
     : `donar-${slug}`;
 
-  const draftValues = { category, description, quantity, unit, notes };
+  const draftValues = { category, description, supplyId, quantity, unit, notes };
   const draftSetters = {
     category: setCategory,
     description: setDescription,
+    supplyId: setSupplyId,
     quantity: setQuantity,
     unit: setUnit,
     notes: setNotes,
@@ -136,17 +139,20 @@ export function DonarForm({
         htmlFor="description"
         label={<>{t.description_label} <span aria-hidden="true">*</span></>}
       >
-        <Input
+        <SupplySelector
           id="description"
-          name="description"
-          type="text"
-          required
-          minLength={2}
+          locale={locale}
           placeholder={t.description_placeholder}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          required
+          value={{ name: description, supplyId: supplyId === '' ? null : supplyId }}
+          onChange={(patch) => {
+            if (patch.name !== undefined) setDescription(patch.name);
+            if (patch.supplyId !== undefined) setSupplyId(patch.supplyId ?? '');
+          }}
         />
       </FormField>
+      <input type="hidden" name="supplyId" value={supplyId} />
+      <input type="hidden" name="description" value={description} />
 
       <div className="flex gap-3">
         <div className="flex-1">

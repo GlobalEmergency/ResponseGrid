@@ -13,6 +13,7 @@ import { ALL_CATEGORIES } from '@/lib/categories';
 interface Item {
   id: number;
   name: string;
+  supplyId: string | null;
   quantity: number;
   unit: string;
   category: string;
@@ -21,7 +22,14 @@ interface Item {
 let nextId = 1;
 
 function makeItem(): Item {
-  return { id: nextId++, name: '', quantity: 1, unit: '', category: 'food' };
+  return {
+    id: nextId++,
+    name: '',
+    supplyId: null,
+    quantity: 1,
+    unit: '',
+    category: 'food',
+  };
 }
 
 interface ItemsFieldProps {
@@ -50,8 +58,9 @@ export function ItemsField({ t }: ItemsFieldProps) {
   };
 
   const serialized = JSON.stringify(
-    items.map(({ name, quantity, unit, category }) => ({
+    items.map(({ name, supplyId, quantity, unit, category }) => ({
       name,
+      ...(supplyId !== null ? { supplyId } : {}),
       quantity,
       ...(unit.trim() !== '' ? { unit: unit.trim() } : {}),
       category,
