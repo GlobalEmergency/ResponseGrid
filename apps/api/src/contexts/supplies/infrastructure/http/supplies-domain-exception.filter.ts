@@ -13,6 +13,14 @@ import {
   ContainerValidationError,
 } from '../../domain/container-errors';
 import { SupplyLineValidationError } from '../../domain/supply-line';
+import { SupplyValidationError } from '../../domain/supply';
+import {
+  AliasConflictError,
+  MergeIntoSelfError,
+  SupplyCodeConflictError,
+  SupplyNotFoundError,
+  VariantTargetNotFoundError,
+} from '../../domain/supply-errors';
 
 type DomainError =
   | ContainerNotFoundError
@@ -20,7 +28,13 @@ type DomainError =
   | ContainerCycleError
   | ContainerEmergencyMismatchError
   | ContainerValidationError
-  | SupplyLineValidationError;
+  | SupplyLineValidationError
+  | SupplyValidationError
+  | SupplyNotFoundError
+  | SupplyCodeConflictError
+  | VariantTargetNotFoundError
+  | MergeIntoSelfError
+  | AliasConflictError;
 
 /**
  * Maps supplies domain errors to HTTP codes. The supplies context owns the
@@ -41,6 +55,12 @@ type DomainError =
   ContainerEmergencyMismatchError,
   ContainerValidationError,
   SupplyLineValidationError,
+  SupplyValidationError,
+  SupplyNotFoundError,
+  SupplyCodeConflictError,
+  VariantTargetNotFoundError,
+  MergeIntoSelfError,
+  AliasConflictError,
 )
 export class SuppliesDomainExceptionFilter implements ExceptionFilter {
   catch(exception: DomainError, host: ArgumentsHost): void {
@@ -52,13 +72,25 @@ export class SuppliesDomainExceptionFilter implements ExceptionFilter {
   }
 
   private statusFor(exception: DomainError): HttpStatus {
-    if (exception instanceof ContainerNotFoundError) {
+    if (
+      exception instanceof ContainerNotFoundError ||
+      exception instanceof SupplyNotFoundError ||
+      exception instanceof VariantTargetNotFoundError
+    ) {
       return HttpStatus.NOT_FOUND;
     }
-    if (exception instanceof ContainerSealedError) {
+    if (
+      exception instanceof ContainerSealedError ||
+      exception instanceof SupplyCodeConflictError ||
+      exception instanceof AliasConflictError
+    ) {
       return HttpStatus.CONFLICT;
     }
-    if (exception instanceof SupplyLineValidationError) {
+    if (
+      exception instanceof SupplyLineValidationError ||
+      exception instanceof SupplyValidationError ||
+      exception instanceof MergeIntoSelfError
+    ) {
       return HttpStatus.BAD_REQUEST;
     }
     return HttpStatus.UNPROCESSABLE_ENTITY;
