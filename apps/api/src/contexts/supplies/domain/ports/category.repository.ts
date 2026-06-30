@@ -29,6 +29,9 @@ export interface CategoryRepository {
     slug: string,
     options?: CategoryListOptions,
   ): Promise<CategoryDefinition | null>;
-  createCategory(input: CategoryWriteInput): Promise<void>;
-  updateCategory(slug: string, input: CategoryWriteInput): Promise<void>;
+  createCategory(input: CategoryWriteInput): Promise<CategoryDefinition>;
+  updateCategory(
+    slug: string,
+    input: CategoryWriteInput,
+  ): Promise<CategoryDefinition>;
 }

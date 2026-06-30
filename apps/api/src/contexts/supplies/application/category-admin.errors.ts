@@ -19,13 +19,6 @@ export class CategoryParentNotFoundError extends Error {
   }
 }
 
-export class CategoryImmutableSlugError extends Error {
-  constructor(slug: string) {
-    super(`Core category slug cannot be changed: ${slug}`);
-    this.name = 'CategoryImmutableSlugError';
-  }
-}
-
 export class CategoryValidationError extends Error {
   constructor(message: string) {
     super(message);

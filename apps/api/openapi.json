@@ -866,6 +866,7 @@
     },
     "/emergencies/{emergencyId}/resources": {
       "post": {
+        "description": "Open to any authenticated user. A trusted integration may also register on behalf of a third party with its service-account API key when it holds `resource:register` and includes the `author` block (#235).",
         "operationId": "ResourcesController_create",
         "parameters": [
           {
@@ -901,13 +902,19 @@
             }
           },
           "400": {
-            "description": "Invalid request body or UUID"
+            "description": "Invalid request body or UUID, or missing author for an API key"
           },
           "401": {
-            "description": "Missing or invalid token"
+            "description": "Missing or invalid credentials"
+          },
+          "403": {
+            "description": "Service account lacks the resource:register grant at this scope"
           }
         },
         "security": [
+          {
+            "api-key": []
+          },
           {
             "bearer": []
           }
@@ -2550,6 +2557,7 @@
     },
     "/emergencies/{emergencyId}/needs": {
       "post": {
+        "description": "Open to any authenticated user (a citizen submits; a coordinator validates later). A trusted integration may also create on behalf of a third party with its service-account API key when it holds `need:create` and includes the `author` block (#235).",
         "operationId": "NeedsController_create",
         "parameters": [
           {
@@ -2585,13 +2593,19 @@
             }
           },
           "400": {
-            "description": "Invalid request body or UUID"
+            "description": "Invalid request body or UUID, or missing author for an API key"
           },
           "401": {
-            "description": "Missing or invalid token"
+            "description": "Missing or invalid credentials"
+          },
+          "403": {
+            "description": "Service account lacks the need:create grant at this scope"
           }
         },
         "security": [
+          {
+            "api-key": []
+          },
           {
             "bearer": []
           }
@@ -2634,7 +2648,13 @@
                 "medicines",
                 "medical_equipment",
                 "medical_supplies",
-                "medical_personnel"
+                "medical_personnel",
+                "food_fresh",
+                "food_non_perishable",
+                "hygiene_infantile",
+                "hygiene_personal",
+                "tools_extraction",
+                "other_pets"
               ],
               "type": "string"
             }
@@ -2892,7 +2912,13 @@
                 "medicines",
                 "medical_equipment",
                 "medical_supplies",
-                "medical_personnel"
+                "medical_personnel",
+                "food_fresh",
+                "food_non_perishable",
+                "hygiene_infantile",
+                "hygiene_personal",
+                "tools_extraction",
+                "other_pets"
               ],
               "type": "string"
             }
@@ -3881,6 +3907,7 @@
     },
     "/emergencies/{emergencyId}/offers": {
       "post": {
+        "description": "Open to any authenticated user. A trusted integration may also submit on behalf of a third party with its service-account API key when it holds `offer:create` and includes the `author` block (#235).",
         "operationId": "OffersController_submit",
         "parameters": [
           {
@@ -3916,16 +3943,22 @@
             }
           },
           "400": {
-            "description": "Invalid request body or UUID"
+            "description": "Invalid request body or UUID, or missing author for an API key"
           },
           "401": {
-            "description": "Missing or invalid token"
+            "description": "Missing or invalid credentials"
+          },
+          "403": {
+            "description": "Service account lacks the offer:create grant at this scope"
           },
           "409": {
             "description": "Emergency is not accepting intake (paused/closed)"
           }
         },
         "security": [
+          {
+            "api-key": []
+          },
           {
             "bearer": []
           }
@@ -5640,7 +5673,26 @@
     "/categories": {
       "get": {
         "operationId": "CategoriesController_list",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "description": "Preferred locale",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "description": "Fallback locale header (es, en or a custom translation locale)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "The category taxonomy",
@@ -5659,6 +5711,746 @@
         "summary": "List the shared category taxonomy (slug + labels + hierarchy)",
         "tags": [
           "categories"
+        ]
+      }
+    },
+    "/admin/categories": {
+      "get": {
+        "operationId": "CategoriesAdminController_list",
+        "parameters": [
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "description": "Preferred locale",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accept-language",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "description": "Fallback locale header (es, en or a custom translation locale)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryAdminDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing catalogue:manage permission"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the full category taxonomy for admin (archived included)",
+        "tags": [
+          "categories-admin"
+        ]
+      },
+      "post": {
+        "operationId": "CategoriesAdminController_create",
+        "parameters": [
+          {
+            "name": "locale",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accept-language",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryAdminDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid category payload"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing catalogue:manage permission"
+          },
+          "409": {
+            "description": "Category slug already exists"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a category or subcategory",
+        "tags": [
+          "categories-admin"
+        ]
+      }
+    },
+    "/admin/categories/{slug}": {
+      "patch": {
+        "operationId": "CategoriesAdminController_update",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "description": "Current category slug",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accept-language",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryAdminDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid category payload"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing catalogue:manage permission"
+          },
+          "404": {
+            "description": "Category not found"
+          },
+          "409": {
+            "description": "Category slug already exists"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a category, subcategory or archive flag",
+        "tags": [
+          "categories-admin"
+        ]
+      },
+      "delete": {
+        "operationId": "CategoriesAdminController_delete",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "description": "Category slug to archive",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Category archived"
+          },
+          "400": {
+            "description": "Core category slug cannot be archived by delete"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing catalogue:manage permission"
+          },
+          "404": {
+            "description": "Category not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Archive a custom category (core slugs are protected)",
+        "tags": [
+          "categories-admin"
+        ]
+      }
+    },
+    "/supplies": {
+      "get": {
+        "operationId": "SuppliesController_list",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Autocomplete term",
+            "schema": {
+              "example": "advil",
+              "type": "string"
+            }
+          },
+          {
+            "name": "categorySlug",
+            "required": false,
+            "in": "query",
+            "description": "Filter by category slug",
+            "schema": {
+              "example": "medical_supplies",
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "description": "Preferred locale",
+            "schema": {
+              "example": "en",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max items to return",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "How many items to skip",
+            "schema": {
+              "minimum": 0,
+              "example": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "description": "Fallback locale header (es or en)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matched supplies",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SupplyDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Search the shared supply catalog (canonical names, aliases and codes)",
+        "tags": [
+          "supplies"
+        ]
+      }
+    },
+    "/supplies/{id}": {
+      "get": {
+        "operationId": "SuppliesController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "description": "Preferred locale",
+            "schema": {}
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "description": "Fallback locale header (es or en)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Supply detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplyDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get a supply by id",
+        "tags": [
+          "supplies"
+        ]
+      }
+    },
+    "/admin/supplies": {
+      "post": {
+        "operationId": "SuppliesAdminController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSupplyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSupplyResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear un insumo (asigna código INS-NNNN)",
+        "tags": [
+          "supplies-admin"
+        ]
+      },
+      "get": {
+        "operationId": "SuppliesAdminController_list",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Búsqueda por código o nombre",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categorySlug",
+            "required": false,
+            "in": "query",
+            "description": "Filtra por categoría",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "archived"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminSupplyDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar el catálogo (incluye archivados)",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/{id}": {
+      "get": {
+        "operationId": "SuppliesAdminController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSupplyDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Detalle de gestión de un insumo",
+        "tags": [
+          "supplies-admin"
+        ]
+      },
+      "patch": {
+        "operationId": "SuppliesAdminController_edit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditSupplyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar un insumo (code no editable)",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/{id}/archive": {
+      "post": {
+        "operationId": "SuppliesAdminController_archive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Archivar un insumo",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/{id}/restore": {
+      "post": {
+        "operationId": "SuppliesAdminController_restore",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reactivar un insumo archivado",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/{id}/aliases": {
+      "post": {
+        "operationId": "SuppliesAdminController_addAlias",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddSupplyAliasDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Añadir un alias/sinónimo a un insumo",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/{id}/aliases/{aliasNorm}": {
+      "delete": {
+        "operationId": "SuppliesAdminController_removeAlias",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "aliasNorm",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar un alias del catálogo",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/merge": {
+      "post": {
+        "operationId": "SuppliesAdminController_merge",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeSuppliesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Fusionar un insumo duplicado en el canónico",
+        "tags": [
+          "supplies-admin"
         ]
       }
     },
@@ -8608,7 +9400,13 @@
               "medicines",
               "medical_equipment",
               "medical_supplies",
-              "medical_personnel"
+              "medical_personnel",
+              "food_fresh",
+              "food_non_perishable",
+              "hygiene_infantile",
+              "hygiene_personal",
+              "tools_extraction",
+              "other_pets"
             ],
             "example": "water"
           },
@@ -8619,8 +9417,8 @@
           },
           "expiresAt": {
             "type": "string",
-            "format": "date",
             "example": "2026-07-01",
+            "format": "date",
             "description": "Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD)."
           }
         },
@@ -8629,6 +9427,44 @@
           "quantity",
           "category"
         ]
+      },
+      "AuthorDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "María P.",
+            "maxLength": 200
+          },
+          "email": {
+            "type": "string",
+            "example": "maria@example.com",
+            "maxLength": 320
+          },
+          "phone": {
+            "type": "string",
+            "example": "+58 412 1234567",
+            "maxLength": 64
+          },
+          "note": {
+            "type": "string",
+            "example": "Contactar por la tarde; vive en el 3er piso",
+            "maxLength": 2000,
+            "description": "Free-text contact / context note"
+          },
+          "verified": {
+            "type": "boolean",
+            "example": false,
+            "default": false,
+            "description": "Whether the integrating source verified this identity (e.g. OTP). Defaults to false — public anonymous capture is unverified."
+          },
+          "source": {
+            "type": "string",
+            "example": "terremotovenezuela.app",
+            "maxLength": 200,
+            "description": "Which integration contributed this author"
+          }
+        }
       },
       "RegisterResourceDto": {
         "type": "object",
@@ -8731,6 +9567,14 @@
             "items": {
               "$ref": "#/components/schemas/SupplyLineDto"
             }
+          },
+          "author": {
+            "description": "Restricted contact of the real person this place is registered on behalf of (#235). Optional; required when a trusted integration writes via API key. Never exposed on public reads.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuthorDto"
+              }
+            ]
           }
         },
         "required": [
@@ -9641,6 +10485,42 @@
           "inventoryCategories"
         ]
       },
+      "AuthorResponseDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "example": "María P."
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "example": "maria@example.com"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true,
+            "example": "+58…"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "verified": {
+            "type": "boolean",
+            "example": false
+          },
+          "source": {
+            "type": "string",
+            "nullable": true,
+            "example": "terremotovenezuela.app"
+          }
+        },
+        "required": [
+          "verified"
+        ]
+      },
       "ResourceAdminViewDto": {
         "type": "object",
         "properties": {
@@ -9789,6 +10669,16 @@
             "example": "Terremoto Venezuela 2026",
             "nullable": true,
             "description": "Resolved emergency name, or null when it could not be found"
+          },
+          "author": {
+            "nullable": true,
+            "description": "Restricted contact of the real registrant when filed by an integration on their behalf (#235). Platform-admin only — never returned publicly.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuthorResponseDto"
+              }
+            ]
           }
         },
         "required": [
@@ -9994,6 +10884,16 @@
             "example": "Terremoto Venezuela 2026",
             "nullable": true,
             "description": "Resolved emergency name, or null when it could not be found"
+          },
+          "author": {
+            "nullable": true,
+            "description": "Restricted contact of the real registrant when filed by an integration on their behalf (#235). Platform-admin only — never returned publicly.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuthorResponseDto"
+              }
+            ]
           },
           "inventoryCategories": {
             "example": [
@@ -10477,6 +11377,14 @@
             "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
             "description": "Link this need to a resource / final recipient (#60). Optional.",
             "nullable": true
+          },
+          "author": {
+            "description": "Restricted contact of the real person this need is filed on behalf of (#235). Optional; only meaningful — and required — when a trusted integration writes via API key. Never exposed on public reads.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuthorDto"
+              }
+            ]
           }
         },
         "required": [
@@ -10551,7 +11459,13 @@
               "medicines",
               "medical_equipment",
               "medical_supplies",
-              "medical_personnel"
+              "medical_personnel",
+              "food_fresh",
+              "food_non_perishable",
+              "hygiene_infantile",
+              "hygiene_personal",
+              "tools_extraction",
+              "other_pets"
             ],
             "example": "water"
           },
@@ -10563,9 +11477,9 @@
           },
           "expiresAt": {
             "type": "string",
-            "format": "date",
-            "nullable": true,
             "example": "2026-07-01",
+            "nullable": true,
+            "format": "date",
             "description": "Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD)."
           }
         },
@@ -11649,6 +12563,14 @@
             "type": "string",
             "example": "Available for pickup Mon-Fri",
             "description": "Additional notes (optional)"
+          },
+          "author": {
+            "description": "Restricted contact of the real donor this offer is filed on behalf of (#235). Optional; required when a trusted integration writes via API key. Never exposed on public reads.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuthorDto"
+              }
+            ]
           }
         },
         "required": [
@@ -11752,6 +12674,16 @@
           "updatedAt": {
             "type": "string",
             "example": "2024-01-01T00:00:00.000Z"
+          },
+          "author": {
+            "nullable": true,
+            "description": "Restricted contact of the real donor when filed by an integration on their behalf (#235). Coordinator/owner-only — never returned publicly.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuthorResponseDto"
+              }
+            ]
           }
         },
         "required": [
@@ -12170,7 +13102,13 @@
               "medicines",
               "medical_equipment",
               "medical_supplies",
-              "medical_personnel"
+              "medical_personnel",
+              "food_fresh",
+              "food_non_perishable",
+              "hygiene_infantile",
+              "hygiene_personal",
+              "tools_extraction",
+              "other_pets"
             ],
             "example": "water"
           },
@@ -12179,6 +13117,13 @@
             "example": "ampolla",
             "nullable": true,
             "description": "Presentation / route of administration (ampolla, EV, inhalador…) — #61."
+          },
+          "expiresAt": {
+            "type": "string",
+            "example": "2026-07-01",
+            "nullable": true,
+            "format": "date",
+            "description": "Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD)."
           },
           "id": {
             "type": "string",
@@ -12937,9 +13882,10 @@
       "CategoryDto": {
         "type": "object",
         "properties": {
-          "slug": {
+          "label": {
             "type": "string",
-            "example": "medicines"
+            "example": "Medicamentos",
+            "description": "Localized category label"
           },
           "labelEs": {
             "type": "string",
@@ -12963,15 +13909,448 @@
             "type": "number",
             "example": 41,
             "description": "Display sort order"
+          },
+          "codePrefix": {
+            "type": "string",
+            "example": "MED",
+            "nullable": true,
+            "description": "Unique 3-letter prefix for supplies in this category, or null if inherited"
+          }
+        },
+        "required": [
+          "label",
+          "labelEs",
+          "labelEn",
+          "parentSlug",
+          "vertical",
+          "sort",
+          "codePrefix"
+        ]
+      },
+      "CategoryTranslationDto": {
+        "type": "object",
+        "properties": {
+          "locale": {
+            "type": "string",
+            "example": "fr"
+          },
+          "label": {
+            "type": "string",
+            "example": "Nourriture"
+          }
+        },
+        "required": [
+          "locale",
+          "label"
+        ]
+      },
+      "CategoryAdminDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "example": "baby_food"
+          },
+          "label": {
+            "type": "string",
+            "example": "Alimentos para bebé",
+            "description": "Localized label"
+          },
+          "labelEs": {
+            "type": "string",
+            "example": "Alimentos para bebé"
+          },
+          "labelEn": {
+            "type": "string",
+            "example": "Baby food"
+          },
+          "parentSlug": {
+            "type": "string",
+            "example": "food",
+            "nullable": true,
+            "description": "Parent category slug, or null for a top-level category"
+          },
+          "vertical": {
+            "type": "string",
+            "example": "general"
+          },
+          "sort": {
+            "type": "number",
+            "example": 140
+          },
+          "archivedAt": {
+            "type": "object",
+            "example": null,
+            "nullable": true,
+            "description": "Soft-archive timestamp"
+          },
+          "translations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryTranslationDto"
+            }
+          }
+        },
+        "required": [
+          "slug",
+          "label",
+          "labelEs",
+          "labelEn",
+          "parentSlug",
+          "vertical",
+          "sort",
+          "archivedAt",
+          "translations"
+        ]
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "example": "baby_food"
+          },
+          "labelEs": {
+            "type": "string",
+            "example": "Alimentos para bebé"
+          },
+          "labelEn": {
+            "type": "string",
+            "example": "Baby food"
+          },
+          "parentSlug": {
+            "type": "object",
+            "example": "food",
+            "nullable": true,
+            "description": "Parent category slug, or null for a top-level category"
+          },
+          "vertical": {
+            "type": "string",
+            "example": "general"
+          },
+          "sort": {
+            "type": "number",
+            "example": 140
+          },
+          "translations": {
+            "description": "Additional locale labels to persist in category_translations",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryTranslationDto"
+            }
           }
         },
         "required": [
           "slug",
           "labelEs",
           "labelEn",
-          "parentSlug",
           "vertical",
           "sort"
+        ]
+      },
+      "UpdateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "labelEs": {
+            "type": "string",
+            "example": "Alimentos para bebé"
+          },
+          "labelEn": {
+            "type": "string",
+            "example": "Baby food"
+          },
+          "parentSlug": {
+            "type": "object",
+            "example": "food",
+            "nullable": true,
+            "description": "Parent category slug, or null for a top-level category"
+          },
+          "vertical": {
+            "type": "string",
+            "example": "general"
+          },
+          "sort": {
+            "type": "number",
+            "example": 140
+          },
+          "translations": {
+            "description": "Replace the category_translation rows with this set",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryTranslationDto"
+            }
+          },
+          "archived": {
+            "type": "boolean",
+            "example": false,
+            "description": "True to hide/archive the category, false to restore it"
+          }
+        }
+      },
+      "SupplyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "cf8da6e3-7b91-52ff-8cf7-bbff50786c35"
+          },
+          "code": {
+            "type": "string",
+            "example": "WAT-0001"
+          },
+          "name": {
+            "type": "string",
+            "example": "Agua potable (botellón 18L)"
+          },
+          "nameEs": {
+            "type": "string",
+            "example": "Agua potable (botellón 18L)"
+          },
+          "nameEn": {
+            "type": "string",
+            "example": "Water (18L jug)",
+            "nullable": true
+          },
+          "categorySlug": {
+            "type": "string",
+            "example": "food"
+          },
+          "categoryLabel": {
+            "type": "string",
+            "example": "Alimentos"
+          },
+          "categoryLabelEs": {
+            "type": "string",
+            "example": "Alimentos"
+          },
+          "categoryLabelEn": {
+            "type": "string",
+            "example": "Food",
+            "nullable": true
+          },
+          "defaultUnit": {
+            "type": "string",
+            "example": "und",
+            "nullable": true
+          },
+          "attributes": {
+            "type": "object",
+            "example": {
+              "size": "18L"
+            },
+            "description": "Structured attributes for variants and catalog metadata"
+          },
+          "variantOfId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "example": null,
+            "description": "Parent supply id when this item is a variant"
+          },
+          "aliases": {
+            "example": [
+              "Agua embotellada",
+              "botellón"
+            ],
+            "description": "Known aliases for the canonical supply",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "nameEs",
+          "categorySlug",
+          "categoryLabel",
+          "categoryLabelEs",
+          "attributes",
+          "aliases"
+        ]
+      },
+      "CreateSupplyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Agua potable (botella 1.5L)"
+          },
+          "categorySlug": {
+            "type": "string",
+            "example": "water",
+            "description": "Slug de categoría existente"
+          },
+          "defaultUnit": {
+            "type": "object",
+            "example": "und"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Atributos estructurados (jsonb)"
+          },
+          "registrationNotes": {
+            "type": "object",
+            "description": "Notas internas de gestión"
+          },
+          "variantOfId": {
+            "type": "object",
+            "format": "uuid",
+            "description": "Si es variante, id del insumo padre (debe existir)"
+          }
+        },
+        "required": [
+          "name",
+          "categorySlug"
+        ]
+      },
+      "CreateSupplyResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "example": "INS-0212"
+          }
+        },
+        "required": [
+          "id",
+          "code"
+        ]
+      },
+      "AdminSupplyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "example": "INS-0212"
+          },
+          "name": {
+            "type": "string",
+            "example": "Agua potable (botella 1.5L)"
+          },
+          "categorySlug": {
+            "type": "string",
+            "example": "water"
+          },
+          "defaultUnit": {
+            "type": "string",
+            "example": "und",
+            "nullable": true
+          },
+          "attributes": {
+            "type": "object",
+            "example": {
+              "size": "1.5L"
+            }
+          },
+          "variantOfId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "archived"
+            ],
+            "example": "active"
+          },
+          "registrationNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "aliases": {
+            "example": [
+              "agua embotellada",
+              "botellon"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "categorySlug",
+          "attributes",
+          "status",
+          "aliases"
+        ]
+      },
+      "EditSupplyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Agua mineral"
+          },
+          "categorySlug": {
+            "type": "string",
+            "example": "food"
+          },
+          "defaultUnit": {
+            "type": "object",
+            "example": "kg"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "registrationNotes": {
+            "type": "object"
+          },
+          "variantOfId": {
+            "type": "object",
+            "format": "uuid"
+          }
+        }
+      },
+      "AddSupplyAliasDto": {
+        "type": "object",
+        "properties": {
+          "term": {
+            "type": "string",
+            "example": "agua embotellada",
+            "description": "Término/sinónimo; se normaliza en el servidor"
+          }
+        },
+        "required": [
+          "term"
+        ]
+      },
+      "MergeSuppliesDto": {
+        "type": "object",
+        "properties": {
+          "sourceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Insumo duplicado (se archiva)"
+          },
+          "targetId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Insumo canónico (conserva todo)"
+          }
+        },
+        "required": [
+          "sourceId",
+          "targetId"
         ]
       },
       "ContainerHolderDto": {

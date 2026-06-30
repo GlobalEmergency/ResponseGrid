@@ -5,10 +5,10 @@ import { ApiProperty } from '@nestjs/swagger';
  * Returned by `GET /categories`.
  */
 export class CategoryDto {
-  @ApiProperty({ example: 'medicines' })
-  slug!: string;
-
-  @ApiProperty({ example: 'Medicamentos', description: 'Localized label' })
+  @ApiProperty({
+    example: 'Medicamentos',
+    description: 'Localized category label',
+  })
   label!: string;
 
   @ApiProperty({ example: 'Medicamentos' })
@@ -30,4 +30,13 @@ export class CategoryDto {
 
   @ApiProperty({ example: 41, description: 'Display sort order' })
   sort!: number;
+
+  @ApiProperty({
+    example: 'MED',
+    nullable: true,
+    type: String,
+    description:
+      'Unique 3-letter prefix for supplies in this category, or null if inherited',
+  })
+  codePrefix!: string | null;
 }

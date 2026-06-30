@@ -5,6 +5,7 @@ import {
   toResourceView,
   toResourceDetailView,
 } from './resource-view';
+import { AuthorSnapshot } from '../../../shared/domain/author';
 
 /**
  * Admin list/detail view: the existing {@link ResourceView} plus the owning
@@ -17,6 +18,12 @@ export interface ResourceAdminView extends ResourceView {
   emergencyId: string;
   /** Resolved emergency name, or null when it could not be looked up. */
   emergencyName: string | null;
+  /**
+   * Restricted author attribution (#235). Only ever surfaced on the
+   * platform-admin console — never on the public/coordination resource views,
+   * which share the public {@link ResourceView} shape.
+   */
+  author: AuthorSnapshot | null;
 }
 
 /**
@@ -36,6 +43,7 @@ export function toResourceAdminView(
     ...toResourceView(r),
     emergencyId: r.emergencyId.value,
     emergencyName,
+    author: r.author ? r.author.toSnapshot() : null,
   };
 }
 
@@ -47,5 +55,6 @@ export function toResourceAdminDetailView(
     ...toResourceDetailView(r),
     emergencyId: r.emergencyId.value,
     emergencyName,
+    author: r.author ? r.author.toSnapshot() : null,
   };
 }

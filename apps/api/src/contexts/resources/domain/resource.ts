@@ -29,6 +29,7 @@ import {
   SupplyLine,
   SupplyLineSnapshot,
 } from '../../supplies/domain/supply-line';
+import { Author, AuthorSnapshot } from '../../../shared/domain/author';
 
 export type Provenance = {
   sourceName: string;
@@ -60,6 +61,8 @@ export interface RegisterResourceProps {
   recipientType?: string | null;
   // inventario declarado del lugar (qué material tiene para entregar)
   items?: SupplyLine[];
+  /** Restricted author attribution when registered via integration (#235). */
+  author?: Author | null;
 }
 
 /** Fields a coordinator may change while verifying. Omit a field to keep it. */
@@ -97,6 +100,8 @@ export interface ResourceSnapshot {
   items: SupplyLineSnapshot[];
   disputed?: boolean;
   disputedAt?: Date | null;
+  /** Optional (legacy-safe) restricted author attribution (#235). */
+  author?: AuthorSnapshot | null;
 }
 
 export class Resource {
@@ -127,6 +132,7 @@ export class Resource {
     private _items: SupplyLine[],
     private _disputed: boolean,
     private _disputedAt: Date | null,
+    public readonly author: Author | null,
   ) {}
 
   static register(props: RegisterResourceProps): Resource {
@@ -161,6 +167,7 @@ export class Resource {
       props.items ?? [],
       false,
       null,
+      props.author ?? null,
     );
     r.events.push(
       new ResourceRegistered(r.id.value, {
@@ -199,6 +206,7 @@ export class Resource {
       (s.items ?? []).map((i) => SupplyLine.fromSnapshot(i)),
       s.disputed ?? false,
       s.disputedAt ?? null,
+      s.author ? Author.fromSnapshot(s.author) : null,
     );
   }
 
@@ -432,6 +440,7 @@ export class Resource {
       items: this.items.map((i) => i.toSnapshot()),
       disputed: this._disputed,
       disputedAt: this._disputedAt,
+      author: this.author ? this.author.toSnapshot() : null,
     };
   }
 

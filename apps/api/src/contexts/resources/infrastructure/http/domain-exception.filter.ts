@@ -21,6 +21,8 @@ import {
   ResourceNotDisputedError,
 } from '../../domain/resource-errors';
 import { EmergencyNotAcceptingIntakeError } from '../../../emergencies/domain/emergency-not-accepting-intake.error';
+import { InvalidAuthorError } from '../../../../shared/domain/author';
+import { SupplyLineValidationError } from '../../../supplies/domain/supply-line';
 
 type DomainError =
   | ResourceNotFoundError
@@ -36,7 +38,9 @@ type DomainError =
   | ResourceNameRequiredError
   | OwnerCannotReportValidityError
   | ResourceNotReportableError
-  | ResourceNotDisputedError;
+  | ResourceNotDisputedError
+  | InvalidAuthorError
+  | SupplyLineValidationError;
 
 type ErrorCtor = new (...args: never[]) => Error;
 
@@ -73,6 +77,8 @@ const STATUS_BY_ERROR: ReadonlyArray<readonly [ErrorCtor, HttpStatus]> = [
   OwnerCannotReportValidityError,
   ResourceNotReportableError,
   ResourceNotDisputedError,
+  InvalidAuthorError,
+  SupplyLineValidationError,
 )
 export class DomainExceptionFilter implements ExceptionFilter {
   catch(exception: DomainError, host: ArgumentsHost): void {

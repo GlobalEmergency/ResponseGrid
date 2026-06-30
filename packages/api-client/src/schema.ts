@@ -323,7 +323,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Register a resource for an emergency (requires authentication) */
+        /**
+         * Register a resource for an emergency (requires authentication)
+         * @description Open to any authenticated user. A trusted integration may also register on behalf of a third party with its service-account API key when it holds `resource:register` and includes the `author` block (#235).
+         */
         post: operations["ResourcesController_create"];
         delete?: never;
         options?: never;
@@ -819,7 +822,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Create a need for an emergency (authenticated requester) */
+        /**
+         * Create a need for an emergency (authenticated requester)
+         * @description Open to any authenticated user (a citizen submits; a coordinator validates later). A trusted integration may also create on behalf of a third party with its service-account API key when it holds `need:create` and includes the `author` block (#235).
+         */
         post: operations["NeedsController_create"];
         delete?: never;
         options?: never;
@@ -1216,7 +1222,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Submit a donation offer for an emergency (authenticated donor) */
+        /**
+         * Submit a donation offer for an emergency (authenticated donor)
+         * @description Open to any authenticated user. A trusted integration may also submit on behalf of a third party with its service-account API key when it holds `offer:create` and includes the `author` block (#235).
+         */
         post: operations["OffersController_submit"];
         delete?: never;
         options?: never;
@@ -1797,6 +1806,197 @@ export interface paths {
         get: operations["CategoriesController_list"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the full category taxonomy for admin (archived included) */
+        get: operations["CategoriesAdminController_list"];
+        put?: never;
+        /** Create a category or subcategory */
+        post: operations["CategoriesAdminController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/categories/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Archive a custom category (core slugs are protected) */
+        delete: operations["CategoriesAdminController_delete"];
+        options?: never;
+        head?: never;
+        /** Update a category, subcategory or archive flag */
+        patch: operations["CategoriesAdminController_update"];
+        trace?: never;
+    };
+    "/supplies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search the shared supply catalog (canonical names, aliases and codes) */
+        get: operations["SuppliesController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/supplies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a supply by id */
+        get: operations["SuppliesController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/supplies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar el catálogo (incluye archivados) */
+        get: operations["SuppliesAdminController_list"];
+        put?: never;
+        /** Crear un insumo (asigna código INS-NNNN) */
+        post: operations["SuppliesAdminController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/supplies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detalle de gestión de un insumo */
+        get: operations["SuppliesAdminController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Editar un insumo (code no editable) */
+        patch: operations["SuppliesAdminController_edit"];
+        trace?: never;
+    };
+    "/admin/supplies/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Archivar un insumo */
+        post: operations["SuppliesAdminController_archive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/supplies/{id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reactivar un insumo archivado */
+        post: operations["SuppliesAdminController_restore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/supplies/{id}/aliases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Añadir un alias/sinónimo a un insumo */
+        post: operations["SuppliesAdminController_addAlias"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/supplies/{id}/aliases/{aliasNorm}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Eliminar un alias del catálogo */
+        delete: operations["SuppliesAdminController_removeAlias"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/supplies/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Fusionar un insumo duplicado en el canónico */
+        post: operations["SuppliesAdminController_merge"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2692,7 +2892,7 @@ export interface components {
              * @example water
              * @enum {string}
              */
-            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
             /**
              * @description Optional soft link to the canonical supply master data.
              * @example 1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8
@@ -2704,10 +2904,35 @@ export interface components {
              */
             presentation?: string;
             /**
+             * Format: date
              * @description Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD).
              * @example 2026-07-01
              */
             expiresAt?: string;
+        };
+        AuthorDto: {
+            /** @example María P. */
+            name?: string;
+            /** @example maria@example.com */
+            email?: string;
+            /** @example +58 412 1234567 */
+            phone?: string;
+            /**
+             * @description Free-text contact / context note
+             * @example Contactar por la tarde; vive en el 3er piso
+             */
+            note?: string;
+            /**
+             * @description Whether the integrating source verified this identity (e.g. OTP). Defaults to false — public anonymous capture is unverified.
+             * @default false
+             * @example false
+             */
+            verified: boolean;
+            /**
+             * @description Which integration contributed this author
+             * @example terremotovenezuela.app
+             */
+            source?: string;
         };
         RegisterResourceDto: {
             /**
@@ -2778,6 +3003,8 @@ export interface components {
             recipientType?: string;
             /** @description Declared inventory: the supply lines this place holds for delivery (optional) */
             items?: components["schemas"]["SupplyLineDto"][];
+            /** @description Restricted contact of the real person this place is registered on behalf of (#235). Optional; required when a trusted integration writes via API key. Never exposed on public reads. */
+            author?: components["schemas"]["AuthorDto"];
         };
         RegisterResourceResponseDto: {
             /**
@@ -3204,6 +3431,19 @@ export interface components {
              */
             inventoryCategories: string[];
         };
+        AuthorResponseDto: {
+            /** @example María P. */
+            name?: string | null;
+            /** @example maria@example.com */
+            email?: string | null;
+            /** @example +58… */
+            phone?: string | null;
+            note?: string | null;
+            /** @example false */
+            verified: boolean;
+            /** @example terremotovenezuela.app */
+            source?: string | null;
+        };
         ResourceAdminViewDto: {
             /**
              * Format: uuid
@@ -3295,6 +3535,8 @@ export interface components {
              * @example Terremoto Venezuela 2026
              */
             emergencyName: string | null;
+            /** @description Restricted contact of the real registrant when filed by an integration on their behalf (#235). Platform-admin only — never returned publicly. */
+            author?: components["schemas"]["AuthorResponseDto"] | null;
         };
         PagedAdminResourcesDto: {
             items: components["schemas"]["ResourceAdminViewDto"][];
@@ -3396,6 +3638,8 @@ export interface components {
              * @example Terremoto Venezuela 2026
              */
             emergencyName: string | null;
+            /** @description Restricted contact of the real registrant when filed by an integration on their behalf (#235). Platform-admin only — never returned publicly. */
+            author?: components["schemas"]["AuthorResponseDto"] | null;
             /**
              * @description Distinct categories of material this place has declared
              * @example [
@@ -3613,6 +3857,8 @@ export interface components {
              * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
              */
             resourceId?: string | null;
+            /** @description Restricted contact of the real person this need is filed on behalf of (#235). Optional; only meaningful — and required — when a trusted integration writes via API key. Never exposed on public reads. */
+            author?: components["schemas"]["AuthorDto"];
         };
         CreateNeedResponseDto: {
             /**
@@ -3645,13 +3891,14 @@ export interface components {
              * @example water
              * @enum {string}
              */
-            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
             /**
              * @description Presentation / route of administration (ampolla, EV, inhalador…) — #61.
              * @example ampolla
              */
             presentation?: string | null;
             /**
+             * Format: date
              * @description Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD).
              * @example 2026-07-01
              */
@@ -4117,6 +4364,8 @@ export interface components {
              * @example Available for pickup Mon-Fri
              */
             notes?: string;
+            /** @description Restricted contact of the real donor this offer is filed on behalf of (#235). Optional; required when a trusted integration writes via API key. Never exposed on public reads. */
+            author?: components["schemas"]["AuthorDto"];
         };
         SubmitOfferResponseDto: {
             /**
@@ -4159,6 +4408,8 @@ export interface components {
             createdAt: string;
             /** @example 2024-01-01T00:00:00.000Z */
             updatedAt: string;
+            /** @description Restricted contact of the real donor when filed by an integration on their behalf (#235). Coordinator/owner-only — never returned publicly. */
+            author?: components["schemas"]["AuthorResponseDto"] | null;
         };
         MatchOfferDto: {
             /**
@@ -4316,12 +4567,18 @@ export interface components {
              * @example water
              * @enum {string}
              */
-            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
             /**
              * @description Presentation / route of administration (ampolla, EV, inhalador…) — #61.
              * @example ampolla
              */
             presentation?: string | null;
+            /**
+             * Format: date
+             * @description Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD).
+             * @example 2026-07-01
+             */
+            expiresAt?: string | null;
             /** Format: uuid */
             id: string;
             sortOrder: number;
@@ -4666,8 +4923,11 @@ export interface components {
             updatedAt: string;
         };
         CategoryDto: {
-            /** @example medicines */
-            slug: string;
+            /**
+             * @description Localized category label
+             * @example Medicamentos
+             */
+            label: string;
             /** @example Medicamentos */
             labelEs: string;
             /** @example Medicines */
@@ -4684,6 +4944,226 @@ export interface components {
              * @example 41
              */
             sort: number;
+            /**
+             * @description Unique 3-letter prefix for supplies in this category, or null if inherited
+             * @example MED
+             */
+            codePrefix: string | null;
+        };
+        CategoryTranslationDto: {
+            /** @example fr */
+            locale: string;
+            /** @example Nourriture */
+            label: string;
+        };
+        CategoryAdminDto: {
+            /** @example baby_food */
+            slug: string;
+            /**
+             * @description Localized label
+             * @example Alimentos para bebé
+             */
+            label: string;
+            /** @example Alimentos para bebé */
+            labelEs: string;
+            /** @example Baby food */
+            labelEn: string;
+            /**
+             * @description Parent category slug, or null for a top-level category
+             * @example food
+             */
+            parentSlug: string | null;
+            /** @example general */
+            vertical: string;
+            /** @example 140 */
+            sort: number;
+            /**
+             * @description Soft-archive timestamp
+             * @example null
+             */
+            archivedAt: Record<string, never> | null;
+            translations: components["schemas"]["CategoryTranslationDto"][];
+        };
+        CreateCategoryDto: {
+            /** @example baby_food */
+            slug: string;
+            /** @example Alimentos para bebé */
+            labelEs: string;
+            /** @example Baby food */
+            labelEn: string;
+            /**
+             * @description Parent category slug, or null for a top-level category
+             * @example food
+             */
+            parentSlug?: Record<string, never> | null;
+            /** @example general */
+            vertical: string;
+            /** @example 140 */
+            sort: number;
+            /** @description Additional locale labels to persist in category_translations */
+            translations?: components["schemas"]["CategoryTranslationDto"][];
+        };
+        UpdateCategoryDto: {
+            /** @example Alimentos para bebé */
+            labelEs?: string;
+            /** @example Baby food */
+            labelEn?: string;
+            /**
+             * @description Parent category slug, or null for a top-level category
+             * @example food
+             */
+            parentSlug?: Record<string, never> | null;
+            /** @example general */
+            vertical?: string;
+            /** @example 140 */
+            sort?: number;
+            /** @description Replace the category_translation rows with this set */
+            translations?: components["schemas"]["CategoryTranslationDto"][];
+            /**
+             * @description True to hide/archive the category, false to restore it
+             * @example false
+             */
+            archived?: boolean;
+        };
+        SupplyDto: {
+            /**
+             * Format: uuid
+             * @example cf8da6e3-7b91-52ff-8cf7-bbff50786c35
+             */
+            id: string;
+            /** @example WAT-0001 */
+            code: string;
+            /** @example Agua potable (botellón 18L) */
+            name: string;
+            /** @example Agua potable (botellón 18L) */
+            nameEs: string;
+            /** @example Water (18L jug) */
+            nameEn?: string | null;
+            /** @example food */
+            categorySlug: string;
+            /** @example Alimentos */
+            categoryLabel: string;
+            /** @example Alimentos */
+            categoryLabelEs: string;
+            /** @example Food */
+            categoryLabelEn?: string | null;
+            /** @example und */
+            defaultUnit?: string | null;
+            /**
+             * @description Structured attributes for variants and catalog metadata
+             * @example {
+             *       "size": "18L"
+             *     }
+             */
+            attributes: Record<string, never>;
+            /**
+             * Format: uuid
+             * @description Parent supply id when this item is a variant
+             * @example null
+             */
+            variantOfId?: string | null;
+            /**
+             * @description Known aliases for the canonical supply
+             * @example [
+             *       "Agua embotellada",
+             *       "botellón"
+             *     ]
+             */
+            aliases: string[];
+        };
+        CreateSupplyDto: {
+            /** @example Agua potable (botella 1.5L) */
+            name: string;
+            /**
+             * @description Slug de categoría existente
+             * @example water
+             */
+            categorySlug: string;
+            /** @example und */
+            defaultUnit?: Record<string, never>;
+            /** @description Atributos estructurados (jsonb) */
+            attributes?: {
+                [key: string]: unknown;
+            };
+            /** @description Notas internas de gestión */
+            registrationNotes?: Record<string, never>;
+            /**
+             * Format: uuid
+             * @description Si es variante, id del insumo padre (debe existir)
+             */
+            variantOfId?: Record<string, never>;
+        };
+        CreateSupplyResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example INS-0212 */
+            code: string;
+        };
+        AdminSupplyDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example INS-0212 */
+            code: string;
+            /** @example Agua potable (botella 1.5L) */
+            name: string;
+            /** @example water */
+            categorySlug: string;
+            /** @example und */
+            defaultUnit?: string | null;
+            /**
+             * @example {
+             *       "size": "1.5L"
+             *     }
+             */
+            attributes: Record<string, never>;
+            /** Format: uuid */
+            variantOfId?: string | null;
+            /**
+             * @example active
+             * @enum {string}
+             */
+            status: "active" | "archived";
+            registrationNotes?: string | null;
+            /**
+             * @example [
+             *       "agua embotellada",
+             *       "botellon"
+             *     ]
+             */
+            aliases: string[];
+        };
+        EditSupplyDto: {
+            /** @example Agua mineral */
+            name?: string;
+            /** @example food */
+            categorySlug?: string;
+            /** @example kg */
+            defaultUnit?: Record<string, never>;
+            attributes?: {
+                [key: string]: unknown;
+            };
+            registrationNotes?: Record<string, never>;
+            /** Format: uuid */
+            variantOfId?: Record<string, never>;
+        };
+        AddSupplyAliasDto: {
+            /**
+             * @description Término/sinónimo; se normaliza en el servidor
+             * @example agua embotellada
+             */
+            term: string;
+        };
+        MergeSuppliesDto: {
+            /**
+             * Format: uuid
+             * @description Insumo duplicado (se archiva)
+             */
+            sourceId: string;
+            /**
+             * Format: uuid
+             * @description Insumo canónico (conserva todo)
+             */
+            targetId: string;
         };
         ContainerHolderDto: {
             /**
@@ -5902,15 +6382,22 @@ export interface operations {
                     "application/json": components["schemas"]["RegisterResourceResponseDto"];
                 };
             };
-            /** @description Invalid request body or UUID */
+            /** @description Invalid request body or UUID, or missing author for an API key */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Missing or invalid token */
+            /** @description Missing or invalid credentials */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Service account lacks the resource:register grant at this scope */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7260,15 +7747,22 @@ export interface operations {
                     "application/json": components["schemas"]["CreateNeedResponseDto"];
                 };
             };
-            /** @description Invalid request body or UUID */
+            /** @description Invalid request body or UUID, or missing author for an API key */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Missing or invalid token */
+            /** @description Missing or invalid credentials */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Service account lacks the need:create grant at this scope */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7280,7 +7774,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filter by item category (needs with at least one item of this category) */
-                category?: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+                category?: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
                 /** @description Filter by need priority */
                 priority?: "low" | "medium" | "high" | "urgent";
                 /** @description Filter to needs linked to this resource / final recipient */
@@ -7380,7 +7874,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filter by item category (needs with at least one item of this category) */
-                category?: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel";
+                category?: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
                 /** @description Filter by need priority */
                 priority?: "low" | "medium" | "high" | "urgent";
             };
@@ -8277,15 +8771,22 @@ export interface operations {
                     "application/json": components["schemas"]["SubmitOfferResponseDto"];
                 };
             };
-            /** @description Invalid request body or UUID */
+            /** @description Invalid request body or UUID, or missing author for an API key */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Missing or invalid token */
+            /** @description Missing or invalid credentials */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Service account lacks the offer:create grant at this scope */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -9861,8 +10362,14 @@ export interface operations {
     };
     CategoriesController_list: {
         parameters: {
-            query?: never;
-            header?: never;
+            query?: {
+                /** @description Preferred locale */
+                locale?: string;
+            };
+            header?: {
+                /** @description Fallback locale header (es, en or a custom translation locale) */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9876,6 +10383,534 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CategoryDto"][];
                 };
+            };
+        };
+    };
+    CategoriesAdminController_list: {
+        parameters: {
+            query?: {
+                /** @description Preferred locale */
+                locale?: string;
+            };
+            header: {
+                "accept-language": string;
+                /** @description Fallback locale header (es, en or a custom translation locale) */
+                "Accept-Language"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryAdminDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing catalogue:manage permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CategoriesAdminController_create: {
+        parameters: {
+            query: {
+                locale: string;
+            };
+            header: {
+                "accept-language": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCategoryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryAdminDto"];
+                };
+            };
+            /** @description Invalid category payload */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing catalogue:manage permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Category slug already exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CategoriesAdminController_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Category slug to archive */
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Category archived */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Core category slug cannot be archived by delete */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing catalogue:manage permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Category not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CategoriesAdminController_update: {
+        parameters: {
+            query: {
+                locale: string;
+            };
+            header: {
+                "accept-language": string;
+            };
+            path: {
+                /** @description Current category slug */
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCategoryDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryAdminDto"];
+                };
+            };
+            /** @description Invalid category payload */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing catalogue:manage permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Category not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Category slug already exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesController_list: {
+        parameters: {
+            query?: {
+                /** @description Autocomplete term */
+                q?: string;
+                /** @description Filter by category slug */
+                categorySlug?: string;
+                /** @description Preferred locale */
+                locale?: string;
+                /** @description Max items to return */
+                limit?: number;
+                /** @description How many items to skip */
+                offset?: number;
+            };
+            header?: {
+                /** @description Fallback locale header (es or en) */
+                "Accept-Language"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Matched supplies */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupplyDto"][];
+                };
+            };
+        };
+    };
+    SuppliesController_get: {
+        parameters: {
+            query?: {
+                /** @description Preferred locale */
+                locale?: unknown;
+            };
+            header?: {
+                /** @description Fallback locale header (es or en) */
+                "Accept-Language"?: string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Supply detail */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupplyDto"];
+                };
+            };
+        };
+    };
+    SuppliesAdminController_list: {
+        parameters: {
+            query?: {
+                /** @description Búsqueda por código o nombre */
+                q?: string;
+                /** @description Filtra por categoría */
+                categorySlug?: string;
+                status?: "active" | "archived";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminSupplyDto"][];
+                };
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSupplyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateSupplyResponseDto"];
+                };
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminSupplyDto"];
+                };
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_edit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditSupplyDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_archive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_restore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_addAlias: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddSupplyAliasDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_removeAlias: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                aliasNorm: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_merge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergeSuppliesDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

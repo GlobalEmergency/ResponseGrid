@@ -86,7 +86,9 @@ import { ACCESS_CONTROL } from '../domain/authorization/access-control';
 import type { AccessControl } from '../domain/authorization/access-control';
 import { LocalAccessControl } from '../domain/authorization/local-access-control';
 import { PermissionGuard } from './http/permission.guard';
+import { ServiceAccountPermissionGuard } from './http/service-account-permission.guard';
 import { ApiKeyAuthGuard } from './http/api-key-auth.guard';
+import { JwtOrApiKeyAuthGuard } from './http/jwt-or-api-key-auth.guard';
 import { SCOPE_RESOLVER } from './http/scope-resolver';
 import { EntityAwareScopeResolver } from './http/entity-aware-scope-resolver';
 import { DrizzleUserIdentityRepository } from './drizzle/drizzle-user-identity.repository';
@@ -491,8 +493,10 @@ const updateProfileProvider = {
     accessControlProvider,
     scopeResolverProvider,
     PermissionGuard,
+    ServiceAccountPermissionGuard,
     ApiKeyAuthGuard,
     JwtAuthGuard,
+    JwtOrApiKeyAuthGuard,
     OptionalJwtAuthGuard,
     RequireAdminGuard,
     GoogleStrategy,
@@ -516,8 +520,10 @@ const updateProfileProvider = {
     ACCESS_CONTROL,
     SCOPE_RESOLVER,
     PermissionGuard,
+    ServiceAccountPermissionGuard,
     ApiKeyAuthGuard,
     JwtAuthGuard,
+    JwtOrApiKeyAuthGuard,
     OptionalJwtAuthGuard,
     RequireAdminGuard,
     JwtModule,

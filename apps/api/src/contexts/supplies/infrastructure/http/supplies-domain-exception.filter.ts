@@ -13,6 +13,21 @@ import {
   ContainerValidationError,
 } from '../../domain/container-errors';
 import { SupplyLineValidationError } from '../../domain/supply-line';
+import { SupplyValidationError } from '../../domain/supply';
+import { SupplyAliasValidationError } from '../../domain/supply-alias';
+import {
+  AliasConflictError,
+  CategoryNotFoundError,
+  MergeIntoSelfError,
+  SupplyCodeConflictError,
+  SupplyNotFoundError,
+  VariantTargetNotFoundError,
+} from '../../domain/supply-errors';
+import {
+  CategoryAlreadyExistsError,
+  CategoryParentNotFoundError,
+  CategoryValidationError,
+} from '../../application/category-admin.errors';
 
 type DomainError =
   | ContainerNotFoundError
@@ -20,7 +35,18 @@ type DomainError =
   | ContainerCycleError
   | ContainerEmergencyMismatchError
   | ContainerValidationError
-  | SupplyLineValidationError;
+  | SupplyLineValidationError
+  | SupplyValidationError
+  | SupplyAliasValidationError
+  | SupplyNotFoundError
+  | SupplyCodeConflictError
+  | VariantTargetNotFoundError
+  | CategoryNotFoundError
+  | MergeIntoSelfError
+  | AliasConflictError
+  | CategoryAlreadyExistsError
+  | CategoryParentNotFoundError
+  | CategoryValidationError;
 
 /**
  * Maps supplies domain errors to HTTP codes. The supplies context owns the
@@ -28,11 +54,9 @@ type DomainError =
  * rather than in another context's filter.
  *
  * - not-found → 404
- * - sealed (a state conflict: mutating/re-sealing a precintado container) → 409
- * - cycle / cross-emergency nest / other container validation → 422
- *   (matches how the codebase maps "wrong emergency", e.g. offers'
- *   TargetNeedWrongEmergencyError → 422)
- * - SupplyLineValidationError (e.g. a whitespace-only line name) → 400
+ * - sealed / already exists (conflict) → 409
+ * - cycle / validation → 422
+ * - SupplyLineValidationError → 400
  */
 @Catch(
   ContainerNotFoundError,
@@ -41,6 +65,17 @@ type DomainError =
   ContainerEmergencyMismatchError,
   ContainerValidationError,
   SupplyLineValidationError,
+  SupplyValidationError,
+  SupplyAliasValidationError,
+  SupplyNotFoundError,
+  SupplyCodeConflictError,
+  VariantTargetNotFoundError,
+  CategoryNotFoundError,
+  MergeIntoSelfError,
+  AliasConflictError,
+  CategoryAlreadyExistsError,
+  CategoryParentNotFoundError,
+  CategoryValidationError,
 )
 export class SuppliesDomainExceptionFilter implements ExceptionFilter {
   catch(exception: DomainError, host: ArgumentsHost): void {
@@ -52,13 +87,29 @@ export class SuppliesDomainExceptionFilter implements ExceptionFilter {
   }
 
   private statusFor(exception: DomainError): HttpStatus {
-    if (exception instanceof ContainerNotFoundError) {
+    if (
+      exception instanceof ContainerNotFoundError ||
+      exception instanceof SupplyNotFoundError ||
+      exception instanceof VariantTargetNotFoundError ||
+      exception instanceof CategoryNotFoundError ||
+      exception instanceof CategoryParentNotFoundError
+    ) {
       return HttpStatus.NOT_FOUND;
     }
-    if (exception instanceof ContainerSealedError) {
+    if (
+      exception instanceof ContainerSealedError ||
+      exception instanceof SupplyCodeConflictError ||
+      exception instanceof AliasConflictError ||
+      exception instanceof CategoryAlreadyExistsError
+    ) {
       return HttpStatus.CONFLICT;
     }
-    if (exception instanceof SupplyLineValidationError) {
+    if (
+      exception instanceof SupplyLineValidationError ||
+      exception instanceof SupplyValidationError ||
+      exception instanceof SupplyAliasValidationError ||
+      exception instanceof MergeIntoSelfError
+    ) {
       return HttpStatus.BAD_REQUEST;
     }
     return HttpStatus.UNPROCESSABLE_ENTITY;

@@ -39,6 +39,7 @@ function rowToSnapshot(
     notes: row.notes ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    author: row.author ?? null,
   };
 }
 
@@ -91,6 +92,7 @@ export class DrizzleOfferRepository implements OfferRepository {
           notes: s.notes,
           createdAt: s.createdAt,
           updatedAt: s.updatedAt,
+          author: s.author ?? null,
         })
         .onConflictDoUpdate({
           target: offersTable.id,

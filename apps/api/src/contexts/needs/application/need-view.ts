@@ -4,6 +4,7 @@ import { SupplyLineSnapshot } from '../../supplies/domain/supply-line';
 import { LocationSensitivity } from '../../../shared/domain/location-sensitivity';
 import { approximateLocation } from '../../../shared/domain/approximate-location';
 import { PersonnelSkill } from '../domain/need-enums';
+import { AuthorSnapshot } from '../../../shared/domain/author';
 
 export interface NeedView {
   id: string;
@@ -27,9 +28,13 @@ export interface NeedView {
   resourceId: string | null;
 }
 
-/** F05: Coordinator view includes the sensitive skillSpecialty field */
+/**
+ * F05: Coordinator view includes the sensitive skillSpecialty field and the
+ * restricted `author` contact (#235) — both omitted from the public view.
+ */
 export interface CoordinatorNeedView extends NeedView {
   skillSpecialty: string | null;
+  author: AuthorSnapshot | null;
 }
 
 /**
@@ -109,6 +114,7 @@ export function toCoordinatorNeedView(n: Need): CoordinatorNeedView {
     skillSpecialty: n.skillSpecialty,
     requestedCount: n.requestedCount,
     resourceId: n.resourceId,
+    author: n.author ? n.author.toSnapshot() : null,
   };
 }
 

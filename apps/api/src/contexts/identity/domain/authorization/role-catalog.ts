@@ -215,6 +215,24 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
     defaultScopeType: 'emergency',
     permissions: READ_ONLY_PERMISSIONS,
   },
+  integration_partner: {
+    id: 'integration_partner',
+    description:
+      'Servicio integrador de confianza (cuenta de servicio / API key): publica ' +
+      'necesidades, ofertas y puntos EN NOMBRE DE terceros, adjuntando el ' +
+      'contacto real en `author`. Es grado ciudadano de escritura (todo entra ' +
+      'como pending y pasa por la moderación existente), no coordina ni valida ' +
+      '(issue #235).',
+    defaultScopeType: 'emergency',
+    permissions: [
+      'need:create',
+      'need:read',
+      'offer:create',
+      'offer:read',
+      'resource:register',
+      'resource:read',
+    ],
+  },
   citizen: {
     id: 'citizen',
     description:

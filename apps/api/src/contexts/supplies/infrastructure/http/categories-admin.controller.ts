@@ -1,13 +1,11 @@
 import {
   BadRequestException,
-  ConflictException,
   Controller,
   Body,
   Delete,
   Get,
   Headers,
   HttpCode,
-  NotFoundException,
   Param,
   Patch,
   Post,
@@ -33,30 +31,26 @@ import {
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
 import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
 import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
-import { Category } from '../../domain/category';
+import { isCoreCategory } from '../../domain/category';
 import { CategoryDefinition } from '../../domain/category-definition';
 import { CreateCategory } from '../../application/create-category';
-import {
-  CategoryAlreadyExistsError,
-  CategoryImmutableSlugError,
-  CategoryNotFoundError,
-  CategoryParentNotFoundError,
-  CategoryValidationError,
-} from '../../application/category-admin.errors';
 import { ListCategories } from '../../application/list-categories';
-import { UpdateCategory } from '../../application/update-category';
+import {
+  UpdateCategory,
+  UpdateCategoryCommand,
+} from '../../application/update-category';
 import {
   CategoryAdminDto,
   CreateCategoryDto,
   UpdateCategoryDto,
 } from './admin-category.dto';
-import { localizedText, resolveLocale } from './locale';
+import { localizedCategoryText, resolveLocale } from './locale';
 import { CategoryWriteInput } from '../../domain/ports/category.repository';
 
-@ApiTags('categories')
+@ApiTags('categories-admin')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, PermissionGuard)
-@Controller('categories/admin')
+@Controller('admin/categories')
 export class CategoriesAdminController {
   constructor(
     private readonly listCategories: ListCategories,
@@ -108,9 +102,7 @@ export class CategoriesAdminController {
     @Headers('accept-language') acceptLanguage?: string,
   ): Promise<CategoryAdminDto> {
     const locale = resolveLocale(localeParam, acceptLanguage);
-    const created = await this.runCategoryCommand(() =>
-      this.createCategory.execute(this.toWriteInput(dto)),
-    );
+    const created = await this.createCategory.execute(this.toWriteInput(dto));
     return this.toDto(created, locale);
   }
 
@@ -131,8 +123,9 @@ export class CategoriesAdminController {
     @Headers('accept-language') acceptLanguage?: string,
   ): Promise<CategoryAdminDto> {
     const locale = resolveLocale(localeParam, acceptLanguage);
-    const updated = await this.runCategoryCommand(() =>
-      this.updateCategory.execute(slug, this.toUpdateCommand(dto)),
+    const updated = await this.updateCategory.execute(
+      slug,
+      this.toUpdateCommand(dto),
     );
     return this.toDto(updated, locale);
   }
@@ -152,14 +145,12 @@ export class CategoriesAdminController {
   @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
   @ApiForbiddenResponse({ description: 'Missing catalogue:manage permission' })
   async delete(@Param('slug') slug: string): Promise<void> {
-    if (Object.values(Category).includes(slug as Category)) {
+    if (isCoreCategory(slug)) {
       throw new BadRequestException(
         `Core category slug cannot be deleted: ${slug}`,
       );
     }
-    await this.runCategoryCommand(() =>
-      this.updateCategory.execute(slug, { archived: true }),
-    );
+    await this.updateCategory.execute(slug, { archived: true });
   }
 
   private toDto(
@@ -168,7 +159,7 @@ export class CategoriesAdminController {
   ): CategoryAdminDto {
     return {
       slug: category.slug,
-      label: localizedText(category, locale),
+      label: localizedCategoryText(category, locale),
       labelEs: category.labelEs,
       labelEn: category.labelEn,
       parentSlug: category.parentSlug,
@@ -197,9 +188,8 @@ export class CategoriesAdminController {
     };
   }
 
-  private toUpdateCommand(dto: UpdateCategoryDto) {
+  private toUpdateCommand(dto: UpdateCategoryDto): UpdateCategoryCommand {
     return {
-      slug: dto.slug,
       labelEs: dto.labelEs,
       labelEn: dto.labelEn,
       parentSlug: dto.parentSlug,
@@ -208,30 +198,5 @@ export class CategoriesAdminController {
       archived: dto.archived,
       translations: dto.translations,
     };
-  }
-
-  private async runCategoryCommand<T>(fn: () => Promise<T>): Promise<T> {
-    try {
-      return await fn();
-    } catch (error) {
-      throw this.toHttpError(error);
-    }
-  }
-
-  private toHttpError(error: unknown): Error {
-    if (error instanceof CategoryNotFoundError) {
-      return new NotFoundException(error.message);
-    }
-    if (
-      error instanceof CategoryAlreadyExistsError ||
-      error instanceof CategoryParentNotFoundError ||
-      error instanceof CategoryImmutableSlugError ||
-      error instanceof CategoryValidationError
-    ) {
-      return error instanceof CategoryAlreadyExistsError
-        ? new ConflictException(error.message)
-        : new BadRequestException(error.message);
-    }
-    return error instanceof Error ? error : new Error('Unknown category error');
   }
 }

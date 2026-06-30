@@ -5,9 +5,11 @@ import {
   timestamp,
   integer,
   doublePrecision,
+  jsonb,
 } from 'drizzle-orm/pg-core';
 import { supplyLineColumns } from '../../../supplies/infrastructure/drizzle/supply-line-columns';
 import { suppliesTable } from '../../../supplies/infrastructure/drizzle/schema';
+import { AuthorSnapshot } from '../../../../shared/domain/author';
 
 export const needsTable = pgTable('needs', {
   id: uuid('id').primaryKey(),
@@ -32,6 +34,11 @@ export const needsTable = pgTable('needs', {
   requestedCount: integer('requested_count'),
   /** Optional link to the resource / final recipient (#60). */
   resourceId: uuid('resource_id'),
+  /**
+   * Restricted self-reported author attribution (#235): contact of the real
+   * person a trusted integration filed this need for. Never exposed publicly.
+   */
+  author: jsonb('author').$type<AuthorSnapshot>(),
 });
 
 export const needItemsTable = pgTable('need_items', {

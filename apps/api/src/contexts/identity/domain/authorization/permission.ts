@@ -34,7 +34,6 @@ export const PERMISSION_CATALOG = {
   role: ['grant', 'revoke', 'create_custom'],
   apikey: ['create', 'revoke'],
   audit: ['read'],
-  catalogue: ['manage'],
   // Logística de transporte (EPIC #103). 'create'/'read' existían como data
   // antes del enforcement; #106 añade 'assign' (coordinador asigna capacidad y
   // transportista) y 'update' (cambios de estado por el coordinador). 'track'
@@ -49,6 +48,11 @@ export const PERMISSION_CATALOG = {
   // 'manage' = crear/anidar/precintar/mover (coordinador / responsable de punto,
   // mirror de capacity:* y shipment:*); 'read' lo consume coordinación/verificación.
   container: ['manage', 'read'],
+  // Catálogo maestro de insumos (#228). 'manage' = alta/edición/archivado de
+  // insumos y variantes, gestión de alias y fusión de duplicados (#222), y CRUD
+  // de categorías/subcategorías (#221) — gobernanza admins-only del catálogo
+  // cerrado. 'read' queda reservado para lecturas internas del catálogo.
+  catalogue: ['manage', 'read'],
 } as const;
 
 type Catalog = typeof PERMISSION_CATALOG;

@@ -4,9 +4,11 @@ import {
   text,
   timestamp,
   doublePrecision,
+  jsonb,
 } from 'drizzle-orm/pg-core';
 import { supplyLineColumns } from '../../../supplies/infrastructure/drizzle/supply-line-columns';
 import { suppliesTable } from '../../../supplies/infrastructure/drizzle/schema';
+import { AuthorSnapshot } from '../../../../shared/domain/author';
 
 export const offersTable = pgTable('offers', {
   id: uuid('id').primaryKey(),
@@ -22,6 +24,8 @@ export const offersTable = pgTable('offers', {
   notes: text('notes'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+  /** Restricted self-reported author attribution (#235). Never public. */
+  author: jsonb('author').$type<AuthorSnapshot>(),
 });
 
 /**

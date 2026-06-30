@@ -1,6 +1,7 @@
 import { DonationOffer } from '../domain/donation-offer';
 import { LocationProps } from '../../../shared/domain/location';
 import { SupplyLineSnapshot } from '../../supplies/domain/supply-line';
+import { AuthorSnapshot } from '../../../shared/domain/author';
 
 export interface OfferView {
   id: string;
@@ -15,6 +16,12 @@ export interface OfferView {
   notes: string | null;
   createdAt: string;
   updatedAt: string;
+  /**
+   * Restricted author attribution (#235). Offers have no public read — every
+   * OfferView consumer is coordinator- or owner-gated — so it is safe to carry
+   * the contact here.
+   */
+  author: AuthorSnapshot | null;
 }
 
 export function toOfferView(o: DonationOffer): OfferView {
@@ -31,5 +38,6 @@ export function toOfferView(o: DonationOffer): OfferView {
     notes: o.notes,
     createdAt: o.createdAt.toISOString(),
     updatedAt: o.updatedAt.toISOString(),
+    author: o.author ? o.author.toSnapshot() : null,
   };
 }
