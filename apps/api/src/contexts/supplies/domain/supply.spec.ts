@@ -4,7 +4,7 @@ describe('Supply', () => {
   it('crea un supply valido y recorta los textos', () => {
     const supply = Supply.create({
       id: ' 11111111-1111-4111-8111-111111111111 ',
-      code: ' INS-0001 ',
+      code: ' WAT-0001 ',
       name: '  Agua potable  ',
       categorySlug: ' water ',
       defaultUnit: ' litros ',
@@ -12,7 +12,7 @@ describe('Supply', () => {
     });
 
     expect(supply.id).toBe('11111111-1111-4111-8111-111111111111');
-    expect(supply.code).toBe('INS-0001');
+    expect(supply.code).toBe('WAT-0001');
     expect(supply.name).toBe('Agua potable');
     expect(supply.categorySlug).toBe('water');
     expect(supply.defaultUnit).toBe('litros');
@@ -24,7 +24,7 @@ describe('Supply', () => {
   it('acepta estado archived y notas de registro', () => {
     const supply = Supply.create({
       id: '11111111-1111-4111-8111-111111111111',
-      code: 'INS-0005',
+      code: 'SHE-0005',
       name: 'Manta',
       categorySlug: 'shelter',
       defaultUnit: 'unidad',
@@ -39,7 +39,7 @@ describe('Supply', () => {
   it('round-trips through snapshot sin perder datos', () => {
     const supply = Supply.create({
       id: '11111111-1111-4111-8111-111111111111',
-      code: 'INS-0004',
+      code: 'SHE-0004',
       name: 'Manta',
       categorySlug: 'shelter',
       defaultUnit: 'unidad',
@@ -61,7 +61,7 @@ describe('Supply', () => {
     expect(() =>
       Supply.create({
         id: '11111111-1111-4111-8111-111111111111',
-        code: 'INS-0003',
+        code: 'CLO-0003',
         name: 'Ropa',
         categorySlug: 'clothing',
         defaultUnit: null,

@@ -2648,7 +2648,13 @@
                 "medicines",
                 "medical_equipment",
                 "medical_supplies",
-                "medical_personnel"
+                "medical_personnel",
+                "food_fresh",
+                "food_non_perishable",
+                "hygiene_infantile",
+                "hygiene_personal",
+                "tools_extraction",
+                "other_pets"
               ],
               "type": "string"
             }
@@ -2906,7 +2912,13 @@
                 "medicines",
                 "medical_equipment",
                 "medical_supplies",
-                "medical_personnel"
+                "medical_personnel",
+                "food_fresh",
+                "food_non_perishable",
+                "hygiene_infantile",
+                "hygiene_personal",
+                "tools_extraction",
+                "other_pets"
               ],
               "type": "string"
             }
@@ -9028,7 +9040,13 @@
               "medicines",
               "medical_equipment",
               "medical_supplies",
-              "medical_personnel"
+              "medical_personnel",
+              "food_fresh",
+              "food_non_perishable",
+              "hygiene_infantile",
+              "hygiene_personal",
+              "tools_extraction",
+              "other_pets"
             ],
             "example": "water"
           },
@@ -11081,7 +11099,13 @@
               "medicines",
               "medical_equipment",
               "medical_supplies",
-              "medical_personnel"
+              "medical_personnel",
+              "food_fresh",
+              "food_non_perishable",
+              "hygiene_infantile",
+              "hygiene_personal",
+              "tools_extraction",
+              "other_pets"
             ],
             "example": "water"
           },
@@ -12718,7 +12742,13 @@
               "medicines",
               "medical_equipment",
               "medical_supplies",
-              "medical_personnel"
+              "medical_personnel",
+              "food_fresh",
+              "food_non_perishable",
+              "hygiene_infantile",
+              "hygiene_personal",
+              "tools_extraction",
+              "other_pets"
             ],
             "example": "water"
           },
@@ -13700,7 +13730,7 @@
           },
           "code": {
             "type": "string",
-            "example": "INS-001"
+            "example": "WAT-0001"
           },
           "name": {
             "type": "string",

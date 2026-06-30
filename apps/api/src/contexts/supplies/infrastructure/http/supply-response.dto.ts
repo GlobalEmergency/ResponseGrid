@@ -12,7 +12,7 @@ export class SupplyDto {
   })
   id!: string;
 
-  @ApiProperty({ example: 'INS-001' })
+  @ApiProperty({ example: 'WAT-0001' })
   code!: string;
 
   @ApiProperty({ example: 'Agua potable (botellón 18L)' })
