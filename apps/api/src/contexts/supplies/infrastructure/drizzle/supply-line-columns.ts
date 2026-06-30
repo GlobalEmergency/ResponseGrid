@@ -13,9 +13,7 @@ import { SupplyLineSnapshot } from '../../domain/supply-line';
  * A factory (not a shared constant) so each table gets its own fresh column
  * builders.
  */
-export function supplyLineColumns(
-  supplyIdColumn = uuid('supply_id'),
-) {
+export function supplyLineColumns(supplyIdColumn = uuid('supply_id')) {
   return {
     name: text('name').notNull(),
     quantity: integer('quantity').notNull(),

@@ -33,11 +33,7 @@ export class IntakeLine {
   }
 
   static fromSnapshot(s: IntakeLineSnapshot): IntakeLine {
-    return new IntakeLine(
-      s.id,
-      s.sortOrder,
-      SupplyLine.fromSnapshot(s),
-    );
+    return new IntakeLine(s.id, s.sortOrder, SupplyLine.fromSnapshot(s));
   }
 
   toSnapshot(): IntakeLineSnapshot {
