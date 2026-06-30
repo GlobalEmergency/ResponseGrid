@@ -2,6 +2,9 @@ import type { components } from '@reliefhub/api-client';
 
 type SupplyLineDto = components['schemas']['SupplyLineDto'];
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
  * Parse the supply lines serialized by a SupplyLine editor (a JSON array in a
  * hidden `items` input) into the typed request shape. Returns `null` on a
@@ -31,7 +34,7 @@ export function parseSupplyLines(
   const items: SupplyLineDto[] = [];
   for (const entry of parsed) {
     if (typeof entry !== 'object' || entry === null) return null;
-    const { name, quantity, unit, category, expiresAt } = entry as Record<
+    const { name, quantity, unit, category, supplyId, expiresAt } = entry as Record<
       string,
       unknown
     >;
@@ -53,12 +56,22 @@ export function parseSupplyLines(
     ) {
       return null;
     }
+    if (
+      supplyId !== undefined &&
+      supplyId !== null &&
+      (typeof supplyId !== 'string' || !UUID_RE.test(supplyId.trim()))
+    ) {
+      return null;
+    }
     items.push({
       name: name.trim(),
       quantity,
       category: category as SupplyLineDto['category'],
       ...(typeof unit === 'string' && unit.trim() !== ''
         ? { unit: unit.trim() }
+        : {}),
+      ...(typeof supplyId === 'string' && supplyId.trim() !== ''
+        ? { supplyId: supplyId.trim() }
         : {}),
       ...(typeof expiresAt === 'string' && expiresAt !== ''
         ? { expiresAt }

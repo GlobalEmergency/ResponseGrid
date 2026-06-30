@@ -7,6 +7,7 @@ import {
   jsonb,
 } from 'drizzle-orm/pg-core';
 import { supplyLineColumns } from '../../../supplies/infrastructure/drizzle/supply-line-columns';
+import { suppliesTable } from '../../../supplies/infrastructure/drizzle/schema';
 import { AuthorSnapshot } from '../../../../shared/domain/author';
 
 export const offersTable = pgTable('offers', {
@@ -37,5 +38,9 @@ export const offerItemsTable = pgTable('offer_items', {
   offerId: uuid('offer_id')
     .notNull()
     .references(() => offersTable.id, { onDelete: 'cascade' }),
-  ...supplyLineColumns(),
+  ...supplyLineColumns(
+    uuid('supply_id').references(() => suppliesTable.id, {
+      onDelete: 'set null',
+    }),
+  ),
 });

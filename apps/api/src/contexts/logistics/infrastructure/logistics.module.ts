@@ -1,6 +1,6 @@
 import { Inject, Module, OnModuleDestroy } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import IORedis from 'ioredis';
+import IORedis, { type Redis as IORedisConnection } from 'ioredis';
 import { DB, DatabaseModule } from '../../../shared/database.module';
 import { Db } from '../../../shared/db';
 import { LogisticsController } from './http/logistics.controller';
@@ -50,6 +50,7 @@ import { DrizzleShipmentAuthorizationLookup } from './drizzle/drizzle-shipment-a
 import { DrizzleCapacityEmergencyLookup } from './drizzle/drizzle-capacity-emergency-lookup';
 import { DrizzleResourceLocationLookup } from './drizzle/drizzle-resource-location-lookup';
 import { DrizzleEmergencyStatusReader } from '../../../shared/drizzle-emergency-status-reader';
+import { toBullMqConnection } from '../../../shared/bullmq-connection';
 import { BullMqShipmentEventBus } from './bullmq-shipment-event-bus';
 import { IdentityModule } from '../../identity/infrastructure/identity.module';
 // MEMBERSHIP_REPOSITORY is exported by IdentityModule and consumed by the
@@ -69,7 +70,7 @@ export const SHIPMENT_EVENT_QUEUE = Symbol('ShipmentEventQueue');
 
 interface EventQueue {
   queue: Queue;
-  connection: IORedis;
+  connection: IORedisConnection;
 }
 
 const eventQueueProvider = {
@@ -77,8 +78,12 @@ const eventQueueProvider = {
   useFactory: (): EventQueue => {
     const url = process.env.REDIS_URL;
     if (!url) throw new Error('REDIS_URL is required');
-    const connection = new IORedis(url, { maxRetriesPerRequest: null });
-    const queue = new Queue('domain-events', { connection });
+    const connection: IORedisConnection = new IORedis(url, {
+      maxRetriesPerRequest: null,
+    });
+    const queue = new Queue('domain-events', {
+      connection: toBullMqConnection(connection),
+    });
     return { queue, connection };
   },
 };

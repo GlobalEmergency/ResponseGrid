@@ -10,6 +10,7 @@ import { MATERIAL_CATEGORIES } from '@/lib/categories';
 interface Item {
   id: number;
   name: string;
+  supplyId: string | null;
   quantity: number;
   unit: string;
   category: string;
@@ -22,6 +23,7 @@ function makeItem(): Item {
   return {
     id: nextId++,
     name: '',
+    supplyId: null,
     quantity: 1,
     unit: '',
     category: MATERIAL_CATEGORIES[0],
@@ -105,8 +107,9 @@ export function InventoryField({
   const serialized = JSON.stringify(
     items
       .filter((i) => i.name.trim() !== '')
-      .map(({ name, quantity, unit, category, expiresAt }) => ({
+      .map(({ name, supplyId, quantity, unit, category, expiresAt }) => ({
         name: name.trim(),
+        ...(supplyId !== null ? { supplyId } : {}),
         quantity,
         ...(unit.trim() !== '' ? { unit: unit.trim() } : {}),
         category,

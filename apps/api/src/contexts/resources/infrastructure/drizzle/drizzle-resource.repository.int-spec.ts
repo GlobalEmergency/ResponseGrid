@@ -1,6 +1,7 @@
 import { eq, sql } from 'drizzle-orm';
 import { createDb, Db } from '../../../../shared/db';
 import { resourcesTable } from './schema';
+import { suppliesTable } from '../../../supplies/infrastructure/drizzle/schema';
 import { emergenciesTable } from '../../../emergencies/infrastructure/drizzle/schema';
 import { DrizzleResourceRepository } from './drizzle-resource.repository';
 import { Resource } from '../../domain/resource';
@@ -43,6 +44,27 @@ describe('DrizzleResourceRepository (integration)', () => {
   });
   beforeEach(async () => {
     await db.delete(resourcesTable);
+    await db
+      .insert(suppliesTable)
+      .values([
+        {
+          id: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
+          code: 'TEST-0001',
+          name: 'Agua Test',
+          categorySlug: 'water',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: '2e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d9',
+          code: 'TEST-0002',
+          name: 'Arroz Test',
+          categorySlug: 'food',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ])
+      .onConflictDoNothing();
   });
 
   it('round-trips an aggregate through Postgres', async () => {
@@ -82,6 +104,7 @@ describe('DrizzleResourceRepository (integration)', () => {
           unit: 'litros',
           category: Category.Water,
           expiresAt: '2026-07-01',
+          supplyId: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
         }),
         SupplyLine.create({
           name: 'Mantas',
@@ -103,6 +126,7 @@ describe('DrizzleResourceRepository (integration)', () => {
           quantity: 200,
           unit: 'litros',
           category: Category.Water,
+          supplyId: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
           presentation: null,
           expiresAt: '2026-07-01',
         },
@@ -111,6 +135,7 @@ describe('DrizzleResourceRepository (integration)', () => {
           quantity: 50,
           unit: null,
           category: Category.Shelter,
+          supplyId: null,
           presentation: null,
           expiresAt: null,
         },
@@ -127,6 +152,7 @@ describe('DrizzleResourceRepository (integration)', () => {
           quantity: 30,
           unit: 'kg',
           category: Category.Food,
+          supplyId: '2e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d9',
           presentation: null,
           expiresAt: null,
         },
@@ -141,6 +167,7 @@ describe('DrizzleResourceRepository (integration)', () => {
         quantity: 30,
         unit: 'kg',
         category: Category.Food,
+        supplyId: '2e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d9',
         presentation: null,
         expiresAt: null,
       },

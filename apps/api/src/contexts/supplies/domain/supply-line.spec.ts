@@ -8,12 +8,14 @@ describe('SupplyLine', () => {
       quantity: 100,
       unit: 'litros',
       category: Category.Water,
+      supplyId: '  1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8  ',
     });
 
     expect(line.name).toBe('Agua embotellada');
     expect(line.quantity).toBe(100);
     expect(line.unit).toBe('litros');
     expect(line.category).toBe(Category.Water);
+    expect(line.supplyId).toBe('1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8');
     expect(line.presentation).toBeNull();
   });
 
@@ -26,6 +28,7 @@ describe('SupplyLine', () => {
     });
 
     expect(line.unit).toBeNull();
+    expect(line.supplyId).toBeNull();
     expect(line.presentation).toBeNull();
   });
 
@@ -102,12 +105,13 @@ describe('SupplyLine', () => {
     },
   );
 
-  it('round-trips through a snapshot (including presentation and expiresAt)', () => {
+  it('round-trips through a snapshot including the soft link', () => {
     const line = SupplyLine.create({
       name: 'Budesonida',
       quantity: 5,
       unit: null,
       category: Category.Medicines,
+      supplyId: 'b3f0c6e0-0f51-4f34-8f2d-8d1f3c0c5b50',
       presentation: 'inhalador',
       expiresAt: '2026-07-01',
     });
@@ -115,5 +119,17 @@ describe('SupplyLine', () => {
     const restored = SupplyLine.fromSnapshot(line.toSnapshot());
 
     expect(restored.toSnapshot()).toEqual(line.toSnapshot());
+  });
+
+  it('round-trips a null soft link in snapshots', () => {
+    const line = SupplyLine.fromSnapshot({
+      name: 'Agua',
+      quantity: 1,
+      unit: null,
+      category: Category.Food,
+      supplyId: null,
+    });
+
+    expect(line.supplyId).toBeNull();
   });
 });
