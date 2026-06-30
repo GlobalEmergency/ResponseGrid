@@ -149,6 +149,7 @@ export class ResourcesController {
         category: i.category,
         presentation: i.presentation ?? null,
         expiresAt: i.expiresAt ?? null,
+        supplyId: i.supplyId ?? null,
       })),
       author: dto.author ?? null,
     });
@@ -187,6 +188,7 @@ export class ResourcesController {
         unit: i.unit ?? null,
         category: i.category,
         presentation: i.presentation ?? null,
+        supplyId: i.supplyId ?? null,
       })),
     });
   }

@@ -105,6 +105,7 @@ describe('DrizzleResourceRepository (integration)', () => {
           category: Category.Water,
           presentation: null,
           expiresAt: '2026-07-01',
+          supplyId: null,
         },
         {
           name: 'Mantas',
@@ -113,6 +114,7 @@ describe('DrizzleResourceRepository (integration)', () => {
           category: Category.Shelter,
           presentation: null,
           expiresAt: null,
+          supplyId: null,
         },
       ]),
     );
@@ -143,6 +145,7 @@ describe('DrizzleResourceRepository (integration)', () => {
         category: Category.Food,
         presentation: null,
         expiresAt: null,
+        supplyId: null,
       },
     ]);
   });

@@ -10,6 +10,7 @@ export interface DonationIntakeTrackingLine {
   unit: string | null;
   category: Category;
   presentation: string | null;
+  supplyId: string | null;
 }
 
 export interface DonationIntakeTracking {
@@ -64,6 +65,7 @@ export class GetDonationIntakeTracking {
         unit: line.unit,
         category: line.category,
         presentation: line.presentation ?? null,
+        supplyId: line.supplyId ?? null,
       })),
     };
   }

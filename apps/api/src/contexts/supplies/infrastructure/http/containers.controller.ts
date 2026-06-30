@@ -187,6 +187,7 @@ export class ContainerController {
         unit: l.unit ?? null,
         category: l.category,
         presentation: l.presentation ?? null,
+        supplyId: l.supplyId ?? null,
       })),
       grossWeightKg: dto.grossWeightKg ?? null,
       grossVolumeM3: dto.grossVolumeM3 ?? null,
@@ -220,6 +221,7 @@ export class ContainerController {
         unit: dto.unit ?? null,
         category: dto.category,
         presentation: dto.presentation ?? null,
+        supplyId: dto.supplyId ?? null,
       },
     });
   }

@@ -18,6 +18,7 @@ export interface EditOfferItemCommand {
   unit: string | null;
   category: Category;
   presentation: string | null;
+  supplyId?: string | null;
 }
 
 export interface EditOfferCommand {
@@ -60,6 +61,7 @@ export class EditOffer {
           unit: i.unit,
           category: i.category,
           presentation: i.presentation,
+          supplyId: i.supplyId ?? null,
         }),
       );
     }

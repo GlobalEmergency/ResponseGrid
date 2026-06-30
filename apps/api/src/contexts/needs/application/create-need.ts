@@ -21,6 +21,8 @@ export interface CreateNeedItemCommand {
   /** Presentation / route of administration (#61). Optional. */
   presentation?: string | null;
   expiresAt?: string | null;
+  /** Soft link to the master catalogue supply (#223). Optional. */
+  supplyId?: string | null;
 }
 
 export interface CreateNeedLocationCommand {
@@ -81,6 +83,7 @@ export class CreateNeed {
         category: i.category,
         presentation: i.presentation ?? null,
         expiresAt: i.expiresAt ?? null,
+        supplyId: i.supplyId ?? null,
       }),
     );
 

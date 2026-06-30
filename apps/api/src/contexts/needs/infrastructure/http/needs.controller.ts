@@ -152,6 +152,7 @@ export class NeedsController {
         category: i.category,
         presentation: i.presentation ?? null,
         expiresAt: i.expiresAt ?? null,
+        supplyId: i.supplyId ?? null,
       })),
       requiredSkill: dto.requiredSkill ?? null,
       skillSpecialty: dto.skillSpecialty ?? null,

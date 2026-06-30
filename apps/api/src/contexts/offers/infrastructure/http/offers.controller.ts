@@ -148,6 +148,7 @@ export class OffersController {
         unit: i.unit ?? null,
         category: i.category,
         presentation: i.presentation ?? null,
+        supplyId: i.supplyId ?? null,
       })),
       location: {
         address: dto.location.address,
@@ -337,6 +338,7 @@ export class OffersController {
         unit: i.unit ?? null,
         category: i.category,
         presentation: i.presentation ?? null,
+        supplyId: i.supplyId ?? null,
       }));
     }
     if (dto.notes !== undefined) cmd.notes = dto.notes;

@@ -82,6 +82,7 @@ function mapItems(items: CreateDonationIntakeDto['items']): SupplyLineProps[] {
     category: item.category,
     presentation: item.presentation ?? null,
     expiresAt: item.expiresAt ?? null,
+    supplyId: item.supplyId ?? null,
   }));
 }
 

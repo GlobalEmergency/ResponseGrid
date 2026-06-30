@@ -79,7 +79,63 @@ describe('Resource', () => {
       category: Category.Water,
       presentation: null,
       expiresAt: null,
+      supplyId: null,
     });
+  });
+
+  it('carries the catalogue soft link (supplyId) through register → snapshot', () => {
+    const supplyId = '22222222-2222-4222-8222-222222222222';
+    const r = Resource.register({
+      id: ResourceId.create(),
+      emergencyId: EmergencyId.fromString(
+        '11111111-1111-4111-8111-111111111111',
+      ),
+      type: ResourceType.Warehouse,
+      stage: ResourceStage.Origin,
+      name: 'Almacén catalogado',
+      location: makeLocation(),
+      ownerUserId: 'user-abc-123',
+      items: [
+        SupplyLine.create({
+          name: 'Agua',
+          quantity: 100,
+          unit: 'litros',
+          category: Category.Water,
+          supplyId,
+        }),
+      ],
+    });
+
+    const restored = Resource.fromSnapshot(r.toSnapshot());
+    expect(restored.items[0].supplyId).toBe(supplyId);
+  });
+
+  it('does not merge a cataloged line with a free-text line of the same name', () => {
+    const supplyId = '22222222-2222-4222-8222-222222222222';
+    const r = make();
+    r.receiveInventory([
+      SupplyLine.create({
+        name: 'Agua',
+        quantity: 5,
+        unit: 'l',
+        category: Category.Water,
+        supplyId,
+      }),
+      SupplyLine.create({
+        name: 'Agua',
+        quantity: 3,
+        unit: 'l',
+        category: Category.Water,
+      }),
+    ]);
+
+    expect(r.items).toHaveLength(2);
+    expect(
+      r.items.map((i) => ({ supplyId: i.supplyId, quantity: i.quantity })),
+    ).toEqual([
+      { supplyId, quantity: 5 },
+      { supplyId: null, quantity: 3 },
+    ]);
   });
 
   it('stores stage, location, ownerUserId and optional ownerOrganizationId', () => {

@@ -41,6 +41,7 @@ export interface SubmitOfferItemCommand {
   unit: string | null;
   category: Category;
   presentation: string | null;
+  supplyId?: string | null;
 }
 
 export interface SubmitOfferCommand {
@@ -100,6 +101,7 @@ export class SubmitOffer {
         unit: i.unit,
         category: i.category,
         presentation: i.presentation,
+        supplyId: i.supplyId ?? null,
       }),
     );
 

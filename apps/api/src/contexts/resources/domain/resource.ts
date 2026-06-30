@@ -329,7 +329,7 @@ export class Resource {
   receiveInventory(lines: SupplyLine[]): void {
     if (lines.length === 0) return;
     const keyOf = (l: SupplyLine): string =>
-      JSON.stringify([l.name, l.category, l.unit, l.presentation]);
+      JSON.stringify([l.name, l.category, l.unit, l.presentation, l.supplyId]);
     const byKey = new Map<string, SupplyLine>();
     for (const item of this._items) byKey.set(keyOf(item), item);
     for (const incoming of lines) {
@@ -343,6 +343,7 @@ export class Resource {
           unit: incoming.unit,
           category: incoming.category,
           presentation: incoming.presentation,
+          supplyId: incoming.supplyId,
         }),
       );
     }

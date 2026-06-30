@@ -41,6 +41,7 @@ export interface RegisterResourceCommand {
     category: Category;
     presentation?: string | null;
     expiresAt?: string | null;
+    supplyId?: string | null;
   }>;
   /** Optional restricted author attribution (#235). */
   author?: AuthorProps | null;
@@ -89,6 +90,7 @@ export class RegisterResource {
           category: i.category,
           presentation: i.presentation ?? null,
           expiresAt: i.expiresAt ?? null,
+          supplyId: i.supplyId ?? null,
         }),
       ),
       author: cmd.author ? Author.create(cmd.author) : null,

@@ -12,6 +12,7 @@ export interface DonationIntakeLineView {
   category: Category;
   presentation: string | null;
   expiresAt: string | null;
+  supplyId: string | null;
 }
 
 export interface DonationIntakeView {
@@ -62,6 +63,7 @@ export class GetDonationIntakeById {
         category: line.category,
         presentation: line.presentation ?? null,
         expiresAt: line.expiresAt ?? null,
+        supplyId: line.supplyId ?? null,
       })),
       volunteerNotes: snap.volunteerNotes,
       evidenceFileKey: snap.evidenceFileKey,

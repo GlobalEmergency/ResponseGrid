@@ -7,6 +7,7 @@ export interface ShipmentItemView {
   unit: string | null;
   category: string;
   presentation: string | null;
+  supplyId: string | null;
 }
 
 export interface ShipmentView {
@@ -32,6 +33,7 @@ function toItemView(i: SupplyLineSnapshot): ShipmentItemView {
     unit: i.unit,
     category: i.category,
     presentation: i.presentation ?? null,
+    supplyId: i.supplyId ?? null,
   };
 }
 

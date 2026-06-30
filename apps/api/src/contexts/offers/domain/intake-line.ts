@@ -43,6 +43,7 @@ export class IntakeLine {
         category: s.category,
         presentation: s.presentation ?? null,
         expiresAt: s.expiresAt ?? null,
+        supplyId: s.supplyId ?? null,
       }),
     );
   }

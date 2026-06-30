@@ -7,6 +7,7 @@ export interface ContainerLineView {
   unit: string | null;
   category: string;
   presentation: string | null;
+  supplyId: string | null;
 }
 
 export interface ContainerView {
@@ -43,6 +44,7 @@ function toLineView(l: SupplyLineSnapshot): ContainerLineView {
     unit: l.unit,
     category: l.category,
     presentation: l.presentation ?? null,
+    supplyId: l.supplyId ?? null,
   };
 }
 

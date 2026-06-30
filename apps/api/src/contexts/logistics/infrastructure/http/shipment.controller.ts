@@ -191,6 +191,7 @@ export class ShipmentController {
         unit: i.unit ?? null,
         category: i.category,
         presentation: i.presentation ?? null,
+        supplyId: i.supplyId ?? null,
       })),
       containerIds: dto.containerIds ?? [],
       manifest: dto.manifest ?? null,

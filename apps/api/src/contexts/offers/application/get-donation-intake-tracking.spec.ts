@@ -86,6 +86,7 @@ describe('GetDonationIntakeTracking', () => {
         unit: 'l',
         category: Category.Water,
         presentation: null,
+        supplyId: null,
       },
     ]);
     // No third-party PII leaks into the public view.
