@@ -43,6 +43,7 @@ export const resourcesTable = pgTable('resources', {
   // `disputed` = varios ciudadanos lo han reportado como cerrado/inexistente/…
   disputed: boolean('disputed').notNull().default(false),
   disputedAt: timestamp('disputed_at', { withTimezone: true }),
+  disputeDismissedAt: timestamp('dispute_dismissed_at', { withTimezone: true }),
   /** Restricted self-reported author attribution (#235). Never public. */
   author: jsonb('author').$type<AuthorSnapshot>(),
 });

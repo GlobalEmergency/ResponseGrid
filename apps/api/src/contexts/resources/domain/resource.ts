@@ -100,6 +100,7 @@ export interface ResourceSnapshot {
   items: SupplyLineSnapshot[];
   disputed?: boolean;
   disputedAt?: Date | null;
+  disputeDismissedAt?: Date | null;
   /** Optional (legacy-safe) restricted author attribution (#235). */
   author?: AuthorSnapshot | null;
 }
@@ -132,6 +133,7 @@ export class Resource {
     private _items: SupplyLine[],
     private _disputed: boolean,
     private _disputedAt: Date | null,
+    private _disputeDismissedAt: Date | null,
     public readonly author: Author | null,
   ) {}
 
@@ -166,6 +168,7 @@ export class Resource {
       props.recipientType ?? null,
       props.items ?? [],
       false,
+      null,
       null,
       props.author ?? null,
     );
@@ -206,6 +209,7 @@ export class Resource {
       (s.items ?? []).map((i) => SupplyLine.fromSnapshot(i)),
       s.disputed ?? false,
       s.disputedAt ?? null,
+      s.disputeDismissedAt ?? null,
       s.author ? Author.fromSnapshot(s.author) : null,
     );
   }
@@ -233,6 +237,9 @@ export class Resource {
   }
   get disputedAt(): Date | null {
     return this._disputedAt;
+  }
+  get disputeDismissedAt(): Date | null {
+    return this._disputeDismissedAt;
   }
   /** Declared inventory the place holds for delivery (#28, #129). */
   get items(): SupplyLine[] {
@@ -379,11 +386,18 @@ export class Resource {
    * until a coordinator resolves the dispute. Only a visible (published) point
    * can be disputed. Idempotent: flagging an already-disputed resource is a
    * no-op (no duplicate event, the original disputedAt is kept).
+   *
+   * cooldownMs: if positive and the resource was recently dismissed, the
+   * re-dispute is suppressed until the window expires (anti-abuse loop guard).
    */
-  flagDisputed(): void {
+  flagDisputed(cooldownMs = 0): void {
     if (this._disputed) return;
     if (!this.isPubliclyVisible()) {
       throw new ResourceNotDisputableError();
+    }
+    if (cooldownMs > 0 && this._disputeDismissedAt !== null) {
+      const elapsed = Date.now() - this._disputeDismissedAt.getTime();
+      if (elapsed < cooldownMs) return;
     }
     this._disputed = true;
     this._disputedAt = new Date();
@@ -398,6 +412,9 @@ export class Resource {
   clearDispute(resolution: string): void {
     this._disputed = false;
     this._disputedAt = null;
+    if (resolution === 'dismiss') {
+      this._disputeDismissedAt = new Date();
+    }
     this.events.push(
       new ResourceDisputeResolved(this.id.value, {
         emergencyId: this.emergencyId.value,
@@ -440,6 +457,7 @@ export class Resource {
       items: this.items.map((i) => i.toSnapshot()),
       disputed: this._disputed,
       disputedAt: this._disputedAt,
+      disputeDismissedAt: this._disputeDismissedAt,
       author: this.author ? this.author.toSnapshot() : null,
     };
   }
