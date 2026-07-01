@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { emergencySectionItems, contextHref, buildNavModel } from './navigation.ts';
+import { emergencySectionItems, contextHref, buildNavModel, buildPrincipalContexts } from './navigation.ts';
 import type { EmergencyAccess } from './emergency-permissions.ts';
 import type { PrincipalContext } from './navigation.ts';
 
@@ -104,4 +104,29 @@ test('admin group appears for platform admins', () => {
     contexts: [], isAdmin: true, canAdminister: true, notificationUnread: 0,
   });
   assert.equal(model.some((g) => g.key === 'admin'), true);
+});
+
+test('buildPrincipalContexts maps each source to a typed context', () => {
+  const ctx = buildPrincipalContexts({
+    emergencies: [{ id: 'e1', slug: 'terremoto', name: 'Terremoto', roleIds: ['emergency_verifier'] }],
+    points: [{ id: 'p1', name: 'Almacén' }],
+    organizations: [{ id: 'o1', name: 'Cruz Roja' }],
+    groups: [{ id: 'g1', name: 'Logística B' }],
+  });
+  assert.deepEqual(ctx.map((c) => [c.type, c.id]), [
+    ['emergency', 'e1'], ['point', 'p1'], ['organization', 'o1'], ['group', 'g1'],
+  ]);
+  const emergency = ctx.find((c) => c.type === 'emergency');
+  assert.equal(emergency?.slug, 'terremoto');
+  assert.deepEqual(emergency?.roleIds, ['emergency_verifier']);
+  const point = ctx.find((c) => c.type === 'point');
+  assert.equal(point?.slug, undefined);
+  assert.deepEqual(point?.roleIds, []);
+});
+
+test('empty sources produce an empty context list', () => {
+  assert.deepEqual(
+    buildPrincipalContexts({ emergencies: [], points: [], organizations: [], groups: [] }),
+    [],
+  );
 });

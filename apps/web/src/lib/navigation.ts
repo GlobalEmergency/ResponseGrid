@@ -77,6 +77,31 @@ export function contextHref(c: PrincipalContext): string {
   }
 }
 
+export interface RawPrincipalContexts {
+  emergencies: { id: string; slug: string; name: string; roleIds: string[] }[];
+  points: { id: string; name: string }[];
+  organizations: { id: string; name: string }[];
+  groups: { id: string; name: string }[];
+}
+
+/** Flatten the principal's raw API results into ordered typed contexts. Pure. */
+export function buildPrincipalContexts(raw: RawPrincipalContexts): PrincipalContext[] {
+  return [
+    ...raw.emergencies.map((e): PrincipalContext => ({
+      type: 'emergency', id: e.id, slug: e.slug, name: e.name, roleIds: e.roleIds,
+    })),
+    ...raw.points.map((p): PrincipalContext => ({
+      type: 'point', id: p.id, name: p.name, roleIds: [],
+    })),
+    ...raw.organizations.map((o): PrincipalContext => ({
+      type: 'organization', id: o.id, name: o.name, roleIds: [],
+    })),
+    ...raw.groups.map((g): PrincipalContext => ({
+      type: 'group', id: g.id, name: g.name, roleIds: [],
+    })),
+  ];
+}
+
 const CATEGORY_ORDER: { type: ContextType; key: string; headingKey: NavLabelKey }[] = [
   { type: 'emergency', key: 'cat-emergencies', headingKey: 'cat_emergencies' },
   { type: 'point', key: 'cat-points', headingKey: 'cat_points' },
