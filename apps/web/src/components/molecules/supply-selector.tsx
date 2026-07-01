@@ -3,17 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/atoms/input';
 import type { Locale } from '@/i18n';
+import { searchSupplies } from '@/adapters/search-supplies';
+import type { CatalogueSupply } from '@/domain/supplies/catalogue-supply';
 
-interface SupplyOption {
-  id: string;
-  code: string;
-  name: string;
-  categoryLabel: string;
-}
-
-export interface SupplySelectorValue {
-  name: string;
-  supplyId: string | null;
+interface SupplySelectorLabels {
+  searching: string;
+  noMatches: string;
+  error: string;
+  hint: string;
 }
 
 interface SupplySelectorProps {
@@ -21,36 +18,14 @@ interface SupplySelectorProps {
   locale: Locale;
   placeholder: string;
   required?: boolean;
-  value: SupplySelectorValue;
-  onChange: (patch: Partial<SupplySelectorValue>) => void;
+  name: string;
+  supplyId: string | null;
+  onTextChange: (name: string) => void;
+  onSelect: (supply: CatalogueSupply) => void;
+  onBlur: () => void;
+  labels: SupplySelectorLabels;
 }
 
-type Copy = {
-  other: string;
-  hint: string;
-  loading: string;
-  empty: string;
-  error: string;
-};
-
-const COPY: Record<Locale, Copy> = {
-  es: {
-    other: 'Otro',
-    hint: 'Busca por nombre, alias o código.',
-    loading: 'Buscando insumos…',
-    empty: 'No hay coincidencias. Usa “Otro” si no está en el catálogo.',
-    error: 'No pudimos cargar sugerencias.',
-  },
-  en: {
-    other: 'Other',
-    hint: 'Search by name, alias, or code.',
-    loading: 'Searching supplies…',
-    empty: 'No matches. Use “Other” if it is not in the catalog.',
-    error: 'We could not load suggestions.',
-  },
-};
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 const DEBOUNCE_MS = 220;
 
 const CheckIcon = (
@@ -86,11 +61,14 @@ export function SupplySelector({
   locale,
   placeholder,
   required = false,
-  value,
-  onChange,
+  name,
+  supplyId,
+  onTextChange,
+  onSelect,
+  onBlur,
+  labels,
 }: SupplySelectorProps) {
-  const copy = COPY[locale];
-  const [results, setResults] = useState<SupplyOption[]>([]);
+  const [results, setResults] = useState<CatalogueSupply[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -115,14 +93,7 @@ export function SupplySelector({
       setLoading(true);
       setError(false);
       try {
-        const params = new URLSearchParams({
-          q: trimmed,
-          locale,
-          limit: '8',
-        });
-        const response = await fetch(`${API_URL}/supplies?${params.toString()}`);
-        if (!response.ok) throw new Error('fetch failed');
-        const data = (await response.json()) as SupplyOption[];
+        const data = await searchSupplies(trimmed, { locale, limit: 8 });
         if (seq !== requestSeq.current) return;
         setResults(data);
         setIsOpen(data.length > 0);
@@ -159,12 +130,15 @@ export function SupplySelector({
     };
   }, []);
 
-  const chooseSupply = useCallback((supply: SupplyOption) => {
-    onChange({ name: supply.name, supplyId: supply.id });
-    setIsOpen(false);
-    setResults([]);
-    setFocusedIndex(-1);
-  }, [onChange]);
+  const chooseSupply = useCallback(
+    (supply: CatalogueSupply) => {
+      onSelect(supply);
+      setIsOpen(false);
+      setResults([]);
+      setFocusedIndex(-1);
+    },
+    [onSelect],
+  );
 
   function handleInputChange(next: string) {
     if (debounceRef.current !== null) clearTimeout(debounceRef.current);
@@ -172,24 +146,18 @@ export function SupplySelector({
     setError(false);
     setLoading(false);
     setFocusedIndex(-1);
-    onChange({ name: next, supplyId: null });
+    onTextChange(next);
     setIsOpen(next.trim().length >= 2);
     debounceRef.current = setTimeout(() => {
       void fetchResults(next);
     }, DEBOUNCE_MS);
   }
 
-  function handleOther() {
-    onChange({ supplyId: null });
-    setIsOpen(false);
-    setFocusedIndex(-1);
-  }
-
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (!isOpen) {
-      if (e.key === 'ArrowDown' && value.name.trim().length >= 2) {
+      if (e.key === 'ArrowDown' && name.trim().length >= 2) {
         setIsOpen(true);
-        void fetchResults(value.name);
+        void fetchResults(name);
       }
       return;
     }
@@ -219,42 +187,36 @@ export function SupplySelector({
           type="text"
           required={required}
           autoComplete="off"
-          value={value.name}
+          value={name}
           onChange={(e) => handleInputChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          onFocus={() => setIsOpen(value.name.trim().length >= 2)}
+          onFocus={() => setIsOpen(name.trim().length >= 2)}
+          onBlur={onBlur}
           placeholder={placeholder}
           role="combobox"
           aria-autocomplete="list"
           aria-expanded={isOpen}
           aria-haspopup="listbox"
           aria-controls={`${id}-listbox`}
-          icon={value.supplyId ? CheckIcon : SearchIcon}
+          icon={supplyId != null ? CheckIcon : SearchIcon}
           className={`flex-1 ${
-            value.supplyId
+            supplyId != null
               ? 'border-emerald-500 bg-emerald-50/10 focus:border-emerald-500 focus:ring-emerald-500/30'
               : ''
           }`}
         />
-        <button
-          type="button"
-          onClick={handleOther}
-          className="shrink-0 rounded-lg border-2 border-line bg-white px-3 py-3 text-sm font-semibold text-ink hover:border-navy focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
-        >
-          {copy.other}
-        </button>
       </div>
 
-      <p className="text-xs text-muted">{copy.hint}</p>
+      <p className="text-xs text-muted">{labels.hint}</p>
 
-      {isOpen && value.name.trim().length >= 2 && (
+      {isOpen && name.trim().length >= 2 && (
         <div className="absolute left-0 right-0 z-50 mt-1 rounded-lg border-2 border-line bg-white shadow-lg max-h-80 overflow-auto">
           {loading ? (
-            <p className="px-4 py-3 text-sm text-muted">{copy.loading}</p>
+            <p className="px-4 py-3 text-sm text-muted">{labels.searching}</p>
           ) : error ? (
-            <p className="px-4 py-3 text-sm text-danger">{copy.error}</p>
+            <p className="px-4 py-3 text-sm text-danger">{labels.error}</p>
           ) : results.length === 0 ? (
-            <p className="px-4 py-3 text-sm text-muted">{copy.empty}</p>
+            <p className="px-4 py-3 text-sm text-muted">{labels.noMatches}</p>
           ) : (
             <ul id={`${id}-listbox`} role="listbox" className="py-1">
               {results.map((supply, idx) => (
@@ -273,9 +235,7 @@ export function SupplySelector({
                     }`}
                   >
                     <span className="text-sm font-semibold text-ink">{supply.name}</span>
-                    <span className="text-xs text-muted">
-                      {supply.code} · {supply.categoryLabel}
-                    </span>
+                    <span className="text-xs text-muted">{supply.code}</span>
                   </button>
                 </li>
               ))}
