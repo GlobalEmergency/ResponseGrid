@@ -11,7 +11,7 @@ import { ShipmentsList } from '@/components/organisms/shipments-list';
 import { CapacitiesPanel } from '@/components/organisms/capacities-panel';
 import { ShipmentsFilter } from '@/components/molecules/shipments-filter';
 import { CapacitiesFilter } from '@/components/molecules/capacities-filter';
-import { CreateShipment } from '@/app/e/[slug]/coordinacion/expediciones/create-shipment';
+import { CreateShipment } from '@/app/emergencies/[slug]/manage/logistics/create-shipment';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';

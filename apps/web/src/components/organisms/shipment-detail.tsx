@@ -8,7 +8,7 @@ import {
   confirmDelivery,
   cancelShipment,
   type ActionResult,
-} from '@/app/e/[slug]/coordinacion/expediciones/actions';
+} from '@/app/emergencies/[slug]/manage/logistics/actions';
 import type { components } from '@reliefhub/api-client';
 import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';

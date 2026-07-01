@@ -16,7 +16,7 @@ import {
   getValidityReports,
   resolveDispute,
   type DisputeResolution,
-} from '@/app/e/[slug]/coordinacion/actions';
+} from '@/app/emergencies/[slug]/manage/actions';
 
 type DisputedResource = components['schemas']['DisputedResourceDto'];
 type ValidityReport = components['schemas']['ValidityReportDto'];

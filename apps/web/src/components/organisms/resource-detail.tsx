@@ -5,9 +5,9 @@ import {
   verifyAndPublish,
   editResource,
   discardResource,
-} from '@/app/e/[slug]/coordinacion/actions';
+} from '@/app/emergencies/[slug]/manage/actions';
 import type { components } from '@reliefhub/api-client';
-import type { ActionResult } from '@/app/e/[slug]/coordinacion/actions';
+import type { ActionResult } from '@/app/emergencies/[slug]/manage/actions';
 import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { VerificationBadge } from '@/components/atoms/verification-badge';
