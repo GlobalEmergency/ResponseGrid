@@ -154,6 +154,7 @@ export default async function ManageReportsPage({ params, searchParams }: Props)
   return (
     <WorkQueue
       title={tc.reports_received_heading}
+      count={reports.length}
       headingId="reports-heading"
       toolbar={
         <QueueToolbar>

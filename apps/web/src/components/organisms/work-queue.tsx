@@ -4,6 +4,8 @@ import { SectionHeading } from '@/components/atoms/section-heading';
 interface WorkQueueProps {
   title: string;
   subtitle?: string;
+  /** Result count shown in muted parentheses trailing the title, when > 0. */
+  count?: number;
   /** Search/filter controls, typically a {@link QueueToolbar}. */
   toolbar?: ReactNode;
   /** The queue itself (a *Queue organism, e.g. ResourcesQueue). */
@@ -23,6 +25,7 @@ interface WorkQueueProps {
 export function WorkQueue({
   title,
   subtitle,
+  count,
   toolbar,
   children,
   pagination,
@@ -33,6 +36,9 @@ export function WorkQueue({
       <div className="flex flex-col gap-1">
         <SectionHeading as="h2" size="lg" id={headingId}>
           {title}
+          {count !== undefined && count > 0 && (
+            <span className="ml-2 text-sm font-normal text-muted">({count})</span>
+          )}
         </SectionHeading>
         {subtitle !== undefined && <p className="text-sm text-muted">{subtitle}</p>}
       </div>
