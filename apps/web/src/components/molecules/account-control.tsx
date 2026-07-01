@@ -13,7 +13,7 @@ interface AccountControlProps {
   t: {
     login: string; account_aria: string; section_emergency: string;
     my_points: string; my_volunteering: string; my_shipments: string;
-    notifications: string; notifications_with_count: string;
+    notifications: string;
     my_panel: string; logout: string; admin: string;
   };
 }

@@ -59,7 +59,6 @@ export async function AppBar({ variant, slug, emergency, backHref }: AppBarProps
     my_volunteering: ta.my_volunteering,
     my_shipments: ta.my_shipments,
     notifications: ta.notifications,
-    notifications_with_count: ta.notifications_with_count,
     my_panel: ta.my_panel,
     logout: ta.logout,
     admin: ta.admin,
@@ -166,6 +165,16 @@ export async function AppBar({ variant, slug, emergency, backHref }: AppBarProps
             className="ml-4 shrink-0 rounded-lg bg-accent px-3 py-1.5 text-[13px] font-bold text-white"
           >
             {ta.offer}
+          </Link>
+        )}
+
+        {variant === 'action' && backHref !== undefined && (
+          <Link
+            href={backHref}
+            className="ml-4 flex shrink-0 items-center gap-1 text-[13px] font-semibold text-on-navy transition-colors hover:text-white"
+          >
+            <span aria-hidden="true">←</span>
+            {ta.back}
           </Link>
         )}
 

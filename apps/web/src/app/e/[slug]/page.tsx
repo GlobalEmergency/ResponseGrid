@@ -142,6 +142,19 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
   const sectionTitle = 'font-display text-base font-bold text-navy';
   const announcement = typeof emergency.announcement === 'string' ? emergency.announcement : null;
 
+  const statusLabel =
+    emergency.status === 'active'
+      ? te.header_status_active
+      : emergency.status === 'paused'
+        ? te.header_status_paused
+        : te.header_status_closed;
+  const statusDot =
+    emergency.status === 'active'
+      ? 'bg-success-dot'
+      : emergency.status === 'paused'
+        ? 'bg-warning-dot'
+        : 'bg-muted-soft';
+
   const initialTab: 'points' | 'needs' =
     category !== undefined || priority !== undefined ? 'needs' : 'points';
 
@@ -224,6 +237,16 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
         </section>
 
         <div className="flex min-w-0 flex-1 flex-col gap-6 px-4 pb-12 pt-5 lg:mx-auto lg:max-w-3xl lg:px-8 lg:pt-7">
+          <div className="flex flex-col gap-2">
+            <h1 className="font-display text-2xl font-extrabold leading-tight tracking-tight text-navy lg:text-3xl">
+              {emergency.name}
+            </h1>
+            <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-line bg-surface-alt px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wide text-muted">
+              <span className={`h-2 w-2 rounded-full ${statusDot}`} aria-hidden="true" />
+              {statusLabel}
+            </span>
+          </div>
+
           {announcement !== null && (
             <AnnouncementCard
               announcement={announcement}
