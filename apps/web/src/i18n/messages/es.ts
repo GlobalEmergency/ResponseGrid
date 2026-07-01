@@ -31,6 +31,7 @@ export const es = {
       nav_orgs: 'Organizaciones',
       nav_coordination: 'Acceso de coordinación',
       resources_heading: 'Recursos',
+      resources_features: 'Funcionalidades',
       resources_about: 'Sobre nosotros',
       resources_how: 'Cómo funciona',
       resources_transparency: 'Transparencia',
@@ -113,6 +114,7 @@ export const es = {
     trust_official: 'Organización acreditada',
 
     // Todo lo que hace la plataforma (para SEO/GEO: hoy no se contaba)
+    features_cta: 'Ver todas las funcionalidades',
     features_heading: 'Todo el operativo en una sola plataforma',
     features_intro:
       'ResponseGrid no es un mapa más: es la infraestructura completa para coordinar ayuda material en una catástrofe. Todo gratuito y de código abierto (licencia MIT), con los datos alojados en la UE (RGPD).',
@@ -1065,6 +1067,50 @@ export const es = {
     err_not_visible: 'Este punto ya no está visible; no se puede reportar.',
     err_owner:
       'Eres el responsable de este punto; usa el panel para cambiar su estado.',
+  },
+
+  // ── Página: Funcionalidades (/funcionalidades) ────────────────────────────
+  features_page: {
+    meta_title: 'Funcionalidades — ResponseGrid | Coordinación de ayuda en emergencias',
+    meta_description:
+      'Todas las funcionalidades de ResponseGrid: puntos de acopio con inventario, necesidades validadas, donaciones con QR y seguimiento, logística y transporte, voluntariado, mapa en tiempo real y API abierta. Gratis y de código abierto.',
+    overline: 'Funcionalidades',
+    h1: 'Todo lo que ResponseGrid pone a tu disposición, gratis',
+    lead:
+      'ResponseGrid reúne en una sola plataforma —gratuita y de código abierto— todo lo necesario para coordinar la ayuda material en una catástrofe: puntos de acopio, necesidades reales, donaciones trazables, logística, voluntariado y coordinación en tiempo real. Esto es todo lo que puedes hacer.',
+    sections: [
+      {
+        heading: 'Puntos de acopio con inventario en tiempo real',
+        body: 'Cada punto de acopio, almacén o espacio publica qué material tiene y qué acepta. La ciudadanía ve en el mapa y en el listado los puntos verificados, su estado (operativo, saturado o en pausa) y su contacto oficial, para no duplicar esfuerzos ni llevar material donde ya sobra.',
+      },
+      {
+        heading: 'Necesidades validadas y emparejamiento de ofertas',
+        body: 'Coordinación local valida cada necesidad de material antes de publicarla, con una frescura de 48 horas para que solo se vea lo que hace falta ahora. Quien quiere ayudar ofrece material y la plataforma lo casa con las necesidades por categoría y cercanía, sobre un catálogo común de insumos.',
+      },
+      {
+        heading: 'Logística: transporte y expediciones',
+        body: 'Empresas y particulares publican su capacidad de transporte —carretera, marítimo o aéreo, con peso y volumen— y coordinación arma las expediciones que mueven el material entre puntos. Así la ayuda no se queda atascada por falta de logística.',
+      },
+      {
+        heading: 'Donaciones con trazabilidad de principio a fin',
+        body: 'Antes de llevar tu material lo pre-registras y obtienes un código/QR para el mostrador. El punto lo confirma en su consola de recepción y tú sigues el recorrido de tu donación en tiempo real, desde «pre-registrada» hasta «recibida».',
+      },
+      {
+        heading: 'Voluntariado, cuadrillas y organizaciones acreditadas',
+        body: 'Apúntate como voluntario con tus habilidades, disponibilidad y vehículo; coordinación te asigna tareas y te organiza en cuadrillas. Las organizaciones pueden acreditarse para obtener el sello oficial y operar con más capacidades.',
+      },
+      {
+        heading: 'Coordinación en tiempo real y partes de campo',
+        body: 'Un único mapa reúne puntos y necesidades. Desde el terreno se envían partes de campo (incidencias, stock y estado) que alimentan las métricas del operativo, para decidir con datos reales y no con rumores.',
+      },
+      {
+        heading: 'Confianza, datos abiertos y desarrolladores',
+        body: 'Todo recurso muestra su nivel de confianza: sin verificar, verificado por coordinación u organización acreditada. La plataforma es de código abierto (licencia MIT), aloja los datos en la UE (RGPD) y ofrece una API pública de solo lectura con documentación para desarrolladores.',
+      },
+    ],
+    cta_heading: '¿Quieres ayudar ahora?',
+    cta_body: 'Consulta las emergencias activas y elige cómo colaborar.',
+    cta_button: 'Ver emergencias activas',
   },
 
   // ── Página: Sobre nosotros (/sobre) ───────────────────────────────────────

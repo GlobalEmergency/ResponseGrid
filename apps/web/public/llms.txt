@@ -19,6 +19,7 @@
 ## Páginas
 
 - [Inicio y emergencias activas](https://responsegrid.app/): directorio de emergencias en curso.
+- [Funcionalidades](https://responsegrid.app/funcionalidades): todo lo que hace la plataforma (puntos con inventario, necesidades validadas, donaciones con QR y seguimiento, logística, voluntariado, mapa en tiempo real, API abierta).
 - [Terremoto Venezuela 2026](https://responsegrid.app/e/terremoto-venezuela-2026): puntos de acopio, necesidades y cómo ayudar tras el terremoto de Venezuela de 2026.
 - [Cómo funciona](https://responsegrid.app/como-funciona): registras, coordinación verifica, se convierte en ayuda útil.
 - [Sobre nosotros](https://responsegrid.app/sobre): qué es ResponseGrid y Global Emergency.

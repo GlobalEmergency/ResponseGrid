@@ -14,6 +14,7 @@ const BASE = 'https://responsegrid.app';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${BASE}/`, changeFrequency: 'hourly', priority: 1 },
+    { url: `${BASE}/funcionalidades`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${BASE}/sobre`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE}/como-funciona`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE}/transparencia`, changeFrequency: 'monthly', priority: 0.5 },

@@ -139,6 +139,13 @@ export default async function HomePage() {
                 </li>
               ))}
             </ul>
+            <Link
+              href="/funcionalidades"
+              className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-navy transition-colors hover:text-accent focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 rounded"
+            >
+              {th.features_cta}
+              <span aria-hidden="true">→</span>
+            </Link>
           </section>
 
           {/* ── La confianza es el producto ─────────────────────────────── */}
