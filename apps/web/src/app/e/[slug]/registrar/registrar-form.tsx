@@ -14,6 +14,7 @@ import { DraftRestoredBanner } from '@/components/atoms/draft-restored-banner';
 import { useFormDraft } from '@/lib/use-form-draft';
 import { InventoryField } from './inventory-field';
 import type { Messages } from '@/i18n/messages/es';
+import type { Category } from '@/domain/supplies/category';
 
 const INITIAL_STATE: ActionState = { status: 'idle' };
 
@@ -27,6 +28,7 @@ interface RegistrarFormProps {
   t: Messages['registrar'];
   backToEmergencyLabel: string;
   locale: 'es' | 'en';
+  categories: readonly Category[];
 }
 
 export function RegistrarForm({
@@ -37,6 +39,7 @@ export function RegistrarForm({
   t,
   backToEmergencyLabel,
   locale,
+  categories,
 }: RegistrarFormProps) {
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     action,
@@ -160,7 +163,7 @@ export function RegistrarForm({
 
       {orgSelector}
 
-      <InventoryField t={t} locale={locale} />
+      <InventoryField t={t} locale={locale} categories={categories} />
 
       <Button type="submit" disabled={pending} fullWidth>
         {pending ? t.submitting : t.submit}

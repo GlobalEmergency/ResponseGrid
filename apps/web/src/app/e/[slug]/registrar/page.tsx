@@ -9,6 +9,7 @@ import { RegistrarForm } from './registrar-form';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { Card } from '@/components/atoms/card';
 import { getT } from '@/i18n/server';
+import { getCategories } from '@/adapters/get-categories';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -40,6 +41,7 @@ export default async function RegistrarPage({ params }: Props) {
     notFound();
   }
 
+  const categories = await getCategories(locale);
   const boundAction = registerResource.bind(null, slug, emergency.id);
 
   return (
@@ -61,6 +63,7 @@ export default async function RegistrarPage({ params }: Props) {
               t={t.registrar}
               backToEmergencyLabel={t.common.back_to_emergency}
               locale={locale}
+              categories={categories}
             />
           </Card>
         </div>
