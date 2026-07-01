@@ -66,7 +66,7 @@ export default async function DonarPage({ params, searchParams }: Props) {
   const targetNeedId =
     targetNeedTitle !== undefined ? rawNeedId : undefined;
 
-  const boundAction = submitOffer.bind(null, emergency.id);
+  const boundAction = submitOffer.bind(null, slug, emergency.id);
 
   return (
     <main className="flex-1 bg-surface">

@@ -44,7 +44,7 @@ export default async function PeticionPage({ params }: Props) {
     notFound();
   }
 
-  const boundAction = submitPeticion.bind(null, emergency.id);
+  const boundAction = submitPeticion.bind(null, slug, emergency.id);
 
   return (
     <main className="flex-1 bg-surface">

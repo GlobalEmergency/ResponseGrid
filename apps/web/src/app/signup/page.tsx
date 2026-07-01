@@ -18,7 +18,7 @@ type Props = {
 
 export default async function SignupPage({ searchParams }: Props) {
   const resolved = await searchParams;
-  const next = typeof resolved.next === 'string' ? resolved.next : '/';
+  const next = typeof resolved.next === 'string' ? resolved.next : '/panel';
   const { t } = await getT();
 
   return (

@@ -60,7 +60,7 @@ export default async function VoluntarioPage({ params }: Props) {
     existingProfile = data;
   }
 
-  const boundAction = registerVolunteer.bind(null, emergency.id);
+  const boundAction = registerVolunteer.bind(null, slug, emergency.id);
 
   return (
     <main className="flex-1 bg-surface">

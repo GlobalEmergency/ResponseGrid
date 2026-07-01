@@ -42,6 +42,7 @@ function parsePositive(raw: FormDataEntryValue | null): number | undefined | nul
  * bound server-side in the page so neither is trusted from the client form.
  */
 export async function submitCapacity(
+  slug: string,
   emergencyId: string,
   providerId: string,
   _prev: CapacityState,
@@ -49,7 +50,7 @@ export async function submitCapacity(
 ): Promise<CapacityState> {
   const token = await getToken();
   if (!token) {
-    redirect('/login');
+    redirect(`/login?next=/e/${slug}/ofrecer-transporte`);
   }
 
   const { t } = await getT();
@@ -135,7 +136,7 @@ export async function submitCapacity(
 
   if (response.status === 401) {
     await clearToken();
-    redirect('/login');
+    redirect(`/login?next=/e/${slug}/ofrecer-transporte`);
   }
 
   if (response.status === 409) {
