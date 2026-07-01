@@ -2,6 +2,7 @@ import type { Metadata, ResolvingMetadata } from 'next';
 import { notFound } from 'next/navigation';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
+import { getToken } from '@/lib/auth';
 import { type ResourceViewDto } from '@/lib/group-by-country';
 import { AppBar } from '@/components/organisms/app-bar';
 import { ResourceList } from '@/components/organisms/resource-list';
@@ -78,6 +79,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
 
   const emergencyId = emergency.id;
   const isActive = emergency.status === 'active';
+  const token = await getToken();
 
   const rawCategory = typeof resolvedSearchParams.category === 'string' ? resolvedSearchParams.category : undefined;
   const rawPriority = typeof resolvedSearchParams.priority === 'string' ? resolvedSearchParams.priority : undefined;
@@ -439,6 +441,18 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
               </p>
             )}
           </section>
+
+          {token !== null && (
+            <section aria-labelledby="manage-heading" className="flex flex-col gap-3">
+              <h2 id="manage-heading" className={sectionTitle}>{te.manage_heading}</h2>
+              <HelpActionRow
+                href={`/e/${slug}/mis-puntos`}
+                icon="🗂️"
+                title={te.manage_my_points_title}
+                subtitle={te.manage_my_points_subtitle}
+              />
+            </section>
+          )}
 
           <section aria-labelledby="explore-heading" className="flex flex-col gap-3">
             <h2 id="explore-heading" className={sectionTitle}>{te.explore_heading}</h2>
