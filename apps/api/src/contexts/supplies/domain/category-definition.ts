@@ -13,6 +13,8 @@ export interface CategoryTranslation {
   label: string;
 }
 
+export type CategoryKind = 'material' | 'personnel';
+
 export interface CategoryDefinition {
   slug: string;
   labelEs: string;
@@ -20,6 +22,8 @@ export interface CategoryDefinition {
   parentSlug: string | null;
   vertical: string;
   sort: number;
+  codePrefix: string | null;
+  kind: CategoryKind;
   archivedAt: Date | null;
   translations: readonly CategoryTranslation[];
 }

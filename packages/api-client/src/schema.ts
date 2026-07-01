@@ -1899,6 +1899,127 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/supplies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar el catálogo (incluye archivados) */
+        get: operations["SuppliesAdminController_list"];
+        put?: never;
+        /** Crear un insumo (asigna código INS-NNNN) */
+        post: operations["SuppliesAdminController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/supplies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detalle de gestión de un insumo */
+        get: operations["SuppliesAdminController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Editar un insumo (code no editable) */
+        patch: operations["SuppliesAdminController_edit"];
+        trace?: never;
+    };
+    "/admin/supplies/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Archivar un insumo */
+        post: operations["SuppliesAdminController_archive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/supplies/{id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reactivar un insumo archivado */
+        post: operations["SuppliesAdminController_restore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/supplies/{id}/aliases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Añadir un alias/sinónimo a un insumo */
+        post: operations["SuppliesAdminController_addAlias"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/supplies/{id}/aliases/{aliasNorm}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Eliminar un alias del catálogo */
+        delete: operations["SuppliesAdminController_removeAlias"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/supplies/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Fusionar un insumo duplicado en el canónico */
+        post: operations["SuppliesAdminController_merge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/supplies/containers": {
         parameters: {
             query?: never;
@@ -2775,6 +2896,11 @@ export interface components {
              */
             name: string;
             /**
+             * @description Optional soft link to the canonical supply master data.
+             * @example 1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8
+             */
+            supplyId?: string | null;
+            /**
              * @description Quantity (positive integer)
              * @example 100
              */
@@ -2831,12 +2957,6 @@ export interface components {
              * @enum {string}
              */
             type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
-            /**
-             * @description Stage of the resource in the emergency supply chain
-             * @example origin
-             * @enum {string}
-             */
-            stage: "origin" | "intermediate" | "destination";
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
@@ -2883,7 +3003,7 @@ export interface components {
              */
             city?: string;
             /**
-             * @description Mark this resource as a final recipient of aid (requires the destination stage)
+             * @description Mark this resource as a final recipient of aid
              * @example true
              */
             isFinalRecipient?: boolean;
@@ -2958,11 +3078,6 @@ export interface components {
              * @enum {string}
              */
             type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
-            /**
-             * @example origin
-             * @enum {string}
-             */
-            stage: "origin" | "intermediate" | "destination";
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
@@ -2987,8 +3102,16 @@ export interface components {
              *     ]
              */
             accepts: string[];
-            /** @example +58 212 555 0000 */
+            /**
+             * @description Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell "hidden" from "absent".
+             * @example +58 212 555 0000
+             */
             contact: string | null;
+            /**
+             * @description Whether a contact exists on file, regardless of whether `contact` is revealed to this caller.
+             * @example true
+             */
+            hasContact: boolean;
             /** @example Lun-Vie 08-18 */
             schedule: string | null;
             /** @example Juan Pérez */
@@ -3133,11 +3256,6 @@ export interface components {
              * @enum {string}
              */
             type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
-            /**
-             * @example origin
-             * @enum {string}
-             */
-            stage: "origin" | "intermediate" | "destination";
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
@@ -3162,8 +3280,16 @@ export interface components {
              *     ]
              */
             accepts: string[];
-            /** @example +58 212 555 0000 */
+            /**
+             * @description Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell "hidden" from "absent".
+             * @example +58 212 555 0000
+             */
             contact: string | null;
+            /**
+             * @description Whether a contact exists on file, regardless of whether `contact` is revealed to this caller.
+             * @example true
+             */
+            hasContact: boolean;
             /** @example Lun-Vie 08-18 */
             schedule: string | null;
             /** @example Juan Pérez */
@@ -3244,11 +3370,6 @@ export interface components {
              * @enum {string}
              */
             type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
-            /**
-             * @example origin
-             * @enum {string}
-             */
-            stage: "origin" | "intermediate" | "destination";
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
@@ -3273,8 +3394,16 @@ export interface components {
              *     ]
              */
             accepts: string[];
-            /** @example +58 212 555 0000 */
+            /**
+             * @description Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell "hidden" from "absent".
+             * @example +58 212 555 0000
+             */
             contact: string | null;
+            /**
+             * @description Whether a contact exists on file, regardless of whether `contact` is revealed to this caller.
+             * @example true
+             */
+            hasContact: boolean;
             /** @example Lun-Vie 08-18 */
             schedule: string | null;
             /** @example Juan Pérez */
@@ -3346,11 +3475,6 @@ export interface components {
              * @enum {string}
              */
             type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
-            /**
-             * @example origin
-             * @enum {string}
-             */
-            stage: "origin" | "intermediate" | "destination";
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
@@ -3375,8 +3499,16 @@ export interface components {
              *     ]
              */
             accepts: string[];
-            /** @example +58 212 555 0000 */
+            /**
+             * @description Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell "hidden" from "absent".
+             * @example +58 212 555 0000
+             */
             contact: string | null;
+            /**
+             * @description Whether a contact exists on file, regardless of whether `contact` is revealed to this caller.
+             * @example true
+             */
+            hasContact: boolean;
             /** @example Lun-Vie 08-18 */
             schedule: string | null;
             /** @example Juan Pérez */
@@ -3449,11 +3581,6 @@ export interface components {
              * @enum {string}
              */
             type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
-            /**
-             * @example origin
-             * @enum {string}
-             */
-            stage: "origin" | "intermediate" | "destination";
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
@@ -3478,8 +3605,16 @@ export interface components {
              *     ]
              */
             accepts: string[];
-            /** @example +58 212 555 0000 */
+            /**
+             * @description Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell "hidden" from "absent".
+             * @example +58 212 555 0000
+             */
             contact: string | null;
+            /**
+             * @description Whether a contact exists on file, regardless of whether `contact` is revealed to this caller.
+             * @example true
+             */
+            hasContact: boolean;
             /** @example Lun-Vie 08-18 */
             schedule: string | null;
             /** @example Juan Pérez */
@@ -3776,6 +3911,11 @@ export interface components {
         SupplyLineResponseDto: {
             /** @example Water bottles */
             name: string;
+            /**
+             * @description Optional soft link to the canonical supply master data.
+             * @example 1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8
+             */
+            supplyId: string | null;
             /** @example 100 */
             quantity: number;
             /** @example liters */
@@ -4447,6 +4587,11 @@ export interface components {
         IntakeLineViewDto: {
             /** @example Water bottles */
             name: string;
+            /**
+             * @description Optional soft link to the canonical supply master data.
+             * @example 1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8
+             */
+            supplyId: string | null;
             /** @example 100 */
             quantity: number;
             /** @example liters */
@@ -4812,6 +4957,11 @@ export interface components {
         };
         CategoryDto: {
             /**
+             * @description Canonical category slug (stable identifier)
+             * @example medicines
+             */
+            slug: string;
+            /**
              * @description Localized category label
              * @example Medicamentos
              */
@@ -4832,6 +4982,17 @@ export interface components {
              * @example 41
              */
             sort: number;
+            /**
+             * @description Unique 3-letter prefix for supplies in this category, or null if inherited
+             * @example MED
+             */
+            codePrefix: string | null;
+            /**
+             * @description Whether the category is aid material or personnel. Personnel (medical_personnel) is excluded from material pickers.
+             * @example material
+             * @enum {string}
+             */
+            kind: "material" | "personnel";
         };
         CategoryTranslationDto: {
             /** @example fr */
@@ -4953,6 +5114,100 @@ export interface components {
              *     ]
              */
             aliases: string[];
+        };
+        CreateSupplyDto: {
+            /** @example Agua potable (botella 1.5L) */
+            name: string;
+            /**
+             * @description Slug de categoría existente
+             * @example water
+             */
+            categorySlug: string;
+            /** @example und */
+            defaultUnit?: Record<string, never>;
+            /** @description Atributos estructurados (jsonb) */
+            attributes?: {
+                [key: string]: unknown;
+            };
+            /** @description Notas internas de gestión */
+            registrationNotes?: Record<string, never>;
+            /**
+             * Format: uuid
+             * @description Si es variante, id del insumo padre (debe existir)
+             */
+            variantOfId?: Record<string, never>;
+        };
+        CreateSupplyResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example INS-0212 */
+            code: string;
+        };
+        AdminSupplyDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example INS-0212 */
+            code: string;
+            /** @example Agua potable (botella 1.5L) */
+            name: string;
+            /** @example water */
+            categorySlug: string;
+            /** @example und */
+            defaultUnit?: string | null;
+            /**
+             * @example {
+             *       "size": "1.5L"
+             *     }
+             */
+            attributes: Record<string, never>;
+            /** Format: uuid */
+            variantOfId?: string | null;
+            /**
+             * @example active
+             * @enum {string}
+             */
+            status: "active" | "archived";
+            registrationNotes?: string | null;
+            /**
+             * @example [
+             *       "agua embotellada",
+             *       "botellon"
+             *     ]
+             */
+            aliases: string[];
+        };
+        EditSupplyDto: {
+            /** @example Agua mineral */
+            name?: string;
+            /** @example food */
+            categorySlug?: string;
+            /** @example kg */
+            defaultUnit?: Record<string, never>;
+            attributes?: {
+                [key: string]: unknown;
+            };
+            registrationNotes?: Record<string, never>;
+            /** Format: uuid */
+            variantOfId?: Record<string, never>;
+        };
+        AddSupplyAliasDto: {
+            /**
+             * @description Término/sinónimo; se normaliza en el servidor
+             * @example agua embotellada
+             */
+            term: string;
+        };
+        MergeSuppliesDto: {
+            /**
+             * Format: uuid
+             * @description Insumo duplicado (se archiva)
+             */
+            sourceId: string;
+            /**
+             * Format: uuid
+             * @description Insumo canónico (conserva todo)
+             */
+            targetId: string;
         };
         ContainerHolderDto: {
             /**
@@ -10496,6 +10751,263 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["SupplyDto"];
                 };
+            };
+        };
+    };
+    SuppliesAdminController_list: {
+        parameters: {
+            query?: {
+                /** @description Búsqueda por código o nombre */
+                q?: string;
+                /** @description Filtra por categoría */
+                categorySlug?: string;
+                status?: "active" | "archived";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminSupplyDto"][];
+                };
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSupplyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateSupplyResponseDto"];
+                };
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminSupplyDto"];
+                };
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_edit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditSupplyDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_archive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_restore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_addAlias: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddSupplyAliasDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_removeAlias: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                aliasNorm: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_merge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergeSuppliesDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

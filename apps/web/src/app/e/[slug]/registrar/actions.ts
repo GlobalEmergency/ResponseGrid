@@ -3,17 +3,13 @@
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
-import { getToken, authHeaders, clearToken } from '@/lib/auth';
-import { MATERIAL_CATEGORIES } from '@/lib/categories';
+import { requireSession, loginHref, authHeaders, clearToken } from '@/lib/auth';
 import { parseSupplyLines } from '@/lib/supply-lines';
 import { getT } from '@/i18n/server';
+import { getCategories } from '@/adapters/get-categories';
+import { isMaterialCategory } from '@/domain/supplies/category';
 
 type ResourceType = components['schemas']['RegisterResourceDto']['type'];
-type Stage = components['schemas']['RegisterResourceDto']['stage'];
-
-function isMaterialCategory(v: string): boolean {
-  return (MATERIAL_CATEGORIES as readonly string[]).includes(v);
-}
 
 export type ActionState =
   | { status: 'idle' }
@@ -30,30 +26,21 @@ const VALID_TYPES: ResourceType[] = [
   'venue',
 ];
 
-const VALID_STAGES: Stage[] = ['origin', 'intermediate', 'destination'];
-
 function isResourceType(value: unknown): value is ResourceType {
   return VALID_TYPES.includes(value as ResourceType);
 }
 
-function isStage(value: unknown): value is Stage {
-  return VALID_STAGES.includes(value as Stage);
-}
-
 export async function registerResource(
+  slug: string,
   emergencyId: string,
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const token = await getToken();
-  if (!token) {
-    redirect('/login');
-  }
+  const token = await requireSession(`/e/${slug}/registrar`);
 
-  const { t } = await getT();
+  const { t, locale } = await getT();
 
   const rawType = formData.get('type');
-  const rawStage = formData.get('stage');
   const rawName = formData.get('name');
   const rawDescription = formData.get('description');
   const rawAddress = formData.get('address');
@@ -65,9 +52,6 @@ export async function registerResource(
 
   if (!isResourceType(rawType)) {
     return { status: 'error', message: t.registrar.err_invalid_type };
-  }
-  if (!isStage(rawStage)) {
-    return { status: 'error', message: t.registrar.err_invalid_stage };
   }
   if (name.length < 2) {
     return { status: 'error', message: t.registrar.err_name_too_short };
@@ -97,8 +81,12 @@ export async function registerResource(
       ? rawOrgId.trim()
       : undefined;
 
+  const validMaterialCategories = new Set(
+    (await getCategories(locale)).filter(isMaterialCategory).map((c) => c.slug),
+  );
+
   const items = parseSupplyLines(formData.get('items'), {
-    isValidCategory: isMaterialCategory,
+    isValidCategory: (c) => validMaterialCategories.has(c),
     allowEmpty: true,
   });
   if (items === null) {
@@ -112,7 +100,6 @@ export async function registerResource(
       headers: authHeaders(token),
       body: {
         type: rawType,
-        stage: rawStage,
         name,
         ...(description !== undefined ? { description } : {}),
         location: { address, latitude, longitude },
@@ -124,7 +111,7 @@ export async function registerResource(
 
   if (response.status === 401) {
     await clearToken();
-    redirect('/login');
+    redirect(loginHref(`/e/${slug}/registrar`));
   }
 
   if (response.status === 409) {

@@ -5,8 +5,7 @@ import type { Messages } from '@/i18n/messages/es';
 import { es } from '@/i18n/messages/es';
 import { Select } from '@/components/atoms/select';
 import { FilterField } from '@/components/molecules/filter-field';
-import { useLocale } from '@/i18n/locale-context';
-import { ALL_CATEGORIES, categoryLabel } from '@/lib/categories';
+import { useCategories, useCategoryLabel } from '@/components/providers/categories-provider';
 
 interface NeedsFilterProps {
   t?: Messages['needs_filter'];
@@ -16,16 +15,17 @@ interface NeedsFilterProps {
 export function NeedsFilter({ t = es.needs_filter, te = es.emergency }: NeedsFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const locale = useLocale();
+  const categories = useCategories();
+  const categoryName = useCategoryLabel();
 
   const currentCategory = searchParams.get('category') ?? '';
   const currentPriority = searchParams.get('priority') ?? '';
 
   const categoryOptions = [
     { value: '', label: t.all_categories },
-    ...ALL_CATEGORIES.map((slug) => ({
-      value: slug,
-      label: categoryLabel(slug, locale),
+    ...categories.map((c) => ({
+      value: c.slug,
+      label: categoryName(c.slug),
     })),
   ];
 

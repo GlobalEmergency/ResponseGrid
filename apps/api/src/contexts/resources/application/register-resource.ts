@@ -6,7 +6,7 @@ import { SupplyLine } from '../../supplies/domain/supply-line';
 import { Category } from '../../supplies/domain/category';
 import { ResourceId } from '../domain/resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { ResourceType, ResourceStage } from '../domain/resource-enums';
+import { ResourceType } from '../domain/resource-enums';
 import { Location, LocationProps } from '../../../shared/domain/location';
 import { Author, AuthorProps } from '../../../shared/domain/author';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
@@ -16,7 +16,6 @@ const ACTIVE_STATUS = 'active';
 export interface RegisterResourceCommand {
   emergencyId: string;
   type: ResourceType;
-  stage: ResourceStage;
   name: string;
   description?: string | null;
   location: LocationProps;
@@ -39,6 +38,7 @@ export interface RegisterResourceCommand {
     quantity: number;
     unit?: string | null;
     category: Category;
+    supplyId?: string | null;
     presentation?: string | null;
     expiresAt?: string | null;
   }>;
@@ -66,7 +66,6 @@ export class RegisterResource {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(cmd.emergencyId),
       type: cmd.type,
-      stage: cmd.stage,
       name: cmd.name,
       description: cmd.description ?? null,
       location: Location.create(cmd.location),
@@ -87,6 +86,7 @@ export class RegisterResource {
           quantity: i.quantity,
           unit: i.unit ?? null,
           category: i.category,
+          supplyId: i.supplyId ?? null,
           presentation: i.presentation ?? null,
           expiresAt: i.expiresAt ?? null,
         }),

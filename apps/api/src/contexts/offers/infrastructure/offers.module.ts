@@ -1,6 +1,6 @@
 import { Inject, Module, OnModuleDestroy } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import IORedis from 'ioredis';
+import IORedis, { type Redis as IORedisConnection } from 'ioredis';
 import { DB, DatabaseModule } from '../../../shared/database.module';
 import { Db } from '../../../shared/db';
 import { OffersController } from './http/offers.controller';
@@ -69,6 +69,7 @@ import {
   NotificationsPort,
 } from '../../notifications/domain/ports/notifications.port';
 import { NotificationsModule } from '../../notifications/infrastructure/notifications.module';
+import { toBullMqConnection } from '../../../shared/bullmq-connection';
 // MEMBERSHIP_REPOSITORY and OFFER_EMERGENCY_LOOKUP are exported by IdentityModule
 // and consumed by OffersController via @Inject — no factory needed here.
 
@@ -76,7 +77,7 @@ export const OFFER_EVENT_QUEUE = Symbol('OffersEventQueue');
 
 interface EventQueue {
   queue: Queue;
-  connection: IORedis;
+  connection: IORedisConnection;
 }
 
 const eventQueueProvider = {
@@ -84,8 +85,12 @@ const eventQueueProvider = {
   useFactory: (): EventQueue => {
     const url = process.env.REDIS_URL;
     if (!url) throw new Error('REDIS_URL is required');
-    const connection = new IORedis(url, { maxRetriesPerRequest: null });
-    const queue = new Queue('domain-events', { connection });
+    const connection: IORedisConnection = new IORedis(url, {
+      maxRetriesPerRequest: null,
+    });
+    const queue = new Queue('domain-events', {
+      connection: toBullMqConnection(connection),
+    });
     return { queue, connection };
   },
 };

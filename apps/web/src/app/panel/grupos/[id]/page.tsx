@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
-import { getToken } from '@/lib/auth';
+import { notFound } from 'next/navigation';
+import { requireSession } from '@/lib/auth';
 import {
   fetchGroup,
   fetchGroupMembers,
@@ -25,10 +25,7 @@ type Props = { params: Promise<{ id: string }> };
 export default async function GroupDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const token = await getToken();
-  if (!token) {
-    redirect(`/login?next=/panel/grupos/${id}`);
-  }
+  await requireSession(`/panel/grupos/${id}`);
 
   const group = await fetchGroup(id);
   if (!group) {

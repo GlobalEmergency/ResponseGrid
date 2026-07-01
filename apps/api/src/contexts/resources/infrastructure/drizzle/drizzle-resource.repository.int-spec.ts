@@ -1,6 +1,7 @@
 import { eq, sql } from 'drizzle-orm';
 import { createDb, Db } from '../../../../shared/db';
 import { resourcesTable } from './schema';
+import { suppliesTable } from '../../../supplies/infrastructure/drizzle/schema';
 import { emergenciesTable } from '../../../emergencies/infrastructure/drizzle/schema';
 import { DrizzleResourceRepository } from './drizzle-resource.repository';
 import { Resource } from '../../domain/resource';
@@ -10,7 +11,6 @@ import { ResourceId } from '../../domain/resource-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import {
   ResourceType,
-  ResourceStage,
   VerificationLevel,
   PublicStatus,
 } from '../../domain/resource-enums';
@@ -43,6 +43,27 @@ describe('DrizzleResourceRepository (integration)', () => {
   });
   beforeEach(async () => {
     await db.delete(resourcesTable);
+    await db
+      .insert(suppliesTable)
+      .values([
+        {
+          id: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
+          code: 'TEST-0001',
+          name: 'Agua Test',
+          categorySlug: 'water',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: '2e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d9',
+          code: 'TEST-0002',
+          name: 'Arroz Test',
+          categorySlug: 'food',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ])
+      .onConflictDoNothing();
   });
 
   it('round-trips an aggregate through Postgres', async () => {
@@ -50,7 +71,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.Warehouse,
-      stage: ResourceStage.Origin,
       name: 'Almacén Sur',
       location: baseLocation,
       ownerUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
@@ -58,7 +78,6 @@ describe('DrizzleResourceRepository (integration)', () => {
     await repo.save(r);
     const found = await repo.findById(r.id);
     expect(found?.name).toBe('Almacén Sur');
-    expect(found?.stage).toBe(ResourceStage.Origin);
     expect(found?.location.address).toBe('Calle Test 1, Sevilla');
     expect(found?.ownerUserId).toBe('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
     expect(found?.ownerOrganizationId).toBeNull();
@@ -71,7 +90,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id,
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.Warehouse,
-      stage: ResourceStage.Origin,
       name: 'Almacén con inventario',
       location: baseLocation,
       ownerUserId: OWNER_ID,
@@ -82,6 +100,7 @@ describe('DrizzleResourceRepository (integration)', () => {
           unit: 'litros',
           category: Category.Water,
           expiresAt: '2026-07-01',
+          supplyId: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
         }),
         SupplyLine.create({
           name: 'Mantas',
@@ -103,6 +122,7 @@ describe('DrizzleResourceRepository (integration)', () => {
           quantity: 200,
           unit: 'litros',
           category: Category.Water,
+          supplyId: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
           presentation: null,
           expiresAt: '2026-07-01',
         },
@@ -111,6 +131,7 @@ describe('DrizzleResourceRepository (integration)', () => {
           quantity: 50,
           unit: null,
           category: Category.Shelter,
+          supplyId: null,
           presentation: null,
           expiresAt: null,
         },
@@ -127,6 +148,7 @@ describe('DrizzleResourceRepository (integration)', () => {
           quantity: 30,
           unit: 'kg',
           category: Category.Food,
+          supplyId: '2e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d9',
           presentation: null,
           expiresAt: null,
         },
@@ -141,6 +163,7 @@ describe('DrizzleResourceRepository (integration)', () => {
         quantity: 30,
         unit: 'kg',
         category: Category.Food,
+        supplyId: '2e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d9',
         presentation: null,
         expiresAt: null,
       },
@@ -152,7 +175,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionAndDelivery,
-      stage: ResourceStage.Intermediate,
       name: 'Punto Mixto',
       description: 'Recogida y entrega central',
       location: baseLocation,
@@ -165,7 +187,6 @@ describe('DrizzleResourceRepository (integration)', () => {
     expect(found?.ownerOrganizationId).toBe(
       'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
     );
-    expect(found?.stage).toBe(ResourceStage.Intermediate);
   });
 
   it('findPendingByEmergency filters by emergency and status', async () => {
@@ -173,7 +194,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'P',
       location: baseLocation,
       ownerUserId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
@@ -182,7 +202,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'V',
       location: baseLocation,
       ownerUserId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
@@ -201,7 +220,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Cruz Roja Centro',
       location: baseLocation,
       ownerUserId: OWNER_ID,
@@ -210,7 +228,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.Warehouse,
-      stage: ResourceStage.Intermediate,
       name: 'Almacén Cáritas',
       location: baseLocation,
       ownerUserId: OWNER_ID,
@@ -219,7 +236,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Cruz Roja Verificada',
       location: baseLocation,
       ownerUserId: OWNER_ID,
@@ -259,7 +275,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Active',
       location: baseLocation,
       ownerUserId: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
@@ -270,7 +285,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Pending',
       location: baseLocation,
       ownerUserId: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
@@ -306,7 +320,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Hidden',
       location: baseLocation,
       ownerUserId: OWNER_ID,
@@ -315,7 +328,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Active',
       location: baseLocation,
       ownerUserId: OWNER_ID,
@@ -340,7 +352,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Owner Resource',
       location: baseLocation,
       ownerUserId: OWNER_ID,
@@ -349,7 +360,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Other Resource',
       location: baseLocation,
       ownerUserId: OTHER_OWNER,
@@ -369,7 +379,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Active',
       location: baseLocation,
       ownerUserId: OWNER_ID,
@@ -395,7 +404,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Hidden',
       location: baseLocation,
       ownerUserId: OWNER_ID,
@@ -427,7 +435,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Mine',
       location: baseLocation,
       ownerUserId: OWNER_ID,
@@ -436,7 +443,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(OTHER_EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Other',
       location: baseLocation,
       ownerUserId: OWNER_ID,
@@ -456,7 +462,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Acopio Venezuela',
       location: baseLocation,
       ownerUserId: OWNER_ID,
@@ -495,7 +500,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.Venue,
-      stage: ResourceStage.Destination,
       name: 'Hospital Central',
       location: baseLocation,
       ownerUserId: OWNER_ID,
@@ -516,7 +520,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.Warehouse,
-      stage: ResourceStage.Origin,
       name: 'Plain Resource',
       location: baseLocation,
       ownerUserId: OWNER_ID,
@@ -540,7 +543,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Provenance Check',
       location: baseLocation,
       ownerUserId: OWNER_ID,
@@ -568,7 +570,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Acopio Externo',
       location: baseLocation,
       ownerUserId: OWNER_ID,
@@ -601,7 +602,6 @@ describe('DrizzleResourceRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Scoped Source',
       location: baseLocation,
       ownerUserId: OWNER_ID,
@@ -627,7 +627,6 @@ describe('DrizzleResourceRepository (integration)', () => {
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(EM),
           type: ResourceType.CollectionPoint,
-          stage: ResourceStage.Origin,
           name,
           location: baseLocation,
           ownerUserId: OWNER_ID,
@@ -649,7 +648,6 @@ describe('DrizzleResourceRepository (integration)', () => {
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(EM),
           type: ResourceType.CollectionPoint,
-          stage: ResourceStage.Origin,
           name: 'Hidden One',
           location: baseLocation,
           ownerUserId: OWNER_ID,
@@ -670,7 +668,6 @@ describe('DrizzleResourceRepository (integration)', () => {
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(EM),
           type: ResourceType.CollectionPoint,
-          stage: ResourceStage.Origin,
           name: 'Verified',
           location: baseLocation,
           ownerUserId: OWNER_ID,
@@ -685,7 +682,6 @@ describe('DrizzleResourceRepository (integration)', () => {
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(EM),
           type: ResourceType.CollectionPoint,
-          stage: ResourceStage.Origin,
           name: 'Ingested Unverified',
           location: baseLocation,
           ownerUserId: OWNER_ID,
@@ -712,7 +708,6 @@ describe('DrizzleResourceRepository (integration)', () => {
             id: ResourceId.create(),
             emergencyId: EmergencyId.fromString(EM),
             type: ResourceType.CollectionPoint,
-            stage: ResourceStage.Origin,
             name,
             location: baseLocation,
             ownerUserId: OWNER_ID,
@@ -755,7 +750,6 @@ describe('DrizzleResourceRepository (integration)', () => {
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(EM),
           type: ResourceType.CollectionPoint,
-          stage: ResourceStage.Origin,
           name: 'Water Resource',
           location: baseLocation,
           ownerUserId: OWNER_ID,
@@ -770,7 +764,6 @@ describe('DrizzleResourceRepository (integration)', () => {
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(EM),
           type: ResourceType.CollectionPoint,
-          stage: ResourceStage.Origin,
           name: 'Food Only',
           location: baseLocation,
           ownerUserId: OWNER_ID,
@@ -804,7 +797,6 @@ describe('DrizzleResourceRepository (integration)', () => {
             id: ResourceId.create(),
             emergencyId: EmergencyId.fromString(EM),
             type: ResourceType.CollectionPoint,
-            stage: ResourceStage.Origin,
             name,
             location: Location.create({
               address: `${name} street`,
@@ -879,7 +871,6 @@ describe('DrizzleResourceRepository (integration)', () => {
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(EM),
           type: ResourceType.CollectionPoint,
-          stage: ResourceStage.Origin,
           name: 'Caritas Hidden',
           location: Location.create({
             address: 'Hidden street',
@@ -934,7 +925,6 @@ describe('DrizzleResourceRepository (integration)', () => {
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(EM),
           type: ResourceType.CollectionPoint,
-          stage: ResourceStage.Origin,
           name: 'VE Resource',
           location: baseLocation,
           ownerUserId: OWNER_ID,
@@ -949,7 +939,6 @@ describe('DrizzleResourceRepository (integration)', () => {
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(EM),
           type: ResourceType.CollectionPoint,
-          stage: ResourceStage.Origin,
           name: 'CO Resource',
           location: baseLocation,
           ownerUserId: OWNER_ID,
@@ -984,7 +973,6 @@ describe('DrizzleResourceRepository (integration)', () => {
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(EM),
           type: ResourceType.CollectionPoint,
-          stage: ResourceStage.Origin,
           name,
           location: baseLocation,
           ownerUserId: OWNER_ID,
@@ -1025,7 +1013,6 @@ describe('DrizzleResourceRepository (integration)', () => {
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(EM),
           type: ResourceType.CollectionPoint,
-          stage: ResourceStage.Origin,
           name: 'Verified',
           location: baseLocation,
           ownerUserId: OWNER_ID,
@@ -1041,7 +1028,6 @@ describe('DrizzleResourceRepository (integration)', () => {
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(EM),
           type: ResourceType.CollectionPoint,
-          stage: ResourceStage.Origin,
           name: 'Ingested Unverified',
           location: baseLocation,
           ownerUserId: OWNER_ID,
@@ -1085,7 +1071,6 @@ describe('DrizzleResourceRepository (integration)', () => {
         id: ResourceId.create(),
         emergencyId: EmergencyId.fromString(GEO_EM),
         type: ResourceType.CollectionPoint,
-        stage: ResourceStage.Origin,
         name,
         location: Location.create({
           address: `${name} addr`,
@@ -1189,7 +1174,6 @@ describe('DrizzleResourceRepository (integration)', () => {
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(GEO_EM),
           type: ResourceType.CollectionPoint,
-          stage: ResourceStage.Origin,
           name: 'Provenance Nearby',
           location: Location.create({
             address: 'Near addr',
@@ -1293,7 +1277,6 @@ describe('DrizzleResourceRepository (integration)', () => {
         id: ResourceId.create(),
         emergencyId: EmergencyId.fromString(BBOX_EM),
         type: ResourceType.CollectionPoint,
-        stage: ResourceStage.Origin,
         name,
         location: Location.create({
           address: `${name} addr`,
@@ -1437,7 +1420,6 @@ describe('DrizzleResourceRepository (integration)', () => {
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(OTHER_EM),
           type: ResourceType.CollectionPoint,
-          stage: ResourceStage.Origin,
           name: 'Other Emergency',
           location: Location.create({
             address: 'addr',
@@ -1473,12 +1455,12 @@ describe('DrizzleResourceRepository (integration)', () => {
     try {
       await db.execute(sql`
         INSERT INTO resources (
-          id, emergency_id, type, stage, name,
+          id, emergency_id, type, name,
           address, latitude, longitude,
           owner_user_id, verification_level, public_status, created_at,
           source_name, external_id
         ) VALUES (
-          ${id}, ${EM}, 'collection_point', 'origin', 'Constraint Test',
+          ${id}, ${EM}, 'collection_point', 'Constraint Test',
           'Calle Test 1, Sevilla', 37.3886, -5.9823,
           ${OWNER_ID}, 'unverified', 'hidden', NOW(),
           'some-source', NULL
@@ -1510,7 +1492,6 @@ describe('DrizzleResourceRepository (integration)', () => {
         id: ResourceId.create().value,
         emergencyId: props.emergencyId,
         type: props.type ?? ResourceType.CollectionPoint,
-        stage: ResourceStage.Origin,
         name: props.name,
         description: null,
         location: {
@@ -1688,7 +1669,6 @@ describe('DrizzleResourceRepository (integration)', () => {
         id: ResourceId.create().value,
         emergencyId: EM2,
         type: ResourceType.Warehouse,
-        stage: ResourceStage.Origin,
         name: 'Almacén oculto con stock',
         description: null,
         location: {

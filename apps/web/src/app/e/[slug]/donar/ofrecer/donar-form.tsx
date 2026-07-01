@@ -4,8 +4,6 @@ import { useActionState, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { OfferState } from './actions';
 import { Button } from '@/components/atoms/button';
-import { Select } from '@/components/atoms/select';
-import { Input } from '@/components/atoms/input';
 import { Textarea } from '@/components/atoms/textarea';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { FormField } from '@/components/molecules/form-field';
@@ -13,7 +11,9 @@ import { FormSuccessScreen } from '@/components/molecules/form-success-screen';
 import { DraftRestoredBanner } from '@/components/atoms/draft-restored-banner';
 import { useFormDraft } from '@/lib/use-form-draft';
 import { useLocale } from '@/i18n/locale-context';
-import { MATERIAL_CATEGORIES, categoryLabel } from '@/lib/categories';
+import { SupplyLineFields } from '@/components/molecules/supply-line-fields';
+import type { SupplyLine } from '@/domain/supplies/supply-line';
+import type { Category } from '@/domain/supplies/category';
 import type { Messages } from '@/i18n/messages/es';
 
 const INITIAL_STATE: OfferState = { status: 'idle' };
@@ -29,6 +29,7 @@ interface DonarFormProps {
   orgSelector: ReactNode;
   t: Messages['donar'];
   backToEmergencyLabel: string;
+  categories: readonly Category[];
 }
 
 export function DonarForm({
@@ -40,6 +41,7 @@ export function DonarForm({
   orgSelector,
   t,
   backToEmergencyLabel,
+  categories,
 }: DonarFormProps) {
   const [state, formAction, pending] = useActionState<OfferState, FormData>(
     action,
@@ -47,9 +49,10 @@ export function DonarForm({
   );
   const locale = useLocale();
 
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState(() => categories[0]?.slug ?? '');
   const [description, setDescription] = useState('');
-  const [quantity, setQuantity] = useState('');
+  const [supplyId, setSupplyId] = useState('');
+  const [quantity, setQuantity] = useState('1');
   const [unit, setUnit] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -58,10 +61,11 @@ export function DonarForm({
     ? `donar-${slug}-need-${targetNeedId}`
     : `donar-${slug}`;
 
-  const draftValues = { category, description, quantity, unit, notes };
+  const draftValues = { category, description, supplyId, quantity, unit, notes };
   const draftSetters = {
     category: setCategory,
     description: setDescription,
+    supplyId: setSupplyId,
     quantity: setQuantity,
     unit: setUnit,
     notes: setNotes,
@@ -72,10 +76,24 @@ export function DonarForm({
     if (state.status === 'success') clearDraft();
   }, [state.status, clearDraft]);
 
-  const categories = MATERIAL_CATEGORIES.map((slug) => ({
-    value: slug,
-    label: categoryLabel(slug, locale),
-  }));
+  // The single-line SupplyLine model driving <SupplyLineFields>; its parts are
+  // the same controlled strings the draft mechanism persists (draft values must
+  // stay plain strings — see useFormDraft), converted to/from SupplyLine here.
+  const line: SupplyLine = {
+    name: description,
+    supplyId: supplyId === '' ? null : supplyId,
+    quantity: Math.max(1, Math.floor(Number(quantity) || 1)),
+    unit,
+    category,
+  };
+
+  const handleLineChange = (patch: Partial<SupplyLine>) => {
+    if (patch.name !== undefined) setDescription(patch.name);
+    if (patch.supplyId !== undefined) setSupplyId(patch.supplyId ?? '');
+    if (patch.quantity !== undefined) setQuantity(String(patch.quantity));
+    if (patch.unit !== undefined) setUnit(patch.unit);
+    if (patch.category !== undefined) setCategory(patch.category);
+  };
 
   if (state.status === 'success') {
     return (
@@ -110,84 +128,33 @@ export function DonarForm({
         </>
       )}
 
-      <FormField
-        htmlFor="category"
-        label={<>{t.category_label} <span aria-hidden="true">*</span></>}
-      >
-        <Select
-          id="category"
-          name="category"
-          required
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        >
-          <option value="" disabled>
-            {t.select_category_placeholder}
-          </option>
-          {categories.map(({ value, label }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </Select>
-      </FormField>
-
-      <FormField
-        htmlFor="description"
-        label={<>{t.description_label} <span aria-hidden="true">*</span></>}
-      >
-        <Input
-          id="description"
-          name="description"
-          type="text"
-          required
-          minLength={2}
-          placeholder={t.description_placeholder}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-      </FormField>
-
-      <div className="flex gap-3">
-        <div className="flex-1">
-          <FormField
-            htmlFor="quantity"
-            label={<>{t.quantity_label} <span aria-hidden="true">*</span></>}
-          >
-            <Input
-              id="quantity"
-              name="quantity"
-              type="number"
-              required
-              min={1}
-              step={1}
-              placeholder={t.quantity_placeholder}
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-            />
-          </FormField>
-        </div>
-        <div className="flex-1">
-          <FormField
-            htmlFor="unit"
-            label={
-              <>
-                {t.unit_label}{' '}
-                <span className="text-muted-soft font-normal normal-case">(opcional)</span>
-              </>
-            }
-          >
-            <Input
-              id="unit"
-              name="unit"
-              type="text"
-              placeholder={t.unit_placeholder}
-              value={unit}
-              onChange={(e) => setUnit(e.target.value)}
-            />
-          </FormField>
-        </div>
-      </div>
+      <SupplyLineFields
+        idPrefix="offer"
+        rowId="0"
+        index={0}
+        required
+        removable={false}
+        categories={categories}
+        locale={locale}
+        value={line}
+        onChange={handleLineChange}
+        onRemove={() => {}}
+        hideHeader
+        labels={{
+          nameLabel: t.description_label,
+          namePlaceholder: t.description_placeholder,
+          quantityLabel: t.quantity_label,
+          unitLabel: t.unit_label,
+          unitPlaceholder: t.unit_placeholder,
+          categoryLabel: t.category_label,
+        }}
+      />
+      {/* Hidden inputs post the same field names the server action expects */}
+      <input type="hidden" name="category" value={category} />
+      <input type="hidden" name="supplyId" value={supplyId} />
+      <input type="hidden" name="description" value={description} />
+      <input type="hidden" name="quantity" value={quantity} />
+      <input type="hidden" name="unit" value={unit} />
 
       <FormField
         htmlFor="location-search"

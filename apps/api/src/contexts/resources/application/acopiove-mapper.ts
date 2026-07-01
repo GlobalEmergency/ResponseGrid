@@ -11,7 +11,7 @@
  *    inside IngestExternalResources via CategoryResolver.
  */
 
-import { ResourceType, ResourceStage } from '../domain/resource-enums';
+import { ResourceType } from '../domain/resource-enums';
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -19,7 +19,6 @@ const UUID_RE =
 export type MappedResourceInput = {
   externalId: string;
   type: ResourceType;
-  stage: ResourceStage;
   name: string;
   description: string | null;
   address: string;
@@ -55,17 +54,12 @@ type AcopioveRecord = {
   updatedAt?: unknown;
 };
 
-function mapTipo(
-  tipo: unknown,
-): { type: ResourceType; stage: ResourceStage } | null {
+function mapTipo(tipo: unknown): ResourceType | null {
   switch (tipo) {
     case 'acopio':
-      return {
-        type: ResourceType.CollectionPoint,
-        stage: ResourceStage.Origin,
-      };
+      return ResourceType.CollectionPoint;
     case 'refugio':
-      return { type: ResourceType.Venue, stage: ResourceStage.Destination };
+      return ResourceType.Venue;
     default:
       return null;
   }
@@ -117,8 +111,8 @@ export const acopioveMapper: ResourceMapper = (
   if (longitude === null) return null;
 
   // Guard: tipo must map to a known type
-  const typeMapping = mapTipo(r.tipo);
-  if (!typeMapping) return null;
+  const type = mapTipo(r.tipo);
+  if (!type) return null;
 
   const name = toStringOrNull(r.name) ?? 'Sin nombre';
   const ciudad = toStringOrNull(r.ciudad);
@@ -136,8 +130,7 @@ export const acopioveMapper: ResourceMapper = (
 
   return {
     externalId: r.id,
-    type: typeMapping.type,
-    stage: typeMapping.stage,
+    type,
     name,
     description,
     address,

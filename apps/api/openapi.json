@@ -6147,6 +6147,366 @@
         ]
       }
     },
+    "/admin/supplies": {
+      "post": {
+        "operationId": "SuppliesAdminController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSupplyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSupplyResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear un insumo (asigna código INS-NNNN)",
+        "tags": [
+          "supplies-admin"
+        ]
+      },
+      "get": {
+        "operationId": "SuppliesAdminController_list",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Búsqueda por código o nombre",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categorySlug",
+            "required": false,
+            "in": "query",
+            "description": "Filtra por categoría",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "archived"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminSupplyDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar el catálogo (incluye archivados)",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/{id}": {
+      "get": {
+        "operationId": "SuppliesAdminController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSupplyDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Detalle de gestión de un insumo",
+        "tags": [
+          "supplies-admin"
+        ]
+      },
+      "patch": {
+        "operationId": "SuppliesAdminController_edit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditSupplyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar un insumo (code no editable)",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/{id}/archive": {
+      "post": {
+        "operationId": "SuppliesAdminController_archive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Archivar un insumo",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/{id}/restore": {
+      "post": {
+        "operationId": "SuppliesAdminController_restore",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reactivar un insumo archivado",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/{id}/aliases": {
+      "post": {
+        "operationId": "SuppliesAdminController_addAlias",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddSupplyAliasDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Añadir un alias/sinónimo a un insumo",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/{id}/aliases/{aliasNorm}": {
+      "delete": {
+        "operationId": "SuppliesAdminController_removeAlias",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "aliasNorm",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar un alias del catálogo",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/merge": {
+      "post": {
+        "operationId": "SuppliesAdminController_merge",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeSuppliesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Fusionar un insumo duplicado en el canónico",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
     "/supplies/containers": {
       "post": {
         "operationId": "ContainerController_create",
@@ -9069,6 +9429,12 @@
             "example": "Water bottles",
             "description": "Name of the supply"
           },
+          "supplyId": {
+            "type": "string",
+            "example": "1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8",
+            "nullable": true,
+            "description": "Optional soft link to the canonical supply master data."
+          },
           "quantity": {
             "type": "number",
             "example": 100,
@@ -9175,16 +9541,6 @@
             ],
             "example": "collection_point"
           },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "origin",
-              "intermediate",
-              "destination"
-            ],
-            "example": "origin",
-            "description": "Stage of the resource in the emergency supply chain"
-          },
           "name": {
             "type": "string",
             "example": "Cruz Roja Madrid",
@@ -9247,7 +9603,7 @@
           "isFinalRecipient": {
             "type": "boolean",
             "example": true,
-            "description": "Mark this resource as a final recipient of aid (requires the destination stage)"
+            "description": "Mark this resource as a final recipient of aid"
           },
           "recipientType": {
             "type": "string",
@@ -9272,7 +9628,6 @@
         },
         "required": [
           "type",
-          "stage",
           "name",
           "location"
         ]
@@ -9421,15 +9776,6 @@
             ],
             "example": "collection_point"
           },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "origin",
-              "intermediate",
-              "destination"
-            ],
-            "example": "origin"
-          },
           "name": {
             "type": "string",
             "example": "Cruz Roja Madrid"
@@ -9481,7 +9827,13 @@
           "contact": {
             "type": "string",
             "example": "+58 212 555 0000",
-            "nullable": true
+            "nullable": true,
+            "description": "Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell \"hidden\" from \"absent\"."
+          },
+          "hasContact": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether a contact exists on file, regardless of whether `contact` is revealed to this caller."
           },
           "schedule": {
             "type": "string",
@@ -9541,7 +9893,6 @@
         "required": [
           "id",
           "type",
-          "stage",
           "name",
           "description",
           "location",
@@ -9550,6 +9901,7 @@
           "ownerOrganizationId",
           "accepts",
           "contact",
+          "hasContact",
           "schedule",
           "manager",
           "sourceName",
@@ -9800,15 +10152,6 @@
             ],
             "example": "collection_point"
           },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "origin",
-              "intermediate",
-              "destination"
-            ],
-            "example": "origin"
-          },
           "name": {
             "type": "string",
             "example": "Cruz Roja Madrid"
@@ -9860,7 +10203,13 @@
           "contact": {
             "type": "string",
             "example": "+58 212 555 0000",
-            "nullable": true
+            "nullable": true,
+            "description": "Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell \"hidden\" from \"absent\"."
+          },
+          "hasContact": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether a contact exists on file, regardless of whether `contact` is revealed to this caller."
           },
           "schedule": {
             "type": "string",
@@ -9925,7 +10274,6 @@
         "required": [
           "id",
           "type",
-          "stage",
           "name",
           "description",
           "location",
@@ -9934,6 +10282,7 @@
           "ownerOrganizationId",
           "accepts",
           "contact",
+          "hasContact",
           "schedule",
           "manager",
           "sourceName",
@@ -10025,15 +10374,6 @@
             ],
             "example": "collection_point"
           },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "origin",
-              "intermediate",
-              "destination"
-            ],
-            "example": "origin"
-          },
           "name": {
             "type": "string",
             "example": "Cruz Roja Madrid"
@@ -10085,7 +10425,13 @@
           "contact": {
             "type": "string",
             "example": "+58 212 555 0000",
-            "nullable": true
+            "nullable": true,
+            "description": "Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell \"hidden\" from \"absent\"."
+          },
+          "hasContact": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether a contact exists on file, regardless of whether `contact` is revealed to this caller."
           },
           "schedule": {
             "type": "string",
@@ -10156,7 +10502,6 @@
         "required": [
           "id",
           "type",
-          "stage",
           "name",
           "description",
           "location",
@@ -10165,6 +10510,7 @@
           "ownerOrganizationId",
           "accepts",
           "contact",
+          "hasContact",
           "schedule",
           "manager",
           "sourceName",
@@ -10235,15 +10581,6 @@
             ],
             "example": "collection_point"
           },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "origin",
-              "intermediate",
-              "destination"
-            ],
-            "example": "origin"
-          },
           "name": {
             "type": "string",
             "example": "Cruz Roja Madrid"
@@ -10295,7 +10632,13 @@
           "contact": {
             "type": "string",
             "example": "+58 212 555 0000",
-            "nullable": true
+            "nullable": true,
+            "description": "Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell \"hidden\" from \"absent\"."
+          },
+          "hasContact": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether a contact exists on file, regardless of whether `contact` is revealed to this caller."
           },
           "schedule": {
             "type": "string",
@@ -10377,7 +10720,6 @@
         "required": [
           "id",
           "type",
-          "stage",
           "name",
           "description",
           "location",
@@ -10386,6 +10728,7 @@
           "ownerOrganizationId",
           "accepts",
           "contact",
+          "hasContact",
           "schedule",
           "manager",
           "sourceName",
@@ -10450,15 +10793,6 @@
             ],
             "example": "collection_point"
           },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "origin",
-              "intermediate",
-              "destination"
-            ],
-            "example": "origin"
-          },
           "name": {
             "type": "string",
             "example": "Cruz Roja Madrid"
@@ -10510,7 +10844,13 @@
           "contact": {
             "type": "string",
             "example": "+58 212 555 0000",
-            "nullable": true
+            "nullable": true,
+            "description": "Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell \"hidden\" from \"absent\"."
+          },
+          "hasContact": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether a contact exists on file, regardless of whether `contact` is revealed to this caller."
           },
           "schedule": {
             "type": "string",
@@ -10610,7 +10950,6 @@
         "required": [
           "id",
           "type",
-          "stage",
           "name",
           "description",
           "location",
@@ -10619,6 +10958,7 @@
           "ownerOrganizationId",
           "accepts",
           "contact",
+          "hasContact",
           "schedule",
           "manager",
           "sourceName",
@@ -11143,6 +11483,12 @@
             "type": "string",
             "example": "Water bottles"
           },
+          "supplyId": {
+            "type": "string",
+            "example": "1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8",
+            "nullable": true,
+            "description": "Optional soft link to the canonical supply master data."
+          },
           "quantity": {
             "type": "number",
             "example": 100
@@ -11192,6 +11538,7 @@
         },
         "required": [
           "name",
+          "supplyId",
           "quantity",
           "category"
         ]
@@ -12786,6 +13133,12 @@
             "type": "string",
             "example": "Water bottles"
           },
+          "supplyId": {
+            "type": "string",
+            "example": "1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8",
+            "nullable": true,
+            "description": "Optional soft link to the canonical supply master data."
+          },
           "quantity": {
             "type": "number",
             "example": 100
@@ -12842,6 +13195,7 @@
         },
         "required": [
           "name",
+          "supplyId",
           "quantity",
           "category",
           "id",
@@ -13589,6 +13943,11 @@
       "CategoryDto": {
         "type": "object",
         "properties": {
+          "slug": {
+            "type": "string",
+            "example": "medicines",
+            "description": "Canonical category slug (stable identifier)"
+          },
           "label": {
             "type": "string",
             "example": "Medicamentos",
@@ -13616,15 +13975,33 @@
             "type": "number",
             "example": 41,
             "description": "Display sort order"
+          },
+          "codePrefix": {
+            "type": "string",
+            "example": "MED",
+            "nullable": true,
+            "description": "Unique 3-letter prefix for supplies in this category, or null if inherited"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "material",
+              "personnel"
+            ],
+            "example": "material",
+            "description": "Whether the category is aid material or personnel. Personnel (medical_personnel) is excluded from material pickers."
           }
         },
         "required": [
+          "slug",
           "label",
           "labelEs",
           "labelEn",
           "parentSlug",
           "vertical",
-          "sort"
+          "sort",
+          "codePrefix",
+          "kind"
         ]
       },
       "CategoryTranslationDto": {
@@ -13870,6 +14247,187 @@
           "categoryLabelEs",
           "attributes",
           "aliases"
+        ]
+      },
+      "CreateSupplyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Agua potable (botella 1.5L)"
+          },
+          "categorySlug": {
+            "type": "string",
+            "example": "water",
+            "description": "Slug de categoría existente"
+          },
+          "defaultUnit": {
+            "type": "object",
+            "example": "und"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Atributos estructurados (jsonb)"
+          },
+          "registrationNotes": {
+            "type": "object",
+            "description": "Notas internas de gestión"
+          },
+          "variantOfId": {
+            "type": "object",
+            "format": "uuid",
+            "description": "Si es variante, id del insumo padre (debe existir)"
+          }
+        },
+        "required": [
+          "name",
+          "categorySlug"
+        ]
+      },
+      "CreateSupplyResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "example": "INS-0212"
+          }
+        },
+        "required": [
+          "id",
+          "code"
+        ]
+      },
+      "AdminSupplyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "example": "INS-0212"
+          },
+          "name": {
+            "type": "string",
+            "example": "Agua potable (botella 1.5L)"
+          },
+          "categorySlug": {
+            "type": "string",
+            "example": "water"
+          },
+          "defaultUnit": {
+            "type": "string",
+            "example": "und",
+            "nullable": true
+          },
+          "attributes": {
+            "type": "object",
+            "example": {
+              "size": "1.5L"
+            }
+          },
+          "variantOfId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "archived"
+            ],
+            "example": "active"
+          },
+          "registrationNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "aliases": {
+            "example": [
+              "agua embotellada",
+              "botellon"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "categorySlug",
+          "attributes",
+          "status",
+          "aliases"
+        ]
+      },
+      "EditSupplyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Agua mineral"
+          },
+          "categorySlug": {
+            "type": "string",
+            "example": "food"
+          },
+          "defaultUnit": {
+            "type": "object",
+            "example": "kg"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "registrationNotes": {
+            "type": "object"
+          },
+          "variantOfId": {
+            "type": "object",
+            "format": "uuid"
+          }
+        }
+      },
+      "AddSupplyAliasDto": {
+        "type": "object",
+        "properties": {
+          "term": {
+            "type": "string",
+            "example": "agua embotellada",
+            "description": "Término/sinónimo; se normaliza en el servidor"
+          }
+        },
+        "required": [
+          "term"
+        ]
+      },
+      "MergeSuppliesDto": {
+        "type": "object",
+        "properties": {
+          "sourceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Insumo duplicado (se archiva)"
+          },
+          "targetId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Insumo canónico (conserva todo)"
+          }
+        },
+        "required": [
+          "sourceId",
+          "targetId"
         ]
       },
       "ContainerHolderDto": {

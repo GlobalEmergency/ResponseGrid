@@ -4,7 +4,7 @@ import { ResourceNotFoundError } from './resource-not-found.error';
 import { InMemoryResourceRepository } from '../infrastructure/in-memory-resource.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { ResourceId } from '../domain/resource-id';
-import { ResourceType, ResourceStage } from '../domain/resource-enums';
+import { ResourceType } from '../domain/resource-enums';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { ResourceNotEditableError } from '../domain/resource-errors';
 
@@ -29,7 +29,6 @@ describe('EditResource', () => {
     const { id } = await new RegisterResource(repo, bus, activeReader).execute({
       emergencyId: EM,
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Acopio Centro',
       description: null,
       location: { address: 'Caracas', latitude: 10.48, longitude: -66.9 },

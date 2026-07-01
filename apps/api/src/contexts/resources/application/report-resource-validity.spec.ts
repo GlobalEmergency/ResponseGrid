@@ -6,7 +6,7 @@ import { InMemoryResourceRepository } from '../infrastructure/in-memory-resource
 import { InMemoryResourceValidityReportRepository } from '../infrastructure/in-memory-resource-validity-report.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { ResourceId } from '../domain/resource-id';
-import { ResourceType, ResourceStage } from '../domain/resource-enums';
+import { ResourceType } from '../domain/resource-enums';
 import { ValidityReason } from '../domain/resource-validity-report';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { OrganizationAccreditationReader } from '../domain/ports/organization-accreditation-reader';
@@ -44,7 +44,6 @@ describe('ReportResourceValidity', () => {
     ).execute({
       emergencyId: EM,
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name,
       description: null,
       location: { address: 'Caracas', latitude: 10.48, longitude: -66.9 },
@@ -176,7 +175,6 @@ describe('ReportResourceValidity', () => {
     ).execute({
       emergencyId: EM,
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Oculto',
       description: null,
       location: { address: 'Caracas', latitude: 10.48, longitude: -66.9 },

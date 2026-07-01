@@ -2,7 +2,6 @@ import { ResourceId } from './resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import {
   ResourceType,
-  ResourceStage,
   VerificationLevel,
   PublicStatus,
 } from './resource-enums';
@@ -13,7 +12,6 @@ import {
   ResourceAlreadyPublishedError,
   ResourceNotPublishedError,
   ResourceNotVerifiedError,
-  FinalRecipientMustBeDestinationError,
   ResourceNotPendingError,
   ResourceNotEditableError,
   ResourceNameRequiredError,
@@ -42,7 +40,6 @@ export interface RegisterResourceProps {
   id: ResourceId;
   emergencyId: EmergencyId;
   type: ResourceType;
-  stage: ResourceStage;
   name: string;
   description?: string | null;
   location: Location;
@@ -78,7 +75,6 @@ export interface ResourceSnapshot {
   id: string;
   emergencyId: string;
   type: ResourceType;
-  stage: ResourceStage;
   name: string;
   description: string | null;
   location: LocationProps;
@@ -111,7 +107,6 @@ export class Resource {
     public readonly id: ResourceId,
     public readonly emergencyId: EmergencyId,
     public readonly type: ResourceType,
-    public readonly stage: ResourceStage,
     private _name: string,
     private _description: string | null,
     public readonly location: Location,
@@ -136,17 +131,10 @@ export class Resource {
   ) {}
 
   static register(props: RegisterResourceProps): Resource {
-    if (
-      (props.isFinalRecipient ?? false) &&
-      props.stage !== ResourceStage.Destination
-    ) {
-      throw new FinalRecipientMustBeDestinationError(props.stage);
-    }
     const r = new Resource(
       props.id,
       props.emergencyId,
       props.type,
-      props.stage,
       props.name,
       props.description ?? null,
       props.location,
@@ -173,7 +161,6 @@ export class Resource {
       new ResourceRegistered(r.id.value, {
         emergencyId: r.emergencyId.value,
         type: r.type,
-        stage: r.stage,
         name: r.name,
       }),
     );
@@ -185,7 +172,6 @@ export class Resource {
       ResourceId.fromString(s.id),
       EmergencyId.fromString(s.emergencyId),
       s.type,
-      s.stage,
       s.name,
       s.description,
       Location.create(s.location),
@@ -419,7 +405,6 @@ export class Resource {
       id: this.id.value,
       emergencyId: this.emergencyId.value,
       type: this.type,
-      stage: this.stage,
       name: this.name,
       description: this.description,
       location: this.location.toPlain(),

@@ -7,7 +7,7 @@ import type { ReviewReportResult } from '@/app/e/[slug]/reportar/actions';
 import {
   editReport,
   discardReport,
-} from '@/app/e/[slug]/coordinacion/actions';
+} from '@/app/emergencies/[slug]/manage/actions';
 import { Button } from '@/components/atoms/button';
 import {
   ValidationActions,

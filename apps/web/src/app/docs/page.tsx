@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { SiteHeaderBand } from '@/components/organisms/site-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
 import { CoordinationIllustration } from '@/components/atoms/illustrations';
 import { getT } from '@/i18n/server';
 import { CodeBlock } from './code-block';
@@ -342,9 +342,9 @@ for (const p of items) {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-md bg-surface lg:max-w-6xl">
-        <SiteHeaderBand />
+      <AppBar variant="content" />
 
+      <div className="mx-auto w-full max-w-md bg-surface lg:max-w-6xl">
         <div className="px-5 pb-16 pt-8 lg:px-8 lg:pt-10">
           <header className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
             <div>

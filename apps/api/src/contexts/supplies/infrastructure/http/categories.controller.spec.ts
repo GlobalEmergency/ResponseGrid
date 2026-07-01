@@ -10,6 +10,7 @@ describe('CategoriesController', () => {
       parentSlug: null,
       vertical: 'general',
       sort: 1,
+      kind: 'material',
       archivedAt: null,
       translations: [
         { locale: 'es', label: 'Alimentos' },
@@ -34,5 +35,25 @@ describe('CategoriesController', () => {
     expect(en[0]?.labelEs).toBe('Alimentos');
     expect(es[0]?.label).toBe('Alimentos');
     expect(fr[0]?.label).toBe('Nourriture');
+  });
+
+  it('no expone archivedAt ni campos internos en la proyección pública', async () => {
+    const controller = new CategoriesController({
+      execute: () => Promise.resolve(categories),
+    });
+
+    const result = await controller.list('es', {});
+
+    expect(result[0]).not.toHaveProperty('archivedAt');
+    expect(result[0]).toEqual({
+      slug: 'food',
+      label: 'Alimentos',
+      labelEs: 'Alimentos',
+      labelEn: 'Food',
+      parentSlug: null,
+      vertical: 'general',
+      sort: 1,
+      kind: 'material',
+    });
   });
 });

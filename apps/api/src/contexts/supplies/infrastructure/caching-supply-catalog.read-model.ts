@@ -45,4 +45,14 @@ export class CachingSupplyCatalogReadModel implements SupplyCatalogReadModel {
       this.inflight = null;
     }
   }
+
+  /**
+   * Descarta el catálogo cacheado para que la próxima lectura recargue datos
+   * frescos. Lo llaman las escrituras de gestión (#222) tras alta/edición/
+   * archivado/alias/fusión, de modo que el cambio aflora de inmediato en la
+   * cara pública en vez de esperar al TTL.
+   */
+  invalidate(): void {
+    this.cached = null;
+  }
 }

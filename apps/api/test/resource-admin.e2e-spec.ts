@@ -155,7 +155,6 @@ describe('Admin resources console (e2e)', () => {
       .set('Authorization', `Bearer ${citizenToken}`)
       .send({
         type: 'warehouse',
-        stage: 'origin',
         name: 'Centro oculto e2e 177',
         location: baseLocation,
       })

@@ -98,7 +98,6 @@ export class IngestExternalResources {
           emergencyId: existingSnap.emergencyId,
           // Source-owned (updated):
           type: mapped.type,
-          stage: mapped.stage,
           name: mapped.name,
           description: mapped.description,
           location: {
@@ -128,7 +127,6 @@ export class IngestExternalResources {
           id: ResourceId.create().value,
           emergencyId: emergencyIdVO.value,
           type: mapped.type,
-          stage: mapped.stage,
           name: mapped.name,
           description: mapped.description,
           location: {

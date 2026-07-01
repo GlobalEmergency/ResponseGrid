@@ -128,7 +128,6 @@ export class ResourcesController {
     return this.register.execute({
       emergencyId,
       type: dto.type,
-      stage: dto.stage,
       name: dto.name,
       description: dto.description ?? null,
       location: dto.location,
@@ -147,6 +146,7 @@ export class ResourcesController {
         quantity: i.quantity,
         unit: i.unit ?? null,
         category: i.category,
+        supplyId: i.supplyId ?? null,
         presentation: i.presentation ?? null,
         expiresAt: i.expiresAt ?? null,
       })),
@@ -186,6 +186,7 @@ export class ResourcesController {
         quantity: i.quantity,
         unit: i.unit ?? null,
         category: i.category,
+        supplyId: i.supplyId ?? null,
         presentation: i.presentation ?? null,
       })),
     });

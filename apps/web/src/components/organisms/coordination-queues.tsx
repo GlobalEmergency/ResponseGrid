@@ -23,7 +23,7 @@ import { ResourceDetail } from '@/components/organisms/resource-detail';
 import { OfferDetail } from '@/components/organisms/offer-detail';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
-import { categoryLabel } from '@/lib/categories';
+import { useCategoryLabel } from '@/components/providers/categories-provider';
 import { offerTitle } from '@/lib/supply-lines';
 
 type NeedView = components['schemas']['NeedViewDto'];
@@ -295,6 +295,7 @@ export function OffersQueue({
 }: OffersQueueProps) {
   const locale = useLocale();
   const tc = getMessages(locale).coord;
+  const categoryName = useCategoryLabel();
   const [openId, setOpenId] = useState<string | null>(null);
   const { acted, markActed } = useActedSet();
 
@@ -339,7 +340,7 @@ export function OffersQueue({
                   {first !== undefined && (
                     <>
                       <span className="font-medium">
-                        {categoryLabel(first.category, locale)}
+                        {categoryName(first.category)}
                       </span>
                       <span aria-hidden="true" className="text-muted-soft">
                         ·

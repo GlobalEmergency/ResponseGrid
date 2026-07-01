@@ -189,7 +189,6 @@ describe('Emergency lifecycle (e2e)', () => {
       .set('Authorization', `Bearer ${coordToken}`)
       .send({
         type: 'warehouse',
-        stage: 'origin',
         name: 'Blocked Resource',
         location: baseLocation,
       })
@@ -257,7 +256,6 @@ describe('Emergency lifecycle (e2e)', () => {
       .set('Authorization', `Bearer ${coordToken}`)
       .send({
         type: 'warehouse',
-        stage: 'origin',
         name: 'Resumed Resource',
         location: baseLocation,
       })

@@ -165,7 +165,6 @@ describe('Audit log (e2e)', () => {
       .set('Authorization', `Bearer ${coordToken}`)
       .send({
         type: 'warehouse',
-        stage: 'origin',
         name: 'Audit E2E Resource',
         location: {
           address: 'Calle Audit, Valencia',
@@ -262,7 +261,6 @@ describe('Audit log (e2e)', () => {
       .set('Authorization', `Bearer ${coordToken}`)
       .send({
         type: 'warehouse',
-        stage: 'origin',
         name: 'Audit Filter Resource',
         location: {
           address: 'Calle Filter, Valencia',

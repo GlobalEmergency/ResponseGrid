@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { getMe, getRoles } from '@/lib/navigation-data';
@@ -9,9 +9,11 @@ import {
   type EmergencyAccess,
 } from '@/lib/emergency-permissions';
 import type { MeGrant, RoleCatalogEntry } from '@/lib/admin-scopes';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { getT } from '@/i18n/server';
-import { categoryLabel } from '@/lib/categories';
+import { labelForCategory } from '@/domain/supplies/category';
+import { getCategoriesCached } from '@/adapters/get-categories';
 import { formatDate } from '@/lib/format-date';
 import { submitReception } from '../actions';
 import { ReceptionActions } from './reception-actions';
@@ -36,10 +38,7 @@ export default async function IntakeDetailPage({ params }: Props) {
   const { slug, intakeId } = await params;
   const next = `/e/${slug}/recepcion/${intakeId}`;
 
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=${next}`);
-  }
+  const token = await requireSession(next);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
@@ -51,7 +50,7 @@ export default async function IntakeDetailPage({ params }: Props) {
   const [me, roles] = await Promise.all([getMe(), getRoles()]);
   if (me == null) {
     await clearToken();
-    redirect(`/login?next=${next}`);
+    redirect(loginHref(next));
   }
 
   const access: EmergencyAccess = resolveEmergencyAccess(
@@ -69,7 +68,7 @@ export default async function IntakeDetailPage({ params }: Props) {
   });
   if (res.response.status === 401) {
     await clearToken();
-    redirect(`/login?next=${next}`);
+    redirect(loginHref(next));
   }
   if (res.response.status === 403) {
     redirect(`/e/${slug}/recepcion`);
@@ -81,6 +80,7 @@ export default async function IntakeDetailPage({ params }: Props) {
 
   const { t, locale } = await getT();
   const tr = t.recepcion;
+  const categories = await getCategoriesCached(locale);
 
   const statusLabel =
     intake.status === 'received'
@@ -101,11 +101,12 @@ export default async function IntakeDetailPage({ params }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <PageHeaderBand
+        <AppBar
+          variant="action"
+          slug={slug}
           backHref={`/e/${slug}/recepcion`}
-          backLabel={tr.back_to_list}
-          title={tr.detail_subtitle.replace('{code}', intake.intakeCode)}
         />
+        <PageHeading title={tr.detail_subtitle.replace('{code}', intake.intakeCode)} />
         <div className="flex flex-col gap-6 px-4 pb-12 pt-6">
           <span className="w-fit rounded-full bg-surface-alt px-3 py-1 text-sm font-semibold text-ink">
             {statusLabel}
@@ -132,7 +133,7 @@ export default async function IntakeDetailPage({ params }: Props) {
                       {line.name}
                     </span>
                     <span className="text-[12.5px] text-muted">
-                      {categoryLabel(line.category, locale)}
+                      {labelForCategory(line.category, categories)}
                       {line.presentation != null && line.presentation !== ''
                         ? ` · ${line.presentation}`
                         : ''}

@@ -5,8 +5,8 @@ import {
   pauseEmergency,
   resumeEmergency,
   publishAnnouncement,
-} from '@/app/e/[slug]/coordinacion/actions';
-import type { ActionResult } from '@/app/e/[slug]/coordinacion/actions';
+} from '@/app/emergencies/[slug]/manage/actions';
+import type { ActionResult } from '@/app/emergencies/[slug]/manage/actions';
 import { Button } from '@/components/atoms/button';
 import { Textarea } from '@/components/atoms/textarea';
 import { ErrorMessage } from '@/components/atoms/error-message';

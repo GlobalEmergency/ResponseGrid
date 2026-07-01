@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { getToken } from '@/lib/auth';
+import { requireSession, loginHref } from '@/lib/auth';
 import { getMe } from '@/lib/navigation-data';
 import { submitCapacity } from './actions';
 import { OfrecerTransporteForm } from './ofrecer-transporte-form';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
 import { Card } from '@/components/atoms/card';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { getT } from '@/i18n/server';
 
 type Props = {
@@ -36,15 +37,12 @@ export default async function OfrecerTransportePage({ params }: Props) {
   const { t } = await getT();
 
   // Publishing a capacity REQUIRES auth (capacity:publish, citizen-grade).
-  const token = await getToken();
-  if (!token) {
-    redirect(`/login?next=/e/${slug}/ofrecer-transporte`);
-  }
+  await requireSession(`/e/${slug}/ofrecer-transporte`);
 
   // Resolve the current user — they are the provider (type: volunteer).
   const me = await getMe();
   if (me == null) {
-    redirect(`/login?next=/e/${slug}/ofrecer-transporte`);
+    redirect(loginHref(`/e/${slug}/ofrecer-transporte`));
   }
 
   const emergency = await getEmergencyBySlug(slug);
@@ -54,14 +52,13 @@ export default async function OfrecerTransportePage({ params }: Props) {
 
   // Bind both the emergency and the provider id server-side so neither is
   // trusted from the client form.
-  const boundAction = submitCapacity.bind(null, emergency.id, me.id);
+  const boundAction = submitCapacity.bind(null, slug, emergency.id, me.id);
 
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <PageHeaderBand
-          backHref={`/e/${slug}`}
-          backLabel={t.common.back_to_emergency}
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <PageHeading
           title={t.ofrecerTransporte.page_title}
           subtitle={t.ofrecerTransporte.page_subtitle.replace(
             '{emergencyName}',

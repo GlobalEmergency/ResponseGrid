@@ -149,7 +149,6 @@ describe('Resource status semaphore (e2e)', () => {
       .set('Authorization', `Bearer ${ownerToken}`)
       .send({
         type: 'warehouse',
-        stage: 'origin',
         name,
         location: baseLocation,
       })
@@ -266,7 +265,6 @@ describe('Resource status semaphore (e2e)', () => {
       .set('Authorization', `Bearer ${coordToken}`)
       .send({
         type: 'venue',
-        stage: 'destination',
         name: 'Coord Venue',
         location: baseLocation,
       })

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { getMe, getRoles } from '@/lib/navigation-data';
@@ -10,10 +10,12 @@ import {
   type EmergencyAccess,
 } from '@/lib/emergency-permissions';
 import type { MeGrant, RoleCatalogEntry } from '@/lib/admin-scopes';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { formatDate } from '@/lib/format-date';
-import { categoryLabel } from '@/lib/categories';
+import { labelForCategory } from '@/domain/supplies/category';
+import { getCategoriesCached } from '@/adapters/get-categories';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
@@ -41,10 +43,7 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const sp = await searchParams;
 
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/recepcion`);
-  }
+  const token = await requireSession(`/e/${slug}/recepcion`);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
@@ -57,7 +56,7 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
   const [me, roles] = await Promise.all([getMe(), getRoles()]);
   if (me == null) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/recepcion`);
+    redirect(loginHref(`/e/${slug}/recepcion`));
   }
 
   const access: EmergencyAccess = resolveEmergencyAccess(
@@ -72,6 +71,7 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
 
   const { t, locale } = await getT();
   const tr = t.recepcion;
+  const categories = await getCategoriesCached(locale);
 
   const q = typeof sp.q === 'string' ? sp.q.trim().slice(0, 100) : '';
 
@@ -82,7 +82,7 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
   });
   if (mineRes.response.status === 401) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/recepcion`);
+    redirect(loginHref(`/e/${slug}/recepcion`));
   }
   const myPoints = (mineRes.data ?? []).filter((r) =>
     COLLECTION_TYPES.has(r.type),
@@ -142,12 +142,12 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <PageHeaderBand
-          backHref={`/e/${slug}/coordinacion`}
-          backLabel={tr.back_to_hub}
-          title={tr.page_title}
-          subtitle={tr.page_subtitle}
+        <AppBar
+          variant="action"
+          slug={slug}
+          backHref={`/emergencies/${slug}/manage`}
         />
+        <PageHeading title={tr.page_title} subtitle={tr.page_subtitle} />
         <div className="flex flex-col gap-5 px-4 pb-12 pt-6">
           <Link
             href={`/e/${slug}/pre-registro`}
@@ -245,7 +245,7 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
                                 {line.name}
                               </span>
                               <span className="text-[12.5px] text-muted">
-                                {categoryLabel(line.category, locale)} ·{' '}
+                                {labelForCategory(line.category, categories)} ·{' '}
                                 {tr.incoming_from_intakes.replace(
                                   '{n}',
                                   String(line.intakeCount),

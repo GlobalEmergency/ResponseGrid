@@ -5,11 +5,7 @@ import { PublishResource } from './publish-resource';
 import { InMemoryResourceRepository } from '../infrastructure/in-memory-resource.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { ResourceId } from '../domain/resource-id';
-import {
-  ResourceType,
-  ResourceStage,
-  PublicStatus,
-} from '../domain/resource-enums';
+import { ResourceType, PublicStatus } from '../domain/resource-enums';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { ResourceMembershipReader } from '../domain/ports/membership-reader';
 import { ResourceNotFoundError } from './resource-not-found.error';
@@ -54,7 +50,6 @@ async function makePublishedResource(
   const { id } = await new RegisterResource(repo, bus, activeReader).execute({
     emergencyId: EM,
     type: ResourceType.CollectionPoint,
-    stage: ResourceStage.Origin,
     name: 'Punto Test',
     location: baseLocation,
     ownerUserId: OWNER_ID,
@@ -132,7 +127,6 @@ describe('UpdateResourcePublicStatus', () => {
     const { id } = await new RegisterResource(repo, bus, activeReader).execute({
       emergencyId: EM,
       type: ResourceType.Warehouse,
-      stage: ResourceStage.Origin,
       name: 'Hidden Warehouse',
       location: baseLocation,
       ownerUserId: OWNER_ID,

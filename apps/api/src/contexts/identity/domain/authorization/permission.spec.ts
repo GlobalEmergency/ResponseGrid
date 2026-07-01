@@ -59,6 +59,12 @@ describe('permission catalog', () => {
     expect(READ_ONLY_PERMISSIONS).toContain('intake:read');
   });
 
+  it('includes the supply catalogue governance permission (#228)', () => {
+    expect(ALL_PERMISSIONS).toContain('catalogue:manage');
+    expect(isPermission('catalogue:manage')).toBe(true);
+    expect(READ_ONLY_PERMISSIONS).toContain('catalogue:read');
+  });
+
   it('has no duplicates', () => {
     expect(new Set(ALL_PERMISSIONS).size).toBe(ALL_PERMISSIONS.length);
   });

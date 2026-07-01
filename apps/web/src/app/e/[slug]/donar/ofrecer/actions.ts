@@ -3,9 +3,10 @@
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
-import { getToken, authHeaders, clearToken } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders, clearToken } from '@/lib/auth';
 import { getT } from '@/i18n/server';
-import { MATERIAL_CATEGORIES } from '@/lib/categories';
+import { getCategories } from '@/adapters/get-categories';
+import { isMaterialCategory } from '@/domain/supplies/category';
 
 type OfferCategory =
   components['schemas']['SubmitOfferDto']['items'][number]['category'];
@@ -15,35 +16,36 @@ export type OfferState =
   | { status: 'success'; id: string }
   | { status: 'error'; message: string };
 
-// Validate against the same material catalogue the donor form offers
-// (MATERIAL_CATEGORIES) so every category the UI shows is accepted — avoids the
-// drift where a hardcoded subset rejected clothing/medicines/etc.
-function isCategory(value: unknown): value is OfferCategory {
-  return (MATERIAL_CATEGORIES as readonly string[]).includes(value as string);
-}
-
 export async function submitOffer(
+  slug: string,
   emergencyId: string,
   _prev: OfferState,
   formData: FormData,
 ): Promise<OfferState> {
-  const token = await getToken();
-  if (!token) {
-    redirect('/login');
-  }
+  const token = await requireSession(`/e/${slug}/donar/ofrecer`);
 
-  const { t } = await getT();
+  const { t, locale } = await getT();
 
   const rawCategory = formData.get('category');
   const rawDescription = formData.get('description');
   const rawQuantity = formData.get('quantity');
   const rawUnit = formData.get('unit');
+  const rawSupplyId = formData.get('supplyId');
   const rawAddress = formData.get('address');
   const rawLatitude = formData.get('latitude');
   const rawLongitude = formData.get('longitude');
   const rawOrgId = formData.get('organizationId');
   const rawNotes = formData.get('notes');
   const rawTargetNeedId = formData.get('targetNeedId');
+
+  // Validate against the DB-backed material catalogue (single source of
+  // truth) so every category the UI shows is accepted — avoids the drift
+  // where a hardcoded subset rejected clothing/medicines/etc.
+  const validMaterialCategories = new Set(
+    (await getCategories(locale)).filter(isMaterialCategory).map((c) => c.slug),
+  );
+  const isCategory = (value: unknown): value is OfferCategory =>
+    typeof value === 'string' && validMaterialCategories.has(value);
 
   if (!isCategory(rawCategory)) {
     return { status: 'error', message: t.donar.err_invalid_category };
@@ -88,6 +90,11 @@ export async function submitOffer(
       ? rawNotes.trim()
       : undefined;
 
+  const supplyId =
+    typeof rawSupplyId === 'string' && rawSupplyId.trim() !== ''
+      ? rawSupplyId.trim()
+      : undefined;
+
   const donorOrganizationId =
     typeof rawOrgId === 'string' && rawOrgId.trim() !== ''
       ? rawOrgId.trim()
@@ -112,6 +119,7 @@ export async function submitOffer(
             quantity: quantityRaw,
             category: rawCategory,
             ...(unit !== undefined ? { unit } : {}),
+            ...(supplyId !== undefined ? { supplyId } : {}),
           },
         ],
         location: { address, latitude, longitude },
@@ -124,7 +132,7 @@ export async function submitOffer(
 
   if (response.status === 401) {
     await clearToken();
-    redirect('/login');
+    redirect(loginHref(`/e/${slug}/donar/ofrecer`));
   }
 
   if (response.status === 409) {

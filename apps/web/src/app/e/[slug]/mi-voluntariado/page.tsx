@@ -1,13 +1,14 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
-import { getToken } from '@/lib/auth';
+import { notFound } from 'next/navigation';
+import { requireSession } from '@/lib/auth';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { fetchMyVolunteerProfile, fetchMyTasks } from './actions';
 import { TaskCard } from './task-card';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { Badge } from '@/components/atoms/badge';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
@@ -61,10 +62,7 @@ export default async function MiVoluntariadoPage({ params }: Props) {
     inactive: ta.vol_status_inactive,
   };
 
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/mi-voluntariado`);
-  }
+  await requireSession(`/e/${slug}/mi-voluntariado`);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
@@ -79,12 +77,8 @@ export default async function MiVoluntariadoPage({ params }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <PageHeaderBand
-          backHref={`/e/${slug}`}
-          backLabel={emergency.name}
-          title={ta.vol_title}
-          subtitle={ta.vol_subtitle}
-        />
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <PageHeading title={ta.vol_title} subtitle={ta.vol_subtitle} />
         <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">
 
         <section aria-labelledby="profile-heading" className="flex flex-col gap-4">

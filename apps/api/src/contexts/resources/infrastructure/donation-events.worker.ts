@@ -1,8 +1,9 @@
 import { Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Worker, Job } from 'bullmq';
-import IORedis from 'ioredis';
+import IORedis, { type Redis as IORedisConnection } from 'ioredis';
 import { ReceiveDonationIntoInventory } from '../application/receive-donation-into-inventory';
 import { SupplyLineSnapshot } from '../../supplies/domain/supply-line';
+import { toBullMqConnection } from '../../../shared/bullmq-connection';
 
 interface DomainEventJobData {
   name: string;
@@ -28,7 +29,7 @@ const DONATION_RECEIVED = 'donation_intake.received';
 export class DonationEventsWorker implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DonationEventsWorker.name);
   private worker: Worker<DomainEventJobData> | null = null;
-  private connection: IORedis | null = null;
+  private connection: IORedisConnection | null = null;
 
   constructor(private readonly receive: ReceiveDonationIntoInventory) {}
 
@@ -36,11 +37,12 @@ export class DonationEventsWorker implements OnModuleInit, OnModuleDestroy {
     const url = process.env.REDIS_URL;
     if (!url) throw new Error('REDIS_URL is required');
     // BullMQ workers need a dedicated connection with blocking commands enabled.
-    this.connection = new IORedis(url, { maxRetriesPerRequest: null });
+    const connection = new IORedis(url, { maxRetriesPerRequest: null });
+    this.connection = connection;
     this.worker = new Worker<DomainEventJobData>(
       'domain-events',
       (job: Job<DomainEventJobData>) => this.handle(job),
-      { connection: this.connection },
+      { connection: toBullMqConnection(connection) },
     );
     this.worker.on('failed', (job, err) => {
       this.logger.error(

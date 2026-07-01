@@ -210,7 +210,6 @@ describe('Accreditation (e2e)', () => {
         .set('Authorization', `Bearer ${coordToken}`)
         .send({
           type: 'warehouse',
-          stage: 'origin',
           name: 'Almacén Oficial E2E',
           location: baseLocation,
           ownerOrganizationId: ORG_ID,
@@ -246,7 +245,6 @@ describe('Accreditation (e2e)', () => {
         .set('Authorization', `Bearer ${coordToken}`)
         .send({
           type: 'venue',
-          stage: 'destination',
           name: 'Venue No-accredit E2E',
           location: baseLocation,
           ownerOrganizationId: UNACCREDITED_ORG_ID,
@@ -280,7 +278,6 @@ describe('Accreditation (e2e)', () => {
         .set('Authorization', `Bearer ${coordToken}`)
         .send({
           type: 'transport',
-          stage: 'intermediate',
           name: 'Furgón Personal E2E',
           location: baseLocation,
           // no ownerOrganizationId

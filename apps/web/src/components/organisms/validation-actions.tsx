@@ -5,7 +5,7 @@ import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
-import type { ActionResult } from '@/app/e/[slug]/coordinacion/actions';
+import type { ActionResult } from '@/app/emergencies/[slug]/manage/actions';
 
 export type EditField =
   | {

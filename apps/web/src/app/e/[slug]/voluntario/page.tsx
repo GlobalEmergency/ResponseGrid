@@ -1,13 +1,14 @@
 import type { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { getToken, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { registerVolunteer } from './actions';
 import { VoluntarioForm } from './voluntario-form';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
 import { Card } from '@/components/atoms/card';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
@@ -37,10 +38,7 @@ export default async function VoluntarioPage({ params }: Props) {
   const { slug } = await params;
   const { t } = await getT();
 
-  const token = await getToken();
-  if (!token) {
-    redirect(`/login?next=/e/${slug}/voluntario`);
-  }
+  const token = await requireSession(`/e/${slug}/voluntario`);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
@@ -60,14 +58,13 @@ export default async function VoluntarioPage({ params }: Props) {
     existingProfile = data;
   }
 
-  const boundAction = registerVolunteer.bind(null, emergency.id);
+  const boundAction = registerVolunteer.bind(null, slug, emergency.id);
 
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <PageHeaderBand
-          backHref={`/e/${slug}`}
-          backLabel={t.common.back_to_emergency}
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <PageHeading
           title={t.voluntario.page_title}
           subtitle={t.voluntario.page_subtitle.replace('{emergencyName}', emergency.name)}
         />

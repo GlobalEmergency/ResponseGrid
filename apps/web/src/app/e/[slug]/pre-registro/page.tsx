@@ -5,10 +5,12 @@ import { getEmergencyBySlug } from '@/lib/emergencies';
 import { api } from '@/lib/api';
 import { getMe } from '@/lib/navigation-data';
 import { getT } from '@/i18n/server';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { submitPreRegistration } from './actions';
 import { PreRegistroForm } from './pre-registro-form';
+import { getCategories } from '@/adapters/get-categories';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,12 +77,8 @@ export default async function PreRegistroPage({ params, searchParams }: Props) {
     return (
       <main className="flex-1 bg-surface">
         <div className="mx-auto w-full max-w-3xl">
-          <PageHeaderBand
-            backHref={`/e/${slug}`}
-            backLabel={t.common.back_to_emergency}
-            title={tp.pick_title}
-            subtitle={tp.pick_hint}
-          />
+          <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+          <PageHeading title={tp.pick_title} subtitle={tp.pick_hint} />
           <div className="flex flex-col gap-5 px-4 pb-12 pt-6">
             <form method="get" role="search" className="flex gap-2">
               <input
@@ -153,19 +151,22 @@ export default async function PreRegistroPage({ params, searchParams }: Props) {
   const donorProfile = me
     ? { name: me.name, email: me.email, phone: me.phone ?? null }
     : null;
+  const categories = eligible ? await getCategories(locale) : [];
 
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <PageHeaderBand
+        <AppBar
+          variant="action"
+          slug={slug}
           backHref={`/e/${slug}/pre-registro`}
-          backLabel={tp.back_to_pick}
+        />
+        <PageHeading
           title={tp.page_title}
-          subtitle={
-            eligible && resource !== undefined
-              ? tp.page_subtitle.replace('{pointName}', resource.name)
-              : undefined
-          }
+          {...(eligible &&
+            resource !== undefined && {
+              subtitle: tp.page_subtitle.replace('{pointName}', resource.name),
+            })}
         />
         <div className="flex flex-col gap-6 px-4 pb-12 pt-6">
           {eligible && resource !== undefined ? (
@@ -181,6 +182,7 @@ export default async function PreRegistroPage({ params, searchParams }: Props) {
               t={tp}
               locale={locale}
               backToEmergencyLabel={t.common.back_to_emergency}
+              categories={categories}
               profile={donorProfile}
             />
           ) : (

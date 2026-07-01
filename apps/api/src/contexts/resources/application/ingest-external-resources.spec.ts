@@ -20,7 +20,6 @@ import { CategoryResolver } from '../../supplies/domain/category-resolver';
 import { MappedResourceInput, ResourceMapper } from './acopiove-mapper';
 import {
   ResourceType,
-  ResourceStage,
   VerificationLevel,
   PublicStatus,
 } from '../domain/resource-enums';
@@ -44,7 +43,6 @@ function makeMappedInput(
   return {
     externalId: EXT_ID_1,
     type: ResourceType.CollectionPoint,
-    stage: ResourceStage.Origin,
     name: 'Punto Acopio Prueba',
     description: 'Necesitamos agua | Fuente: Cruz Roja',
     address: 'Calle Mayor 1, Valencia',
@@ -164,7 +162,6 @@ describe('IngestExternalResources', () => {
       expect(found!.city).toBe('Valencia');
       expect(found!.country).toBe('España');
       expect(found!.type).toBe(ResourceType.CollectionPoint);
-      expect(found!.stage).toBe(ResourceStage.Origin);
     });
 
     it('new resource starts with verificationLevel=Unverified and publicStatus=Active', async () => {
@@ -226,7 +223,6 @@ describe('IngestExternalResources', () => {
         id: existingId.value,
         emergencyId: EMERGENCY_ID,
         type: ResourceType.CollectionPoint,
-        stage: ResourceStage.Origin,
         name: 'Punto Original',
         description: null,
         location: {
@@ -294,7 +290,6 @@ describe('IngestExternalResources', () => {
         id: ResourceId.create().value,
         emergencyId: EMERGENCY_ID,
         type: ResourceType.CollectionPoint,
-        stage: ResourceStage.Origin,
         name: 'Punto Disputado',
         description: null,
         location: { address: 'Calle 1', latitude: 39.46, longitude: -0.37 },

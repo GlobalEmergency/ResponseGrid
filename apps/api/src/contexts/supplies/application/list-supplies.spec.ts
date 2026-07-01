@@ -62,4 +62,40 @@ describe('ListSupplies', () => {
     expect(result).toHaveLength(1);
     expect(result[0]?.id).toBe(catalog[0].id);
   });
+
+  it('soporta búsquedas difusas (fuzzy) con errores tipográficos (ej: abua -> agua)', async () => {
+    const result = await new ListSupplies(readModel()).execute({
+      q: 'abua',
+      locale: 'es',
+      limit: 20,
+      offset: 0,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.nameEs).toBe('Agua potable');
+  });
+
+  it('soporta búsquedas por subcadenas o partes de palabra (ej: gua -> agua)', async () => {
+    const result = await new ListSupplies(readModel()).execute({
+      q: 'gua',
+      locale: 'es',
+      limit: 20,
+      offset: 0,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.nameEs).toBe('Agua potable');
+  });
+
+  it('ordena los resultados de forma que los mejores matches (exacto/prefijo) salgan primero', async () => {
+    const result = await new ListSupplies(readModel()).execute({
+      q: 'agua',
+      locale: 'es',
+      limit: 20,
+      offset: 0,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.nameEs).toBe('Agua potable');
+  });
 });
