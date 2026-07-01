@@ -1,21 +1,16 @@
 /**
- * Role-and-scope-aware navigation model.
+ * Context-aware navigation model.
  *
- * Pure, framework-free: given the principal's grants, the role catalog and a
- * little resolved context (emergencies they belong to, unread count), it returns
- * the menu structure. It does NOT fetch — the data layer (navigation-data.ts)
- * loads inputs and the app shell renders the output. Gating is by permission
- * (derived from /roles) and by scope, so new roles inherit menu items for free.
- *
- * Admin/management surfacing reuses the existing `admin-scopes` helper so the
- * sidebar stays consistent with the /administracion hub.
+ * Pure, framework-free: given the principal's resolved contexts (emergencies,
+ * points, organizations, groups they hold a grant in), the active context (if
+ * any) and its resolved access, it returns the menu structure — Inicio, one
+ * collapsible category per context type, the active context's gated sections
+ * inlined, personal links and, if applicable, the administration hub. It does
+ * NOT fetch — the data layer (navigation-data.ts) loads inputs and the app
+ * shell renders the output. `isAdmin`/`canAdminister` are passed in so this
+ * module has no dependency on `admin-scopes`.
  */
 import type { Messages } from '@/i18n/messages/es';
-import {
-  canAdminister,
-  type MeGrant,
-  type RoleCatalogEntry,
-} from './admin-scopes.ts';
 import type { EmergencyAccess } from '@/lib/emergency-permissions';
 
 /** Static labels live in the `nav` i18n namespace; dynamic ones pass `label`. */
@@ -31,6 +26,8 @@ export interface NavItem {
   badgeCount?: number;
   /** Active-match strategy: exact path vs path prefix (default: prefix). */
   exact?: boolean;
+  /** Nesting level for indentation (0 = top-level). */
+  depth?: number;
 }
 
 export interface NavGroup {
@@ -80,90 +77,76 @@ export function contextHref(c: PrincipalContext): string {
   }
 }
 
-/** Permissions that mean "this person operates this emergency" (coordinator/verifier). */
-const COORDINATION_PERMISSIONS = [
-  'need:validate',
-  'need:prioritize',
-  'offer:match',
-  'report:triage',
-  'task:assign',
-  'task:create',
-  'resource:verify',
+const CATEGORY_ORDER: { type: ContextType; key: string; headingKey: NavLabelKey }[] = [
+  { type: 'emergency', key: 'cat-emergencies', headingKey: 'cat_emergencies' },
+  { type: 'point', key: 'cat-points', headingKey: 'cat_points' },
+  { type: 'organization', key: 'cat-organizations', headingKey: 'cat_organizations' },
+  { type: 'group', key: 'cat-groups', headingKey: 'cat_groups' },
 ];
 
 export interface BuildNavArgs {
-  grants: MeGrant[];
-  roles: RoleCatalogEntry[];
+  contexts: PrincipalContext[];
   isAdmin: boolean;
-  myEmergencies: MyEmergencyNav[];
+  canAdminister: boolean;
   notificationUnread: number;
+  activeContext?: ActiveContextRef;
+  activeEmergencyAccess?: EmergencyAccess;
 }
 
-/** Max per-emergency coordination links shown directly in the sidebar. */
-const MAX_COORDINATION_ITEMS = 8;
-
 export function buildNavModel({
-  grants,
-  roles,
+  contexts,
   isAdmin,
-  myEmergencies,
+  canAdminister,
   notificationUnread,
+  activeContext,
+  activeEmergencyAccess,
 }: BuildNavArgs): NavModel {
-  const permsByRole = new Map(roles.map((r) => [r.id, new Set(r.permissions)]));
   const groups: NavModel = [];
 
-  // Top — Panel (always for authenticated users).
+  // Top — Inicio (personal home).
   groups.push({
     key: 'main',
-    items: [{ key: 'panel', href: '/panel', labelKey: 'panel', exact: true }],
+    items: [{ key: 'home', href: '/dashboard', labelKey: 'home', exact: true }],
   });
 
-  // Coordinación — one entry per emergency where the principal's roles confer
-  // operational permissions (coordinator or verifier).
-  const coordinationEmergencies = myEmergencies.filter((e) =>
-    e.roleIds.some((roleId) => {
-      const perms = permsByRole.get(roleId);
-      return perms != null && COORDINATION_PERMISSIONS.some((p) => perms.has(p));
-    }),
-  );
-  if (coordinationEmergencies.length > 0) {
-    groups.push({
-      key: 'coordination',
-      headingKey: 'coordination',
-      items: coordinationEmergencies.slice(0, MAX_COORDINATION_ITEMS).map((e) => ({
-        key: `coord-${e.id}`,
-        href: `/e/${e.slug}/coordinacion`,
-        label: e.name,
-      })),
-    });
+  // One collapsible category per context type the principal actually has.
+  for (const cat of CATEGORY_ORDER) {
+    const inCat = contexts.filter((c) => c.type === cat.type);
+    if (inCat.length === 0) continue;
+
+    const items: NavItem[] = [];
+    for (const c of inCat) {
+      items.push({ key: `ctx-${c.id}`, href: contextHref(c), label: c.name, depth: 1 });
+      const isActive =
+        activeContext != null && activeContext.type === c.type && activeContext.id === c.id;
+      if (isActive && c.type === 'emergency' && activeEmergencyAccess != null && c.slug != null) {
+        for (const s of emergencySectionItems(c.slug, activeEmergencyAccess)) {
+          items.push({ ...s, key: `sec-${s.key}`, depth: 2 });
+        }
+      }
+    }
+    groups.push({ key: cat.key, headingKey: cat.headingKey, items });
   }
 
-  // Administración — single entry into the role-aware hub (reuses admin-scopes).
-  if (isAdmin || canAdminister(grants, roles)) {
-    groups.push({
-      key: 'admin',
-      items: [
-        { key: 'administracion', href: '/panel/administracion', labelKey: 'administration' },
-      ],
-    });
-  }
-
-  // Personal — always available to any authenticated user.
+  // Personal — always.
   groups.push({
     key: 'personal',
     headingKey: 'account_section',
     items: [
-      {
-        key: 'notifications',
-        href: '/panel/notificaciones',
-        labelKey: 'notifications',
-        badgeCount: notificationUnread,
-      },
-      { key: 'groups', href: '/panel/grupos', labelKey: 'my_groups' },
-      { key: 'orgs', href: '/panel/organizaciones', labelKey: 'my_orgs' },
-      { key: 'permissions', href: '/panel/mis-permisos', labelKey: 'my_permissions' },
+      { key: 'notifications', href: '/dashboard/notifications', labelKey: 'notifications', badgeCount: notificationUnread },
+      { key: 'donations', href: '/dashboard/donations', labelKey: 'my_donations' },
+      { key: 'permissions', href: '/dashboard/permissions', labelKey: 'my_permissions' },
+      { key: 'profile', href: '/dashboard/profile', labelKey: 'my_profile' },
     ],
   });
+
+  // Administración — platform-level hub.
+  if (isAdmin || canAdminister) {
+    groups.push({
+      key: 'admin',
+      items: [{ key: 'admin', href: '/admin', labelKey: 'administration' }],
+    });
+  }
 
   return groups;
 }

@@ -2551,6 +2551,8 @@ export const en = {
     cat_points: 'Collection points',
     cat_organizations: 'Organizations',
     cat_groups: 'Crews',
+    my_donations: 'My donations',
+    my_profile: 'My profile',
   },
 
   panel: {

@@ -2588,6 +2588,8 @@ export const es = {
     cat_points: 'Puntos de acopio',
     cat_organizations: 'Organizaciones',
     cat_groups: 'Cuadrillas',
+    my_donations: 'Mis donaciones',
+    my_profile: 'Mi perfil',
   },
 
   panel: {
