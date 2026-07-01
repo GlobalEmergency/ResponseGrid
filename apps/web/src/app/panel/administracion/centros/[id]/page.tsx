@@ -6,10 +6,10 @@ import { PageHeader } from '@/components/molecules/page-header';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { Badge } from '@/components/atoms/badge';
 import { LocalDate } from '@/components/atoms/local-date';
-import { categoryLabel, categoryColor } from '@/lib/categories';
+import { categoryColor } from '@/lib/categories';
 import { getT } from '@/i18n/server';
 import { getCategories } from '@/adapters/get-categories';
-import { isMaterialCategory } from '@/domain/supplies/category';
+import { isMaterialCategory, labelForCategory } from '@/domain/supplies/category';
 import { fetchAdminResourceDetail } from '../actions';
 import { RecordInventoryEntry } from './record-inventory-entry';
 import {
@@ -48,7 +48,8 @@ export default async function CentroDetailPage({ params }: Props) {
   const { t, locale } = await getT();
   const ta = t.admin;
 
-  const materialCategories = (await getCategories(locale)).filter(isMaterialCategory);
+  const categories = await getCategories(locale);
+  const materialCategories = categories.filter(isMaterialCategory);
 
   if (!resource) {
     return (
@@ -201,7 +202,7 @@ export default async function CentroDetailPage({ params }: Props) {
                         slug,
                       )}`}
                     >
-                      {categoryLabel(slug, locale)}
+                      {labelForCategory(slug, categories)}
                     </span>
                   ))}
                 </div>

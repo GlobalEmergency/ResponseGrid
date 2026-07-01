@@ -1,10 +1,12 @@
+'use client';
+
 import Link from 'next/link';
 import type { components } from '@reliefhub/api-client';
 import { Card } from '@/components/atoms/card';
 import { PriorityBadge, type Priority } from '@/components/atoms/priority-badge';
 import { FreshnessIndicator } from '@/components/atoms/freshness-indicator';
 import { PrivacyLocationNotice } from '@/components/atoms/privacy-location-notice';
-import { categoryLabel } from '@/lib/categories';
+import { useCategoryLabel } from '@/components/providers/categories-provider';
 import type { Messages } from '@/i18n/messages/es';
 
 type NeedViewDto = components['schemas']['NeedViewDto'];
@@ -17,11 +19,12 @@ interface NeedCardProps {
   locale: 'es' | 'en';
 }
 
-export function NeedCard({ need, te, slug, active, locale }: NeedCardProps) {
+export function NeedCard({ need, te, slug, active }: NeedCardProps) {
+  const categoryLabel = useCategoryLabel();
   const priority = need.priority as Priority;
   const item = need.items[0];
   const categoryText =
-    item !== undefined ? categoryLabel(item.category, locale) : undefined;
+    item !== undefined ? categoryLabel(item.category) : undefined;
   const quantity =
     item !== undefined
       ? `${String(item.quantity)}${item.unit != null ? ` ${String(item.unit)}` : ''}`

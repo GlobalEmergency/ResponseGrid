@@ -12,7 +12,9 @@ import {
 import { PublicResourceCard } from "@/components/organisms/public-resource-card";
 import { NeedCard } from "@/components/molecules/need-card";
 import { EmptyState } from "@/components/molecules/empty-state";
-import { categoryLabel, categoryColor } from "@/lib/categories";
+import { categoryColor } from "@/lib/categories";
+import { labelForCategory } from "@/domain/supplies/category";
+import { getCategoriesCached } from "@/adapters/get-categories";
 import { getT } from "@/i18n/server";
 import { ResourceGrantsPanel } from "./resource-grants-panel";
 import { fetchResourceGrants } from "./actions";
@@ -27,6 +29,7 @@ export default async function RecipientResourcePage({ params }: Props) {
   const { slug, resourceId } = await params;
   const emergency = await getEmergencyBySlug(slug);
   const { t, locale } = await getT();
+  const categories = await getCategoriesCached(locale);
 
   if (!emergency) {
     notFound();
@@ -151,7 +154,7 @@ export default async function RecipientResourcePage({ params }: Props) {
                     role="listitem"
                     className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${categoryColor(slug)}`}
                   >
-                    {categoryLabel(slug, locale)}
+                    {labelForCategory(slug, categories)}
                   </span>
                 ))}
               </div>
