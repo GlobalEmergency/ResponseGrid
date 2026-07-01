@@ -34,8 +34,8 @@ export async function DashboardLayout({
     isAdmin: me.isAdmin === true,
     canAdminister: canAdminister(grants, roleCatalog),
     notificationUnread,
-    ...(activeContext != null && { activeContext }),
-    ...(activeEmergencyAccess != null && { activeEmergencyAccess }),
+    activeContext,
+    activeEmergencyAccess,
   });
 
   const resolveItem = (it: NavItem): ResolvedNavItem => ({

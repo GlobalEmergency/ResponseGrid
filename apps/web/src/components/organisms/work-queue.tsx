@@ -40,14 +40,16 @@ export function WorkQueue({
             <span className="ml-2 text-sm font-normal text-muted">({count})</span>
           )}
         </SectionHeading>
-        {subtitle !== undefined && <p className="text-sm text-muted">{subtitle}</p>}
+        {subtitle != null && subtitle !== '' && (
+          <p className="text-sm text-muted">{subtitle}</p>
+        )}
       </div>
 
-      {toolbar !== undefined && toolbar}
+      {toolbar}
 
       {children}
 
-      {pagination !== undefined && pagination}
+      {pagination}
     </section>
   );
 }

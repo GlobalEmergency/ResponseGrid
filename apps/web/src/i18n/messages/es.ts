@@ -323,10 +323,6 @@ export const es = {
     privacy_approximate_location: 'Coordenadas aproximadas — verifica la dirección por teléfono antes de trasladarte.',
 
     // Footer links
-    footer_my_points: 'Mis puntos',
-    footer_my_volunteer: 'Mi voluntariado',
-    footer_my_shipments: 'Mis expediciones',
-    footer_report: 'Reportar',
     footer_coordination: 'Acceso de coordinación',
 
     // Priority labels

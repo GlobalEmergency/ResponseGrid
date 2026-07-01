@@ -314,10 +314,6 @@ export const en = {
     // Privacy (F09)
     privacy_approximate_location: 'Approximate coordinates — verify the address by phone before travelling.',
 
-    footer_my_points: 'My points',
-    footer_my_volunteer: 'My volunteering',
-    footer_my_shipments: 'My shipments',
-    footer_report: 'Report',
     footer_coordination: 'Coordination access',
 
     priority_low: 'Low',
