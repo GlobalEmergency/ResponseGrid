@@ -20,11 +20,12 @@ interface SupplyLineFieldsProps {
   onRemove: () => void;
   labels?: Partial<Messages['supplyLine']>;
   showExpiry?: boolean;
+  hideHeader?: boolean;
 }
 
 export function SupplyLineFields({
   idPrefix, rowId, index, required, removable, categories, locale,
-  value, onChange, onRemove, labels, showExpiry = false,
+  value, onChange, onRemove, labels, showExpiry = false, hideHeader = false,
 }: SupplyLineFieldsProps) {
   const t = { ...getMessages(locale).supplyLine, ...labels };
   const n = String(index + 1);
@@ -37,21 +38,23 @@ export function SupplyLineFields({
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border-2 border-line p-4">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-muted uppercase tracking-wide">
-          {t.itemNumber.replace('{n}', n)}
-        </span>
-        {removable && (
-          <button
-            type="button"
-            onClick={onRemove}
-            aria-label={t.itemRemove.replace('{n}', n)}
-            className="text-sm text-danger hover:text-danger focus:outline-none focus:ring-2 focus:ring-danger focus:ring-offset-1 rounded"
-          >
-            {t.itemRemoveLabel}
-          </button>
-        )}
-      </div>
+      {!hideHeader && (
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold text-muted uppercase tracking-wide">
+            {t.itemNumber.replace('{n}', n)}
+          </span>
+          {removable && (
+            <button
+              type="button"
+              onClick={onRemove}
+              aria-label={t.itemRemove.replace('{n}', n)}
+              className="text-sm text-danger hover:text-danger focus:outline-none focus:ring-2 focus:ring-danger focus:ring-offset-1 rounded"
+            >
+              {t.itemRemoveLabel}
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor={`${idPrefix}-name-${rowId}`} className="text-sm font-medium text-ink-soft">

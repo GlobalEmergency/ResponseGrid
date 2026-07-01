@@ -139,6 +139,7 @@ export function DonarForm({
         value={line}
         onChange={handleLineChange}
         onRemove={() => {}}
+        hideHeader
         labels={{
           nameLabel: t.description_label,
           namePlaceholder: t.description_placeholder,
