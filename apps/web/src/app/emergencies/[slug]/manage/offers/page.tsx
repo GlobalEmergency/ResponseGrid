@@ -1,14 +1,9 @@
 import type { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
-import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { loginHref, clearToken } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { getMe, getRoles } from '@/lib/navigation-data';
-import {
-  resolveEmergencyAccess,
-  type EmergencyAccess,
-} from '@/lib/emergency-permissions';
-import type { MeGrant, RoleCatalogEntry } from '@/lib/admin-scopes';
+import { resolveManageAccess } from '@/lib/manage-access';
 import type { components } from '@reliefhub/api-client';
 import { WorkQueue } from '@/components/organisms/work-queue';
 import { QueueToolbar } from '@/components/molecules/queue-toolbar';
@@ -50,27 +45,9 @@ export default async function ManageOffersPage({
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
 
-  const token = await requireSession(`/emergencies/${slug}/manage/offers`);
-
-  const emergency = await getEmergencyBySlug(slug);
-  if (!emergency) {
-    notFound();
-  }
-
+  const returnPath = `/emergencies/${slug}/manage/offers`;
+  const { emergency, access, headers } = await resolveManageAccess(slug, returnPath);
   const emergencyId = emergency.id;
-  const headers = authHeaders(token);
-
-  const [me, roles] = await Promise.all([getMe(), getRoles()]);
-  if (me == null) {
-    await clearToken();
-    redirect(loginHref(`/emergencies/${slug}/manage/offers`));
-  }
-
-  const access: EmergencyAccess = resolveEmergencyAccess(
-    emergencyId,
-    (me.grants ?? []) as MeGrant[],
-    roles as RoleCatalogEntry[],
-  );
 
   // Permission gate: a principal without offer:match is bounced to the hub.
   if (!access.canMatchOffers) {

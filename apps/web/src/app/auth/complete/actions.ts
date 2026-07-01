@@ -17,5 +17,5 @@ export async function completeOAuthAction(
     redirect('/login?error=oauth_failed');
   }
   await setToken(token.trim());
-  redirect(safeNextPath(next) ?? '/panel');
+  redirect(safeNextPath(next) ?? '/dashboard');
 }

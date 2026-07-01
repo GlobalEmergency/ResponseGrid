@@ -1,14 +1,9 @@
 import type { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
-import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { loginHref, clearToken } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { getMe, getRoles } from '@/lib/navigation-data';
-import {
-  resolveEmergencyAccess,
-  type EmergencyAccess,
-} from '@/lib/emergency-permissions';
-import type { MeGrant, RoleCatalogEntry } from '@/lib/admin-scopes';
+import { resolveManageAccess } from '@/lib/manage-access';
 import { WorkQueue } from '@/components/organisms/work-queue';
 import { DisputedQueue } from '@/components/organisms/disputed-queue';
 import { getT } from '@/i18n/server';
@@ -36,27 +31,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ManageResourcesDisputesPage({ params }: Props) {
   const { slug } = await params;
 
-  const token = await requireSession(`/emergencies/${slug}/manage/resources/disputes`);
-
-  const emergency = await getEmergencyBySlug(slug);
-  if (!emergency) {
-    notFound();
-  }
-
+  const returnPath = `/emergencies/${slug}/manage/resources/disputes`;
+  const { emergency, access, headers } = await resolveManageAccess(slug, returnPath);
   const emergencyId = emergency.id;
-  const headers = authHeaders(token);
-
-  const [me, roles] = await Promise.all([getMe(), getRoles()]);
-  if (me == null) {
-    await clearToken();
-    redirect(loginHref(`/emergencies/${slug}/manage/resources/disputes`));
-  }
-
-  const access: EmergencyAccess = resolveEmergencyAccess(
-    emergencyId,
-    (me.grants ?? []) as MeGrant[],
-    roles as RoleCatalogEntry[],
-  );
 
   // Same permission as the verification queue (resource coordination).
   if (!access.canVerifyResources) {
