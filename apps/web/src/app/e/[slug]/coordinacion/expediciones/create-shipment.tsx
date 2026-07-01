@@ -52,7 +52,6 @@ export function CreateShipment({
   const [error, setError] = useState<string | undefined>(undefined);
 
   const labels = {
-    itemNumber: tc.ship_item_description_label,
     nameLabel: tc.ship_item_description_label,
     namePlaceholder: tc.ship_item_description_placeholder,
     quantityLabel: tc.ship_item_quantity_label,

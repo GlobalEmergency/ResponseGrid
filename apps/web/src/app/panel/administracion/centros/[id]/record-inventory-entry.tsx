@@ -36,7 +36,6 @@ export function RecordInventoryEntry({ resourceId, categories }: RecordInventory
   const [error, setError] = useState<string | undefined>(undefined);
 
   const labels = {
-    itemNumber: ta.centros_detail_inv_name_label,
     nameLabel: ta.centros_detail_inv_name_label,
     namePlaceholder: ta.centros_detail_inv_name_ph,
     quantityLabel: ta.centros_detail_inv_qty_label,
