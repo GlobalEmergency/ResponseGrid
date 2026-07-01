@@ -16,6 +16,8 @@ import { ShipmentsFilter } from '@/components/molecules/shipments-filter';
 import { CapacitiesFilter } from '@/components/molecules/capacities-filter';
 import { CreateShipment } from './create-shipment';
 import { getT } from '@/i18n/server';
+import { getCategories } from '@/adapters/get-categories';
+import { isMaterialCategory } from '@/domain/supplies/category';
 
 export const dynamic = 'force-dynamic';
 
@@ -119,7 +121,7 @@ export default async function CoordinacionExpedicionesPage({
     ? (rawCapStatus as CapacityStatus)
     : undefined;
 
-  const { t } = await getT();
+  const { t, locale } = await getT();
   const tc = t.coord;
 
   const onUnauthorized = async (statusCode: number): Promise<void> => {
@@ -129,7 +131,7 @@ export default async function CoordinacionExpedicionesPage({
     }
   };
 
-  const [shipments, capacities, resourcesPage] = await Promise.all([
+  const [shipments, capacities, resourcesPage, allCategories] = await Promise.all([
     api
       .GET('/emergencies/{emergencyId}/logistics/shipments', {
         params: {
@@ -169,11 +171,13 @@ export default async function CoordinacionExpedicionesPage({
         },
       })
       .then((r) => r.data?.items ?? []),
+    getCategories(locale),
   ]);
 
   const resourceNames: Record<string, string> = {};
   for (const r of resourcesPage) resourceNames[r.id] = r.name;
   const resourceOptions = resourcesPage.map((r) => ({ id: r.id, name: r.name }));
+  const materialCategories = allCategories.filter(isMaterialCategory);
 
   const assignableCapacities = capacities.filter((c) => c.status === 'available');
 
@@ -191,6 +195,7 @@ export default async function CoordinacionExpedicionesPage({
               emergencyId={emergencyId}
               slug={slug}
               resources={resourceOptions}
+              categories={materialCategories}
             />
           )}
         </div>

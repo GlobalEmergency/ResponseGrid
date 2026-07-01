@@ -2,45 +2,29 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import type { components } from '@reliefhub/api-client';
 import { createShipment } from './actions';
 import { Button } from '@/components/atoms/button';
-import { Input } from '@/components/atoms/input';
 import { Select } from '@/components/atoms/select';
 import { Textarea } from '@/components/atoms/textarea';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { FormField } from '@/components/molecules/form-field';
 import { DetailDrawer } from '@/components/organisms/detail-drawer';
+import { SupplyLineList } from '@/components/organisms/supply-line-list';
+import { emptyLine, toDto, isComplete, type SupplyLine } from '@/domain/supplies/supply-line';
+import type { Category } from '@/domain/supplies/category';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
-import { MATERIAL_CATEGORIES, categoryLabel } from '@/lib/categories';
 
 export interface ResourceOption {
   id: string;
   name: string;
 }
 
-type CargoLine = components['schemas']['SupplyLineDto'];
-type CargoCategory = CargoLine['category'];
-
-interface ItemRow {
-  name: string;
-  quantity: string;
-  unit: string;
-  category: CargoCategory;
-}
-
-const EMPTY_ROW: ItemRow = {
-  name: '',
-  quantity: '1',
-  unit: '',
-  category: MATERIAL_CATEGORIES[0] as CargoCategory,
-};
-
 interface CreateShipmentProps {
   emergencyId: string;
   slug: string;
   resources: ResourceOption[];
+  categories: readonly Category[];
 }
 
 /**
@@ -51,6 +35,7 @@ export function CreateShipment({
   emergencyId,
   slug,
   resources,
+  categories,
 }: CreateShipmentProps) {
   const locale = useLocale();
   const tc = getMessages(locale).coord;
@@ -58,63 +43,40 @@ export function CreateShipment({
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
 
+  const defaultCategory = categories[0]?.slug ?? '';
+
   const [originId, setOriginId] = useState('');
   const [destinationId, setDestinationId] = useState('');
-  const [rows, setRows] = useState<ItemRow[]>([{ ...EMPTY_ROW }]);
+  const [lines, setLines] = useState<SupplyLine[]>([emptyLine(defaultCategory)]);
   const [manifest, setManifest] = useState('');
   const [error, setError] = useState<string | undefined>(undefined);
+
+  const labels = {
+    itemNumber: tc.ship_item_description_label,
+    nameLabel: tc.ship_item_description_label,
+    namePlaceholder: tc.ship_item_description_placeholder,
+    quantityLabel: tc.ship_item_quantity_label,
+    unitLabel: tc.ship_item_unit_label,
+    unitPlaceholder: tc.ship_item_unit_placeholder,
+    categoryLabel: tc.ship_item_category_label,
+    addItem: tc.ship_item_add,
+    itemRemoveLabel: tc.ship_item_remove,
+    legend: tc.ship_items_legend,
+  };
 
   function reset() {
     setOriginId('');
     setDestinationId('');
-    setRows([{ ...EMPTY_ROW }]);
+    setLines([emptyLine(defaultCategory)]);
     setManifest('');
     setError(undefined);
-  }
-
-  function updateRow(index: number, patch: Partial<ItemRow>) {
-    setRows((prev) =>
-      prev.map((row, i) => (i === index ? { ...row, ...patch } : row)),
-    );
-  }
-
-  function addRow() {
-    setRows((prev) => [...prev, { ...EMPTY_ROW }]);
-  }
-
-  function removeRow(index: number) {
-    setRows((prev) =>
-      prev.length === 1 ? prev : prev.filter((_, i) => i !== index),
-    );
   }
 
   function handleSubmit() {
     setError(undefined);
 
-    let invalid = false;
-    const items = rows
-      .map((row): CargoLine | null => {
-        const name = row.name.trim();
-        if (name === '') return null;
-        const quantity = Number(row.quantity.trim());
-        if (!Number.isInteger(quantity) || quantity < 1) {
-          invalid = true;
-          return null;
-        }
-        const unit = row.unit.trim();
-        return {
-          name,
-          quantity,
-          category: row.category,
-          ...(unit !== '' ? { unit } : {}),
-        };
-      })
-      .filter((x): x is CargoLine => x !== null);
+    const items = lines.filter(isComplete).map(toDto);
 
-    if (invalid) {
-      setError(tc.ship_err_quantity_invalid);
-      return;
-    }
     if (items.length === 0) {
       setError(tc.ship_err_items_required);
       return;
@@ -214,75 +176,16 @@ export function CreateShipment({
               </Select>
             </FormField>
 
-            <fieldset className="flex flex-col gap-3">
-              <legend className="text-sm font-semibold text-ink uppercase tracking-wide">
-                {tc.ship_items_legend} <span aria-hidden="true">*</span>
-              </legend>
-              {rows.map((row, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col gap-2 rounded-lg border border-line p-3"
-                >
-                  <Input
-                    aria-label={tc.ship_item_description_label}
-                    placeholder={tc.ship_item_description_placeholder}
-                    value={row.name}
-                    onChange={(e) => updateRow(index, { name: e.target.value })}
-                  />
-                  <div className="flex gap-2">
-                    <Input
-                      aria-label={tc.ship_item_quantity_label}
-                      type="number"
-                      inputMode="numeric"
-                      min={1}
-                      step={1}
-                      placeholder={tc.ship_item_quantity_placeholder}
-                      value={row.quantity}
-                      onChange={(e) =>
-                        updateRow(index, { quantity: e.target.value })
-                      }
-                    />
-                    <Input
-                      aria-label={tc.ship_item_unit_label}
-                      placeholder={tc.ship_item_unit_placeholder}
-                      value={row.unit}
-                      onChange={(e) => updateRow(index, { unit: e.target.value })}
-                    />
-                  </div>
-                  <Select
-                    aria-label={tc.ship_item_category_label}
-                    value={row.category}
-                    onChange={(e) =>
-                      updateRow(index, {
-                        category: e.target.value as CargoCategory,
-                      })
-                    }
-                  >
-                    {MATERIAL_CATEGORIES.map((slug) => (
-                      <option key={slug} value={slug}>
-                        {categoryLabel(slug, locale)}
-                      </option>
-                    ))}
-                  </Select>
-                  {rows.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeRow(index)}
-                      className="self-start text-xs font-semibold text-danger underline underline-offset-2 focus:outline-none focus:ring-2 focus:ring-danger rounded"
-                    >
-                      {tc.ship_item_remove}
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={addRow}
-                className="self-start text-sm font-semibold text-navy underline underline-offset-2 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 rounded"
-              >
-                {tc.ship_item_add}
-              </button>
-            </fieldset>
+            <SupplyLineList
+              value={lines}
+              onChange={setLines}
+              categories={categories}
+              locale={locale}
+              idPrefix="ship"
+              required
+              defaultCategory={defaultCategory}
+              labels={labels}
+            />
 
             <FormField
               htmlFor="ship-manifest"
