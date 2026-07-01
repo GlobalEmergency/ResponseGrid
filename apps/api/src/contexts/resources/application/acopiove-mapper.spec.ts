@@ -1,5 +1,5 @@
 import { acopioveMapper } from './acopiove-mapper';
-import { ResourceType, ResourceStage } from '../domain/resource-enums';
+import { ResourceType } from '../domain/resource-enums';
 
 const VALID_UUID = '11111111-1111-4111-8111-111111111111';
 
@@ -25,18 +25,16 @@ function makeRecord(overrides: Record<string, unknown> = {}): unknown {
 }
 
 describe('acopioveMapper', () => {
-  it('maps tipo:acopio to collection_point / origin', () => {
+  it('maps tipo:acopio to collection_point', () => {
     const result = acopioveMapper(makeRecord({ tipo: 'acopio' }));
     expect(result).not.toBeNull();
     expect(result!.type).toBe(ResourceType.CollectionPoint);
-    expect(result!.stage).toBe(ResourceStage.Origin);
   });
 
-  it('maps tipo:refugio to venue / destination', () => {
+  it('maps tipo:refugio to venue', () => {
     const result = acopioveMapper(makeRecord({ tipo: 'refugio' }));
     expect(result).not.toBeNull();
     expect(result!.type).toBe(ResourceType.Venue);
-    expect(result!.stage).toBe(ResourceStage.Destination);
   });
 
   it('sets acceptsRawLabels from recibe[] without resolving', () => {

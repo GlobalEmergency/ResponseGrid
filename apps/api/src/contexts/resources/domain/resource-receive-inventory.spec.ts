@@ -3,7 +3,7 @@ import { SupplyLine } from '../../supplies/domain/supply-line';
 import { Category } from '../../supplies/domain/category';
 import { ResourceId } from './resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { ResourceType, ResourceStage } from './resource-enums';
+import { ResourceType } from './resource-enums';
 import { Location } from '../../../shared/domain/location';
 
 const make = (items: SupplyLine[] = []): Resource =>
@@ -11,7 +11,6 @@ const make = (items: SupplyLine[] = []): Resource =>
     id: ResourceId.create(),
     emergencyId: EmergencyId.fromString('11111111-1111-4111-8111-111111111111'),
     type: ResourceType.Warehouse,
-    stage: ResourceStage.Origin,
     name: 'Acopio Centro',
     location: Location.create({ address: 'X', latitude: 1, longitude: 2 }),
     ownerUserId: 'user-1',

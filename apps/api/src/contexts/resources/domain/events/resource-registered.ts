@@ -8,7 +8,6 @@ export class ResourceRegistered implements DomainEvent {
     readonly payload: {
       emergencyId: string;
       type: string;
-      stage: string;
       name: string;
     },
   ) {}

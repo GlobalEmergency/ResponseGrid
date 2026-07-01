@@ -128,7 +128,6 @@ export class ResourcesController {
     return this.register.execute({
       emergencyId,
       type: dto.type,
-      stage: dto.stage,
       name: dto.name,
       description: dto.description ?? null,
       location: dto.location,

@@ -41,12 +41,6 @@ export default async function MisPuntosPage({ params }: Props) {
     venue: ta.type_venue,
   };
 
-  const STAGE_LABELS: Record<string, string> = {
-    origin: ta.stage_origin,
-    intermediate: ta.stage_intermediate,
-    destination: ta.stage_destination,
-  };
-
   const token = await getToken();
   if (token === null) {
     redirect(`/login?next=/e/${slug}/mis-puntos`);
@@ -94,8 +88,6 @@ export default async function MisPuntosPage({ params }: Props) {
                       </h3>
                       <p className="text-sm text-muted">
                         {TYPE_LABELS[resource.type] ?? resource.type}
-                        {' · '}
-                        {STAGE_LABELS[resource.stage] ?? resource.stage}
                       </p>
                     </div>
 

@@ -6,7 +6,6 @@ import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { ResourceId } from '../domain/resource-id';
 import {
   ResourceType,
-  ResourceStage,
   VerificationLevel,
   PublicStatus,
 } from '../domain/resource-enums';
@@ -31,7 +30,6 @@ describe('PublishResource', () => {
     const { id } = await new RegisterResource(repo, bus, activeReader).execute({
       emergencyId: EM,
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Punto',
       location: baseLocation,
       ownerUserId: 'user-publish-test',
@@ -58,7 +56,6 @@ describe('PublishResource', () => {
     const { id } = await new RegisterResource(repo, bus, activeReader).execute({
       emergencyId: EM,
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Punto',
       location: baseLocation,
       ownerUserId: 'user-publish-test-2',

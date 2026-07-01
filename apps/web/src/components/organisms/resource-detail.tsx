@@ -54,11 +54,7 @@ export function ResourceDetail({
     venue: tc.resource_type_venue,
   };
 
-  const STAGE_LABELS: Record<ResourceView['stage'], string> = {
-    origin: tc.resource_stage_origin,
-    intermediate: tc.resource_stage_intermediate,
-    destination: tc.resource_stage_destination,
-  };
+
 
   const PUBLIC_STATUS_LABELS: Record<ResourceView['publicStatus'], string> = {
     hidden: tc.public_status_hidden,
@@ -154,10 +150,7 @@ export function ResourceDetail({
           label={tc.detail_field_type}
           value={TYPE_LABELS[resource.type]}
         />
-        <DetailField
-          label={tc.detail_field_stage}
-          value={STAGE_LABELS[resource.stage]}
-        />
+
         <DetailField label={tc.detail_field_accepts} value={accepts} />
         <DetailField
           label={tc.detail_field_public_status}

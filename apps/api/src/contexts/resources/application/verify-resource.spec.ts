@@ -4,11 +4,7 @@ import { ResourceNotFoundError } from './resource-not-found.error';
 import { InMemoryResourceRepository } from '../infrastructure/in-memory-resource.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { ResourceId } from '../domain/resource-id';
-import {
-  ResourceType,
-  ResourceStage,
-  VerificationLevel,
-} from '../domain/resource-enums';
+import { ResourceType, VerificationLevel } from '../domain/resource-enums';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { OrganizationAccreditationReader } from '../domain/ports/organization-accreditation-reader';
 import {
@@ -53,7 +49,6 @@ describe('VerifyResource — Official derivation', () => {
     const { id } = await new RegisterResource(repo, bus, activeReader).execute({
       emergencyId: EM,
       type: ResourceType.Warehouse,
-      stage: ResourceStage.Origin,
       name: 'Almacén',
       location: baseLocation,
       ownerUserId: 'user-1',
@@ -79,7 +74,6 @@ describe('VerifyResource — Official derivation', () => {
     const { id } = await new RegisterResource(repo, bus, activeReader).execute({
       emergencyId: EM,
       type: ResourceType.Warehouse,
-      stage: ResourceStage.Origin,
       name: 'Almacén 2',
       location: baseLocation,
       ownerUserId: 'user-1',
@@ -102,7 +96,6 @@ describe('VerifyResource — Official derivation', () => {
     const { id } = await new RegisterResource(repo, bus, activeReader).execute({
       emergencyId: EM,
       type: ResourceType.Venue,
-      stage: ResourceStage.Destination,
       name: 'Local personal',
       location: baseLocation,
       ownerUserId: 'user-2',
@@ -137,7 +130,6 @@ describe('VerifyResource — Official derivation', () => {
     const { id } = await new RegisterResource(repo, bus, activeReader).execute({
       emergencyId: EM,
       type: ResourceType.Venue,
-      stage: ResourceStage.Destination,
       name: 'Local',
       location: baseLocation,
       ownerUserId: 'owner-user',
@@ -165,7 +157,6 @@ describe('VerifyResource — Official derivation', () => {
     const { id } = await new RegisterResource(repo, bus, activeReader).execute({
       emergencyId: EM,
       type: ResourceType.Venue,
-      stage: ResourceStage.Destination,
       name: 'Local',
       location: baseLocation,
       ownerUserId: 'owner-user',

@@ -62,7 +62,7 @@ export function DetailDrawer({
 
   return (
     <div
-      className="fixed inset-0 z-50"
+      className="fixed inset-0 z-[2000]"
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel ?? title}

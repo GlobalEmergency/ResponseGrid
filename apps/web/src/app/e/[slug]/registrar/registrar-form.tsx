@@ -48,12 +48,11 @@ export function RegistrarForm({
   // the state object, which re-renders the component, but React preserves
   // useState hooks across re-renders of the same component instance).
   const [type, setType] = useState('');
-  const [stage, setStage] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
 
-  const draftValues = { type, stage, name, description };
-  const draftSetters = { type: setType, stage: setStage, name: setName, description: setDescription };
+  const draftValues = { type, name, description };
+  const draftSetters = { type: setType, name: setName, description: setDescription };
   const { clearDraft, wasRestored } = useFormDraft(
     `registrar-${slug}`,
     draftValues,
@@ -72,12 +71,6 @@ export function RegistrarForm({
     { value: 'transport', label: t.type_transport },
     { value: 'supplier', label: t.type_supplier },
     { value: 'venue', label: t.type_venue },
-  ] as const;
-
-  const stages = [
-    { value: 'origin', label: t.stage_origin },
-    { value: 'intermediate', label: t.stage_intermediate },
-    { value: 'destination', label: t.stage_destination },
   ] as const;
 
   if (state.status === 'success') {
@@ -115,28 +108,6 @@ export function RegistrarForm({
             {t.select_type_placeholder}
           </option>
           {resourceTypes.map(({ value, label }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </Select>
-      </FormField>
-
-      <FormField
-        htmlFor="stage"
-        label={<>{t.stage_label} <span aria-hidden="true">*</span></>}
-      >
-        <Select
-          id="stage"
-          name="stage"
-          required
-          value={stage}
-          onChange={(e) => setStage(e.target.value)}
-        >
-          <option value="" disabled>
-            {t.select_stage_placeholder}
-          </option>
-          {stages.map(({ value, label }) => (
             <option key={value} value={value}>
               {label}
             </option>

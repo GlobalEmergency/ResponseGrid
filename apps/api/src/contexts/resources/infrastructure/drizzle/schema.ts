@@ -15,7 +15,6 @@ export const resourcesTable = pgTable('resources', {
   id: uuid('id').primaryKey(),
   emergencyId: uuid('emergency_id').notNull(),
   type: text('type').notNull(),
-  stage: text('stage').notNull(),
   name: text('name').notNull(),
   description: text('description'),
   address: text('address').notNull(),

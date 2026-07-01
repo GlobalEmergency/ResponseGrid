@@ -14,7 +14,6 @@ import { ResourceId } from '../src/contexts/resources/domain/resource-id';
 import { EmergencyId } from '../src/shared/domain/emergency-id';
 import {
   ResourceType,
-  ResourceStage,
   VerificationLevel,
   PublicStatus,
 } from '../src/contexts/resources/domain/resource-enums';
@@ -77,7 +76,6 @@ const makeVisible = (
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name,
       location: baseLocation,
       ownerUserId: OWNER_ID,
@@ -233,7 +231,6 @@ describe('Public resources paged (e2e)', () => {
         id: ResourceId.create(),
         emergencyId: EmergencyId.fromString(EM),
         type: ResourceType.CollectionPoint,
-        stage: ResourceStage.Origin,
         name: 'Hidden',
         location: baseLocation,
         ownerUserId: OWNER_ID,
@@ -262,7 +259,6 @@ describe('Public resources paged (e2e)', () => {
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(EM),
           type: ResourceType.CollectionPoint,
-          stage: ResourceStage.Origin,
           name: 'Rich Resource',
           location: baseLocation,
           ownerUserId: OWNER_ID,
@@ -354,7 +350,6 @@ describe('Public resources paged (e2e)', () => {
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(EM),
           type: ResourceType.CollectionPoint,
-          stage: ResourceStage.Origin,
           name: 'Provenance Resource',
           location: baseLocation,
           ownerUserId: OWNER_ID,

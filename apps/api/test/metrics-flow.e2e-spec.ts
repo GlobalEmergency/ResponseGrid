@@ -36,7 +36,6 @@ const baseNeedBody = {
 
 const baseResourceBody = {
   type: 'collection_point',
-  stage: 'origin',
   name: 'Test collection point',
   location: {
     address: 'Test Avenue, Caracas',
