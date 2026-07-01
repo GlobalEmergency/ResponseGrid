@@ -2584,6 +2584,22 @@ export const en = {
     qa_my_donations: 'My donations',
     qa_explore: 'View emergencies',
     qa_my_profile: 'My profile',
+    home_greeting: 'Hi, {name}',
+    home_subtitle: 'Everything you manage, in one place.',
+    home_empty:
+      'You are not managing any context yet. Explore the active emergencies to get started.',
+    home_section_emergencies: 'Your emergencies',
+    home_section_points: 'Your collection points',
+    home_section_orgs_groups: 'Your organizations and crews',
+    home_register_point: 'Register a point',
+    role_generic_point: 'Manager',
+    role_generic_organization: 'Organization',
+    role_generic_group: 'Crew',
+    home_personal_heading: 'Personal shortcuts',
+    personal_donations: 'My donations',
+    personal_notifications: 'Notifications',
+    personal_permissions: 'My permissions',
+    personal_profile: 'My profile',
   },
 
   miPerfil: {

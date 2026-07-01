@@ -2621,6 +2621,22 @@ export const es = {
     qa_my_donations: 'Mis donaciones',
     qa_explore: 'Ver emergencias',
     qa_my_profile: 'Mi perfil',
+    home_greeting: 'Hola, {name}',
+    home_subtitle: 'Todo lo que gestionas, en un sitio.',
+    home_empty:
+      'Aún no gestionas ningún contexto. Explora las emergencias activas para empezar.',
+    home_section_emergencies: 'Tus emergencias',
+    home_section_points: 'Tus puntos de acopio',
+    home_section_orgs_groups: 'Tus organizaciones y cuadrillas',
+    home_register_point: 'Registrar un punto',
+    role_generic_point: 'Gestora',
+    role_generic_organization: 'Organización',
+    role_generic_group: 'Cuadrilla',
+    home_personal_heading: 'Accesos personales',
+    personal_donations: 'Mis donaciones',
+    personal_notifications: 'Notificaciones',
+    personal_permissions: 'Mis permisos',
+    personal_profile: 'Mi perfil',
   },
 
   miPerfil: {
