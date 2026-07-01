@@ -6,7 +6,8 @@ import { Select } from '@/components/atoms/select';
 import { FilterField } from '@/components/molecules/filter-field';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
-import { ALL_CATEGORIES, categoryLabel } from '@/lib/categories';
+import { useCategories, useCategoryLabel } from '@/components/providers/categories-provider';
+import { isMaterialCategory } from '@/domain/supplies/category';
 
 const STATUS_VALUES = ['open', 'matched', 'fulfilled', 'cancelled'] as const;
 
@@ -15,6 +16,8 @@ export function OffersFilter() {
   const tc = getMessages(locale).coord;
   const router = useRouter();
   const searchParams = useSearchParams();
+  const materialCategories = useCategories().filter(isMaterialCategory);
+  const categoryName = useCategoryLabel();
 
   const currentCategory = searchParams.get('category') ?? '';
   const currentStatus = searchParams.get('status') ?? '';
@@ -49,9 +52,9 @@ export function OffersFilter() {
           aria-label={tc.offers_filter_category_aria}
         >
           <option value="">{tc.offers_filter_category_all}</option>
-          {ALL_CATEGORIES.map((value) => (
-            <option key={value} value={value}>
-              {categoryLabel(value, locale)}
+          {materialCategories.map((c) => (
+            <option key={c.slug} value={c.slug}>
+              {categoryName(c.slug)}
             </option>
           ))}
         </Select>
