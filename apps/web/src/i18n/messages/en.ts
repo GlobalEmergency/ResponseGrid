@@ -2537,6 +2537,15 @@ export const en = {
     admin_templates: 'Templates',
     admin_audit: 'Audit log',
     admin_tabs_aria: 'Administration sections',
+    sec_overview: 'Overview',
+    sec_resources: 'Resources',
+    sec_disputes: 'Disputed points',
+    sec_needs: 'Requests',
+    sec_offers: 'Offers',
+    sec_logistics: 'Logistics',
+    sec_volunteers: 'Volunteers',
+    sec_reports: 'Reports',
+    sec_activity: 'Activity',
   },
 
   panel: {

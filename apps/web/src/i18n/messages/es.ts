@@ -2574,6 +2574,15 @@ export const es = {
     admin_templates: 'Plantillas',
     admin_audit: 'Auditoría',
     admin_tabs_aria: 'Secciones de administración',
+    sec_overview: 'Resumen',
+    sec_resources: 'Recursos',
+    sec_disputes: 'Puntos en duda',
+    sec_needs: 'Peticiones',
+    sec_offers: 'Ofertas',
+    sec_logistics: 'Logística',
+    sec_volunteers: 'Voluntarios',
+    sec_reports: 'Reportes',
+    sec_activity: 'Actividad',
   },
 
   panel: {
