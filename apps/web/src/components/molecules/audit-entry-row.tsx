@@ -1,5 +1,5 @@
 import { StatusCodeBadge } from '@/components/atoms/status-code-badge';
-import type { AuditEntryDto } from '@/app/panel/administracion/auditoria/actions';
+import type { AuditEntryDto } from '@/app/admin/audit/actions';
 import { formatDate as formatDateUtc } from '@/lib/format-date';
 import { getT } from '@/i18n/server';
 

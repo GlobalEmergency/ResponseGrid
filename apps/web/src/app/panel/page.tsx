@@ -80,7 +80,7 @@ export default async function PanelPage() {
           </SectionHeading>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {isManager && (
-              <QuickAction href="/panel/administracion" label={tp.qa_administration} />
+              <QuickAction href="/admin" label={tp.qa_administration} />
             )}
             <QuickAction
               href="/panel/notificaciones"

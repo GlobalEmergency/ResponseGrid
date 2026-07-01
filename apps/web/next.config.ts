@@ -6,9 +6,9 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(__dirname, '../..'),
   },
-  // The authenticated area was consolidated under /panel/*. Personal pages have
-  // since migrated to /dashboard/* (English). Keep old bookmarks working. Order
-  // matters: specific rules before the /admin/* catch-all so it isn't shadowed.
+  // The authenticated area was consolidated under /panel/*. Personal pages and
+  // platform administration have since migrated to /dashboard/* and /admin/*
+  // (English). Keep old bookmarks working.
   async redirects() {
     return [
       // --- Personal: migrado a /dashboard/* (inglés) ---
@@ -18,14 +18,56 @@ const nextConfig: NextConfig = {
       { source: '/panel/mis-permisos', destination: '/dashboard/permissions', permanent: true },
       { source: '/notificaciones', destination: '/dashboard/notifications', permanent: true },
       { source: '/mis-permisos', destination: '/dashboard/permissions', permanent: true },
-      // --- Sin migrar aún (los invierten C2/C3). Orden: específicas antes que catch-all ---
+      // --- Administración: migrado a /admin/* (inglés). Orden: rutas específicas
+      // antes que la raíz para que ninguna quede eclipsada. ---
+      { source: '/panel/administracion', destination: '/admin', permanent: true },
       {
-        source: '/admin/templates/:path*',
-        destination: '/panel/administracion/plantillas/:path*',
+        source: '/panel/administracion/usuarios/:path*',
+        destination: '/admin/users/:path*',
         permanent: true,
       },
-      { source: '/admin/:path*', destination: '/panel/administracion/:path*', permanent: true },
-      { source: '/administracion/:path*', destination: '/panel/administracion/:path*', permanent: true },
+      {
+        source: '/panel/administracion/organizaciones/:path*',
+        destination: '/admin/organizations/:path*',
+        permanent: true,
+      },
+      {
+        source: '/panel/administracion/centros/:path*',
+        destination: '/admin/points/:path*',
+        permanent: true,
+      },
+      {
+        source: '/panel/administracion/permisos/:path*',
+        destination: '/admin/permissions/:path*',
+        permanent: true,
+      },
+      {
+        source: '/panel/administracion/api-keys/:path*',
+        destination: '/admin/api-keys/:path*',
+        permanent: true,
+      },
+      {
+        source: '/panel/administracion/acreditaciones/:path*',
+        destination: '/admin/accreditations/:path*',
+        permanent: true,
+      },
+      {
+        source: '/panel/administracion/plantillas/:path*',
+        destination: '/admin/templates/:path*',
+        permanent: true,
+      },
+      {
+        source: '/panel/administracion/auditoria/:path*',
+        destination: '/admin/audit/:path*',
+        permanent: true,
+      },
+      {
+        source: '/panel/administracion/ambito/:path*',
+        destination: '/admin/scope/:path*',
+        permanent: true,
+      },
+      { source: '/administracion', destination: '/admin', permanent: true },
+      // --- Sin migrar aún ---
       { source: '/grupos/:path*', destination: '/panel/grupos/:path*', permanent: true },
       {
         source: '/organizaciones/:path*',

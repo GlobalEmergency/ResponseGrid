@@ -30,7 +30,7 @@ export function AccountNav({
       </span>
       <Link href="/panel/organizaciones" className={linkClass}>{t.my_orgs}</Link>
       {authed && canAdminister && (
-        <Link href="/panel/administracion" className={linkClass}>{t.administration}</Link>
+        <Link href="/admin" className={linkClass}>{t.administration}</Link>
       )}
       {authed && (
         <>
@@ -46,11 +46,11 @@ export function AccountNav({
       <Link href="/login" className={linkClass}>{t.coordination_access}</Link>
       {isAdmin && (
         <>
-          <Link href="/panel/administracion/acreditaciones" className={linkClass}>{t.admin}</Link>
-          <Link href="/panel/administracion/permisos" className={linkClass}>{t.admin_permissions}</Link>
-          <Link href="/panel/administracion/api-keys" className={linkClass}>{t.admin_api_keys}</Link>
-          <Link href="/panel/administracion/plantillas" className={linkClass}>{t.templates}</Link>
-          <Link href="/panel/administracion/auditoria" className={linkClass}>{t.audit}</Link>
+          <Link href="/admin/accreditations" className={linkClass}>{t.admin}</Link>
+          <Link href="/admin/permissions" className={linkClass}>{t.admin_permissions}</Link>
+          <Link href="/admin/api-keys" className={linkClass}>{t.admin_api_keys}</Link>
+          <Link href="/admin/templates" className={linkClass}>{t.templates}</Link>
+          <Link href="/admin/audit" className={linkClass}>{t.audit}</Link>
         </>
       )}
     </nav>
