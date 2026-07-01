@@ -9,6 +9,8 @@ import {
   resolveEmergencyAccess,
   type EmergencyAccess,
 } from "@/lib/emergency-permissions";
+import { AppBar } from "@/components/organisms/app-bar";
+import { PageHeading } from "@/components/atoms/page-heading";
 import { PublicResourceCard } from "@/components/organisms/public-resource-card";
 import { NeedCard } from "@/components/molecules/need-card";
 import { EmptyState } from "@/components/molecules/empty-state";
@@ -85,14 +87,9 @@ export default async function RecipientResourcePage({ params }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl bg-surface">
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <PageHeading title={resource.name} />
         <div className="flex flex-col gap-5 px-4 pb-12 pt-5 lg:gap-6 lg:px-8">
-          <Link
-            href={`/e/${slug}`}
-            className="w-fit text-sm font-semibold text-navy hover:underline"
-          >
-            ← {td.back}
-          </Link>
-
           <PublicResourceCard
             resource={resource}
             t={t.resource_card}
