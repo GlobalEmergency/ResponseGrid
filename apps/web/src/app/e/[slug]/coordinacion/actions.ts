@@ -45,7 +45,7 @@ export async function matchOffer(
   needId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion`);
+  const token = await requireSession(`/emergencies/${slug}/manage`);
 
   const { t } = await getT();
 
@@ -58,7 +58,7 @@ export async function matchOffer(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion`));
+      redirect(loginHref(`/emergencies/${slug}/manage`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.err_no_permission_match };
@@ -72,7 +72,7 @@ export async function matchOffer(
     return { status: 'error', message: t.coord.err_match_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   return { status: 'success' };
 }
 
@@ -80,7 +80,7 @@ export async function fulfillOffer(
   offerId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion`);
+  const token = await requireSession(`/emergencies/${slug}/manage`);
 
   const { t } = await getT();
 
@@ -92,7 +92,7 @@ export async function fulfillOffer(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion`));
+      redirect(loginHref(`/emergencies/${slug}/manage`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.err_no_permission_fulfill };
@@ -103,7 +103,7 @@ export async function fulfillOffer(
     return { status: 'error', message: t.coord.err_fulfill_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   return { status: 'success' };
 }
 
@@ -111,7 +111,7 @@ export async function cancelOffer(
   offerId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion`);
+  const token = await requireSession(`/emergencies/${slug}/manage`);
 
   const { t } = await getT();
 
@@ -123,7 +123,7 @@ export async function cancelOffer(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion`));
+      redirect(loginHref(`/emergencies/${slug}/manage`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.err_no_permission_cancel };
@@ -134,7 +134,7 @@ export async function cancelOffer(
     return { status: 'error', message: t.coord.err_cancel_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   return { status: 'success' };
 }
 
@@ -147,7 +147,7 @@ export async function verifyAndPublish(
   resourceId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion`);
+  const token = await requireSession(`/emergencies/${slug}/manage`);
 
   const { t } = await getT();
 
@@ -169,7 +169,7 @@ export async function verifyAndPublish(
   if (!verifyResponse.ok) {
     if (verifyResponse.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion`));
+      redirect(loginHref(`/emergencies/${slug}/manage`));
     }
     return {
       status: 'error',
@@ -188,19 +188,19 @@ export async function verifyAndPublish(
   if (publishError !== undefined) {
     if (publishResponse.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion`));
+      redirect(loginHref(`/emergencies/${slug}/manage`));
     }
     // The verify step already persisted; refresh so the queue/badge reflect the
     // now-verified state even though publishing failed (avoids a stale "Sin
     // verificar" and a misleading retry).
-    revalidatePath(`/e/${slug}/coordinacion`);
+    revalidatePath(`/emergencies/${slug}/manage`);
     return {
       status: 'error',
       message: t.coord.err_publish_resource_failed,
     };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   return { status: 'success' };
 }
 
@@ -208,7 +208,7 @@ export async function validateNeed(
   needId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion`);
+  const token = await requireSession(`/emergencies/${slug}/manage`);
 
   const { t } = await getT();
 
@@ -222,7 +222,7 @@ export async function validateNeed(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion`));
+      redirect(loginHref(`/emergencies/${slug}/manage`));
     }
     return {
       status: 'error',
@@ -230,7 +230,7 @@ export async function validateNeed(
     };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   return { status: 'success' };
 }
 
@@ -241,7 +241,7 @@ export async function renewNeed(
   needId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion`);
+  const token = await requireSession(`/emergencies/${slug}/manage`);
 
   const { t } = await getT();
 
@@ -253,7 +253,7 @@ export async function renewNeed(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion`));
+      redirect(loginHref(`/emergencies/${slug}/manage`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.err_no_permission_renew };
@@ -264,7 +264,7 @@ export async function renewNeed(
     return { status: 'error', message: t.coord.err_renew_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   return { status: 'success' };
 }
 
@@ -281,7 +281,7 @@ export async function pauseEmergency(
   emergencyId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion`);
+  const token = await requireSession(`/emergencies/${slug}/manage`);
 
   const { t } = await getT();
 
@@ -293,7 +293,7 @@ export async function pauseEmergency(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion`));
+      redirect(loginHref(`/emergencies/${slug}/manage`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.err_no_permission_pause };
@@ -304,7 +304,7 @@ export async function pauseEmergency(
     return { status: 'error', message: t.coord.err_pause_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   revalidatePath(`/e/${slug}`);
   return { status: 'success' };
 }
@@ -313,7 +313,7 @@ export async function resumeEmergency(
   emergencyId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion`);
+  const token = await requireSession(`/emergencies/${slug}/manage`);
 
   const { t } = await getT();
 
@@ -325,7 +325,7 @@ export async function resumeEmergency(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion`));
+      redirect(loginHref(`/emergencies/${slug}/manage`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.err_no_permission_resume };
@@ -336,7 +336,7 @@ export async function resumeEmergency(
     return { status: 'error', message: t.coord.err_resume_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   revalidatePath(`/e/${slug}`);
   return { status: 'success' };
 }
@@ -350,7 +350,7 @@ export async function editNeed(
   slug: string,
   input: EditNeedInput,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion`);
+  const token = await requireSession(`/emergencies/${slug}/manage`);
 
   const { t } = await getT();
   if (reasonTooShort(input.reason)) {
@@ -373,12 +373,12 @@ export async function editNeed(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion`));
+      redirect(loginHref(`/emergencies/${slug}/manage`));
     }
     return { status: 'error', message: t.coord.err_edit_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   return { status: 'success' };
 }
 
@@ -387,7 +387,7 @@ export async function discardNeed(
   slug: string,
   reason: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion`);
+  const token = await requireSession(`/emergencies/${slug}/manage`);
 
   const { t } = await getT();
   if (reasonTooShort(reason)) {
@@ -403,12 +403,12 @@ export async function discardNeed(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion`));
+      redirect(loginHref(`/emergencies/${slug}/manage`));
     }
     return { status: 'error', message: t.coord.err_discard_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   return { status: 'success' };
 }
 
@@ -417,7 +417,7 @@ export async function editResource(
   slug: string,
   input: EditResourceInput,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion`);
+  const token = await requireSession(`/emergencies/${slug}/manage`);
 
   const { t } = await getT();
   if (reasonTooShort(input.reason)) {
@@ -441,12 +441,12 @@ export async function editResource(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion`));
+      redirect(loginHref(`/emergencies/${slug}/manage`));
     }
     return { status: 'error', message: t.coord.err_edit_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   return { status: 'success' };
 }
 
@@ -455,7 +455,7 @@ export async function discardResource(
   slug: string,
   reason: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion`);
+  const token = await requireSession(`/emergencies/${slug}/manage`);
 
   const { t } = await getT();
   if (reasonTooShort(reason)) {
@@ -471,12 +471,12 @@ export async function discardResource(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion`));
+      redirect(loginHref(`/emergencies/${slug}/manage`));
     }
     return { status: 'error', message: t.coord.err_discard_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   return { status: 'success' };
 }
 
@@ -495,7 +495,9 @@ export async function resolveDispute(
   resolution: DisputeResolution,
   reason: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion/puntos-en-duda`);
+  const token = await requireSession(
+    `/emergencies/${slug}/manage/resources/disputes`,
+  );
 
   const { t } = await getT();
   if (reasonTooShort(reason)) {
@@ -514,13 +516,13 @@ export async function resolveDispute(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion/puntos-en-duda`));
+      redirect(loginHref(`/emergencies/${slug}/manage/resources/disputes`));
     }
     return { status: 'error', message: t.coord.err_resolve_dispute_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion/puntos-en-duda`);
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage/resources/disputes`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   return { status: 'success' };
 }
 
@@ -540,7 +542,9 @@ export async function getValidityReports(
   resourceId: string,
   slug: string,
 ): Promise<ValidityReportsResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion/puntos-en-duda`);
+  const token = await requireSession(
+    `/emergencies/${slug}/manage/resources/disputes`,
+  );
 
   const { t } = await getT();
 
@@ -555,7 +559,7 @@ export async function getValidityReports(
   if (error !== undefined || data === undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion/puntos-en-duda`));
+      redirect(loginHref(`/emergencies/${slug}/manage/resources/disputes`));
     }
     return { status: 'error', message: t.coord.err_load_reports_failed };
   }
@@ -568,7 +572,7 @@ export async function editOffer(
   slug: string,
   input: EditOfferInput,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion`);
+  const token = await requireSession(`/emergencies/${slug}/manage`);
 
   const { t } = await getT();
   if (reasonTooShort(input.reason)) {
@@ -587,12 +591,12 @@ export async function editOffer(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion`));
+      redirect(loginHref(`/emergencies/${slug}/manage`));
     }
     return { status: 'error', message: t.coord.err_edit_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   return { status: 'success' };
 }
 
@@ -601,7 +605,7 @@ export async function discardOffer(
   slug: string,
   reason: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion`);
+  const token = await requireSession(`/emergencies/${slug}/manage`);
 
   const { t } = await getT();
   if (reasonTooShort(reason)) {
@@ -617,12 +621,12 @@ export async function discardOffer(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion`));
+      redirect(loginHref(`/emergencies/${slug}/manage`));
     }
     return { status: 'error', message: t.coord.err_discard_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   return { status: 'success' };
 }
 
@@ -631,7 +635,7 @@ export async function editReport(
   slug: string,
   input: EditReportInput,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion`);
+  const token = await requireSession(`/emergencies/${slug}/manage`);
 
   const { t } = await getT();
   if (reasonTooShort(input.reason)) {
@@ -651,12 +655,12 @@ export async function editReport(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion`));
+      redirect(loginHref(`/emergencies/${slug}/manage`));
     }
     return { status: 'error', message: t.coord.err_edit_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   return { status: 'success' };
 }
 
@@ -665,7 +669,7 @@ export async function discardReport(
   slug: string,
   reason: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion`);
+  const token = await requireSession(`/emergencies/${slug}/manage`);
 
   const { t } = await getT();
   if (reasonTooShort(reason)) {
@@ -681,12 +685,12 @@ export async function discardReport(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion`));
+      redirect(loginHref(`/emergencies/${slug}/manage`));
     }
     return { status: 'error', message: t.coord.err_discard_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   return { status: 'success' };
 }
 
@@ -695,7 +699,7 @@ export async function publishAnnouncement(
   slug: string,
   message: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion`);
+  const token = await requireSession(`/emergencies/${slug}/manage`);
 
   const { t } = await getT();
 
@@ -708,7 +712,7 @@ export async function publishAnnouncement(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion`));
+      redirect(loginHref(`/emergencies/${slug}/manage`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.err_no_permission_announce };
@@ -716,7 +720,7 @@ export async function publishAnnouncement(
     return { status: 'error', message: t.coord.err_announce_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   revalidatePath(`/e/${slug}`);
   return { status: 'success' };
 }
