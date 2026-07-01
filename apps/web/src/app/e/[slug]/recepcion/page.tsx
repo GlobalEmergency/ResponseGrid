@@ -14,7 +14,8 @@ import { AppBar } from '@/components/organisms/app-bar';
 import { PageHeading } from '@/components/atoms/page-heading';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { formatDate } from '@/lib/format-date';
-import { categoryLabel } from '@/lib/categories';
+import { labelForCategory } from '@/domain/supplies/category';
+import { getCategoriesCached } from '@/adapters/get-categories';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
@@ -70,6 +71,7 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
 
   const { t, locale } = await getT();
   const tr = t.recepcion;
+  const categories = await getCategoriesCached(locale);
 
   const q = typeof sp.q === 'string' ? sp.q.trim().slice(0, 100) : '';
 
@@ -243,7 +245,7 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
                                 {line.name}
                               </span>
                               <span className="text-[12.5px] text-muted">
-                                {categoryLabel(line.category, locale)} ·{' '}
+                                {labelForCategory(line.category, categories)} ·{' '}
                                 {tr.incoming_from_intakes.replace(
                                   '{n}',
                                   String(line.intakeCount),

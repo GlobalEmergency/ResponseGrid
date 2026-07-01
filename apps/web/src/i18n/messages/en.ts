@@ -556,6 +556,32 @@ export const en = {
     err_submit_failed: 'Couldn’t submit the offer. Please try again.',
   },
 
+  // ── Supply line (supply line) ──────────────────────────────────────────────
+  supplyLine: {
+    itemNumber: 'Item {n}',
+    itemRemove: 'Remove item {n}',
+    itemRemoveLabel: 'Remove',
+    nameLabel: 'Product',
+    namePlaceholder: 'Search by name, alias or code',
+    nameHint: 'Search by name, alias, or code.',
+    otherHint: 'If it is not in the catalog, type it and continue.',
+    searching: 'Searching supplies…',
+    noMatches: 'No matches. Type it if it is not in the catalog.',
+    error: 'We could not load suggestions.',
+    quantityLabel: 'Quantity',
+    qtyDecrease: 'Decrease quantity',
+    qtyIncrease: 'Increase quantity',
+    unitLabel: 'Unit',
+    unitOpt: '(optional)',
+    unitPlaceholder: 'e.g. boxes, liters',
+    categoryLabel: 'Category',
+    expiryLabel: 'Expiry',
+    expiryOpt: '(optional)',
+    addItem: 'Add item',
+    emptyList: 'No items yet.',
+    legend: 'Items',
+  },
+
   // ── Citizen delivery pre-registration (#130) ──────────────────────────────
   prereg: {
     page_title: 'Pre-register my delivery',

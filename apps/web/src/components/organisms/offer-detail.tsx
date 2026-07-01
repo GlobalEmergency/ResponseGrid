@@ -22,7 +22,7 @@ import {
 import { DetailField, DetailSection } from '@/components/molecules/detail-field';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
-import { categoryLabel } from '@/lib/categories';
+import { useCategoryLabel } from '@/components/providers/categories-provider';
 import { offerTitle, lineSummary } from '@/lib/supply-lines';
 
 type OfferViewDto = components['schemas']['OfferViewDto'];
@@ -63,6 +63,7 @@ export function OfferDetail({
 }: OfferDetailProps) {
   const locale = useLocale();
   const tc = getMessages(locale).coord;
+  const categoryName = useCategoryLabel();
 
   const STATUS_LABELS: Record<OfferViewDto['status'], string> = {
     open: tc.offer_status_open,
@@ -245,7 +246,7 @@ export function OfferDetail({
         {offer.items.map((item, i) => (
           <DetailField
             key={i}
-            label={categoryLabel(item.category, locale)}
+            label={categoryName(item.category)}
             value={lineSummary(item)}
           />
         ))}

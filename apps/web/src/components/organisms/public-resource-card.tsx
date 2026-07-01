@@ -1,3 +1,5 @@
+'use client';
+
 import type { components } from '@reliefhub/api-client';
 import Link from 'next/link';
 import { VerificationBadge } from '@/components/atoms/verification-badge';
@@ -6,7 +8,8 @@ import { FreshnessIndicator } from '@/components/atoms/freshness-indicator';
 import { Card } from '@/components/atoms/card';
 import type { Messages } from '@/i18n/messages/es';
 import type { Locale } from '@/i18n';
-import { categoryLabel, categoryColor } from '@/lib/categories';
+import { categoryColor } from '@/lib/categories';
+import { useCategoryLabel } from '@/components/providers/categories-provider';
 import {
   recipientTypeLabel,
   recipientTypeColor,
@@ -34,6 +37,7 @@ export function PublicResourceCard({
   locale = 'es',
   slug,
 }: PublicResourceCardProps) {
+  const categoryLabel = useCategoryLabel();
   const typeLabels: Record<ResourceViewDto['type'], string> = {
     collection_point: t.type_collection_point,
     delivery_point: t.type_delivery_point,
@@ -108,7 +112,7 @@ export function PublicResourceCard({
               role="listitem"
               className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${categoryColor(slug)}`}
             >
-              {categoryLabel(slug, locale)}
+              {categoryLabel(slug)}
             </span>
           ))}
         </div>

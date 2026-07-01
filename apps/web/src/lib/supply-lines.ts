@@ -10,8 +10,9 @@ const UUID_RE =
  * hidden `items` input) into the typed request shape. Returns `null` on a
  * malformed/tampered payload so the caller can surface a validation error.
  *
- * - `isValidCategory` narrows each category against the allowed catalogue
- *   (`ALL_CATEGORIES` for needs, `MATERIAL_CATEGORIES` for offers/inventory).
+ * - `isValidCategory` narrows each category against the allowed catalogue for
+ *   the caller's context (e.g. all categories for needs, material-only
+ *   categories for offers/inventory) — sourced from the DB category taxonomy.
  * - `allowEmpty` decides whether an absent/empty list is valid (`[]`, e.g.
  *   optional resource inventory) or an error (`null`, e.g. a need needs ≥1 item).
  */

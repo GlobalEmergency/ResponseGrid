@@ -10,6 +10,7 @@ import { PageHeading } from '@/components/atoms/page-heading';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { submitPreRegistration } from './actions';
 import { PreRegistroForm } from './pre-registro-form';
+import { getCategories } from '@/adapters/get-categories';
 
 export const dynamic = 'force-dynamic';
 
@@ -150,6 +151,7 @@ export default async function PreRegistroPage({ params, searchParams }: Props) {
   const donorProfile = me
     ? { name: me.name, email: me.email, phone: me.phone ?? null }
     : null;
+  const categories = eligible ? await getCategories(locale) : [];
 
   return (
     <main className="flex-1 bg-surface">
@@ -180,6 +182,7 @@ export default async function PreRegistroPage({ params, searchParams }: Props) {
               t={tp}
               locale={locale}
               backToEmergencyLabel={t.common.back_to_emergency}
+              categories={categories}
               profile={donorProfile}
             />
           ) : (

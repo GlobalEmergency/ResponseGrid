@@ -8,7 +8,7 @@ import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
-import { categoryLabel } from '@/lib/categories';
+import { useCategoryLabel } from '@/components/providers/categories-provider';
 import { LocalDate } from '@/components/atoms/local-date';
 
 type NeedView = components['schemas']['NeedViewDto'];
@@ -23,6 +23,7 @@ interface ExpiredNeedCardProps {
 export function ExpiredNeedCard({ need, slug }: ExpiredNeedCardProps) {
   const locale = useLocale();
   const tc = getMessages(locale).coord;
+  const categoryName = useCategoryLabel();
 
   const PRIORITY_LABELS: Record<NeedView['priority'], string> = {
     low: tc.priority_low,
@@ -54,7 +55,7 @@ export function ExpiredNeedCard({ need, slug }: ExpiredNeedCardProps) {
         <div className="flex flex-wrap gap-3 text-sm text-muted">
           {need.items[0] !== undefined && (
             <span className="font-medium">
-              {categoryLabel(need.items[0].category, locale)}
+              {categoryName(need.items[0].category)}
             </span>
           )}
           <span aria-hidden="true" className="text-muted-soft">·</span>

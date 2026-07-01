@@ -13876,6 +13876,11 @@
       "CategoryDto": {
         "type": "object",
         "properties": {
+          "slug": {
+            "type": "string",
+            "example": "medicines",
+            "description": "Canonical category slug (stable identifier)"
+          },
           "label": {
             "type": "string",
             "example": "Medicamentos",
@@ -13921,6 +13926,7 @@
           }
         },
         "required": [
+          "slug",
           "label",
           "labelEs",
           "labelEn",
