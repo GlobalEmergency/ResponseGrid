@@ -182,7 +182,6 @@ export default async function RecipientResourcePage({ params }: Props) {
                       te={te}
                       slug={slug}
                       active={isActive}
-                      locale={locale}
                     />
                   </li>
                 ))}

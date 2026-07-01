@@ -16,7 +16,6 @@ interface NeedCardProps {
   te: Messages['emergency'];
   slug: string;
   active: boolean;
-  locale: 'es' | 'en';
 }
 
 export function NeedCard({ need, te, slug, active }: NeedCardProps) {
