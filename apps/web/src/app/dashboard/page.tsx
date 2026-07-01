@@ -35,7 +35,7 @@ export default async function DashboardHomePage() {
   const roleDesc = new Map(roles.map((r) => [r.id, r.description ?? r.id]));
 
   const emergencies = contexts.filter((c) => c.type === 'emergency');
-  const points = contexts.filter((c) => c.type === 'point');
+  const resources = contexts.filter((c) => c.type === 'resource');
   const orgsGroups = contexts.filter(
     (c) => c.type === 'organization' || c.type === 'group',
   );
@@ -48,7 +48,7 @@ export default async function DashboardHomePage() {
     }
     if (c.type === 'organization') return tp.role_generic_organization;
     if (c.type === 'group') return tp.role_generic_group;
-    return tp.role_generic_point;
+    return tp.role_generic_resource;
   };
 
   return (
@@ -59,26 +59,39 @@ export default async function DashboardHomePage() {
           subtitle={tp.home_subtitle}
         />
 
-        {emergencies.length > 0 && (
-          <ContextSection
-            heading={tp.home_section_emergencies}
-            headingId="home-emergencies"
-            contexts={emergencies}
-            subtitleFor={subtitleFor}
-          />
-        )}
-
-        {/* Points: either the list, or the dashed "register a point" CTA. */}
-        <section aria-labelledby="home-points" className="flex flex-col gap-3">
-          <SectionHeading id="home-points" size="sm">
-            {tp.home_section_points}
-          </SectionHeading>
-          {points.length > 0 ? (
-            <ContextGrid contexts={points} subtitleFor={subtitleFor} />
-          ) : (
-            <RegisterPointCta label={tp.home_register_point} />
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-4">
+          {emergencies.length > 0 && (
+            <ContextSection
+              heading={tp.home_section_emergencies}
+              headingId="home-emergencies"
+              contexts={emergencies}
+              subtitleFor={subtitleFor}
+              className="lg:flex-1"
+            />
           )}
-        </section>
+
+          {/* Resources: either the list, or the dashed "register a resource" CTA. */}
+          <section aria-labelledby="home-resources" className="flex flex-col gap-3 lg:flex-1">
+            <SectionHeading id="home-resources" size="sm">
+              {tp.home_section_resources}
+            </SectionHeading>
+            {resources.length > 0 ? (
+              <ContextList>
+                {resources.map((c) => (
+                  <ContextListRow
+                    key={`${c.type}-${c.id}`}
+                    href={contextHref(c)}
+                    title={c.name}
+                    subtitle={subtitleFor(c)}
+                    icon={<ContextIcon type={c.type} resourceType={c.resourceType} />}
+                  />
+                ))}
+              </ContextList>
+            ) : (
+              <RegisterResourceCta label={tp.home_register_resource} />
+            )}
+          </section>
+        </div>
 
         {orgsGroups.length > 0 && (
           <ContextSection
@@ -95,57 +108,45 @@ export default async function DashboardHomePage() {
   );
 }
 
+/**
+ * One section = one heading + one bordered `ContextList` holding every row for
+ * that category (never one bordered box per context — see design review #6).
+ */
 function ContextSection({
   heading,
   headingId,
   contexts,
   subtitleFor,
+  className = '',
 }: {
   heading: string;
   headingId: string;
   contexts: PrincipalContext[];
   subtitleFor: (c: PrincipalContext) => string | undefined;
+  className?: string;
 }) {
   return (
-    <section aria-labelledby={headingId} className="flex flex-col gap-3">
+    <section aria-labelledby={headingId} className={`flex flex-col gap-3 ${className}`.trim()}>
       <SectionHeading id={headingId} size="sm">
         {heading}
       </SectionHeading>
-      <ContextGrid contexts={contexts} subtitleFor={subtitleFor} />
+      <ContextList>
+        {contexts.map((c) => (
+          <ContextListRow
+            key={`${c.type}-${c.id}`}
+            href={contextHref(c)}
+            title={c.name}
+            subtitle={subtitleFor(c)}
+            icon={<ContextIcon type={c.type} resourceType={c.resourceType} />}
+          />
+        ))}
+      </ContextList>
     </section>
   );
 }
 
-/**
- * Mobile-first single column of dense rows in one bordered container; on wider
- * screens the rows split into two columns. Each column is its own bordered
- * `ContextList` so the "group = one border" rule holds in both layouts.
- */
-function ContextGrid({
-  contexts,
-  subtitleFor,
-}: {
-  contexts: PrincipalContext[];
-  subtitleFor: (c: PrincipalContext) => string | undefined;
-}) {
-  return (
-    <div className="grid gap-3 sm:grid-cols-2">
-      {contexts.map((c) => (
-        <ContextList key={`${c.type}-${c.id}`}>
-          <ContextListRow
-            href={contextHref(c)}
-            title={c.name}
-            subtitle={subtitleFor(c)}
-            icon={<ContextIcon type={c.type} />}
-          />
-        </ContextList>
-      ))}
-    </div>
-  );
-}
-
-/** Dashed action row shown when the principal manages no collection point. */
-function RegisterPointCta({ label }: { label: string }) {
+/** Dashed action row shown when the principal manages no resource. */
+function RegisterResourceCta({ label }: { label: string }) {
   return (
     <Link
       href="/"

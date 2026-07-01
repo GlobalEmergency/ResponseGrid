@@ -99,9 +99,11 @@ export const getMyGroups = cache(async () => {
   return (data ?? []).map((g) => ({ id: g.id, name: g.name }));
 });
 
-/** Points are emergency-scoped: aggregate `resources/mine` across the principal's
- *  emergencies. N+1 cached calls (see Global Constraints ceiling). */
-export const getMyPoints = cache(async () => {
+/** Resources are emergency-scoped: aggregate `resources/mine` across the principal's
+ *  emergencies. Carries every resource type (collection points, warehouses, transport,
+ *  suppliers, venues, …) — the principal manages all of it, not just collection points.
+ *  N+1 cached calls (see Global Constraints ceiling). */
+export const getMyResources = cache(async () => {
   const token = await getToken();
   if (token == null) return [];
   const emergencies = await getMyEmergencies();
@@ -111,17 +113,17 @@ export const getMyPoints = cache(async () => {
         headers: authHeaders(token),
         params: { path: { emergencyId: e.id } },
       });
-      return (data ?? []).map((r) => ({ id: r.id, name: r.name }));
+      return (data ?? []).map((r) => ({ id: r.id, name: r.name, resourceType: r.type }));
     }),
   );
   return perEmergency.flat();
 });
 
 export const getPrincipalContexts = cache(async (): Promise<PrincipalContext[]> => {
-  const [emergencies, points, organizations, groups] = await Promise.all([
-    getMyEmergencies(), getMyPoints(), getMyOrganizations(), getMyGroups(),
+  const [emergencies, resources, organizations, groups] = await Promise.all([
+    getMyEmergencies(), getMyResources(), getMyOrganizations(), getMyGroups(),
   ]);
-  return buildPrincipalContexts({ emergencies, points, organizations, groups });
+  return buildPrincipalContexts({ emergencies, resources, organizations, groups });
 });
 
 /** Everything the dashboard shell needs in one cached call. */

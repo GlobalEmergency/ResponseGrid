@@ -48,7 +48,7 @@ test('no permissions → just the overview', () => {
 test('contextHref points each context type at its workspace', () => {
   const cases: [PrincipalContext, string][] = [
     [{ type: 'emergency', id: 'e1', slug: 'terremoto', name: 'T', roleIds: [] }, '/emergencies/terremoto/manage'],
-    [{ type: 'point', id: 'p1', name: 'Almacén', roleIds: [] }, '/points/p1/manage'],
+    [{ type: 'resource', id: 'p1', name: 'Almacén', roleIds: [] }, '/resources/p1/manage'],
     [{ type: 'organization', id: 'o1', name: 'Cruz Roja', roleIds: [] }, '/organizations/o1/manage'],
     [{ type: 'group', id: 'g1', name: 'Logística B', roleIds: [] }, '/dashboard/groups/g1'],
   ];
@@ -57,7 +57,7 @@ test('contextHref points each context type at its workspace', () => {
 
 const MARIA: PrincipalContext[] = [
   { type: 'emergency', id: 'e1', slug: 'terremoto', name: 'Terremoto Venezuela 2026', roleIds: ['emergency_verifier'] },
-  { type: 'point', id: 'p1', name: 'Almacén Central Caracas', roleIds: ['point_manager'] },
+  { type: 'resource', id: 'p1', name: 'Almacén Central Caracas', roleIds: ['point_manager'], resourceType: 'warehouse' },
   { type: 'organization', id: 'o1', name: 'Cruz Roja Local', roleIds: ['org_admin'] },
 ];
 
@@ -66,7 +66,7 @@ test('home model: categories, no active context, no admin', () => {
     contexts: MARIA, isAdmin: false, canAdminister: false, notificationUnread: 3,
   });
   const keys = model.map((g) => g.key);
-  assert.deepEqual(keys, ['main', 'cat-emergencies', 'cat-points', 'cat-organizations', 'personal']);
+  assert.deepEqual(keys, ['main', 'cat-emergencies', 'cat-resources', 'cat-organizations', 'personal']);
   const emergencies = model.find((g) => g.key === 'cat-emergencies');
   assert.equal(emergencies?.items[0].href, '/emergencies/terremoto/manage');
 });
@@ -109,24 +109,25 @@ test('admin group appears for platform admins', () => {
 test('buildPrincipalContexts maps each source to a typed context', () => {
   const ctx = buildPrincipalContexts({
     emergencies: [{ id: 'e1', slug: 'terremoto', name: 'Terremoto', roleIds: ['emergency_verifier'] }],
-    points: [{ id: 'p1', name: 'Almacén' }],
+    resources: [{ id: 'p1', name: 'Almacén', resourceType: 'warehouse' }],
     organizations: [{ id: 'o1', name: 'Cruz Roja' }],
     groups: [{ id: 'g1', name: 'Logística B' }],
   });
   assert.deepEqual(ctx.map((c) => [c.type, c.id]), [
-    ['emergency', 'e1'], ['point', 'p1'], ['organization', 'o1'], ['group', 'g1'],
+    ['emergency', 'e1'], ['resource', 'p1'], ['organization', 'o1'], ['group', 'g1'],
   ]);
   const emergency = ctx.find((c) => c.type === 'emergency');
   assert.equal(emergency?.slug, 'terremoto');
   assert.deepEqual(emergency?.roleIds, ['emergency_verifier']);
-  const point = ctx.find((c) => c.type === 'point');
-  assert.equal(point?.slug, undefined);
-  assert.deepEqual(point?.roleIds, []);
+  const resource = ctx.find((c) => c.type === 'resource');
+  assert.equal(resource?.slug, undefined);
+  assert.deepEqual(resource?.roleIds, []);
+  assert.equal(resource?.resourceType, 'warehouse');
 });
 
 test('empty sources produce an empty context list', () => {
   assert.deepEqual(
-    buildPrincipalContexts({ emergencies: [], points: [], organizations: [], groups: [] }),
+    buildPrincipalContexts({ emergencies: [], resources: [], organizations: [], groups: [] }),
     [],
   );
 });

@@ -46,7 +46,7 @@ export interface MyEmergencyNav {
   roleIds: string[];
 }
 
-export type ContextType = 'emergency' | 'point' | 'organization' | 'group';
+export type ContextType = 'emergency' | 'resource' | 'organization' | 'group';
 
 /** A context the principal holds a grant in, resolved for the switcher. */
 export interface PrincipalContext {
@@ -56,6 +56,8 @@ export interface PrincipalContext {
   slug?: string;
   name: string;
   roleIds: string[];
+  /** Only set for `resource` contexts — the `ResourceViewDto` type enum value. */
+  resourceType?: string;
 }
 
 /** Which context (if any) the current route is inside. */
@@ -68,8 +70,8 @@ export function contextHref(c: PrincipalContext): string {
   switch (c.type) {
     case 'emergency':
       return `/emergencies/${c.slug}/manage`;
-    case 'point':
-      return `/points/${c.id}/manage`;
+    case 'resource':
+      return `/resources/${c.id}/manage`;
     case 'organization':
       return `/organizations/${c.id}/manage`;
     case 'group':
@@ -79,7 +81,7 @@ export function contextHref(c: PrincipalContext): string {
 
 export interface RawPrincipalContexts {
   emergencies: { id: string; slug: string; name: string; roleIds: string[] }[];
-  points: { id: string; name: string }[];
+  resources: { id: string; name: string; resourceType: string }[];
   organizations: { id: string; name: string }[];
   groups: { id: string; name: string }[];
 }
@@ -90,8 +92,8 @@ export function buildPrincipalContexts(raw: RawPrincipalContexts): PrincipalCont
     ...raw.emergencies.map((e): PrincipalContext => ({
       type: 'emergency', id: e.id, slug: e.slug, name: e.name, roleIds: e.roleIds,
     })),
-    ...raw.points.map((p): PrincipalContext => ({
-      type: 'point', id: p.id, name: p.name, roleIds: [],
+    ...raw.resources.map((r): PrincipalContext => ({
+      type: 'resource', id: r.id, name: r.name, roleIds: [], resourceType: r.resourceType,
     })),
     ...raw.organizations.map((o): PrincipalContext => ({
       type: 'organization', id: o.id, name: o.name, roleIds: [],
@@ -104,7 +106,7 @@ export function buildPrincipalContexts(raw: RawPrincipalContexts): PrincipalCont
 
 const CATEGORY_ORDER: { type: ContextType; key: string; headingKey: NavLabelKey }[] = [
   { type: 'emergency', key: 'cat-emergencies', headingKey: 'cat_emergencies' },
-  { type: 'point', key: 'cat-points', headingKey: 'cat_points' },
+  { type: 'resource', key: 'cat-resources', headingKey: 'cat_resources' },
   { type: 'organization', key: 'cat-organizations', headingKey: 'cat_organizations' },
   { type: 'group', key: 'cat-groups', headingKey: 'cat_groups' },
 ];
