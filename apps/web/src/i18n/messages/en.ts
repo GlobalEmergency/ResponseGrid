@@ -59,6 +59,8 @@ export const en = {
     see_emergencies: 'See emergencies',
     account_aria: 'Account menu',
     menu_aria: 'Menu',
+    open_menu: 'Open menu',
+    close_menu: 'Close menu',
     section_emergency: 'In this emergency',
     my_points: 'My points',
     my_volunteering: 'My volunteering',

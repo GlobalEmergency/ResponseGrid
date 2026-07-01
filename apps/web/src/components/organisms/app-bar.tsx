@@ -183,7 +183,7 @@ export async function AppBar({ variant, slug, emergency, backHref }: AppBarProps
             brand={brand}
             account={<div className="px-3">{account}</div>}
             links={infoLinks}
-            labels={{ openMenu: ta.menu_aria, closeMenu: ta.menu_aria, navAria: ta.menu_aria }}
+            labels={{ openMenu: ta.open_menu, closeMenu: ta.close_menu, navAria: ta.menu_aria }}
             {...(isEmergency && slug !== undefined
               ? { requestCta: { href: `/e/${slug}/peticion`, label: ta.request } }
               : {})}
