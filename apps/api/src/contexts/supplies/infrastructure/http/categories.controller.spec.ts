@@ -10,6 +10,7 @@ describe('CategoriesController', () => {
       parentSlug: null,
       vertical: 'general',
       sort: 1,
+      kind: 'material',
       archivedAt: null,
       translations: [
         { locale: 'es', label: 'Alimentos' },
@@ -52,6 +53,7 @@ describe('CategoriesController', () => {
       parentSlug: null,
       vertical: 'general',
       sort: 1,
+      kind: 'material',
     });
   });
 });
