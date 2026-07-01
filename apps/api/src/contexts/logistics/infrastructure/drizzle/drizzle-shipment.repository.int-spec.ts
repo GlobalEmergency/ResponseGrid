@@ -4,6 +4,7 @@ import { DrizzleShipmentRepository } from './drizzle-shipment.repository';
 import { DrizzleShipmentAuthorizationLookup } from './drizzle-shipment-authorization-lookup';
 import { Shipment } from '../../domain/shipment';
 import { ShipmentId } from '../../domain/shipment-id';
+import { formatShipmentCode } from '../../domain/shipment-code';
 import { SupplyLine } from '../../../supplies/domain/supply-line';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import { CarrierType, ShipmentStatus } from '../../domain/shipment-enums';
@@ -22,6 +23,10 @@ const CARRIER_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const CONTAINER_A = '11111111-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const CONTAINER_B = '22222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 
+// Monotonic across the file so every created shipment gets a distinct code
+// (the unique (emergency_id, code) index rejects collisions).
+let codeSeq = 0;
+
 function makeShipment(opts?: {
   emergencyId?: string;
   items?: SupplyLine[];
@@ -30,6 +35,7 @@ function makeShipment(opts?: {
 }): Shipment {
   return Shipment.create({
     id: ShipmentId.create(),
+    code: formatShipmentCode(++codeSeq),
     emergencyId: EmergencyId.fromString(opts?.emergencyId ?? EM),
     originResourceId: ORIGIN,
     destinationResourceId: DEST,

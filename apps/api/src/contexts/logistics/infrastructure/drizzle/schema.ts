@@ -4,6 +4,7 @@ import {
   text,
   timestamp,
   doublePrecision,
+  integer,
   jsonb,
 } from 'drizzle-orm/pg-core';
 import { CoverageProps } from '../../domain/coverage';
@@ -34,6 +35,9 @@ export const transportCapacitiesTable = pgTable('transport_capacities', {
 
 export const shipmentsTable = pgTable('shipments', {
   id: uuid('id').primaryKey(),
+  // Legible/QR "Código Único" of the expedition (`EXP-0001`, #163). Unique per
+  // emergency (migration 0049); allocated via `shipment_code_sequences`.
+  code: text('code').notNull(),
   emergencyId: uuid('emergency_id').notNull(),
   // Route between two resource nodes (no FK — cross-context to resources).
   originResourceId: uuid('origin_resource_id').notNull(),
@@ -54,4 +58,17 @@ export const shipmentsTable = pgTable('shipments', {
   status: text('status').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+});
+
+/**
+ * Monotonic per-emergency allocator for expedition codes (`EXP-0001`), mirror
+ * of `container_code_sequences` (#140). An atomic upsert (INSERT … ON CONFLICT
+ * DO UPDATE SET last_value = last_value + 1 RETURNING) hands out the next value
+ * so concurrent creates never mint the same code and a deleted shipment never
+ * frees its code — keeping `shipments.code` unique per emergency. The primary
+ * key (emergency_id) lives in migration 0049.
+ */
+export const shipmentCodeSequencesTable = pgTable('shipment_code_sequences', {
+  emergencyId: uuid('emergency_id').notNull(),
+  lastValue: integer('last_value').notNull(),
 });
