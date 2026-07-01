@@ -24,7 +24,9 @@ import { DiscardResource } from '../application/discard-resource';
 import { UpdateResourcePublicStatus } from '../application/update-resource-public-status';
 import { RecordInventoryEntry } from '../application/record-inventory-entry';
 import { ReceiveDonationIntoInventory } from '../application/receive-donation-into-inventory';
-import { DonationEventsWorker } from './donation-events.worker';
+import { ConsumerWorker } from '../../../shared/events/consumer-worker';
+import { DrizzleProcessedEventStore } from '../../../shared/events/drizzle-processed-event-store';
+import { receiveDonationHandler } from './donation-received.handler';
 import {
   RESOURCE_REPOSITORY,
   ResourceRepository,
@@ -301,11 +303,25 @@ const receiveDonationIntoInventoryProvider = {
     new ReceiveDonationIntoInventory(repo),
 };
 
+// Idempotency ledger shared by this context's event consumers (#129).
+const processedEventStoreProvider = {
+  provide: DrizzleProcessedEventStore,
+  inject: [DB],
+  useFactory: (db: Db) => new DrizzleProcessedEventStore(db),
+};
+
+// Resources consumer of the domain-event fan-out: applies received donation
+// lines to the target point's inventory, at most once per intake.
 const donationEventsWorkerProvider = {
-  provide: DonationEventsWorker,
-  inject: [ReceiveDonationIntoInventory],
-  useFactory: (receive: ReceiveDonationIntoInventory) =>
-    new DonationEventsWorker(receive),
+  provide: ConsumerWorker,
+  inject: [DrizzleProcessedEventStore, ReceiveDonationIntoInventory],
+  useFactory: (
+    store: DrizzleProcessedEventStore,
+    receive: ReceiveDonationIntoInventory,
+  ) =>
+    new ConsumerWorker('resources', store, {
+      'donation_intake.received': receiveDonationHandler(receive),
+    }),
 };
 
 // Manual inventory entry (#9): an operator records received supply lines into a
@@ -355,6 +371,7 @@ const recordInventoryEntryProvider = {
     listResourcesAdminProvider,
     getResourceAdminDetailProvider,
     receiveDonationIntoInventoryProvider,
+    processedEventStoreProvider,
     donationEventsWorkerProvider,
     recordInventoryEntryProvider,
   ],

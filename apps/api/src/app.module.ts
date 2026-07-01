@@ -19,6 +19,7 @@ import { NotificationsModule } from './contexts/notifications/infrastructure/not
 import { AuditModule } from './contexts/audit/infrastructure/audit.module';
 import { GroupsModule } from './contexts/groups/infrastructure/groups.module';
 import { SuppliesModule } from './contexts/supplies/supplies.module';
+import { EventsModule } from './shared/events/events.module';
 
 // In test environments (NODE_ENV=test) the throttler is disabled to avoid
 // breaking e2e tests that perform many login requests in quick succession.
@@ -63,6 +64,7 @@ const isTestEnv = process.env.NODE_ENV === 'test';
     AuditModule,
     GroupsModule,
     SuppliesModule,
+    EventsModule,
   ],
 })
 export class AppModule {}
