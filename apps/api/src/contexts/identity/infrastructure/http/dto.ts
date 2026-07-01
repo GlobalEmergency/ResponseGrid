@@ -1,4 +1,12 @@
-import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  Equals,
+  IsBoolean,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class LoginDto {
@@ -33,14 +41,28 @@ export class RegisterDto {
 
   @ApiProperty({
     example: '+58 412 555 0101',
-    required: false,
-    nullable: true,
     type: String,
-    description: 'Teléfono de contacto opcional',
+    description: 'Teléfono de contacto (obligatorio)',
   })
-  @IsOptional()
   @IsString()
-  phone?: string;
+  @IsNotEmpty()
+  phone!: string;
+
+  @ApiProperty({
+    example: true,
+    description: 'Aceptación de las condiciones del servicio (debe ser true)',
+  })
+  @IsBoolean()
+  @Equals(true)
+  acceptedTerms!: boolean;
+
+  @ApiProperty({
+    example: true,
+    description: 'Aceptación de la política de privacidad (debe ser true)',
+  })
+  @IsBoolean()
+  @Equals(true)
+  acceptedPrivacy!: boolean;
 }
 
 export class RegisterResponseDto {
@@ -48,6 +70,41 @@ export class RegisterResponseDto {
     description: 'JWT access token (auto-login after registration)',
   })
   accessToken!: string;
+}
+
+export class OnboardingDto {
+  @ApiProperty({
+    example: '+58 412 555 0101',
+    type: String,
+    description: 'Teléfono de contacto (obligatorio)',
+  })
+  @IsString()
+  @IsNotEmpty()
+  phone!: string;
+
+  @ApiProperty({
+    example: true,
+    description: 'Aceptación de las condiciones del servicio (debe ser true)',
+  })
+  @IsBoolean()
+  @Equals(true)
+  acceptedTerms!: boolean;
+
+  @ApiProperty({
+    example: true,
+    description: 'Aceptación de la política de privacidad (debe ser true)',
+  })
+  @IsBoolean()
+  @Equals(true)
+  acceptedPrivacy!: boolean;
+}
+
+export class OnboardingResponseDto {
+  @ApiProperty({
+    description:
+      'true una vez el perfil queda completo (teléfono + consentimientos)',
+  })
+  profileComplete!: boolean;
 }
 
 export class MeGrantDto {
@@ -97,6 +154,13 @@ export class MeResponseDto {
     description: 'Optional contact phone, null until the user provides one',
   })
   phone!: string | null;
+
+  @ApiProperty({
+    description:
+      'true si el perfil está completo (teléfono + consentimientos vigentes). ' +
+      'false obliga a pasar por el onboarding (típico en altas sociales).',
+  })
+  profileComplete!: boolean;
 
   @ApiProperty({
     type: [MeGrantDto],

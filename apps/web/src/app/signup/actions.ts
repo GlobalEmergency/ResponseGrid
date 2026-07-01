@@ -17,12 +17,18 @@ export async function signupAction(
 ): Promise<SignupResult> {
   const name = String(formData.get('name') ?? '').trim();
   const email = String(formData.get('email') ?? '').trim();
+  const phone = String(formData.get('phone') ?? '').trim();
   const password = String(formData.get('password') ?? '');
+  const consent = formData.get('consent') != null;
 
   const { t } = await getT();
 
   if (!name || !email || !password) {
     return { status: 'error', message: t.signup.err_all_fields_required };
+  }
+
+  if (!phone) {
+    return { status: 'error', message: t.signup.err_phone_required };
   }
 
   if (password.length < 8) {
@@ -32,8 +38,19 @@ export async function signupAction(
     };
   }
 
+  if (!consent) {
+    return { status: 'error', message: t.signup.err_consent_required };
+  }
+
   const { data, error, response } = await api.POST('/auth/register', {
-    body: { name, email, password },
+    body: {
+      name,
+      email,
+      phone,
+      password,
+      acceptedTerms: true,
+      acceptedPrivacy: true,
+    },
   });
 
   if (response.status === 409) {
