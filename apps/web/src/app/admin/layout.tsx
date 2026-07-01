@@ -7,10 +7,10 @@ import { PageContainer } from '@/components/molecules/page-container';
 
 /**
  * Platform-administration shell: resolves the session and mounts
- * `DashboardLayout` with the `admin` active context, which makes the sidebar
- * expand the admin sections inline (see `navigation.ts` `adminSectionItems`).
- * Sections live in the sidebar now, so — unlike the legacy `administracion`
- * layout — this does NOT render `AdminTabs`.
+ * `DashboardLayout`. The sidebar nests the admin sections for platform admins
+ * on its own now (see `navigation.ts` `adminSectionItems`), so this layout no
+ * longer threads an active context. Sections live in the sidebar, so — unlike
+ * the legacy `administracion` layout — this does NOT render `AdminTabs`.
  *
  * Gate here is just "authenticated" — the individual admin pages already do
  * their own permission checks (platform-admin-only vs. scope-administrable),
@@ -25,7 +25,7 @@ export default async function AdminLayout({
   if (me == null) redirect(loginHref('/admin'));
 
   return (
-    <DashboardLayout activeContext={{ type: 'admin', id: 'platform' }}>
+    <DashboardLayout>
       <main className="flex-1 bg-surface">
         <PageContainer>{children}</PageContainer>
       </main>

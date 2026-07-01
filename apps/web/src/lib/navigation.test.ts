@@ -70,6 +70,7 @@ const MARIA: PrincipalContext[] = [
 test('home model: categories, no active context, no admin', () => {
   const model = buildNavModel({
     contexts: MARIA, isAdmin: false, canAdminister: false, notificationUnread: 3,
+    emergencyAccessById: {},
   });
   const keys = model.map((g) => g.key);
   assert.deepEqual(keys, ['main', 'cat-emergencies', 'cat-resources', 'cat-organizations', 'personal']);
@@ -80,25 +81,50 @@ test('home model: categories, no active context, no admin', () => {
 test('empty categories are omitted', () => {
   const model = buildNavModel({
     contexts: [MARIA[2]], isAdmin: false, canAdminister: false, notificationUnread: 0,
+    emergencyAccessById: {},
   });
   assert.equal(model.some((g) => g.key === 'cat-emergencies'), false);
   assert.equal(model.some((g) => g.key === 'cat-organizations'), true);
 });
 
-test('active emergency nests its gated sections as children of the context', () => {
+test('every emergency context nests its own gated sections as children', () => {
   const verifier = access({ canVerifyResources: true });
   const model = buildNavModel({
     contexts: MARIA, isAdmin: false, canAdminister: false, notificationUnread: 3,
-    activeContext: { type: 'emergency', id: 'e1' }, activeEmergencyAccess: verifier,
+    emergencyAccessById: { e1: verifier },
   });
   const emergencies = model.find((g) => g.key === 'cat-emergencies');
   const ctx = emergencies?.items.find((i) => i.key === 'ctx-e1');
   assert.deepEqual(ctx?.children?.map((i) => i.key), ['sec-overview', 'sec-resources', 'sec-disputes']);
 });
 
-test('a context with no active state has no children', () => {
+test('sections are gated by EACH emergency access (a different map → different sections)', () => {
+  const coordinator = access({
+    canVerifyResources: true, canValidateNeeds: true, canMatchOffers: true,
+    canCoordinateLogistics: true, canCoordinate: true, canViewAudit: true,
+  });
+  const contexts: PrincipalContext[] = [
+    MARIA[0],
+    { type: 'emergency', id: 'e2', slug: 'otra', name: 'Otra Emergencia', roleIds: ['emergency_coordinator'] },
+  ];
+  const model = buildNavModel({
+    contexts, isAdmin: false, canAdminister: false, notificationUnread: 0,
+    emergencyAccessById: { e1: access({ canVerifyResources: true }), e2: coordinator },
+  });
+  const emergencies = model.find((g) => g.key === 'cat-emergencies');
+  const e1 = emergencies?.items.find((i) => i.key === 'ctx-e1');
+  const e2 = emergencies?.items.find((i) => i.key === 'ctx-e2');
+  assert.deepEqual(e1?.children?.map((i) => i.key), ['sec-overview', 'sec-resources', 'sec-disputes']);
+  assert.deepEqual(e2?.children?.map((i) => i.key), [
+    'sec-overview', 'sec-resources', 'sec-disputes', 'sec-needs', 'sec-offers',
+    'sec-logistics', 'sec-volunteers', 'sec-reports', 'sec-activity',
+  ]);
+});
+
+test('an emergency context with no access entry has no children', () => {
   const model = buildNavModel({
     contexts: MARIA, isAdmin: false, canAdminister: false, notificationUnread: 0,
+    emergencyAccessById: {},
   });
   const emergencies = model.find((g) => g.key === 'cat-emergencies');
   const ctx = emergencies?.items.find((i) => i.key === 'ctx-e1');
@@ -108,6 +134,7 @@ test('a context with no active state has no children', () => {
 test('admin group appears for platform admins', () => {
   const model = buildNavModel({
     contexts: [], isAdmin: true, canAdminister: true, notificationUnread: 0,
+    emergencyAccessById: {},
   });
   assert.equal(model.some((g) => g.key === 'admin'), true);
 });
@@ -148,10 +175,10 @@ test('adminSectionItems lists the 9 admin sections with /admin routes', () => {
   assert.equal(items[0].exact, true);
 });
 
-test('platform admin sees admin sections nested; active admin expands them', () => {
+test('platform admin always gets the admin sections nested (not gated on active)', () => {
   const model = buildNavModel({
     contexts: [], isAdmin: true, canAdminister: true, notificationUnread: 0,
-    activeContext: { type: 'admin', id: 'platform' },
+    emergencyAccessById: {},
   });
   const admin = model.find((g) => g.key === 'admin');
   const hub = admin?.items.find((i) => i.key === 'admin');
@@ -161,6 +188,7 @@ test('platform admin sees admin sections nested; active admin expands them', () 
 test('scope-only admin (not platform) gets a single admin link, no children', () => {
   const model = buildNavModel({
     contexts: [], isAdmin: false, canAdminister: true, notificationUnread: 0,
+    emergencyAccessById: {},
   });
   const admin = model.find((g) => g.key === 'admin');
   const hub = admin?.items.find((i) => i.key === 'admin');

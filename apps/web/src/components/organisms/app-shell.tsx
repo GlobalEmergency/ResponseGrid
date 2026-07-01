@@ -9,7 +9,7 @@ interface AppShellProps {
   groups: ResolvedNavGroup[];
   user: { name: string; email: string; isAdmin: boolean };
   accountLabels: { admin: string; logout: string };
-  chrome: { openMenu: string; closeMenu: string; navAria: string };
+  chrome: { openMenu: string; closeMenu: string; navAria: string; toggleSection: string };
   emergencyContext?: ReactNode;
   children: ReactNode;
 }
@@ -34,7 +34,7 @@ export function AppShell({
   const navGroups = (
     <div className="flex flex-col gap-1 pb-2">
       {groups.map((g) => (
-        <NavGroup key={g.key} group={g} />
+        <NavGroup key={g.key} group={g} toggleLabel={chrome.toggleSection} />
       ))}
     </div>
   );

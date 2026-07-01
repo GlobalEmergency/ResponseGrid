@@ -2656,6 +2656,7 @@ export const en = {
     admin_chip: 'Admin',
     open_menu: 'Open menu',
     close_menu: 'Close menu',
+    toggle_section: 'Show or hide sections',
     nav_aria: 'Main navigation',
     emergency_context: 'Operating',
     exit_emergency: 'Exit operation',

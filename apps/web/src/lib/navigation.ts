@@ -2,10 +2,10 @@
  * Context-aware navigation model.
  *
  * Pure, framework-free: given the principal's resolved contexts (emergencies,
- * resources, organizations, groups they hold a grant in), the active context (if
- * any) and its resolved access, it returns the menu structure — Inicio, one
- * collapsible category per context type, the active context's gated sections
- * inlined, personal links and, if applicable, the administration hub. It does
+ * resources, organizations, groups they hold a grant in) and each emergency's
+ * resolved access (keyed by id), it returns the menu structure — Inicio, one
+ * category per context type, every emergency's gated sections nested as
+ * children, personal links and, if applicable, the administration hub. It does
  * NOT fetch — the data layer (navigation-data.ts) loads inputs and the app
  * shell renders the output. `isAdmin`/`canAdminister` are passed in so this
  * module has no dependency on `admin-scopes`.
@@ -75,12 +75,6 @@ export interface PrincipalContext {
   resourceType?: ResourceType;
 }
 
-/** Which context (if any) the current route is inside. */
-export interface ActiveContextRef {
-  type: ContextType;
-  id: string;
-}
-
 export function contextHref(c: PrincipalContext): string {
   switch (c.type) {
     case 'emergency':
@@ -136,8 +130,13 @@ export interface BuildNavArgs {
   isAdmin: boolean;
   canAdminister: boolean;
   notificationUnread: number;
-  activeContext?: ActiveContextRef;
-  activeEmergencyAccess?: EmergencyAccess;
+  /**
+   * Resolved emergency access keyed by emergency id. The caller (the app
+   * shell) resolves each context's access; this module stays pure and only
+   * consumes the map — every emergency the map has an entry for gets its gated
+   * sections nested as children (regardless of which route is active).
+   */
+  emergencyAccessById: Record<string, EmergencyAccess>;
 }
 
 export function buildNavModel({
@@ -145,8 +144,7 @@ export function buildNavModel({
   isAdmin,
   canAdminister,
   notificationUnread,
-  activeContext,
-  activeEmergencyAccess,
+  emergencyAccessById,
 }: BuildNavArgs): NavModel {
   const groups: NavModel = [];
 
@@ -163,10 +161,9 @@ export function buildNavModel({
 
     const items: NavItem[] = inCat.map((c) => {
       const item: NavItem = { key: `ctx-${c.id}`, href: contextHref(c), label: c.name };
-      const isActive =
-        activeContext != null && activeContext.type === c.type && activeContext.id === c.id;
-      if (isActive && c.type === 'emergency' && activeEmergencyAccess != null && c.slug != null) {
-        item.children = emergencySectionItems(c.slug, activeEmergencyAccess).map((s) => ({
+      const access = emergencyAccessById[c.id];
+      if (c.type === 'emergency' && access != null && c.slug != null) {
+        item.children = emergencySectionItems(c.slug, access).map((s) => ({
           ...s,
           key: `sec-${s.key}`,
         }));
@@ -192,7 +189,7 @@ export function buildNavModel({
   // Administración — platform-level hub.
   if (isAdmin || canAdminister) {
     const hub: NavItem = { key: 'admin', href: '/admin', labelKey: 'administration' };
-    if (isAdmin && activeContext?.type === 'admin') {
+    if (isAdmin) {
       hub.children = adminSectionItems();
     }
     groups.push({ key: 'admin', items: [hub] });

@@ -29,10 +29,11 @@ function roleLabel(
 
 /**
  * Emergency workspace shell: resolves session/emergency/access and mounts
- * `DashboardLayout` with `activeContext` set, which makes the sidebar expand
- * this emergency's gated sections inline (see `navigation.ts`
- * `emergencySectionItems`). Sections live in the sidebar now, so — unlike the
- * legacy `coordinacion` layout — this does NOT render `CoordinationTabs`.
+ * `DashboardLayout`. The sidebar (see `navigation.ts` / `DashboardLayout`)
+ * nests every emergency's gated sections on its own now, so this layout no
+ * longer threads active-context props; it still resolves `access` for the
+ * role badge below. Sections live in the sidebar, so — unlike the legacy
+ * `coordinacion` layout — this does NOT render `CoordinationTabs`.
  */
 export default async function ManageLayout({
   children,
@@ -52,10 +53,7 @@ export default async function ManageLayout({
   const roleDesc = new Map(roles.map((r) => [r.id, r.description ?? r.id]));
 
   return (
-    <DashboardLayout
-      activeContext={{ type: 'emergency', id: emergency.id }}
-      activeEmergencyAccess={access}
-    >
+    <DashboardLayout>
       <main className="flex-1 bg-surface">
         <PageContainer>
           <ContextSwitcher

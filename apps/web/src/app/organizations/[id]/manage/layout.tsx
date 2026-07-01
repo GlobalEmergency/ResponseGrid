@@ -26,7 +26,7 @@ export default async function OrganizationManageLayout({
   }
 
   return (
-    <DashboardLayout activeContext={{ type: 'organization', id }}>
+    <DashboardLayout>
       {children}
     </DashboardLayout>
   );
