@@ -1,13 +1,14 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { loginHref } from './safe-next';
+import { SESSION_COOKIE } from './session-cookie';
 
 // Re-exported so server callers can pull the login-redirect contract and the
 // session gate from one place (`@/lib/auth`); defined in `safe-next` because it
 // is pure and must stay importable from client components too.
 export { loginHref };
 
-const COOKIE_NAME = 'rh_token';
+const COOKIE_NAME = SESSION_COOKIE;
 
 /**
  * Session lifetime in seconds. Defaults to 8 hours; override with SESSION_MAX_AGE_SECONDS
