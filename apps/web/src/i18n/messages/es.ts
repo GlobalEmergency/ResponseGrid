@@ -191,6 +191,27 @@ export const es = {
       'Esta es la página oficial de {emergency} en ResponseGrid. Aquí encuentras los puntos de acopio verificados, las necesidades de material validadas por coordinación y qué NO llevar, todo actualizado en tiempo real. Elige un punto activo, confírmalo por teléfono antes de ir y evita desplazamientos que saturan la logística.',
     intro_source:
       'Información coordinada y verificada. Un proyecto open source de Global Emergency.',
+
+    // FAQ visible + FAQPage schema (contenido citable por buscadores y IA)
+    faq_heading: 'Preguntas frecuentes',
+    faq: [
+      {
+        q: '¿Dónde puedo llevar donaciones para {emergency}?',
+        a: 'En los puntos de acopio verificados que aparecen en el mapa y en la lista de esta página. Cada punto indica qué material acepta y su estado; confirma siempre por teléfono antes de trasladarte.',
+      },
+      {
+        q: '¿Qué material se necesita ahora en {emergency}?',
+        a: 'Las necesidades validadas por coordinación aparecen en la pestaña «Necesidades», con su prioridad. Solo se muestran peticiones reales y recientes (frescura de 48 h).',
+      },
+      {
+        q: '¿Qué NO debo llevar?',
+        a: 'Evita ropa usada sin clasificar, medicamentos por vía no sanitaria, alimentos caseros y material sin punto receptor asignado. Enviar material sin coordinar satura la logística.',
+      },
+      {
+        q: '¿Cómo puedo ayudar además de donar material?',
+        a: 'Puedes ofrecer un punto logístico o almacén, poner tu capacidad de transporte, apuntarte como voluntario o registrar una petición desde «¿Cómo quieres colaborar?».',
+      },
+    ],
     status_active: 'Emergencia activa',
     status_active_aria: 'Estado: emergencia activa',
 

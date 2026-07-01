@@ -54,7 +54,7 @@ export async function generateMetadata(
     ],
     alternates: { canonical: url },
     openGraph: { title, description, url, type: 'article' },
-    twitter: { card: 'summary', title, description },
+    twitter: { card: 'summary_large_image', title, description },
   };
 }
 
@@ -177,6 +177,20 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
     },
   };
 
+  const faqItems = te.faq.map((item) => ({
+    q: item.q.replace('{emergency}', emergency.name),
+    a: item.a,
+  }));
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: { '@type': 'Answer', text: item.a },
+    })),
+  };
+
   const statusLabel =
     emergency.status === 'active'
       ? te.header_status_active
@@ -242,6 +256,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <JsonLd data={specialAnnouncementJsonLd} />
+      <JsonLd data={faqJsonLd} />
       <AppBar variant="emergency" slug={slug} emergency={{ name: emergency.name, status: emergency.status }} />
 
       {!isActive && (
@@ -466,6 +481,29 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
               ))}
             </ul>
           </details>
+
+          <section aria-labelledby="faq-heading" className="flex flex-col gap-2.5">
+            <h2 id="faq-heading" className={sectionTitle}>{te.faq_heading}</h2>
+            <div className="flex flex-col gap-2">
+              {faqItems.map((item) => (
+                <details
+                  key={item.q}
+                  className="group rounded-card border border-line bg-surface-alt px-4 py-3 open:pb-3.5"
+                >
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[14px] font-bold text-navy [&::-webkit-details-marker]:hidden">
+                    {item.q}
+                    <span
+                      aria-hidden="true"
+                      className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-line bg-white text-muted transition-transform group-open:rotate-180"
+                    >
+                      ⌄
+                    </span>
+                  </summary>
+                  <p className="mt-2 text-[13.5px] leading-[1.5] text-muted">{item.a}</p>
+                </details>
+              ))}
+            </div>
+          </section>
 
           <EmergencyQuickLinks slug={slug} te={te} />
         </div>

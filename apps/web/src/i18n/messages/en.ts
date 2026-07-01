@@ -189,6 +189,27 @@ export const en = {
       'This is the official page for {emergency} on ResponseGrid. Here you will find the verified collection points, the supply needs validated by coordination and what NOT to bring, all updated in real time. Pick an active point, confirm it by phone before going and avoid trips that overload logistics.',
     intro_source:
       'Coordinated and verified information. An open source project by Global Emergency.',
+
+    // Visible FAQ + FAQPage schema (content citable by search engines and AI)
+    faq_heading: 'Frequently asked questions',
+    faq: [
+      {
+        q: 'Where can I take donations for {emergency}?',
+        a: 'To the verified collection points shown on the map and in the list on this page. Each point states what it accepts and its status; always confirm by phone before travelling.',
+      },
+      {
+        q: 'What supplies are needed right now in {emergency}?',
+        a: 'The needs validated by coordination appear in the “Needs” tab, with their priority. Only real and recent requests are shown (48h freshness).',
+      },
+      {
+        q: 'What should I NOT bring?',
+        a: 'Avoid unsorted used clothing, medicines outside the authorised health channel, home-made food and supplies without an assigned receiving point. Sending supplies without coordinating overloads logistics.',
+      },
+      {
+        q: 'How can I help beyond donating supplies?',
+        a: 'You can offer a logistics point or warehouse, provide transport capacity, sign up as a volunteer or register a request from “How do you want to help?”.',
+      },
+    ],
     status_active: 'Active emergency',
     status_active_aria: 'Status: active emergency',
 
