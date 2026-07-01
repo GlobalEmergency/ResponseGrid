@@ -25,12 +25,12 @@ interface ResourceViewBody {
   id: string;
   name: string;
   type: string;
-  stage: string;
   verificationLevel: string;
   publicStatus: string;
   location: { address: string; latitude: number; longitude: number };
   accepts: string[];
   contact: string | null;
+  hasContact: boolean;
   schedule: string | null;
   manager: string | null;
   country: string | null;
@@ -269,7 +269,8 @@ describe('Public resources paged (e2e)', () => {
           country: 'VE',
           city: 'Maracaibo',
         }).toSnapshot(),
-        verificationLevel: VerificationLevel.Verified,
+        // Official → contact is public (not redacted for anonymous callers).
+        verificationLevel: VerificationLevel.Official,
         publicStatus: PublicStatus.Active,
         createdAt: new Date(),
       });
@@ -283,10 +284,41 @@ describe('Public resources paged (e2e)', () => {
     const item = (res.body as PagedResourcesBody).items[0];
     expect(item.accepts).toEqual(['water']);
     expect(item.contact).toBe('+1-555-0100');
+    expect(item.hasContact).toBe(true);
     expect(item.schedule).toBe('Mon-Fri 9-17');
     expect(item.manager).toBe('María');
     expect(item.country).toBe('VE');
     expect(item.city).toBe('Maracaibo');
+  });
+
+  it('redacts contact from anonymous callers on non-official resources (hasContact stays true)', async () => {
+    await withCleanRepo(async (repo) => {
+      const r = Resource.fromSnapshot({
+        ...Resource.register({
+          id: ResourceId.create(),
+          emergencyId: EmergencyId.fromString(EM),
+          type: ResourceType.CollectionPoint,
+          name: 'Verified Resource',
+          location: baseLocation,
+          ownerUserId: OWNER_ID,
+          accepts: ['water'],
+          contact: '+1-555-0199',
+        }).toSnapshot(),
+        // Verified (not official) → contact is personal data, redacted for anon.
+        verificationLevel: VerificationLevel.Verified,
+        publicStatus: PublicStatus.Active,
+        createdAt: new Date(),
+      });
+      await repo.save(r);
+    });
+
+    const res = await request(server)
+      .get(`/emergencies/${EM}/public/resources`)
+      .expect(200);
+
+    const item = (res.body as PagedResourcesBody).items[0];
+    expect(item.contact).toBeNull();
+    expect(item.hasContact).toBe(true);
   });
 
   it('GET /emergencies/:id/public/resources?limit=200 returns 400 (exceeds @Max(100))', async () => {

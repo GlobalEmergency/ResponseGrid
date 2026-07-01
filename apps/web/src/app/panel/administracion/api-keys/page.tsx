@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { getToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { fetchServiceAccounts } from './actions';
 import { CreateServiceAccountForm } from './create-sa-form';
@@ -17,13 +17,12 @@ export const metadata: Metadata = {
 };
 
 export default async function ApiKeysPage() {
-  const token = await getToken();
-  if (!token) redirect('/login?next=/panel/administracion/api-keys');
+  const token = await requireSession('/panel/administracion/api-keys');
 
   const { data: me, response: meRes } = await api.GET('/auth/me', {
     headers: authHeaders(token),
   });
-  if (meRes.status === 401 || !me) redirect('/login?next=/panel/administracion/api-keys');
+  if (meRes.status === 401 || !me) redirect(loginHref('/panel/administracion/api-keys'));
   if (!me.isAdmin) redirect('/');
 
   const accounts = await fetchServiceAccounts();

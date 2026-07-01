@@ -173,7 +173,6 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
         description: te.points_empty_description,
       }}
       locale={locale}
-      authed={token !== null}
     />
   );
 

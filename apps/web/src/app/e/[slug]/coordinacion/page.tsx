@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { getMe, getRoles } from '@/lib/navigation-data';
@@ -34,10 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CoordinacionPage({ params }: Props) {
   const { slug } = await params;
 
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion`);
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion`);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
@@ -50,7 +47,7 @@ export default async function CoordinacionPage({ params }: Props) {
   const [me, roles] = await Promise.all([getMe(), getRoles()]);
   if (me == null) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/coordinacion`);
+    redirect(loginHref(`/e/${slug}/coordinacion`));
   }
 
   const access: EmergencyAccess = resolveEmergencyAccess(
@@ -65,7 +62,7 @@ export default async function CoordinacionPage({ params }: Props) {
   const onUnauthorized = async (status: number): Promise<void> => {
     if (status === 401) {
       await clearToken();
-      redirect(`/login?next=/e/${slug}/coordinacion`);
+      redirect(loginHref(`/e/${slug}/coordinacion`));
     }
   };
 

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { getToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 export type OrgActionResult =
@@ -15,10 +15,7 @@ export async function createOrganizationAction(
   _prev: OrgActionResult,
   formData: FormData,
 ): Promise<OrgActionResult> {
-  const token = await getToken();
-  if (!token) {
-    redirect('/login?next=/panel/organizaciones');
-  }
+  const token = await requireSession('/panel/organizaciones');
 
   const { t } = await getT();
 
@@ -41,7 +38,7 @@ export async function createOrganizationAction(
   });
 
   if (error !== undefined || data === undefined) {
-    if (response.status === 401) redirect('/login?next=/panel/organizaciones');
+    if (response.status === 401) redirect(loginHref('/panel/organizaciones'));
     return { status: 'error', message: t.organizaciones.err_create_failed };
   }
 
@@ -54,10 +51,7 @@ export async function addMemberAction(
   _prev: OrgActionResult,
   formData: FormData,
 ): Promise<OrgActionResult> {
-  const token = await getToken();
-  if (!token) {
-    redirect(`/login?next=/panel/organizaciones/${orgId}`);
-  }
+  const token = await requireSession(`/panel/organizaciones/${orgId}`);
 
   const { t } = await getT();
 
@@ -73,7 +67,7 @@ export async function addMemberAction(
   });
 
   if (error !== undefined) {
-    if (response.status === 401) redirect(`/login?next=/panel/organizaciones/${orgId}`);
+    if (response.status === 401) redirect(loginHref(`/panel/organizaciones/${orgId}`));
     if (response.status === 403) {
       return { status: 'error', message: t.organizaciones.err_owner_only };
     }
@@ -94,10 +88,7 @@ export async function removeMemberAction(
   orgId: string,
   userId: string,
 ): Promise<OrgActionResult> {
-  const token = await getToken();
-  if (!token) {
-    redirect(`/login?next=/panel/organizaciones/${orgId}`);
-  }
+  const token = await requireSession(`/panel/organizaciones/${orgId}`);
 
   const { t } = await getT();
 
@@ -107,7 +98,7 @@ export async function removeMemberAction(
   });
 
   if (error !== undefined) {
-    if (response.status === 401) redirect(`/login?next=/panel/organizaciones/${orgId}`);
+    if (response.status === 401) redirect(loginHref(`/panel/organizaciones/${orgId}`));
     if (response.status === 403) {
       return { status: 'error', message: t.organizaciones.err_owner_only };
     }

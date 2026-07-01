@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { getToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { PageHeader } from '@/components/molecules/page-header';
 import { Card } from '@/components/atoms/card';
@@ -30,8 +30,7 @@ function capChips(scope: AdminScope): string[] {
 }
 
 export default async function AdministracionPage() {
-  const token = await getToken();
-  if (!token) redirect('/login?next=/panel/administracion');
+  const token = await requireSession('/panel/administracion');
 
   const [meRes, rolesRes, emergenciesRes] = await Promise.all([
     api.GET('/auth/me', { headers: authHeaders(token) }),
@@ -40,7 +39,7 @@ export default async function AdministracionPage() {
   ]);
 
   const me = meRes.data;
-  if (meRes.response.status === 401 || !me) redirect('/login?next=/panel/administracion');
+  if (meRes.response.status === 401 || !me) redirect(loginHref('/panel/administracion'));
 
   const roles = (rolesRes.data ?? []) as { id: string; permissions: string[] }[];
   const scopes = sortAdminScopes(administrableScopes(me.grants ?? [], roles));

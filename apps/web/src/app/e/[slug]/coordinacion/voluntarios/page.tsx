@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { VolunteerCard } from '@/components/molecules/volunteer-card';
@@ -38,10 +38,7 @@ export default async function CoordinacionVoluntariosPage({ params, searchParams
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
 
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion/voluntarios`);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
@@ -87,7 +84,7 @@ export default async function CoordinacionVoluntariosPage({ params, searchParams
 
   if (rosterResult.response.status === 401 || tasksResult.response.status === 401) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
+    redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
   }
 
   if (rosterResult.response.status === 403 || tasksResult.response.status === 403) {

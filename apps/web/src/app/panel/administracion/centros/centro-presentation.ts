@@ -99,4 +99,3 @@ export function reportStatusLabel(status: string, ta: AdminMessages): string {
   const key = REPORT_STATUS_KEYS[status];
   return key ? ta[key] : status;
 }
-

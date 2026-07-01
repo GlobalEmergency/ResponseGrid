@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { getToken, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders } from '@/lib/auth';
 import { AddMemberForm } from './add-member-form';
 import { RemoveMemberButton } from './remove-member-button';
 import { Badge } from '@/components/atoms/badge';
@@ -23,10 +23,7 @@ type Props = {
 export default async function OrganizationDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const token = await getToken();
-  if (!token) {
-    redirect(`/login?next=/panel/organizaciones/${id}`);
-  }
+  const token = await requireSession(`/panel/organizaciones/${id}`);
 
   const { data: me } = await api.GET('/auth/me', {
     headers: authHeaders(token),

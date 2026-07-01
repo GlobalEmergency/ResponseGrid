@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { getToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
 import { PageContainer } from '@/components/molecules/page-container';
@@ -18,8 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function MiPerfilPage() {
-  const token = await getToken();
-  if (token === null) redirect('/login?next=/panel/mi-perfil');
+  const token = await requireSession('/panel/mi-perfil');
 
   const { t } = await getT();
   const tm = t.miPerfil;
@@ -28,7 +27,7 @@ export default async function MiPerfilPage() {
     headers: authHeaders(token),
   });
 
-  if (me === undefined) redirect('/login?next=/panel/mi-perfil');
+  if (me === undefined) redirect(loginHref('/panel/mi-perfil'));
 
   return (
     <main className="flex-1 bg-surface">

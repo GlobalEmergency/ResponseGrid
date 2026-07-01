@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { getToken, authHeaders, clearToken } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders, clearToken } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 export type ReceptionActionState =
@@ -27,8 +27,7 @@ export async function submitReception(
   _prev: ReceptionActionState,
   formData: FormData,
 ): Promise<ReceptionActionState> {
-  const token = await getToken();
-  if (!token) redirect(`/login?next=/e/${slug}/recepcion`);
+  const token = await requireSession(`/e/${slug}/recepcion`);
 
   const { t } = await getT();
   const tr = t.recepcion;
@@ -67,7 +66,7 @@ export async function submitReception(
 
   if (result.response.status === 401) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/recepcion`);
+    redirect(loginHref(`/e/${slug}/recepcion`));
   }
   if (result.response.status === 409) {
     return { status: 'error', message: tr.err_already_processed };

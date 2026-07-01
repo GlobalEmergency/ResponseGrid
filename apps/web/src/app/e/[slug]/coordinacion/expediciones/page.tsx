@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { getMe, getRoles } from '@/lib/navigation-data';
@@ -66,10 +66,7 @@ export default async function CoordinacionExpedicionesPage({
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
 
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion/expediciones`);
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion/expediciones`);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
@@ -82,7 +79,7 @@ export default async function CoordinacionExpedicionesPage({
   const [me, roles] = await Promise.all([getMe(), getRoles()]);
   if (me == null) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/coordinacion/expediciones`);
+    redirect(loginHref(`/e/${slug}/coordinacion/expediciones`));
   }
 
   const access: EmergencyAccess = resolveEmergencyAccess(
@@ -128,7 +125,7 @@ export default async function CoordinacionExpedicionesPage({
   const onUnauthorized = async (statusCode: number): Promise<void> => {
     if (statusCode === 401) {
       await clearToken();
-      redirect(`/login?next=/e/${slug}/coordinacion/expediciones`);
+      redirect(loginHref(`/e/${slug}/coordinacion/expediciones`));
     }
   };
 

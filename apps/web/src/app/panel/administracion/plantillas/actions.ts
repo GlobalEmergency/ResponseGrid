@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
@@ -31,10 +31,7 @@ export async function createTemplateAction(
   _prev: TemplateActionResult,
   formData: FormData,
 ): Promise<TemplateActionResult> {
-  const token = await getToken();
-  if (!token) {
-    redirect('/login?next=/panel/administracion/plantillas');
-  }
+  const token = await requireSession('/panel/administracion/plantillas');
 
   const { t } = await getT();
 
@@ -71,7 +68,7 @@ export async function createTemplateAction(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect('/login?next=/panel/administracion/plantillas');
+      redirect(loginHref('/panel/administracion/plantillas'));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.templates.err_no_permission_create };
@@ -87,10 +84,7 @@ export async function createTemplateAction(
 }
 
 export async function deleteTemplateAction(id: string): Promise<TemplateActionResult> {
-  const token = await getToken();
-  if (!token) {
-    redirect('/login?next=/panel/administracion/plantillas');
-  }
+  const token = await requireSession('/panel/administracion/plantillas');
 
   const { t } = await getT();
 
@@ -102,7 +96,7 @@ export async function deleteTemplateAction(id: string): Promise<TemplateActionRe
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect('/login?next=/panel/administracion/plantillas');
+      redirect(loginHref('/panel/administracion/plantillas'));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.templates.err_no_permission_delete };
@@ -126,10 +120,7 @@ export async function createFromTemplateAction(
   _prev: CreateFromTemplateResult,
   formData: FormData,
 ): Promise<CreateFromTemplateResult> {
-  const token = await getToken();
-  if (!token) {
-    redirect('/login?next=/panel/administracion/plantillas');
-  }
+  const token = await requireSession('/panel/administracion/plantillas');
 
   const { t } = await getT();
 
@@ -159,7 +150,7 @@ export async function createFromTemplateAction(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect('/login?next=/panel/administracion/plantillas');
+      redirect(loginHref('/panel/administracion/plantillas'));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.templates.err_no_permission_create_emergency };

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { getMe, getRoles } from '@/lib/navigation-data';
@@ -56,10 +56,7 @@ export default async function CoordinacionRecursosPage({
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
 
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion/recursos`);
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion/recursos`);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
@@ -72,7 +69,7 @@ export default async function CoordinacionRecursosPage({
   const [me, roles] = await Promise.all([getMe(), getRoles()]);
   if (me == null) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/coordinacion/recursos`);
+    redirect(loginHref(`/e/${slug}/coordinacion/recursos`));
   }
 
   const access: EmergencyAccess = resolveEmergencyAccess(
@@ -120,7 +117,7 @@ export default async function CoordinacionRecursosPage({
 
   if (result.response.status === 401) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/coordinacion/recursos`);
+    redirect(loginHref(`/e/${slug}/coordinacion/recursos`));
   }
   if (result.response.status === 403) {
     redirect(`/e/${slug}/coordinacion`);

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
+
 import { api } from '@/lib/api';
-import { getToken, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders } from '@/lib/auth';
 import { CreateOrgForm } from './create-org-form';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { PageContainer } from '@/components/molecules/page-container';
@@ -20,10 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function OrganizacionesPage() {
-  const token = await getToken();
-  if (!token) {
-    redirect('/login?next=/panel/organizaciones');
-  }
+  const token = await requireSession('/panel/organizaciones');
 
   const { data: orgs } = await api.GET('/organizations/mine', {
     headers: authHeaders(token),
