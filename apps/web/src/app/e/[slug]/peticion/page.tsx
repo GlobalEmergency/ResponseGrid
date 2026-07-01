@@ -15,6 +15,7 @@ import { getCategories } from '@/adapters/get-categories';
 
 type Props = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ resourceId?: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -32,8 +33,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function PeticionPage({ params }: Props) {
+export default async function PeticionPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const { resourceId } = await searchParams;
   const { t, locale } = await getT();
 
   await requireSession(`/e/${slug}/peticion`);
@@ -59,6 +61,7 @@ export default async function PeticionPage({ params }: Props) {
             <PeticionForm
               action={boundAction}
               slug={slug}
+              resourceId={resourceId}
               locationPicker={<LocationPicker />}
               orgSelector={<OrgSelector />}
               itemsField={<ItemsField t={t.peticion} categories={categories} />}

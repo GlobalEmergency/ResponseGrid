@@ -21,6 +21,8 @@ type BoundAction = (prev: PeticionState, formData: FormData) => Promise<Peticion
 interface PeticionFormProps {
   action: BoundAction;
   slug: string;
+  /** Optional resource to link this need to, prefilled from ?resourceId (#263). */
+  resourceId?: string;
   locationPicker: ReactNode;
   orgSelector: ReactNode;
   itemsField: ReactNode;
@@ -31,6 +33,7 @@ interface PeticionFormProps {
 export function PeticionForm({
   action,
   slug,
+  resourceId,
   locationPicker,
   orgSelector,
   itemsField,
@@ -83,6 +86,7 @@ export function PeticionForm({
 
   return (
     <form action={formAction} className="flex flex-col gap-6" noValidate>
+      {resourceId && <input type="hidden" name="resourceId" value={resourceId} />}
       {wasRestored && <DraftRestoredBanner />}
 
       {state.status === 'error' && (

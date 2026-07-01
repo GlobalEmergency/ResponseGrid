@@ -431,6 +431,9 @@ export const en = {
     success_message:
       'Thank you, you are registered. Do not receive materials or publish anything until we validate you.',
     success_register_another: 'Register another resource',
+    success_manage_point: 'View / manage my point',
+    success_manage_inventory: 'Manage my inventory',
+    success_declare_needs: 'Declare needs',
     error_fallback: 'Error registering resource',
 
     // Inventory / available materials (optional)
@@ -1508,6 +1511,17 @@ export const en = {
     no_points_description: 'When you register a resource in this emergency it will appear here.',
     point_card_aria: 'Point: {name}',
     report_incident_cta: 'Report incident',
+    manage_inventory_cta: 'Manage inventory',
+    declare_needs_cta: 'Declare needs',
+    inventory_page_title: 'Point inventory',
+    inventory_page_subtitle:
+      'Declare the material this point holds for delivery. Replaces the current inventory.',
+    inventory_save_cta: 'Save inventory',
+    inventory_saving: 'Saving…',
+    inventory_saved_success: 'Inventory updated.',
+    inventory_update_forbidden: 'You are not allowed to edit this inventory.',
+    inventory_update_failed: 'Could not save the inventory.',
+    inventory_invalid_items: 'Check the material: some lines are incomplete or invalid.',
 
     type_collection_point: 'Collection point',
     type_delivery_point: 'Delivery point',

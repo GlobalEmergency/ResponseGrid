@@ -65,3 +65,9 @@
 body {
   font-family: var(--font-sans);
 }
+
+/* Keep Leaflet's panes/controls from painting over the sticky AppBar. */
+.leaflet-container {
+  isolation: isolate;
+  z-index: 0;
+}

@@ -38,6 +38,7 @@ export async function submitPeticion(
   const rawLatitude = formData.get('latitude');
   const rawLongitude = formData.get('longitude');
   const rawOrgId = formData.get('organizationId');
+  const rawResourceId = formData.get('resourceId');
   const rawItems = formData.get('items');
 
   const title = typeof rawTitle === 'string' ? rawTitle.trim() : '';
@@ -93,6 +94,13 @@ export async function submitPeticion(
       ? rawOrgId.trim()
       : undefined;
 
+  // Optional link to the resource this need belongs to, prefilled from the
+  // post-registration success screen (#263). The API validates it.
+  const resourceId =
+    typeof rawResourceId === 'string' && rawResourceId.trim() !== ''
+      ? rawResourceId.trim()
+      : undefined;
+
   const { data, error, response } = await api.POST(
     '/emergencies/{emergencyId}/needs',
     {
@@ -104,6 +112,7 @@ export async function submitPeticion(
         priority: rawPriority,
         location: { address, latitude, longitude },
         ...(requesterOrganizationId !== undefined ? { requesterOrganizationId } : {}),
+        ...(resourceId !== undefined ? { resourceId } : {}),
         items,
       },
     },
