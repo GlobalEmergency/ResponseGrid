@@ -35,8 +35,8 @@ export function AccountNav({
       {authed && (
         <>
           <Link href="/panel/grupos" className={linkClass}>{t.groups}</Link>
-          <Link href="/panel/mis-permisos" className={linkClass}>{t.my_permissions}</Link>
-          <Link href="/panel/notificaciones" className={linkClass}>
+          <Link href="/dashboard/permissions" className={linkClass}>{t.my_permissions}</Link>
+          <Link href="/dashboard/notifications" className={linkClass}>
             {notificationUnreadCount > 0
               ? t.notifications_with_count.replace('{count}', String(notificationUnreadCount))
               : t.notifications}

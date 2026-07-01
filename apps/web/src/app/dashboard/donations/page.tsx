@@ -27,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * search is a separate, permission-gated surface.
  */
 export default async function MisDonacionesPage() {
-  const token = await requireSession('/panel/mis-donaciones');
+  const token = await requireSession('/dashboard/donations');
 
   const { t, locale } = await getT();
   const tm = t.misDonaciones;
@@ -37,7 +37,7 @@ export default async function MisDonacionesPage() {
   });
   if (res.response.status === 401) {
     await clearToken();
-    redirect(loginHref('/panel/mis-donaciones'));
+    redirect(loginHref('/dashboard/donations'));
   }
   const donations = res.data ?? [];
 

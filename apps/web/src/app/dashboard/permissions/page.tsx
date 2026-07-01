@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function MisPermisosPage() {
-  const token = await requireSession('/panel/mis-permisos');
+  const token = await requireSession('/dashboard/permissions');
 
   const [{ data: me, response: meRes }, { data: roles }] = await Promise.all([
     api.GET('/auth/me', { headers: authHeaders(token) }),
@@ -24,7 +24,7 @@ export default async function MisPermisosPage() {
   ]);
 
   if (meRes.status === 401 || !me) {
-    redirect(loginHref('/panel/mis-permisos'));
+    redirect(loginHref('/dashboard/permissions'));
   }
 
   const roleMap = new Map((roles ?? []).map((r) => [r.id, r]));

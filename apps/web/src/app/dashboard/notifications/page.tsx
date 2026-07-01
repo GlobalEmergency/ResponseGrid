@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function NotificacionesPage() {
-  const token = await requireSession('/panel/notificaciones');
+  const token = await requireSession('/dashboard/notifications');
 
   const { data } = await api.GET('/notifications/mine', {
     headers: authHeaders(token),

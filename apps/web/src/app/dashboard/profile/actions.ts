@@ -27,6 +27,6 @@ export async function updateProfileAction(
 
   if (error !== undefined) return { status: 'error', message: 'Error al guardar' };
 
-  revalidatePath('/panel/mi-perfil');
+  revalidatePath('/dashboard/profile');
   return { status: 'success' };
 }

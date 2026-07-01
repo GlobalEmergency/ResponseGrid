@@ -18,7 +18,7 @@ export type NotificationActionResult =
 export async function markNotificationReadAction(
   id: string,
 ): Promise<NotificationActionResult> {
-  const token = await requireSession('/panel/notificaciones');
+  const token = await requireSession('/dashboard/notifications');
 
   const { t } = await getT();
 
@@ -28,7 +28,7 @@ export async function markNotificationReadAction(
   });
 
   if (error !== undefined) {
-    if (response.status === 401) redirect(loginHref('/panel/notificaciones'));
+    if (response.status === 401) redirect(loginHref('/dashboard/notifications'));
     if (response.status === 403) {
       return { status: 'error', message: t.notificaciones.err_mark_read_forbidden };
     }
@@ -38,13 +38,13 @@ export async function markNotificationReadAction(
     return { status: 'error', message: t.notificaciones.err_mark_read_failed };
   }
 
-  revalidatePath('/panel/notificaciones');
+  revalidatePath('/dashboard/notifications');
   revalidatePath('/');
   return { status: 'success' };
 }
 
 export async function markAllNotificationsReadAction(): Promise<NotificationActionResult> {
-  const token = await requireSession('/panel/notificaciones');
+  const token = await requireSession('/dashboard/notifications');
 
   const { t } = await getT();
 
@@ -53,11 +53,11 @@ export async function markAllNotificationsReadAction(): Promise<NotificationActi
   });
 
   if (error !== undefined) {
-    if (response.status === 401) redirect(loginHref('/panel/notificaciones'));
+    if (response.status === 401) redirect(loginHref('/dashboard/notifications'));
     return { status: 'error', message: t.notificaciones.err_mark_all_read_failed };
   }
 
-  revalidatePath('/panel/notificaciones');
+  revalidatePath('/dashboard/notifications');
   revalidatePath('/');
   return { status: 'success' };
 }

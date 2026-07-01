@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function MiPerfilPage() {
-  const token = await requireSession('/panel/mi-perfil');
+  const token = await requireSession('/dashboard/profile');
 
   const { t } = await getT();
   const tm = t.miPerfil;
@@ -27,7 +27,7 @@ export default async function MiPerfilPage() {
     headers: authHeaders(token),
   });
 
-  if (me === undefined) redirect(loginHref('/panel/mi-perfil'));
+  if (me === undefined) redirect(loginHref('/dashboard/profile'));
 
   return (
     <main className="flex-1 bg-surface">
