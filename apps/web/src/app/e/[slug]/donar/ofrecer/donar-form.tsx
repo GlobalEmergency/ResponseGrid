@@ -50,7 +50,7 @@ export function DonarForm({
 
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
-  const [supplyId, setSupplyId] = useState('');
+  const [supplyId, setSupplyId] = useState<string | null>(null);
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('');
   const [notes, setNotes] = useState('');
@@ -144,14 +144,14 @@ export function DonarForm({
           locale={locale}
           placeholder={t.description_placeholder}
           required
-          value={{ name: description, supplyId: supplyId === '' ? null : supplyId }}
+          value={{ name: description, supplyId }}
           onChange={(patch) => {
             if (patch.name !== undefined) setDescription(patch.name);
-            if (patch.supplyId !== undefined) setSupplyId(patch.supplyId ?? '');
+            if (patch.supplyId !== undefined) setSupplyId(patch.supplyId ?? null);
           }}
         />
       </FormField>
-      <input type="hidden" name="supplyId" value={supplyId} />
+      <input type="hidden" name="supplyId" value={supplyId ?? ''} />
       <input type="hidden" name="description" value={description} />
 
       <div className="flex gap-3">

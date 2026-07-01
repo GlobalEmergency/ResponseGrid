@@ -67,6 +67,7 @@ export function SupplySelector({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const requestSeq = useRef(0);
 
@@ -81,6 +82,10 @@ export function SupplySelector({
         return;
       }
 
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
       const seq = ++requestSeq.current;
       setLoading(true);
       setError(false);
@@ -90,13 +95,16 @@ export function SupplySelector({
           locale,
           limit: '8',
         });
-        const response = await fetch(`${API_URL}/supplies?${params.toString()}`);
+        const response = await fetch(`${API_URL}/supplies?${params.toString()}`, {
+          signal: controller.signal,
+        });
         if (!response.ok) throw new Error('fetch failed');
         const data = (await response.json()) as SupplyOption[];
         if (seq !== requestSeq.current) return;
         setResults(data);
         setIsOpen(data.length > 0);
-      } catch {
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return;
         if (seq !== requestSeq.current) return;
         setResults([]);
         setError(true);
@@ -137,9 +145,10 @@ export function SupplySelector({
     if (debounceRef.current !== null) clearTimeout(debounceRef.current);
     setResults([]);
     setError(false);
-    setLoading(false);
     onChange({ name: next, supplyId: null });
-    setIsOpen(next.trim().length >= 2);
+    const hasEnough = next.trim().length >= 2;
+    setLoading(hasEnough);
+    setIsOpen(hasEnough);
     debounceRef.current = setTimeout(() => {
       void fetchResults(next);
     }, DEBOUNCE_MS);
@@ -151,7 +160,7 @@ export function SupplySelector({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div ref={containerRef} className="flex flex-col gap-2">
       <div className="flex gap-2">
         <Input
           id={id}
@@ -160,7 +169,7 @@ export function SupplySelector({
           autoComplete="off"
           value={value.name}
           onChange={(e) => handleInputChange(e.target.value)}
-          onFocus={() => setIsOpen(true)}
+          onFocus={() => { if (value.name.trim().length >= 2) setIsOpen(true); }}
           placeholder={placeholder}
           role="combobox"
           aria-autocomplete="list"
@@ -195,7 +204,7 @@ export function SupplySelector({
                   <button
                     type="button"
                     role="option"
-                    aria-selected={false}
+                    aria-selected={supply.id === value.supplyId}
                     onMouseDown={(event) => {
                       event.preventDefault();
                       chooseSupply(supply);
