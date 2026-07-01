@@ -451,6 +451,7 @@ export const en = {
     back: 'Back to the emergency',
     needs_heading: 'Needs of this recipient',
     needs_empty: 'This recipient has no published needs.',
+    add_need_cta: 'Add a need',
     inventory_heading: 'Available materials',
     inventory_empty: 'This point has not declared available materials.',
     prereg_cta: 'Pre-register what I’ll bring',

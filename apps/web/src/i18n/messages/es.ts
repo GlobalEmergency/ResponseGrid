@@ -469,6 +469,7 @@ export const es = {
     back: 'Volver a la emergencia',
     needs_heading: 'Necesidades de este destinatario',
     needs_empty: 'Este destinatario no tiene necesidades publicadas.',
+    add_need_cta: 'Añadir una necesidad',
     inventory_heading: 'Material disponible',
     inventory_empty: 'Este punto no ha declarado material disponible.',
     prereg_cta: 'Pre-registrar lo que llevaré',

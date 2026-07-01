@@ -184,6 +184,14 @@ export default async function RecipientResourcePage({ params }: Props) {
                 ))}
               </ul>
             )}
+            {isActive && (
+              <Link
+                href={`/e/${slug}/peticion?resourceId=${resourceId}`}
+                className="w-fit text-sm font-semibold text-navy hover:underline"
+              >
+                + {td.add_need_cta}
+              </Link>
+            )}
           </section>
         </div>
       </div>
