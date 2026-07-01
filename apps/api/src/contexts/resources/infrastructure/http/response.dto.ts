@@ -1,7 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   ResourceType,
-  ResourceStage,
   VerificationLevel,
   PublicStatus,
 } from '../../domain/resource-enums';
@@ -39,9 +38,6 @@ export class ResourceViewDto {
 
   @ApiProperty({ enum: ResourceType, example: ResourceType.CollectionPoint })
   type!: ResourceType;
-
-  @ApiProperty({ enum: ResourceStage, example: ResourceStage.Origin })
-  stage!: ResourceStage;
 
   @ApiProperty({ example: 'Cruz Roja Madrid' })
   name!: string;

@@ -9376,6 +9376,12 @@
             "example": "Water bottles",
             "description": "Name of the supply"
           },
+          "supplyId": {
+            "type": "string",
+            "example": "1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8",
+            "nullable": true,
+            "description": "Optional soft link to the canonical supply master data."
+          },
           "quantity": {
             "type": "number",
             "example": 100,
@@ -9482,16 +9488,6 @@
             ],
             "example": "collection_point"
           },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "origin",
-              "intermediate",
-              "destination"
-            ],
-            "example": "origin",
-            "description": "Stage of the resource in the emergency supply chain"
-          },
           "name": {
             "type": "string",
             "example": "Cruz Roja Madrid",
@@ -9554,7 +9550,7 @@
           "isFinalRecipient": {
             "type": "boolean",
             "example": true,
-            "description": "Mark this resource as a final recipient of aid (requires the destination stage)"
+            "description": "Mark this resource as a final recipient of aid"
           },
           "recipientType": {
             "type": "string",
@@ -9579,7 +9575,6 @@
         },
         "required": [
           "type",
-          "stage",
           "name",
           "location"
         ]
@@ -9728,15 +9723,6 @@
             ],
             "example": "collection_point"
           },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "origin",
-              "intermediate",
-              "destination"
-            ],
-            "example": "origin"
-          },
           "name": {
             "type": "string",
             "example": "Cruz Roja Madrid"
@@ -9848,7 +9834,6 @@
         "required": [
           "id",
           "type",
-          "stage",
           "name",
           "description",
           "location",
@@ -10107,15 +10092,6 @@
             ],
             "example": "collection_point"
           },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "origin",
-              "intermediate",
-              "destination"
-            ],
-            "example": "origin"
-          },
           "name": {
             "type": "string",
             "example": "Cruz Roja Madrid"
@@ -10232,7 +10208,6 @@
         "required": [
           "id",
           "type",
-          "stage",
           "name",
           "description",
           "location",
@@ -10331,15 +10306,6 @@
               "venue"
             ],
             "example": "collection_point"
-          },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "origin",
-              "intermediate",
-              "destination"
-            ],
-            "example": "origin"
           },
           "name": {
             "type": "string",
@@ -10463,7 +10429,6 @@
         "required": [
           "id",
           "type",
-          "stage",
           "name",
           "description",
           "location",
@@ -10541,15 +10506,6 @@
               "venue"
             ],
             "example": "collection_point"
-          },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "origin",
-              "intermediate",
-              "destination"
-            ],
-            "example": "origin"
           },
           "name": {
             "type": "string",
@@ -10684,7 +10640,6 @@
         "required": [
           "id",
           "type",
-          "stage",
           "name",
           "description",
           "location",
@@ -10756,15 +10711,6 @@
               "venue"
             ],
             "example": "collection_point"
-          },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "origin",
-              "intermediate",
-              "destination"
-            ],
-            "example": "origin"
           },
           "name": {
             "type": "string",
@@ -10917,7 +10863,6 @@
         "required": [
           "id",
           "type",
-          "stage",
           "name",
           "description",
           "location",
@@ -11436,6 +11381,12 @@
             "type": "string",
             "example": "Water bottles"
           },
+          "supplyId": {
+            "type": "string",
+            "example": "1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8",
+            "nullable": true,
+            "description": "Optional soft link to the canonical supply master data."
+          },
           "quantity": {
             "type": "number",
             "example": 100
@@ -11485,6 +11436,7 @@
         },
         "required": [
           "name",
+          "supplyId",
           "quantity",
           "category"
         ]
@@ -13079,6 +13031,12 @@
             "type": "string",
             "example": "Water bottles"
           },
+          "supplyId": {
+            "type": "string",
+            "example": "1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8",
+            "nullable": true,
+            "description": "Optional soft link to the canonical supply master data."
+          },
           "quantity": {
             "type": "number",
             "example": 100
@@ -13135,6 +13093,7 @@
         },
         "required": [
           "name",
+          "supplyId",
           "quantity",
           "category",
           "id",

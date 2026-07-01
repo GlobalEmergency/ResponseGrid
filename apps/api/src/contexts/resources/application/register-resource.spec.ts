@@ -2,11 +2,7 @@ import { RegisterResource } from './register-resource';
 import { InMemoryResourceRepository } from '../infrastructure/in-memory-resource.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import {
-  ResourceType,
-  ResourceStage,
-  VerificationLevel,
-} from '../domain/resource-enums';
+import { ResourceType, VerificationLevel } from '../domain/resource-enums';
 import { Category } from '../../supplies/domain/category';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
@@ -38,7 +34,6 @@ describe('RegisterResource', () => {
     const { id } = await useCase.execute({
       emergencyId: EM,
       type: ResourceType.Warehouse,
-      stage: ResourceStage.Origin,
       name: 'Almacén Norte',
       location: baseLocation,
       ownerUserId: 'user-test-1',
@@ -55,7 +50,7 @@ describe('RegisterResource', () => {
     ]);
   });
 
-  it('persists stage, location, and owner on the aggregate', async () => {
+  it('persists location, and owner on the aggregate', async () => {
     const repo = new InMemoryResourceRepository();
     const bus = new FakeEventBus();
     const useCase = new RegisterResource(repo, bus, activeReader);
@@ -63,7 +58,6 @@ describe('RegisterResource', () => {
     const { id } = await useCase.execute({
       emergencyId: EM,
       type: ResourceType.CollectionAndDelivery,
-      stage: ResourceStage.Intermediate,
       name: 'Punto Mixto',
       description: 'Recogida y entrega',
       location: baseLocation,
@@ -75,7 +69,6 @@ describe('RegisterResource', () => {
       EmergencyId.fromString(EM),
     );
     const resource = pending.find((r) => r.id.value === id);
-    expect(resource?.stage).toBe(ResourceStage.Intermediate);
     expect(resource?.location.address).toBe('Calle Mayor 1, Valencia');
     expect(resource?.ownerUserId).toBe('user-test-2');
     expect(resource?.ownerOrganizationId).toBe('org-test-1');
@@ -90,7 +83,6 @@ describe('RegisterResource', () => {
     const { id } = await useCase.execute({
       emergencyId: EM,
       type: ResourceType.Warehouse,
-      stage: ResourceStage.Origin,
       name: 'Almacén con stock',
       location: baseLocation,
       ownerUserId: 'user-test-items',
@@ -132,7 +124,6 @@ describe('RegisterResource', () => {
     const { id } = await useCase.execute({
       emergencyId: EM,
       type: ResourceType.Warehouse,
-      stage: ResourceStage.Origin,
       name: 'Almacén sin stock',
       location: baseLocation,
       ownerUserId: 'user-test-noitems',
@@ -154,7 +145,6 @@ describe('RegisterResource', () => {
       useCase.execute({
         emergencyId: EM,
         type: ResourceType.Warehouse,
-        stage: ResourceStage.Origin,
         name: 'Should Fail',
         location: baseLocation,
         ownerUserId: 'user-test-3',
@@ -172,7 +162,6 @@ describe('RegisterResource', () => {
       useCase.execute({
         emergencyId: EM,
         type: ResourceType.Warehouse,
-        stage: ResourceStage.Origin,
         name: 'Should Also Fail',
         location: baseLocation,
         ownerUserId: 'user-test-4',
@@ -190,7 +179,6 @@ describe('RegisterResource', () => {
       useCase.execute({
         emergencyId: EM,
         type: ResourceType.Warehouse,
-        stage: ResourceStage.Origin,
         name: 'Non-existent emergency',
         location: baseLocation,
         ownerUserId: 'user-test-5',

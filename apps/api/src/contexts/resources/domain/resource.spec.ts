@@ -5,7 +5,6 @@ import { ResourceId } from './resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import {
   ResourceType,
-  ResourceStage,
   VerificationLevel,
   PublicStatus,
 } from './resource-enums';
@@ -16,7 +15,6 @@ import {
   InvalidVerificationLevelError,
   InvalidPublicStatusTransitionError,
   ResourceNotPublishedError,
-  FinalRecipientMustBeDestinationError,
 } from './resource-errors';
 
 const makeLocation = () =>
@@ -31,7 +29,6 @@ const make = () =>
     id: ResourceId.create(),
     emergencyId: EmergencyId.fromString('11111111-1111-4111-8111-111111111111'),
     type: ResourceType.Warehouse,
-    stage: ResourceStage.Origin,
     name: 'Almacén Centro',
     location: makeLocation(),
     ownerUserId: 'user-abc-123',
@@ -56,7 +53,6 @@ describe('Resource', () => {
         '11111111-1111-4111-8111-111111111111',
       ),
       type: ResourceType.Warehouse,
-      stage: ResourceStage.Origin,
       name: 'Almacén con stock',
       location: makeLocation(),
       ownerUserId: 'user-abc-123',
@@ -90,14 +86,12 @@ describe('Resource', () => {
         '11111111-1111-4111-8111-111111111111',
       ),
       type: ResourceType.CollectionAndDelivery,
-      stage: ResourceStage.Intermediate,
       name: 'Punto Mixto',
       description: 'Punto de recogida y entrega intermedio',
       location: makeLocation(),
       ownerUserId: 'user-xyz-456',
       ownerOrganizationId: 'org-789',
     });
-    expect(r.stage).toBe(ResourceStage.Intermediate);
     expect(r.location.address).toBe('Calle Mayor 1, Valencia');
     expect(r.ownerUserId).toBe('user-xyz-456');
     expect(r.ownerOrganizationId).toBe('org-789');
@@ -222,7 +216,6 @@ describe('Resource', () => {
         '11111111-1111-4111-8111-111111111111',
       ),
       type: ResourceType.Transport,
-      stage: ResourceStage.Destination,
       name: 'Camión',
       description: 'Camión de reparto',
       location: makeLocation(),
@@ -231,7 +224,6 @@ describe('Resource', () => {
     });
     const snap = r.toSnapshot();
     const restored = Resource.fromSnapshot(snap);
-    expect(restored.stage).toBe(ResourceStage.Destination);
     expect(restored.location.address).toBe('Calle Mayor 1, Valencia');
     expect(restored.ownerUserId).toBe('user-roundtrip');
     expect(restored.ownerOrganizationId).toBe('org-roundtrip');
@@ -247,7 +239,6 @@ describe('Resource', () => {
           '11111111-1111-4111-8111-111111111111',
         ),
         type: ResourceType.CollectionPoint,
-        stage: ResourceStage.Origin,
         name: 'Acopio Venezuela',
         location: makeLocation(),
         ownerUserId: 'user-enrich',
@@ -298,7 +289,6 @@ describe('Resource', () => {
           '11111111-1111-4111-8111-111111111111',
         ),
         type: ResourceType.CollectionPoint,
-        stage: ResourceStage.Origin,
         name: 'Snapshot Enrich',
         location: makeLocation(),
         ownerUserId: 'user-snap-enrich',
@@ -336,7 +326,6 @@ describe('Resource', () => {
           '11111111-1111-4111-8111-111111111111',
         ),
         type: ResourceType.Venue,
-        stage: ResourceStage.Destination,
         name: 'Hospital Central',
         location: makeLocation(),
         ownerUserId: 'user-recipient',
@@ -354,23 +343,6 @@ describe('Resource', () => {
       const r = make();
       expect(r.isFinalRecipient).toBe(false);
       expect(r.recipientType).toBeNull();
-    });
-
-    it('rejects a final recipient that is not at the destination stage', () => {
-      expect(() =>
-        Resource.register({
-          id: ResourceId.create(),
-          emergencyId: EmergencyId.fromString(
-            '11111111-1111-4111-8111-111111111111',
-          ),
-          type: ResourceType.Venue,
-          stage: ResourceStage.Origin,
-          name: 'No-destino',
-          location: makeLocation(),
-          ownerUserId: 'user-bad',
-          isFinalRecipient: true,
-        }),
-      ).toThrow(FinalRecipientMustBeDestinationError);
     });
 
     it('toSnapshot / fromSnapshot round-trip preserves the recipient role', () => {

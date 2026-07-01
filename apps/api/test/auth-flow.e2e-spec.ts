@@ -196,7 +196,6 @@ describe('Auth flow (e2e)', () => {
         .set('Authorization', `Bearer ${coordToken}`)
         .send({
           type: 'warehouse',
-          stage: 'origin',
           name: 'Test Resource',
           location: baseLocation,
         })
@@ -226,7 +225,6 @@ describe('Auth flow (e2e)', () => {
         .post(`/emergencies/${EM_ID}/resources`)
         .send({
           type: 'venue',
-          stage: 'destination',
           name: 'Anonymous Resource',
           location: baseLocation,
         })
@@ -239,7 +237,6 @@ describe('Auth flow (e2e)', () => {
         .set('Authorization', `Bearer ${coordToken}`)
         .send({
           type: 'venue',
-          stage: 'destination',
           name: 'Authenticated Resource',
           location: baseLocation,
         })

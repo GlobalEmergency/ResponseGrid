@@ -7,7 +7,6 @@ import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { Resource } from '../domain/resource';
 import {
   ResourceType,
-  ResourceStage,
   PublicStatus,
   VerificationLevel,
 } from '../domain/resource-enums';
@@ -35,7 +34,6 @@ describe('GetPublicResources', () => {
     const { id } = await register.execute({
       emergencyId: EM,
       type: ResourceType.Warehouse,
-      stage: ResourceStage.Origin,
       name: 'Almacén Público',
       location: baseLocation,
       ownerUserId: 'user-public-test',
@@ -58,7 +56,6 @@ describe('GetPublicResources', () => {
     expect(result.items[0]).toMatchObject({
       name: 'Almacén Público',
       publicStatus: PublicStatus.Active,
-      stage: ResourceStage.Origin,
     });
     expect(result.items[0].location).toEqual(baseLocation);
   });
@@ -71,7 +68,6 @@ describe('GetPublicResources', () => {
     await register.execute({
       emergencyId: EM,
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Destination,
       name: 'Solo Registrado',
       location: baseLocation,
       ownerUserId: 'user-unverified-test',
@@ -94,7 +90,6 @@ describe('GetPublicResources', () => {
         id: '44444444-4444-4444-8444-444444444444',
         emergencyId: EM,
         type: ResourceType.CollectionPoint,
-        stage: ResourceStage.Destination,
         name: 'Ingested Unverified',
         description: null,
         location: baseLocation,
@@ -136,7 +131,6 @@ describe('GetPublicResources', () => {
       const { id } = await register.execute({
         emergencyId: EM,
         type: ResourceType.Warehouse,
-        stage: ResourceStage.Origin,
         name: `Resource ${i}`,
         location: baseLocation,
         ownerUserId: `user-${i}`,
@@ -172,7 +166,6 @@ describe('GetPublicResources', () => {
     const { id: caritasId } = await register.execute({
       emergencyId: EM,
       type: ResourceType.Warehouse,
-      stage: ResourceStage.Origin,
       name: 'Caritas',
       location: baseLocation,
       ownerUserId: 'user-caritas',
@@ -188,7 +181,6 @@ describe('GetPublicResources', () => {
     const { id: cruzId } = await register.execute({
       emergencyId: EM,
       type: ResourceType.Warehouse,
-      stage: ResourceStage.Origin,
       name: 'Cruz Roja',
       location: baseLocation,
       ownerUserId: 'user-cruz',
@@ -231,7 +223,6 @@ describe('GetPublicResources', () => {
     const { id } = await register.execute({
       emergencyId: EM,
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Centro Acopio',
       location: baseLocation,
       ownerUserId: 'user-enriched',

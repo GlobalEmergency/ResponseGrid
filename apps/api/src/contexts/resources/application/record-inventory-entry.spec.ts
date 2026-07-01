@@ -3,7 +3,7 @@ import { RegisterResource } from './register-resource';
 import { InMemoryResourceRepository } from '../infrastructure/in-memory-resource.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { ResourceId } from '../domain/resource-id';
-import { ResourceType, ResourceStage } from '../domain/resource-enums';
+import { ResourceType } from '../domain/resource-enums';
 import { Category } from '../../supplies/domain/category';
 import { ResourceNotFoundError } from './resource-not-found.error';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
@@ -25,7 +25,6 @@ async function seedPoint(
   const { id } = await new RegisterResource(repo, bus, activeReader).execute({
     emergencyId: EM,
     type: ResourceType.CollectionPoint,
-    stage: ResourceStage.Origin,
     name: 'Acopio CDMX',
     location: baseLocation,
     ownerUserId: 'op-1',

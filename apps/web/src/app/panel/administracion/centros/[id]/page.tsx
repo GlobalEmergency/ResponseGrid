@@ -17,7 +17,6 @@ import {
   verificationLabel,
   verificationBadgeVariant,
   reportStatusLabel,
-  stageLabel,
 } from '../centro-presentation';
 
 export const dynamic = 'force-dynamic';
@@ -121,12 +120,7 @@ export default async function CentroDetailPage({ params }: Props) {
                   <dd>{resource.city}</dd>
                 </div>
               )}
-              <div className="flex flex-wrap gap-x-1.5">
-                <dt className="font-semibold text-ink-soft">
-                  {ta.centros_detail_stage_label}
-                </dt>
-                <dd>{stageLabel(resource.stage, ta)}</dd>
-              </div>
+
               {resource.contact && (
                 <div className="flex flex-wrap gap-x-1.5">
                   <dt className="font-semibold text-ink-soft">

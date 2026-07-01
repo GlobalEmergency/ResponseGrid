@@ -2,7 +2,7 @@ import { GetCoordinationQueue } from './get-coordination-queue';
 import { RegisterResource } from './register-resource';
 import { InMemoryResourceRepository } from '../infrastructure/in-memory-resource.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
-import { ResourceType, ResourceStage } from '../domain/resource-enums';
+import { ResourceType } from '../domain/resource-enums';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 
 const EM = '11111111-1111-4111-8111-111111111111';
@@ -26,7 +26,6 @@ describe('GetCoordinationQueue', () => {
     await makeRegister(repo).execute({
       emergencyId: EM,
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Punto 1',
       location: baseLocation,
       ownerUserId: 'user-coord-test',
@@ -40,7 +39,6 @@ describe('GetCoordinationQueue', () => {
       items: [
         expect.objectContaining({
           name: 'Punto 1',
-          stage: ResourceStage.Origin,
           verificationLevel: 'unverified',
           publicStatus: 'hidden',
         }),
@@ -58,7 +56,6 @@ describe('GetCoordinationQueue', () => {
       await register.execute({
         emergencyId: EM,
         type: ResourceType.CollectionPoint,
-        stage: ResourceStage.Origin,
         name: `Punto ${i}`,
         location: baseLocation,
         ownerUserId: `user-${i}`,
@@ -83,7 +80,6 @@ describe('GetCoordinationQueue', () => {
     await register.execute({
       emergencyId: EM,
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Cruz Roja Valencia',
       location: baseLocation,
       ownerUserId: 'user-a',
@@ -91,7 +87,6 @@ describe('GetCoordinationQueue', () => {
     await register.execute({
       emergencyId: EM,
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Cáritas Madrid',
       location: baseLocation,
       ownerUserId: 'user-b',
@@ -112,7 +107,6 @@ describe('GetCoordinationQueue', () => {
     await register.execute({
       emergencyId: EM,
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Acopio',
       location: baseLocation,
       ownerUserId: 'user-a',
@@ -120,7 +114,6 @@ describe('GetCoordinationQueue', () => {
     await register.execute({
       emergencyId: EM,
       type: ResourceType.Warehouse,
-      stage: ResourceStage.Intermediate,
       name: 'Almacén central',
       location: baseLocation,
       ownerUserId: 'user-b',

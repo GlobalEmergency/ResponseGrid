@@ -2,11 +2,7 @@ import { InMemoryResourceRepository } from './in-memory-resource.repository';
 import { Resource } from '../domain/resource';
 import { ResourceId } from '../domain/resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import {
-  ResourceType,
-  ResourceStage,
-  VerificationLevel,
-} from '../domain/resource-enums';
+import { ResourceType, VerificationLevel } from '../domain/resource-enums';
 import { PublicStatus } from '../domain/resource-enums';
 import { Location } from '../../../shared/domain/location';
 
@@ -23,7 +19,6 @@ const make = (emergencyId: string, name: string) =>
     id: ResourceId.create(),
     emergencyId: EmergencyId.fromString(emergencyId),
     type: ResourceType.CollectionPoint,
-    stage: ResourceStage.Origin,
     name,
     location: baseLocation,
     ownerUserId: 'user-test-inmem',
@@ -44,7 +39,6 @@ const makeActiveUnverified = (
     id: ResourceId.create().value,
     emergencyId,
     type: ResourceType.CollectionPoint,
-    stage: ResourceStage.Origin,
     name,
     description: null,
     location: baseLocation.toPlain(),
@@ -125,7 +119,6 @@ describe('InMemoryResourceRepository', () => {
         id: ResourceId.create(),
         emergencyId: EmergencyId.fromString(emergencyId),
         type: ResourceType.CollectionPoint,
-        stage: ResourceStage.Origin,
         name,
         location: baseLocation,
         ownerUserId: 'user-test',
@@ -207,7 +200,6 @@ describe('InMemoryResourceRepository', () => {
           id: ResourceId.create(),
           emergencyId: EmergencyId.fromString(EM_A),
           type: ResourceType.CollectionPoint,
-          stage: ResourceStage.Origin,
           name,
           location: baseLocation,
           ownerUserId: 'u1',
@@ -240,7 +232,6 @@ describe('InMemoryResourceRepository', () => {
         id: ResourceId.create(),
         emergencyId: EmergencyId.fromString(EM_A),
         type: ResourceType.CollectionPoint,
-        stage: ResourceStage.Origin,
         name: 'Verified',
         location: baseLocation,
         ownerUserId: 'u1',
