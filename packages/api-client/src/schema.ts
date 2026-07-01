@@ -4933,6 +4933,11 @@ export interface components {
         };
         CategoryDto: {
             /**
+             * @description Canonical category slug (stable identifier)
+             * @example medicines
+             */
+            slug: string;
+            /**
              * @description Localized category label
              * @example Medicamentos
              */
