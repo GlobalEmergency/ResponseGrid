@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { getToken, requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { parseDateInput } from '@/lib/parse-date-input';
 
@@ -104,8 +104,7 @@ export async function grantRoleAction(
 ): Promise<ActionResult> {
   const scopeType = String(formData.get('scopeType') ?? '').trim() as ScopeType;
   const scopeId = String(formData.get('scopeId') ?? '').trim();
-  const token = await getToken();
-  if (!token) redirect(path(scopeType, scopeId));
+  const token = await requireSession(path(scopeType, scopeId));
 
   const principalInput = String(formData.get('principal') ?? '').trim();
   const roleId = String(formData.get('roleId') ?? '').trim();
@@ -136,7 +135,7 @@ export async function grantRoleAction(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(path(scopeType, scopeId));
+      redirect(loginHref(path(scopeType, scopeId)));
     }
     if (response.status === 403) {
       return {
@@ -160,8 +159,7 @@ export async function revokeGrantAction(
   scopeType: ScopeType,
   scopeId: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (!token) redirect(path(scopeType, scopeId));
+  const token = await requireSession(path(scopeType, scopeId));
 
   const { error, response } = await api.DELETE('/grants/{id}', {
     params: { path: { id: grantId } },
@@ -171,7 +169,7 @@ export async function revokeGrantAction(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(path(scopeType, scopeId));
+      redirect(loginHref(path(scopeType, scopeId)));
     }
     if (response.status === 403) {
       return { status: 'error', message: 'No tienes permiso para revocar este rol.' };
@@ -220,8 +218,7 @@ export async function createServiceAccountAction(
   orgId: string,
   name: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (!token) redirect(path('organization', orgId));
+  const token = await requireSession(path('organization', orgId));
   if (!name.trim()) return { status: 'error', message: 'El nombre es obligatorio.' };
 
   const { error, response } = await api.POST('/service-accounts', {
