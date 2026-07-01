@@ -2586,8 +2586,6 @@ export const en = {
     qa_my_profile: 'My profile',
     home_greeting: 'Hi, {name}',
     home_subtitle: 'Everything you manage, in one place.',
-    home_empty:
-      'You are not managing any context yet. Explore the active emergencies to get started.',
     home_section_emergencies: 'Your emergencies',
     home_section_points: 'Your collection points',
     home_section_orgs_groups: 'Your organizations and crews',

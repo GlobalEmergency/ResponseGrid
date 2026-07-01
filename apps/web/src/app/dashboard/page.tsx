@@ -13,7 +13,7 @@ import {
   ContextListRow,
 } from '@/components/molecules/context-list-row';
 import { PageContainer } from '@/components/molecules/page-container';
-import { EmptyState } from '@/components/molecules/empty-state';
+import { PageHeader } from '@/components/molecules/page-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,21 +51,13 @@ export default async function DashboardHomePage() {
     return tp.role_generic_point;
   };
 
-  const hasAnyContext = contexts.length > 0;
-
   return (
     <main className="flex-1 bg-surface">
       <PageContainer>
-        <header className="flex flex-col gap-1">
-          <h1 className="font-display text-xl font-bold text-navy lg:text-2xl">
-            {tp.home_greeting.replace('{name}', me.name)}
-          </h1>
-          <p className="text-sm text-muted">{tp.home_subtitle}</p>
-        </header>
-
-        {!hasAnyContext && points.length === 0 && (
-          <EmptyState title={tp.home_empty} />
-        )}
+        <PageHeader
+          title={tp.home_greeting.replace('{name}', me.name)}
+          subtitle={tp.home_subtitle}
+        />
 
         {emergencies.length > 0 && (
           <ContextSection

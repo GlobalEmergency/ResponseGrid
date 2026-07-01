@@ -2623,8 +2623,6 @@ export const es = {
     qa_my_profile: 'Mi perfil',
     home_greeting: 'Hola, {name}',
     home_subtitle: 'Todo lo que gestionas, en un sitio.',
-    home_empty:
-      'Aún no gestionas ningún contexto. Explora las emergencias activas para empezar.',
     home_section_emergencies: 'Tus emergencias',
     home_section_points: 'Tus puntos de acopio',
     home_section_orgs_groups: 'Tus organizaciones y cuadrillas',

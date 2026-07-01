@@ -50,7 +50,7 @@ export function ContextListRow({
       href={href}
       className="flex min-h-[56px] items-center gap-3 px-4 py-3 transition-colors hover:bg-surface focus:outline-none focus-visible:bg-surface"
     >
-      {icon != null && icon}
+      {icon}
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-sm font-medium text-ink">{title}</span>
         {subtitle != null && subtitle !== '' && (
