@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import { setToken } from '@/lib/auth';
-import { safeNextPath } from '@/lib/safe-next';
+import { postAuthPath } from '@/lib/post-auth';
 import { getT } from '@/i18n/server';
 
 export type LoginResult =
@@ -28,6 +28,7 @@ export async function loginAction(
   }
 
   await setToken(data.accessToken);
-  // Only allow internal relative paths (prevents open-redirect attacks).
-  redirect(safeNextPath(next) ?? '/dashboard');
+  // Route through onboarding when the profile is incomplete; otherwise to `next`
+  // (safeNextPath inside postAuthPath prevents open-redirect attacks).
+  redirect(await postAuthPath(data.accessToken, next));
 }

@@ -366,6 +366,8 @@ export const en = {
     subtitle: 'Join ResponseGrid to coordinate emergency resources.',
     name_label: 'Full name',
     email_label: 'Email address',
+    phone_label: 'Contact phone',
+    phone_hint: '(required)',
     password_label: 'Password',
     password_hint: '(min. 8 characters)',
     submit: 'Create account',
@@ -380,7 +382,32 @@ export const en = {
     err_all_fields_required: 'All fields are required.',
     err_password_too_short: 'Password must be at least 8 characters.',
     err_email_exists: 'That email is already registered.',
+    err_phone_required: 'A contact phone is required.',
+    err_consent_required:
+      'You must accept the terms of service and the privacy policy.',
     err_signup_failed: 'Couldn’t create the account. Please try again.',
+  },
+
+  consent: {
+    prefix: 'I accept the ',
+    terms: 'terms of service',
+    and: ' and the ',
+    privacy: 'privacy policy',
+  },
+
+  onboarding: {
+    title: 'Complete your profile',
+    subtitle:
+      'We need your contact phone and your acceptance of the terms before continuing.',
+    phone_label: 'Contact phone',
+    phone_hint: '(required)',
+    submit: 'Continue',
+    submitting: 'Saving…',
+    error_fallback: 'Could not complete your profile.',
+    err_phone_required: 'A contact phone is required.',
+    err_consent_required:
+      'You must accept the terms of service and the privacy policy.',
+    meta_title: 'Complete your profile — ResponseGrid',
   },
 
   needs_filter: {

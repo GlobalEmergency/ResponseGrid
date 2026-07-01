@@ -69,6 +69,9 @@ describe('Organization flow (e2e)', () => {
           email: 'orguser@reliefhub.org',
           password: 'password123',
           name: 'Org User',
+          phone: '+58 412 555 0101',
+          acceptedTerms: true,
+          acceptedPrivacy: true,
         })
         .expect(201);
 
@@ -84,6 +87,9 @@ describe('Organization flow (e2e)', () => {
           email: 'duplicate@reliefhub.org',
           password: 'password123',
           name: 'First',
+          phone: '+58 412 555 0101',
+          acceptedTerms: true,
+          acceptedPrivacy: true,
         })
         .expect(201);
 
@@ -93,6 +99,9 @@ describe('Organization flow (e2e)', () => {
           email: 'duplicate@reliefhub.org',
           password: 'other1234',
           name: 'Second',
+          phone: '+58 412 555 0101',
+          acceptedTerms: true,
+          acceptedPrivacy: true,
         })
         .expect(409);
     });
@@ -124,6 +133,9 @@ describe('Organization flow (e2e)', () => {
           email: 'meuser@reliefhub.org',
           password: 'password123',
           name: 'Me User',
+          phone: '+58 412 555 0101',
+          acceptedTerms: true,
+          acceptedPrivacy: true,
         })
         .expect(201);
       const token = (reg.body as { accessToken: string }).accessToken;
@@ -160,6 +172,9 @@ describe('Organization flow (e2e)', () => {
           email: 'orgcreator@reliefhub.org',
           password: 'password123',
           name: 'Creator',
+          phone: '+58 412 555 0101',
+          acceptedTerms: true,
+          acceptedPrivacy: true,
         })
         .expect(201);
       accessToken = (res.body as { accessToken: string }).accessToken;
@@ -236,6 +251,9 @@ describe('Organization flow (e2e)', () => {
           email: 'owner@reliefhub.org',
           password: 'password123',
           name: 'Owner User',
+          phone: '+58 412 555 0101',
+          acceptedTerms: true,
+          acceptedPrivacy: true,
         })
         .expect(201);
       ownerToken = (ownerRes.body as { accessToken: string }).accessToken;
@@ -247,6 +265,9 @@ describe('Organization flow (e2e)', () => {
           email: 'newmember@reliefhub.org',
           password: 'password123',
           name: 'New Member',
+          phone: '+58 412 555 0101',
+          acceptedTerms: true,
+          acceptedPrivacy: true,
         })
         .expect(201);
       memberToken = (memberRes.body as { accessToken: string }).accessToken;
@@ -415,6 +436,9 @@ describe('Organization flow (e2e)', () => {
           email: 'plaincitizen@reliefhub.org',
           password: 'password123',
           name: 'Plain Citizen',
+          phone: '+58 412 555 0101',
+          acceptedTerms: true,
+          acceptedPrivacy: true,
         })
         .expect(201);
       citizenToken = (citizenReg.body as { accessToken: string }).accessToken;

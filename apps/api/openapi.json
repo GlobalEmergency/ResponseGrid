@@ -83,6 +83,49 @@
         ]
       }
     },
+    "/auth/onboarding": {
+      "post": {
+        "operationId": "AuthController_onboardingRoute",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Perfil completado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Falta el teléfono o el consentimiento"
+          },
+          "401": {
+            "description": "Token inválido o ausente"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Completar el alta: teléfono + aceptación de términos y privacidad (usado tras el login social)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/auth/me": {
       "get": {
         "operationId": "AuthController_me",
@@ -8609,14 +8652,26 @@
           "phone": {
             "type": "string",
             "example": "+58 412 555 0101",
-            "nullable": true,
-            "description": "Teléfono de contacto opcional"
+            "description": "Teléfono de contacto (obligatorio)"
+          },
+          "acceptedTerms": {
+            "type": "boolean",
+            "example": true,
+            "description": "Aceptación de las condiciones del servicio (debe ser true)"
+          },
+          "acceptedPrivacy": {
+            "type": "boolean",
+            "example": true,
+            "description": "Aceptación de la política de privacidad (debe ser true)"
           }
         },
         "required": [
           "email",
           "password",
-          "name"
+          "name",
+          "phone",
+          "acceptedTerms",
+          "acceptedPrivacy"
         ]
       },
       "RegisterResponseDto": {
@@ -8629,6 +8684,43 @@
         },
         "required": [
           "accessToken"
+        ]
+      },
+      "OnboardingDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+58 412 555 0101",
+            "description": "Teléfono de contacto (obligatorio)"
+          },
+          "acceptedTerms": {
+            "type": "boolean",
+            "example": true,
+            "description": "Aceptación de las condiciones del servicio (debe ser true)"
+          },
+          "acceptedPrivacy": {
+            "type": "boolean",
+            "example": true,
+            "description": "Aceptación de la política de privacidad (debe ser true)"
+          }
+        },
+        "required": [
+          "phone",
+          "acceptedTerms",
+          "acceptedPrivacy"
+        ]
+      },
+      "OnboardingResponseDto": {
+        "type": "object",
+        "properties": {
+          "profileComplete": {
+            "type": "boolean",
+            "description": "true una vez el perfil queda completo (teléfono + consentimientos)"
+          }
+        },
+        "required": [
+          "profileComplete"
         ]
       },
       "MeGrantDto": {
@@ -8691,6 +8783,10 @@
             "nullable": true,
             "description": "Optional contact phone, null until the user provides one"
           },
+          "profileComplete": {
+            "type": "boolean",
+            "description": "true si el perfil está completo (teléfono + consentimientos vigentes). false obliga a pasar por el onboarding (típico en altas sociales)."
+          },
           "grants": {
             "description": "The effective role grants (role @ scope) for this user",
             "type": "array",
@@ -8705,6 +8801,7 @@
           "name",
           "isAdmin",
           "phone",
+          "profileComplete",
           "grants"
         ]
       },

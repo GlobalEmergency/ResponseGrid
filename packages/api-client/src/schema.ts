@@ -38,6 +38,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/onboarding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Completar el alta: teléfono + aceptación de términos y privacidad (usado tras el login social) */
+        post: operations["AuthController_onboardingRoute"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/me": {
         parameters: {
             query?: never;
@@ -2625,14 +2642,45 @@ export interface components {
             /** @example Jane Doe */
             name: string;
             /**
-             * @description Teléfono de contacto opcional
+             * @description Teléfono de contacto (obligatorio)
              * @example +58 412 555 0101
              */
-            phone?: string | null;
+            phone: string;
+            /**
+             * @description Aceptación de las condiciones del servicio (debe ser true)
+             * @example true
+             */
+            acceptedTerms: boolean;
+            /**
+             * @description Aceptación de la política de privacidad (debe ser true)
+             * @example true
+             */
+            acceptedPrivacy: boolean;
         };
         RegisterResponseDto: {
             /** @description JWT access token (auto-login after registration) */
             accessToken: string;
+        };
+        OnboardingDto: {
+            /**
+             * @description Teléfono de contacto (obligatorio)
+             * @example +58 412 555 0101
+             */
+            phone: string;
+            /**
+             * @description Aceptación de las condiciones del servicio (debe ser true)
+             * @example true
+             */
+            acceptedTerms: boolean;
+            /**
+             * @description Aceptación de la política de privacidad (debe ser true)
+             * @example true
+             */
+            acceptedPrivacy: boolean;
+        };
+        OnboardingResponseDto: {
+            /** @description true una vez el perfil queda completo (teléfono + consentimientos) */
+            profileComplete: boolean;
         };
         MeGrantDto: {
             /**
@@ -2660,6 +2708,8 @@ export interface components {
              * @example +58 412 555 0101
              */
             phone: string | null;
+            /** @description true si el perfil está completo (teléfono + consentimientos vigentes). false obliga a pasar por el onboarding (típico en altas sociales). */
+            profileComplete: boolean;
             /** @description The effective role grants (role @ scope) for this user */
             grants: components["schemas"]["MeGrantDto"][];
         };
@@ -5701,6 +5751,44 @@ export interface operations {
             };
             /** @description Rate limit exceeded — try again later */
             429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_onboardingRoute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingDto"];
+            };
+        };
+        responses: {
+            /** @description Perfil completado */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OnboardingResponseDto"];
+                };
+            };
+            /** @description Falta el teléfono o el consentimiento */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Token inválido o ausente */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
