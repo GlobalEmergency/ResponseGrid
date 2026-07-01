@@ -11,6 +11,7 @@ export interface ResolvedNavItem {
   label: string;
   badgeCount?: number;
   exact?: boolean;
+  children?: ResolvedNavItem[];
 }
 
 function isActive(pathname: string, href: string, exact?: boolean): boolean {
@@ -18,34 +19,54 @@ function isActive(pathname: string, href: string, exact?: boolean): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+/** Left padding per nesting level — indentation only, no colored side-stripe. */
+const INDENT_BY_LEVEL = ['pl-3', 'pl-6', 'pl-9', 'pl-12'] as const;
+
+function indentClass(level: number): string {
+  return INDENT_BY_LEVEL[Math.min(level, INDENT_BY_LEVEL.length - 1)];
+}
+
 interface NavItemProps {
   item: ResolvedNavItem;
   /** Called after navigation (used by the mobile drawer to close itself). */
   onNavigate?: () => void;
+  /** Nesting depth, used to compute indentation for `children`. Root items are level 0. */
+  level?: number;
 }
 
-export function NavItem({ item, onNavigate }: NavItemProps) {
+export function NavItem({ item, onNavigate, level = 0 }: NavItemProps) {
   const pathname = usePathname();
   const active = isActive(pathname, item.href, item.exact);
+  const hasChildren = item.children != null && item.children.length > 0;
 
   return (
-    <Link
-      href={item.href}
-      onClick={onNavigate}
-      aria-current={active ? 'page' : undefined}
-      className={[
-        'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-        active
-          ? 'bg-white/15 text-white'
-          : 'text-on-navy hover:bg-white/10 hover:text-white',
-      ].join(' ')}
-    >
-      <span className="truncate">{item.label}</span>
-      {item.badgeCount != null && item.badgeCount > 0 ? (
-        <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-accent px-1.5 py-0.5 text-[11px] font-bold leading-none text-white">
-          {item.badgeCount > 99 ? '99+' : item.badgeCount}
-        </span>
+    <div role={hasChildren ? 'group' : undefined}>
+      <Link
+        href={item.href}
+        onClick={onNavigate}
+        aria-current={active ? 'page' : undefined}
+        className={[
+          'flex items-center gap-2 rounded-lg py-2 pr-3 text-sm font-medium transition-colors',
+          indentClass(level),
+          active
+            ? 'bg-white/15 text-white'
+            : 'text-on-navy hover:bg-white/10 hover:text-white',
+        ].join(' ')}
+      >
+        <span className="truncate">{item.label}</span>
+        {item.badgeCount != null && item.badgeCount > 0 ? (
+          <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-accent px-1.5 py-0.5 text-[11px] font-bold leading-none text-white">
+            {item.badgeCount > 99 ? '99+' : item.badgeCount}
+          </span>
+        ) : null}
+      </Link>
+      {hasChildren ? (
+        <div role="list" className="flex flex-col gap-0.5">
+          {item.children?.map((child) => (
+            <NavItem key={child.key} item={child} onNavigate={onNavigate} level={level + 1} />
+          ))}
+        </div>
       ) : null}
-    </Link>
+    </div>
   );
 }

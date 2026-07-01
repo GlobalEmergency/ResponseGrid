@@ -2,10 +2,11 @@ import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { getT } from '@/i18n/server';
 import { getNavContext } from '@/lib/navigation-data';
-import { buildNavModel } from '@/lib/navigation';
+import { buildNavModel, type NavItem } from '@/lib/navigation';
 import { canAdminister, type MeGrant, type RoleCatalogEntry } from '@/lib/admin-scopes';
 import { AppShell } from '@/components/organisms/app-shell';
 import type { ResolvedNavGroup } from '@/components/molecules/nav-group';
+import type { ResolvedNavItem } from '@/components/atoms/nav-item';
 
 export async function DashboardLayout({
   children,
@@ -30,16 +31,19 @@ export async function DashboardLayout({
     notificationUnread,
   });
 
+  const resolveItem = (it: NavItem): ResolvedNavItem => ({
+    key: it.key,
+    href: it.href,
+    label: it.label ?? (it.labelKey != null ? tn[it.labelKey] : ''),
+    badgeCount: it.badgeCount,
+    exact: it.exact,
+    children: it.children?.map(resolveItem),
+  });
+
   const groups: ResolvedNavGroup[] = model.map((g) => ({
     key: g.key,
     heading: g.headingKey != null ? tn[g.headingKey] : undefined,
-    items: g.items.map((it) => ({
-      key: it.key,
-      href: it.href,
-      label: it.label ?? (it.labelKey != null ? tn[it.labelKey] : ''),
-      badgeCount: it.badgeCount,
-      exact: it.exact,
-    })),
+    items: g.items.map(resolveItem),
   }));
 
   return (
