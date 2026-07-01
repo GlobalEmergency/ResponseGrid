@@ -10,6 +10,8 @@ import { DonarForm } from './donar-form';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
 import { Card } from '@/components/atoms/card';
 import { getT } from '@/i18n/server';
+import { getCategories } from '@/adapters/get-categories';
+import { isMaterialCategory } from '@/domain/supplies/category';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -34,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function DonarPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
-  const { t } = await getT();
+  const { t, locale } = await getT();
 
   await requireSession(`/e/${slug}/donar/ofrecer`);
 
@@ -42,6 +44,8 @@ export default async function DonarPage({ params, searchParams }: Props) {
   if (!emergency) {
     notFound();
   }
+
+  const categories = (await getCategories(locale)).filter(isMaterialCategory);
 
   const rawNeedId =
     typeof resolvedSearchParams.needId === 'string'
@@ -85,6 +89,7 @@ export default async function DonarPage({ params, searchParams }: Props) {
               orgSelector={<OrgSelector />}
               t={t.donar}
               backToEmergencyLabel={t.common.back_to_emergency}
+              categories={categories}
             />
           </Card>
         </div>
