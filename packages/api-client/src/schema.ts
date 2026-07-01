@@ -4918,6 +4918,12 @@ export interface components {
              * @example MED
              */
             codePrefix: string | null;
+            /**
+             * @description Whether the category is aid material or personnel. Personnel (medical_personnel) is excluded from material pickers.
+             * @example material
+             * @enum {string}
+             */
+            kind: "material" | "personnel";
         };
         CategoryTranslationDto: {
             /** @example fr */
