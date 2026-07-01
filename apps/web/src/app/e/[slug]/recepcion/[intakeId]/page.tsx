@@ -12,7 +12,8 @@ import type { MeGrant, RoleCatalogEntry } from '@/lib/admin-scopes';
 import { AppBar } from '@/components/organisms/app-bar';
 import { PageHeading } from '@/components/atoms/page-heading';
 import { getT } from '@/i18n/server';
-import { categoryLabel } from '@/lib/categories';
+import { labelForCategory } from '@/domain/supplies/category';
+import { getCategoriesCached } from '@/adapters/get-categories';
 import { formatDate } from '@/lib/format-date';
 import { submitReception } from '../actions';
 import { ReceptionActions } from './reception-actions';
@@ -79,6 +80,7 @@ export default async function IntakeDetailPage({ params }: Props) {
 
   const { t, locale } = await getT();
   const tr = t.recepcion;
+  const categories = await getCategoriesCached(locale);
 
   const statusLabel =
     intake.status === 'received'
@@ -131,7 +133,7 @@ export default async function IntakeDetailPage({ params }: Props) {
                       {line.name}
                     </span>
                     <span className="text-[12.5px] text-muted">
-                      {categoryLabel(line.category, locale)}
+                      {labelForCategory(line.category, categories)}
                       {line.presentation != null && line.presentation !== ''
                         ? ` · ${line.presentation}`
                         : ''}

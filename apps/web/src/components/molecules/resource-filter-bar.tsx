@@ -2,10 +2,10 @@
 
 import type { Messages } from '@/i18n/messages/es';
 import type { Locale } from '@/i18n';
-import { categoryLabel } from '@/lib/categories';
 import { Select } from '@/components/atoms/select';
 import { Input } from '@/components/atoms/input';
 import { FilterField } from '@/components/molecules/filter-field';
+import { useCategoryLabel } from '@/components/providers/categories-provider';
 
 interface ResourceFilterBarProps {
   /** Facet counts keyed by category slug, e.g. { water: 5, food: 3 } */
@@ -52,8 +52,8 @@ export function ResourceFilterBar({
   onCountryChange,
   onSearchChange,
   t,
-  locale,
 }: ResourceFilterBarProps) {
+  const categoryName = useCategoryLabel();
   const categoryOptions = Object.entries(byCategory).sort(([, a], [, b]) => b - a);
   const countryOptions = Object.entries(byCountry).sort(([, a], [, b]) => b - a);
 
@@ -61,7 +61,7 @@ export function ResourceFilterBar({
   if (activeCategory !== '') {
     activeFilters.push({
       key: 'category',
-      label: `${categoryLabel(activeCategory, locale)} (${byCategory[activeCategory] ?? 0})`,
+      label: `${categoryName(activeCategory)} (${byCategory[activeCategory] ?? 0})`,
     });
   }
   if (activeCountry !== '') {
@@ -86,7 +86,7 @@ export function ResourceFilterBar({
           <option value="">{t.all_categories}</option>
           {categoryOptions.map(([slug, count]) => (
             <option key={slug} value={slug}>
-              {categoryLabel(slug, locale)} ({count})
+              {categoryName(slug)} ({count})
             </option>
           ))}
         </Select>

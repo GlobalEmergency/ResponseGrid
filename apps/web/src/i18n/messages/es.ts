@@ -674,6 +674,32 @@ export const es = {
     err_submit_failed: 'Error al enviar la oferta. Inténtalo de nuevo.',
   },
 
+  // ── Supply line (línea de insumos) ─────────────────────────────────────────
+  supplyLine: {
+    itemNumber: 'Artículo {n}',
+    itemRemove: 'Quitar artículo {n}',
+    itemRemoveLabel: 'Quitar',
+    nameLabel: 'Producto',
+    namePlaceholder: 'Busca por nombre, alias o código',
+    nameHint: 'Busca por nombre, alias o código.',
+    otherHint: 'Si no está en el catálogo, escríbelo y continúa.',
+    searching: 'Buscando insumos…',
+    noMatches: 'No hay coincidencias. Escríbelo si no está en el catálogo.',
+    error: 'No pudimos cargar sugerencias.',
+    quantityLabel: 'Cantidad',
+    qtyDecrease: 'Reducir cantidad',
+    qtyIncrease: 'Aumentar cantidad',
+    unitLabel: 'Unidad',
+    unitOpt: '(opcional)',
+    unitPlaceholder: 'ej. cajas, litros',
+    categoryLabel: 'Categoría',
+    expiryLabel: 'Caducidad',
+    expiryOpt: '(opcional)',
+    addItem: 'Añadir artículo',
+    emptyList: 'Sin artículos todavía.',
+    legend: 'Artículos',
+  },
+
   // ── Pre-registro de entrega ciudadano (#130) ──────────────────────────────
   prereg: {
     page_title: 'Pre-registrar mi entrega',

@@ -175,7 +175,6 @@ export function NeedsList({
                       te={te}
                       slug={slug}
                       active={active}
-                      locale={locale}
                     />
                     <div className="mt-1 flex justify-end px-1">
                       <DistanceBadge
@@ -205,7 +204,6 @@ export function NeedsList({
                   te={te}
                   slug={slug}
                   active={active}
-                  locale={locale}
                 />
               </li>
             ))}

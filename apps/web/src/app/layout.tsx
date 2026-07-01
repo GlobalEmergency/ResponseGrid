@@ -6,6 +6,8 @@ import { GlobalFooter } from '@/components/organisms/global-footer';
 import { JsonLd } from '@/components/atoms/json-ld';
 import { getT } from '@/i18n/server';
 import { LocaleProvider } from '@/i18n/locale-context';
+import { CategoriesProvider } from '@/components/providers/categories-provider';
+import { getCategoriesCached } from '@/adapters/get-categories';
 import { GLOBAL_EMERGENCY } from '@/lib/global-emergency';
 
 const archivo = Archivo({
@@ -73,13 +75,16 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const { locale, t } = await getT();
+  const categories = await getCategoriesCached(locale);
 
   return (
     <html lang={locale} className={`h-full ${archivo.variable} ${publicSans.variable}`}>
       <body className="min-h-full flex flex-col bg-surface text-ink antialiased font-sans">
         <LocaleProvider locale={locale}>
-          {children}
-          <GlobalFooter tf={t.common.footer} />
+          <CategoriesProvider categories={categories}>
+            {children}
+            <GlobalFooter tf={t.common.footer} />
+          </CategoriesProvider>
         </LocaleProvider>
         <JsonLd data={orgJsonLd} />
         <JsonLd data={siteJsonLd} />

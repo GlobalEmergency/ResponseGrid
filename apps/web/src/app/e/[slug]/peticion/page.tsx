@@ -11,6 +11,7 @@ import { AppBar } from '@/components/organisms/app-bar';
 import { Card } from '@/components/atoms/card';
 import { PageHeading } from '@/components/atoms/page-heading';
 import { getT } from '@/i18n/server';
+import { getCategories } from '@/adapters/get-categories';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -33,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PeticionPage({ params }: Props) {
   const { slug } = await params;
-  const { t } = await getT();
+  const { t, locale } = await getT();
 
   await requireSession(`/e/${slug}/peticion`);
 
@@ -42,6 +43,7 @@ export default async function PeticionPage({ params }: Props) {
     notFound();
   }
 
+  const categories = await getCategories(locale);
   const boundAction = submitPeticion.bind(null, slug, emergency.id);
 
   return (
@@ -59,7 +61,7 @@ export default async function PeticionPage({ params }: Props) {
               slug={slug}
               locationPicker={<LocationPicker />}
               orgSelector={<OrgSelector />}
-              itemsField={<ItemsField t={t.peticion} />}
+              itemsField={<ItemsField t={t.peticion} categories={categories} />}
               t={t.peticion}
               backToEmergencyLabel={t.common.back_to_emergency}
             />

@@ -7,6 +7,12 @@ import type { CategoryKind } from '../../domain/category-definition';
  */
 export class CategoryDto {
   @ApiProperty({
+    example: 'medicines',
+    description: 'Canonical category slug (stable identifier)',
+  })
+  slug!: string;
+
+  @ApiProperty({
     example: 'Medicamentos',
     description: 'Localized category label',
   })

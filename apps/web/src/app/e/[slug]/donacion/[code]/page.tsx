@@ -6,7 +6,8 @@ import { getT } from '@/i18n/server';
 import { AppBar } from '@/components/organisms/app-bar';
 import { PageHeading } from '@/components/atoms/page-heading';
 import { EmptyState } from '@/components/molecules/empty-state';
-import { categoryLabel } from '@/lib/categories';
+import { labelForCategory } from '@/domain/supplies/category';
+import { getCategoriesCached } from '@/adapters/get-categories';
 import { formatDate } from '@/lib/format-date';
 
 export const dynamic = 'force-dynamic';
@@ -34,6 +35,7 @@ export default async function DonacionTrackingPage({ params }: Props) {
   const { slug, code } = await params;
   const { t, locale } = await getT();
   const td = t.donacion;
+  const categories = await getCategoriesCached(locale);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
@@ -158,7 +160,7 @@ export default async function DonacionTrackingPage({ params }: Props) {
                     {line.name}
                   </span>
                   <span className="text-[12.5px] text-muted">
-                    {categoryLabel(line.category, locale)}
+                    {labelForCategory(line.category, categories)}
                     {line.presentation != null && line.presentation !== ''
                       ? ` · ${line.presentation}`
                       : ''}
