@@ -49,7 +49,7 @@ export function DonarForm({
   );
   const locale = useLocale();
 
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState(() => categories[0]?.slug ?? '');
   const [description, setDescription] = useState('');
   const [supplyId, setSupplyId] = useState('');
   const [quantity, setQuantity] = useState('1');
