@@ -1,6 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { emergencySectionItems, contextHref, buildNavModel, buildPrincipalContexts } from './navigation.ts';
+import {
+  emergencySectionItems,
+  contextHref,
+  buildNavModel,
+  buildPrincipalContexts,
+  adminSectionItems,
+} from './navigation.ts';
 import type { EmergencyAccess } from './emergency-permissions.ts';
 import type { PrincipalContext } from './navigation.ts';
 
@@ -130,4 +136,33 @@ test('empty sources produce an empty context list', () => {
     buildPrincipalContexts({ emergencies: [], resources: [], organizations: [], groups: [] }),
     [],
   );
+});
+
+test('adminSectionItems lists the 9 admin sections with /admin routes', () => {
+  const items = adminSectionItems();
+  assert.deepEqual(items.map((i) => i.href), [
+    '/admin', '/admin/users', '/admin/organizations', '/admin/points',
+    '/admin/permissions', '/admin/api-keys', '/admin/accreditations',
+    '/admin/templates', '/admin/audit',
+  ]);
+  assert.equal(items[0].exact, true);
+});
+
+test('platform admin sees admin sections nested; active admin expands them', () => {
+  const model = buildNavModel({
+    contexts: [], isAdmin: true, canAdminister: true, notificationUnread: 0,
+    activeContext: { type: 'admin', id: 'platform' },
+  });
+  const admin = model.find((g) => g.key === 'admin');
+  const hub = admin?.items.find((i) => i.key === 'admin');
+  assert.equal(hub?.children?.[1]?.href, '/admin/users');
+});
+
+test('scope-only admin (not platform) gets a single admin link, no children', () => {
+  const model = buildNavModel({
+    contexts: [], isAdmin: false, canAdminister: true, notificationUnread: 0,
+  });
+  const admin = model.find((g) => g.key === 'admin');
+  const hub = admin?.items.find((i) => i.key === 'admin');
+  assert.equal(hub?.children, undefined);
 });

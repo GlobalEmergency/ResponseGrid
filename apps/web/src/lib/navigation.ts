@@ -46,7 +46,7 @@ export interface MyEmergencyNav {
   roleIds: string[];
 }
 
-export type ContextType = 'emergency' | 'resource' | 'organization' | 'group';
+export type ContextType = 'emergency' | 'resource' | 'organization' | 'group' | 'admin';
 
 /** A context the principal holds a grant in, resolved for the switcher. */
 export interface PrincipalContext {
@@ -76,6 +76,11 @@ export function contextHref(c: PrincipalContext): string {
       return `/organizations/${c.id}/manage`;
     case 'group':
       return `/dashboard/groups/${c.id}`;
+    case 'admin':
+      // Unreachable in practice: 'admin' is not a grant a principal holds
+      // (it's platform-wide, not a `PrincipalContext`) — kept only so the
+      // switch stays exhaustive over `ContextType`.
+      return '/admin';
   }
 }
 
@@ -171,13 +176,33 @@ export function buildNavModel({
 
   // Administración — platform-level hub.
   if (isAdmin || canAdminister) {
-    groups.push({
-      key: 'admin',
-      items: [{ key: 'admin', href: '/admin', labelKey: 'administration' }],
-    });
+    const hub: NavItem = { key: 'admin', href: '/admin', labelKey: 'administration' };
+    if (isAdmin) {
+      hub.children = adminSectionItems();
+    }
+    groups.push({ key: 'admin', items: [hub] });
   }
 
   return groups;
+}
+
+/**
+ * Admin hub sections — shown nested under the `admin` entry for platform
+ * admins (mirrors an emergency's gated sections, but always fully shown:
+ * there's no per-section gating for platform admin, unlike emergency roles).
+ */
+export function adminSectionItems(): NavItem[] {
+  return [
+    { key: 'admin-overview', href: '/admin', labelKey: 'admin_overview', exact: true },
+    { key: 'admin-users', href: '/admin/users', labelKey: 'admin_users' },
+    { key: 'admin-orgs', href: '/admin/organizations', labelKey: 'admin_orgs' },
+    { key: 'admin-points', href: '/admin/points', labelKey: 'admin_centros' },
+    { key: 'admin-permissions', href: '/admin/permissions', labelKey: 'admin_permissions' },
+    { key: 'admin-api-keys', href: '/admin/api-keys', labelKey: 'admin_api_keys' },
+    { key: 'admin-accreditations', href: '/admin/accreditations', labelKey: 'admin_accreditations' },
+    { key: 'admin-templates', href: '/admin/templates', labelKey: 'admin_templates' },
+    { key: 'admin-audit', href: '/admin/audit', labelKey: 'admin_audit' },
+  ];
 }
 
 /**

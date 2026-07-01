@@ -21,6 +21,7 @@ const TINT: Record<ContextType, string> = {
   resource: 'bg-success-soft text-success',
   organization: 'bg-surface-alt text-ink-soft',
   group: 'bg-surface-alt text-ink-soft',
+  admin: 'bg-surface-alt text-ink-soft',
 };
 
 const SVG = {
@@ -147,6 +148,10 @@ function TypeGlyph({ type, resourceType }: { type: ContextType; resourceType?: s
           <path d="M17 15.5a5 5 0 0 1 3 4.5" />
         </svg>
       );
+    // Admin — unreachable in practice (this component renders `PrincipalContext`
+    // entries, and 'admin' is not one); kept only for TypeGlyph's exhaustiveness.
+    case 'admin':
+      return <CollectionGlyph />;
   }
 }
 
