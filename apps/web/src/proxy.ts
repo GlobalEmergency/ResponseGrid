@@ -18,7 +18,7 @@ import { SESSION_COOKIE } from '@/lib/session-cookie';
  * earlier redirect.
  *
  * Scope: whole segments that are protected in their entirety (`/panel/*` and the
- * coordination workspace). Scattered single-page forms under `/e/:slug`
+ * emergency management workspace). Scattered single-page forms under `/e/:slug`
  * (registrar, peticion, …) keep their authoritative per-page `requireSession`
  * gate rather than being enumerated here, where the list would silently drift.
  */
@@ -31,6 +31,6 @@ export function proxy(request: NextRequest): NextResponse {
 export const config = {
   matcher: [
     '/panel/:path*',
-    '/e/:slug/coordinacion/:path*',
+    '/emergencies/:slug/manage/:path*',
   ],
 };

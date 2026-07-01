@@ -17,7 +17,7 @@ export async function createTaskFromNeed(
   volunteerIds: string[],
   dueDate?: string,
 ): Promise<PersonnelActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion`);
+  const token = await requireSession(`/emergencies/${slug}/manage`);
 
   const { t } = await getT();
 
@@ -32,7 +32,7 @@ export async function createTaskFromNeed(
 
   if (response.status === 401) {
     await clearToken();
-    redirect(loginHref(`/e/${slug}/coordinacion`));
+    redirect(loginHref(`/emergencies/${slug}/manage`));
   }
 
   if (response.status === 403) {
@@ -60,8 +60,8 @@ export async function createTaskFromNeed(
     return { status: 'error', message: msg };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion`);
-  revalidatePath(`/e/${slug}/coordinacion/voluntarios`);
+  revalidatePath(`/emergencies/${slug}/manage`);
+  revalidatePath(`/emergencies/${slug}/manage/volunteers`);
 
   return { status: 'success', taskId: data.id };
 }

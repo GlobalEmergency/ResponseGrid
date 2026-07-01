@@ -29,7 +29,7 @@ export function EmergencyQuickLinks({ slug, te, authed }: EmergencyQuickLinksPro
         </div>
       )}
 
-      <Link href={`/e/${slug}/coordinacion`} className={linkClass}>
+      <Link href={`/emergencies/${slug}/manage`} className={linkClass}>
         {te.footer_coordination} →
       </Link>
     </nav>

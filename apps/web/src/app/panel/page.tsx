@@ -124,7 +124,7 @@ export default async function PanelPage() {
                       </div>
                     </div>
                     <Link
-                      href={`/e/${e.slug}/coordinacion`}
+                      href={`/emergencies/${e.slug}/manage`}
                       className="mt-auto inline-flex w-fit items-center rounded-lg bg-navy px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-navy-700"
                     >
                       {tp.enter_coordination}
@@ -159,7 +159,7 @@ export default async function PanelPage() {
                       </div>
                     </div>
                     <Link
-                      href={`/e/${e.slug}/coordinacion`}
+                      href={`/emergencies/${e.slug}/manage`}
                       className="mt-auto inline-flex w-fit items-center rounded-lg bg-navy px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-navy-700"
                     >
                       {tp.enter_validation}

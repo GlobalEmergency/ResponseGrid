@@ -32,6 +32,48 @@ const nextConfig: NextConfig = {
         destination: '/panel/organizaciones/:path*',
         permanent: true,
       },
+      // --- Coordinación de emergencia: migrado a /emergencies/:slug/manage/* ---
+      { source: '/e/:slug/coordinacion', destination: '/emergencies/:slug/manage', permanent: true },
+      {
+        source: '/e/:slug/coordinacion/recursos',
+        destination: '/emergencies/:slug/manage/resources',
+        permanent: true,
+      },
+      {
+        source: '/e/:slug/coordinacion/puntos-en-duda',
+        destination: '/emergencies/:slug/manage/resources/disputes',
+        permanent: true,
+      },
+      {
+        source: '/e/:slug/coordinacion/peticiones',
+        destination: '/emergencies/:slug/manage/needs',
+        permanent: true,
+      },
+      {
+        source: '/e/:slug/coordinacion/ofertas',
+        destination: '/emergencies/:slug/manage/offers',
+        permanent: true,
+      },
+      {
+        source: '/e/:slug/coordinacion/expediciones',
+        destination: '/emergencies/:slug/manage/logistics',
+        permanent: true,
+      },
+      {
+        source: '/e/:slug/coordinacion/voluntarios',
+        destination: '/emergencies/:slug/manage/volunteers',
+        permanent: true,
+      },
+      {
+        source: '/e/:slug/coordinacion/reportes',
+        destination: '/emergencies/:slug/manage/reports',
+        permanent: true,
+      },
+      {
+        source: '/e/:slug/coordinacion/actividad',
+        destination: '/emergencies/:slug/manage/activity',
+        permanent: true,
+      },
     ];
   },
 };
