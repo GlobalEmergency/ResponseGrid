@@ -21,10 +21,25 @@ const { Client } = require('pg');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const TEST_DB = 'reliefhub_test';
-/** Connect to the maintenance `postgres` DB so we can DROP/CREATE the test DB. */
-const ADMIN_URL = 'postgres://reliefhub:reliefhub@localhost:5433/postgres';
-const TEST_URL = `postgres://reliefhub:reliefhub@localhost:5433/${TEST_DB}`;
+/**
+ * Single source of truth for the test DB connection — the SAME env var the Jest
+ * workers read (see test/jest-setup-test-db.ts), so the schema is applied to
+ * exactly the DB the tests talk to. Defaults to the docker-compose port (5433,
+ * used by CI); override TEST_DATABASE_URL to point at another host/port locally.
+ */
+const TEST_URL =
+  process.env.TEST_DATABASE_URL ??
+  'postgres://reliefhub:reliefhub@localhost:5433/reliefhub_test';
+
+/** Test DB name, parsed from the connection URL (e.g. `reliefhub_test`). */
+const TEST_DB = new URL(TEST_URL).pathname.replace(/^\//, '');
+
+/** Maintenance `postgres` DB on the same server — to DROP/CREATE the test DB. */
+const ADMIN_URL = (() => {
+  const url = new URL(TEST_URL);
+  url.pathname = '/postgres';
+  return url.toString();
+})();
 
 /** Directory that holds the Drizzle migration .sql files. */
 const DRIZZLE_DIR = path.resolve(__dirname, '../drizzle');

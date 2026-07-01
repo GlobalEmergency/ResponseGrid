@@ -43,7 +43,6 @@ interface ResourceListProps {
   locale: Locale;
   /** Emergency slug — enables linking each card to its resource detail page. */
   slug?: string;
-  authed?: boolean;
 }
 
 export function ResourceList({
@@ -61,7 +60,6 @@ export function ResourceList({
   tEmpty,
   locale,
   slug,
-  authed = false,
 }: ResourceListProps) {
   // ── Filter state (category/country) → triggers re-fetch ──────────────────
   const [activeCategory, setActiveCategory] = useState('');
@@ -240,7 +238,6 @@ export function ResourceList({
                   tStatusLight={tStatusLight}
                   locale={locale}
                   slug={slug}
-                  authed={authed}
                 />
                 <div className="mt-1 flex justify-end px-1">
                   <DistanceBadge distanceMeters={item.distanceMeters} locale={locale} />
@@ -366,7 +363,6 @@ export function ResourceList({
                       tStatusLight={tStatusLight}
                       locale={locale}
                       slug={slug}
-                      authed={authed}
                     />
                   </li>
                 ))}
@@ -392,7 +388,6 @@ export function ResourceList({
                       tStatusLight={tStatusLight}
                       locale={locale}
                       slug={slug}
-                      authed={authed}
                     />
                   </li>
                 ))}
@@ -418,7 +413,6 @@ export function ResourceList({
                       tStatusLight={tStatusLight}
                       locale={locale}
                       slug={slug}
-                      authed={authed}
                     />
                   </li>
                 ))}

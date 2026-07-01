@@ -24,7 +24,6 @@ interface PublicResourceCardProps {
   locale?: Locale;
   /** When set, the card name links to the resource detail page (#59). */
   slug?: string;
-  authed?: boolean;
 }
 
 export function PublicResourceCard({
@@ -34,7 +33,6 @@ export function PublicResourceCard({
   tStatusLight,
   locale = 'es',
   slug,
-  authed = false,
 }: PublicResourceCardProps) {
   const typeLabels: Record<ResourceViewDto['type'], string> = {
     collection_point: t.type_collection_point,
@@ -119,10 +117,11 @@ export function PublicResourceCard({
       {/* sourceName is intentionally NOT rendered — ResponseGrid is the
           source of truth; external provenance is internal metadata only. */}
       {(resource.contact != null ||
+        resource.hasContact ||
         resource.schedule != null ||
         resource.manager != null) && (
         <dl className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted">
-          {resource.contact != null && (
+          {(resource.contact != null || resource.hasContact) && (
             <div className="flex items-center gap-1">
               <dt className="font-medium text-muted-soft">
                 {resource.verificationLevel === 'official'
@@ -130,9 +129,11 @@ export function PublicResourceCard({
                   : t.meta_contact}
               </dt>
               <dd>
-                {resource.verificationLevel === 'official' || authed ? (
+                {resource.contact != null ? (
+                  // Revealed by the API (official resource, or authenticated call).
                   resource.contact
                 ) : (
+                  // Redacted server-side: a contact exists but is gated behind auth.
                   <span className="italic text-muted-soft/80">
                     {t.contact_login_required}
                   </span>
@@ -155,7 +156,7 @@ export function PublicResourceCard({
         </dl>
       )}
 
-      {resource.contact == null && (
+      {resource.contact == null && !resource.hasContact && (
         <p className="text-xs italic text-muted-soft">
           {t.no_official_contact}
         </p>

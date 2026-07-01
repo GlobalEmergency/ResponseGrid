@@ -19,6 +19,13 @@ export interface ResourceView {
   // enriched fields
   accepts: string[];
   contact: string | null;
+  /**
+   * Whether the resource has a contact on file, independent of whether
+   * `contact` is revealed to this caller. Lets the public UI show a
+   * "log in to see it" hint instead of "no contact" once `contact` is
+   * redacted for anonymous callers. See {@link redactContact}.
+   */
+  hasContact: boolean;
   schedule: string | null;
   manager: string | null;
   sourceName: string | null;
@@ -61,6 +68,7 @@ export function toResourceView(r: Resource): ResourceView {
     ownerOrganizationId: r.ownerOrganizationId,
     accepts: r.accepts,
     contact: r.contact,
+    hasContact: r.contact != null,
     schedule: r.schedule,
     manager: r.manager,
     sourceName: r.provenance?.sourceName ?? null,

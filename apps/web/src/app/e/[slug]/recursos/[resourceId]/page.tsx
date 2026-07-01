@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { clearToken, getToken } from "@/lib/auth";
+import { authHeaders, clearToken, getToken } from "@/lib/auth";
 import { api } from "@/lib/api";
 import { getEmergencyBySlug } from "@/lib/emergencies";
 import { getMe, getRoles } from "@/lib/navigation-data";
@@ -53,6 +53,8 @@ export default async function RecipientResourcePage({ params }: Props) {
   const [{ data: resource }, { data: needs }] = await Promise.all([
     api.GET("/emergencies/{emergencyId}/public/resources/{resourceId}", {
       params: { path: { emergencyId, resourceId } },
+      // Forward auth so logged-in users see the contact (redacted for anon).
+      ...(token !== null && { headers: authHeaders(token) }),
     }),
     api.GET("/emergencies/{emergencyId}/public/needs", {
       params: { path: { emergencyId }, query: { resourceId } },
@@ -97,7 +99,6 @@ export default async function RecipientResourcePage({ params }: Props) {
             tVerification={t.verification_badge}
             tStatusLight={t.status_light}
             locale={locale}
-            authed={token !== null}
           />
 
           {canPreRegister && (

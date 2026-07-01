@@ -300,9 +300,6 @@ export const en = {
     type_transport: 'Transport',
     type_supplier: 'Supplier',
     type_venue: 'Venue / Space',
-    stage_origin: 'Origin',
-    stage_intermediate: 'Intermediate',
-    stage_destination: 'Destination',
     // Rich card extras
     accepts_label: 'Accepts',
     meta_contact: 'Contact:',
@@ -405,7 +402,6 @@ export const en = {
     meta_description: 'Register a logistics point (collection, warehouse, space) for {emergencyName}.',
 
     type_label: 'Resource type',
-    stage_label: 'Stage',
     name_label: 'Name',
     name_placeholder: 'e.g. Red Cross Madrid',
     description_label: 'Description',
@@ -420,12 +416,7 @@ export const en = {
     type_supplier: 'Supplier',
     type_venue: 'Venue / Space',
 
-    stage_origin: 'Origin',
-    stage_intermediate: 'Intermediate',
-    stage_destination: 'Destination',
-
     select_type_placeholder: 'Select a type…',
-    select_stage_placeholder: 'Select a stage…',
 
     submit: 'Register resource',
     submitting: 'Sending…',
@@ -455,7 +446,6 @@ export const en = {
 
     // server-action messages
     err_invalid_type: 'Invalid resource type.',
-    err_invalid_stage: 'Invalid stage.',
     err_name_too_short: 'Name must be at least 2 characters.',
     err_location_required: 'Select a location.',
     err_invalid_items:
@@ -1493,10 +1483,6 @@ export const en = {
     type_supplier: 'Supplier',
     type_venue: 'Venue / Space',
 
-    stage_origin: 'Origin',
-    stage_intermediate: 'Intermediate',
-    stage_destination: 'Destination',
-
     current_label: 'Current:',
     change_status_label: 'Change status',
     status_invalid: 'Invalid status.',
@@ -1758,15 +1744,11 @@ export const en = {
     centros_detail_contact_label: 'Contact:',
     centros_detail_schedule_label: 'Schedule:',
     centros_detail_manager_label: 'Manager:',
-    centros_detail_stage_label: 'Stage:',
     centros_detail_created_label: 'Created:',
     centros_detail_source_label: 'Source:',
     centros_detail_recipient_label: 'Final recipient',
     centros_detail_recipient_type_label: 'Recipient type:',
     centros_detail_none: '—',
-    centros_detail_stage_origin: 'Origin',
-    centros_detail_stage_intermediate: 'Intermediate',
-    centros_detail_stage_destination: 'Destination',
     centros_detail_inventory_heading: 'Declared inventory ({count})',
     centros_detail_inventory_empty: 'This center has not declared any inventory.',
     centros_detail_inventory_note:
@@ -2031,9 +2013,6 @@ export const en = {
     resource_type_transport: 'Transport',
     resource_type_supplier: 'Supplier',
     resource_type_venue: 'Venue / Space',
-    resource_stage_origin: 'Origin',
-    resource_stage_intermediate: 'Intermediate',
-    resource_stage_destination: 'Destination',
 
     offer_card_label: 'Offer: {description}',
     offer_status_open: 'Open',
@@ -2073,7 +2052,6 @@ export const en = {
     detail_field_created: 'Created',
     detail_field_expiry: 'Freshness',
     detail_field_type: 'Type',
-    detail_field_stage: 'Stage',
     detail_field_accepts: 'Accepts',
     detail_field_contact: 'Contact',
     detail_field_schedule: 'Schedule',
@@ -2509,6 +2487,8 @@ export const en = {
     map_disputed: 'In review · possible closure',
     map_report_cta: 'Something wrong? Tell us',
     map_no_locations: 'No locations on the map yet.',
+    map_geolocate: 'Go to my location',
+    map_geolocate_error: 'Could not get your location',
   },
 
   nav: {
