@@ -24,7 +24,7 @@ export function fromSupplyDto(dto: SupplyDto): CatalogueSupply {
     code: dto.code,
     name: dto.name,
     categorySlug: dto.categorySlug,
-    defaultUnit: dto.defaultUnit,
+    defaultUnit: dto.defaultUnit ?? null,
     aliases: dto.aliases,
   };
 }
