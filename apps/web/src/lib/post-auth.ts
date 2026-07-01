@@ -13,7 +13,7 @@ export async function postAuthPath(
   token: string,
   next?: string | null,
 ): Promise<string> {
-  const target = safeNextPath(next) ?? '/panel';
+  const target = safeNextPath(next) ?? '/dashboard';
   const { data } = await api.GET('/auth/me', { headers: authHeaders(token) });
   if (data && data.profileComplete === false) {
     return `/auth/onboarding?next=${encodeURIComponent(target)}`;

@@ -16,7 +16,7 @@ type Props = {
 
 export default async function OnboardingPage({ searchParams }: Props) {
   const resolved = await searchParams;
-  const next = typeof resolved.next === 'string' ? resolved.next : '/panel';
+  const next = typeof resolved.next === 'string' ? resolved.next : '/dashboard';
   // Onboarding requires an authenticated (but incomplete) session.
   await requireSession(next);
   const { t } = await getT();

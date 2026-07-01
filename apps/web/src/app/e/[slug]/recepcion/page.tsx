@@ -145,7 +145,7 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
         <AppBar
           variant="action"
           slug={slug}
-          backHref={`/e/${slug}/coordinacion`}
+          backHref={`/emergencies/${slug}/manage`}
         />
         <PageHeading title={tr.page_title} subtitle={tr.page_subtitle} />
         <div className="flex flex-col gap-5 px-4 pb-12 pt-6">

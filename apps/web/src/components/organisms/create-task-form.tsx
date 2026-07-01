@@ -1,8 +1,8 @@
 'use client';
 
 import { useActionState, useRef } from 'react';
-import { createTask } from '@/app/e/[slug]/coordinacion/voluntarios/actions';
-import type { ActionResult } from '@/app/e/[slug]/coordinacion/voluntarios/actions';
+import { createTask } from '@/app/emergencies/[slug]/manage/volunteers/actions';
+import type { ActionResult } from '@/app/emergencies/[slug]/manage/volunteers/actions';
 import { Button } from '@/components/atoms/button';
 import { Input } from '@/components/atoms/input';
 import { Textarea } from '@/components/atoms/textarea';

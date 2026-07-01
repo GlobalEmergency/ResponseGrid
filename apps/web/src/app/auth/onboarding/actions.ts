@@ -38,5 +38,5 @@ export async function onboardingAction(
     return { status: 'error', message: t.onboarding.error_fallback };
   }
 
-  redirect(safeNextPath(next) ?? '/panel');
+  redirect(safeNextPath(next) ?? '/dashboard');
 }

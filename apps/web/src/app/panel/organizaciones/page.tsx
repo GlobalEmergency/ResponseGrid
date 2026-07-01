@@ -47,7 +47,7 @@ export default async function OrganizacionesPage() {
               {myOrgs.map((org) => (
                 <li key={org.id}>
                   <Link
-                    href={`/panel/organizaciones/${org.id}`}
+                    href={`/organizations/${org.id}/manage`}
                     className="flex flex-col gap-1 rounded-lg border border-line bg-white p-5 hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors"
                   >
                     <span className="text-lg font-bold text-ink">{org.name}</span>

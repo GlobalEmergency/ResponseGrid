@@ -8,7 +8,7 @@ import {
   confirmDelivery,
   cancelShipment,
   type ActionResult,
-} from '@/app/e/[slug]/coordinacion/expediciones/actions';
+} from '@/app/emergencies/[slug]/manage/logistics/actions';
 import type { components } from '@reliefhub/api-client';
 import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
@@ -97,7 +97,7 @@ export function ShipmentDetail({
   // only steers the 401-redirect + revalidate target — both views also call
   // router.refresh() on success, so the visible list updates either way.
   const carrierBase = `/e/${slug}/mis-expediciones`;
-  const coordBase = `/e/${slug}/coordinacion/expediciones`;
+  const coordBase = `/emergencies/${slug}/manage/logistics`;
   const actorPath = canManage ? coordBase : carrierBase;
 
   // ── Ranked capacity suggestions (#107) ───────────────────────────────────

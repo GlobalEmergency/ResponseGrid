@@ -1,0 +1,46 @@
+import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
+import { requireSession, loginHref, authHeaders } from '@/lib/auth';
+import { api } from '@/lib/api';
+import { PageHeader } from '@/components/molecules/page-header';
+import { getT } from '@/i18n/server';
+import { fetchOrganizations } from './actions';
+import { OrganizationsList } from './organizations-list';
+
+export const dynamic = 'force-dynamic';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  return {
+    title: t.admin.orgs_meta_title,
+    description: t.admin.orgs_meta_description,
+  };
+}
+
+export default async function OrganizacionesPage() {
+  const token = await requireSession('/admin/organizations');
+
+  const { data: me, response: meResponse } = await api.GET('/auth/me', {
+    headers: authHeaders(token),
+  });
+
+  if (meResponse.status === 401 || !me) {
+    redirect(loginHref('/admin/organizations'));
+  }
+
+  if (!me.isAdmin) {
+    redirect('/');
+  }
+
+  const organizations = await fetchOrganizations();
+
+  const { t } = await getT();
+  const ta = t.admin;
+
+  return (
+    <>
+      <PageHeader title={ta.orgs_title} subtitle={ta.orgs_subtitle} />
+      <OrganizationsList organizations={organizations} ta={ta} />
+    </>
+  );
+}

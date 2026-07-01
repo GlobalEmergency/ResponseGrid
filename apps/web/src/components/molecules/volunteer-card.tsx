@@ -2,8 +2,8 @@
 
 import { useActionState } from 'react';
 import type { components } from '@reliefhub/api-client';
-import { updateVolunteerStatus } from '@/app/e/[slug]/coordinacion/voluntarios/actions';
-import type { ActionResult } from '@/app/e/[slug]/coordinacion/voluntarios/actions';
+import { updateVolunteerStatus } from '@/app/emergencies/[slug]/manage/volunteers/actions';
+import type { ActionResult } from '@/app/emergencies/[slug]/manage/volunteers/actions';
 import { Badge } from '@/components/atoms/badge';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { useLocale } from '@/i18n/locale-context';

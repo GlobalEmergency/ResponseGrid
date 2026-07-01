@@ -66,5 +66,5 @@ export async function signupAction(
 
   await setToken(data.accessToken);
   // Only allow internal relative paths (prevents open-redirect attacks).
-  redirect(safeNextPath(next) ?? '/panel');
+  redirect(safeNextPath(next) ?? '/dashboard');
 }

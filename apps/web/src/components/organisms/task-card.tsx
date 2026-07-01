@@ -7,8 +7,8 @@ import {
   unassignVolunteer,
   completeTask,
   cancelTask,
-} from '@/app/e/[slug]/coordinacion/voluntarios/actions';
-import type { ActionResult } from '@/app/e/[slug]/coordinacion/voluntarios/actions';
+} from '@/app/emergencies/[slug]/manage/volunteers/actions';
+import type { ActionResult } from '@/app/emergencies/[slug]/manage/volunteers/actions';
 import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';

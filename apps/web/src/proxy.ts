@@ -17,8 +17,9 @@ import { SESSION_COOKIE } from '@/lib/session-cookie';
  * drifts, the per-page gate still protects the route; the only thing lost is the
  * earlier redirect.
  *
- * Scope: whole segments that are protected in their entirety (`/panel/*` and the
- * coordination workspace). Scattered single-page forms under `/e/:slug`
+ * Scope: whole segments that are protected in their entirety (`/dashboard/*`,
+ * `/admin/*`, the `/organizations` auth workspace, `/panel/*` and the emergency
+ * management workspace). Scattered single-page forms under `/e/:slug`
  * (registrar, peticion, …) keep their authoritative per-page `requireSession`
  * gate rather than being enumerated here, where the list would silently drift.
  */
@@ -30,7 +31,10 @@ export function proxy(request: NextRequest): NextResponse {
 
 export const config = {
   matcher: [
+    '/dashboard/:path*',
+    '/admin/:path*',
+    '/organizations/:path*',
+    '/emergencies/:slug/manage/:path*',
     '/panel/:path*',
-    '/e/:slug/coordinacion/:path*',
   ],
 };
