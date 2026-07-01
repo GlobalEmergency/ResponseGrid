@@ -29,8 +29,8 @@ interface HeaderBandShellProps {
 /**
  * HeaderBandShell — the shared navy "Banda oficial" header chrome: rounded
  * bottom, the brand logo (links home) + ES/EN switch, then page-specific
- * children. Single source of truth for SiteHeaderBand, OfficialHeaderBand and
- * PageHeaderBand.
+ * children. Base chrome for PageHeaderBand (client-only pages that can't mount
+ * the async AppBar organism, e.g. offline and auth/complete).
  */
 export function HeaderBandShell({
   children,

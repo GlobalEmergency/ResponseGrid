@@ -2,9 +2,8 @@ import type { Metadata, ResolvingMetadata } from 'next';
 import { notFound } from 'next/navigation';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { getToken } from '@/lib/auth';
 import { type ResourceViewDto } from '@/lib/group-by-country';
-import { OfficialHeaderBand } from '@/components/organisms/official-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
 import { ResourceList } from '@/components/organisms/resource-list';
 import { EmergencyMapWrapper } from '@/components/organisms/emergency-map-wrapper';
 import { NeedsFilter } from '@/components/molecules/needs-filter';
@@ -62,7 +61,6 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
   }
 
   const emergencyId = emergency.id;
-  const token = await getToken();
   const isActive = emergency.status === 'active';
 
   const rawCategory = typeof resolvedSearchParams.category === 'string' ? resolvedSearchParams.category : undefined;
@@ -144,6 +142,19 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
   const sectionTitle = 'font-display text-base font-bold text-navy';
   const announcement = typeof emergency.announcement === 'string' ? emergency.announcement : null;
 
+  const statusLabel =
+    emergency.status === 'active'
+      ? te.header_status_active
+      : emergency.status === 'paused'
+        ? te.header_status_paused
+        : te.header_status_closed;
+  const statusDot =
+    emergency.status === 'active'
+      ? 'bg-success-dot'
+      : emergency.status === 'paused'
+        ? 'bg-warning-dot'
+        : 'bg-muted-soft';
+
   const initialTab: 'points' | 'needs' =
     category !== undefined || priority !== undefined ? 'needs' : 'points';
 
@@ -195,12 +206,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
-      <OfficialHeaderBand
-        name={emergency.name}
-        status={emergency.status}
-        updatedAt={emergency.updatedAt}
-        te={te}
-      />
+      <AppBar variant="emergency" slug={slug} emergency={{ name: emergency.name, status: emergency.status }} />
 
       {!isActive && (
         <div className="px-4 pt-4 lg:px-8">
@@ -211,14 +217,14 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
       <div className="lg:flex lg:items-start">
         <section
           aria-labelledby="map-heading"
-          className="sticky top-0 z-30 w-full lg:h-screen lg:w-[58%] lg:shrink-0 lg:z-10"
+          className="sticky top-16 w-full lg:top-[52px] lg:w-[58%] lg:shrink-0 lg:z-10"
         >
           <h2 id="map-heading" className="sr-only">{te.map_heading}</h2>
           <EmergencyMapWrapper
             points={mapPoints}
             emergencyId={emergencyId}
             slug={slug}
-            containerClassName="h-[35vh] min-h-[220px] max-h-[350px] border-y border-line lg:h-full lg:min-h-0 lg:max-h-none lg:border-y-0 lg:border-r"
+            containerClassName="h-[35vh] min-h-[220px] max-h-[350px] border-y border-line lg:h-[calc(100vh-52px)] lg:min-h-0 lg:max-h-none lg:border-y-0 lg:border-r"
           />
           <div className="pointer-events-none absolute bottom-3 left-3 z-[500] flex max-w-[calc(100%-1.5rem)] flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-line bg-white/95 px-3 py-2 text-[11px] font-medium text-muted shadow-md backdrop-blur-sm">
             {legendItems.map((item) => (
@@ -231,6 +237,16 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
         </section>
 
         <div className="flex min-w-0 flex-1 flex-col gap-6 px-4 pb-12 pt-5 lg:mx-auto lg:max-w-3xl lg:px-8 lg:pt-7">
+          <div className="flex flex-col gap-2">
+            <h1 className="font-display text-2xl font-extrabold leading-tight tracking-tight text-navy lg:text-3xl">
+              {emergency.name}
+            </h1>
+            <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-line bg-surface-alt px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wide text-muted">
+              <span className={`h-2 w-2 rounded-full ${statusDot}`} aria-hidden="true" />
+              {statusLabel}
+            </span>
+          </div>
+
           {announcement !== null && (
             <AnnouncementCard
               announcement={announcement}
@@ -409,7 +425,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
             </ul>
           </details>
 
-          <EmergencyQuickLinks slug={slug} te={te} authed={token !== null} />
+          <EmergencyQuickLinks slug={slug} te={te} />
         </div>
       </div>
     </main>

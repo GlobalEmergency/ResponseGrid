@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { categoryLabel } from '@/lib/categories';
 import { formatDate } from '@/lib/format-date';
@@ -47,12 +47,13 @@ export default async function DonacionTrackingPage({ params }: Props) {
   const shell = (children: React.ReactNode) => (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-md">
-        <PageHeaderBand
-          backHref={`/e/${slug}`}
-          backLabel={t.common.back_to_emergency}
-          title={td.page_title}
-          subtitle={td.page_subtitle}
-        />
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <div className="px-4 pt-6">
+          <h1 className="font-display text-2xl font-extrabold tracking-tight text-navy">
+            {td.page_title}
+          </h1>
+          <p className="mt-1.5 text-sm text-muted">{td.page_subtitle}</p>
+        </div>
         <div className="flex flex-col gap-6 px-4 pb-12 pt-6">{children}</div>
       </div>
     </main>

@@ -1,11 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { api } from '@/lib/api';
-import { getToken, authHeaders } from '@/lib/auth';
-import { SiteHeaderBand } from '@/components/organisms/site-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
 import { EmergencyDirectoryCard } from '@/components/organisms/emergency-directory-card';
-import { AccountNav } from '@/components/molecules/account-nav';
-import { hasManagerRole } from '@/lib/admin-scopes';
 import { HowItWorksStep } from '@/components/molecules/how-it-works-step';
 import { TrustLevelsCard } from '@/components/molecules/trust-levels-card';
 import { EmptyState } from '@/components/molecules/empty-state';
@@ -26,24 +23,6 @@ export default async function HomePage() {
   const { t } = await getT();
   const { data: emergencies } = await api.GET('/emergencies');
 
-  const token = await getToken();
-  let notificationUnreadCount = 0;
-  let isAdmin = false;
-  let canAdminister = false;
-  if (token != null) {
-    const [notifResult, meResult] = await Promise.all([
-      api.GET('/notifications/mine', { headers: authHeaders(token) }),
-      api.GET('/auth/me', { headers: authHeaders(token) }),
-    ]);
-    if (notifResult.data != null) {
-      notificationUnreadCount = notifResult.data.unreadCount;
-    }
-    if (meResult.data != null) {
-      isAdmin = meResult.data.isAdmin === true;
-      canAdminister = isAdmin || hasManagerRole(meResult.data.grants ?? []);
-    }
-  }
-
   const all = emergencies ?? [];
   const activeEmergencies = all.filter((e) => e.status === 'active');
   const closedEmergencies = all.filter((e) => e.status !== 'active');
@@ -53,9 +32,9 @@ export default async function HomePage() {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-3xl bg-surface">
-        <SiteHeaderBand />
+      <AppBar variant="home" />
 
+      <div className="mx-auto w-full max-w-3xl bg-surface">
         <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">
           {/* ── Hero (SEO H1) ───────────────────────────────────────────── */}
           <section>
@@ -146,14 +125,6 @@ export default async function HomePage() {
               { level: 'official', text: th.trust_official },
             ]}
             tVerification={t.verification_badge}
-          />
-
-          <AccountNav
-            t={th}
-            authed={token !== null}
-            isAdmin={isAdmin}
-            canAdminister={canAdminister}
-            notificationUnreadCount={notificationUnreadCount}
           />
         </div>
       </div>
