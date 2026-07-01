@@ -33,7 +33,7 @@ export async function createShipment(
     manifest?: string;
   },
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion/expediciones`);
+  const token = await requireSession(`/emergencies/${slug}/manage/logistics`);
 
   const { t } = await getT();
   const ts = t.coord;
@@ -64,7 +64,7 @@ export async function createShipment(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion/expediciones`));
+      redirect(loginHref(`/emergencies/${slug}/manage/logistics`));
     }
     if (response.status === 403) {
       return { status: 'error', message: ts.ship_err_no_permission_create };
@@ -75,8 +75,8 @@ export async function createShipment(
     return { status: 'error', message: ts.ship_err_create_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion/expediciones`);
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage/logistics`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   return { status: 'success' };
 }
 
@@ -90,7 +90,7 @@ export async function assignCapacity(
   capacityId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion/expediciones`);
+  const token = await requireSession(`/emergencies/${slug}/manage/logistics`);
 
   const { t } = await getT();
   const ts = t.coord;
@@ -111,7 +111,7 @@ export async function assignCapacity(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion/expediciones`));
+      redirect(loginHref(`/emergencies/${slug}/manage/logistics`));
     }
     if (response.status === 403) {
       return { status: 'error', message: ts.ship_err_no_permission_assign };
@@ -125,7 +125,7 @@ export async function assignCapacity(
     return { status: 'error', message: ts.ship_err_assign_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion/expediciones`);
+  revalidatePath(`/emergencies/${slug}/manage/logistics`);
   return { status: 'success' };
 }
 
@@ -138,7 +138,7 @@ export async function getCapacitySuggestions(
   shipmentId: string,
   slug: string,
 ): Promise<SuggestionsResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion/expediciones`);
+  const token = await requireSession(`/emergencies/${slug}/manage/logistics`);
 
   const { t } = await getT();
   const ts = t.coord;
@@ -154,7 +154,7 @@ export async function getCapacitySuggestions(
   if (error !== undefined || data === undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion/expediciones`));
+      redirect(loginHref(`/emergencies/${slug}/manage/logistics`));
     }
     if (response.status === 403) {
       return { status: 'error', message: ts.ship_err_no_permission_assign };
@@ -172,9 +172,9 @@ export async function markInTransit(
   shipmentId: string,
   slug: string,
   /** Where to bounce on 401 — defaults to the coordinator panel. */
-  loginNext = `/e/${slug}/coordinacion/expediciones`,
+  loginNext = `/emergencies/${slug}/manage/logistics`,
   /** Path to revalidate after the transition. */
-  revalidate = `/e/${slug}/coordinacion/expediciones`,
+  revalidate = `/emergencies/${slug}/manage/logistics`,
 ): Promise<ActionResult> {
   const token = await requireSession(loginNext);
 
@@ -213,8 +213,8 @@ export async function markInTransit(
 export async function confirmDelivery(
   shipmentId: string,
   slug: string,
-  loginNext = `/e/${slug}/coordinacion/expediciones`,
-  revalidate = `/e/${slug}/coordinacion/expediciones`,
+  loginNext = `/emergencies/${slug}/manage/logistics`,
+  revalidate = `/emergencies/${slug}/manage/logistics`,
 ): Promise<ActionResult> {
   const token = await requireSession(loginNext);
 
@@ -254,7 +254,7 @@ export async function cancelShipment(
   shipmentId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion/expediciones`);
+  const token = await requireSession(`/emergencies/${slug}/manage/logistics`);
 
   const { t } = await getT();
   const ts = t.coord;
@@ -270,7 +270,7 @@ export async function cancelShipment(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion/expediciones`));
+      redirect(loginHref(`/emergencies/${slug}/manage/logistics`));
     }
     if (response.status === 403) {
       return { status: 'error', message: ts.ship_err_no_permission_cancel };
@@ -284,7 +284,7 @@ export async function cancelShipment(
     return { status: 'error', message: ts.ship_err_cancel_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion/expediciones`);
-  revalidatePath(`/e/${slug}/coordinacion`);
+  revalidatePath(`/emergencies/${slug}/manage/logistics`);
+  revalidatePath(`/emergencies/${slug}/manage`);
   return { status: 'success' };
 }

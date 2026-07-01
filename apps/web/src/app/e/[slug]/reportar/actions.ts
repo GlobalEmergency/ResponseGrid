@@ -107,7 +107,7 @@ export async function reviewReport(
   reportId: string,
   slug: string,
 ): Promise<ReviewReportResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion/reportes`);
+  const token = await requireSession(`/emergencies/${slug}/manage/reports`);
 
   const { t } = await getT();
 
@@ -118,7 +118,7 @@ export async function reviewReport(
 
   if (response.status === 401) {
     await clearToken();
-    redirect(loginHref(`/e/${slug}/coordinacion/reportes`));
+    redirect(loginHref(`/emergencies/${slug}/manage/reports`));
   }
 
   if (response.status === 403) {

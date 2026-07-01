@@ -16,7 +16,7 @@ export async function updateVolunteerStatus(
   status: 'available' | 'assigned' | 'inactive',
   slug: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion/voluntarios`);
+  const token = await requireSession(`/emergencies/${slug}/manage/volunteers`);
 
   const { t } = await getT();
 
@@ -29,7 +29,7 @@ export async function updateVolunteerStatus(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
+      redirect(loginHref(`/emergencies/${slug}/manage/volunteers`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.vol_err_no_permission_status };
@@ -40,7 +40,7 @@ export async function updateVolunteerStatus(
     return { status: 'error', message: t.coord.vol_err_update_status_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion/voluntarios`);
+  revalidatePath(`/emergencies/${slug}/manage/volunteers`);
   return { status: 'success' };
 }
 
@@ -49,7 +49,7 @@ export async function createTask(
   slug: string,
   formData: FormData,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion/voluntarios`);
+  const token = await requireSession(`/emergencies/${slug}/manage/volunteers`);
 
   const { t } = await getT();
 
@@ -95,7 +95,7 @@ export async function createTask(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
+      redirect(loginHref(`/emergencies/${slug}/manage/volunteers`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.vol_err_no_permission_create };
@@ -103,7 +103,7 @@ export async function createTask(
     return { status: 'error', message: t.coord.vol_err_create_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion/voluntarios`);
+  revalidatePath(`/emergencies/${slug}/manage/volunteers`);
   return { status: 'success' };
 }
 
@@ -112,7 +112,7 @@ export async function assignVolunteer(
   volunteerId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion/voluntarios`);
+  const token = await requireSession(`/emergencies/${slug}/manage/volunteers`);
 
   const { t } = await getT();
 
@@ -125,7 +125,7 @@ export async function assignVolunteer(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
+      redirect(loginHref(`/emergencies/${slug}/manage/volunteers`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.vol_err_no_permission_assign };
@@ -139,7 +139,7 @@ export async function assignVolunteer(
     return { status: 'error', message: t.coord.vol_err_assign_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion/voluntarios`);
+  revalidatePath(`/emergencies/${slug}/manage/volunteers`);
   return { status: 'success' };
 }
 
@@ -148,7 +148,7 @@ export async function unassignVolunteer(
   volunteerId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion/voluntarios`);
+  const token = await requireSession(`/emergencies/${slug}/manage/volunteers`);
 
   const { t } = await getT();
 
@@ -161,7 +161,7 @@ export async function unassignVolunteer(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
+      redirect(loginHref(`/emergencies/${slug}/manage/volunteers`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.vol_err_no_permission_unassign };
@@ -175,7 +175,7 @@ export async function unassignVolunteer(
     return { status: 'error', message: t.coord.vol_err_unassign_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion/voluntarios`);
+  revalidatePath(`/emergencies/${slug}/manage/volunteers`);
   return { status: 'success' };
 }
 
@@ -183,7 +183,7 @@ export async function completeTask(
   taskId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion/voluntarios`);
+  const token = await requireSession(`/emergencies/${slug}/manage/volunteers`);
 
   const { t } = await getT();
 
@@ -195,7 +195,7 @@ export async function completeTask(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
+      redirect(loginHref(`/emergencies/${slug}/manage/volunteers`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.vol_err_no_permission_complete };
@@ -206,7 +206,7 @@ export async function completeTask(
     return { status: 'error', message: t.coord.vol_err_complete_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion/voluntarios`);
+  revalidatePath(`/emergencies/${slug}/manage/volunteers`);
   return { status: 'success' };
 }
 
@@ -214,7 +214,7 @@ export async function cancelTask(
   taskId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await requireSession(`/e/${slug}/coordinacion/voluntarios`);
+  const token = await requireSession(`/emergencies/${slug}/manage/volunteers`);
 
   const { t } = await getT();
 
@@ -226,7 +226,7 @@ export async function cancelTask(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
+      redirect(loginHref(`/emergencies/${slug}/manage/volunteers`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.vol_err_no_permission_cancel };
@@ -237,6 +237,6 @@ export async function cancelTask(
     return { status: 'error', message: t.coord.vol_err_cancel_failed };
   }
 
-  revalidatePath(`/e/${slug}/coordinacion/voluntarios`);
+  revalidatePath(`/emergencies/${slug}/manage/volunteers`);
   return { status: 'success' };
 }
