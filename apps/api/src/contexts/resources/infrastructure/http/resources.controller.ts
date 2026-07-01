@@ -10,6 +10,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import {
   ApiTags,
   ApiOperation,
@@ -388,7 +389,8 @@ export class ResourcesController {
 
   @Post('resources/:resourceId/validity-reports')
   @HttpCode(201)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(ThrottlerGuard, JwtAuthGuard)
+  @Throttle({ validity: { ttl: 3_600_000, limit: 20 } })
   @ApiBearerAuth()
   @ApiOperation({
     summary:

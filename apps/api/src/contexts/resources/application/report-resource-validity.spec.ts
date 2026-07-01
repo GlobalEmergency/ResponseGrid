@@ -57,8 +57,11 @@ describe('ReportResourceValidity', () => {
     return id;
   }
 
-  const useCase = (threshold?: number): ReportResourceValidity =>
-    new ReportResourceValidity(resources, reports, bus, threshold);
+  const useCase = (
+    threshold?: number,
+    cooldownMs?: number,
+  ): ReportResourceValidity =>
+    new ReportResourceValidity(resources, reports, bus, threshold, cooldownMs);
 
   const cmd = (resourceId: string, reporterUserId: string) => ({
     resourceId,
@@ -172,5 +175,23 @@ describe('ReportResourceValidity', () => {
     await expect(useCase().execute(cmd(id, 'user-1'))).rejects.toThrow(
       ResourceNotReportableError,
     );
+  });
+
+  it('cooldown activo tras dismiss: el umbral se alcanza pero no marca disputed', async () => {
+    const id = await seedPublished();
+    const rep = useCase(2);
+    await rep.execute(cmd(id, 'user-1'));
+    await rep.execute(cmd(id, 'user-2'));
+    let r = await resources.findById(ResourceId.fromString(id));
+    expect(r!.disputed).toBe(true);
+
+    r!.clearDispute('dismiss');
+    await resources.save(r!);
+
+    const repWithCooldown = useCase(1, 86_400_000);
+    const result = await repWithCooldown.execute(cmd(id, 'user-3'));
+    expect(result.disputed).toBe(false);
+    r = await resources.findById(ResourceId.fromString(id));
+    expect(r!.disputed).toBe(false);
   });
 });
