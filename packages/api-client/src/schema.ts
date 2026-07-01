@@ -3085,8 +3085,16 @@ export interface components {
              *     ]
              */
             accepts: string[];
-            /** @example +58 212 555 0000 */
+            /**
+             * @description Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell "hidden" from "absent".
+             * @example +58 212 555 0000
+             */
             contact: string | null;
+            /**
+             * @description Whether a contact exists on file, regardless of whether `contact` is revealed to this caller.
+             * @example true
+             */
+            hasContact: boolean;
             /** @example Lun-Vie 08-18 */
             schedule: string | null;
             /** @example Juan Pérez */
@@ -3255,8 +3263,16 @@ export interface components {
              *     ]
              */
             accepts: string[];
-            /** @example +58 212 555 0000 */
+            /**
+             * @description Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell "hidden" from "absent".
+             * @example +58 212 555 0000
+             */
             contact: string | null;
+            /**
+             * @description Whether a contact exists on file, regardless of whether `contact` is revealed to this caller.
+             * @example true
+             */
+            hasContact: boolean;
             /** @example Lun-Vie 08-18 */
             schedule: string | null;
             /** @example Juan Pérez */
@@ -3361,8 +3377,16 @@ export interface components {
              *     ]
              */
             accepts: string[];
-            /** @example +58 212 555 0000 */
+            /**
+             * @description Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell "hidden" from "absent".
+             * @example +58 212 555 0000
+             */
             contact: string | null;
+            /**
+             * @description Whether a contact exists on file, regardless of whether `contact` is revealed to this caller.
+             * @example true
+             */
+            hasContact: boolean;
             /** @example Lun-Vie 08-18 */
             schedule: string | null;
             /** @example Juan Pérez */
@@ -3458,8 +3482,16 @@ export interface components {
              *     ]
              */
             accepts: string[];
-            /** @example +58 212 555 0000 */
+            /**
+             * @description Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell "hidden" from "absent".
+             * @example +58 212 555 0000
+             */
             contact: string | null;
+            /**
+             * @description Whether a contact exists on file, regardless of whether `contact` is revealed to this caller.
+             * @example true
+             */
+            hasContact: boolean;
             /** @example Lun-Vie 08-18 */
             schedule: string | null;
             /** @example Juan Pérez */
@@ -3556,8 +3588,16 @@ export interface components {
              *     ]
              */
             accepts: string[];
-            /** @example +58 212 555 0000 */
+            /**
+             * @description Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell "hidden" from "absent".
+             * @example +58 212 555 0000
+             */
             contact: string | null;
+            /**
+             * @description Whether a contact exists on file, regardless of whether `contact` is revealed to this caller.
+             * @example true
+             */
+            hasContact: boolean;
             /** @example Lun-Vie 08-18 */
             schedule: string | null;
             /** @example Juan Pérez */

@@ -315,9 +315,6 @@ export const es = {
     type_transport: 'Transporte',
     type_supplier: 'Proveedor',
     type_venue: 'Local / Espacio',
-    stage_origin: 'Origen',
-    stage_intermediate: 'Intermedio',
-    stage_destination: 'Destino',
     // Rich card extras
     accepts_label: 'Acepta',
     meta_contact: 'Contacto:',
@@ -425,7 +422,6 @@ export const es = {
     meta_description: 'Da de alta un punto logístico (acopio, almacén, espacio) para {emergencyName}.',
 
     type_label: 'Tipo de recurso',
-    stage_label: 'Etapa',
     name_label: 'Nombre',
     name_placeholder: 'Ej. Cruz Roja Madrid',
     description_label: 'Descripción',
@@ -440,12 +436,7 @@ export const es = {
     type_supplier: 'Proveedor',
     type_venue: 'Local / Espacio',
 
-    stage_origin: 'Origen',
-    stage_intermediate: 'Intermedio',
-    stage_destination: 'Destino',
-
     select_type_placeholder: 'Selecciona un tipo…',
-    select_stage_placeholder: 'Selecciona una etapa…',
 
     submit: 'Registrar recurso',
     submitting: 'Enviando…',
@@ -475,7 +466,6 @@ export const es = {
 
     // server-action messages
     err_invalid_type: 'Tipo de recurso no válido.',
-    err_invalid_stage: 'Etapa no válida.',
     err_name_too_short: 'El nombre debe tener al menos 2 caracteres.',
     err_location_required: 'Selecciona una ubicación.',
     err_invalid_items:
@@ -1526,10 +1516,6 @@ export const es = {
     type_supplier: 'Proveedor',
     type_venue: 'Local / Espacio',
 
-    stage_origin: 'Origen',
-    stage_intermediate: 'Intermedio',
-    stage_destination: 'Destino',
-
     current_label: 'Actual:',
     change_status_label: 'Cambiar estado',
     status_invalid: 'Estado no válido.',
@@ -1792,15 +1778,11 @@ export const es = {
     centros_detail_contact_label: 'Contacto:',
     centros_detail_schedule_label: 'Horario:',
     centros_detail_manager_label: 'Responsable:',
-    centros_detail_stage_label: 'Etapa:',
     centros_detail_created_label: 'Alta:',
     centros_detail_source_label: 'Fuente:',
     centros_detail_recipient_label: 'Destinatario final',
     centros_detail_recipient_type_label: 'Tipo de destinatario:',
     centros_detail_none: '—',
-    centros_detail_stage_origin: 'Origen',
-    centros_detail_stage_intermediate: 'Intermedio',
-    centros_detail_stage_destination: 'Destino',
     centros_detail_inventory_heading: 'Inventario declarado ({count})',
     centros_detail_inventory_empty: 'Este centro no ha declarado inventario.',
     centros_detail_inventory_note:
@@ -2065,9 +2047,6 @@ export const es = {
     resource_type_transport: 'Transporte',
     resource_type_supplier: 'Proveedor',
     resource_type_venue: 'Local / Espacio',
-    resource_stage_origin: 'Origen',
-    resource_stage_intermediate: 'Intermedio',
-    resource_stage_destination: 'Destino',
 
     offer_card_label: 'Oferta: {description}',
     offer_status_open: 'Abierta',
@@ -2107,7 +2086,6 @@ export const es = {
     detail_field_created: 'Creada',
     detail_field_expiry: 'Validez',
     detail_field_type: 'Tipo',
-    detail_field_stage: 'Etapa',
     detail_field_accepts: 'Acepta',
     detail_field_contact: 'Contacto',
     detail_field_schedule: 'Horario',
@@ -2546,6 +2524,8 @@ export const es = {
     map_disputed: 'En verificación · posible cierre',
     map_report_cta: '¿Algo va mal? Avísanos',
     map_no_locations: 'Aún no hay ubicaciones en el mapa.',
+    map_geolocate: 'Ir a mi ubicación',
+    map_geolocate_error: 'No se pudo obtener tu ubicación',
   },
 
   nav: {

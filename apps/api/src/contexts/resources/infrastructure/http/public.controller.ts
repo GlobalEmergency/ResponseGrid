@@ -5,7 +5,10 @@ import {
   Param,
   ParseUUIDPipe,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -19,6 +22,9 @@ import { GetNearbyResources } from '../../application/get-nearby-resources';
 import { GetResourcesInBounds } from '../../application/get-resources-in-bounds';
 import { GetPublicResource } from '../../application/get-public-resource';
 import { ResourceDetailView } from '../../application/resource-view';
+import { redactContact } from '../../application/redact-contact';
+import { OptionalJwtAuthGuard } from '../../../identity/infrastructure/http/optional-jwt-auth.guard';
+import type { AuthenticatedUser } from '../../../identity/infrastructure/http/jwt-auth.guard';
 import {
   PagedResourcesDto,
   ResourceFacetsDto,
@@ -32,8 +38,13 @@ import {
   InBoundsQueryDto,
 } from './dto';
 
+type OptionalAuthedRequest = Request & { user?: AuthenticatedUser };
+
 @ApiTags('public')
 @Controller()
+// Optional auth: an anonymous caller gets `contact` redacted on non-official
+// resources (it's personal data); a caller with a valid Bearer token sees it.
+@UseGuards(OptionalJwtAuthGuard)
 export class PublicController {
   constructor(
     private readonly getPublicResources: GetPublicResources,
@@ -60,8 +71,9 @@ export class PublicController {
   async list(
     @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
     @Query() query: PublicResourcesQueryDto,
+    @Req() req: OptionalAuthedRequest,
   ): Promise<PagedResourcesDto> {
-    return this.getPublicResources.execute({
+    const result = await this.getPublicResources.execute({
       emergencyId,
       page: query.page ?? 1,
       limit: query.limit ?? 50,
@@ -69,6 +81,11 @@ export class PublicController {
       ...(query.country !== undefined && { country: query.country }),
       ...(query.q !== undefined && query.q !== '' && { q: query.q }),
     });
+    const authed = req.user != null;
+    return {
+      ...result,
+      items: result.items.map((item) => redactContact(item, authed)),
+    };
   }
 
   @Get('emergencies/:emergencyId/public/resources/nearby')
@@ -87,14 +104,19 @@ export class PublicController {
   async nearby(
     @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
     @Query() query: NearbyResourcesQueryDto,
+    @Req() req: OptionalAuthedRequest,
   ): Promise<NearbyResourcesResponseDto> {
-    return this.getNearbyResources.execute({
+    const result = await this.getNearbyResources.execute({
       emergencyId,
       lat: query.lat,
       lng: query.lng,
       radiusMeters: query.radius,
       limit: query.limit ?? 50,
     });
+    const authed = req.user != null;
+    return {
+      items: result.items.map((item) => redactContact(item, authed)),
+    };
   }
 
   @Get('emergencies/:emergencyId/public/resources/in-bounds')
@@ -113,8 +135,9 @@ export class PublicController {
   async inBounds(
     @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
     @Query() query: InBoundsQueryDto,
+    @Req() req: OptionalAuthedRequest,
   ): Promise<InBoundsResourcesDto> {
-    return this.getResourcesInBounds.execute({
+    const result = await this.getResourcesInBounds.execute({
       emergencyId,
       minLat: query.minLat,
       minLng: query.minLng,
@@ -122,6 +145,10 @@ export class PublicController {
       maxLng: query.maxLng,
       limit: query.limit ?? 500,
     });
+    const authed = req.user != null;
+    return {
+      items: result.items.map((item) => redactContact(item, authed)),
+    };
   }
 
   @Get('emergencies/:emergencyId/public/resources/facets')
@@ -166,6 +193,7 @@ export class PublicController {
   async getOne(
     @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
     @Param('resourceId', ParseUUIDPipe) resourceId: string,
+    @Req() req: OptionalAuthedRequest,
   ): Promise<ResourceDetailView> {
     const resource = await this.getPublicResource.execute({
       emergencyId,
@@ -174,6 +202,6 @@ export class PublicController {
     if (resource === null) {
       throw new NotFoundException('Resource not found');
     }
-    return resource;
+    return redactContact(resource, req.user != null);
   }
 }

@@ -119,7 +119,6 @@ export default async function CentroDetailPage({ params }: Props) {
                   <dd>{resource.city}</dd>
                 </div>
               )}
-
               {resource.contact && (
                 <div className="flex flex-wrap gap-x-1.5">
                   <dt className="font-semibold text-ink-soft">
