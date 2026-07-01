@@ -7,9 +7,9 @@ import {
   cancelOffer,
   editOffer,
   discardOffer,
-} from '@/app/e/[slug]/coordinacion/actions';
+} from '@/app/emergencies/[slug]/manage/actions';
 import type { components } from '@reliefhub/api-client';
-import type { ActionResult } from '@/app/e/[slug]/coordinacion/actions';
+import type { ActionResult } from '@/app/emergencies/[slug]/manage/actions';
 import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Select } from '@/components/atoms/select';

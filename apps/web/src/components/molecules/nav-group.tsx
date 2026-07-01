@@ -11,9 +11,11 @@ export interface ResolvedNavGroup {
 interface NavGroupProps {
   group: ResolvedNavGroup;
   onNavigate?: () => void;
+  /** aria-label for collapsible items' expand/collapse toggles (pre-resolved). */
+  toggleLabel?: string;
 }
 
-export function NavGroup({ group, onNavigate }: NavGroupProps) {
+export function NavGroup({ group, onNavigate, toggleLabel }: NavGroupProps) {
   return (
     <div className="flex flex-col gap-0.5">
       {group.heading != null && group.heading !== '' ? (
@@ -22,7 +24,7 @@ export function NavGroup({ group, onNavigate }: NavGroupProps) {
         </h3>
       ) : null}
       {group.items.map((item) => (
-        <NavItem key={item.key} item={item} onNavigate={onNavigate} />
+        <NavItem key={item.key} item={item} onNavigate={onNavigate} toggleLabel={toggleLabel} />
       ))}
     </div>
   );
