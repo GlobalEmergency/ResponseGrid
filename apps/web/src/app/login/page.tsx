@@ -19,7 +19,7 @@ type Props = {
 export default async function LoginPage({ searchParams }: Props) {
   const resolved = await searchParams;
   const next =
-    typeof resolved.next === 'string' ? resolved.next : '/';
+    typeof resolved.next === 'string' ? resolved.next : '/panel';
   const { t } = await getT();
 
   return (

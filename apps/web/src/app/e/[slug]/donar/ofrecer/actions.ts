@@ -23,13 +23,14 @@ function isCategory(value: unknown): value is OfferCategory {
 }
 
 export async function submitOffer(
+  slug: string,
   emergencyId: string,
   _prev: OfferState,
   formData: FormData,
 ): Promise<OfferState> {
   const token = await getToken();
   if (!token) {
-    redirect('/login');
+    redirect(`/login?next=/e/${slug}/donar/ofrecer`);
   }
 
   const { t } = await getT();
@@ -131,7 +132,7 @@ export async function submitOffer(
 
   if (response.status === 401) {
     await clearToken();
-    redirect('/login');
+    redirect(`/login?next=/e/${slug}/donar/ofrecer`);
   }
 
   if (response.status === 409) {

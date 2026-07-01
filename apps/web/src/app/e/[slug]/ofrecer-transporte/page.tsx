@@ -54,7 +54,7 @@ export default async function OfrecerTransportePage({ params }: Props) {
 
   // Bind both the emergency and the provider id server-side so neither is
   // trusted from the client form.
-  const boundAction = submitCapacity.bind(null, emergency.id, me.id);
+  const boundAction = submitCapacity.bind(null, slug, emergency.id, me.id);
 
   return (
     <main className="flex-1 bg-surface">

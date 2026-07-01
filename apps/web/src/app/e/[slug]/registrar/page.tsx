@@ -43,7 +43,7 @@ export default async function RegistrarPage({ params }: Props) {
     notFound();
   }
 
-  const boundAction = registerResource.bind(null, emergency.id);
+  const boundAction = registerResource.bind(null, slug, emergency.id);
 
   return (
     <main className="flex-1 bg-surface">

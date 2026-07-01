@@ -29,13 +29,14 @@ function isPriority(value: unknown): value is NeedPriority {
 }
 
 export async function submitPeticion(
+  slug: string,
   emergencyId: string,
   _prev: PeticionState,
   formData: FormData,
 ): Promise<PeticionState> {
   const token = await getToken();
   if (!token) {
-    redirect('/login');
+    redirect(`/login?next=/e/${slug}/peticion`);
   }
 
   const { t } = await getT();
@@ -115,7 +116,7 @@ export async function submitPeticion(
 
   if (response.status === 401) {
     await clearToken();
-    redirect('/login');
+    redirect(`/login?next=/e/${slug}/peticion`);
   }
 
   if (response.status === 409) {

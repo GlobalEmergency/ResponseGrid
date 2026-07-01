@@ -41,13 +41,14 @@ function isStage(value: unknown): value is Stage {
 }
 
 export async function registerResource(
+  slug: string,
   emergencyId: string,
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
   const token = await getToken();
   if (!token) {
-    redirect('/login');
+    redirect(`/login?next=/e/${slug}/registrar`);
   }
 
   const { t } = await getT();
@@ -124,7 +125,7 @@ export async function registerResource(
 
   if (response.status === 401) {
     await clearToken();
-    redirect('/login');
+    redirect(`/login?next=/e/${slug}/registrar`);
   }
 
   if (response.status === 409) {

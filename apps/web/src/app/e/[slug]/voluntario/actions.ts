@@ -42,13 +42,14 @@ function isVehicle(value: unknown): value is Vehicle {
 }
 
 export async function registerVolunteer(
+  slug: string,
   emergencyId: string,
   _prev: VolunteerActionState,
   formData: FormData,
 ): Promise<VolunteerActionState> {
   const token = await getToken();
   if (!token) {
-    redirect('/login');
+    redirect(`/login?next=/e/${slug}/voluntario`);
   }
 
   const { t } = await getT();
@@ -107,7 +108,7 @@ export async function registerVolunteer(
 
   if (response.status === 401) {
     await clearToken();
-    redirect('/login');
+    redirect(`/login?next=/e/${slug}/voluntario`);
   }
 
   if (response.status === 409) {
