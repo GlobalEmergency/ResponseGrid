@@ -181,31 +181,29 @@ export function SupplySelector({
 
   return (
     <div ref={containerRef} className="relative flex flex-col gap-2">
-      <div className="flex gap-2">
-        <Input
-          id={id}
-          type="text"
-          required={required}
-          autoComplete="off"
-          value={name}
-          onChange={(e) => handleInputChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onFocus={() => setIsOpen(name.trim().length >= 2)}
-          onBlur={onBlur}
-          placeholder={placeholder}
-          role="combobox"
-          aria-autocomplete="list"
-          aria-expanded={isOpen}
-          aria-haspopup="listbox"
-          aria-controls={`${id}-listbox`}
-          icon={supplyId != null ? CheckIcon : SearchIcon}
-          className={`flex-1 ${
-            supplyId != null
-              ? 'border-emerald-500 bg-emerald-50/10 focus:border-emerald-500 focus:ring-emerald-500/30'
-              : ''
-          }`}
-        />
-      </div>
+      <Input
+        id={id}
+        type="text"
+        required={required}
+        autoComplete="off"
+        value={name}
+        onChange={(e) => handleInputChange(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onFocus={() => setIsOpen(name.trim().length >= 2)}
+        onBlur={onBlur}
+        placeholder={placeholder}
+        role="combobox"
+        aria-autocomplete="list"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-controls={`${id}-listbox`}
+        icon={supplyId != null ? CheckIcon : SearchIcon}
+        className={
+          supplyId != null
+            ? 'border-emerald-500 bg-emerald-50/10 focus:border-emerald-500 focus:ring-emerald-500/30'
+            : ''
+        }
+      />
 
       <p className="text-xs text-muted">{labels.hint}</p>
 
