@@ -1,3 +1,5 @@
+'use client';
+
 import type { components } from '@reliefhub/api-client';
 import Link from 'next/link';
 import { VerificationBadge } from '@/components/atoms/verification-badge';
@@ -6,7 +8,8 @@ import { FreshnessIndicator } from '@/components/atoms/freshness-indicator';
 import { Card } from '@/components/atoms/card';
 import type { Messages } from '@/i18n/messages/es';
 import type { Locale } from '@/i18n';
-import { categoryLabel, categoryColor } from '@/lib/categories';
+import { categoryColor } from '@/lib/categories';
+import { useCategoryLabel } from '@/components/providers/categories-provider';
 import {
   recipientTypeLabel,
   recipientTypeColor,
@@ -24,7 +27,6 @@ interface PublicResourceCardProps {
   locale?: Locale;
   /** When set, the card name links to the resource detail page (#59). */
   slug?: string;
-  authed?: boolean;
 }
 
 export function PublicResourceCard({
@@ -34,8 +36,8 @@ export function PublicResourceCard({
   tStatusLight,
   locale = 'es',
   slug,
-  authed = false,
 }: PublicResourceCardProps) {
+  const categoryLabel = useCategoryLabel();
   const typeLabels: Record<ResourceViewDto['type'], string> = {
     collection_point: t.type_collection_point,
     delivery_point: t.type_delivery_point,
@@ -110,7 +112,7 @@ export function PublicResourceCard({
               role="listitem"
               className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${categoryColor(slug)}`}
             >
-              {categoryLabel(slug, locale)}
+              {categoryLabel(slug)}
             </span>
           ))}
         </div>
@@ -119,10 +121,11 @@ export function PublicResourceCard({
       {/* sourceName is intentionally NOT rendered — ResponseGrid is the
           source of truth; external provenance is internal metadata only. */}
       {(resource.contact != null ||
+        resource.hasContact ||
         resource.schedule != null ||
         resource.manager != null) && (
         <dl className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted">
-          {resource.contact != null && (
+          {(resource.contact != null || resource.hasContact) && (
             <div className="flex items-center gap-1">
               <dt className="font-medium text-muted-soft">
                 {resource.verificationLevel === 'official'
@@ -130,9 +133,11 @@ export function PublicResourceCard({
                   : t.meta_contact}
               </dt>
               <dd>
-                {resource.verificationLevel === 'official' || authed ? (
+                {resource.contact != null ? (
+                  // Revealed by the API (official resource, or authenticated call).
                   resource.contact
                 ) : (
+                  // Redacted server-side: a contact exists but is gated behind auth.
                   <span className="italic text-muted-soft/80">
                     {t.contact_login_required}
                   </span>
@@ -155,7 +160,7 @@ export function PublicResourceCard({
         </dl>
       )}
 
-      {resource.contact == null && (
+      {resource.contact == null && !resource.hasContact && (
         <p className="text-xs italic text-muted-soft">
           {t.no_official_contact}
         </p>

@@ -22,6 +22,7 @@ export function GlobalFooter({ tf }: GlobalFooterProps) {
     { href: '/login', label: tf.nav_coordination },
   ];
   const resources = [
+    { href: '/funcionalidades', label: tf.resources_features },
     { href: '/sobre', label: tf.resources_about },
     { href: '/como-funciona', label: tf.resources_how },
     { href: '/transparencia', label: tf.resources_transparency },

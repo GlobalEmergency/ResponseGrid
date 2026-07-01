@@ -355,11 +355,14 @@ export default function EmergencyMap({
 
 function GeolocateControl() {
   const map = useMap();
+  const t = getMessages(useLocale()).ui;
   const [loading, setLoading] = useState(false);
+  const [errored, setErrored] = useState(false);
 
   const handleGeolocate = () => {
     if (!navigator.geolocation) return;
     setLoading(true);
+    setErrored(false);
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
@@ -369,19 +372,22 @@ function GeolocateControl() {
       (error) => {
         console.error('Error getting geolocation', error);
         setLoading(false);
+        setErrored(true);
       },
       { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
     );
   };
+
+  const label = errored ? t.map_geolocate_error : t.map_geolocate;
 
   return (
     <button
       type="button"
       onClick={handleGeolocate}
       disabled={loading}
-      className="absolute bottom-3 right-3 z-[1000] flex h-10 w-10 items-center justify-center rounded-full border border-line bg-white shadow-md transition-colors hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy disabled:opacity-50"
-      aria-label="Geolocalizar"
-      title="Ir a mi ubicación"
+      className={`absolute bottom-3 right-3 z-[1000] flex h-10 w-10 items-center justify-center rounded-full border bg-white shadow-md transition-colors hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy disabled:opacity-50 ${errored ? 'border-danger' : 'border-line'}`}
+      aria-label={label}
+      title={label}
     >
       {loading ? (
         <span className="h-4 w-4 animate-spin rounded-full border-2 border-muted border-t-navy" />

@@ -6,8 +6,10 @@ import { PageHeader } from '@/components/molecules/page-header';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { Badge } from '@/components/atoms/badge';
 import { LocalDate } from '@/components/atoms/local-date';
-import { categoryLabel, categoryColor } from '@/lib/categories';
+import { categoryColor } from '@/lib/categories';
 import { getT } from '@/i18n/server';
+import { getCategoriesCached } from '@/adapters/get-categories';
+import { isMaterialCategory, labelForCategory } from '@/domain/supplies/category';
 import { fetchAdminResourceDetail } from '../actions';
 import { RecordInventoryEntry } from './record-inventory-entry';
 import {
@@ -45,6 +47,9 @@ export default async function CentroDetailPage({ params }: Props) {
 
   const { t, locale } = await getT();
   const ta = t.admin;
+
+  const categories = await getCategoriesCached(locale);
+  const materialCategories = categories.filter(isMaterialCategory);
 
   if (!resource) {
     return (
@@ -119,7 +124,6 @@ export default async function CentroDetailPage({ params }: Props) {
                   <dd>{resource.city}</dd>
                 </div>
               )}
-
               {resource.contact && (
                 <div className="flex flex-wrap gap-x-1.5">
                   <dt className="font-semibold text-ink-soft">
@@ -180,7 +184,7 @@ export default async function CentroDetailPage({ params }: Props) {
                   String(inventoryCategories.length),
                 )}
               </h2>
-              <RecordInventoryEntry resourceId={resource.id} />
+              <RecordInventoryEntry resourceId={resource.id} categories={materialCategories} />
             </div>
             {inventoryCategories.length === 0 ? (
               <EmptyState title={ta.centros_detail_inventory_empty} />
@@ -198,7 +202,7 @@ export default async function CentroDetailPage({ params }: Props) {
                         slug,
                       )}`}
                     >
-                      {categoryLabel(slug, locale)}
+                      {labelForCategory(slug, categories)}
                     </span>
                   ))}
                 </div>

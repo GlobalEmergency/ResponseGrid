@@ -6,8 +6,9 @@ import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { registerVolunteer } from './actions';
 import { VoluntarioForm } from './voluntario-form';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
 import { Card } from '@/components/atoms/card';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
@@ -62,9 +63,8 @@ export default async function VoluntarioPage({ params }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <PageHeaderBand
-          backHref={`/e/${slug}`}
-          backLabel={t.common.back_to_emergency}
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <PageHeading
           title={t.voluntario.page_title}
           subtitle={t.voluntario.page_subtitle.replace('{emergencyName}', emergency.name)}
         />

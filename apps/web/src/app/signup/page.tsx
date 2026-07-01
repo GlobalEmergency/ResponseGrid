@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { SignupForm } from '@/components/organisms/signup-form';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
 import { Card } from '@/components/atoms/card';
 import { getT } from '@/i18n/server';
 
@@ -23,9 +23,17 @@ export default async function SignupPage({ searchParams }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
+      <AppBar variant="content" />
+
       <div className="mx-auto w-full max-w-3xl">
-        <PageHeaderBand title={t.signup.title} subtitle={t.signup.subtitle} />
         <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">
+          <div>
+            <h1 className="font-display text-2xl font-extrabold leading-tight tracking-tight text-navy lg:text-[28px]">
+              {t.signup.title}
+            </h1>
+            <p className="mt-1.5 text-sm text-ink-soft">{t.signup.subtitle}</p>
+          </div>
+
           <Card className="p-5 lg:p-7">
             <SignupForm next={next} t={t.signup} />
           </Card>

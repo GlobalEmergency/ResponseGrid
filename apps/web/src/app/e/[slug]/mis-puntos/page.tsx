@@ -6,7 +6,8 @@ import { getEmergencyBySlug } from '@/lib/emergencies';
 import { fetchMyResources } from './actions';
 import { StatusForm } from './status-form';
 import { EmptyState } from '@/components/molecules/empty-state';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
@@ -53,12 +54,8 @@ export default async function MisPuntosPage({ params }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <PageHeaderBand
-          backHref={`/e/${slug}`}
-          backLabel={emergency.name}
-          title={ta.points_title}
-          subtitle={ta.points_subtitle}
-        />
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <PageHeading title={ta.points_title} subtitle={ta.points_subtitle} />
         <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">
 
         <section aria-labelledby="my-points-heading" className="flex flex-col gap-4">

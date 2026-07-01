@@ -5,8 +5,9 @@ import { requireSession, loginHref } from '@/lib/auth';
 import { getMe } from '@/lib/navigation-data';
 import { submitCapacity } from './actions';
 import { OfrecerTransporteForm } from './ofrecer-transporte-form';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
 import { Card } from '@/components/atoms/card';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { getT } from '@/i18n/server';
 
 type Props = {
@@ -56,9 +57,8 @@ export default async function OfrecerTransportePage({ params }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <PageHeaderBand
-          backHref={`/e/${slug}`}
-          backLabel={t.common.back_to_emergency}
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <PageHeading
           title={t.ofrecerTransporte.page_title}
           subtitle={t.ofrecerTransporte.page_subtitle.replace(
             '{emergencyName}',

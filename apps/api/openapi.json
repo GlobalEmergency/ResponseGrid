@@ -9774,7 +9774,13 @@
           "contact": {
             "type": "string",
             "example": "+58 212 555 0000",
-            "nullable": true
+            "nullable": true,
+            "description": "Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell \"hidden\" from \"absent\"."
+          },
+          "hasContact": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether a contact exists on file, regardless of whether `contact` is revealed to this caller."
           },
           "schedule": {
             "type": "string",
@@ -9842,6 +9848,7 @@
           "ownerOrganizationId",
           "accepts",
           "contact",
+          "hasContact",
           "schedule",
           "manager",
           "sourceName",
@@ -10143,7 +10150,13 @@
           "contact": {
             "type": "string",
             "example": "+58 212 555 0000",
-            "nullable": true
+            "nullable": true,
+            "description": "Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell \"hidden\" from \"absent\"."
+          },
+          "hasContact": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether a contact exists on file, regardless of whether `contact` is revealed to this caller."
           },
           "schedule": {
             "type": "string",
@@ -10216,6 +10229,7 @@
           "ownerOrganizationId",
           "accepts",
           "contact",
+          "hasContact",
           "schedule",
           "manager",
           "sourceName",
@@ -10358,7 +10372,13 @@
           "contact": {
             "type": "string",
             "example": "+58 212 555 0000",
-            "nullable": true
+            "nullable": true,
+            "description": "Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell \"hidden\" from \"absent\"."
+          },
+          "hasContact": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether a contact exists on file, regardless of whether `contact` is revealed to this caller."
           },
           "schedule": {
             "type": "string",
@@ -10437,6 +10457,7 @@
           "ownerOrganizationId",
           "accepts",
           "contact",
+          "hasContact",
           "schedule",
           "manager",
           "sourceName",
@@ -10558,7 +10579,13 @@
           "contact": {
             "type": "string",
             "example": "+58 212 555 0000",
-            "nullable": true
+            "nullable": true,
+            "description": "Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell \"hidden\" from \"absent\"."
+          },
+          "hasContact": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether a contact exists on file, regardless of whether `contact` is revealed to this caller."
           },
           "schedule": {
             "type": "string",
@@ -10648,6 +10675,7 @@
           "ownerOrganizationId",
           "accepts",
           "contact",
+          "hasContact",
           "schedule",
           "manager",
           "sourceName",
@@ -10763,7 +10791,13 @@
           "contact": {
             "type": "string",
             "example": "+58 212 555 0000",
-            "nullable": true
+            "nullable": true,
+            "description": "Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell \"hidden\" from \"absent\"."
+          },
+          "hasContact": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether a contact exists on file, regardless of whether `contact` is revealed to this caller."
           },
           "schedule": {
             "type": "string",
@@ -10871,6 +10905,7 @@
           "ownerOrganizationId",
           "accepts",
           "contact",
+          "hasContact",
           "schedule",
           "manager",
           "sourceName",
@@ -13841,6 +13876,11 @@
       "CategoryDto": {
         "type": "object",
         "properties": {
+          "slug": {
+            "type": "string",
+            "example": "medicines",
+            "description": "Canonical category slug (stable identifier)"
+          },
           "label": {
             "type": "string",
             "example": "Medicamentos",
@@ -13874,16 +13914,27 @@
             "example": "MED",
             "nullable": true,
             "description": "Unique 3-letter prefix for supplies in this category, or null if inherited"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "material",
+              "personnel"
+            ],
+            "example": "material",
+            "description": "Whether the category is aid material or personnel. Personnel (medical_personnel) is excluded from material pickers."
           }
         },
         "required": [
+          "slug",
           "label",
           "labelEs",
           "labelEn",
           "parentSlug",
           "vertical",
           "sort",
-          "codePrefix"
+          "codePrefix",
+          "kind"
         ]
       },
       "CategoryTranslationDto": {

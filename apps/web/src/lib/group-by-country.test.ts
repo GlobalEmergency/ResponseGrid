@@ -14,7 +14,6 @@ function makeResource(id: string, country: string | null): ResourceViewDto {
   return {
     id,
     type: 'collection_point',
-    stage: 'origin',
     name: `Resource ${id}`,
     description: null,
     location: { address: '—', latitude: 0, longitude: 0 },
@@ -23,6 +22,7 @@ function makeResource(id: string, country: string | null): ResourceViewDto {
     ownerOrganizationId: null,
     accepts: [],
     contact: null,
+    hasContact: false,
     schedule: null,
     manager: null,
     sourceName: null,

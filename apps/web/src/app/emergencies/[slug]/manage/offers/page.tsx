@@ -9,8 +9,9 @@ import { WorkQueue } from '@/components/organisms/work-queue';
 import { QueueToolbar } from '@/components/molecules/queue-toolbar';
 import { OffersQueue } from '@/components/organisms/coordination-queues';
 import { OffersFilter } from '@/components/molecules/offers-filter';
-import { MATERIAL_CATEGORIES } from '@/lib/categories';
-import { getT } from '@/i18n/server';
+import { getCategoriesCached } from '@/adapters/get-categories';
+import { isMaterialCategory } from '@/domain/supplies/category';
+import { getT, getLocale } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,8 +19,8 @@ type OfferCategory =
   components['schemas']['OfferViewDto']['items'][number]['category'];
 type OfferStatus = components['schemas']['OfferViewDto']['status'];
 
-// Offers carry material supply lines, so the filter mirrors MATERIAL_CATEGORIES
-// (the single catalogue) — never medical_personnel, which is not material.
+// Offers carry material supply lines, so the filter mirrors the material
+// categories from the DB catalogue — never medical_personnel, which is not material.
 const VALID_STATUSES: OfferStatus[] = ['open', 'matched', 'fulfilled', 'cancelled'];
 
 type Props = {
@@ -54,13 +55,17 @@ export default async function ManageOffersPage({
     redirect(`/emergencies/${slug}/manage`);
   }
 
+  const locale = await getLocale();
+  const materialCategorySlugs = (await getCategoriesCached(locale))
+    .filter(isMaterialCategory)
+    .map((c) => c.slug);
+
   const rawCategory =
     typeof resolvedSearchParams.category === 'string' ? resolvedSearchParams.category : undefined;
   const rawStatus =
     typeof resolvedSearchParams.status === 'string' ? resolvedSearchParams.status : undefined;
   const category =
-    rawCategory !== undefined &&
-    (MATERIAL_CATEGORIES as readonly string[]).includes(rawCategory)
+    rawCategory !== undefined && materialCategorySlugs.includes(rawCategory)
       ? (rawCategory as OfferCategory)
       : undefined;
   const status = VALID_STATUSES.includes(rawStatus as OfferStatus)

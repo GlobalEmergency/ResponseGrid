@@ -54,8 +54,6 @@ export function ResourceDetail({
     venue: tc.resource_type_venue,
   };
 
-
-
   const PUBLIC_STATUS_LABELS: Record<ResourceView['publicStatus'], string> = {
     hidden: tc.public_status_hidden,
     active: tc.public_status_active,
@@ -150,7 +148,6 @@ export function ResourceDetail({
           label={tc.detail_field_type}
           value={TYPE_LABELS[resource.type]}
         />
-
         <DetailField label={tc.detail_field_accepts} value={accepts} />
         <DetailField
           label={tc.detail_field_public_status}

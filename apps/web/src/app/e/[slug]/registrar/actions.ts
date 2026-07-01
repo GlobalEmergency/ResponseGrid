@@ -4,15 +4,12 @@ import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { requireSession, loginHref, authHeaders, clearToken } from '@/lib/auth';
-import { MATERIAL_CATEGORIES } from '@/lib/categories';
 import { parseSupplyLines } from '@/lib/supply-lines';
 import { getT } from '@/i18n/server';
+import { getCategories } from '@/adapters/get-categories';
+import { isMaterialCategory } from '@/domain/supplies/category';
 
 type ResourceType = components['schemas']['RegisterResourceDto']['type'];
-
-function isMaterialCategory(v: string): boolean {
-  return (MATERIAL_CATEGORIES as readonly string[]).includes(v);
-}
 
 export type ActionState =
   | { status: 'idle' }
@@ -41,7 +38,7 @@ export async function registerResource(
 ): Promise<ActionState> {
   const token = await requireSession(`/e/${slug}/registrar`);
 
-  const { t } = await getT();
+  const { t, locale } = await getT();
 
   const rawType = formData.get('type');
   const rawName = formData.get('name');
@@ -84,8 +81,12 @@ export async function registerResource(
       ? rawOrgId.trim()
       : undefined;
 
+  const validMaterialCategories = new Set(
+    (await getCategories(locale)).filter(isMaterialCategory).map((c) => c.slug),
+  );
+
   const items = parseSupplyLines(formData.get('items'), {
-    isValidCategory: isMaterialCategory,
+    isValidCategory: (c) => validMaterialCategories.has(c),
     allowEmpty: true,
   });
   if (items === null) {

@@ -3,48 +3,31 @@
 import { useState } from 'react';
 import type { Messages } from '@/i18n/messages/es';
 import { PersonnelNeedFields } from '@/components/molecules/personnel-need-fields';
-import {
-  SupplyLineRowFields,
-  type SupplyLineRowLabels,
-} from '@/components/molecules/supply-line-row-fields';
+import { SupplyLineList } from '@/components/organisms/supply-line-list';
+import { emptyLine, toDto, isComplete, type SupplyLine } from '@/domain/supplies/supply-line';
+import type { Category } from '@/domain/supplies/category';
 import { useLocale } from '@/i18n/locale-context';
-import { ALL_CATEGORIES } from '@/lib/categories';
-
-interface Item {
-  id: number;
-  name: string;
-  supplyId: string | null;
-  quantity: number;
-  unit: string;
-  category: string;
-}
-
-let nextId = 1;
-
-function makeItem(): Item {
-  return {
-    id: nextId++,
-    name: '',
-    supplyId: null,
-    quantity: 1,
-    unit: '',
-    category: 'food',
-  };
-}
 
 interface ItemsFieldProps {
   t: Messages['peticion'];
+  categories: readonly Category[];
 }
 
-export function ItemsField({ t }: ItemsFieldProps) {
-  const [items, setItems] = useState<Item[]>([makeItem()]);
+/**
+ * Editable list of needed supply lines. Categories are the FULL list (not
+ * material-only) so `medical_personnel` stays selectable: when any row uses
+ * that category, `PersonnelNeedFields` renders below the list to collect the
+ * volunteer-skill request.
+ */
+export function ItemsField({ t, categories }: ItemsFieldProps) {
   const locale = useLocale();
+  const [lines, setLines] = useState<SupplyLine[]>([emptyLine('food')]);
 
-  const hasPersonnelCategory = items.some(
-    (item) => item.category === 'medical_personnel',
+  const hasPersonnelCategory = lines.some(
+    (line) => line.category === 'medical_personnel',
   );
 
-  const labels: SupplyLineRowLabels = {
+  const labels = {
     itemNumber: t.item_number,
     itemRemove: t.item_remove,
     itemRemoveLabel: t.item_remove_label,
@@ -55,64 +38,24 @@ export function ItemsField({ t }: ItemsFieldProps) {
     unitOpt: t.item_unit_opt,
     unitPlaceholder: t.item_unit_placeholder,
     categoryLabel: t.item_category_label,
+    addItem: t.items_add,
+    legend: t.items_heading,
   };
 
-  const serialized = JSON.stringify(
-    items.map(({ name, supplyId, quantity, unit, category }) => ({
-      name,
-      ...(supplyId !== null ? { supplyId } : {}),
-      quantity,
-      ...(unit.trim() !== '' ? { unit: unit.trim() } : {}),
-      category,
-    })),
-  );
-
-  const updateItem = (id: number, patch: Partial<Omit<Item, 'id'>>) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, ...patch } : item)),
-    );
-  };
-
-  const addItem = () => setItems((prev) => [...prev, makeItem()]);
-
-  const removeItem = (id: number) => {
-    setItems((prev) => {
-      if (prev.length <= 1) return prev; // keep at least 1
-      return prev.filter((item) => item.id !== id);
-    });
-  };
+  const serialized = JSON.stringify(lines.filter(isComplete).map(toDto));
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-ink uppercase tracking-wide">
-          {t.items_heading} <span aria-hidden="true">*</span>
-        </p>
-        <button
-          type="button"
-          onClick={addItem}
-          className="text-sm font-semibold text-ink underline underline-offset-2 hover:text-muted focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 rounded"
-        >
-          {t.items_add}
-        </button>
-      </div>
-
-      {items.map((item, index) => (
-        <SupplyLineRowFields
-          key={item.id}
-          rowId={item.id}
-          index={index}
-          idPrefix="item"
-          required
-          removable={items.length > 1}
-          categories={ALL_CATEGORIES}
-          locale={locale}
-          labels={labels}
-          value={item}
-          onChange={(patch) => updateItem(item.id, patch)}
-          onRemove={() => removeItem(item.id)}
-        />
-      ))}
+      <SupplyLineList
+        value={lines}
+        onChange={setLines}
+        categories={categories}
+        locale={locale}
+        idPrefix="item"
+        required
+        defaultCategory="food"
+        labels={labels}
+      />
 
       <input type="hidden" name="items" value={serialized} />
 

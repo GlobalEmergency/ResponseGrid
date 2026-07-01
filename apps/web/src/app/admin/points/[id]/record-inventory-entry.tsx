@@ -2,33 +2,20 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import type { components } from '@reliefhub/api-client';
 import { recordInventoryEntry } from '../actions';
 import { Button } from '@/components/atoms/button';
-import { Input } from '@/components/atoms/input';
-import { Select } from '@/components/atoms/select';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { DetailDrawer } from '@/components/organisms/detail-drawer';
+import { SupplyLineList } from '@/components/organisms/supply-line-list';
+import { emptyLine, toDto, isComplete, type SupplyLine } from '@/domain/supplies/supply-line';
+import type { Category } from '@/domain/supplies/category';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
-import { MATERIAL_CATEGORIES, categoryLabel } from '@/lib/categories';
 
-type SupplyLine = components['schemas']['SupplyLineDto'];
-type SupplyCategory = SupplyLine['category'];
-
-interface ItemRow {
-  name: string;
-  quantity: string;
-  unit: string;
-  category: SupplyCategory;
+interface RecordInventoryEntryProps {
+  resourceId: string;
+  categories: readonly Category[];
 }
-
-const EMPTY_ROW: ItemRow = {
-  name: '',
-  quantity: '1',
-  unit: '',
-  category: MATERIAL_CATEGORIES[0] as SupplyCategory,
-};
 
 /**
  * Manual inventory entry for a point/warehouse (#9). Captures one or more
@@ -36,63 +23,40 @@ const EMPTY_ROW: ItemRow = {
  * the existing inventory. Reuses the same line-row shape as the shipment cargo
  * form so the material model is entered consistently everywhere.
  */
-export function RecordInventoryEntry({ resourceId }: { resourceId: string }) {
+export function RecordInventoryEntry({ resourceId, categories }: RecordInventoryEntryProps) {
   const locale = useLocale();
   const ta = getMessages(locale).admin;
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
-  const [rows, setRows] = useState<ItemRow[]>([{ ...EMPTY_ROW }]);
+
+  const defaultCategory = categories[0]?.slug ?? '';
+
+  const [lines, setLines] = useState<SupplyLine[]>([emptyLine(defaultCategory)]);
   const [error, setError] = useState<string | undefined>(undefined);
 
+  const labels = {
+    nameLabel: ta.centros_detail_inv_name_label,
+    namePlaceholder: ta.centros_detail_inv_name_ph,
+    quantityLabel: ta.centros_detail_inv_qty_label,
+    unitLabel: ta.centros_detail_inv_unit_label,
+    unitPlaceholder: ta.centros_detail_inv_unit_ph,
+    categoryLabel: ta.centros_detail_inv_category_label,
+    addItem: ta.centros_detail_inv_add,
+    itemRemoveLabel: ta.centros_detail_inv_remove,
+    legend: ta.centros_detail_inv_items_legend,
+  };
+
   function reset() {
-    setRows([{ ...EMPTY_ROW }]);
+    setLines([emptyLine(defaultCategory)]);
     setError(undefined);
-  }
-
-  function updateRow(index: number, patch: Partial<ItemRow>) {
-    setRows((prev) =>
-      prev.map((row, i) => (i === index ? { ...row, ...patch } : row)),
-    );
-  }
-
-  function addRow() {
-    setRows((prev) => [...prev, { ...EMPTY_ROW }]);
-  }
-
-  function removeRow(index: number) {
-    setRows((prev) =>
-      prev.length === 1 ? prev : prev.filter((_, i) => i !== index),
-    );
   }
 
   function handleSubmit() {
     setError(undefined);
 
-    let invalid = false;
-    const items = rows
-      .map((row): SupplyLine | null => {
-        const name = row.name.trim();
-        if (name === '') return null;
-        const quantity = Number(row.quantity.trim());
-        if (!Number.isInteger(quantity) || quantity < 1) {
-          invalid = true;
-          return null;
-        }
-        const unit = row.unit.trim();
-        return {
-          name,
-          quantity,
-          category: row.category,
-          ...(unit !== '' ? { unit } : {}),
-        };
-      })
-      .filter((x): x is SupplyLine => x !== null);
+    const items = lines.filter(isComplete).map(toDto);
 
-    if (invalid) {
-      setError(ta.centros_detail_inv_err_qty);
-      return;
-    }
     if (items.length === 0) {
       setError(ta.centros_detail_inv_err_items);
       return;
@@ -148,75 +112,16 @@ export function RecordInventoryEntry({ resourceId }: { resourceId: string }) {
           <div className="flex flex-col gap-5">
             <p className="text-sm text-ink-soft">{ta.centros_detail_inv_intro}</p>
 
-            <fieldset className="flex flex-col gap-3">
-              <legend className="text-sm font-semibold uppercase tracking-wide text-ink">
-                {ta.centros_detail_inv_items_legend}
-              </legend>
-              {rows.map((row, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col gap-2 rounded-lg border border-line p-3"
-                >
-                  <Input
-                    aria-label={ta.centros_detail_inv_name_label}
-                    placeholder={ta.centros_detail_inv_name_ph}
-                    value={row.name}
-                    onChange={(e) => updateRow(index, { name: e.target.value })}
-                  />
-                  <div className="flex gap-2">
-                    <Input
-                      aria-label={ta.centros_detail_inv_qty_label}
-                      type="number"
-                      inputMode="numeric"
-                      min={1}
-                      step={1}
-                      placeholder={ta.centros_detail_inv_qty_ph}
-                      value={row.quantity}
-                      onChange={(e) =>
-                        updateRow(index, { quantity: e.target.value })
-                      }
-                    />
-                    <Input
-                      aria-label={ta.centros_detail_inv_unit_label}
-                      placeholder={ta.centros_detail_inv_unit_ph}
-                      value={row.unit}
-                      onChange={(e) => updateRow(index, { unit: e.target.value })}
-                    />
-                  </div>
-                  <Select
-                    aria-label={ta.centros_detail_inv_category_label}
-                    value={row.category}
-                    onChange={(e) =>
-                      updateRow(index, {
-                        category: e.target.value as SupplyCategory,
-                      })
-                    }
-                  >
-                    {MATERIAL_CATEGORIES.map((slug) => (
-                      <option key={slug} value={slug}>
-                        {categoryLabel(slug, locale)}
-                      </option>
-                    ))}
-                  </Select>
-                  {rows.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeRow(index)}
-                      className="self-start rounded text-xs font-semibold text-danger underline underline-offset-2 focus:outline-none focus:ring-2 focus:ring-danger"
-                    >
-                      {ta.centros_detail_inv_remove}
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={addRow}
-                className="self-start rounded text-sm font-semibold text-navy underline underline-offset-2 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
-              >
-                {ta.centros_detail_inv_add}
-              </button>
-            </fieldset>
+            <SupplyLineList
+              value={lines}
+              onChange={setLines}
+              categories={categories}
+              locale={locale}
+              idPrefix="inv-entry"
+              required
+              defaultCategory={defaultCategory}
+              labels={labels}
+            />
           </div>
         </DetailDrawer>
       )}

@@ -21,7 +21,7 @@ import {
 import { DetailField, DetailSection } from '@/components/molecules/detail-field';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
-import { categoryLabel } from '@/lib/categories';
+import { useCategoryLabel } from '@/components/providers/categories-provider';
 
 type NeedView = components['schemas']['NeedViewDto'];
 
@@ -58,6 +58,7 @@ export function NeedDetail({
 }: NeedDetailProps) {
   const locale = useLocale();
   const tc = getMessages(locale).coord;
+  const categoryName = useCategoryLabel();
 
   const PRIORITY_LABELS: Record<NeedView['priority'], string> = {
     low: tc.priority_low,
@@ -218,7 +219,7 @@ export function NeedDetail({
                 <span className="font-semibold">{item.name}</span>
                 <span className="text-muted">
                   {' · '}
-                  {categoryLabel(item.category, locale)}
+                  {categoryName(item.category)}
                   {' · '}
                   {item.quantity}
                   {item.unit != null && item.unit !== '' ? ` ${item.unit}` : ''}

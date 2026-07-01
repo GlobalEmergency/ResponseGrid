@@ -6,9 +6,11 @@ import { OrgSelector } from '@/components/molecules/org-selector';
 import { LocationPicker } from '@/components/organisms/location-picker';
 import { registerResource } from './actions';
 import { RegistrarForm } from './registrar-form';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
 import { Card } from '@/components/atoms/card';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { getT } from '@/i18n/server';
+import { getCategories } from '@/adapters/get-categories';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -40,14 +42,14 @@ export default async function RegistrarPage({ params }: Props) {
     notFound();
   }
 
+  const categories = await getCategories(locale);
   const boundAction = registerResource.bind(null, slug, emergency.id);
 
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <PageHeaderBand
-          backHref={`/e/${slug}`}
-          backLabel={t.common.back_to_emergency}
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <PageHeading
           title={t.registrar.page_title}
           subtitle={t.registrar.page_subtitle.replace('{emergencyName}', emergency.name)}
         />
@@ -61,6 +63,7 @@ export default async function RegistrarPage({ params }: Props) {
               t={t.registrar}
               backToEmergencyLabel={t.common.back_to_emergency}
               locale={locale}
+              categories={categories}
             />
           </Card>
         </div>

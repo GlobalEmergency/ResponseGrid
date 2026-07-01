@@ -4,13 +4,12 @@ import type { Messages } from '@/i18n/messages/es';
 interface EmergencyQuickLinksProps {
   slug: string;
   te: Messages['emergency'];
-  authed: boolean;
 }
 
 const linkClass =
   'text-[12.5px] text-muted-soft underline underline-offset-2 transition-colors hover:text-navy focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 rounded w-fit';
 
-export function EmergencyQuickLinks({ slug, te, authed }: EmergencyQuickLinksProps) {
+export function EmergencyQuickLinks({ slug, te }: EmergencyQuickLinksProps) {
   return (
     <nav aria-label={te.footer_coordination} className="mt-2 flex flex-col gap-3 border-t border-line pt-5">
       <Link
@@ -19,15 +18,6 @@ export function EmergencyQuickLinks({ slug, te, authed }: EmergencyQuickLinksPro
       >
         {te.footer_verify}
       </Link>
-
-      {authed && (
-        <div className="flex flex-wrap gap-x-4 gap-y-1.5">
-          <Link href={`/e/${slug}/mis-puntos`} className={linkClass}>{te.footer_my_points}</Link>
-          <Link href={`/e/${slug}/mi-voluntariado`} className={linkClass}>{te.footer_my_volunteer}</Link>
-          <Link href={`/e/${slug}/mis-expediciones`} className={linkClass}>{te.footer_my_shipments}</Link>
-          <Link href={`/e/${slug}/reportar`} className={linkClass}>{te.footer_report}</Link>
-        </div>
-      )}
 
       <Link href={`/emergencies/${slug}/manage`} className={linkClass}>
         {te.footer_coordination} →

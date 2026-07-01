@@ -1,0 +1,31 @@
+# ResponseGrid
+
+> Plataforma open source de coordinación de ayuda material y logística en emergencias, de Global Emergency. Se activa por catástrofe: conecta a ciudadanía, organizaciones y coordinación para que la ayuda llegue donde hace falta sin saturar la logística. Información oficial, verificada y en tiempo real. Los datos se aíslan por emergencia y se sirven en HTML renderizado en servidor (citable directamente).
+
+## Qué hace la plataforma (todo gratuito y de código abierto, licencia MIT)
+
+- Puntos de acopio y logísticos verificados, cada uno con su inventario de material declarado.
+- Necesidades de material validadas por coordinación local, con frescura de 48 h.
+- Ofertas de material y emparejamiento automático con las necesidades.
+- Catálogo común de insumos y categorías reutilizado en toda la operación.
+- Transporte y expediciones: capacidad de carga + envíos coordinados.
+- Voluntariado y tareas por habilidades y disponibilidad.
+- Pre-registro de entregas con código/QR, consola de recepción y seguimiento público de la donación.
+- Partes de campo (incidencia, stock, estado) desde el terreno.
+- Mapa en tiempo real con puntos y necesidades.
+- Tres niveles de confianza: sin verificar · verificado por coordinación · organización acreditada (oficial).
+- API pública de solo lectura y documentación para desarrolladores.
+
+## Páginas
+
+- [Inicio y emergencias activas](https://responsegrid.app/): directorio de emergencias en curso.
+- [Funcionalidades](https://responsegrid.app/funcionalidades): todo lo que hace la plataforma (puntos con inventario, necesidades validadas, donaciones con QR y seguimiento, logística, voluntariado, mapa en tiempo real, API abierta).
+- [Terremoto Venezuela 2026](https://responsegrid.app/e/terremoto-venezuela-2026): puntos de acopio, necesidades y cómo ayudar tras el terremoto de Venezuela de 2026.
+- [Cómo funciona](https://responsegrid.app/como-funciona): registras, coordinación verifica, se convierte en ayuda útil.
+- [Sobre nosotros](https://responsegrid.app/sobre): qué es ResponseGrid y Global Emergency.
+- [Transparencia](https://responsegrid.app/transparencia): verificación, datos en la UE (RGPD), código abierto.
+- [API para desarrolladores](https://responsegrid.app/docs): API pública de solo lectura.
+
+## Organización
+
+- Global Emergency — iniciativa open source que democratiza tecnología profesional para Protección Civil y servicios de emergencia: https://globalemergency.online

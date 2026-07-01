@@ -4,7 +4,8 @@ import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { ShipmentsList } from '@/components/organisms/shipments-list';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
@@ -70,12 +71,8 @@ export default async function MisExpedicionesPage({ params }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <PageHeaderBand
-          backHref={`/e/${slug}`}
-          backLabel={emergency.name}
-          title={ta.ship_title}
-          subtitle={ta.ship_subtitle}
-        />
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <PageHeading title={ta.ship_title} subtitle={ta.ship_subtitle} />
         <div className="flex flex-col gap-6 px-5 pb-12 pt-6 lg:px-8">
           <ShipmentsList
             shipments={shipments}
