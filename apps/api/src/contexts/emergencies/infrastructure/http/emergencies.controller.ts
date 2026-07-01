@@ -271,7 +271,7 @@ export class EmergenciesController {
   ): Promise<void> {
     await this.setDisputeThreshold.execute({
       emergencyId,
-      threshold: dto.threshold ?? null,
+      threshold: dto.threshold,
     });
   }
 }

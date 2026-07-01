@@ -27,6 +27,7 @@ describe('ListMyEmergencies', () => {
       status: EmergencyStatus.Active,
       announcement: null,
       dontBringList: [],
+      resourceDisputeThreshold: 7,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -40,6 +41,7 @@ describe('ListMyEmergencies', () => {
       status: EmergencyStatus.Paused,
       announcement: null,
       dontBringList: [],
+      resourceDisputeThreshold: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -58,6 +60,16 @@ describe('ListMyEmergencies', () => {
     expect(views[0].id).toBe(VE_ID);
     expect(views[0].slug).toBe('terremoto-venezuela-2026');
     expect(views[0].roleIds).toEqual(['emergency_verifier']);
+    expect(views[0].resourceDisputeThreshold).toBe(7);
+  });
+
+  it('exposes a null dispute threshold when the emergency uses the global default', async () => {
+    const repo = await seed();
+    const useCase = new ListMyEmergencies(repo);
+
+    const views = await useCase.execute([grant(PAUSED_ID)]);
+
+    expect(views[0].resourceDisputeThreshold).toBeNull();
   });
 
   it('includes PAUSED emergencies (unlike listActive)', async () => {

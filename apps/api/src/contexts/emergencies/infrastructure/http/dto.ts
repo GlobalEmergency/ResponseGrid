@@ -6,9 +6,12 @@ import {
   IsString,
   IsUUID,
   Matches,
+  Max,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { MAX_RESOURCE_DISPUTE_THRESHOLD } from '../../domain/invalid-dispute-threshold.error';
 
 export class CreateEmergencyDto {
   @ApiProperty({ example: 'Emergencia sísmica — Venezuela', minLength: 2 })
@@ -90,6 +93,16 @@ export class MyEmergencyViewDto extends EmergencyViewDto {
     description: 'Role ids the principal holds at this emergency scope',
   })
   roleIds!: string[];
+
+  @ApiProperty({
+    example: 5,
+    nullable: true,
+    type: Number,
+    description:
+      'Umbral de disputa configurado para esta emergencia, o null cuando usa ' +
+      'el global. Solo se expone en la vista autenticada.',
+  })
+  resourceDisputeThreshold!: number | null;
 }
 
 export class PublishAnnouncementDto {
@@ -133,13 +146,21 @@ export class SetDisputeThresholdDto {
   @ApiProperty({
     example: 5,
     nullable: true,
+    minimum: 1,
+    maximum: MAX_RESOURCE_DISPUTE_THRESHOLD,
     description:
-      'Número mínimo de reportantes distintos para marcar el punto como disputado. ' +
-      'Null elimina el umbral específico y vuelve al global (RESOURCE_DISPUTE_THRESHOLD / 3).',
+      'Número mínimo de reportantes distintos para marcar el punto como disputado ' +
+      `(entero entre 1 y ${MAX_RESOURCE_DISPUTE_THRESHOLD}). ` +
+      'Enviar null explícito elimina el umbral específico y vuelve al global ' +
+      '(RESOURCE_DISPUTE_THRESHOLD / 3). El campo es obligatorio: un body vacío es 400.',
     type: Number,
   })
-  @IsOptional()
+  // Requerido y explícito: solo se omite la validación cuando el valor es
+  // exactamente null (limpiar el umbral). Un body sin `threshold` (undefined)
+  // falla la validación → 400, de modo que limpiar es siempre intencional.
+  @ValidateIf((o: SetDisputeThresholdDto) => o.threshold !== null)
   @IsInt()
   @IsPositive()
+  @Max(MAX_RESOURCE_DISPUTE_THRESHOLD)
   threshold!: number | null;
 }

@@ -2,6 +2,7 @@ import { SetEmergencyDisputeThreshold } from './set-emergency-dispute-threshold'
 import { EmergencyNotFoundError } from './emergency-not-found.error';
 import { Emergency } from '../domain/emergency';
 import { EmergencyStatus } from '../domain/emergency-status';
+import { InvalidDisputeThresholdError } from '../domain/invalid-dispute-threshold.error';
 import { EmergencyRepository } from '../domain/ports/emergency.repository';
 
 const SNAP = {
@@ -64,6 +65,19 @@ describe('SetEmergencyDisputeThreshold', () => {
     });
 
     expect(saved()!.resourceDisputeThreshold).toBeNull();
+  });
+
+  it('propaga el error de dominio y no persiste con un umbral inválido', async () => {
+    const emergency = Emergency.fromSnapshot(SNAP);
+    const { repo, saveMock } = makeRepo(emergency);
+
+    await expect(
+      new SetEmergencyDisputeThreshold(repo).execute({
+        emergencyId: SNAP.id,
+        threshold: 0,
+      }),
+    ).rejects.toBeInstanceOf(InvalidDisputeThresholdError);
+    expect(saveMock).not.toHaveBeenCalled();
   });
 
   it('lanza EmergencyNotFoundError si la emergencia no existe', async () => {

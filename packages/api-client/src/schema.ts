@@ -3810,6 +3810,11 @@ export interface components {
              *     ]
              */
             roleIds: string[];
+            /**
+             * @description Umbral de disputa configurado para esta emergencia, o null cuando usa el global. Solo se expone en la vista autenticada.
+             * @example 5
+             */
+            resourceDisputeThreshold: number | null;
         };
         CreateEmergencyFromTemplateDto: {
             /** @example aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa */
@@ -3830,7 +3835,7 @@ export interface components {
         };
         SetDisputeThresholdDto: {
             /**
-             * @description Número mínimo de reportantes distintos para marcar el punto como disputado. Null elimina el umbral específico y vuelve al global (RESOURCE_DISPUTE_THRESHOLD / 3).
+             * @description Número mínimo de reportantes distintos para marcar el punto como disputado (entero entre 1 y 1000). Enviar null explícito elimina el umbral específico y vuelve al global (RESOURCE_DISPUTE_THRESHOLD / 3). El campo es obligatorio: un body vacío es 400.
              * @example 5
              */
             threshold: number | null;

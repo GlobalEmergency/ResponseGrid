@@ -89,12 +89,20 @@ export class ReportResourceValidity {
       Date.now() - FRESHNESS_WINDOW_DAYS * 24 * 60 * 60 * 1000,
     );
     const freshDistinct = open.filter((r) => r.createdAt >= cutoff).length;
+
+    // Already disputed: the flag never toggles back here, so there is nothing to
+    // re-decide and no need to read the per-emergency threshold. Skip both the
+    // extra query and the re-read on this hot path.
+    if (resource.disputed) {
+      return { id: report.id, disputed: true };
+    }
+
     const emergencyThreshold = this.emergencyThresholds
       ? await this.emergencyThresholds.getThreshold(resource.emergencyId.value)
       : null;
     const effectiveThreshold = emergencyThreshold ?? this.threshold;
     let disputed = freshDistinct >= effectiveThreshold;
-    if (disputed && !resource.disputed) {
+    if (disputed) {
       // Re-read so the flag decision uses the current persisted state, not the
       // snapshot loaded before this report was saved — two citizens crossing
       // the threshold at once must not each emit a ResourceDisputed event.

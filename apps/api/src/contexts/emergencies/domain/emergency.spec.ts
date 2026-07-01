@@ -3,6 +3,10 @@ import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Slug } from './slug';
 import { EmergencyStatus } from './emergency-status';
 import { InvalidEmergencyTransitionError } from './invalid-emergency-transition.error';
+import {
+  InvalidDisputeThresholdError,
+  MAX_RESOURCE_DISPUTE_THRESHOLD,
+} from './invalid-dispute-threshold.error';
 
 const makeEmergency = () =>
   Emergency.create({
@@ -115,6 +119,45 @@ describe('Emergency', () => {
       e.publishAnnouncement('Paused announcement');
       expect(e.announcement).toBe('Paused announcement');
     });
+  });
+
+  describe('setResourceDisputeThreshold()', () => {
+    it('creates with a null threshold (uses the global default)', () => {
+      expect(makeEmergency().resourceDisputeThreshold).toBeNull();
+    });
+
+    it('sets a valid positive integer threshold and updates updatedAt', () => {
+      const e = makeEmergency();
+      const before = new Date();
+      e.setResourceDisputeThreshold(5);
+      expect(e.resourceDisputeThreshold).toBe(5);
+      expect(e.updatedAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
+    });
+
+    it('clears the threshold when set to null', () => {
+      const e = makeEmergency();
+      e.setResourceDisputeThreshold(5);
+      e.setResourceDisputeThreshold(null);
+      expect(e.resourceDisputeThreshold).toBeNull();
+    });
+
+    it('accepts the upper bound', () => {
+      const e = makeEmergency();
+      e.setResourceDisputeThreshold(MAX_RESOURCE_DISPUTE_THRESHOLD);
+      expect(e.resourceDisputeThreshold).toBe(MAX_RESOURCE_DISPUTE_THRESHOLD);
+    });
+
+    it.each([0, -1, 1.5, MAX_RESOURCE_DISPUTE_THRESHOLD + 1])(
+      'throws InvalidDisputeThresholdError for %p',
+      (bad) => {
+        const e = makeEmergency();
+        expect(() => e.setResourceDisputeThreshold(bad)).toThrow(
+          InvalidDisputeThresholdError,
+        );
+        // The invalid value must not mutate the aggregate.
+        expect(e.resourceDisputeThreshold).toBeNull();
+      },
+    );
   });
 
   it('toSnapshot / fromSnapshot round-trips correctly with new fields', () => {

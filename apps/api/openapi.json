@@ -11257,6 +11257,12 @@
             "items": {
               "type": "string"
             }
+          },
+          "resourceDisputeThreshold": {
+            "type": "number",
+            "example": 5,
+            "nullable": true,
+            "description": "Umbral de disputa configurado para esta emergencia, o null cuando usa el global. Solo se expone en la vista autenticada."
           }
         },
         "required": [
@@ -11268,7 +11274,8 @@
           "announcement",
           "dontBringList",
           "updatedAt",
-          "roleIds"
+          "roleIds",
+          "resourceDisputeThreshold"
         ]
       },
       "CreateEmergencyFromTemplateDto": {
@@ -11321,7 +11328,9 @@
             "type": "number",
             "example": 5,
             "nullable": true,
-            "description": "Número mínimo de reportantes distintos para marcar el punto como disputado. Null elimina el umbral específico y vuelve al global (RESOURCE_DISPUTE_THRESHOLD / 3)."
+            "minimum": 1,
+            "maximum": 1000,
+            "description": "Número mínimo de reportantes distintos para marcar el punto como disputado (entero entre 1 y 1000). Enviar null explícito elimina el umbral específico y vuelve al global (RESOURCE_DISPUTE_THRESHOLD / 3). El campo es obligatorio: un body vacío es 400."
           }
         },
         "required": [

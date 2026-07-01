@@ -2,6 +2,10 @@ import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Slug } from './slug';
 import { EmergencyStatus } from './emergency-status';
 import { InvalidEmergencyTransitionError } from './invalid-emergency-transition.error';
+import {
+  InvalidDisputeThresholdError,
+  MAX_RESOURCE_DISPUTE_THRESHOLD,
+} from './invalid-dispute-threshold.error';
 
 export interface CreateEmergencyProps {
   id: EmergencyId;
@@ -117,6 +121,14 @@ export class Emergency {
   }
 
   setResourceDisputeThreshold(threshold: number | null): void {
+    if (
+      threshold !== null &&
+      (!Number.isInteger(threshold) ||
+        threshold < 1 ||
+        threshold > MAX_RESOURCE_DISPUTE_THRESHOLD)
+    ) {
+      throw new InvalidDisputeThresholdError(threshold);
+    }
     this._resourceDisputeThreshold = threshold;
     this._updatedAt = new Date();
   }
