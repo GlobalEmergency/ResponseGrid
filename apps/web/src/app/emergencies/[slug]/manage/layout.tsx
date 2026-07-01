@@ -12,6 +12,27 @@ import type { MeGrant, RoleCatalogEntry } from '@/lib/admin-scopes';
 import { DashboardLayout } from '@/lib/dashboard-layout';
 import { ContextSwitcher } from '@/components/molecules/context-switcher';
 import { PageContainer } from '@/components/molecules/page-container';
+import { Badge } from '@/components/atoms/badge';
+import type { Messages } from '@/i18n/messages/es';
+
+function roleLabel(
+  roleId: string,
+  tc: Messages['coord'],
+  roleDesc: Map<string, string>,
+): string {
+  switch (roleId) {
+    case 'emergency_coordinator':
+      return tc.role_emergency_coordinator;
+    case 'emergency_verifier':
+      return tc.role_emergency_verifier;
+    case 'platform_admin':
+      return tc.role_platform_admin;
+    case 'platform_operator':
+      return tc.role_platform_operator;
+    default:
+      return roleDesc.get(roleId) ?? roleId;
+  }
+}
 
 /**
  * Emergency workspace shell: resolves session/emergency/access and mounts
@@ -49,6 +70,8 @@ export default async function ManageLayout({
   );
 
   const { t } = await getT();
+  const tc = t.coord;
+  const roleDesc = new Map(roles.map((r) => [r.id, r.description ?? r.id]));
 
   return (
     <DashboardLayout
@@ -58,8 +81,19 @@ export default async function ManageLayout({
       <main className="flex-1 bg-surface">
         <PageContainer>
           <ContextSwitcher
+            ariaLabel={t.nav.breadcrumb}
             items={[{ label: t.nav.home, href: '/dashboard' }, { label: emergency.name }]}
           />
+          {access.roleIds.length > 0 && (
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <span className="text-sm text-muted">{tc.your_role_heading}</span>
+              {access.roleIds.map((rid) => (
+                <Badge key={rid} variant="role-owner">
+                  {roleLabel(rid, tc, roleDesc)}
+                </Badge>
+              ))}
+            </div>
+          )}
           {children}
         </PageContainer>
       </main>

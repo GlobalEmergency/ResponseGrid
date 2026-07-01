@@ -2590,6 +2590,7 @@ export const es = {
     cat_groups: 'Cuadrillas',
     my_donations: 'Mis donaciones',
     my_profile: 'Mi perfil',
+    breadcrumb: 'Migas de pan',
   },
 
   panel: {

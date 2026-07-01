@@ -2553,6 +2553,7 @@ export const en = {
     cat_groups: 'Crews',
     my_donations: 'My donations',
     my_profile: 'My profile',
+    breadcrumb: 'Breadcrumb',
   },
 
   panel: {

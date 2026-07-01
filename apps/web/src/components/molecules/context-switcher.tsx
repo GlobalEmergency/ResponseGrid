@@ -8,6 +8,8 @@ export interface ContextSwitcherItem {
 
 interface ContextSwitcherProps {
   items: ContextSwitcherItem[];
+  /** i18n label for the nav's `aria-label` — callers supply it from `t.nav.breadcrumb`. */
+  ariaLabel: string;
 }
 
 /**
@@ -15,9 +17,9 @@ interface ContextSwitcherProps {
  * Every item but the last links out; the last renders as plain text (current
  * location). Presentational only — callers resolve labels/hrefs.
  */
-export function ContextSwitcher({ items }: ContextSwitcherProps) {
+export function ContextSwitcher({ items, ariaLabel }: ContextSwitcherProps) {
   return (
-    <nav aria-label="breadcrumb" className="flex flex-wrap items-center gap-1.5 text-sm">
+    <nav aria-label={ariaLabel} className="flex flex-wrap items-center gap-1.5 text-sm">
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
         return (
