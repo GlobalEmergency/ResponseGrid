@@ -5,7 +5,7 @@ import { getEmergencyBySlug } from '@/lib/emergencies';
 import { api } from '@/lib/api';
 import { getMe } from '@/lib/navigation-data';
 import { getT } from '@/i18n/server';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { submitPreRegistration } from './actions';
 import { PreRegistroForm } from './pre-registro-form';
@@ -76,12 +76,13 @@ export default async function PreRegistroPage({ params, searchParams }: Props) {
     return (
       <main className="flex-1 bg-surface">
         <div className="mx-auto w-full max-w-3xl">
-          <PageHeaderBand
-            backHref={`/e/${slug}`}
-            backLabel={t.common.back_to_emergency}
-            title={tp.pick_title}
-            subtitle={tp.pick_hint}
-          />
+          <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+          <div className="px-4 pt-6">
+            <h1 className="font-display text-2xl font-extrabold tracking-tight text-navy">
+              {tp.pick_title}
+            </h1>
+            <p className="mt-1.5 text-sm text-muted">{tp.pick_hint}</p>
+          </div>
           <div className="flex flex-col gap-5 px-4 pb-12 pt-6">
             <form method="get" role="search" className="flex gap-2">
               <input
@@ -159,16 +160,21 @@ export default async function PreRegistroPage({ params, searchParams }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <PageHeaderBand
+        <AppBar
+          variant="action"
+          slug={slug}
           backHref={`/e/${slug}/pre-registro`}
-          backLabel={tp.back_to_pick}
-          title={tp.page_title}
-          subtitle={
-            eligible && resource !== undefined
-              ? tp.page_subtitle.replace('{pointName}', resource.name)
-              : undefined
-          }
         />
+        <div className="px-4 pt-6">
+          <h1 className="font-display text-2xl font-extrabold tracking-tight text-navy">
+            {tp.page_title}
+          </h1>
+          {eligible && resource !== undefined && (
+            <p className="mt-1.5 text-sm text-muted">
+              {tp.page_subtitle.replace('{pointName}', resource.name)}
+            </p>
+          )}
+        </div>
         <div className="flex flex-col gap-6 px-4 pb-12 pt-6">
           {eligible && resource !== undefined ? (
             <PreRegistroForm

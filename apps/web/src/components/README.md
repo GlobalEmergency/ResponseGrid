@@ -38,8 +38,9 @@ e.g. `bg-navy text-white`, `border-line`, `text-on-navy`, `rounded-card`.
 - **`SectionHeading`** (atom) — Archivo/navy/bold section titles (`size` sm/md/lg, `as` h2/h3).
 - **`Badge`** + `PriorityBadge` / `VerificationBadge` / `StatusLight` (atoms) — all pill/status chips. Add a `Badge` variant rather than inlining a new pill.
 - **`Button`**, `Input`, `Select`, `Textarea`, `Label` (atoms) — form controls.
-- **`HeaderBandShell`** (molecule) — the navy "Banda oficial" header chrome; base for `SiteHeaderBand`, `OfficialHeaderBand` and `PageHeaderBand`.
-- **`PageHeaderBand`** (molecule) — drop-in branded header (back + title/subtitle) for any inner page; pair with a `bg-surface` page wrapper.
+- **`AppBar`** (organism) — the unified sticky public nav bar (brand · context · CTAs · language · account). Renders on every public page via `variant: 'home' | 'emergency' | 'action' | 'content'`. Do NOT use inside `/panel` or `/coordinacion` (they own their sidebar chrome).
+- **`HeaderBandShell`** (molecule) — the navy "Banda oficial" header chrome; base for `PageHeaderBand` (kept for client-only pages: offline, auth/complete).
+- **`PageHeaderBand`** (molecule) — drop-in branded header (back + title/subtitle) for client-only inner pages that can't mount the async `AppBar`; pair with a `bg-surface` page wrapper.
 - **`FormField`**, `EmptyState`, `FormSuccessScreen` (molecules) — form/list scaffolding.
 
 ## Adding a component

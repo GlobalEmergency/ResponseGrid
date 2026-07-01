@@ -10,7 +10,7 @@ import {
   type EmergencyAccess,
 } from '@/lib/emergency-permissions';
 import type { MeGrant, RoleCatalogEntry } from '@/lib/admin-scopes';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { formatDate } from '@/lib/format-date';
 import { labelForCategory } from '@/domain/supplies/category';
@@ -141,12 +141,17 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <PageHeaderBand
+        <AppBar
+          variant="action"
+          slug={slug}
           backHref={`/e/${slug}/coordinacion`}
-          backLabel={tr.back_to_hub}
-          title={tr.page_title}
-          subtitle={tr.page_subtitle}
         />
+        <div className="px-4 pt-6">
+          <h1 className="font-display text-2xl font-extrabold tracking-tight text-navy">
+            {tr.page_title}
+          </h1>
+          <p className="mt-1.5 text-sm text-muted">{tr.page_subtitle}</p>
+        </div>
         <div className="flex flex-col gap-5 px-4 pb-12 pt-6">
           <Link
             href={`/e/${slug}/pre-registro`}

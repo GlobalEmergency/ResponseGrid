@@ -9,7 +9,7 @@ import {
   type EmergencyAccess,
 } from '@/lib/emergency-permissions';
 import type { MeGrant, RoleCatalogEntry } from '@/lib/admin-scopes';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
 import { getT } from '@/i18n/server';
 import { labelForCategory } from '@/domain/supplies/category';
 import { getCategoriesCached } from '@/adapters/get-categories';
@@ -100,11 +100,16 @@ export default async function IntakeDetailPage({ params }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <PageHeaderBand
+        <AppBar
+          variant="action"
+          slug={slug}
           backHref={`/e/${slug}/recepcion`}
-          backLabel={tr.back_to_list}
-          title={tr.detail_subtitle.replace('{code}', intake.intakeCode)}
         />
+        <div className="px-4 pt-6">
+          <h1 className="font-display text-2xl font-extrabold tracking-tight text-navy">
+            {tr.detail_subtitle.replace('{code}', intake.intakeCode)}
+          </h1>
+        </div>
         <div className="flex flex-col gap-6 px-4 pb-12 pt-6">
           <span className="w-fit rounded-full bg-surface-alt px-3 py-1 text-sm font-semibold text-ink">
             {statusLabel}
