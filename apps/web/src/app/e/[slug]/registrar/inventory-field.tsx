@@ -90,6 +90,8 @@ export function InventoryField({
 
   return (
     <div className="flex flex-col gap-4">
+      <p className="text-xs text-muted normal-case">{t.inventory_hint}</p>
+
       <SupplyLineList
         value={lines}
         onChange={setLines}
