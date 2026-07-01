@@ -26,8 +26,8 @@ export interface NavItem {
   badgeCount?: number;
   /** Active-match strategy: exact path vs path prefix (default: prefix). */
   exact?: boolean;
-  /** Nesting level for indentation (0 = top-level). */
-  depth?: number;
+  /** Nested items (e.g. the active emergency's gated sections). */
+  children?: NavItem[];
 }
 
 export interface NavGroup {
@@ -114,17 +114,19 @@ export function buildNavModel({
     const inCat = contexts.filter((c) => c.type === cat.type);
     if (inCat.length === 0) continue;
 
-    const items: NavItem[] = [];
-    for (const c of inCat) {
-      items.push({ key: `ctx-${c.id}`, href: contextHref(c), label: c.name, depth: 1 });
+    const items: NavItem[] = inCat.map((c) => {
+      const item: NavItem = { key: `ctx-${c.id}`, href: contextHref(c), label: c.name };
       const isActive =
         activeContext != null && activeContext.type === c.type && activeContext.id === c.id;
       if (isActive && c.type === 'emergency' && activeEmergencyAccess != null && c.slug != null) {
-        for (const s of emergencySectionItems(c.slug, activeEmergencyAccess)) {
-          items.push({ ...s, key: `sec-${s.key}`, depth: 2 });
-        }
+        item.children = emergencySectionItems(c.slug, activeEmergencyAccess).map((s) => ({
+          ...s,
+          key: `sec-${s.key}`,
+        }));
       }
-    }
+      return item;
+    });
+
     groups.push({ key: cat.key, headingKey: cat.headingKey, items });
   }
 

@@ -79,17 +79,24 @@ test('empty categories are omitted', () => {
   assert.equal(model.some((g) => g.key === 'cat-organizations'), true);
 });
 
-test('active emergency inlines its gated sections under the context', () => {
+test('active emergency nests its gated sections as children of the context', () => {
   const verifier = access({ canVerifyResources: true });
   const model = buildNavModel({
     contexts: MARIA, isAdmin: false, canAdminister: false, notificationUnread: 3,
     activeContext: { type: 'emergency', id: 'e1' }, activeEmergencyAccess: verifier,
   });
   const emergencies = model.find((g) => g.key === 'cat-emergencies');
-  const itemKeys = emergencies?.items.map((i) => i.key);
-  assert.deepEqual(itemKeys, ['ctx-e1', 'sec-overview', 'sec-resources', 'sec-disputes']);
-  const resources = emergencies?.items.find((i) => i.key === 'sec-resources');
-  assert.equal(resources?.depth, 2);
+  const ctx = emergencies?.items.find((i) => i.key === 'ctx-e1');
+  assert.deepEqual(ctx?.children?.map((i) => i.key), ['sec-overview', 'sec-resources', 'sec-disputes']);
+});
+
+test('a context with no active state has no children', () => {
+  const model = buildNavModel({
+    contexts: MARIA, isAdmin: false, canAdminister: false, notificationUnread: 0,
+  });
+  const emergencies = model.find((g) => g.key === 'cat-emergencies');
+  const ctx = emergencies?.items.find((i) => i.key === 'ctx-e1');
+  assert.equal(ctx?.children, undefined);
 });
 
 test('admin group appears for platform admins', () => {
