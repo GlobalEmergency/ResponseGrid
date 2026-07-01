@@ -88,9 +88,9 @@ export async function AppBar({ variant, slug, emergency, backHref }: AppBarProps
   const isEmergency = variant === 'emergency' && emergency !== undefined;
 
   return (
-    <header className="sticky top-0 z-40 bg-navy text-white" style={{ height: APP_BAR_H }}>
+    <header className="sticky top-0 z-40 bg-navy text-white">
       {/* Rama escritorio: brand + contexto + CTAs + idioma + cuenta, todo inline. */}
-      <div className="hidden h-full items-center gap-3 px-4 lg:flex lg:px-8">
+      <div className="hidden items-center gap-3 px-4 lg:flex lg:px-8" style={{ height: APP_BAR_H }}>
         {brand}
 
         {/* contexto */}
@@ -157,7 +157,9 @@ export async function AppBar({ variant, slug, emergency, backHref }: AppBarProps
         emergencia), como hermano flex a la izquierda de MobileNav para que
         la fila se lea: [CTA] [brand … hamburguesa].
       */}
-      <div className="flex h-full items-center lg:hidden">
+      {/* Altura natural (~64px): la fija la fila propia de NavDrawer, no APP_BAR_H
+          (52 es solo escritorio). El offset del mapa en móvil usa top-16 = 64px. */}
+      <div className="flex items-center lg:hidden">
         {isEmergency && slug !== undefined && (
           <Link
             href={`/e/${slug}/donar`}

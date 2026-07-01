@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { type ResourceViewDto } from '@/lib/group-by-country';
-import { AppBar, APP_BAR_H } from '@/components/organisms/app-bar';
+import { AppBar } from '@/components/organisms/app-bar';
 import { ResourceList } from '@/components/organisms/resource-list';
 import { EmergencyMapWrapper } from '@/components/organisms/emergency-map-wrapper';
 import { NeedsFilter } from '@/components/molecules/needs-filter';
@@ -204,8 +204,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
       <div className="lg:flex lg:items-start">
         <section
           aria-labelledby="map-heading"
-          className="sticky w-full lg:w-[58%] lg:shrink-0 lg:z-10"
-          style={{ top: APP_BAR_H }}
+          className="sticky top-16 w-full lg:top-[52px] lg:w-[58%] lg:shrink-0 lg:z-10"
         >
           <h2 id="map-heading" className="sr-only">{te.map_heading}</h2>
           <EmergencyMapWrapper
