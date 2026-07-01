@@ -43,3 +43,13 @@ export function resolveCategory(slug: string, all: readonly Category[]): Categor
 export function sortCategories(all: readonly Category[]): Category[] {
   return [...all].sort((a, b) => a.sort - b.sort || a.label.localeCompare(b.label));
 }
+
+/**
+ * Resolve the display label for a category `slug` against a DB-sourced
+ * catalogue. Degrades gracefully — when the slug is not found (or the
+ * catalogue is empty, e.g. the categories fetch failed upstream) it falls
+ * back to the slug itself so callers never crash on a missing/stale label.
+ */
+export function labelForCategory(slug: string, categories: readonly Category[]): string {
+  return resolveCategory(slug, categories)?.label ?? slug;
+}

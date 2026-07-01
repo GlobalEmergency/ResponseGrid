@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   fromCategoryDto,
   isMaterialCategory,
+  labelForCategory,
   resolveCategory,
   sortCategories,
   type Category,
@@ -52,4 +53,18 @@ test('sortCategories orders by sort then label', () => {
     fromCategoryDto({ ...dto, slug: 'water', label: 'Agua', sort: 5 }),
   ];
   assert.deepEqual(sortCategories(cats).map((c) => c.slug), ['food', 'water', 'tools']);
+});
+
+test('labelForCategory returns the matching label when the slug is found', () => {
+  const all: Category[] = [fromCategoryDto(dto)];
+  assert.equal(labelForCategory('water', all), 'Agua');
+});
+
+test('labelForCategory falls back to the slug when not found', () => {
+  const all: Category[] = [fromCategoryDto(dto)];
+  assert.equal(labelForCategory('nope', all), 'nope');
+});
+
+test('labelForCategory falls back to the slug when the catalogue is empty', () => {
+  assert.equal(labelForCategory('water', []), 'water');
 });
