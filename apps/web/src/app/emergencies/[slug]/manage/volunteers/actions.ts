@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { getT } from '@/i18n/server';
+import { VALID_SKILLS, type VolunteerSkill } from './skills';
 
 export type ActionResult =
   | { status: 'idle' }
@@ -67,10 +68,9 @@ export async function createTask(
     return { status: 'error', message: t.coord.vol_err_description_required };
   }
 
-  type Skill = 'driving' | 'medical' | 'logistics' | 'cooking' | 'languages' | 'admin' | 'general';
-  const VALID_SKILLS: Skill[] = ['driving', 'medical', 'logistics', 'cooking', 'languages', 'admin', 'general'];
-
-  const skillValue = VALID_SKILLS.includes(requiredSkill as Skill) ? (requiredSkill as Skill) : undefined;
+  const skillValue = VALID_SKILLS.includes(requiredSkill as VolunteerSkill)
+    ? (requiredSkill as VolunteerSkill)
+    : undefined;
 
   let location: { address: string; latitude: number; longitude: number } | undefined;
   if (address !== '' && latitudeRaw !== '' && longitudeRaw !== '') {

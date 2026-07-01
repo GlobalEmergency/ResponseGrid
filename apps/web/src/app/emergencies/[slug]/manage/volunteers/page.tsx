@@ -13,11 +13,11 @@ import { CreateTaskForm } from '@/components/organisms/create-task-form';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { getT } from '@/i18n/server';
 import type { components } from '@reliefhub/api-client';
+import { VALID_SKILLS, type VolunteerSkill } from './skills';
 
 export const dynamic = 'force-dynamic';
 
 type VolunteerStatus = components['schemas']['VolunteerViewDto']['status'];
-type VolunteerSkill = components['schemas']['VolunteerViewDto']['skills'][number];
 type VolunteerAvailability = components['schemas']['VolunteerViewDto']['availability'];
 type VolunteerVehicle = components['schemas']['VolunteerViewDto']['vehicle'];
 
@@ -50,7 +50,6 @@ export default async function ManageVolunteersPage({ params, searchParams }: Pro
     redirect(`/emergencies/${slug}/manage`);
   }
 
-  const VALID_SKILLS: VolunteerSkill[] = ['driving', 'medical', 'logistics', 'cooking', 'languages', 'admin', 'general'];
   const VALID_AVAILABILITIES: VolunteerAvailability[] = ['immediate', 'this_week', 'flexible'];
   const VALID_VEHICLES: VolunteerVehicle[] = ['none', 'car', 'van', 'truck'];
   const VALID_STATUSES: VolunteerStatus[] = ['available', 'assigned', 'inactive'];

@@ -13,7 +13,7 @@ import { ShipmentsFilter } from '@/components/molecules/shipments-filter';
 import { CapacitiesFilter } from '@/components/molecules/capacities-filter';
 import { CreateShipment } from '@/app/emergencies/[slug]/manage/logistics/create-shipment';
 import { getT } from '@/i18n/server';
-import { getCategories } from '@/adapters/get-categories';
+import { getCategoriesCached } from '@/adapters/get-categories';
 import { isMaterialCategory } from '@/domain/supplies/category';
 
 export const dynamic = 'force-dynamic';
@@ -150,7 +150,7 @@ export default async function ManageLogisticsPage({
         },
       })
       .then((r) => r.data?.items ?? []),
-    getCategories(locale),
+    getCategoriesCached(locale),
   ]);
 
   const resourceNames: Record<string, string> = {};

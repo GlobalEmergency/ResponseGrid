@@ -12,15 +12,15 @@ import { NeedsFilter } from '@/components/molecules/needs-filter';
 import { SearchBox } from '@/components/molecules/search-box';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { getT } from '@/i18n/server';
+import { getCategoriesCached } from '@/adapters/get-categories';
+import type { paths } from '@reliefhub/api-client';
 
 export const dynamic = 'force-dynamic';
 
-const VALID_CATEGORIES = [
-  'hygiene', 'water', 'food', 'medical', 'shelter', 'tools', 'other',
-  'medicines', 'medical_equipment', 'medical_supplies', 'medical_personnel',
-] as const;
 const VALID_PRIORITIES = ['low', 'medium', 'high', 'urgent'] as const;
-type NeedCategory = (typeof VALID_CATEGORIES)[number];
+type NeedCategory = NonNullable<
+  paths['/emergencies/{emergencyId}/needs/queue']['get']['parameters']['query']
+>['category'];
 type Priority = (typeof VALID_PRIORITIES)[number];
 
 type Props = {
@@ -55,13 +55,22 @@ export default async function ManageNeedsPage({
     redirect(`/emergencies/${slug}/manage`);
   }
 
+  const { t, locale } = await getT();
+  const tc = t.coord;
+
+  // Needs can carry any category (incl. clothing/medical/personnel — see
+  // NeedsFilter, which lists the full DB catalogue), so we validate against
+  // ALL category slugs, not just material ones (unlike offers).
+  const categorySlugs = (await getCategoriesCached(locale)).map((c) => c.slug);
+
   const rawCategory =
     typeof resolvedSearchParams.category === 'string' ? resolvedSearchParams.category : undefined;
   const rawPriority =
     typeof resolvedSearchParams.priority === 'string' ? resolvedSearchParams.priority : undefined;
-  const category = VALID_CATEGORIES.includes(rawCategory as NeedCategory)
-    ? (rawCategory as NeedCategory)
-    : undefined;
+  const category =
+    rawCategory !== undefined && categorySlugs.includes(rawCategory)
+      ? (rawCategory as NeedCategory)
+      : undefined;
   const priority = VALID_PRIORITIES.includes(rawPriority as Priority)
     ? (rawPriority as Priority)
     : undefined;
@@ -70,9 +79,6 @@ export default async function ManageNeedsPage({
   )
     .slice(0, 100)
     .toLowerCase();
-
-  const { t } = await getT();
-  const tc = t.coord;
 
   const onUnauthorized = async (status: number): Promise<void> => {
     if (status === 401) {
