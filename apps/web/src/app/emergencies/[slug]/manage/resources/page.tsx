@@ -4,6 +4,7 @@ import { loginHref, clearToken } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { resolveManageAccess } from '@/lib/manage-access';
+import type { ResourceType } from '@/lib/navigation';
 import { WorkQueue } from '@/components/organisms/work-queue';
 import { QueueToolbar } from '@/components/molecules/queue-toolbar';
 import { ResourcesQueue } from '@/components/organisms/coordination-queues';
@@ -16,7 +17,7 @@ export const dynamic = 'force-dynamic';
 
 const PAGE_SIZE = 20;
 
-const VALID_TYPES = [
+const VALID_TYPES: ResourceType[] = [
   'collection_point',
   'delivery_point',
   'collection_and_delivery',
@@ -24,8 +25,7 @@ const VALID_TYPES = [
   'transport',
   'supplier',
   'venue',
-] as const;
-type ResourceType = (typeof VALID_TYPES)[number];
+];
 
 type Props = {
   params: Promise<{ slug: string }>;

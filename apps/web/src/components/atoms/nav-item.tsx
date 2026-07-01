@@ -38,13 +38,18 @@ export function NavItem({ item, onNavigate, level = 0 }: NavItemProps) {
   const pathname = usePathname();
   const active = isActive(pathname, item.href, item.exact);
   const hasChildren = item.children != null && item.children.length > 0;
+  // A child that exactly matches the current path is the true current page —
+  // the parent (prefix-matched active for ancestor highlighting) must not
+  // also claim aria-current, or the nav emits two "current page" items.
+  const childExactActive =
+    item.children?.some((c) => c.exact === true && pathname === c.href) ?? false;
 
   return (
     <div>
       <Link
         href={item.href}
         onClick={onNavigate}
-        aria-current={active ? 'page' : undefined}
+        aria-current={active && !childExactActive ? 'page' : undefined}
         className={[
           'flex items-center gap-2 rounded-lg py-2 pr-3 text-sm font-medium transition-colors',
           indentClass(level),

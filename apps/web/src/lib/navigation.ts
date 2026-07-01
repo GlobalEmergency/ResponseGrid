@@ -48,6 +48,21 @@ export interface MyEmergencyNav {
 
 export type ContextType = 'emergency' | 'resource' | 'organization' | 'group' | 'admin';
 
+/**
+ * The `ResourceViewDto.type` enum (see `packages/api-client/src/schema.ts`) —
+ * the single source of truth reused wherever a resource's type is switched on
+ * (nav context icons, the resources queue filter), so a new resource type is
+ * a compile error instead of a silent fallthrough.
+ */
+export type ResourceType =
+  | 'collection_point'
+  | 'delivery_point'
+  | 'collection_and_delivery'
+  | 'warehouse'
+  | 'transport'
+  | 'supplier'
+  | 'venue';
+
 /** A context the principal holds a grant in, resolved for the switcher. */
 export interface PrincipalContext {
   type: ContextType;
@@ -57,7 +72,7 @@ export interface PrincipalContext {
   name: string;
   roleIds: string[];
   /** Only set for `resource` contexts — the `ResourceViewDto` type enum value. */
-  resourceType?: string;
+  resourceType?: ResourceType;
 }
 
 /** Which context (if any) the current route is inside. */
@@ -86,7 +101,7 @@ export function contextHref(c: PrincipalContext): string {
 
 export interface RawPrincipalContexts {
   emergencies: { id: string; slug: string; name: string; roleIds: string[] }[];
-  resources: { id: string; name: string; resourceType: string }[];
+  resources: { id: string; name: string; resourceType: ResourceType }[];
   organizations: { id: string; name: string }[];
   groups: { id: string; name: string }[];
 }
@@ -177,7 +192,7 @@ export function buildNavModel({
   // Administración — platform-level hub.
   if (isAdmin || canAdminister) {
     const hub: NavItem = { key: 'admin', href: '/admin', labelKey: 'administration' };
-    if (isAdmin) {
+    if (isAdmin && activeContext?.type === 'admin') {
       hub.children = adminSectionItems();
     }
     groups.push({ key: 'admin', items: [hub] });

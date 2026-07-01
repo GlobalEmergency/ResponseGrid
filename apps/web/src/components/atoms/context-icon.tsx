@@ -1,4 +1,4 @@
-import type { ContextType } from '@/lib/navigation';
+import type { ContextType, ResourceType } from '@/lib/navigation';
 
 /**
  * Tinted square badge that identifies a context by type on the personal home.
@@ -12,7 +12,7 @@ import type { ContextType } from '@/lib/navigation';
 interface ContextIconProps {
   type: ContextType;
   /** Only meaningful when `type === 'resource'` — selects the glyph. */
-  resourceType?: string;
+  resourceType?: ResourceType;
   className?: string;
 }
 
@@ -97,7 +97,7 @@ function VenueGlyph() {
 }
 
 /** Glyph per `ResourceViewDto.type`. Point-like types share the collection glyph. */
-function ResourceTypeGlyph({ resourceType }: { resourceType?: string }) {
+function ResourceTypeGlyph({ resourceType }: { resourceType?: ResourceType }) {
   switch (resourceType) {
     case 'warehouse':
       return <WarehouseGlyph />;
@@ -115,7 +115,7 @@ function ResourceTypeGlyph({ resourceType }: { resourceType?: string }) {
   }
 }
 
-function TypeGlyph({ type, resourceType }: { type: ContextType; resourceType?: string }) {
+function TypeGlyph({ type, resourceType }: { type: ContextType; resourceType?: ResourceType }) {
   switch (type) {
     // Emergency — warning triangle.
     case 'emergency':
