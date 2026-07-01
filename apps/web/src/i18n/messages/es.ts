@@ -51,6 +51,28 @@ export const es = {
     intake_paused: 'El alta está en pausa en esta emergencia. Inténtalo más tarde.',
   },
 
+  // ── AppBar ────────────────────────────────────────────────────────────────
+  appbar: {
+    login: 'Iniciar sesión',
+    offer: 'Ofrecer ayuda',
+    request: 'Pedir ayuda',
+    see_emergencies: 'Ver emergencias',
+    account_aria: 'Menú de cuenta',
+    menu_aria: 'Menú',
+    section_emergency: 'En esta emergencia',
+    my_points: 'Mis puntos',
+    my_volunteering: 'Mi voluntariado',
+    my_shipments: 'Mis expediciones',
+    notifications: 'Notificaciones',
+    notifications_with_count: 'Notificaciones ({count})',
+    my_panel: 'Mi panel',
+    logout: 'Cerrar sesión',
+    admin: 'Admin',
+    back: 'Volver',
+    how_it_works: 'Cómo funciona',
+    verify: 'Verificar',
+  },
+
   // ── Home page ─────────────────────────────────────────────────────────────
   home: {
     title: 'ResponseGrid',

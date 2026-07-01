@@ -52,6 +52,27 @@ export const en = {
     intake_paused: 'Intake is paused for this emergency. Please try again later.',
   },
 
+  appbar: {
+    login: 'Log in',
+    offer: 'Offer help',
+    request: 'Request help',
+    see_emergencies: 'See emergencies',
+    account_aria: 'Account menu',
+    menu_aria: 'Menu',
+    section_emergency: 'In this emergency',
+    my_points: 'My points',
+    my_volunteering: 'My volunteering',
+    my_shipments: 'My shipments',
+    notifications: 'Notifications',
+    notifications_with_count: 'Notifications ({count})',
+    my_panel: 'My panel',
+    logout: 'Log out',
+    admin: 'Admin',
+    back: 'Back',
+    how_it_works: 'How it works',
+    verify: 'Verify',
+  },
+
   home: {
     title: 'ResponseGrid',
     subtitle: 'Emergency resource coordination.',
