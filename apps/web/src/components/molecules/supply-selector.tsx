@@ -180,7 +180,7 @@ export function SupplySelector({
   }
 
   return (
-    <div ref={containerRef} className="relative flex flex-col gap-2">
+    <div ref={containerRef} className="relative space-y-2">
       <Input
         id={id}
         type="text"
