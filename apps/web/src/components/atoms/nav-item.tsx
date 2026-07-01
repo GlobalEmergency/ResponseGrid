@@ -40,7 +40,7 @@ export function NavItem({ item, onNavigate, level = 0 }: NavItemProps) {
   const hasChildren = item.children != null && item.children.length > 0;
 
   return (
-    <div role={hasChildren ? 'group' : undefined}>
+    <div>
       <Link
         href={item.href}
         onClick={onNavigate}
@@ -61,7 +61,7 @@ export function NavItem({ item, onNavigate, level = 0 }: NavItemProps) {
         ) : null}
       </Link>
       {hasChildren ? (
-        <div role="list" className="flex flex-col gap-0.5">
+        <div className="flex flex-col gap-0.5">
           {item.children?.map((child) => (
             <NavItem key={child.key} item={child} onNavigate={onNavigate} level={level + 1} />
           ))}

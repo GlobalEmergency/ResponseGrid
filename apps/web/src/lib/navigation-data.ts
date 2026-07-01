@@ -128,12 +128,11 @@ export const getPrincipalContexts = cache(async (): Promise<PrincipalContext[]> 
 
 /** Everything the dashboard shell needs in one cached call. */
 export const getNavContext = cache(async () => {
-  const [me, roles, myEmergencies, notificationUnread, contexts] = await Promise.all([
+  const [me, roles, notificationUnread, contexts] = await Promise.all([
     getMe(),
     getRoles(),
-    getMyEmergencies(),
     getNotificationUnread(),
     getPrincipalContexts(),
   ]);
-  return { me, roles, myEmergencies, notificationUnread, contexts };
+  return { me, roles, notificationUnread, contexts };
 });
