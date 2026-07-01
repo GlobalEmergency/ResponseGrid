@@ -10,6 +10,7 @@ describe('CategoriesAdminController', () => {
     parentSlug: 'food',
     vertical: 'general',
     sort: 140,
+    kind: 'material',
     archivedAt: null,
     translations: [
       { locale: 'es', label: 'Alimentos para bebé' },

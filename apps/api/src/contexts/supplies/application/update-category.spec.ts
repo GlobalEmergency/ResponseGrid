@@ -11,6 +11,7 @@ const BASE: CategoryDefinition = {
   parentSlug: 'food',
   vertical: 'general',
   sort: 140,
+  kind: 'material',
   archivedAt: null,
   translations: [],
 };
@@ -72,6 +73,7 @@ describe('UpdateCategory — archive / restore', () => {
       ...BASE,
       slug: Category.Food,
       parentSlug: null,
+      kind: 'material',
     };
     const repo = makeRepo({ findBySlug: () => Promise.resolve(core) });
 
