@@ -32,6 +32,7 @@ export const en = {
       nav_orgs: 'Organisations',
       nav_coordination: 'Coordination access',
       resources_heading: 'Resources',
+      resources_features: 'Features',
       resources_about: 'About us',
       resources_how: 'How it works',
       resources_transparency: 'Transparency',
@@ -111,14 +112,106 @@ export const en = {
     trust_verified: 'Validated by local coordination',
     trust_official: 'Accredited organisation',
 
-    meta_title: 'ResponseGrid — Active emergencies',
+    // Everything the platform does (previously untold — for SEO/GEO)
+    features_cta: 'See all features',
+    features_heading: 'The whole operation on a single platform',
+    features_intro:
+      'ResponseGrid is not just another map: it is the full infrastructure to coordinate material aid in a disaster. All free and open source (MIT licence), with data hosted in the EU (GDPR).',
+    features: [
+      {
+        icon: '📍',
+        title: 'Collection points with inventory',
+        body: 'Every verified point declares what supplies it holds and accepts, to avoid duplication and overload.',
+      },
+      {
+        icon: '✅',
+        title: 'Validated needs in real time',
+        body: 'Local coordination validates every supply request. 48h freshness: you only see what is needed now.',
+      },
+      {
+        icon: '🎁',
+        title: 'Supply offers and matching',
+        body: 'Offer what you have and we match it with whoever requests it, by category and proximity.',
+      },
+      {
+        icon: '📦',
+        title: 'Shared supplies catalogue',
+        body: 'A single language of materials and categories reused across the whole operation.',
+      },
+      {
+        icon: '🚚',
+        title: 'Transport and shipments',
+        body: 'Offer load capacity (road, sea, air) and coordination assembles the shipments.',
+      },
+      {
+        icon: '🙋',
+        title: 'Volunteering and tasks',
+        body: 'Sign up with your skills and availability; coordination assigns tasks where they are needed.',
+      },
+      {
+        icon: '🏷️',
+        title: 'Pre-registration with code/QR and tracking',
+        body: 'Declare your delivery, get a code/QR for the desk and track it until it is received.',
+      },
+      {
+        icon: '🗺️',
+        title: 'Real-time map',
+        body: 'Points and needs on a single map, with your location kept only in your browser (never published).',
+      },
+      {
+        icon: '📣',
+        title: 'Field reports',
+        body: 'Incidents, stock and status reported from the ground to decide with real data.',
+      },
+      {
+        icon: '🛡️',
+        title: 'Three trust levels',
+        body: 'Unverified, validated by coordination, or accredited organisation: trust is always visible.',
+      },
+      {
+        icon: '🔌',
+        title: 'Public API and open source',
+        body: 'Read-only open data, developer documentation and fully auditable code (MIT).',
+      },
+    ],
+
+    meta_title:
+      'ResponseGrid — Coordinate emergency aid | Collection points, needs and volunteering',
     meta_description:
-      'Emergency aid coordination platform. Check active emergencies and how you can help.',
+      'Open source platform to coordinate material aid in disasters: verified collection points, real-time validated needs, donations, transport and volunteering. A Global Emergency project.',
   },
 
   emergency: {
     back_all: '← All emergencies',
     official_source: 'Official source · ResponseGrid',
+
+    // Citable intro (SEO/GEO): summarises the page for search engines and AI
+    intro_heading: 'How to help now',
+    intro_body:
+      'This is the official page for {emergency} on ResponseGrid. Here you will find the verified collection points, the supply needs validated by coordination and what NOT to bring, all updated in real time. Pick an active point, confirm it by phone before going and avoid trips that overload logistics.',
+    intro_source:
+      'Coordinated and verified information. An open source project by Global Emergency.',
+
+    // Visible FAQ + FAQPage schema (content citable by search engines and AI)
+    faq_heading: 'Frequently asked questions',
+    faq: [
+      {
+        q: 'Where can I take donations for {emergency}?',
+        a: 'To the verified collection points shown on the map and in the list on this page. Each point states what it accepts and its status; always confirm by phone before travelling.',
+      },
+      {
+        q: 'What supplies are needed right now in {emergency}?',
+        a: 'The needs validated by coordination appear in the “Needs” tab, with their priority. Only real and recent requests are shown (48h freshness).',
+      },
+      {
+        q: 'What should I NOT bring?',
+        a: 'Avoid unsorted used clothing, medicines outside the authorised health channel, home-made food and supplies without an assigned receiving point. Sending supplies without coordinating overloads logistics.',
+      },
+      {
+        q: 'How can I help beyond donating supplies?',
+        a: 'You can offer a logistics point or warehouse, provide transport capacity, sign up as a volunteer or register a request from “How do you want to help?”.',
+      },
+    ],
     status_active: 'Active emergency',
     status_active_aria: 'Status: active emergency',
 
@@ -968,6 +1061,50 @@ export const en = {
     err_submit_failed: 'Couldn’t send the report. Please try again.',
     err_not_visible: 'This point is no longer visible; it can’t be reported.',
     err_owner: 'You manage this point; use the dashboard to change its status.',
+  },
+
+  // ── Page: Features (/funcionalidades) ─────────────────────────────────────
+  features_page: {
+    meta_title: 'Features — ResponseGrid | Emergency aid coordination',
+    meta_description:
+      'Every ResponseGrid feature: collection points with inventory, validated needs, donations with QR and tracking, logistics and transport, volunteering, real-time map and open API. Free and open source.',
+    overline: 'Features',
+    h1: 'Everything ResponseGrid gives you, for free',
+    lead:
+      'ResponseGrid brings together in a single platform —free and open source— everything needed to coordinate material aid in a disaster: collection points, real needs, traceable donations, logistics, volunteering and real-time coordination. This is everything you can do.',
+    sections: [
+      {
+        heading: 'Collection points with real-time inventory',
+        body: 'Every collection point, warehouse or venue publishes what supplies it holds and accepts. People see the verified points on the map and list, their status (operational, saturated or paused) and their official contact, to avoid duplicating effort or taking supplies where they are already plentiful.',
+      },
+      {
+        heading: 'Validated needs and offer matching',
+        body: 'Local coordination validates every supply need before publishing it, with 48-hour freshness so you only see what is needed now. Anyone who wants to help offers supplies and the platform matches them to needs by category and proximity, over a shared supplies catalogue.',
+      },
+      {
+        heading: 'Logistics: transport and shipments',
+        body: 'Companies and individuals publish their transport capacity —road, sea or air, with weight and volume— and coordination assembles the shipments that move supplies between points. That way aid does not get stuck for lack of logistics.',
+      },
+      {
+        heading: 'Donations traceable end to end',
+        body: 'Before bringing your supplies you pre-register them and get a code/QR for the desk. The point confirms it in its reception console and you follow your donation in real time, from “pre-registered” to “received”.',
+      },
+      {
+        heading: 'Volunteering, crews and accredited organisations',
+        body: 'Sign up as a volunteer with your skills, availability and vehicle; coordination assigns you tasks and organises you into crews. Organisations can get accredited to earn the official badge and operate with more capabilities.',
+      },
+      {
+        heading: 'Real-time coordination and field reports',
+        body: 'A single map brings together points and needs. From the ground, field reports (incidents, stock and status) feed the operation metrics, to decide with real data instead of rumours.',
+      },
+      {
+        heading: 'Trust, open data and developers',
+        body: 'Every resource shows its trust level: unverified, validated by coordination or accredited organisation. The platform is open source (MIT licence), hosts data in the EU (GDPR) and offers a read-only public API with developer documentation.',
+      },
+    ],
+    cta_heading: 'Want to help now?',
+    cta_body: 'Check the active emergencies and choose how to help.',
+    cta_button: 'View active emergencies',
   },
 
   // ── Page: About us (/sobre) ───────────────────────────────────────────────
