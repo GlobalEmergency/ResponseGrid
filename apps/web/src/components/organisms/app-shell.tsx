@@ -24,7 +24,7 @@ export function AppShell({
 }: AppShellProps) {
   const brand = (
     <Link
-      href="/panel"
+      href="/dashboard"
       className="inline-flex text-white focus:outline-none focus:ring-2 focus:ring-white rounded"
     >
       <BrandLogo wordmarkClassName="text-base text-white" />

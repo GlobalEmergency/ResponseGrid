@@ -3,9 +3,9 @@
  * authenticated viewers. The role-aware nav (PR #87 sidebar/drawer) only exists
  * inside the dashboard sections, so a signed-in user on the home or any public
  * page would otherwise have no way to reach it. This gives them a one-tap route
- * into /panel, where the full menu lives. Renders nothing for anonymous
- * visitors. Cheap by design: a cookie read only — no API call — since /panel
- * itself revalidates the session and redirects if it has expired.
+ * into /dashboard, where the full menu lives. Renders nothing for anonymous
+ * visitors. Cheap by design: a cookie read only — no API call — since
+ * /dashboard itself revalidates the session and redirects if it has expired.
  */
 import Link from 'next/link';
 import { getToken } from '@/lib/auth';
@@ -19,7 +19,7 @@ export async function HeaderAccountEntry() {
 
   return (
     <Link
-      href="/panel"
+      href="/dashboard"
       className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/60"
     >
       <svg

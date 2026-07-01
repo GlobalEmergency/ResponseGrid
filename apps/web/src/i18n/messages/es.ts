@@ -2009,9 +2009,7 @@ export const es = {
     err_edit_failed: 'No se pudo guardar la edición.',
     err_discard_failed: 'No se pudo descartar el elemento.',
     err_reason_required: 'El motivo es obligatorio.',
-    tab_activity: 'Actividad',
     // Puntos en duda (ficha 15)
-    tab_disputes: 'Puntos en duda',
     hub_disputes_label: 'Puntos en duda',
     hub_disputes_description:
       'Puntos reportados por la ciudadanía como cerrados o inexistentes.',
@@ -2151,15 +2149,6 @@ export const es = {
     queue_view_detail: 'Ver detalle',
 
     // ── Sub-navegación / hub / buscador (#117) ────────────────────────
-    tab_overview: 'Resumen',
-    tab_resources: 'Recursos',
-    tab_needs: 'Peticiones',
-    tab_offers: 'Ofertas',
-    tab_shipments: 'Expediciones',
-    tab_volunteers: 'Voluntarios',
-    tab_reports: 'Reportes',
-    tabs_aria: 'Secciones de coordinación',
-
     hub_sections_label: 'Secciones de coordinación',
     hub_count_aria: 'pendientes',
     hub_resources_label: 'Recursos por verificar',
@@ -2549,13 +2538,9 @@ export const es = {
   },
 
   nav: {
-    panel: 'Panel',
-    coordination: 'Coordinación',
     administration: 'Administración',
     account_section: 'Mi cuenta',
     notifications: 'Notificaciones',
-    my_groups: 'Mis grupos',
-    my_orgs: 'Mis organizaciones',
     my_permissions: 'Mis permisos',
     logout: 'Cerrar sesión',
     admin_chip: 'Admin',
@@ -2567,13 +2552,12 @@ export const es = {
     admin_overview: 'Resumen',
     admin_users: 'Usuarios',
     admin_orgs: 'Organizaciones',
-    admin_centros: 'Centros',
+    admin_centros: 'Puntos',
     admin_permissions: 'Permisos',
     admin_api_keys: 'API keys',
     admin_accreditations: 'Acreditaciones',
     admin_templates: 'Plantillas',
     admin_audit: 'Auditoría',
-    admin_tabs_aria: 'Secciones de administración',
     sec_overview: 'Resumen',
     sec_resources: 'Recursos',
     sec_disputes: 'Puntos en duda',

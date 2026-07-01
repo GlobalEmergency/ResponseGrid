@@ -1975,9 +1975,7 @@ export const en = {
     err_edit_failed: 'Could not save the edit.',
     err_discard_failed: 'Could not discard the item.',
     err_reason_required: 'A reason is required.',
-    tab_activity: 'Activity',
     // Disputed points (ficha 15)
-    tab_disputes: 'Disputed points',
     hub_disputes_label: 'Disputed points',
     hub_disputes_description:
       'Points reported by citizens as closed or non-existent.',
@@ -2116,15 +2114,6 @@ export const en = {
     queue_view_detail: 'View detail',
 
     // ── Sub-navigation / hub / search (#117) ──────────────────────────
-    tab_overview: 'Overview',
-    tab_resources: 'Resources',
-    tab_needs: 'Requests',
-    tab_offers: 'Offers',
-    tab_shipments: 'Shipments',
-    tab_volunteers: 'Volunteers',
-    tab_reports: 'Reports',
-    tabs_aria: 'Coordination sections',
-
     hub_sections_label: 'Coordination sections',
     hub_count_aria: 'pending',
     hub_resources_label: 'Resources to verify',
@@ -2512,13 +2501,9 @@ export const en = {
   },
 
   nav: {
-    panel: 'Dashboard',
-    coordination: 'Coordination',
     administration: 'Administration',
     account_section: 'My account',
     notifications: 'Notifications',
-    my_groups: 'My groups',
-    my_orgs: 'My organizations',
     my_permissions: 'My permissions',
     logout: 'Log out',
     admin_chip: 'Admin',
@@ -2530,13 +2515,12 @@ export const en = {
     admin_overview: 'Overview',
     admin_users: 'Users',
     admin_orgs: 'Organizations',
-    admin_centros: 'Centers',
+    admin_centros: 'Points',
     admin_permissions: 'Permissions',
     admin_api_keys: 'API keys',
     admin_accreditations: 'Accreditations',
     admin_templates: 'Templates',
     admin_audit: 'Audit log',
-    admin_tabs_aria: 'Administration sections',
     sec_overview: 'Overview',
     sec_resources: 'Resources',
     sec_disputes: 'Disputed points',

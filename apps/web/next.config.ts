@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       // --- Personal: migrado a /dashboard/* (inglés) ---
+      { source: '/panel', destination: '/dashboard', permanent: true },
       { source: '/panel/mi-perfil', destination: '/dashboard/profile', permanent: true },
       { source: '/panel/notificaciones', destination: '/dashboard/notifications', permanent: true },
       { source: '/panel/mis-donaciones', destination: '/dashboard/donations', permanent: true },
