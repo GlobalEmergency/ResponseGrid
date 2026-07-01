@@ -49,6 +49,37 @@ export interface MyEmergencyNav {
   roleIds: string[];
 }
 
+export type ContextType = 'emergency' | 'point' | 'organization' | 'group';
+
+/** A context the principal holds a grant in, resolved for the switcher. */
+export interface PrincipalContext {
+  type: ContextType;
+  id: string;
+  /** Emergencies address by slug; the rest by id. */
+  slug?: string;
+  name: string;
+  roleIds: string[];
+}
+
+/** Which context (if any) the current route is inside. */
+export interface ActiveContextRef {
+  type: ContextType;
+  id: string;
+}
+
+export function contextHref(c: PrincipalContext): string {
+  switch (c.type) {
+    case 'emergency':
+      return `/emergencies/${c.slug}/manage`;
+    case 'point':
+      return `/points/${c.id}/manage`;
+    case 'organization':
+      return `/organizations/${c.id}/manage`;
+    case 'group':
+      return `/dashboard/groups/${c.id}`;
+  }
+}
+
 /** Permissions that mean "this person operates this emergency" (coordinator/verifier). */
 const COORDINATION_PERMISSIONS = [
   'need:validate',

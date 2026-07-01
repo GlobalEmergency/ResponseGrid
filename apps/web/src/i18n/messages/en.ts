@@ -2546,6 +2546,11 @@ export const en = {
     sec_volunteers: 'Volunteers',
     sec_reports: 'Reports',
     sec_activity: 'Activity',
+    home: 'Home',
+    cat_emergencies: 'Emergencies',
+    cat_points: 'Collection points',
+    cat_organizations: 'Organizations',
+    cat_groups: 'Crews',
   },
 
   panel: {

@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { emergencySectionItems } from './navigation.ts';
+import { emergencySectionItems, contextHref } from './navigation.ts';
 import type { EmergencyAccess } from './emergency-permissions.ts';
+import type { PrincipalContext } from './navigation.ts';
 
 function access(partial: Partial<EmergencyAccess>): EmergencyAccess {
   return {
@@ -42,4 +43,14 @@ test('a full coordinator sees every section in order', () => {
 test('no permissions → just the overview', () => {
   const items = emergencySectionItems('e1', access({}));
   assert.deepEqual(items.map((i) => i.key), ['overview']);
+});
+
+test('contextHref points each context type at its workspace', () => {
+  const cases: [PrincipalContext, string][] = [
+    [{ type: 'emergency', id: 'e1', slug: 'terremoto', name: 'T', roleIds: [] }, '/emergencies/terremoto/manage'],
+    [{ type: 'point', id: 'p1', name: 'Almacén', roleIds: [] }, '/points/p1/manage'],
+    [{ type: 'organization', id: 'o1', name: 'Cruz Roja', roleIds: [] }, '/organizations/o1/manage'],
+    [{ type: 'group', id: 'g1', name: 'Logística B', roleIds: [] }, '/dashboard/groups/g1'],
+  ];
+  for (const [ctx, href] of cases) assert.equal(contextHref(ctx), href);
 });

@@ -2583,6 +2583,11 @@ export const es = {
     sec_volunteers: 'Voluntarios',
     sec_reports: 'Reportes',
     sec_activity: 'Actividad',
+    home: 'Inicio',
+    cat_emergencies: 'Emergencias',
+    cat_points: 'Puntos de acopio',
+    cat_organizations: 'Organizaciones',
+    cat_groups: 'Cuadrillas',
   },
 
   panel: {
