@@ -1,5 +1,8 @@
 import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
-import { CategoryDefinition } from '../../domain/category-definition';
+import {
+  CategoryDefinition,
+  CategoryKind,
+} from '../../domain/category-definition';
 import {
   CategoryListOptions,
   CategoryRepository,
@@ -69,6 +72,7 @@ export class DrizzleCategoryRepository implements CategoryRepository {
       vertical: row.vertical,
       sort: row.sort,
       codePrefix: row.codePrefix ?? null,
+      kind: row.kind as CategoryKind,
       archivedAt: row.archivedAt ?? null,
       translations: (translationsBySlug.get(row.slug) ?? []).sort((a, b) =>
         a.locale.localeCompare(b.locale),
@@ -112,6 +116,7 @@ export class DrizzleCategoryRepository implements CategoryRepository {
       vertical: row.vertical,
       sort: row.sort,
       codePrefix: row.codePrefix ?? null,
+      kind: row.kind as CategoryKind,
       archivedAt: row.archivedAt ?? null,
       translations,
     };

@@ -13909,6 +13909,15 @@
             "example": "MED",
             "nullable": true,
             "description": "Unique 3-letter prefix for supplies in this category, or null if inherited"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "material",
+              "personnel"
+            ],
+            "example": "material",
+            "description": "Whether the category is aid material or personnel. Personnel (medical_personnel) is excluded from material pickers."
           }
         },
         "required": [
@@ -13918,7 +13927,8 @@
           "parentSlug",
           "vertical",
           "sort",
-          "codePrefix"
+          "codePrefix",
+          "kind"
         ]
       },
       "CategoryTranslationDto": {

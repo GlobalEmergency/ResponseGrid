@@ -45,6 +45,7 @@ export class CategoriesController {
       parentSlug: category.parentSlug,
       vertical: category.vertical,
       sort: category.sort,
+      kind: category.kind,
       codePrefix: category.codePrefix,
     }));
   }
