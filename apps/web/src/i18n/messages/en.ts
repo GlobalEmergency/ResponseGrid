@@ -83,20 +83,7 @@ export const en = {
     no_emergencies_title: 'No active emergencies at the moment.',
     no_emergencies_description: 'When an emergency is activated it will appear here.',
     emergency_status_active: 'Active',
-    my_orgs: 'My organizations',
-    administration: 'Administration',
-    notifications: 'Notifications',
-    notifications_with_count: 'Notifications ({count})',
-    coordination_access: 'Coordination access',
-    admin: 'Admin',
-    templates: 'Templates',
-    audit: 'Audit',
-    my_permissions: 'My permissions',
-    groups: 'My groups',
-    admin_permissions: 'Permissions & roles',
-    admin_api_keys: 'API keys',
     aria_emergency_list: 'List of active emergencies',
-    aria_secondary_nav: 'Secondary navigation',
     enter_operation: 'Enter the operation',
     active_count: '{count} ongoing',
     closed_label: 'Closed · report available',
@@ -123,9 +110,6 @@ export const en = {
     trust_unverified: 'In queue · do not bring supplies',
     trust_verified: 'Validated by local coordination',
     trust_official: 'Accredited organisation',
-
-    // Account access (home secondary bar)
-    account_heading: 'Your account',
 
     meta_title: 'ResponseGrid — Active emergencies',
     meta_description:
