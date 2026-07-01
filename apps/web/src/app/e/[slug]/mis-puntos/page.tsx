@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
-import { getToken } from '@/lib/auth';
+import { notFound } from 'next/navigation';
+import { requireSession } from '@/lib/auth';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { fetchMyResources } from './actions';
 import { StatusForm } from './status-form';
@@ -41,10 +41,7 @@ export default async function MisPuntosPage({ params }: Props) {
     venue: ta.type_venue,
   };
 
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/mis-puntos`);
-  }
+  await requireSession(`/e/${slug}/mis-puntos`);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {

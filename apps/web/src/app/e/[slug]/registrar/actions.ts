@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
-import { getToken, authHeaders, clearToken } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders, clearToken } from '@/lib/auth';
 import { MATERIAL_CATEGORIES } from '@/lib/categories';
 import { parseSupplyLines } from '@/lib/supply-lines';
 import { getT } from '@/i18n/server';
@@ -39,10 +39,7 @@ export async function registerResource(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const token = await getToken();
-  if (!token) {
-    redirect(`/login?next=/e/${slug}/registrar`);
-  }
+  const token = await requireSession(`/e/${slug}/registrar`);
 
   const { t } = await getT();
 
@@ -113,7 +110,7 @@ export async function registerResource(
 
   if (response.status === 401) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/registrar`);
+    redirect(loginHref(`/e/${slug}/registrar`));
   }
 
   if (response.status === 409) {

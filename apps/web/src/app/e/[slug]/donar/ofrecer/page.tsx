@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { getToken } from '@/lib/auth';
+import { requireSession } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { OrgSelector } from '@/components/molecules/org-selector';
 import { LocationPicker } from '@/components/organisms/location-picker';
@@ -36,10 +36,7 @@ export default async function DonarPage({ params, searchParams }: Props) {
   const resolvedSearchParams = await searchParams;
   const { t } = await getT();
 
-  const token = await getToken();
-  if (!token) {
-    redirect(`/login?next=/e/${slug}/donar/ofrecer`);
-  }
+  await requireSession(`/e/${slug}/donar/ofrecer`);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {

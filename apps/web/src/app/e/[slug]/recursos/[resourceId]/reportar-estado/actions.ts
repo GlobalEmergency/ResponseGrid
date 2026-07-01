@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { getToken, clearToken, authHeaders, loginHref } from '@/lib/auth';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { getT } from '@/i18n/server';
@@ -31,7 +31,7 @@ export async function reportValidity(
   _prev: ReportValidityState,
   formData: FormData,
 ): Promise<ReportValidityState> {
-  const loginNext = `/login?next=/e/${slug}/recursos/${resourceId}/reportar-estado`;
+  const loginNext = loginHref(`/e/${slug}/recursos/${resourceId}/reportar-estado`);
   const token = await getToken();
   if (token === null) {
     redirect(loginNext);

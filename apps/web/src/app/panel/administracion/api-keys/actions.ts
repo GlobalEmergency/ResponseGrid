@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 
 export type ApiKeyActionResult =
@@ -63,8 +63,7 @@ export async function createServiceAccountAction(
   _prev: ApiKeyActionResult,
   formData: FormData,
 ): Promise<ApiKeyActionResult> {
-  const token = await getToken();
-  if (!token) redirect('/login?next=/panel/administracion/api-keys');
+  const token = await requireSession('/panel/administracion/api-keys');
 
   const name = String(formData.get('name') ?? '').trim();
   const ownerOrganizationId = String(
@@ -84,7 +83,7 @@ export async function createServiceAccountAction(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect('/login?next=/panel/administracion/api-keys');
+      redirect(loginHref('/panel/administracion/api-keys'));
     }
     if (response.status === 403) {
       return {
@@ -102,8 +101,7 @@ export async function createServiceAccountAction(
 export async function issueApiKeyAction(
   serviceAccountId: string,
 ): Promise<IssueKeyResult> {
-  const token = await getToken();
-  if (!token) redirect('/login?next=/panel/administracion/api-keys');
+  const token = await requireSession('/panel/administracion/api-keys');
 
   const { data, error, response } = await api.POST(
     '/service-accounts/{serviceAccountId}/api-keys',
@@ -129,8 +127,7 @@ export async function revokeApiKeyAction(
   keyId: string,
   serviceAccountId: string,
 ): Promise<ApiKeyActionResult> {
-  const token = await getToken();
-  if (!token) redirect('/login?next=/panel/administracion/api-keys');
+  const token = await requireSession('/panel/administracion/api-keys');
 
   const { error, response } = await api.DELETE('/api-keys/{keyId}', {
     params: { path: { keyId } },

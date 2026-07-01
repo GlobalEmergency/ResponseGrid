@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { notFound, redirect } from 'next/navigation';
-import { getToken, clearToken } from '@/lib/auth';
+import { requireSession, loginHref, clearToken } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { getMe, getRoles } from '@/lib/navigation-data';
@@ -43,10 +43,7 @@ export default async function CoordinacionLayout({
 }) {
   const { slug } = await params;
 
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion`);
-  }
+  await requireSession(`/e/${slug}/coordinacion`);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
@@ -56,7 +53,7 @@ export default async function CoordinacionLayout({
   const [me, roles] = await Promise.all([getMe(), getRoles()]);
   if (me == null) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/coordinacion`);
+    redirect(loginHref(`/e/${slug}/coordinacion`));
   }
 
   const access: EmergencyAccess = resolveEmergencyAccess(

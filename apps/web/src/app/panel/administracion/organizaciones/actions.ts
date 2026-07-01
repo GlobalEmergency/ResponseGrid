@@ -1,6 +1,6 @@
 'use server';
 
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 
@@ -58,8 +58,7 @@ export interface OrganizationDetail {
 }
 
 export async function fetchOrganizations(): Promise<OrganizationListItem[]> {
-  const token = await getToken();
-  if (!token) redirect('/login?next=/panel/administracion/organizaciones');
+  const token = await requireSession('/panel/administracion/organizaciones');
 
   const { data, error, response } = await api.GET('/organizations/admin', {
     headers: authHeaders(token),
@@ -68,7 +67,7 @@ export async function fetchOrganizations(): Promise<OrganizationListItem[]> {
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect('/login?next=/panel/administracion/organizaciones');
+      redirect(loginHref('/panel/administracion/organizaciones'));
     }
     return [];
   }
@@ -80,8 +79,7 @@ export async function fetchOrganizations(): Promise<OrganizationListItem[]> {
 export async function fetchOrganizationDetail(
   id: string,
 ): Promise<OrganizationDetail | null> {
-  const token = await getToken();
-  if (!token) redirect(`/login?next=/panel/administracion/organizaciones/${id}`);
+  const token = await requireSession(`/panel/administracion/organizaciones/${id}`);
 
   const { data, error, response } = await api.GET('/organizations/{id}', {
     params: { path: { id } },
@@ -91,7 +89,7 @@ export async function fetchOrganizationDetail(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(`/login?next=/panel/administracion/organizaciones/${id}`);
+      redirect(loginHref(`/panel/administracion/organizaciones/${id}`));
     }
     if (response.status === 404) return null;
     return null;

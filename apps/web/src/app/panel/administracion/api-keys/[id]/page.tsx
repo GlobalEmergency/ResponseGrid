@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { getToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { fetchServiceAccounts, fetchApiKeys } from '../actions';
 import { IssueKeyButton } from '../issue-key-button';
@@ -21,13 +21,12 @@ type Props = { params: Promise<{ id: string }> };
 export default async function ServiceAccountDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const token = await getToken();
-  if (!token) redirect(`/login?next=/panel/administracion/api-keys/${id}`);
+  const token = await requireSession(`/panel/administracion/api-keys/${id}`);
 
   const { data: me, response: meRes } = await api.GET('/auth/me', {
     headers: authHeaders(token),
   });
-  if (meRes.status === 401 || !me) redirect(`/login?next=/panel/administracion/api-keys/${id}`);
+  if (meRes.status === 401 || !me) redirect(loginHref(`/panel/administracion/api-keys/${id}`));
   if (!me.isAdmin) redirect('/');
 
   const [accounts, keys] = await Promise.all([

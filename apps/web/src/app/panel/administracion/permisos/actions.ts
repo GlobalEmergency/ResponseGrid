@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { parseDateInput } from '@/lib/parse-date-input';
 
@@ -87,8 +87,7 @@ export async function grantRoleAction(
   _prev: GrantActionResult,
   formData: FormData,
 ): Promise<GrantActionResult> {
-  const token = await getToken();
-  if (!token) redirect('/login?next=/panel/administracion/permisos');
+  const token = await requireSession('/panel/administracion/permisos');
 
   const principalId = String(formData.get('principalId') ?? '').trim();
   const roleId = String(formData.get('roleId') ?? '').trim();
@@ -125,7 +124,7 @@ export async function grantRoleAction(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect('/login?next=/panel/administracion/permisos');
+      redirect(loginHref('/panel/administracion/permisos'));
     }
     if (response.status === 403) {
       return {
@@ -147,8 +146,7 @@ export async function grantRoleAction(
 export async function revokeGrantAction(
   grantId: string,
 ): Promise<GrantActionResult> {
-  const token = await getToken();
-  if (!token) redirect('/login?next=/panel/administracion/permisos');
+  const token = await requireSession('/panel/administracion/permisos');
 
   const { error, response } = await api.DELETE('/grants/{id}', {
     params: { path: { id: grantId } },
