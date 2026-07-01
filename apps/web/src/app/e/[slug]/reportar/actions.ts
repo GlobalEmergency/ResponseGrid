@@ -1,7 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { getT } from '@/i18n/server';
@@ -107,10 +107,7 @@ export async function reviewReport(
   reportId: string,
   slug: string,
 ): Promise<ReviewReportResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion/reportes`);
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion/reportes`);
 
   const { t } = await getT();
 
@@ -121,7 +118,7 @@ export async function reviewReport(
 
   if (response.status === 401) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/coordinacion/reportes`);
+    redirect(loginHref(`/e/${slug}/coordinacion/reportes`));
   }
 
   if (response.status === 403) {

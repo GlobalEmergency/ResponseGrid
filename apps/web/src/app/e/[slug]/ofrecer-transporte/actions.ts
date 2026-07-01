@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
-import { getToken, authHeaders, clearToken } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders, clearToken } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 type CapacityMode = components['schemas']['PublishCapacityDto']['mode'];
@@ -48,10 +48,7 @@ export async function submitCapacity(
   _prev: CapacityState,
   formData: FormData,
 ): Promise<CapacityState> {
-  const token = await getToken();
-  if (!token) {
-    redirect(`/login?next=/e/${slug}/ofrecer-transporte`);
-  }
+  const token = await requireSession(`/e/${slug}/ofrecer-transporte`);
 
   const { t } = await getT();
   const tt = t.ofrecerTransporte;
@@ -136,7 +133,7 @@ export async function submitCapacity(
 
   if (response.status === 401) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/ofrecer-transporte`);
+    redirect(loginHref(`/e/${slug}/ofrecer-transporte`));
   }
 
   if (response.status === 409) {

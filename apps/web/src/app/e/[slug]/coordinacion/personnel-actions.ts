@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 export type PersonnelActionResult =
@@ -17,10 +17,7 @@ export async function createTaskFromNeed(
   volunteerIds: string[],
   dueDate?: string,
 ): Promise<PersonnelActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion`);
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion`);
 
   const { t } = await getT();
 
@@ -35,7 +32,7 @@ export async function createTaskFromNeed(
 
   if (response.status === 401) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/coordinacion`);
+    redirect(loginHref(`/e/${slug}/coordinacion`));
   }
 
   if (response.status === 403) {

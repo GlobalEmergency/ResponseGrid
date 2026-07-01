@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect, notFound } from 'next/navigation';
-import { getToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { PageHeader } from '@/components/molecules/page-header';
 import { EmptyState } from '@/components/molecules/empty-state';
@@ -44,15 +44,14 @@ export default async function ScopeAdminPage({ params }: PageProps) {
   const scopeType = rawType;
   const next = `/panel/administracion/ambito/${scopeType}/${scopeId}`;
 
-  const token = await getToken();
-  if (!token) redirect(`/login?next=${next}`);
+  const token = await requireSession(next);
 
   const [meRes, roles] = await Promise.all([
     api.GET('/auth/me', { headers: authHeaders(token) }),
     fetchRoles(),
   ]);
   const me = meRes.data;
-  if (meRes.response.status === 401 || !me) redirect(`/login?next=${next}`);
+  if (meRes.response.status === 401 || !me) redirect(loginHref(next));
 
   // Authorize: the caller must actually administer THIS scope.
   const scope = administrableScopes(me.grants ?? [], roles).find(

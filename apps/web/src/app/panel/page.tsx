@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { getToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
 import {
@@ -32,11 +32,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PanelPage() {
-  const token = await getToken();
-  if (token == null) redirect('/login?next=/panel');
+  const token = await requireSession('/panel');
 
   const me = await getMe();
-  if (me == null) redirect('/login?next=/panel');
+  if (me == null) redirect(loginHref('/panel'));
 
   const { t } = await getT();
   const tp = t.panel;

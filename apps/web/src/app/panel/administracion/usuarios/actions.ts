@@ -1,6 +1,6 @@
 'use server';
 
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 
@@ -57,8 +57,7 @@ export interface UserDetail {
 }
 
 export async function fetchUsers(): Promise<UserListItem[]> {
-  const token = await getToken();
-  if (!token) redirect('/login?next=/panel/administracion/usuarios');
+  const token = await requireSession('/panel/administracion/usuarios');
 
   const { data, error, response } = await api.GET('/users', {
     headers: authHeaders(token),
@@ -67,7 +66,7 @@ export async function fetchUsers(): Promise<UserListItem[]> {
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect('/login?next=/panel/administracion/usuarios');
+      redirect(loginHref('/panel/administracion/usuarios'));
     }
     return [];
   }
@@ -77,8 +76,7 @@ export async function fetchUsers(): Promise<UserListItem[]> {
 
 // Returns null on 404 so the page can render a not-found state.
 export async function fetchUserDetail(id: string): Promise<UserDetail | null> {
-  const token = await getToken();
-  if (!token) redirect(`/login?next=/panel/administracion/usuarios/${id}`);
+  const token = await requireSession(`/panel/administracion/usuarios/${id}`);
 
   const { data, error, response } = await api.GET('/users/{id}', {
     params: { path: { id } },
@@ -88,7 +86,7 @@ export async function fetchUserDetail(id: string): Promise<UserDetail | null> {
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(`/login?next=/panel/administracion/usuarios/${id}`);
+      redirect(loginHref(`/panel/administracion/usuarios/${id}`));
     }
     if (response.status === 404) return null;
     return null;
