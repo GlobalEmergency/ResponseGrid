@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { loginHref, getToken } from '@/lib/auth';
+import { requireSession, loginHref } from '@/lib/auth';
 import { getMe } from '@/lib/navigation-data';
 import { submitCapacity } from './actions';
 import { OfrecerTransporteForm } from './ofrecer-transporte-form';
@@ -36,10 +36,7 @@ export default async function OfrecerTransportePage({ params }: Props) {
   const { t } = await getT();
 
   // Publishing a capacity REQUIRES auth (capacity:publish, citizen-grade).
-  const token = await getToken();
-  if (!token) {
-    redirect(loginHref(`/e/${slug}/ofrecer-transporte`));
-  }
+  await requireSession(`/e/${slug}/ofrecer-transporte`);
 
   // Resolve the current user — they are the provider (type: volunteer).
   const me = await getMe();

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { loginHref, getToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
 import { fetchTemplates } from './actions';
@@ -22,10 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function TemplatesPage() {
-  const token = await getToken();
-  if (!token) {
-    redirect(loginHref('/panel/administracion/plantillas'));
-  }
+  const token = await requireSession('/panel/administracion/plantillas');
 
   const { data: me, response: meResponse } = await api.GET('/auth/me', {
     headers: authHeaders(token),

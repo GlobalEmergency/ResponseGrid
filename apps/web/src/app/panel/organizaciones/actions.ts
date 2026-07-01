@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { loginHref, getToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 export type OrgActionResult =
@@ -15,10 +15,7 @@ export async function createOrganizationAction(
   _prev: OrgActionResult,
   formData: FormData,
 ): Promise<OrgActionResult> {
-  const token = await getToken();
-  if (!token) {
-    redirect(loginHref('/panel/organizaciones'));
-  }
+  const token = await requireSession('/panel/organizaciones');
 
   const { t } = await getT();
 
@@ -54,10 +51,7 @@ export async function addMemberAction(
   _prev: OrgActionResult,
   formData: FormData,
 ): Promise<OrgActionResult> {
-  const token = await getToken();
-  if (!token) {
-    redirect(loginHref(`/panel/organizaciones/${orgId}`));
-  }
+  const token = await requireSession(`/panel/organizaciones/${orgId}`);
 
   const { t } = await getT();
 
@@ -94,10 +88,7 @@ export async function removeMemberAction(
   orgId: string,
   userId: string,
 ): Promise<OrgActionResult> {
-  const token = await getToken();
-  if (!token) {
-    redirect(loginHref(`/panel/organizaciones/${orgId}`));
-  }
+  const token = await requireSession(`/panel/organizaciones/${orgId}`);
 
   const { t } = await getT();
 

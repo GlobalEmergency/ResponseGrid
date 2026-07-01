@@ -1,7 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { getT } from '@/i18n/server';
@@ -107,10 +107,7 @@ export async function reviewReport(
   reportId: string,
   slug: string,
 ): Promise<ReviewReportResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion/reportes`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion/reportes`);
 
   const { t } = await getT();
 

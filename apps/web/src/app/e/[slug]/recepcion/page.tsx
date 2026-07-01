@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
-import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { getMe, getRoles } from '@/lib/navigation-data';
@@ -41,10 +41,7 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const sp = await searchParams;
 
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/recepcion`));
-  }
+  const token = await requireSession(`/e/${slug}/recepcion`);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {

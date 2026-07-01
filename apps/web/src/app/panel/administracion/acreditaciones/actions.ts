@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
@@ -49,10 +49,7 @@ export async function grantAccreditationAction(
   _prev: AccreditationActionResult,
   formData: FormData,
 ): Promise<AccreditationActionResult> {
-  const token = await getToken();
-  if (!token) {
-    redirect(loginHref('/panel/administracion/acreditaciones'));
-  }
+  const token = await requireSession('/panel/administracion/acreditaciones');
 
   const { t } = await getT();
   const ta = t.admin;
@@ -101,10 +98,7 @@ export async function grantAccreditationAction(
 export async function revokeAccreditationAction(
   id: string,
 ): Promise<AccreditationActionResult> {
-  const token = await getToken();
-  if (!token) {
-    redirect(loginHref('/panel/administracion/acreditaciones'));
-  }
+  const token = await requireSession('/panel/administracion/acreditaciones');
 
   const { t } = await getT();
   const ta = t.admin;

@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
-import { loginHref, getToken, authHeaders, clearToken } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders, clearToken } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 type Skill = components['schemas']['RegisterVolunteerDto']['skills'][number];
@@ -47,10 +47,7 @@ export async function registerVolunteer(
   _prev: VolunteerActionState,
   formData: FormData,
 ): Promise<VolunteerActionState> {
-  const token = await getToken();
-  if (!token) {
-    redirect(loginHref(`/e/${slug}/voluntario`));
-  }
+  const token = await requireSession(`/e/${slug}/voluntario`);
 
   const { t } = await getT();
 

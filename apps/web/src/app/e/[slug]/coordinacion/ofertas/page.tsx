@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { getMe, getRoles } from '@/lib/navigation-data';
@@ -48,10 +48,7 @@ export default async function CoordinacionOfertasPage({
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
 
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion/ofertas`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion/ofertas`);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {

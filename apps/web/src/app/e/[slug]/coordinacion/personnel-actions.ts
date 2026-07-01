@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 export type PersonnelActionResult =
@@ -17,10 +17,7 @@ export async function createTaskFromNeed(
   volunteerIds: string[],
   dueDate?: string,
 ): Promise<PersonnelActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion`);
 
   const { t } = await getT();
 

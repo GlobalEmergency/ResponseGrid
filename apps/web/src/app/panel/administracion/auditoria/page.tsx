@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { loginHref, getToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { fetchAuditEntries } from './actions';
 import { AuditFilter } from './audit-filter';
@@ -31,10 +31,7 @@ interface PageProps {
 const PAGE_LIMIT = 50;
 
 export default async function AuditoriaPage({ searchParams }: PageProps) {
-  const token = await getToken();
-  if (!token) {
-    redirect(loginHref('/panel/administracion/auditoria'));
-  }
+  const token = await requireSession('/panel/administracion/auditoria');
 
   const { data: me, response: meResponse } = await api.GET('/auth/me', {
     headers: authHeaders(token),

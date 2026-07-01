@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 export type ActionResult =
@@ -16,10 +16,7 @@ export async function updateVolunteerStatus(
   status: 'available' | 'assigned' | 'inactive',
   slug: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion/voluntarios`);
 
   const { t } = await getT();
 
@@ -52,10 +49,7 @@ export async function createTask(
   slug: string,
   formData: FormData,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion/voluntarios`);
 
   const { t } = await getT();
 
@@ -118,10 +112,7 @@ export async function assignVolunteer(
   volunteerId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion/voluntarios`);
 
   const { t } = await getT();
 
@@ -157,10 +148,7 @@ export async function unassignVolunteer(
   volunteerId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion/voluntarios`);
 
   const { t } = await getT();
 
@@ -195,10 +183,7 @@ export async function completeTask(
   taskId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion/voluntarios`);
 
   const { t } = await getT();
 
@@ -229,10 +214,7 @@ export async function cancelTask(
   taskId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion/voluntarios`);
 
   const { t } = await getT();
 

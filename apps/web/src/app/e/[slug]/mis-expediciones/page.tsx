@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { ShipmentsList } from '@/components/organisms/shipments-list';
@@ -31,10 +31,7 @@ export default async function MisExpedicionesPage({ params }: Props) {
   const { t } = await getT();
   const ta = t.account;
 
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/mis-expediciones`));
-  }
+  const token = await requireSession(`/e/${slug}/mis-expediciones`);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {

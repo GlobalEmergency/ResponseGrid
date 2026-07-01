@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
@@ -31,10 +31,7 @@ export async function createTemplateAction(
   _prev: TemplateActionResult,
   formData: FormData,
 ): Promise<TemplateActionResult> {
-  const token = await getToken();
-  if (!token) {
-    redirect(loginHref('/panel/administracion/plantillas'));
-  }
+  const token = await requireSession('/panel/administracion/plantillas');
 
   const { t } = await getT();
 
@@ -87,10 +84,7 @@ export async function createTemplateAction(
 }
 
 export async function deleteTemplateAction(id: string): Promise<TemplateActionResult> {
-  const token = await getToken();
-  if (!token) {
-    redirect(loginHref('/panel/administracion/plantillas'));
-  }
+  const token = await requireSession('/panel/administracion/plantillas');
 
   const { t } = await getT();
 
@@ -126,10 +120,7 @@ export async function createFromTemplateAction(
   _prev: CreateFromTemplateResult,
   formData: FormData,
 ): Promise<CreateFromTemplateResult> {
-  const token = await getToken();
-  if (!token) {
-    redirect(loginHref('/panel/administracion/plantillas'));
-  }
+  const token = await requireSession('/panel/administracion/plantillas');
 
   const { t } = await getT();
 

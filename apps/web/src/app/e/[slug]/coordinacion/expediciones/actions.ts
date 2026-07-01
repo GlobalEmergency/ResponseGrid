@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 import type { components } from '@reliefhub/api-client';
 
@@ -33,10 +33,7 @@ export async function createShipment(
     manifest?: string;
   },
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion/expediciones`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion/expediciones`);
 
   const { t } = await getT();
   const ts = t.coord;
@@ -93,10 +90,7 @@ export async function assignCapacity(
   capacityId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion/expediciones`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion/expediciones`);
 
   const { t } = await getT();
   const ts = t.coord;
@@ -144,10 +138,7 @@ export async function getCapacitySuggestions(
   shipmentId: string,
   slug: string,
 ): Promise<SuggestionsResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion/expediciones`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion/expediciones`);
 
   const { t } = await getT();
   const ts = t.coord;
@@ -185,10 +176,7 @@ export async function markInTransit(
   /** Path to revalidate after the transition. */
   revalidate = `/e/${slug}/coordinacion/expediciones`,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(loginNext));
-  }
+  const token = await requireSession(loginNext);
 
   const { t } = await getT();
   const ts = t.coord;
@@ -228,10 +216,7 @@ export async function confirmDelivery(
   loginNext = `/e/${slug}/coordinacion/expediciones`,
   revalidate = `/e/${slug}/coordinacion/expediciones`,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(loginNext));
-  }
+  const token = await requireSession(loginNext);
 
   const { t } = await getT();
   const ts = t.coord;
@@ -269,10 +254,7 @@ export async function cancelShipment(
   shipmentId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion/expediciones`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion/expediciones`);
 
   const { t } = await getT();
   const ts = t.coord;

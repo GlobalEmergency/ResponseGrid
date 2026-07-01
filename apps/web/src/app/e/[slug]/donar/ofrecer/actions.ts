@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
-import { loginHref, getToken, authHeaders, clearToken } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders, clearToken } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 import { MATERIAL_CATEGORIES } from '@/lib/categories';
 
@@ -28,10 +28,7 @@ export async function submitOffer(
   _prev: OfferState,
   formData: FormData,
 ): Promise<OfferState> {
-  const token = await getToken();
-  if (!token) {
-    redirect(loginHref(`/e/${slug}/donar/ofrecer`));
-  }
+  const token = await requireSession(`/e/${slug}/donar/ofrecer`);
 
   const { t } = await getT();
 

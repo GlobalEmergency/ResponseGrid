@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
 import type { components } from '@reliefhub/api-client';
@@ -18,10 +18,7 @@ export async function fetchMyResources(
   emergencyId: string,
   slug: string,
 ): Promise<components['schemas']['ResourceViewDto'][]> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/mis-puntos`));
-  }
+  const token = await requireSession(`/e/${slug}/mis-puntos`);
 
   const { data, response } = await api.GET(
     '/emergencies/{emergencyId}/resources/mine',
@@ -48,10 +45,7 @@ export async function updateResourceStatus(
   status: PublicStatus,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/mis-puntos`));
-  }
+  const token = await requireSession(`/e/${slug}/mis-puntos`);
 
   const { response } = await api.POST('/resources/{resourceId}/status', {
     params: { path: { resourceId } },

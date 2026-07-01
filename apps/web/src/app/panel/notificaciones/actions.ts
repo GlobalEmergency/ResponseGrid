@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { loginHref, getToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 export type NotificationActionResult =
@@ -18,10 +18,7 @@ export type NotificationActionResult =
 export async function markNotificationReadAction(
   id: string,
 ): Promise<NotificationActionResult> {
-  const token = await getToken();
-  if (!token) {
-    redirect(loginHref('/panel/notificaciones'));
-  }
+  const token = await requireSession('/panel/notificaciones');
 
   const { t } = await getT();
 
@@ -47,10 +44,7 @@ export async function markNotificationReadAction(
 }
 
 export async function markAllNotificationsReadAction(): Promise<NotificationActionResult> {
-  const token = await getToken();
-  if (!token) {
-    redirect(loginHref('/panel/notificaciones'));
-  }
+  const token = await requireSession('/panel/notificaciones');
 
   const { t } = await getT();
 

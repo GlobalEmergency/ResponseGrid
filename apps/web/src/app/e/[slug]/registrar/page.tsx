@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { loginHref, getToken } from '@/lib/auth';
+import { requireSession } from '@/lib/auth';
 import { OrgSelector } from '@/components/molecules/org-selector';
 import { LocationPicker } from '@/components/organisms/location-picker';
 import { registerResource } from './actions';
@@ -33,10 +33,7 @@ export default async function RegistrarPage({ params }: Props) {
   const { slug } = await params;
   const { t, locale } = await getT();
 
-  const token = await getToken();
-  if (!token) {
-    redirect(loginHref(`/e/${slug}/registrar`));
-  }
+  await requireSession(`/e/${slug}/registrar`);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {

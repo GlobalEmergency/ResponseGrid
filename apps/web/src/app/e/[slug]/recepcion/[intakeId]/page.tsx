@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { getMe, getRoles } from '@/lib/navigation-data';
@@ -36,10 +36,7 @@ export default async function IntakeDetailPage({ params }: Props) {
   const { slug, intakeId } = await params;
   const next = `/e/${slug}/recepcion/${intakeId}`;
 
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(next));
-  }
+  const token = await requireSession(next);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {

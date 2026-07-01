@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { EmptyState } from '@/components/molecules/empty-state';
@@ -39,10 +39,7 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
 
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion/reportes`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion/reportes`);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {

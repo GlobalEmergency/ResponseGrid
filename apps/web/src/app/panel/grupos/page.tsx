@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { loginHref, getToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { fetchMyGroups } from './actions';
 import { CreateGroupForm } from './create-group-form';
@@ -18,10 +18,7 @@ export const metadata: Metadata = {
 };
 
 export default async function GruposPage() {
-  const token = await getToken();
-  if (!token) {
-    redirect(loginHref('/panel/grupos'));
-  }
+  const token = await requireSession('/panel/grupos');
 
   const [{ data: me, response: meRes }, { data: roles }, myGroups] =
     await Promise.all([

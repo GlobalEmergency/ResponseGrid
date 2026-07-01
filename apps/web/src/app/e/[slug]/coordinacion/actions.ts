@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import type { components } from '@reliefhub/api-client';
 import { api } from '@/lib/api';
-import { requireSession, loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 /** A reason is mandatory for every edit/discard; mirror the API's min length. */
@@ -45,10 +45,7 @@ export async function matchOffer(
   needId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion`);
 
   const { t } = await getT();
 
@@ -83,10 +80,7 @@ export async function fulfillOffer(
   offerId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion`);
 
   const { t } = await getT();
 
@@ -117,10 +111,7 @@ export async function cancelOffer(
   offerId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion`);
 
   const { t } = await getT();
 
@@ -156,10 +147,7 @@ export async function verifyAndPublish(
   resourceId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion`);
 
   const { t } = await getT();
 
@@ -220,10 +208,7 @@ export async function validateNeed(
   needId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion`);
 
   const { t } = await getT();
 
@@ -256,10 +241,7 @@ export async function renewNeed(
   needId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion`);
 
   const { t } = await getT();
 
@@ -299,10 +281,7 @@ export async function pauseEmergency(
   emergencyId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion`);
 
   const { t } = await getT();
 
@@ -334,10 +313,7 @@ export async function resumeEmergency(
   emergencyId: string,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion`);
 
   const { t } = await getT();
 
@@ -519,9 +495,7 @@ export async function resolveDispute(
   resolution: DisputeResolution,
   reason: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null)
-    redirect(loginHref(`/e/${slug}/coordinacion/puntos-en-duda`));
+  const token = await requireSession(`/e/${slug}/coordinacion/puntos-en-duda`);
 
   const { t } = await getT();
   if (reasonTooShort(reason)) {
@@ -566,9 +540,7 @@ export async function getValidityReports(
   resourceId: string,
   slug: string,
 ): Promise<ValidityReportsResult> {
-  const token = await getToken();
-  if (token === null)
-    redirect(loginHref(`/e/${slug}/coordinacion/puntos-en-duda`));
+  const token = await requireSession(`/e/${slug}/coordinacion/puntos-en-duda`);
 
   const { t } = await getT();
 
@@ -723,10 +695,7 @@ export async function publishAnnouncement(
   slug: string,
   message: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(`/e/${slug}/coordinacion`));
-  }
+  const token = await requireSession(`/e/${slug}/coordinacion`);
 
   const { t } = await getT();
 
