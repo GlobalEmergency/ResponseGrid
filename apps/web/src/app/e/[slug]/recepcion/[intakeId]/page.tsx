@@ -10,6 +10,7 @@ import {
 } from '@/lib/emergency-permissions';
 import type { MeGrant, RoleCatalogEntry } from '@/lib/admin-scopes';
 import { AppBar } from '@/components/organisms/app-bar';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { getT } from '@/i18n/server';
 import { categoryLabel } from '@/lib/categories';
 import { formatDate } from '@/lib/format-date';
@@ -103,11 +104,7 @@ export default async function IntakeDetailPage({ params }: Props) {
           slug={slug}
           backHref={`/e/${slug}/recepcion`}
         />
-        <div className="px-4 pt-6">
-          <h1 className="font-display text-2xl font-extrabold tracking-tight text-navy">
-            {tr.detail_subtitle.replace('{code}', intake.intakeCode)}
-          </h1>
-        </div>
+        <PageHeading title={tr.detail_subtitle.replace('{code}', intake.intakeCode)} />
         <div className="flex flex-col gap-6 px-4 pb-12 pt-6">
           <span className="w-fit rounded-full bg-surface-alt px-3 py-1 text-sm font-semibold text-ink">
             {statusLabel}

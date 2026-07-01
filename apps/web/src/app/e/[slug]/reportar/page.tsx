@@ -7,6 +7,7 @@ import { submitReport } from './actions';
 import { ReportForm } from './report-form';
 import { AppBar } from '@/components/organisms/app-bar';
 import { Card } from '@/components/atoms/card';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { getT } from '@/i18n/server';
 
 type Props = {
@@ -72,12 +73,7 @@ export default async function ReportarPage({ params, searchParams }: Props) {
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
         <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
-        <div className="px-4 pt-6">
-          <h1 className="font-display text-2xl font-extrabold tracking-tight text-navy">
-            {t.reportar.page_title}
-          </h1>
-          <p className="mt-1.5 text-sm text-muted">{emergency.name}</p>
-        </div>
+        <PageHeading title={t.reportar.page_title} subtitle={emergency.name} />
         <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">
           <Card className="p-5 lg:p-7">
             <ReportForm

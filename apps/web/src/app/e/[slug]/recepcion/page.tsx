@@ -11,6 +11,7 @@ import {
 } from '@/lib/emergency-permissions';
 import type { MeGrant, RoleCatalogEntry } from '@/lib/admin-scopes';
 import { AppBar } from '@/components/organisms/app-bar';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { formatDate } from '@/lib/format-date';
 import { categoryLabel } from '@/lib/categories';
@@ -144,12 +145,7 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
           slug={slug}
           backHref={`/e/${slug}/coordinacion`}
         />
-        <div className="px-4 pt-6">
-          <h1 className="font-display text-2xl font-extrabold tracking-tight text-navy">
-            {tr.page_title}
-          </h1>
-          <p className="mt-1.5 text-sm text-muted">{tr.page_subtitle}</p>
-        </div>
+        <PageHeading title={tr.page_title} subtitle={tr.page_subtitle} />
         <div className="flex flex-col gap-5 px-4 pb-12 pt-6">
           <Link
             href={`/e/${slug}/pre-registro`}

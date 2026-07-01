@@ -7,6 +7,7 @@ import { fetchMyResources } from './actions';
 import { StatusForm } from './status-form';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { AppBar } from '@/components/organisms/app-bar';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
@@ -54,12 +55,7 @@ export default async function MisPuntosPage({ params }: Props) {
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
         <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
-        <div className="px-4 pt-6">
-          <h1 className="font-display text-2xl font-extrabold tracking-tight text-navy">
-            {ta.points_title}
-          </h1>
-          <p className="mt-1.5 text-sm text-muted">{ta.points_subtitle}</p>
-        </div>
+        <PageHeading title={ta.points_title} subtitle={ta.points_subtitle} />
         <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">
 
         <section aria-labelledby="my-points-heading" className="flex flex-col gap-4">
