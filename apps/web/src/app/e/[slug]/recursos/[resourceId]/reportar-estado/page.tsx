@@ -6,6 +6,7 @@ import { reportValidity } from './actions';
 import { ReportValidezForm } from './report-validez-form';
 import { AppBar } from '@/components/organisms/app-bar';
 import { Card } from '@/components/atoms/card';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { getT } from '@/i18n/server';
 
 type Props = {
@@ -49,12 +50,7 @@ export default async function ReportarEstadoPage({ params }: Props) {
           slug={slug}
           backHref={`/e/${slug}/recursos/${resourceId}`}
         />
-        <div className="px-4 pt-6">
-          <h1 className="font-display text-2xl font-extrabold tracking-tight text-navy">
-            {t.reportar_validez.page_title}
-          </h1>
-          <p className="mt-1.5 text-sm text-muted">{emergency.name}</p>
-        </div>
+        <PageHeading title={t.reportar_validez.page_title} subtitle={emergency.name} />
         <div className="flex flex-col gap-6 px-5 pb-12 pt-6 lg:px-8">
           <Card className="flex flex-col gap-6 p-5 lg:p-7">
             <p className="text-sm text-muted">{t.reportar_validez.intro}</p>

@@ -8,6 +8,7 @@ import { TaskCard } from './task-card';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { Badge } from '@/components/atoms/badge';
 import { AppBar } from '@/components/organisms/app-bar';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
@@ -77,12 +78,7 @@ export default async function MiVoluntariadoPage({ params }: Props) {
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
         <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
-        <div className="px-4 pt-6">
-          <h1 className="font-display text-2xl font-extrabold tracking-tight text-navy">
-            {ta.vol_title}
-          </h1>
-          <p className="mt-1.5 text-sm text-muted">{ta.vol_subtitle}</p>
-        </div>
+        <PageHeading title={ta.vol_title} subtitle={ta.vol_subtitle} />
         <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">
 
         <section aria-labelledby="profile-heading" className="flex flex-col gap-4">

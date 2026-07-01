@@ -4,6 +4,7 @@ import { getEmergencyBySlug } from '@/lib/emergencies';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
 import { AppBar } from '@/components/organisms/app-bar';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { categoryLabel } from '@/lib/categories';
 import { formatDate } from '@/lib/format-date';
@@ -48,12 +49,7 @@ export default async function DonacionTrackingPage({ params }: Props) {
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-md">
         <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
-        <div className="px-4 pt-6">
-          <h1 className="font-display text-2xl font-extrabold tracking-tight text-navy">
-            {td.page_title}
-          </h1>
-          <p className="mt-1.5 text-sm text-muted">{td.page_subtitle}</p>
-        </div>
+        <PageHeading title={td.page_title} subtitle={td.page_subtitle} />
         <div className="flex flex-col gap-6 px-4 pb-12 pt-6">{children}</div>
       </div>
     </main>
