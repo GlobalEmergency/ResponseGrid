@@ -57,11 +57,7 @@ export function NavItem({ item, onNavigate, level = 0, toggleLabel }: NavItemPro
   const [expanded, setExpanded] = useState(() =>
     hasChildren ? subtreeContainsPath(item, pathname) : false,
   );
-  // A child that exactly matches the current path is the true current page —
-  // the parent (prefix-matched active for ancestor highlighting) must not
-  // also claim aria-current, or the nav emits two "current page" items.
-  const childExactActive =
-    item.children?.some((c) => c.exact === true && pathname === c.href) ?? false;
+  const childrenId = `nav-children-${item.key}`;
 
   return (
     <div>
@@ -69,7 +65,7 @@ export function NavItem({ item, onNavigate, level = 0, toggleLabel }: NavItemPro
         <Link
           href={item.href}
           onClick={onNavigate}
-          aria-current={active && !childExactActive ? 'page' : undefined}
+          aria-current={!hasChildren && pathname === item.href ? 'page' : undefined}
           className={[
             'flex min-w-0 flex-1 items-center gap-2 rounded-lg py-2 pr-3 text-sm font-medium transition-colors',
             indentClass(level),
@@ -89,6 +85,7 @@ export function NavItem({ item, onNavigate, level = 0, toggleLabel }: NavItemPro
           <button
             type="button"
             aria-expanded={expanded}
+            aria-controls={childrenId}
             aria-label={toggleLabel}
             onClick={(e) => {
               e.preventDefault();
@@ -116,7 +113,7 @@ export function NavItem({ item, onNavigate, level = 0, toggleLabel }: NavItemPro
         ) : null}
       </div>
       {hasChildren && expanded ? (
-        <div className="flex flex-col gap-0.5">
+        <div id={childrenId} className="flex flex-col gap-0.5">
           {item.children?.map((child) => (
             <NavItem
               key={child.key}
