@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CategoryKind } from '../../domain/category-definition';
+import type { CategoryKind } from '../../domain/category-definition';
 
 /**
  * A category of the shared taxonomy (slug + localized labels + hierarchy).
