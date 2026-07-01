@@ -71,6 +71,7 @@ export const en = {
     back: 'Back',
     how_it_works: 'How it works',
     verify: 'Verify',
+    info_nav: 'Info',
   },
 
   home: {

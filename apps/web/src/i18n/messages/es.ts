@@ -71,6 +71,7 @@ export const es = {
     back: 'Volver',
     how_it_works: 'Cómo funciona',
     verify: 'Verificar',
+    info_nav: 'Información',
   },
 
   // ── Home page ─────────────────────────────────────────────────────────────

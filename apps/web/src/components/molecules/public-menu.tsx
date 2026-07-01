@@ -5,9 +5,20 @@ export interface PublicLink {
   label: string;
 }
 
-export function PublicMenu({ links, className = '' }: { links: PublicLink[]; className?: string }) {
+export function PublicMenu({
+  links,
+  className = '',
+  ariaLabel,
+}: {
+  links: PublicLink[];
+  className?: string;
+  ariaLabel?: string;
+}) {
   return (
-    <nav className={`hidden items-center gap-5 lg:flex ${className}`.trim()} aria-label="">
+    <nav
+      className={`hidden items-center gap-5 lg:flex ${className}`.trim()}
+      {...(ariaLabel !== undefined && { 'aria-label': ariaLabel })}
+    >
       {links.map((l) => (
         <Link
           key={l.href}

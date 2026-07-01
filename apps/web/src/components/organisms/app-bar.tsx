@@ -103,7 +103,7 @@ export async function AppBar({ variant, slug, emergency, backHref }: AppBarProps
             <span className="truncate">{emergency.name}</span>
           </span>
         ) : variant !== 'action' ? (
-          <PublicMenu links={infoLinks} className="ml-2" />
+          <PublicMenu links={infoLinks} className="ml-2" ariaLabel={ta.info_nav} />
         ) : backHref !== undefined ? (
           <Link
             href={backHref}
