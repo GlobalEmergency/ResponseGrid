@@ -61,7 +61,12 @@ export function toDto(line: SupplyLine): SupplyLineDto {
   };
 }
 
-/** A line is complete when it has a non-empty name and a positive integer quantity. */
+/** A line is complete when it has a non-empty name, a positive integer quantity, and a category. */
 export function isComplete(line: SupplyLine): boolean {
-  return line.name.trim() !== '' && Number.isInteger(line.quantity) && line.quantity >= 1;
+  return (
+    line.name.trim() !== '' &&
+    Number.isInteger(line.quantity) &&
+    line.quantity >= 1 &&
+    line.category.trim() !== ''
+  );
 }

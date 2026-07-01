@@ -57,8 +57,9 @@ test('toDto includes unit and expiresAt when present', () => {
   assert.deepEqual(toDto(line), { name: 'Agua', quantity: 2, category: 'water', unit: 'botellas', expiresAt: '2026-07-01' });
 });
 
-test('isComplete requires non-empty name and quantity >= 1', () => {
+test('isComplete requires non-empty name, quantity >= 1, and a category', () => {
   assert.equal(isComplete({ name: 'Agua', supplyId: null, quantity: 1, unit: '', category: 'water' }), true);
   assert.equal(isComplete({ name: '  ', supplyId: null, quantity: 1, unit: '', category: 'water' }), false);
   assert.equal(isComplete({ name: 'Agua', supplyId: null, quantity: 0, unit: '', category: 'water' }), false);
+  assert.equal(isComplete({ name: 'Agua', supplyId: null, quantity: 1, unit: '', category: '' }), false);
 });
