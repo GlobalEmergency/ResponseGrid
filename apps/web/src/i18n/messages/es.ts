@@ -380,6 +380,8 @@ export const es = {
     subtitle: 'Únete a ResponseGrid para coordinar recursos en emergencias.',
     name_label: 'Nombre completo',
     email_label: 'Correo electrónico',
+    phone_label: 'Teléfono de contacto',
+    phone_hint: '(obligatorio)',
     password_label: 'Contraseña',
     password_hint: '(mín. 8 caracteres)',
     submit: 'Crear cuenta',
@@ -394,7 +396,34 @@ export const es = {
     err_all_fields_required: 'Todos los campos son obligatorios.',
     err_password_too_short: 'La contraseña debe tener al menos 8 caracteres.',
     err_email_exists: 'Ese email ya está registrado.',
+    err_phone_required: 'El teléfono de contacto es obligatorio.',
+    err_consent_required:
+      'Debes aceptar las condiciones del servicio y la política de privacidad.',
     err_signup_failed: 'Error al crear la cuenta. Inténtalo de nuevo.',
+  },
+
+  // ── Consentimiento legal (registro + onboarding) ─────────────────────────────
+  consent: {
+    prefix: 'Acepto las ',
+    terms: 'condiciones del servicio',
+    and: ' y la ',
+    privacy: 'política de privacidad',
+  },
+
+  // ── Onboarding tras login social ─────────────────────────────────────────────
+  onboarding: {
+    title: 'Completa tu perfil',
+    subtitle:
+      'Necesitamos tu teléfono de contacto y tu aceptación de las condiciones antes de continuar.',
+    phone_label: 'Teléfono de contacto',
+    phone_hint: '(obligatorio)',
+    submit: 'Continuar',
+    submitting: 'Guardando…',
+    error_fallback: 'No se pudo completar el perfil.',
+    err_phone_required: 'El teléfono de contacto es obligatorio.',
+    err_consent_required:
+      'Debes aceptar las condiciones del servicio y la política de privacidad.',
+    meta_title: 'Completa tu perfil — ResponseGrid',
   },
 
   // ── Needs filter ──────────────────────────────────────────────────────────
