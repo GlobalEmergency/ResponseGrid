@@ -608,6 +608,8 @@ export const es = {
     noMatches: 'No hay coincidencias. Escríbelo si no está en el catálogo.',
     error: 'No pudimos cargar sugerencias.',
     quantityLabel: 'Cantidad',
+    qtyDecrease: 'Reducir cantidad',
+    qtyIncrease: 'Aumentar cantidad',
     unitLabel: 'Unidad',
     unitOpt: '(opcional)',
     unitPlaceholder: 'ej. cajas, litros',

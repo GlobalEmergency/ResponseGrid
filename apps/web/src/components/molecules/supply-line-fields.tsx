@@ -104,13 +104,33 @@ export function SupplyLineFields({
           <label htmlFor={`${idPrefix}-qty-${rowId}`} className="text-sm font-medium text-ink-soft">
             {t.quantityLabel} <span aria-hidden="true">*</span>
           </label>
-          <input
-            id={`${idPrefix}-qty-${rowId}`}
-            type="number" min={1} step={1} required={required}
-            value={value.quantity}
-            onChange={(e) => onChange({ quantity: Math.max(1, Math.floor(Number(e.target.value) || 1)) })}
-            className={fieldClass}
-          />
+          <div className="flex items-stretch gap-2">
+            <button
+              type="button"
+              aria-label={t.qtyDecrease}
+              onClick={() => onChange({ quantity: Math.max(1, value.quantity - 1) })}
+              disabled={value.quantity <= 1}
+              className="flex w-12 shrink-0 items-center justify-center rounded-lg border-2 border-navy bg-white text-2xl leading-none font-semibold text-navy transition-colors hover:bg-navy hover:text-white focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-navy"
+            >
+              −
+            </button>
+            <input
+              id={`${idPrefix}-qty-${rowId}`}
+              type="number" min={1} step={1} required={required}
+              inputMode="numeric"
+              value={value.quantity}
+              onChange={(e) => onChange({ quantity: Math.max(1, Math.floor(Number(e.target.value) || 1)) })}
+              className="min-w-0 flex-1 rounded-lg border-2 border-navy bg-white px-4 py-3 text-center text-base text-ink focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            />
+            <button
+              type="button"
+              aria-label={t.qtyIncrease}
+              onClick={() => onChange({ quantity: value.quantity + 1 })}
+              className="flex w-12 shrink-0 items-center justify-center rounded-lg border-2 border-navy bg-white text-2xl leading-none font-semibold text-navy transition-colors hover:bg-navy hover:text-white focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
+            >
+              +
+            </button>
+          </div>
         </div>
       </div>
 

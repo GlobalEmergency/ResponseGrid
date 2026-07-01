@@ -583,6 +583,8 @@ export const en = {
     noMatches: 'No matches. Type it if it is not in the catalog.',
     error: 'We could not load suggestions.',
     quantityLabel: 'Quantity',
+    qtyDecrease: 'Decrease quantity',
+    qtyIncrease: 'Increase quantity',
     unitLabel: 'Unit',
     unitOpt: '(optional)',
     unitPlaceholder: 'e.g. boxes, liters',
