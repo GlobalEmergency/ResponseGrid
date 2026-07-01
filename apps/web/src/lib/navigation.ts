@@ -2,7 +2,7 @@
  * Context-aware navigation model.
  *
  * Pure, framework-free: given the principal's resolved contexts (emergencies,
- * points, organizations, groups they hold a grant in), the active context (if
+ * resources, organizations, groups they hold a grant in), the active context (if
  * any) and its resolved access, it returns the menu structure — Inicio, one
  * collapsible category per context type, the active context's gated sections
  * inlined, personal links and, if applicable, the administration hub. It does
