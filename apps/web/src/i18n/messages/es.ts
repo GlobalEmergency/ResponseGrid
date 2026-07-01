@@ -281,6 +281,10 @@ export const es = {
     actions_paused:
       'El alta de recursos y peticiones está en pausa. Consulta la información disponible y vuelve más tarde.',
 
+    manage_heading: 'Gestión',
+    manage_my_points_title: 'Mis puntos en esta emergencia',
+    manage_my_points_subtitle: 'Ver y gestionar los puntos que has registrado',
+
     quick_access_heading: 'Acceso rápido',
     quick_access_card_label: 'Resumen',
     quick_access_help_intro: 'Ve directo a la zona de acciones si quieres ayudar ahora mismo.',

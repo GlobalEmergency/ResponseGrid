@@ -276,6 +276,10 @@ export const en = {
     actions_paused:
       'Resource and request registration is paused. Check the available information and come back later.',
 
+    manage_heading: 'Management',
+    manage_my_points_title: 'My points in this emergency',
+    manage_my_points_subtitle: 'View and manage the points you have registered',
+
     quick_access_heading: 'Quick access',
     quick_access_card_label: 'At a glance',
     quick_access_help_intro: 'Go straight to the action area if you want to help right now.',
