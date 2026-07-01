@@ -7,6 +7,7 @@ import { cache } from 'react';
 import { getToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import type { MyEmergencyNav } from '@/lib/navigation';
+import { buildPrincipalContexts, type PrincipalContext } from '@/lib/navigation';
 
 export const getMe = cache(async () => {
   const token = await getToken();
@@ -84,13 +85,53 @@ export const getActiveEmergencies = cache(
   },
 );
 
+export const getMyOrganizations = cache(async () => {
+  const token = await getToken();
+  if (token == null) return [];
+  const { data } = await api.GET('/organizations/mine', { headers: authHeaders(token) });
+  return (data ?? []).map((o) => ({ id: o.id, name: o.name }));
+});
+
+export const getMyGroups = cache(async () => {
+  const token = await getToken();
+  if (token == null) return [];
+  const { data } = await api.GET('/groups/mine', { headers: authHeaders(token) });
+  return (data ?? []).map((g) => ({ id: g.id, name: g.name }));
+});
+
+/** Points are emergency-scoped: aggregate `resources/mine` across the principal's
+ *  emergencies. N+1 cached calls (see Global Constraints ceiling). */
+export const getMyPoints = cache(async () => {
+  const token = await getToken();
+  if (token == null) return [];
+  const emergencies = await getMyEmergencies();
+  const perEmergency = await Promise.all(
+    emergencies.map(async (e) => {
+      const { data } = await api.GET('/emergencies/{emergencyId}/resources/mine', {
+        headers: authHeaders(token),
+        params: { path: { emergencyId: e.id } },
+      });
+      return (data ?? []).map((r) => ({ id: r.id, name: r.name }));
+    }),
+  );
+  return perEmergency.flat();
+});
+
+export const getPrincipalContexts = cache(async (): Promise<PrincipalContext[]> => {
+  const [emergencies, points, organizations, groups] = await Promise.all([
+    getMyEmergencies(), getMyPoints(), getMyOrganizations(), getMyGroups(),
+  ]);
+  return buildPrincipalContexts({ emergencies, points, organizations, groups });
+});
+
 /** Everything the dashboard shell needs in one cached call. */
 export const getNavContext = cache(async () => {
-  const [me, roles, myEmergencies, notificationUnread] = await Promise.all([
+  const [me, roles, myEmergencies, notificationUnread, contexts] = await Promise.all([
     getMe(),
     getRoles(),
     getMyEmergencies(),
     getNotificationUnread(),
+    getPrincipalContexts(),
   ]);
-  return { me, roles, myEmergencies, notificationUnread };
+  return { me, roles, myEmergencies, notificationUnread, contexts };
 });

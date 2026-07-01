@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { getT } from '@/i18n/server';
 import { getNavContext } from '@/lib/navigation-data';
-import { buildNavModel, type PrincipalContext } from '@/lib/navigation';
+import { buildNavModel } from '@/lib/navigation';
 import { canAdminister, type MeGrant, type RoleCatalogEntry } from '@/lib/admin-scopes';
 import { AppShell } from '@/components/organisms/app-shell';
 import type { ResolvedNavGroup } from '@/components/molecules/nav-group';
@@ -14,7 +14,7 @@ export async function DashboardLayout({
   children: ReactNode;
   emergencyContext?: ReactNode;
 }) {
-  const { me, roles, myEmergencies, notificationUnread } = await getNavContext();
+  const { me, roles, notificationUnread, contexts } = await getNavContext();
   if (me == null) redirect('/login');
 
   const { t } = await getT();
@@ -22,13 +22,6 @@ export async function DashboardLayout({
 
   const grants = (me.grants ?? []) as MeGrant[];
   const roleCatalog = roles as RoleCatalogEntry[];
-  const contexts: PrincipalContext[] = myEmergencies.map((e) => ({
-    type: 'emergency',
-    id: e.id,
-    slug: e.slug,
-    name: e.name,
-    roleIds: e.roleIds,
-  }));
 
   const model = buildNavModel({
     contexts,
