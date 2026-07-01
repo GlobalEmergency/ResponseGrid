@@ -112,15 +112,85 @@ export const es = {
     trust_verified: 'Validado por coordinación local',
     trust_official: 'Organización acreditada',
 
-    meta_title: 'ResponseGrid — Emergencias activas',
+    // Todo lo que hace la plataforma (para SEO/GEO: hoy no se contaba)
+    features_heading: 'Todo el operativo en una sola plataforma',
+    features_intro:
+      'ResponseGrid no es un mapa más: es la infraestructura completa para coordinar ayuda material en una catástrofe. Todo gratuito y de código abierto (licencia MIT), con los datos alojados en la UE (RGPD).',
+    features: [
+      {
+        icon: '📍',
+        title: 'Puntos de acopio con inventario',
+        body: 'Cada punto verificado declara qué material tiene y qué acepta, para no duplicar ni saturar.',
+      },
+      {
+        icon: '✅',
+        title: 'Necesidades validadas en tiempo real',
+        body: 'Coordinación local valida cada petición de material. Frescura de 48 h: solo ves lo que hace falta ahora.',
+      },
+      {
+        icon: '🎁',
+        title: 'Ofertas de material y emparejamiento',
+        body: 'Ofreces lo que tienes y lo casamos con quien lo pide, por categoría y cercanía.',
+      },
+      {
+        icon: '📦',
+        title: 'Catálogo común de insumos',
+        body: 'Un lenguaje único de materiales y categorías reutilizado en toda la operación.',
+      },
+      {
+        icon: '🚚',
+        title: 'Transporte y expediciones',
+        body: 'Ofrece capacidad de carga (carretera, marítimo, aéreo) y coordinación arma los envíos.',
+      },
+      {
+        icon: '🙋',
+        title: 'Voluntariado y tareas',
+        body: 'Apúntate con tus habilidades y disponibilidad; coordinación asigna tareas donde hacen falta.',
+      },
+      {
+        icon: '🏷️',
+        title: 'Pre-registro con código/QR y seguimiento',
+        body: 'Declara tu entrega, recibe un código/QR para el mostrador y sigue su recorrido hasta que se recibe.',
+      },
+      {
+        icon: '🗺️',
+        title: 'Mapa en tiempo real',
+        body: 'Puntos y necesidades sobre un único mapa, con tu ubicación solo en tu navegador (no se publica).',
+      },
+      {
+        icon: '📣',
+        title: 'Partes de campo',
+        body: 'Incidencias, stock y estado reportados desde el terreno para decidir con datos reales.',
+      },
+      {
+        icon: '🛡️',
+        title: 'Tres niveles de confianza',
+        body: 'Sin verificar, verificado por coordinación u organización acreditada: la confianza siempre visible.',
+      },
+      {
+        icon: '🔌',
+        title: 'API pública y open source',
+        body: 'Datos abiertos de solo lectura, documentación para desarrolladores y todo el código auditable (MIT).',
+      },
+    ],
+
+    meta_title:
+      'ResponseGrid — Coordina ayuda en emergencias | Puntos de acopio, necesidades y voluntariado',
     meta_description:
-      'Plataforma de coordinación de ayuda en emergencias. Consulta las emergencias activas y cómo puedes colaborar.',
+      'Plataforma open source para coordinar ayuda material en catástrofes: puntos de acopio verificados, necesidades validadas en tiempo real, donaciones, transporte y voluntariado. Un proyecto de Global Emergency.',
   },
 
   // ── Emergency landing (e/[slug]) ──────────────────────────────────────────
   emergency: {
     back_all: '← Todas las emergencias',
     official_source: 'Fuente oficial · ResponseGrid',
+
+    // Intro citable (SEO/GEO): resume qué es la página para buscadores y motores de IA
+    intro_heading: 'Cómo ayudar ahora',
+    intro_body:
+      'Esta es la página oficial de {emergency} en ResponseGrid. Aquí encuentras los puntos de acopio verificados, las necesidades de material validadas por coordinación y qué NO llevar, todo actualizado en tiempo real. Elige un punto activo, confírmalo por teléfono antes de ir y evita desplazamientos que saturan la logística.',
+    intro_source:
+      'Información coordinada y verificada. Un proyecto open source de Global Emergency.',
     status_active: 'Emergencia activa',
     status_active_aria: 'Estado: emergencia activa',
 

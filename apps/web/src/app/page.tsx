@@ -16,6 +16,12 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t.home.meta_title,
     description: t.home.meta_description,
+    alternates: { canonical: '/' },
+    openGraph: {
+      title: t.home.meta_title,
+      description: t.home.meta_description,
+      url: '/',
+    },
   };
 }
 
@@ -113,6 +119,26 @@ export default async function HomePage() {
               <HowItWorksStep index={2} title={th.step2_title} body={th.step2_body} />
               <HowItWorksStep index={3} title={th.step3_title} body={th.step3_body} tone="accent" />
             </div>
+          </section>
+
+          {/* ── Todo lo que hace la plataforma ──────────────────────────── */}
+          <section aria-labelledby="features-heading">
+            <h2 id="features-heading" className={`${sectionHeading} mb-1.5`}>{th.features_heading}</h2>
+            <p className="mb-4 max-w-2xl text-[14px] leading-[1.55] text-ink-soft">{th.features_intro}</p>
+            <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" role="list">
+              {th.features.map((f) => (
+                <li
+                  key={f.title}
+                  className="flex flex-col gap-1.5 rounded-card border border-line bg-surface-alt px-4 py-3.5"
+                >
+                  <span className="flex items-center gap-2">
+                    <span aria-hidden="true" className="text-lg">{f.icon}</span>
+                    <span className="text-[14px] font-bold text-navy">{f.title}</span>
+                  </span>
+                  <span className="text-[13px] leading-snug text-muted">{f.body}</span>
+                </li>
+              ))}
+            </ul>
           </section>
 
           {/* ── La confianza es el producto ─────────────────────────────── */}

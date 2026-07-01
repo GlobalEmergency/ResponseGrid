@@ -15,6 +15,7 @@ import { HelpActionRow } from '@/components/molecules/help-action-row';
 import { NeedsList } from '@/components/organisms/needs-list';
 import { EmergencyExplorer } from '@/components/organisms/emergency-explorer';
 import { EmergencyQuickLinks } from '@/components/molecules/emergency-quick-links';
+import { JsonLd } from '@/components/atoms/json-ld';
 import type { MapPoint } from '@/components/organisms/emergency-map';
 import { getT } from '@/i18n/server';
 
@@ -36,9 +37,24 @@ export async function generateMetadata(
     return { title: 'Emergencia no encontrada · ResponseGrid' };
   }
 
+  const title = `${emergency.name}: puntos de acopio y cómo ayudar · ResponseGrid`;
+  const description = `Puntos de acopio verificados, necesidades de material validadas y cómo ayudar en ${emergency.name}. Dona material, ofrece recursos o transporte, apúntate como voluntario y consulta qué NO llevar. Información oficial y en tiempo real.`;
+  const url = `/e/${emergency.slug}`;
+
   return {
-    title: `${emergency.name} · ResponseGrid`,
-    description: `Información oficial y puntos activos de ayuda para ${emergency.name}. Coordina la ayuda material: ofrece recursos, consulta las necesidades validadas y evita saturar la logística.`,
+    title,
+    description,
+    keywords: [
+      emergency.name,
+      'puntos de acopio',
+      'cómo ayudar',
+      'donar material',
+      'ayuda humanitaria',
+      'voluntariado',
+    ],
+    alternates: { canonical: url },
+    openGraph: { title, description, url, type: 'article' },
+    twitter: { card: 'summary', title, description },
   };
 }
 
@@ -141,6 +157,25 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
     emergency.dontBringList.length > 0 ? emergency.dontBringList : te.dont_bring_items;
   const sectionTitle = 'font-display text-base font-bold text-navy';
   const announcement = typeof emergency.announcement === 'string' ? emergency.announcement : null;
+  const introBody = te.intro_body.replace('{emergency}', emergency.name);
+
+  // schema.org SpecialAnnouncement — the civic/disaster type search engines and
+  // AI assistants use to understand and cite emergency notices.
+  const specialAnnouncementJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SpecialAnnouncement',
+    name: `${emergency.name} · ResponseGrid`,
+    text: announcement ?? introBody,
+    datePosted: emergency.updatedAt,
+    url: `https://responsegrid.app/e/${slug}`,
+    category: 'https://www.wikidata.org/wiki/Q8065',
+    spatialCoverage: { '@type': 'Place', name: emergency.country },
+    provider: {
+      '@type': 'Organization',
+      name: 'Global Emergency',
+      url: 'https://globalemergency.online',
+    },
+  };
 
   const statusLabel =
     emergency.status === 'active'
@@ -206,6 +241,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
+      <JsonLd data={specialAnnouncementJsonLd} />
       <AppBar variant="emergency" slug={slug} emergency={{ name: emergency.name, status: emergency.status }} />
 
       {!isActive && (
@@ -246,6 +282,12 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
               {statusLabel}
             </span>
           </div>
+
+          <section aria-labelledby="intro-heading" className="flex flex-col gap-1.5">
+            <h2 id="intro-heading" className="sr-only">{te.intro_heading}</h2>
+            <p className="text-[14px] leading-[1.55] text-ink-soft">{introBody}</p>
+            <p className="text-[12.5px] text-muted-soft">{te.intro_source}</p>
+          </section>
 
           {announcement !== null && (
             <AnnouncementCard
