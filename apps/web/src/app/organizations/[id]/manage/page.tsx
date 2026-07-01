@@ -23,7 +23,7 @@ type Props = {
 export default async function OrganizationDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const token = await requireSession(`/panel/organizaciones/${id}`);
+  const token = await requireSession(`/organizations/${id}/manage`);
 
   const { data: me } = await api.GET('/auth/me', {
     headers: authHeaders(token),
@@ -45,7 +45,7 @@ export default async function OrganizationDetailPage({ params }: Props) {
 
   if (membersError !== undefined) {
     // Not a member of this org → redirect
-    redirect('/panel/organizaciones');
+    redirect('/dashboard');
   }
 
   const memberList = members ?? [];
@@ -60,7 +60,7 @@ export default async function OrganizationDetailPage({ params }: Props) {
     <main className="flex-1 bg-surface">
       <PageContainer>
         <PageHeader
-          backHref="/panel/organizaciones"
+          backHref="/dashboard"
           backLabel={td.back}
           title={org?.name ?? td.fallback_title}
           subtitle={org ? `${org.type} · ${org.verificationLevel}` : undefined}

@@ -67,6 +67,12 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       { source: '/administracion', destination: '/admin', permanent: true },
+      // --- Organizaciones: detalle migrado a /organizations/:id/manage (inglés) ---
+      {
+        source: '/panel/organizaciones/:id',
+        destination: '/organizations/:id/manage',
+        permanent: true,
+      },
       // --- Sin migrar aún ---
       { source: '/grupos/:path*', destination: '/panel/grupos/:path*', permanent: true },
       {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
-import { removeMemberAction } from '../actions';
+import { removeMemberAction } from './actions';
 import { Button } from '@/components/atoms/button';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';

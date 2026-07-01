@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { addMemberAction, type OrgActionResult } from '../actions';
+import { addMemberAction, type OrgActionResult } from './actions';
 import { Input } from '@/components/atoms/input';
 import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';

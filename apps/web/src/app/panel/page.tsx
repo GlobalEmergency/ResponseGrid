@@ -215,7 +215,7 @@ export default async function PanelPage() {
             <ul className="grid gap-3 sm:grid-cols-2" role="list">
               {orgs.map((o) => (
                 <li key={o.id}>
-                  <Link href={`/panel/organizaciones/${o.id}`} className="block">
+                  <Link href={`/organizations/${o.id}/manage`} className="block">
                     <Card className="flex items-center justify-between gap-3 p-4 transition-colors hover:bg-surface">
                       <span className="truncate text-sm font-semibold text-ink">
                         {o.name}
