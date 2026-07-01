@@ -2,8 +2,9 @@ import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { getT } from '@/i18n/server';
 import { getNavContext } from '@/lib/navigation-data';
-import { buildNavModel, type NavItem } from '@/lib/navigation';
+import { buildNavModel, type NavItem, type ActiveContextRef } from '@/lib/navigation';
 import { canAdminister, type MeGrant, type RoleCatalogEntry } from '@/lib/admin-scopes';
+import type { EmergencyAccess } from '@/lib/emergency-permissions';
 import { AppShell } from '@/components/organisms/app-shell';
 import type { ResolvedNavGroup } from '@/components/molecules/nav-group';
 import type { ResolvedNavItem } from '@/components/atoms/nav-item';
@@ -11,9 +12,13 @@ import type { ResolvedNavItem } from '@/components/atoms/nav-item';
 export async function DashboardLayout({
   children,
   emergencyContext,
+  activeContext,
+  activeEmergencyAccess,
 }: {
   children: ReactNode;
   emergencyContext?: ReactNode;
+  activeContext?: ActiveContextRef;
+  activeEmergencyAccess?: EmergencyAccess;
 }) {
   const { me, roles, notificationUnread, contexts } = await getNavContext();
   if (me == null) redirect('/login');
@@ -29,6 +34,8 @@ export async function DashboardLayout({
     isAdmin: me.isAdmin === true,
     canAdminister: canAdminister(grants, roleCatalog),
     notificationUnread,
+    ...(activeContext != null && { activeContext }),
+    ...(activeEmergencyAccess != null && { activeEmergencyAccess }),
   });
 
   const resolveItem = (it: NavItem): ResolvedNavItem => ({
