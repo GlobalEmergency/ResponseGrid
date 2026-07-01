@@ -97,6 +97,7 @@ export default async function RecipientResourcePage({ params }: Props) {
             tVerification={t.verification_badge}
             tStatusLight={t.status_light}
             locale={locale}
+            authed={token !== null}
           />
 
           {canPreRegister && (

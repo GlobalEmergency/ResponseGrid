@@ -5,7 +5,7 @@ import { SupplyLine } from '../../supplies/domain/supply-line';
 import { Category } from '../../supplies/domain/category';
 import { ResourceId } from '../domain/resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { ResourceType, ResourceStage } from '../domain/resource-enums';
+import { ResourceType } from '../domain/resource-enums';
 import { Location } from '../../../shared/domain/location';
 
 const EMG = '11111111-1111-4111-8111-111111111111';
@@ -15,7 +15,6 @@ const buildResource = (id: ResourceId, items: SupplyLine[] = []): Resource =>
     id,
     emergencyId: EmergencyId.fromString(EMG),
     type: ResourceType.Warehouse,
-    stage: ResourceStage.Origin,
     name: 'Acopio',
     location: Location.create({ address: 'X', latitude: 1, longitude: 2 }),
     ownerUserId: 'u1',

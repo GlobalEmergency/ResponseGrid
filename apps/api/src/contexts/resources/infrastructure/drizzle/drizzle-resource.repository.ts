@@ -17,7 +17,6 @@ import { ResourceId } from '../../domain/resource-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import {
   ResourceType,
-  ResourceStage,
   VerificationLevel,
   PublicStatus,
 } from '../../domain/resource-enums';
@@ -57,7 +56,6 @@ type RawRow = {
   id: string;
   emergency_id: string;
   type: string;
-  stage: string;
   name: string;
   description: string | null;
   address: string;
@@ -133,7 +131,6 @@ function rawRowToSnapshot(row: RawRow): ResourceSnapshot {
     id: row.id,
     emergencyId: row.emergency_id,
     type: row.type as ResourceType,
-    stage: row.stage as ResourceStage,
     name: row.name,
     description: row.description ?? null,
     location: {
@@ -181,7 +178,6 @@ function rowToSnapshot(row: Row, items: ItemsRow[] = []): ResourceSnapshot {
     id: row.id,
     emergencyId: row.emergencyId,
     type: row.type as ResourceType,
-    stage: row.stage as ResourceStage,
     name: row.name,
     description: row.description ?? null,
     location: {
@@ -235,7 +231,6 @@ export class DrizzleResourceRepository implements ResourceRepository {
           id: s.id,
           emergencyId: s.emergencyId,
           type: s.type,
-          stage: s.stage,
           name: s.name,
           description: s.description,
           address: s.location.address,

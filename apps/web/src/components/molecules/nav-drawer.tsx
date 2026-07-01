@@ -53,7 +53,7 @@ export function NavDrawer({
       </div>
 
       {open ? (
-        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={navAriaLabel}>
+        <div className="fixed inset-0 z-[2000]" role="dialog" aria-modal="true" aria-label={navAriaLabel}>
           <button
             type="button"
             aria-label={closeLabel}

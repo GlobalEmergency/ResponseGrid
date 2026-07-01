@@ -30,12 +30,6 @@ export class ResourceAlreadyPublishedError extends Error {
     this.name = 'ResourceAlreadyPublishedError';
   }
 }
-export class FinalRecipientMustBeDestinationError extends Error {
-  constructor(stage: string) {
-    super(`A final recipient must be at the destination stage; got "${stage}"`);
-    this.name = 'FinalRecipientMustBeDestinationError';
-  }
-}
 export class ResourceNotPendingError extends Error {
   constructor() {
     super('Only a resource pending verification can be discarded');

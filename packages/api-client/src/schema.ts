@@ -2879,6 +2879,11 @@ export interface components {
              */
             name: string;
             /**
+             * @description Optional soft link to the canonical supply master data.
+             * @example 1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8
+             */
+            supplyId?: string | null;
+            /**
              * @description Quantity (positive integer)
              * @example 100
              */
@@ -2893,11 +2898,6 @@ export interface components {
              * @enum {string}
              */
             category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
-            /**
-             * @description Optional soft link to the canonical supply master data.
-             * @example 1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8
-             */
-            supplyId?: string | null;
             /**
              * @description Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe… Optional, free-form (#61).
              * @example ampolla
@@ -2940,12 +2940,6 @@ export interface components {
              * @enum {string}
              */
             type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
-            /**
-             * @description Stage of the resource in the emergency supply chain
-             * @example origin
-             * @enum {string}
-             */
-            stage: "origin" | "intermediate" | "destination";
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
@@ -2992,7 +2986,7 @@ export interface components {
              */
             city?: string;
             /**
-             * @description Mark this resource as a final recipient of aid (requires the destination stage)
+             * @description Mark this resource as a final recipient of aid
              * @example true
              */
             isFinalRecipient?: boolean;
@@ -3067,11 +3061,6 @@ export interface components {
              * @enum {string}
              */
             type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
-            /**
-             * @example origin
-             * @enum {string}
-             */
-            stage: "origin" | "intermediate" | "destination";
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
@@ -3242,11 +3231,6 @@ export interface components {
              * @enum {string}
              */
             type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
-            /**
-             * @example origin
-             * @enum {string}
-             */
-            stage: "origin" | "intermediate" | "destination";
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
@@ -3353,11 +3337,6 @@ export interface components {
              * @enum {string}
              */
             type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
-            /**
-             * @example origin
-             * @enum {string}
-             */
-            stage: "origin" | "intermediate" | "destination";
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
@@ -3455,11 +3434,6 @@ export interface components {
              * @enum {string}
              */
             type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
-            /**
-             * @example origin
-             * @enum {string}
-             */
-            stage: "origin" | "intermediate" | "destination";
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
@@ -3558,11 +3532,6 @@ export interface components {
              * @enum {string}
              */
             type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
-            /**
-             * @example origin
-             * @enum {string}
-             */
-            stage: "origin" | "intermediate" | "destination";
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */

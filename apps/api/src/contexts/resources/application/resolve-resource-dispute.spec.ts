@@ -9,7 +9,6 @@ import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { ResourceId } from '../domain/resource-id';
 import {
   ResourceType,
-  ResourceStage,
   PublicStatus,
   VerificationLevel,
 } from '../domain/resource-enums';
@@ -49,7 +48,6 @@ describe('ResolveResourceDispute', () => {
     ).execute({
       emergencyId: EM,
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Acopio Centro',
       description: null,
       location: { address: 'Caracas', latitude: 10.48, longitude: -66.9 },

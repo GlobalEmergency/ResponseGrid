@@ -319,6 +319,7 @@ export const en = {
     // Citizen-reported validity (ficha 15)
     disputed_label: 'In review',
     report_cta: 'Something wrong? Let us know',
+    contact_login_required: 'Log in to view',
   },
 
   resource_detail: {

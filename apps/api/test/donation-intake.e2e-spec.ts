@@ -104,7 +104,6 @@ describe('Donation intake flow (e2e)', () => {
         id: RESOURCE,
         emergencyId: EM,
         type: 'collection_point',
-        stage: 'origin',
         name: 'Acopio E2E',
         address: 'Av. Test, Caracas',
         latitude: 10.4806,

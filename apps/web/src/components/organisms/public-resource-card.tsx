@@ -24,6 +24,7 @@ interface PublicResourceCardProps {
   locale?: Locale;
   /** When set, the card name links to the resource detail page (#59). */
   slug?: string;
+  authed?: boolean;
 }
 
 export function PublicResourceCard({
@@ -33,6 +34,7 @@ export function PublicResourceCard({
   tStatusLight,
   locale = 'es',
   slug,
+  authed = false,
 }: PublicResourceCardProps) {
   const typeLabels: Record<ResourceViewDto['type'], string> = {
     collection_point: t.type_collection_point,
@@ -44,14 +46,8 @@ export function PublicResourceCard({
     venue: t.type_venue,
   };
 
-  const stageLabels: Record<ResourceViewDto['stage'], string> = {
-    origin: t.stage_origin,
-    intermediate: t.stage_intermediate,
-    destination: t.stage_destination,
-  };
-
-  // Build the subtitle line: "tipo · etapa · ciudad, país" (omit nulls)
-  const subtitleParts: string[] = [typeLabels[resource.type], stageLabels[resource.stage]];
+  // Build the subtitle line: "tipo · ciudad, país" (omit nulls)
+  const subtitleParts: string[] = [typeLabels[resource.type]];
   const locationParts: string[] = [];
   if (resource.city != null) locationParts.push(resource.city);
   if (resource.country != null) locationParts.push(resource.country);
@@ -133,7 +129,15 @@ export function PublicResourceCard({
                   ? t.meta_contact_official
                   : t.meta_contact}
               </dt>
-              <dd>{resource.contact}</dd>
+              <dd>
+                {resource.verificationLevel === 'official' || authed ? (
+                  resource.contact
+                ) : (
+                  <span className="italic text-muted-soft/80">
+                    {t.contact_login_required}
+                  </span>
+                )}
+              </dd>
             </div>
           )}
           {resource.schedule != null && (

@@ -100,13 +100,3 @@ export function reportStatusLabel(status: string, ta: AdminMessages): string {
   return key ? ta[key] : status;
 }
 
-const STAGE_KEYS: Record<string, keyof AdminMessages> = {
-  origin: 'centros_detail_stage_origin',
-  intermediate: 'centros_detail_stage_intermediate',
-  destination: 'centros_detail_stage_destination',
-};
-
-export function stageLabel(stage: string, ta: AdminMessages): string {
-  const key = STAGE_KEYS[stage];
-  return key ? ta[key] : stage;
-}

@@ -9,7 +9,6 @@ import { parseSupplyLines } from '@/lib/supply-lines';
 import { getT } from '@/i18n/server';
 
 type ResourceType = components['schemas']['RegisterResourceDto']['type'];
-type Stage = components['schemas']['RegisterResourceDto']['stage'];
 
 function isMaterialCategory(v: string): boolean {
   return (MATERIAL_CATEGORIES as readonly string[]).includes(v);
@@ -30,14 +29,8 @@ const VALID_TYPES: ResourceType[] = [
   'venue',
 ];
 
-const VALID_STAGES: Stage[] = ['origin', 'intermediate', 'destination'];
-
 function isResourceType(value: unknown): value is ResourceType {
   return VALID_TYPES.includes(value as ResourceType);
-}
-
-function isStage(value: unknown): value is Stage {
-  return VALID_STAGES.includes(value as Stage);
 }
 
 export async function registerResource(
@@ -51,7 +44,6 @@ export async function registerResource(
   const { t } = await getT();
 
   const rawType = formData.get('type');
-  const rawStage = formData.get('stage');
   const rawName = formData.get('name');
   const rawDescription = formData.get('description');
   const rawAddress = formData.get('address');
@@ -63,9 +55,6 @@ export async function registerResource(
 
   if (!isResourceType(rawType)) {
     return { status: 'error', message: t.registrar.err_invalid_type };
-  }
-  if (!isStage(rawStage)) {
-    return { status: 'error', message: t.registrar.err_invalid_stage };
   }
   if (name.length < 2) {
     return { status: 'error', message: t.registrar.err_name_too_short };
@@ -110,7 +99,6 @@ export async function registerResource(
       headers: authHeaders(token),
       body: {
         type: rawType,
-        stage: rawStage,
         name,
         ...(description !== undefined ? { description } : {}),
         location: { address, latitude, longitude },

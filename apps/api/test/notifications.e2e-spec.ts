@@ -34,7 +34,6 @@ const MEM_COORD_N = 'f0000003-0000-4000-8000-000000000020';
 
 const BASE_RESOURCE = {
   type: 'warehouse',
-  stage: 'origin',
   name: 'Almacén Notif E2E',
   location: {
     address: 'Av. Test, Valencia',

@@ -334,6 +334,7 @@ export const es = {
     // Validez reportada por ciudadanos (ficha 15)
     disputed_label: 'En verificación',
     report_cta: '¿Algo va mal? Avísanos',
+    contact_login_required: 'Inicia sesión para ver',
   },
 
   resource_detail: {

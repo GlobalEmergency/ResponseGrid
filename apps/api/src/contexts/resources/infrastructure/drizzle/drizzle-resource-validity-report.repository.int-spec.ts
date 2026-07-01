@@ -6,7 +6,7 @@ import { DrizzleResourceRepository } from './drizzle-resource.repository';
 import { Resource } from '../../domain/resource';
 import { ResourceId } from '../../domain/resource-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
-import { ResourceType, ResourceStage } from '../../domain/resource-enums';
+import { ResourceType } from '../../domain/resource-enums';
 import { Location } from '../../../../shared/domain/location';
 import {
   ResourceValidityReport,
@@ -43,7 +43,6 @@ describe('DrizzleResourceValidityReportRepository (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Acopio Integración',
       location: Location.create({
         address: 'Caracas',

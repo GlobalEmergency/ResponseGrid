@@ -153,7 +153,6 @@ describe('Coordinator scope authz (e2e)', () => {
         .set('Authorization', `Bearer ${coordToken}`)
         .send({
           type: 'warehouse',
-          stage: 'origin',
           name: 'My Resource',
           location: baseLocation,
         })
@@ -182,7 +181,6 @@ describe('Coordinator scope authz (e2e)', () => {
         .set('Authorization', `Bearer ${ownerToken}`)
         .send({
           type: 'warehouse',
-          stage: 'origin',
           name: 'Other EM Resource',
           location: baseLocation,
         })
@@ -213,7 +211,6 @@ describe('Coordinator scope authz (e2e)', () => {
         .set('Authorization', `Bearer ${coordToken}`)
         .send({
           type: 'venue',
-          stage: 'destination',
           name: 'Publishable Resource',
           location: baseLocation,
         })
@@ -245,7 +242,6 @@ describe('Coordinator scope authz (e2e)', () => {
         .set('Authorization', `Bearer ${ownerToken}`)
         .send({
           type: 'warehouse',
-          stage: 'origin',
           name: 'Other EM Resource 2',
           location: baseLocation,
         })

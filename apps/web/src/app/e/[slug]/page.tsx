@@ -173,6 +173,7 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
         description: te.points_empty_description,
       }}
       locale={locale}
+      authed={token !== null}
     />
   );
 
@@ -211,14 +212,14 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
       <div className="lg:flex lg:items-start">
         <section
           aria-labelledby="map-heading"
-          className="relative lg:sticky lg:top-0 lg:h-screen lg:w-[58%] lg:shrink-0"
+          className="sticky top-0 z-30 w-full lg:h-screen lg:w-[58%] lg:shrink-0 lg:z-10"
         >
           <h2 id="map-heading" className="sr-only">{te.map_heading}</h2>
           <EmergencyMapWrapper
             points={mapPoints}
             emergencyId={emergencyId}
             slug={slug}
-            containerClassName="h-[44vh] min-h-[300px] max-h-[480px] border-y border-line lg:h-full lg:min-h-0 lg:max-h-none lg:border-y-0 lg:border-r"
+            containerClassName="h-[35vh] min-h-[220px] max-h-[350px] border-y border-line lg:h-full lg:min-h-0 lg:max-h-none lg:border-y-0 lg:border-r"
           />
           <div className="pointer-events-none absolute bottom-3 left-3 z-[500] flex max-w-[calc(100%-1.5rem)] flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-line bg-white/95 px-3 py-2 text-[11px] font-medium text-muted shadow-md backdrop-blur-sm">
             {legendItems.map((item) => (

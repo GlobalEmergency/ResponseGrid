@@ -1,7 +1,6 @@
 import { Resource } from '../domain/resource';
 import {
   ResourceType,
-  ResourceStage,
   VerificationLevel,
   PublicStatus,
 } from '../domain/resource-enums';
@@ -11,7 +10,6 @@ import { Category } from '../../supplies/domain/category';
 export interface ResourceView {
   id: string;
   type: ResourceType;
-  stage: ResourceStage;
   name: string;
   description: string | null;
   location: LocationProps;
@@ -55,7 +53,6 @@ export function toResourceView(r: Resource): ResourceView {
   return {
     id: r.id.value,
     type: r.type,
-    stage: r.stage,
     name: r.name,
     description: r.description,
     location: r.location.toPlain(),

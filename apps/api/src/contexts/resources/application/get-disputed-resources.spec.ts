@@ -6,11 +6,7 @@ import { PublishResource } from './publish-resource';
 import { InMemoryResourceRepository } from '../infrastructure/in-memory-resource.repository';
 import { InMemoryResourceValidityReportRepository } from '../infrastructure/in-memory-resource-validity-report.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
-import {
-  ResourceType,
-  ResourceStage,
-  PublicStatus,
-} from '../domain/resource-enums';
+import { ResourceType, PublicStatus } from '../domain/resource-enums';
 import { ResourceId } from '../domain/resource-id';
 import { ValidityReason } from '../domain/resource-validity-report';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
@@ -44,7 +40,6 @@ describe('GetDisputedResources', () => {
     ).execute({
       emergencyId: EM,
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Acopio Centro',
       description: null,
       location: { address: 'Caracas', latitude: 10.48, longitude: -66.9 },
