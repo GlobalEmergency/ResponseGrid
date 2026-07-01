@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { getMe, getRoles } from '@/lib/navigation-data';
@@ -43,7 +43,7 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
 
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/recepcion`);
+    redirect(loginHref(`/e/${slug}/recepcion`));
   }
 
   const emergency = await getEmergencyBySlug(slug);
@@ -57,7 +57,7 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
   const [me, roles] = await Promise.all([getMe(), getRoles()]);
   if (me == null) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/recepcion`);
+    redirect(loginHref(`/e/${slug}/recepcion`));
   }
 
   const access: EmergencyAccess = resolveEmergencyAccess(
@@ -82,7 +82,7 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
   });
   if (mineRes.response.status === 401) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/recepcion`);
+    redirect(loginHref(`/e/${slug}/recepcion`));
   }
   const myPoints = (mineRes.data ?? []).filter((r) =>
     COLLECTION_TYPES.has(r.type),

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
 import { PageContainer } from '@/components/molecules/page-container';
@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function MisDonacionesPage() {
   const token = await getToken();
   if (token === null) {
-    redirect('/login?next=/panel/mis-donaciones');
+    redirect(loginHref('/panel/mis-donaciones'));
   }
 
   const { t, locale } = await getT();
@@ -40,7 +40,7 @@ export default async function MisDonacionesPage() {
   });
   if (res.response.status === 401) {
     await clearToken();
-    redirect('/login?next=/panel/mis-donaciones');
+    redirect(loginHref('/panel/mis-donaciones'));
   }
   const donations = res.data ?? [];
 

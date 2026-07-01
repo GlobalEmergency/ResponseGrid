@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { getToken, authHeaders } from '@/lib/auth';
+import { loginHref, getToken, authHeaders } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 export type NotificationActionResult =
@@ -20,7 +20,7 @@ export async function markNotificationReadAction(
 ): Promise<NotificationActionResult> {
   const token = await getToken();
   if (!token) {
-    redirect('/login?next=/panel/notificaciones');
+    redirect(loginHref('/panel/notificaciones'));
   }
 
   const { t } = await getT();
@@ -31,7 +31,7 @@ export async function markNotificationReadAction(
   });
 
   if (error !== undefined) {
-    if (response.status === 401) redirect('/login?next=/panel/notificaciones');
+    if (response.status === 401) redirect(loginHref('/panel/notificaciones'));
     if (response.status === 403) {
       return { status: 'error', message: t.notificaciones.err_mark_read_forbidden };
     }
@@ -49,7 +49,7 @@ export async function markNotificationReadAction(
 export async function markAllNotificationsReadAction(): Promise<NotificationActionResult> {
   const token = await getToken();
   if (!token) {
-    redirect('/login?next=/panel/notificaciones');
+    redirect(loginHref('/panel/notificaciones'));
   }
 
   const { t } = await getT();
@@ -59,7 +59,7 @@ export async function markAllNotificationsReadAction(): Promise<NotificationActi
   });
 
   if (error !== undefined) {
-    if (response.status === 401) redirect('/login?next=/panel/notificaciones');
+    if (response.status === 401) redirect(loginHref('/panel/notificaciones'));
     return { status: 'error', message: t.notificaciones.err_mark_all_read_failed };
   }
 

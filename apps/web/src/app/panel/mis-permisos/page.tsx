@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { getToken, authHeaders } from '@/lib/auth';
+import { loginHref, getToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { scopeLabel } from '@/lib/permissions';
 import { formatDate } from '@/lib/format-date';
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export default async function MisPermisosPage() {
   const token = await getToken();
   if (!token) {
-    redirect('/login?next=/panel/mis-permisos');
+    redirect(loginHref('/panel/mis-permisos'));
   }
 
   const [{ data: me, response: meRes }, { data: roles }] = await Promise.all([
@@ -27,7 +27,7 @@ export default async function MisPermisosPage() {
   ]);
 
   if (meRes.status === 401 || !me) {
-    redirect('/login?next=/panel/mis-permisos');
+    redirect(loginHref('/panel/mis-permisos'));
   }
 
   const roleMap = new Map((roles ?? []).map((r) => [r.id, r]));

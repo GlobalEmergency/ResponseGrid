@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { getToken, authHeaders } from '@/lib/auth';
+import { loginHref, getToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { submitReport } from './actions';
 import { ReportForm } from './report-form';
@@ -34,7 +34,7 @@ export default async function ReportarPage({ params, searchParams }: Props) {
 
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/reportar`);
+    redirect(loginHref(`/e/${slug}/reportar`));
   }
 
   const emergency = await getEmergencyBySlug(slug);

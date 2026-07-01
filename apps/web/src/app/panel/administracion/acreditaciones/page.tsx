@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { getToken, authHeaders } from '@/lib/auth';
+import { loginHref, getToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { fetchAccreditations } from './actions';
 import { GrantAccreditationForm } from './grant-form';
@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AcreditacionesPage() {
   const token = await getToken();
   if (!token) {
-    redirect('/login?next=/panel/administracion/acreditaciones');
+    redirect(loginHref('/panel/administracion/acreditaciones'));
   }
 
   const { data: me, response: meResponse } = await api.GET('/auth/me', {
@@ -32,7 +32,7 @@ export default async function AcreditacionesPage() {
   });
 
   if (meResponse.status === 401 || !me) {
-    redirect('/login?next=/panel/administracion/acreditaciones');
+    redirect(loginHref('/panel/administracion/acreditaciones'));
   }
 
   if (!me.isAdmin) {

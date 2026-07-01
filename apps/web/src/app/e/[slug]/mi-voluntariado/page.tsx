@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { getToken } from '@/lib/auth';
+import { loginHref, getToken } from '@/lib/auth';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { fetchMyVolunteerProfile, fetchMyTasks } from './actions';
 import { TaskCard } from './task-card';
@@ -63,7 +63,7 @@ export default async function MiVoluntariadoPage({ params }: Props) {
 
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/mi-voluntariado`);
+    redirect(loginHref(`/e/${slug}/mi-voluntariado`));
   }
 
   const emergency = await getEmergencyBySlug(slug);

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { getToken, authHeaders } from '@/lib/auth';
+import { loginHref, getToken, authHeaders } from '@/lib/auth';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { NotificationItem } from '@/components/molecules/notification-item';
 import { PageContainer } from '@/components/molecules/page-container';
@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function NotificacionesPage() {
   const token = await getToken();
   if (!token) {
-    redirect('/login?next=/panel/notificaciones');
+    redirect(loginHref('/panel/notificaciones'));
   }
 
   const { data } = await api.GET('/notifications/mine', {

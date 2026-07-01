@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 import type { components } from '@reliefhub/api-client';
 
@@ -35,7 +35,7 @@ export async function createShipment(
 ): Promise<ActionResult> {
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion/expediciones`);
+    redirect(loginHref(`/e/${slug}/coordinacion/expediciones`));
   }
 
   const { t } = await getT();
@@ -67,7 +67,7 @@ export async function createShipment(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(`/login?next=/e/${slug}/coordinacion/expediciones`);
+      redirect(loginHref(`/e/${slug}/coordinacion/expediciones`));
     }
     if (response.status === 403) {
       return { status: 'error', message: ts.ship_err_no_permission_create };
@@ -95,7 +95,7 @@ export async function assignCapacity(
 ): Promise<ActionResult> {
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion/expediciones`);
+    redirect(loginHref(`/e/${slug}/coordinacion/expediciones`));
   }
 
   const { t } = await getT();
@@ -117,7 +117,7 @@ export async function assignCapacity(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(`/login?next=/e/${slug}/coordinacion/expediciones`);
+      redirect(loginHref(`/e/${slug}/coordinacion/expediciones`));
     }
     if (response.status === 403) {
       return { status: 'error', message: ts.ship_err_no_permission_assign };
@@ -146,7 +146,7 @@ export async function getCapacitySuggestions(
 ): Promise<SuggestionsResult> {
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion/expediciones`);
+    redirect(loginHref(`/e/${slug}/coordinacion/expediciones`));
   }
 
   const { t } = await getT();
@@ -163,7 +163,7 @@ export async function getCapacitySuggestions(
   if (error !== undefined || data === undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(`/login?next=/e/${slug}/coordinacion/expediciones`);
+      redirect(loginHref(`/e/${slug}/coordinacion/expediciones`));
     }
     if (response.status === 403) {
       return { status: 'error', message: ts.ship_err_no_permission_assign };
@@ -187,7 +187,7 @@ export async function markInTransit(
 ): Promise<ActionResult> {
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=${loginNext}`);
+    redirect(loginHref(loginNext));
   }
 
   const { t } = await getT();
@@ -204,7 +204,7 @@ export async function markInTransit(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(`/login?next=${loginNext}`);
+      redirect(loginHref(loginNext));
     }
     if (response.status === 403) {
       return { status: 'error', message: ts.ship_err_no_permission_act };
@@ -230,7 +230,7 @@ export async function confirmDelivery(
 ): Promise<ActionResult> {
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=${loginNext}`);
+    redirect(loginHref(loginNext));
   }
 
   const { t } = await getT();
@@ -247,7 +247,7 @@ export async function confirmDelivery(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(`/login?next=${loginNext}`);
+      redirect(loginHref(loginNext));
     }
     if (response.status === 403) {
       return { status: 'error', message: ts.ship_err_no_permission_act };
@@ -271,7 +271,7 @@ export async function cancelShipment(
 ): Promise<ActionResult> {
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion/expediciones`);
+    redirect(loginHref(`/e/${slug}/coordinacion/expediciones`));
   }
 
   const { t } = await getT();
@@ -288,7 +288,7 @@ export async function cancelShipment(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(`/login?next=/e/${slug}/coordinacion/expediciones`);
+      redirect(loginHref(`/e/${slug}/coordinacion/expediciones`));
     }
     if (response.status === 403) {
       return { status: 'error', message: ts.ship_err_no_permission_cancel };

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { getToken } from '@/lib/auth';
+import { loginHref, getToken } from '@/lib/auth';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { fetchMyResources } from './actions';
 import { StatusForm } from './status-form';
@@ -49,7 +49,7 @@ export default async function MisPuntosPage({ params }: Props) {
 
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/mis-puntos`);
+    redirect(loginHref(`/e/${slug}/mis-puntos`));
   }
 
   const emergency = await getEmergencyBySlug(slug);

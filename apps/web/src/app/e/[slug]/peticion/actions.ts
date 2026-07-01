@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
-import { getToken, authHeaders, clearToken } from '@/lib/auth';
+import { loginHref, getToken, authHeaders, clearToken } from '@/lib/auth';
 import { ALL_CATEGORIES } from '@/lib/categories';
 import { parseSupplyLines } from '@/lib/supply-lines';
 import { getT } from '@/i18n/server';
@@ -36,7 +36,7 @@ export async function submitPeticion(
 ): Promise<PeticionState> {
   const token = await getToken();
   if (!token) {
-    redirect(`/login?next=/e/${slug}/peticion`);
+    redirect(loginHref(`/e/${slug}/peticion`));
   }
 
   const { t } = await getT();
@@ -116,7 +116,7 @@ export async function submitPeticion(
 
   if (response.status === 401) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/peticion`);
+    redirect(loginHref(`/e/${slug}/peticion`));
   }
 
   if (response.status === 409) {

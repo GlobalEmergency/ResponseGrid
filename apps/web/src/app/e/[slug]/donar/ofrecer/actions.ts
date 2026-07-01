@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
-import { getToken, authHeaders, clearToken } from '@/lib/auth';
+import { loginHref, getToken, authHeaders, clearToken } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 import { MATERIAL_CATEGORIES } from '@/lib/categories';
 
@@ -30,7 +30,7 @@ export async function submitOffer(
 ): Promise<OfferState> {
   const token = await getToken();
   if (!token) {
-    redirect(`/login?next=/e/${slug}/donar/ofrecer`);
+    redirect(loginHref(`/e/${slug}/donar/ofrecer`));
   }
 
   const { t } = await getT();
@@ -132,7 +132,7 @@ export async function submitOffer(
 
   if (response.status === 401) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/donar/ofrecer`);
+    redirect(loginHref(`/e/${slug}/donar/ofrecer`));
   }
 
   if (response.status === 409) {

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { getMe, getRoles } from '@/lib/navigation-data';
@@ -37,7 +37,7 @@ export default async function CoordinacionDisputesPage({ params }: Props) {
 
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion/puntos-en-duda`);
+    redirect(loginHref(`/e/${slug}/coordinacion/puntos-en-duda`));
   }
 
   const emergency = await getEmergencyBySlug(slug);
@@ -51,7 +51,7 @@ export default async function CoordinacionDisputesPage({ params }: Props) {
   const [me, roles] = await Promise.all([getMe(), getRoles()]);
   if (me == null) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/coordinacion/puntos-en-duda`);
+    redirect(loginHref(`/e/${slug}/coordinacion/puntos-en-duda`));
   }
 
   const access: EmergencyAccess = resolveEmergencyAccess(
@@ -72,7 +72,7 @@ export default async function CoordinacionDisputesPage({ params }: Props) {
 
   if (result.response.status === 401) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/coordinacion/puntos-en-duda`);
+    redirect(loginHref(`/e/${slug}/coordinacion/puntos-en-duda`));
   }
   if (result.response.status === 403) {
     redirect(`/e/${slug}/coordinacion`);

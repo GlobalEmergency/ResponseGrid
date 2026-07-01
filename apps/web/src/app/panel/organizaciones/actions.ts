@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { getToken, authHeaders } from '@/lib/auth';
+import { loginHref, getToken, authHeaders } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 export type OrgActionResult =
@@ -17,7 +17,7 @@ export async function createOrganizationAction(
 ): Promise<OrgActionResult> {
   const token = await getToken();
   if (!token) {
-    redirect('/login?next=/panel/organizaciones');
+    redirect(loginHref('/panel/organizaciones'));
   }
 
   const { t } = await getT();
@@ -41,7 +41,7 @@ export async function createOrganizationAction(
   });
 
   if (error !== undefined || data === undefined) {
-    if (response.status === 401) redirect('/login?next=/panel/organizaciones');
+    if (response.status === 401) redirect(loginHref('/panel/organizaciones'));
     return { status: 'error', message: t.organizaciones.err_create_failed };
   }
 
@@ -56,7 +56,7 @@ export async function addMemberAction(
 ): Promise<OrgActionResult> {
   const token = await getToken();
   if (!token) {
-    redirect(`/login?next=/panel/organizaciones/${orgId}`);
+    redirect(loginHref(`/panel/organizaciones/${orgId}`));
   }
 
   const { t } = await getT();
@@ -73,7 +73,7 @@ export async function addMemberAction(
   });
 
   if (error !== undefined) {
-    if (response.status === 401) redirect(`/login?next=/panel/organizaciones/${orgId}`);
+    if (response.status === 401) redirect(loginHref(`/panel/organizaciones/${orgId}`));
     if (response.status === 403) {
       return { status: 'error', message: t.organizaciones.err_owner_only };
     }
@@ -96,7 +96,7 @@ export async function removeMemberAction(
 ): Promise<OrgActionResult> {
   const token = await getToken();
   if (!token) {
-    redirect(`/login?next=/panel/organizaciones/${orgId}`);
+    redirect(loginHref(`/panel/organizaciones/${orgId}`));
   }
 
   const { t } = await getT();
@@ -107,7 +107,7 @@ export async function removeMemberAction(
   });
 
   if (error !== undefined) {
-    if (response.status === 401) redirect(`/login?next=/panel/organizaciones/${orgId}`);
+    if (response.status === 401) redirect(loginHref(`/panel/organizaciones/${orgId}`));
     if (response.status === 403) {
       return { status: 'error', message: t.organizaciones.err_owner_only };
     }

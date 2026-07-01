@@ -1,6 +1,6 @@
 'use server';
 
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { api } from '@/lib/api';
@@ -21,8 +21,7 @@ export type RecordEntryResult =
 // Unlike the public listing, returns resources of every status and
 // verification level (admin-only view).
 export async function fetchAdminResources(): Promise<ResourceAdminListItem[]> {
-  const token = await getToken();
-  if (!token) redirect('/login?next=/panel/administracion/centros');
+  const token = await requireSession('/panel/administracion/centros');
 
   // Pull a generous page: the client filters/searches in-memory like the
   // users/organizations lists. (Pagination can be layered on later if needed.)
@@ -34,7 +33,7 @@ export async function fetchAdminResources(): Promise<ResourceAdminListItem[]> {
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect('/login?next=/panel/administracion/centros');
+      redirect(loginHref('/panel/administracion/centros'));
     }
     return [];
   }
@@ -46,8 +45,7 @@ export async function fetchAdminResources(): Promise<ResourceAdminListItem[]> {
 export async function fetchAdminResourceDetail(
   id: string,
 ): Promise<ResourceAdminDetail | null> {
-  const token = await getToken();
-  if (!token) redirect(`/login?next=/panel/administracion/centros/${id}`);
+  const token = await requireSession(`/panel/administracion/centros/${id}`);
 
   const { data, error, response } = await api.GET('/resources/{id}', {
     params: { path: { id } },
@@ -57,7 +55,7 @@ export async function fetchAdminResourceDetail(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(`/login?next=/panel/administracion/centros/${id}`);
+      redirect(loginHref(`/panel/administracion/centros/${id}`));
     }
     if (response.status === 404) return null;
     return null;
@@ -73,8 +71,7 @@ export async function recordInventoryEntry(
   resourceId: string,
   items: SupplyLineInput[],
 ): Promise<RecordEntryResult> {
-  const token = await getToken();
-  if (!token) redirect(`/login?next=/panel/administracion/centros/${resourceId}`);
+  const token = await requireSession(`/panel/administracion/centros/${resourceId}`);
 
   const { t } = await getT();
   const ta = t.admin;
@@ -95,7 +92,7 @@ export async function recordInventoryEntry(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(`/login?next=/panel/administracion/centros/${resourceId}`);
+      redirect(loginHref(`/panel/administracion/centros/${resourceId}`));
     }
     if (response.status === 403) {
       return { status: 'error', message: ta.centros_detail_inv_err_forbidden };

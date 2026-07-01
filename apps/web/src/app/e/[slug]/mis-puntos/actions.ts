@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
 import type { components } from '@reliefhub/api-client';
@@ -20,7 +20,7 @@ export async function fetchMyResources(
 ): Promise<components['schemas']['ResourceViewDto'][]> {
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/mis-puntos`);
+    redirect(loginHref(`/e/${slug}/mis-puntos`));
   }
 
   const { data, response } = await api.GET(
@@ -33,7 +33,7 @@ export async function fetchMyResources(
 
   if (response.status === 401) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/mis-puntos`);
+    redirect(loginHref(`/e/${slug}/mis-puntos`));
   }
 
   if (!response.ok || data == null) {
@@ -50,7 +50,7 @@ export async function updateResourceStatus(
 ): Promise<ActionResult> {
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/mis-puntos`);
+    redirect(loginHref(`/e/${slug}/mis-puntos`));
   }
 
   const { response } = await api.POST('/resources/{resourceId}/status', {
@@ -62,7 +62,7 @@ export async function updateResourceStatus(
 
   if (response.status === 401) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/mis-puntos`);
+    redirect(loginHref(`/e/${slug}/mis-puntos`));
   }
 
   if (response.status === 403) {

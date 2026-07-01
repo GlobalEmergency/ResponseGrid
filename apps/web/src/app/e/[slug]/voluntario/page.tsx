@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { getToken, authHeaders } from '@/lib/auth';
+import { loginHref, getToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { registerVolunteer } from './actions';
@@ -39,7 +39,7 @@ export default async function VoluntarioPage({ params }: Props) {
 
   const token = await getToken();
   if (!token) {
-    redirect(`/login?next=/e/${slug}/voluntario`);
+    redirect(loginHref(`/e/${slug}/voluntario`));
   }
 
   const emergency = await getEmergencyBySlug(slug);

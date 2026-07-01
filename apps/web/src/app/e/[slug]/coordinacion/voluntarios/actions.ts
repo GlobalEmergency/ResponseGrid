@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 export type ActionResult =
@@ -18,7 +18,7 @@ export async function updateVolunteerStatus(
 ): Promise<ActionResult> {
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
+    redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
   }
 
   const { t } = await getT();
@@ -32,7 +32,7 @@ export async function updateVolunteerStatus(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
+      redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.vol_err_no_permission_status };
@@ -54,7 +54,7 @@ export async function createTask(
 ): Promise<ActionResult> {
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
+    redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
   }
 
   const { t } = await getT();
@@ -101,7 +101,7 @@ export async function createTask(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
+      redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.vol_err_no_permission_create };
@@ -120,7 +120,7 @@ export async function assignVolunteer(
 ): Promise<ActionResult> {
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
+    redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
   }
 
   const { t } = await getT();
@@ -134,7 +134,7 @@ export async function assignVolunteer(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
+      redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.vol_err_no_permission_assign };
@@ -159,7 +159,7 @@ export async function unassignVolunteer(
 ): Promise<ActionResult> {
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
+    redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
   }
 
   const { t } = await getT();
@@ -173,7 +173,7 @@ export async function unassignVolunteer(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
+      redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.vol_err_no_permission_unassign };
@@ -197,7 +197,7 @@ export async function completeTask(
 ): Promise<ActionResult> {
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
+    redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
   }
 
   const { t } = await getT();
@@ -210,7 +210,7 @@ export async function completeTask(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
+      redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.vol_err_no_permission_complete };
@@ -231,7 +231,7 @@ export async function cancelTask(
 ): Promise<ActionResult> {
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
+    redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
   }
 
   const { t } = await getT();
@@ -244,7 +244,7 @@ export async function cancelTask(
   if (error !== undefined) {
     if (response.status === 401) {
       await clearToken();
-      redirect(`/login?next=/e/${slug}/coordinacion/voluntarios`);
+      redirect(loginHref(`/e/${slug}/coordinacion/voluntarios`));
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.vol_err_no_permission_cancel };

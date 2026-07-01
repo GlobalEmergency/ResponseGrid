@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { getMe, getRoles } from '@/lib/navigation-data';
@@ -38,7 +38,7 @@ export default async function IntakeDetailPage({ params }: Props) {
 
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=${next}`);
+    redirect(loginHref(next));
   }
 
   const emergency = await getEmergencyBySlug(slug);
@@ -51,7 +51,7 @@ export default async function IntakeDetailPage({ params }: Props) {
   const [me, roles] = await Promise.all([getMe(), getRoles()]);
   if (me == null) {
     await clearToken();
-    redirect(`/login?next=${next}`);
+    redirect(loginHref(next));
   }
 
   const access: EmergencyAccess = resolveEmergencyAccess(
@@ -69,7 +69,7 @@ export default async function IntakeDetailPage({ params }: Props) {
   });
   if (res.response.status === 401) {
     await clearToken();
-    redirect(`/login?next=${next}`);
+    redirect(loginHref(next));
   }
   if (res.response.status === 403) {
     redirect(`/e/${slug}/recepcion`);

@@ -1,4 +1,11 @@
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { loginHref } from './safe-next';
+
+// Re-exported so server callers can pull the login-redirect contract and the
+// session gate from one place (`@/lib/auth`); defined in `safe-next` because it
+// is pure and must stay importable from client components too.
+export { loginHref };
 
 const COOKIE_NAME = 'rh_token';
 
@@ -49,4 +56,19 @@ export async function clearToken(): Promise<void> {
  */
 export function authHeaders(token: string): { Authorization: string } {
   return { Authorization: `Bearer ${token}` };
+}
+
+/**
+ * Coarse authentication gate for Server Components and Server Actions: returns
+ * the session token, or redirects to login — preserving `next` — when there is
+ * no session cookie.
+ *
+ * It only checks for the presence of the cookie; it does NOT validate the token
+ * against the API. Callers that additionally call `/auth/me` still handle a 401
+ * from that call and redirect via {@link loginHref}.
+ */
+export async function requireSession(next?: string | null): Promise<string> {
+  const token = await getToken();
+  if (!token) redirect(loginHref(next));
+  return token;
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { getToken } from '@/lib/auth';
+import { loginHref, getToken } from '@/lib/auth';
 import { reportValidity } from './actions';
 import { ReportValidezForm } from './report-validez-form';
 import { PageHeaderBand } from '@/components/molecules/page-header-band';
@@ -34,7 +34,7 @@ export default async function ReportarEstadoPage({ params }: Props) {
 
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/recursos/${resourceId}/reportar-estado`);
+    redirect(loginHref(`/e/${slug}/recursos/${resourceId}/reportar-estado`));
   }
 
   const emergency = await getEmergencyBySlug(slug);

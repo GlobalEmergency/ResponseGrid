@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { getToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { PageHeader } from '@/components/molecules/page-header';
 import { EmptyState } from '@/components/molecules/empty-state';
@@ -30,14 +30,13 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function OrganizacionDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const token = await getToken();
-  if (!token) redirect(`/login?next=/panel/administracion/organizaciones/${id}`);
+  const token = await requireSession(`/panel/administracion/organizaciones/${id}`);
 
   const { data: me, response: meResponse } = await api.GET('/auth/me', {
     headers: authHeaders(token),
   });
   if (meResponse.status === 401 || !me) {
-    redirect(`/login?next=/panel/administracion/organizaciones/${id}`);
+    redirect(loginHref(`/panel/administracion/organizaciones/${id}`));
   }
   if (!me.isAdmin) redirect('/');
 

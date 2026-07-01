@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { EmptyState } from '@/components/molecules/empty-state';
@@ -41,7 +41,7 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
 
   const token = await getToken();
   if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion/reportes`);
+    redirect(loginHref(`/e/${slug}/coordinacion/reportes`));
   }
 
   const emergency = await getEmergencyBySlug(slug);
@@ -89,7 +89,7 @@ export default async function CoordinacionReportesPage({ params, searchParams }:
 
   if (response.status === 401) {
     await clearToken();
-    redirect(`/login?next=/e/${slug}/coordinacion/reportes`);
+    redirect(loginHref(`/e/${slug}/coordinacion/reportes`));
   }
 
   if (response.status === 403) {

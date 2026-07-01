@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { getToken } from '@/lib/auth';
+import { loginHref, getToken } from '@/lib/auth';
 import { OrgSelector } from '@/components/molecules/org-selector';
 import { LocationPicker } from '@/components/organisms/location-picker';
 import { registerResource } from './actions';
@@ -35,7 +35,7 @@ export default async function RegistrarPage({ params }: Props) {
 
   const token = await getToken();
   if (!token) {
-    redirect(`/login?next=/e/${slug}/registrar`);
+    redirect(loginHref(`/e/${slug}/registrar`));
   }
 
   const emergency = await getEmergencyBySlug(slug);

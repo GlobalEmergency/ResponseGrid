@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { getToken } from '@/lib/auth';
+import { loginHref, getToken } from '@/lib/auth';
 import {
   fetchGroup,
   fetchGroupMembers,
@@ -27,7 +27,7 @@ export default async function GroupDetailPage({ params }: Props) {
 
   const token = await getToken();
   if (!token) {
-    redirect(`/login?next=/panel/grupos/${id}`);
+    redirect(loginHref(`/panel/grupos/${id}`));
   }
 
   const group = await fetchGroup(id);
