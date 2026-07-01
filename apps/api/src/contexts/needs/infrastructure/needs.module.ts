@@ -35,6 +35,11 @@ import {
 } from '../domain/ports/personnel-task-creator.port';
 import { DrizzleNeedRepository } from './drizzle/drizzle-need.repository';
 import { DrizzleEmergencyStatusReader } from '../../../shared/drizzle-emergency-status-reader';
+import {
+  NEED_RESOURCE_READER,
+  NeedResourceReader,
+} from '../domain/ports/resource-reader';
+import { DrizzleNeedResourceReader } from './drizzle/drizzle-need-resource-reader';
 import { BullMqEventBus } from './bullmq-event-bus';
 import { IdentityModule } from '../../identity/infrastructure/identity.module';
 import { DrizzleVolunteerMatcher } from '../../volunteers/infrastructure/drizzle/drizzle-volunteer-matcher';
@@ -89,14 +94,26 @@ const eventBusProvider = {
     new BullMqEventBus(eventQueue.queue),
 };
 
+const resourceReaderProvider = {
+  provide: NEED_RESOURCE_READER,
+  inject: [DB],
+  useFactory: (db: Db): NeedResourceReader => new DrizzleNeedResourceReader(db),
+};
+
 const createNeedProvider = {
   provide: CreateNeed,
-  inject: [NEED_REPOSITORY, EVENT_BUS, NEED_EMERGENCY_STATUS_READER],
+  inject: [
+    NEED_REPOSITORY,
+    EVENT_BUS,
+    NEED_EMERGENCY_STATUS_READER,
+    NEED_RESOURCE_READER,
+  ],
   useFactory: (
     repo: NeedRepository,
     bus: EventBus,
     statusReader: NeedEmergencyStatusReader,
-  ) => new CreateNeed(repo, bus, statusReader),
+    resourceReader: NeedResourceReader,
+  ) => new CreateNeed(repo, bus, statusReader, resourceReader),
 };
 
 const validateNeedProvider = {
@@ -210,6 +227,7 @@ const createTaskFromNeedProvider = {
     eventQueueProvider,
     needRepositoryProvider,
     emergencyStatusReaderProvider,
+    resourceReaderProvider,
     eventBusProvider,
     createNeedProvider,
     validateNeedProvider,

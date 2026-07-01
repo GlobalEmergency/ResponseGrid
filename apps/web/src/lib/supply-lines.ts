@@ -35,10 +35,8 @@ export function parseSupplyLines(
   const items: SupplyLineDto[] = [];
   for (const entry of parsed) {
     if (typeof entry !== 'object' || entry === null) return null;
-    const { name, quantity, unit, category, supplyId, expiresAt } = entry as Record<
-      string,
-      unknown
-    >;
+    const { name, quantity, unit, category, supplyId, expiresAt, presentation } =
+      entry as Record<string, unknown>;
     if (typeof name !== 'string' || name.trim() === '') return null;
     if (
       typeof quantity !== 'number' ||
@@ -76,6 +74,9 @@ export function parseSupplyLines(
         : {}),
       ...(typeof expiresAt === 'string' && expiresAt !== ''
         ? { expiresAt }
+        : {}),
+      ...(typeof presentation === 'string' && presentation.trim() !== ''
+        ? { presentation: presentation.trim() }
         : {}),
     });
   }

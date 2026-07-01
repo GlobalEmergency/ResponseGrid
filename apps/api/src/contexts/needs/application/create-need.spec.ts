@@ -3,6 +3,8 @@ import { InMemoryNeedRepository } from '../infrastructure/in-memory-need.reposit
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { Category, Priority, NeedStatus } from '../domain/need-enums';
 import { NeedEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
+import { NeedResourceReader } from '../domain/ports/resource-reader';
+import { InvalidResourceLinkError } from '../domain/need-errors';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 import { LocationSensitivity } from '../../../shared/domain/location-sensitivity';
 
@@ -188,6 +190,39 @@ describe('CreateNeed', () => {
       await expect(uc.execute(makeCmd())).rejects.toThrow(
         EmergencyNotAcceptingIntakeError,
       );
+    });
+  });
+
+  describe('resource link validation (#60)', () => {
+    const RID = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+    const yesReader: NeedResourceReader = {
+      existsInEmergency: () => Promise.resolve(true),
+    };
+    const noReader: NeedResourceReader = {
+      existsInEmergency: () => Promise.resolve(false),
+    };
+
+    it('links the need when the resource exists in the same emergency', async () => {
+      const uc = new CreateNeed(repo, bus, activeReader, yesReader);
+      const result = await uc.execute(makeCmd({ resourceId: RID }));
+      const saved = await repo.findById({ value: result.id } as never);
+      expect(saved!.resourceId).toBe(RID);
+    });
+
+    it('rejects a resourceId not in this emergency → InvalidResourceLinkError', async () => {
+      const uc = new CreateNeed(repo, bus, activeReader, noReader);
+      await expect(
+        uc.execute(makeCmd({ resourceId: RID })),
+      ).rejects.toBeInstanceOf(InvalidResourceLinkError);
+    });
+
+    it('does not consult the reader when no resourceId is given', async () => {
+      const spy = jest.fn().mockResolvedValue(false);
+      const uc = new CreateNeed(repo, bus, activeReader, {
+        existsInEmergency: spy,
+      });
+      await uc.execute(makeCmd());
+      expect(spy).not.toHaveBeenCalled();
     });
   });
 });

@@ -35,6 +35,7 @@ const toLine = (l: SupplyLineView): SupplyLine => ({
   unit: l.unit ?? '',
   category: l.category,
   ...(l.expiresAt ? { expiresAt: l.expiresAt } : {}),
+  ...(l.presentation ? { presentation: l.presentation } : {}),
 });
 
 export function InventoryEditForm({

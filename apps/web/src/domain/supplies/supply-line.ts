@@ -18,6 +18,9 @@ export interface SupplyLine {
   unit: string;
   category: string;
   expiresAt?: string;
+  // Health-vertical route/presentation (#61). Not edited in the current UIs;
+  // carried through so editing a line never erases it (data-loss guard).
+  presentation?: string;
 }
 
 /** A blank line seeded with the given default category slug. */
@@ -58,6 +61,7 @@ export function toDto(line: SupplyLine): SupplyLineDto {
     ...(line.supplyId !== null && line.supplyId !== '' ? { supplyId: line.supplyId } : {}),
     ...(unit !== '' ? { unit } : {}),
     ...(line.expiresAt !== undefined && line.expiresAt !== '' ? { expiresAt: line.expiresAt } : {}),
+    ...(line.presentation !== undefined && line.presentation !== '' ? { presentation: line.presentation } : {}),
   };
 }
 

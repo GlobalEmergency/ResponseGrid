@@ -20,3 +20,12 @@ export class NeedTitleRequiredError extends Error {
     this.name = 'NeedTitleRequiredError';
   }
 }
+
+/** Raised when the optional resourceId link points to a resource that does not
+ *  exist or belongs to another emergency (#60). */
+export class InvalidResourceLinkError extends Error {
+  constructor(resourceId: string) {
+    super(`Resource not found in this emergency: ${resourceId}`);
+    this.name = 'InvalidResourceLinkError';
+  }
+}

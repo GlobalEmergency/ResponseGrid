@@ -1,6 +1,8 @@
 import { NeedRepository } from '../domain/ports/need.repository';
 import { EventBus } from '../domain/ports/event-bus';
 import { NeedEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
+import { NeedResourceReader } from '../domain/ports/resource-reader';
+import { InvalidResourceLinkError } from '../domain/need-errors';
 import { Need } from '../domain/need';
 import { NeedId } from '../domain/need-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
@@ -57,6 +59,11 @@ export class CreateNeed {
     private readonly repo: NeedRepository,
     private readonly bus: EventBus,
     private readonly emergencyStatusReader: NeedEmergencyStatusReader,
+    // Defaults to accept-any so callers that never pass resourceId (and older
+    // tests) need not wire a reader; the DI module always injects the real one.
+    private readonly resourceReader: NeedResourceReader = {
+      existsInEmergency: () => Promise.resolve(true),
+    },
   ) {}
 
   async execute(cmd: CreateNeedCommand): Promise<{ id: string }> {
@@ -66,6 +73,16 @@ export class CreateNeed {
         cmd.emergencyId,
         status ?? 'not-found',
       );
+    }
+
+    // A resource link must point to a resource in the SAME emergency (#60), or
+    // any submitter could attach needs to foreign/cross-emergency resources.
+    if (cmd.resourceId != null) {
+      const ok = await this.resourceReader.existsInEmergency(
+        cmd.resourceId,
+        cmd.emergencyId,
+      );
+      if (!ok) throw new InvalidResourceLinkError(cmd.resourceId);
     }
 
     const location = Location.create({
