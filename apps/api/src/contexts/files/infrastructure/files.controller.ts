@@ -117,7 +117,9 @@ export class FilesController {
    * Streams the file directly from disk.
    */
   @Get(':key')
-  @ApiOperation({ summary: 'Download a stored file by key' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Download a stored file by key (authenticated)' })
   @ApiParam({ name: 'key', description: 'Storage key returned by POST /files' })
   @ApiOkResponse({ description: 'File content streamed' })
   async serve(@Param('key') key: string, @Res() res: Response): Promise<void> {
