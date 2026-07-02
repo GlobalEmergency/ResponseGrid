@@ -451,6 +451,7 @@ export const en = {
     back: 'Back to the emergency',
     needs_heading: 'Needs of this recipient',
     needs_empty: 'This recipient has no published needs.',
+    add_need_cta: 'Add a need',
     inventory_heading: 'Available materials',
     inventory_empty: 'This point has not declared available materials.',
     prereg_cta: 'Pre-register what I’ll bring',
@@ -2499,6 +2500,9 @@ export const en = {
 
     ship_route: '{origin} → {destination}',
     ship_drawer_open: 'View shipment detail: {route}',
+    ship_section_code: 'Unique code',
+    ship_field_code: 'Code',
+    ship_code_qr_alt: 'QR code for shipment {code}',
     ship_section_route: 'Route',
     ship_section_items: 'Cargo',
     ship_section_assignment: 'Assignment',

@@ -36,6 +36,11 @@ import {
 import { EVENT_BUS, EventBus } from '../domain/ports/event-bus';
 import { DrizzleResourceRepository } from './drizzle/drizzle-resource.repository';
 import { DrizzleEmergencyStatusReader } from '../../../shared/drizzle-emergency-status-reader';
+import { DrizzleEmergencyDisputeThresholdReader } from '../../../shared/drizzle-emergency-dispute-threshold-reader';
+import {
+  EMERGENCY_DISPUTE_THRESHOLD_READER,
+  EmergencyDisputeThresholdReader,
+} from '../domain/ports/emergency-dispute-threshold-reader';
 import { DrizzleOrganizationAccreditationReader } from '../../../shared/drizzle-organization-accreditation-reader';
 import { BullMqEventBus } from './bullmq-event-bus';
 import { IdentityModule } from '../../identity/infrastructure/identity.module';
@@ -104,6 +109,13 @@ const emergencyStatusReaderProvider = {
   inject: [DB],
   useFactory: (db: Db): ResourceEmergencyStatusReader =>
     new DrizzleEmergencyStatusReader(db),
+};
+
+const emergencyDisputeThresholdReaderProvider = {
+  provide: EMERGENCY_DISPUTE_THRESHOLD_READER,
+  inject: [DB],
+  useFactory: (db: Db): EmergencyDisputeThresholdReader =>
+    new DrizzleEmergencyDisputeThresholdReader(db),
 };
 
 const busProvider = {
@@ -239,15 +251,27 @@ const validityReportRepositoryProvider = {
 
 const reportResourceValidityProvider = {
   provide: ReportResourceValidity,
-  inject: [RESOURCE_REPOSITORY, RESOURCE_VALIDITY_REPORT_REPOSITORY, EVENT_BUS],
+  inject: [
+    RESOURCE_REPOSITORY,
+    RESOURCE_VALIDITY_REPORT_REPOSITORY,
+    EVENT_BUS,
+    EMERGENCY_DISPUTE_THRESHOLD_READER,
+  ],
   useFactory: (
     repo: ResourceRepository,
     validityRepo: ResourceValidityReportRepository,
     bus: EventBus,
+    thresholdReader: EmergencyDisputeThresholdReader,
   ) => {
     const raw = Number(process.env.RESOURCE_DISPUTE_THRESHOLD);
     const threshold = Number.isFinite(raw) && raw > 0 ? raw : undefined;
-    return new ReportResourceValidity(repo, validityRepo, bus, threshold);
+    return new ReportResourceValidity(
+      repo,
+      validityRepo,
+      bus,
+      threshold,
+      thresholdReader,
+    );
   },
 };
 
@@ -329,6 +353,7 @@ const recordInventoryEntryProvider = {
     eventQueueProvider,
     resourceRepositoryProvider,
     emergencyStatusReaderProvider,
+    emergencyDisputeThresholdReaderProvider,
     organizationAccreditationReaderProvider,
     membershipReaderProvider,
     busProvider,

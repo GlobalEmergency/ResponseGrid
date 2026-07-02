@@ -469,6 +469,7 @@ export const es = {
     back: 'Volver a la emergencia',
     needs_heading: 'Necesidades de este destinatario',
     needs_empty: 'Este destinatario no tiene necesidades publicadas.',
+    add_need_cta: 'Añadir una necesidad',
     inventory_heading: 'Material disponible',
     inventory_empty: 'Este punto no ha declarado material disponible.',
     prereg_cta: 'Pre-registrar lo que llevaré',
@@ -2539,6 +2540,9 @@ export const es = {
 
     ship_route: '{origin} → {destination}',
     ship_drawer_open: 'Ver detalle de la expedición: {route}',
+    ship_section_code: 'Código único',
+    ship_field_code: 'Código',
+    ship_code_qr_alt: 'Código QR de la expedición {code}',
     ship_section_route: 'Ruta',
     ship_section_items: 'Carga',
     ship_section_assignment: 'Asignación',

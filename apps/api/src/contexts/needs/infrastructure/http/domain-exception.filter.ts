@@ -10,6 +10,7 @@ import {
   NeedNotPendingError,
   NeedNotEditableError,
   NeedTitleRequiredError,
+  NeedResourceNotInEmergencyError,
 } from '../../domain/need-errors';
 import { EmergencyNotAcceptingIntakeError } from '../../../emergencies/domain/emergency-not-accepting-intake.error';
 import { InvalidAuthorError } from '../../../../shared/domain/author';
@@ -20,6 +21,7 @@ type DomainError =
   | NeedNotPendingError
   | NeedNotEditableError
   | NeedTitleRequiredError
+  | NeedResourceNotInEmergencyError
   | EmergencyNotAcceptingIntakeError
   | InvalidAuthorError
   | SupplyLineValidationError;
@@ -31,6 +33,7 @@ type DomainError =
   NeedNotPendingError,
   NeedNotEditableError,
   NeedTitleRequiredError,
+  NeedResourceNotInEmergencyError,
   EmergencyNotAcceptingIntakeError,
   InvalidAuthorError,
   SupplyLineValidationError,
@@ -42,6 +45,7 @@ export class NeedsDomainExceptionFilter implements ExceptionFilter {
       exception instanceof NeedNotFoundError
         ? HttpStatus.NOT_FOUND
         : exception instanceof NeedTitleRequiredError ||
+            exception instanceof NeedResourceNotInEmergencyError ||
             exception instanceof InvalidAuthorError ||
             exception instanceof SupplyLineValidationError
           ? HttpStatus.BAD_REQUEST

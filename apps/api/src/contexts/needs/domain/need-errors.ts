@@ -20,3 +20,15 @@ export class NeedTitleRequiredError extends Error {
     this.name = 'NeedTitleRequiredError';
   }
 }
+
+/**
+ * Raised when a need is linked (#60) to a `resourceId` that does not exist or
+ * belongs to a different emergency. Both cases collapse to the same client
+ * error: the referenced resource is not part of this emergency.
+ */
+export class NeedResourceNotInEmergencyError extends Error {
+  constructor(resourceId: string) {
+    super(`Resource ${resourceId} does not exist in this emergency`);
+    this.name = 'NeedResourceNotInEmergencyError';
+  }
+}

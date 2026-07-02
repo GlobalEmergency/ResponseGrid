@@ -17,6 +17,7 @@ export const PERMISSION_CATALOG = {
     'resume',
     'close',
     'announce',
+    'configure',
     'read',
   ],
   resource: ['register', 'read', 'verify', 'close', 'edit'],
