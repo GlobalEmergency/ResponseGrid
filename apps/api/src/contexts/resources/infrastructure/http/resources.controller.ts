@@ -33,6 +33,10 @@ import { PublishResource } from '../../application/publish-resource';
 import { UpdateResourcePublicStatus } from '../../application/update-resource-public-status';
 import { GetMyResources } from '../../application/get-my-resources';
 import {
+  GetMyManagedResources,
+  MyManagedResourceView,
+} from '../../application/get-my-managed-resources';
+import {
   EditResource,
   EditResourceCommand,
 } from '../../application/edit-resource';
@@ -65,6 +69,7 @@ import { setAuditContext } from '../../../audit/infrastructure/http/audit-contex
 import {
   RegisterResourceResponseDto,
   ResourceViewDto,
+  MyManagedResourceDto,
   ReportResourceValidityResponseDto,
   ValidityReportDto,
 } from './response.dto';
@@ -88,6 +93,7 @@ export class ResourcesController {
     private readonly publish: PublishResource,
     private readonly updateStatus: UpdateResourcePublicStatus,
     private readonly getMyResources: GetMyResources,
+    private readonly getMyManagedResources: GetMyManagedResources,
     private readonly editResource: EditResource,
     private readonly discardResource: DiscardResource,
     private readonly recordInventoryEntry: RecordInventoryEntry,
@@ -410,6 +416,39 @@ export class ResourcesController {
       targetStatus: statusMap[dto.status],
       requesterUserId: req.user!.id,
     });
+  }
+
+  @Get('resources/mine')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'List the resources the authenticated principal manages, across every emergency',
+    description:
+      'Union of the resources the principal owns and the ones reached through ' +
+      'an entity-scoped grant (e.g. `point_manager`). Unlike ' +
+      '`/emergencies/{emergencyId}/resources/mine`, this needs no emergency in ' +
+      'the path, so it also serves principals whose only grant is ' +
+      'entity-scoped (#285). Each row carries its emergency id and slug.',
+  })
+  @ApiOkResponse({
+    description: 'Resources the principal manages',
+    type: MyManagedResourceDto,
+    isArray: true,
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  async listMineAcrossEmergencies(
+    @Req() req: Request & { user?: AuthenticatedUser },
+  ): Promise<MyManagedResourceView[]> {
+    const user = req.user!;
+    return this.getMyManagedResources.execute(
+      user.id,
+      user.grants.map((g) => ({
+        roleId: g.roleId,
+        scope: g.scope,
+        expiresAt: g.expiresAt,
+      })),
+    );
   }
 
   @Get('emergencies/:emergencyId/resources/mine')

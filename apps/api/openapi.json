@@ -1380,6 +1380,40 @@
         ]
       }
     },
+    "/resources/mine": {
+      "get": {
+        "description": "Union of the resources the principal owns and the ones reached through an entity-scoped grant (e.g. `point_manager`). Unlike `/emergencies/{emergencyId}/resources/mine`, this needs no emergency in the path, so it also serves principals whose only grant is entity-scoped (#285). Each row carries its emergency id and slug.",
+        "operationId": "ResourcesController_listMineAcrossEmergencies",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Resources the principal manages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MyManagedResourceDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the resources the authenticated principal manages, across every emergency",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
     "/emergencies/{emergencyId}/resources/mine": {
       "get": {
         "operationId": "ResourcesController_listMyResources",
@@ -10020,6 +10054,50 @@
         },
         "required": [
           "status"
+        ]
+      },
+      "MyManagedResourceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "collection_point",
+              "delivery_point",
+              "collection_and_delivery",
+              "warehouse",
+              "transport",
+              "supplier",
+              "venue"
+            ],
+            "example": "collection_point"
+          },
+          "name": {
+            "type": "string",
+            "example": "Cruz Roja Madrid"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emergencySlug": {
+            "type": "string",
+            "example": "terremoto-venezuela-2026",
+            "nullable": true,
+            "description": "Slug of the owning emergency; null if its row is missing."
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "name",
+          "emergencyId",
+          "emergencySlug"
         ]
       },
       "LocationViewDto": {

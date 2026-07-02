@@ -1,6 +1,7 @@
 import {
   ResourceRepository,
   ResourceWithEmergency,
+  ResourceWithEmergencySlug,
 } from '../domain/ports/resource.repository';
 import { Resource } from '../domain/resource';
 import { ResourceId } from '../domain/resource-id';
@@ -146,6 +147,22 @@ export class InMemoryResourceRepository implements ResourceRepository {
           s.emergencyId === emergencyId.value && s.ownerUserId === ownerUserId,
       )
       .map((s) => Resource.fromSnapshot(s));
+    return Promise.resolve(result);
+  }
+
+  findOwnedOrGranted(
+    ownerUserId: string,
+    grantedResourceIds: string[],
+  ): Promise<ResourceWithEmergencySlug[]> {
+    // This store holds no emergencies, so the slug is always null here; the
+    // slug join is covered by the Drizzle integration spec.
+    const granted = new Set(grantedResourceIds);
+    const result = [...this.store.values()]
+      .filter((s) => s.ownerUserId === ownerUserId || granted.has(s.id))
+      .map((s) => ({
+        resource: Resource.fromSnapshot(s),
+        emergencySlug: null,
+      }));
     return Promise.resolve(result);
   }
 

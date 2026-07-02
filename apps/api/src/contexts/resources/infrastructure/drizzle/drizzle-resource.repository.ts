@@ -1,4 +1,4 @@
-import { and, asc, between, count, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, between, count, eq, inArray, or, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { Db } from '../../../../shared/db';
 import { resourcesTable, resourceItemsTable } from './schema';
@@ -6,6 +6,7 @@ import { emergenciesTable } from '../../../emergencies/infrastructure/drizzle/sc
 import {
   ResourceRepository,
   ResourceWithEmergency,
+  ResourceWithEmergencySlug,
 } from '../../domain/ports/resource.repository';
 import { Resource, ResourceSnapshot, Provenance } from '../../domain/resource';
 import { AuthorSnapshot } from '../../../../shared/domain/author';
@@ -402,6 +403,41 @@ export class DrizzleResourceRepository implements ResourceRepository {
         ),
       );
     return rows.map((r) => Resource.fromSnapshot(rowToSnapshot(r)));
+  }
+
+  async findOwnedOrGranted(
+    ownerUserId: string,
+    grantedResourceIds: string[],
+  ): Promise<ResourceWithEmergencySlug[]> {
+    // A single OR keeps a resource that is both owned and granted as one row.
+    // Guard the inArray: drizzle rejects an empty id list.
+    const whereClause =
+      grantedResourceIds.length > 0
+        ? or(
+            eq(resourcesTable.ownerUserId, ownerUserId),
+            inArray(resourcesTable.id, grantedResourceIds),
+          )
+        : eq(resourcesTable.ownerUserId, ownerUserId);
+
+    // LEFT JOIN resolves the emergency slug in the same query (no N+1); LEFT so
+    // an orphaned resource still appears (slug → null) instead of vanishing.
+    const rows = await this.db
+      .select({
+        resource: resourcesTable,
+        emergencySlug: emergenciesTable.slug,
+      })
+      .from(resourcesTable)
+      .leftJoin(
+        emergenciesTable,
+        eq(resourcesTable.emergencyId, emergenciesTable.id),
+      )
+      .where(whereClause)
+      .orderBy(asc(resourcesTable.name), asc(resourcesTable.id));
+
+    return rows.map((r) => ({
+      resource: Resource.fromSnapshot(rowToSnapshot(r.resource)),
+      emergencySlug: r.emergencySlug ?? null,
+    }));
   }
 
   async findAllPaged(q: {

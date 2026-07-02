@@ -20,6 +20,18 @@ export interface ResourceWithEmergency {
   emergencyName: string | null;
 }
 
+/**
+ * A resource the principal manages, labelled with its emergency slug so the
+ * caller can build per-emergency links without an extra lookup. Cross-emergency
+ * by design: it backs `GET /resources/mine`, which must surface a point whose
+ * manager holds only an entity-scoped grant (no emergency grant, issue #285).
+ * `emergencySlug` is null when the emergency row is missing.
+ */
+export interface ResourceWithEmergencySlug {
+  resource: Resource;
+  emergencySlug: string | null;
+}
+
 export interface ResourceRepository {
   save(resource: Resource): Promise<void>;
   findById(id: ResourceId): Promise<Resource | null>;
@@ -49,6 +61,16 @@ export interface ResourceRepository {
     ownerUserId: string,
     emergencyId: EmergencyId,
   ): Promise<Resource[]>;
+  /**
+   * Resources the principal manages, across ALL emergencies (any status):
+   * the ones they own (`ownerUserId`) plus the ones reached through an
+   * entity-scoped grant (`grantedResourceIds`). Each row carries its emergency
+   * slug (see {@link ResourceWithEmergencySlug}).
+   */
+  findOwnedOrGranted(
+    ownerUserId: string,
+    grantedResourceIds: string[],
+  ): Promise<ResourceWithEmergencySlug[]>;
   /** Visible public resources: Active, Saturated, Paused (excludes Hidden and Closed). */
   findVisibleByEmergency(emergencyId: EmergencyId): Promise<Resource[]>;
   /** Resources currently flagged `disputed` (citizen reports pending review). */

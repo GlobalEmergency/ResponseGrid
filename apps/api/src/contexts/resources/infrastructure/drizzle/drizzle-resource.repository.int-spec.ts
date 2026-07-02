@@ -1719,4 +1719,84 @@ describe('DrizzleResourceRepository (integration)', () => {
       expect(found).toBeNull();
     });
   });
+
+  // ── Cross-emergency "mine" read (#285): owner ∪ entity-granted, with slug ──
+  describe('findOwnedOrGranted', () => {
+    const EM3 = '55555555-5555-4555-8555-555555555555';
+    const MANAGER_ID = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+
+    async function seed(props: {
+      emergencyId: string;
+      name: string;
+      ownerUserId: string;
+    }): Promise<string> {
+      const r = Resource.register({
+        id: ResourceId.create(),
+        emergencyId: EmergencyId.fromString(props.emergencyId),
+        type: ResourceType.CollectionPoint,
+        name: props.name,
+        location: baseLocation,
+        ownerUserId: props.ownerUserId,
+      });
+      await repo.save(r);
+      return r.id.value;
+    }
+
+    beforeAll(async () => {
+      await db
+        .insert(emergenciesTable)
+        .values({
+          id: EM3,
+          name: 'Terremoto Test 285',
+          slug: 'terremoto-test-285',
+          country: 'VE',
+          status: 'active',
+          createdAt: new Date(),
+        })
+        .onConflictDoNothing();
+    });
+
+    it('returns owned ∪ granted across emergencies, each with its slug, without duplicates', async () => {
+      const owned = await seed({
+        emergencyId: EM3,
+        name: 'Acopio propio',
+        ownerUserId: OWNER_ID,
+      });
+      const granted = await seed({
+        emergencyId: EM,
+        name: 'Acopio gestionado',
+        ownerUserId: MANAGER_ID,
+      });
+      await seed({
+        emergencyId: EM,
+        name: 'Acopio ajeno',
+        ownerUserId: MANAGER_ID,
+      });
+
+      const rows = await repo.findOwnedOrGranted(OWNER_ID, [granted, owned]);
+
+      expect(rows).toHaveLength(2);
+      const byId = new Map(rows.map((r) => [r.resource.id.value, r]));
+      expect(byId.get(owned)?.emergencySlug).toBe('terremoto-test-285');
+      expect(byId.get(granted)?.resource.name).toBe('Acopio gestionado');
+    });
+
+    it('with no granted ids returns only the owned resources', async () => {
+      await seed({
+        emergencyId: EM3,
+        name: 'Solo propio',
+        ownerUserId: OWNER_ID,
+      });
+      await seed({
+        emergencyId: EM3,
+        name: 'De otro',
+        ownerUserId: MANAGER_ID,
+      });
+
+      const rows = await repo.findOwnedOrGranted(OWNER_ID, []);
+
+      expect(rows).toHaveLength(1);
+      expect(rows[0]?.resource.name).toBe('Solo propio');
+    });
+  });
 });
