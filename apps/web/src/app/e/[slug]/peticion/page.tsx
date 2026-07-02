@@ -15,7 +15,9 @@ import { getCategories } from '@/adapters/get-categories';
 
 type Props = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ resourceId?: string }>;
+  // Next delivers a repeated query param as string[] at runtime, whatever the
+  // annotation says — normalize before use.
+  searchParams: Promise<{ resourceId?: string | string[] }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -35,7 +37,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PeticionPage({ params, searchParams }: Props) {
   const { slug } = await params;
-  const { resourceId } = await searchParams;
+  const { resourceId: rawResourceId } = await searchParams;
+  // A repeated ?resourceId (malformed/crafted link) is no link at all.
+  const resourceId =
+    typeof rawResourceId === 'string' && rawResourceId !== ''
+      ? rawResourceId
+      : undefined;
   const { t, locale } = await getT();
 
   // Keep the resource link in the login round-trip: losing the query here

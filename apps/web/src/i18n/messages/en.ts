@@ -1709,7 +1709,8 @@ export const en = {
     inventory_saved_success: 'Inventory updated.',
     inventory_update_forbidden: 'You are not allowed to edit this inventory.',
     inventory_update_failed: 'Could not save the inventory.',
-    inventory_invalid_items: 'Check the material: some lines are incomplete or invalid.',
+    inventory_invalid_items:
+      'Check the material: some lines are incomplete or invalid. Fill in the missing fields or remove the empty rows.',
 
     type_collection_point: 'Collection point',
     type_delivery_point: 'Delivery point',

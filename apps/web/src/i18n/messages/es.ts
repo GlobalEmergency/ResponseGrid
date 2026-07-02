@@ -1745,7 +1745,8 @@ export const es = {
     inventory_saved_success: 'Inventario actualizado.',
     inventory_update_forbidden: 'No tienes permiso para editar este inventario.',
     inventory_update_failed: 'No se pudo guardar el inventario.',
-    inventory_invalid_items: 'Revisa el material: hay líneas incompletas o inválidas.',
+    inventory_invalid_items:
+      'Revisa el material: hay líneas incompletas o inválidas. Completa los campos que falten o elimina las filas vacías.',
 
     type_collection_point: 'Punto de recogida',
     type_delivery_point: 'Punto de entrega',

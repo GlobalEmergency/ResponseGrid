@@ -8,11 +8,12 @@ import type { Category } from '@/domain/supplies/category';
 import type { CatalogueSupply } from '@/domain/supplies/catalogue-supply';
 
 /**
- * Headless controller for one supply line. Holds the transient `committed`
- * flag (did the user leave the name field on free text?) and derives the
- * display `mode` via the pure `resolveLineMode`. On catalogue selection it
- * applies `deriveFromSupply` (name/supplyId + material-only category + unit).
- * The parent owns the `SupplyLine` value and applies patches via `onChange`.
+ * Headless controller for one supply line. Holds the transient `editing` flag
+ * (is the user mid-typing a free-text name?) and derives the display `mode`
+ * via the pure `resolveLineMode` (committed = not editing). On catalogue
+ * selection it applies `deriveFromSupply` (name/supplyId + material-only
+ * category + unit). The parent owns the `SupplyLine` value and applies patches
+ * via `onChange`.
  */
 export function useSupplyLine(params: {
   value: SupplyLine;
@@ -20,16 +21,17 @@ export function useSupplyLine(params: {
   onChange: (patch: Partial<SupplyLine>) => void;
 }) {
   const { value, categories, onChange } = params;
-  // A line mounted with a free-text name (e.g. prefilled from persisted
-  // inventory, #263) is already committed — otherwise its category/unit/expiry
-  // fields would start collapsed and uneditable.
-  const [committed, setCommitted] = useState(
-    () => value.supplyId === null && value.name.trim() !== '',
-  );
+  // `editing` = the user is re-typing the name and has not left the field yet,
+  // so the manual fields stay collapsed until blur (the catalogue selector can
+  // still take over). Deliberately the INVERSE of a `committed` flag: rows are
+  // keyed by index, so removing a sibling shifts values across component
+  // instances, and the safe default for a line that already carries a
+  // free-text name (prefilled or shifted-in) is to show its manual fields.
+  const [editing, setEditing] = useState(false);
 
   const onTextChange = useCallback(
     (name: string) => {
-      setCommitted(false);
+      setEditing(true);
       onChange({ name, supplyId: null });
     },
     [onChange],
@@ -37,19 +39,17 @@ export function useSupplyLine(params: {
 
   const onSelect = useCallback(
     (supply: CatalogueSupply) => {
-      setCommitted(false);
+      setEditing(false);
       onChange(deriveFromSupply(supply, categories));
     },
     [onChange, categories],
   );
 
   const onBlur = useCallback(() => {
-    if (value.supplyId === null && value.name.trim() !== '') {
-      setCommitted(true);
-    }
-  }, [value.supplyId, value.name]);
+    setEditing(false);
+  }, []);
 
-  const mode: LineMode = resolveLineMode(value.supplyId, value.name, committed);
+  const mode: LineMode = resolveLineMode(value.supplyId, value.name, !editing);
 
   return {
     mode,

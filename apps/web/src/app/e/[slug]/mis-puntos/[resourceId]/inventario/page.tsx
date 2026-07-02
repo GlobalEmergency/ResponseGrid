@@ -27,15 +27,18 @@ export default async function InventarioPage({ params }: Props) {
   const { slug, resourceId } = await params;
   const { t, locale } = await getT();
 
-  // Independent fetches, in parallel; fetchMyInventory gates the session
-  // itself (redirects to login when absent), so no separate requireSession.
-  const [emergency, initial, categories] = await Promise.all([
+  // fetchMyInventory is the auth gate (login/403 redirects) — award it its own
+  // await so an unrelated fetch rejecting inside a Promise.all can never
+  // preempt the redirect. The two remaining independent fetches run in
+  // parallel after it.
+  const initial = await fetchMyInventory(resourceId, slug);
+  if (initial === null) notFound();
+
+  const [emergency, categories] = await Promise.all([
     getEmergencyBySlug(slug),
-    fetchMyInventory(resourceId, slug),
     getCategories(locale),
   ]);
   if (!emergency) notFound();
-  if (initial === null) notFound();
 
   const boundAction = saveMyInventory.bind(null, resourceId, slug);
 

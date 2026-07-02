@@ -37,7 +37,8 @@ export async function fetchMyInventory(
   if (response.status === 403) {
     redirect(`/e/${slug}/mis-puntos`);
   }
-  if (response.status === 404) return null;
+  // 400 = malformed resourceId (ParseUUIDPipe): same user-facing 404 as unknown.
+  if (response.status === 404 || response.status === 400) return null;
   if (!response.ok || data == null) {
     // 5xx/unexpected: the point may exist — fail loudly instead of rendering
     // notFound() for a transient API error.
