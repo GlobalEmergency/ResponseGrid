@@ -217,15 +217,18 @@ export function NeedDetail({
                 className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink"
               >
                 <span className="font-semibold">{item.name}</span>
+                {item.presentation != null && item.presentation !== '' && (
+                  <span className="font-semibold text-navy">
+                    {' — '}
+                    {item.presentation}
+                  </span>
+                )}
                 <span className="text-muted">
                   {' · '}
                   {categoryName(item.category)}
                   {' · '}
                   {item.quantity}
                   {item.unit != null && item.unit !== '' ? ` ${item.unit}` : ''}
-                  {item.presentation != null && item.presentation !== ''
-                    ? ` · ${item.presentation}`
-                    : ''}
                   {item.expiresAt != null && item.expiresAt !== ''
                     ? ` · ${item.expiresAt}`
                     : ''}

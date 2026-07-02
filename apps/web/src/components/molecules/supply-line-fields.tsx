@@ -58,6 +58,15 @@ export function SupplyLineFields({
     value, categories, onChange,
   });
 
+  // Presentation / route of administration is health-vertical only (#61): reveal
+  // it when the line's category is medical (parent 'medical' or one of its
+  // children), independent of catalogue/free mode.
+  const selectedCategory = categories.find((c) => c.slug === value.category);
+  const isMedical =
+    selectedCategory != null &&
+    (selectedCategory.slug === 'medical' ||
+      selectedCategory.parentSlug === 'medical');
+
   const fieldClass =
     'w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2';
 
@@ -133,6 +142,28 @@ export function SupplyLineFields({
           </div>
         </div>
       </div>
+
+      <Collapsible open={isMedical}>
+        <div className="flex flex-col gap-1.5 pt-3">
+          <label htmlFor={`${idPrefix}-pres-${rowId}`} className="text-sm font-medium text-ink-soft">
+            {t.presentationLabel} <span className="text-muted-soft font-normal">{t.presentationOpt}</span>
+          </label>
+          <input
+            id={`${idPrefix}-pres-${rowId}`}
+            type="text"
+            list={`${idPrefix}-pres-opts-${rowId}`}
+            value={value.presentation ?? ''}
+            onChange={(e) => onChange({ presentation: e.target.value })}
+            placeholder={t.presentationPlaceholder}
+            className={fieldClass}
+          />
+          <datalist id={`${idPrefix}-pres-opts-${rowId}`}>
+            {t.presentationOptions.map((o) => (
+              <option key={o} value={o} />
+            ))}
+          </datalist>
+        </div>
+      </Collapsible>
 
       <Collapsible open={showExtra}>
         <div className="flex flex-col gap-3 pt-3">

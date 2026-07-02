@@ -57,6 +57,14 @@ test('toDto includes unit and expiresAt when present', () => {
   assert.deepEqual(toDto(line), { name: 'Agua', quantity: 2, category: 'water', unit: 'botellas', expiresAt: '2026-07-01' });
 });
 
+test('toDto includes trimmed presentation when present, omits it when blank (#61)', () => {
+  const withPres: SupplyLine = { name: 'Clindamicina', supplyId: null, quantity: 5, unit: '', category: 'medicines', presentation: '  EV (intravenoso)  ' };
+  assert.deepEqual(toDto(withPres), { name: 'Clindamicina', quantity: 5, category: 'medicines', presentation: 'EV (intravenoso)' });
+
+  const blankPres: SupplyLine = { name: 'Agua', supplyId: null, quantity: 1, unit: '', category: 'water', presentation: '   ' };
+  assert.deepEqual(toDto(blankPres), { name: 'Agua', quantity: 1, category: 'water' });
+});
+
 test('isComplete requires non-empty name, quantity >= 1, and a category', () => {
   assert.equal(isComplete({ name: 'Agua', supplyId: null, quantity: 1, unit: '', category: 'water' }), true);
   assert.equal(isComplete({ name: '  ', supplyId: null, quantity: 1, unit: '', category: 'water' }), false);
