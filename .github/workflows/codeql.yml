@@ -1,0 +1,42 @@
+name: CodeQL
+
+# Static analysis (SAST) for JS/TS: taint tracking for injection, XSS, path
+# traversal, unsafe deserialization, etc. Runs on PRs, on pushes to main, and
+# weekly to catch newly-published query updates against unchanged code.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly, off-peak minute (avoid :00) — Mondays 03:27 UTC.
+    - cron: "27 3 * * 1"
+
+# Least privilege: analysis only needs to read code and upload results.
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze (javascript-typescript)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # required to upload the SARIF results
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          # No compilation needed for JS/TS — skip the (fragile, slow) autobuild.
+          build-mode: none
+          # Adds security-focused extra queries on top of the default set.
+          queries: security-and-quality
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript-typescript"
