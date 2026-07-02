@@ -233,5 +233,11 @@ describe('LocalAccessControl', () => {
     );
     expect(perms.has('offer:create')).toBe(true);
     expect(perms.has('resource:verify')).toBe(false);
+    // SECURITY (P3-1): the platform-scoped `citizen` role must NOT carry the
+    // read permissions that gate coordinator queues, or it would expose every
+    // emergency's unvalidated data.
+    expect(perms.has('resource:read')).toBe(false);
+    expect(perms.has('need:read')).toBe(false);
+    expect(perms.has('offer:read')).toBe(false);
   });
 });

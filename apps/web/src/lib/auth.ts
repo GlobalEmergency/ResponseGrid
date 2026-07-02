@@ -35,10 +35,13 @@ export async function setToken(token: string): Promise<void> {
     httpOnly: true,
     sameSite: 'lax',
     path: '/',
-    // Secure only when explicitly enabled (set COOKIE_SECURE=true behind HTTPS).
-    // Tying it to NODE_ENV breaks sessions when a production build is served over
-    // plain HTTP (local runs, reverse proxies that don't forward HTTPS).
-    secure: process.env.COOKIE_SECURE === 'true',
+    // Secure by default in production so the session JWT is never sent over plain
+    // HTTP (fail-safe). A production deployment that genuinely terminates HTTPS
+    // upstream and serves the app over plain HTTP can opt out with
+    // COOKIE_SECURE=false; outside production it stays off so local/proxy runs work.
+    secure:
+      process.env.NODE_ENV === 'production' &&
+      process.env.COOKIE_SECURE !== 'false',
     maxAge: SESSION_MAX_AGE_SECONDS,
   });
 }

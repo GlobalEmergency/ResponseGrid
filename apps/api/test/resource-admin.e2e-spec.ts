@@ -72,6 +72,9 @@ describe('Admin resources console (e2e)', () => {
         .delete(usersTable)
         .where(inArray(usersTable.id, [ADMIN_ID, OWNER_ID, COORD_ID]));
 
+      // Upsert (not onConflictDoNothing): another e2e file may have already
+      // inserted this shared emergency id under a different name, and this spec
+      // asserts the canonical name. Force it so the test is order-independent.
       await db
         .insert(emergenciesTable)
         .values({
@@ -82,7 +85,15 @@ describe('Admin resources console (e2e)', () => {
           status: 'active',
           createdAt: new Date(),
         })
-        .onConflictDoNothing();
+        .onConflictDoUpdate({
+          target: emergenciesTable.id,
+          set: {
+            name: 'Terremoto Venezuela 2026',
+            slug: 'terremoto-venezuela-2026',
+            country: 'VE',
+            status: 'active',
+          },
+        });
 
       const [adminHash, ownerHash, coordHash] = await Promise.all([
         bcrypt.hash('admin1234', 10),
