@@ -284,3 +284,56 @@ jobs:
         uses: github/codeql-action/upload-sarif@703b9949c65fcfced30e2f9f41569c4adfcb657f # v3.36.3
         with:
           sarif_file: semgrep.sarif
+
+  # ── Migrate smoke test ──────────────────────────────────────────────────────
+  # Runs the ACTUAL prod migration runner (deploy/migrate.sh) against a real
+  # Postgres and asserts it (1) applies cleanly and (2) is idempotent on re-run.
+  # This is the check that would have caught the psql `:'var'` interpolation bug
+  # that broke the EC2 deploy — the unit/e2e gate never exercises migrate.sh.
+  migrate-smoke:
+    name: Migrate smoke test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: reliefhub
+          POSTGRES_PASSWORD: reliefhub
+          POSTGRES_DB: reliefhub
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd="pg_isready -U reliefhub"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      # migrate.sh reads these; PGHOST/PGPORT/MIGRATIONS_DIR override the prod
+      # container defaults so the same script runs against the mapped service.
+      PGHOST: localhost
+      PGPORT: "5433"
+      POSTGRES_USER: reliefhub
+      POSTGRES_PASSWORD: reliefhub
+      POSTGRES_DB: reliefhub
+      MIGRATIONS_DIR: ${{ github.workspace }}/apps/api/drizzle
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Install psql client
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Apply migrations (fresh DB)
+        run: sh deploy/migrate.sh
+
+      - name: Re-run must be idempotent (nothing re-applied)
+        run: |
+          out=$(sh deploy/migrate.sh)
+          echo "$out"
+          if echo "$out" | grep -q '^apply '; then
+            echo "::error::migrate.sh no es idempotente: reaplicó migraciones en la segunda pasada"
+            exit 1
+          fi
+          echo "OK — segunda pasada sin reaplicar (idempotente)."
