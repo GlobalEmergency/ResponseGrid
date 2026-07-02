@@ -8,7 +8,6 @@ import { requireSession, loginHref, authHeaders, clearToken } from '@/lib/auth';
 import { parseSupplyLines } from '@/lib/supply-lines';
 import { getT } from '@/i18n/server';
 import { getCategories } from '@/adapters/get-categories';
-import { isMaterialCategory } from '@/domain/supplies/category';
 
 type SupplyLineView = components['schemas']['SupplyLineResponseDto'];
 
@@ -33,7 +32,17 @@ export async function fetchMyInventory(
     await clearToken();
     redirect(loginHref(`/e/${slug}/mis-puntos/${resourceId}/inventario`));
   }
-  if (!response.ok || data == null) return null;
+  // Not the owner/coordinator of this point → back to the caller's own list
+  // (same pattern as the intake detail page), never a misleading 404.
+  if (response.status === 403) {
+    redirect(`/e/${slug}/mis-puntos`);
+  }
+  if (response.status === 404) return null;
+  if (!response.ok || data == null) {
+    // 5xx/unexpected: the point may exist — fail loudly instead of rendering
+    // notFound() for a transient API error.
+    throw new Error(`GET /resources/${resourceId}/inventory failed: ${response.status}`);
+  }
   return data;
 }
 
@@ -46,13 +55,16 @@ export async function saveMyInventory(
   const token = await requireSession(`/e/${slug}/mis-puntos/${resourceId}/inventario`);
   const { t, locale } = await getT();
 
-  const validMaterialCategories = new Set(
-    (await getCategories(locale)).filter(isMaterialCategory).map((c) => c.slug),
+  // Full taxonomy, NOT material-only: other intakes (API registration,
+  // inventory entries) persist any `Category`, and a round-trip through this
+  // form must never make such an inventory unsaveable.
+  const validCategories = new Set(
+    (await getCategories(locale)).map((c) => c.slug),
   );
 
   // allowEmpty: the owner can clear the inventory (empty list is a valid save).
   const items = parseSupplyLines(formData.get('items'), {
-    isValidCategory: (c) => validMaterialCategories.has(c),
+    isValidCategory: (c) => validCategories.has(c),
     allowEmpty: true,
   });
   if (items === null) {

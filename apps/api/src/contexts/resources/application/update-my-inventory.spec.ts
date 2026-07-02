@@ -86,6 +86,28 @@ describe('UpdateMyInventory', () => {
     expect(found?.items.map((i) => i.name)).toEqual(['Mantas']);
   });
 
+  it('owner path does not query coordinator membership', async () => {
+    const repo = new InMemoryResourceRepository();
+    const bus = new FakeEventBus();
+    const id = await makeResource(repo, bus, [line('Agua', 10)]);
+
+    let membershipQueried = false;
+    const tracking: ResourceMembershipReader = {
+      isCoordinator: () => {
+        membershipQueried = true;
+        return Promise.resolve(false);
+      },
+    };
+
+    await new UpdateMyInventory(repo, tracking).execute({
+      resourceId: id,
+      requesterUserId: OWNER_ID,
+      lines: [line('Arroz', 3)],
+    });
+
+    expect(membershipQueried).toBe(false);
+  });
+
   it('empty list clears inventory', async () => {
     const repo = new InMemoryResourceRepository();
     const bus = new FakeEventBus();

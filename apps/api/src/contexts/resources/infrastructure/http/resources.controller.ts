@@ -57,6 +57,10 @@ import {
   UpdateInventoryDto,
 } from './dto';
 import { SupplyLineResponseDto } from '../../../supplies/infrastructure/http/supply-line.dto';
+import {
+  toSupplyLineProps,
+  toSupplyLineResponse,
+} from '../../../supplies/infrastructure/http/supply-line.mapper';
 import { setAuditContext } from '../../../audit/infrastructure/http/audit-context';
 import {
   RegisterResourceResponseDto,
@@ -148,15 +152,7 @@ export class ResourcesController {
       city: dto.city ?? null,
       isFinalRecipient: dto.isFinalRecipient ?? false,
       recipientType: dto.recipientType ?? null,
-      items: (dto.items ?? []).map((i) => ({
-        name: i.name,
-        quantity: i.quantity,
-        unit: i.unit ?? null,
-        category: i.category,
-        supplyId: i.supplyId ?? null,
-        presentation: i.presentation ?? null,
-        expiresAt: i.expiresAt ?? null,
-      })),
+      items: (dto.items ?? []).map(toSupplyLineProps),
       author: dto.author ?? null,
     });
   }
@@ -186,16 +182,11 @@ export class ResourcesController {
     @Param('resourceId', ParseUUIDPipe) resourceId: string,
     @Body() dto: RecordInventoryEntryDto,
   ): Promise<void> {
+    // toSupplyLineProps also fixes the drift this copy had: it silently
+    // dropped a client-provided `expiresAt` from manual entries.
     await this.recordInventoryEntry.execute({
       resourceId,
-      lines: dto.items.map((i) => ({
-        name: i.name,
-        quantity: i.quantity,
-        unit: i.unit ?? null,
-        category: i.category,
-        supplyId: i.supplyId ?? null,
-        presentation: i.presentation ?? null,
-      })),
+      lines: dto.items.map(toSupplyLineProps),
     });
   }
 
@@ -222,15 +213,7 @@ export class ResourcesController {
       resourceId,
       requesterUserId: req.user!.id,
     });
-    return lines.map((l) => ({
-      name: l.name,
-      supplyId: l.supplyId,
-      quantity: l.quantity,
-      unit: l.unit,
-      category: l.category,
-      presentation: l.presentation ?? null,
-      expiresAt: l.expiresAt ?? null,
-    }));
+    return lines.map(toSupplyLineResponse);
   }
 
   @Put('resources/:resourceId/inventory')
@@ -258,15 +241,7 @@ export class ResourcesController {
     await this.updateMyInventory.execute({
       resourceId,
       requesterUserId: req.user!.id,
-      lines: dto.items.map((i) => ({
-        name: i.name,
-        quantity: i.quantity,
-        unit: i.unit ?? null,
-        category: i.category,
-        supplyId: i.supplyId ?? null,
-        presentation: i.presentation ?? null,
-        expiresAt: i.expiresAt ?? null,
-      })),
+      lines: dto.items.map(toSupplyLineProps),
     });
   }
 

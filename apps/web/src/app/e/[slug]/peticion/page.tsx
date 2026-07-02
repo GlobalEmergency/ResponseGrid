@@ -38,7 +38,13 @@ export default async function PeticionPage({ params, searchParams }: Props) {
   const { resourceId } = await searchParams;
   const { t, locale } = await getT();
 
-  await requireSession(`/e/${slug}/peticion`);
+  // Keep the resource link in the login round-trip: losing the query here
+  // would silently create the need unlinked after re-authentication (#60).
+  await requireSession(
+    resourceId !== undefined
+      ? `/e/${slug}/peticion?resourceId=${encodeURIComponent(resourceId)}`
+      : `/e/${slug}/peticion`,
+  );
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {

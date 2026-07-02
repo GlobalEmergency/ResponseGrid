@@ -68,6 +68,8 @@ export function InventoryEditForm({
         locale={locale}
         categories={categories}
         initialLines={initial.map(toLine)}
+        strict
+        allowAllCategories
       />
 
       <Button type="submit" disabled={pending} fullWidth>

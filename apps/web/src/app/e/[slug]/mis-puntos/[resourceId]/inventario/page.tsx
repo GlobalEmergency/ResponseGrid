@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { requireSession } from '@/lib/auth';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { fetchMyInventory, saveMyInventory } from './actions';
 import { InventoryEditForm } from './inventory-edit-form';
@@ -28,15 +27,16 @@ export default async function InventarioPage({ params }: Props) {
   const { slug, resourceId } = await params;
   const { t, locale } = await getT();
 
-  await requireSession(`/e/${slug}/mis-puntos/${resourceId}/inventario`);
-
-  const emergency = await getEmergencyBySlug(slug);
+  // Independent fetches, in parallel; fetchMyInventory gates the session
+  // itself (redirects to login when absent), so no separate requireSession.
+  const [emergency, initial, categories] = await Promise.all([
+    getEmergencyBySlug(slug),
+    fetchMyInventory(resourceId, slug),
+    getCategories(locale),
+  ]);
   if (!emergency) notFound();
-
-  const initial = await fetchMyInventory(resourceId, slug);
   if (initial === null) notFound();
 
-  const categories = await getCategories(locale);
   const boundAction = saveMyInventory.bind(null, resourceId, slug);
 
   return (

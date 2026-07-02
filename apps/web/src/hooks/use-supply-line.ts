@@ -20,7 +20,12 @@ export function useSupplyLine(params: {
   onChange: (patch: Partial<SupplyLine>) => void;
 }) {
   const { value, categories, onChange } = params;
-  const [committed, setCommitted] = useState(false);
+  // A line mounted with a free-text name (e.g. prefilled from persisted
+  // inventory, #263) is already committed — otherwise its category/unit/expiry
+  // fields would start collapsed and uneditable.
+  const [committed, setCommitted] = useState(
+    () => value.supplyId === null && value.name.trim() !== '',
+  );
 
   const onTextChange = useCallback(
     (name: string) => {

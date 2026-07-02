@@ -40,11 +40,6 @@ import {
 import { DrizzleNeedRepository } from './drizzle/drizzle-need.repository';
 import { DrizzleNeedResourceReader } from './drizzle/drizzle-need-resource-reader';
 import { DrizzleEmergencyStatusReader } from '../../../shared/drizzle-emergency-status-reader';
-import {
-  NEED_RESOURCE_READER,
-  NeedResourceReader,
-} from '../domain/ports/resource-reader';
-import { DrizzleNeedResourceReader } from './drizzle/drizzle-need-resource-reader';
 import { BullMqEventBus } from './bullmq-event-bus';
 import { IdentityModule } from '../../identity/infrastructure/identity.module';
 import { DrizzleVolunteerMatcher } from '../../volunteers/infrastructure/drizzle/drizzle-volunteer-matcher';
