@@ -19,6 +19,7 @@ export interface EventSubscription {
 
 export const EVENT_SUBSCRIPTIONS: readonly EventSubscription[] = [
   { consumer: 'resources', events: ['donation_intake.received'] },
+  { consumer: 'notifications', events: ['donation_intake.received'] },
 ];
 
 /** Consumers subscribed to `eventName`, in registry order. */

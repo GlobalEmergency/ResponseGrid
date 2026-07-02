@@ -2847,7 +2847,7 @@ export interface components {
             userId: string;
             emergencyId: string | null;
             /** @enum {string} */
-            type: "resource_verified" | "offer_matched" | "task_assigned";
+            type: "resource_verified" | "offer_matched" | "task_assigned" | "donation_received";
             message: string;
             link: string | null;
             read: boolean;

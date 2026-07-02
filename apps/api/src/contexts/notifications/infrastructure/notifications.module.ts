@@ -16,6 +16,9 @@ import {
   NotificationsPort,
 } from '../domain/ports/notifications.port';
 import { DrizzleNotificationRepository } from './drizzle/drizzle-notification.repository';
+import { ConsumerWorker } from '../../../shared/events/consumer-worker';
+import { DrizzleProcessedEventStore } from '../../../shared/events/drizzle-processed-event-store';
+import { notifyDonorOnReception } from './notify-donor-on-reception.handler';
 
 const notificationRepositoryProvider = {
   provide: NOTIFICATION_REPOSITORY,
@@ -49,6 +52,24 @@ const markAllReadProvider = {
   useFactory: (repo: NotificationRepository) => new MarkAllRead(repo),
 };
 
+// Idempotency ledger for this context's event consumers (#129).
+const processedEventStoreProvider = {
+  provide: DrizzleProcessedEventStore,
+  inject: [DB],
+  useFactory: (db: Db) => new DrizzleProcessedEventStore(db),
+};
+
+// Notifications consumer of the domain-event fan-out: on a confirmed reception,
+// notify the donor (when the donation is linked to a user), at most once.
+const donationNotificationsWorkerProvider = {
+  provide: ConsumerWorker,
+  inject: [DrizzleProcessedEventStore, NOTIFICATIONS_PORT],
+  useFactory: (store: DrizzleProcessedEventStore, port: NotificationsPort) =>
+    new ConsumerWorker('notifications', store, {
+      'donation_intake.received': notifyDonorOnReception(port),
+    }),
+};
+
 @Module({
   imports: [DatabaseModule, IdentityModule],
   controllers: [NotificationsController],
@@ -58,6 +79,8 @@ const markAllReadProvider = {
     getMyNotificationsProvider,
     markNotificationReadProvider,
     markAllReadProvider,
+    processedEventStoreProvider,
+    donationNotificationsWorkerProvider,
   ],
   exports: [NOTIFICATIONS_PORT],
 })

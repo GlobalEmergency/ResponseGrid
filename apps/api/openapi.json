@@ -9297,7 +9297,8 @@
             "enum": [
               "resource_verified",
               "offer_matched",
-              "task_assigned"
+              "task_assigned",
+              "donation_received"
             ]
           },
           "message": {

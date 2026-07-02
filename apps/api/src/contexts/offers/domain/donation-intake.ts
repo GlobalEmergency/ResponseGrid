@@ -232,6 +232,7 @@ export class DonationIntake {
         emergencyId: this.emergencyId.value,
         targetResourceId: this.targetResourceId,
         receivedByUserId: input.receivedByUserId,
+        donorUserId: this.donorUserId,
         lines: this._lines.map((line) => line.supplyLine.toSnapshot()),
       }),
     );

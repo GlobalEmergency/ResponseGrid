@@ -11,6 +11,8 @@ export class DonationIntakeReceived implements DomainEvent {
       emergencyId: string;
       targetResourceId: string;
       receivedByUserId: string;
+      /** Donor's platform user id, when the donation is linked to one (#129). */
+      donorUserId: string | null;
       lines: SupplyLineSnapshot[];
     },
   ) {}
