@@ -71,6 +71,9 @@ describe('User admin console (e2e)', () => {
         email: 'plainuser@reliefhub.org',
         password: 'password123',
         name: 'Plain User',
+        phone: '+58 412 555 0101',
+        acceptedTerms: true,
+        acceptedPrivacy: true,
       })
       .expect(201);
     citizenToken = (citizenReg.body as { accessToken: string }).accessToken;

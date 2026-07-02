@@ -9,6 +9,8 @@ import { EmergencyView, toEmergencyView } from './emergency-view';
  */
 export interface MyEmergencyView extends EmergencyView {
   roleIds: string[];
+  /** Per-emergency dispute threshold, or null when it uses the global default. */
+  resourceDisputeThreshold: number | null;
 }
 
 /**
@@ -63,6 +65,7 @@ export class ListMyEmergencies {
     return emergencies.map((e) => ({
       ...toEmergencyView(e),
       roleIds: roleIdsByEmergency.get(e.id.value) ?? [],
+      resourceDisputeThreshold: e.resourceDisputeThreshold,
     }));
   }
 }

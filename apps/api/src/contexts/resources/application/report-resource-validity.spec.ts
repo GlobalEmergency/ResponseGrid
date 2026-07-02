@@ -57,8 +57,19 @@ describe('ReportResourceValidity', () => {
     return id;
   }
 
-  const useCase = (threshold?: number): ReportResourceValidity =>
-    new ReportResourceValidity(resources, reports, bus, threshold);
+  const useCase = (
+    threshold?: number,
+    emergencyThresholds?: {
+      getThreshold: (id: string) => Promise<number | null>;
+    },
+  ): ReportResourceValidity =>
+    new ReportResourceValidity(
+      resources,
+      reports,
+      bus,
+      threshold,
+      emergencyThresholds,
+    );
 
   const cmd = (resourceId: string, reporterUserId: string) => ({
     resourceId,
@@ -172,5 +183,29 @@ describe('ReportResourceValidity', () => {
     await expect(useCase().execute(cmd(id, 'user-1'))).rejects.toThrow(
       ResourceNotReportableError,
     );
+  });
+
+  it('usa el umbral por emergencia cuando está configurado', async () => {
+    const id = await seedPublished();
+    // Umbral de 2 en vez del global de 3
+    const thresholdReader = {
+      getThreshold: () => Promise.resolve(2 as number | null),
+    };
+    const rep = useCase(3, thresholdReader);
+    await rep.execute(cmd(id, 'user-1'));
+    const res = await rep.execute(cmd(id, 'user-2'));
+    expect(res.disputed).toBe(true);
+  });
+
+  it('usa el umbral global cuando el umbral por emergencia es null', async () => {
+    const id = await seedPublished();
+    const thresholdReader = {
+      getThreshold: () => Promise.resolve(null as number | null),
+    };
+    const rep = useCase(3, thresholdReader);
+    await rep.execute(cmd(id, 'user-1'));
+    await rep.execute(cmd(id, 'user-2'));
+    const res = await rep.execute(cmd(id, 'user-3'));
+    expect(res.disputed).toBe(true);
   });
 });

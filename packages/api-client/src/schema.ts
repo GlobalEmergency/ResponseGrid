@@ -38,6 +38,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/onboarding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Completar el alta: teléfono + aceptación de términos y privacidad (usado tras el login social) */
+        post: operations["AuthController_onboardingRoute"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/me": {
         parameters: {
             query?: never;
@@ -806,6 +823,23 @@ export interface paths {
         get?: never;
         /** Publish official announcement for an emergency (coordinator only) */
         put: operations["EmergenciesController_publishEmergencyAnnouncement"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/resource-dispute-threshold": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Fijar (o limpiar) el umbral de disputa por reportes para una emergencia */
+        put: operations["EmergenciesController_setResourceDisputeThreshold"];
         post?: never;
         delete?: never;
         options?: never;
@@ -2625,14 +2659,45 @@ export interface components {
             /** @example Jane Doe */
             name: string;
             /**
-             * @description Teléfono de contacto opcional
+             * @description Teléfono de contacto (obligatorio)
              * @example +58 412 555 0101
              */
-            phone?: string | null;
+            phone: string;
+            /**
+             * @description Aceptación de las condiciones del servicio (debe ser true)
+             * @example true
+             */
+            acceptedTerms: boolean;
+            /**
+             * @description Aceptación de la política de privacidad (debe ser true)
+             * @example true
+             */
+            acceptedPrivacy: boolean;
         };
         RegisterResponseDto: {
             /** @description JWT access token (auto-login after registration) */
             accessToken: string;
+        };
+        OnboardingDto: {
+            /**
+             * @description Teléfono de contacto (obligatorio)
+             * @example +58 412 555 0101
+             */
+            phone: string;
+            /**
+             * @description Aceptación de las condiciones del servicio (debe ser true)
+             * @example true
+             */
+            acceptedTerms: boolean;
+            /**
+             * @description Aceptación de la política de privacidad (debe ser true)
+             * @example true
+             */
+            acceptedPrivacy: boolean;
+        };
+        OnboardingResponseDto: {
+            /** @description true una vez el perfil queda completo (teléfono + consentimientos) */
+            profileComplete: boolean;
         };
         MeGrantDto: {
             /**
@@ -2660,6 +2725,8 @@ export interface components {
              * @example +58 412 555 0101
              */
             phone: string | null;
+            /** @description true si el perfil está completo (teléfono + consentimientos vigentes). false obliga a pasar por el onboarding (típico en altas sociales). */
+            profileComplete: boolean;
             /** @description The effective role grants (role @ scope) for this user */
             grants: components["schemas"]["MeGrantDto"][];
         };
@@ -3793,6 +3860,11 @@ export interface components {
              *     ]
              */
             roleIds: string[];
+            /**
+             * @description Umbral de disputa configurado para esta emergencia, o null cuando usa el global. Solo se expone en la vista autenticada.
+             * @example 5
+             */
+            resourceDisputeThreshold: number | null;
         };
         CreateEmergencyFromTemplateDto: {
             /** @example aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa */
@@ -3810,6 +3882,13 @@ export interface components {
         PublishAnnouncementDto: {
             /** @example Se suspenden las operaciones de rescate hasta nuevo aviso. */
             message: string;
+        };
+        SetDisputeThresholdDto: {
+            /**
+             * @description Número mínimo de reportantes distintos para marcar el punto como disputado (entero entre 1 y 1000). Enviar null explícito elimina el umbral específico y vuelve al global (RESOURCE_DISPUTE_THRESHOLD / 3). El campo es obligatorio: un body vacío es 400.
+             * @example 5
+             */
+            threshold: number | null;
         };
         NeedLocationDto: {
             /** @example 123 Main Street, Caracas, Venezuela */
@@ -4906,6 +4985,11 @@ export interface components {
         ShipmentViewDto: {
             /** Format: uuid */
             id: string;
+            /**
+             * @description Legible/QR "Código Único" of the expedition (#163)
+             * @example EXP-0001
+             */
+            code: string;
             /** Format: uuid */
             emergencyId: string;
             /** Format: uuid */
@@ -5707,6 +5791,44 @@ export interface operations {
             };
             /** @description Rate limit exceeded — try again later */
             429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_onboardingRoute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingDto"];
+            };
+        };
+        responses: {
+            /** @description Perfil completado */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OnboardingResponseDto"];
+                };
+            };
+            /** @description Falta el teléfono o el consentimiento */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Token inválido o ausente */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7733,6 +7855,59 @@ export interface operations {
                 content?: never;
             };
             /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Emergency not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EmergenciesController_setResourceDisputeThreshold: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetDisputeThresholdDto"];
+            };
+        };
+        responses: {
+            /** @description Umbral actualizado */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description emergency:configure permission required */
             403: {
                 headers: {
                     [name: string]: unknown;

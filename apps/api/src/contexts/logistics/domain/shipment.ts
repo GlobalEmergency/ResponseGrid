@@ -28,6 +28,8 @@ export interface CarrierPrincipal {
 
 export interface CreateShipmentProps {
   id: ShipmentId;
+  /** Legible/QR "Código Único" of the expedition (`EXP-0001`, #163). */
+  code: string;
   emergencyId: EmergencyId;
   originResourceId: string;
   destinationResourceId: string;
@@ -40,6 +42,7 @@ export interface CreateShipmentProps {
 
 export interface ShipmentSnapshot {
   id: string;
+  code: string;
   emergencyId: string;
   originResourceId: string;
   destinationResourceId: string;
@@ -76,6 +79,7 @@ export class Shipment {
 
   private constructor(
     public readonly id: ShipmentId,
+    public readonly code: string,
     public readonly emergencyId: EmergencyId,
     public readonly originResourceId: string,
     public readonly destinationResourceId: string,
@@ -105,9 +109,14 @@ export class Shipment {
     if (props.items.length === 0 && containerIds.length === 0) {
       throw new ShipmentMustHaveCargoError();
     }
+    const code = props.code.trim();
+    if (code.length === 0) {
+      throw new InvalidShipmentRouteError('Shipment code must not be empty');
+    }
     const now = new Date();
     return new Shipment(
       props.id,
+      code,
       props.emergencyId,
       props.originResourceId,
       props.destinationResourceId,
@@ -125,6 +134,7 @@ export class Shipment {
   static fromSnapshot(s: ShipmentSnapshot): Shipment {
     return new Shipment(
       ShipmentId.fromString(s.id),
+      s.code,
       EmergencyId.fromString(s.emergencyId),
       s.originResourceId,
       s.destinationResourceId,
@@ -234,6 +244,7 @@ export class Shipment {
   toSnapshot(): ShipmentSnapshot {
     return {
       id: this.id.value,
+      code: this.code,
       emergencyId: this.emergencyId.value,
       originResourceId: this.originResourceId,
       destinationResourceId: this.destinationResourceId,

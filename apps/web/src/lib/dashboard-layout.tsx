@@ -18,6 +18,9 @@ export async function DashboardLayout({
 }) {
   const { me, roles, notificationUnread, contexts } = await getNavContext();
   if (me == null) redirect('/login');
+  // Force onboarding for any incomplete profile (missing phone/consent or an
+  // outdated consent version) before granting access to the panel.
+  if (me.profileComplete === false) redirect('/auth/onboarding?next=/dashboard');
 
   const { t } = await getT();
   const tn = t.nav;

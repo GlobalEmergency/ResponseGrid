@@ -35,7 +35,7 @@ export default async function SignupPage({ searchParams }: Props) {
           </div>
 
           <Card className="p-5 lg:p-7">
-            <SignupForm next={next} t={t.signup} />
+            <SignupForm next={next} t={t.signup} tc={t.consent} />
           </Card>
         </div>
       </div>
