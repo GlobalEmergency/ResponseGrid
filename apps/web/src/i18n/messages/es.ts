@@ -2528,6 +2528,9 @@ export const es = {
 
     ship_route: '{origin} → {destination}',
     ship_drawer_open: 'Ver detalle de la expedición: {route}',
+    ship_section_code: 'Código único',
+    ship_field_code: 'Código',
+    ship_code_qr_alt: 'Código QR de la expedición {code}',
     ship_section_route: 'Ruta',
     ship_section_items: 'Carga',
     ship_section_assignment: 'Asignación',

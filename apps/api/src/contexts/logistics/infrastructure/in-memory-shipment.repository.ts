@@ -8,10 +8,17 @@ import { EmergencyId } from '../../../shared/domain/emergency-id';
 
 export class InMemoryShipmentRepository implements ShipmentRepository {
   private store = new Map<string, ShipmentSnapshot>();
+  private sequences = new Map<string, number>();
 
   save(shipment: Shipment): Promise<void> {
     this.store.set(shipment.id.value, shipment.toSnapshot());
     return Promise.resolve();
+  }
+
+  nextSequence(emergencyId: EmergencyId): Promise<number> {
+    const next = (this.sequences.get(emergencyId.value) ?? 0) + 1;
+    this.sequences.set(emergencyId.value, next);
+    return Promise.resolve(next);
   }
 
   findById(id: ShipmentId): Promise<Shipment | null> {

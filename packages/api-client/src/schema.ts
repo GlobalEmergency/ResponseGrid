@@ -4950,6 +4950,11 @@ export interface components {
         ShipmentViewDto: {
             /** Format: uuid */
             id: string;
+            /**
+             * @description Legible/QR "Código Único" of the expedition (#163)
+             * @example EXP-0001
+             */
+            code: string;
             /** Format: uuid */
             emergencyId: string;
             /** Format: uuid */

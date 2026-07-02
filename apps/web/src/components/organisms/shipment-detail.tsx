@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useState, useEffect, useTransition } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import {
   assignCapacity,
   getCapacitySuggestions,
@@ -380,6 +381,24 @@ export function ShipmentDetail({
       }
       footer={footer}
     >
+      <DetailSection title={tc.ship_section_code}>
+        {/* Código único legible + QR: viaja con el camión/avión (#163). El QR
+            codifica el propio código, resoluble por la consulta pública (#158). */}
+        <div className="flex items-center gap-4 py-2">
+          <div className="rounded-lg border-2 border-navy bg-white p-2">
+            <QRCodeSVG
+              value={shipment.code}
+              size={96}
+              title={tc.ship_code_qr_alt.replace('{code}', shipment.code)}
+              marginSize={0}
+            />
+          </div>
+          <span className="font-display text-2xl font-bold tracking-widest text-navy break-all">
+            {shipment.code}
+          </span>
+        </div>
+      </DetailSection>
+
       <DetailSection title={tc.ship_section_route}>
         <DetailField label={tc.ship_field_origin} value={originName} />
         <DetailField

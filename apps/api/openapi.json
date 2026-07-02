@@ -13886,6 +13886,11 @@
             "type": "string",
             "format": "uuid"
           },
+          "code": {
+            "type": "string",
+            "description": "Legible/QR \"Código Único\" of the expedition (#163)",
+            "example": "EXP-0001"
+          },
           "emergencyId": {
             "type": "string",
             "format": "uuid"
@@ -13960,6 +13965,7 @@
         },
         "required": [
           "id",
+          "code",
           "emergencyId",
           "originResourceId",
           "destinationResourceId",
