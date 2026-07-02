@@ -44,6 +44,8 @@ interface InventoryFieldProps {
    * registrar where declared inventory is fully optional.
    */
   startWithOneRow?: boolean;
+  /** Prefill the editor with existing lines (inventory edit, #263). */
+  initialLines?: SupplyLine[];
 }
 
 /**
@@ -58,12 +60,13 @@ export function InventoryField({
   locale,
   categories,
   startWithOneRow = false,
+  initialLines,
 }: InventoryFieldProps) {
   const materialCategories = categories.filter(isMaterialCategory);
   const defaultCategory = materialCategories[0]?.slug ?? '';
 
   const [lines, setLines] = useState<SupplyLine[]>(
-    startWithOneRow ? [emptyLine(defaultCategory)] : [],
+    initialLines ?? (startWithOneRow ? [emptyLine(defaultCategory)] : []),
   );
 
   const labels = {

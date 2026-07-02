@@ -91,12 +91,26 @@ export default async function MisPuntosPage({ params }: Props) {
                       slug={slug}
                     />
 
-                    <Link
-                      href={`/e/${slug}/reportar?resourceId=${resource.id}`}
-                      className="inline-flex items-center justify-center rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink bg-white hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors w-fit"
-                    >
-                      {ta.report_incident_cta}
-                    </Link>
+                    <div className="flex flex-wrap gap-3">
+                      <Link
+                        href={`/e/${slug}/mis-puntos/${resource.id}/inventario`}
+                        className="inline-flex items-center justify-center rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink bg-white hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors w-fit"
+                      >
+                        {ta.manage_inventory_cta}
+                      </Link>
+                      <Link
+                        href={`/e/${slug}/peticion?resourceId=${resource.id}`}
+                        className="inline-flex items-center justify-center rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink bg-white hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors w-fit"
+                      >
+                        {ta.declare_needs_cta}
+                      </Link>
+                      <Link
+                        href={`/e/${slug}/reportar?resourceId=${resource.id}`}
+                        className="inline-flex items-center justify-center rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink bg-white hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors w-fit"
+                      >
+                        {ta.report_incident_cta}
+                      </Link>
+                    </div>
                   </article>
                 </li>
               ))}

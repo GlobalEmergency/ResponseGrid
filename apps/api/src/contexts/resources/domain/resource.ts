@@ -335,6 +335,12 @@ export class Resource {
     this._items = [...byKey.values()];
   }
 
+  /** Owner/coordinator overwrites the declared inventory (#263). Replaces, not
+   *  merges — unlike receiveInventory (donation/intake). Empty list clears it. */
+  replaceInventory(lines: SupplyLine[]): void {
+    this._items = [...lines];
+  }
+
   /**
    * Discard a resource pending verification: it leaves the verification queue
    * (no longer `unverified`) and can never be published. Only a resource still

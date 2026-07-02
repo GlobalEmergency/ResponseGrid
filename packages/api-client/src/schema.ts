@@ -368,6 +368,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/resources/{resourceId}/inventory": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read a point declared inventory in full (owner or coordinator) */
+        get: operations["ResourcesController_getMyInventoryAction"];
+        /** Replace a point declared inventory (owner or coordinator) — #263 */
+        put: operations["ResourcesController_updateMyInventoryAction"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/resources/{resourceId}/verify": {
         parameters: {
             query?: never;
@@ -3078,6 +3096,39 @@ export interface components {
             /** @description Supply lines received into the point stock (at least one) */
             items: components["schemas"]["SupplyLineDto"][];
         };
+        SupplyLineResponseDto: {
+            /** @example Water bottles */
+            name: string;
+            /**
+             * @description Optional soft link to the canonical supply master data.
+             * @example 1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8
+             */
+            supplyId: string | null;
+            /** @example 100 */
+            quantity: number;
+            /** @example liters */
+            unit?: string | null;
+            /**
+             * @example water
+             * @enum {string}
+             */
+            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
+            /**
+             * @description Presentation / route of administration (ampolla, EV, inhalador…) — #61.
+             * @example ampolla
+             */
+            presentation?: string | null;
+            /**
+             * Format: date
+             * @description Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD).
+             * @example 2026-07-01
+             */
+            expiresAt?: string | null;
+        };
+        UpdateInventoryDto: {
+            /** @description Full declared inventory (replaces current; empty clears it) */
+            items: components["schemas"]["SupplyLineDto"][];
+        };
         VerifyResourceDto: Record<string, never>;
         EditResourceDto: {
             /**
@@ -3962,35 +4013,6 @@ export interface components {
             latitude: number;
             /** @example -66.9036 */
             longitude: number;
-        };
-        SupplyLineResponseDto: {
-            /** @example Water bottles */
-            name: string;
-            /**
-             * @description Optional soft link to the canonical supply master data.
-             * @example 1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8
-             */
-            supplyId: string | null;
-            /** @example 100 */
-            quantity: number;
-            /** @example liters */
-            unit?: string | null;
-            /**
-             * @example water
-             * @enum {string}
-             */
-            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
-            /**
-             * @description Presentation / route of administration (ampolla, EV, inhalador…) — #61.
-             * @example ampolla
-             */
-            presentation?: string | null;
-            /**
-             * Format: date
-             * @description Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD).
-             * @example 2026-07-01
-             */
-            expiresAt?: string | null;
         };
         NeedViewDto: {
             /**
@@ -6591,6 +6613,102 @@ export interface operations {
                 content?: never;
             };
             /** @description Missing intake:receive for this point */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ResourcesController_getMyInventoryAction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource UUID */
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupplyLineResponseDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not owner nor coordinator */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ResourcesController_updateMyInventoryAction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource UUID */
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateInventoryDto"];
+            };
+        };
+        responses: {
+            /** @description Inventory replaced */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body or UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not owner nor coordinator */
             403: {
                 headers: {
                     [name: string]: unknown;

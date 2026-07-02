@@ -575,6 +575,9 @@ export const es = {
     success_message:
       'Gracias, quedas registrado. No recibas material ni publiques nada hasta que te validemos.',
     success_register_another: 'Registrar otro recurso',
+    success_manage_point: 'Ver / gestionar mi punto',
+    success_manage_inventory: 'Gestionar mi inventario',
+    success_declare_needs: 'Declarar necesidades',
     error_fallback: 'Error al registrar el recurso',
 
     // Inventario / material disponible (opcional)
@@ -1732,6 +1735,17 @@ export const es = {
     no_points_description: 'Cuando registres un recurso en esta emergencia aparecerá aquí.',
     point_card_aria: 'Punto: {name}',
     report_incident_cta: 'Reportar incidencia',
+    manage_inventory_cta: 'Gestionar inventario',
+    declare_needs_cta: 'Declarar necesidades',
+    inventory_page_title: 'Inventario del punto',
+    inventory_page_subtitle:
+      'Declara qué material tiene este punto para entregar. Sustituye el inventario actual.',
+    inventory_save_cta: 'Guardar inventario',
+    inventory_saving: 'Guardando…',
+    inventory_saved_success: 'Inventario actualizado.',
+    inventory_update_forbidden: 'No tienes permiso para editar este inventario.',
+    inventory_update_failed: 'No se pudo guardar el inventario.',
+    inventory_invalid_items: 'Revisa el material: hay líneas incompletas o inválidas.',
 
     type_collection_point: 'Punto de recogida',
     type_delivery_point: 'Punto de entrega',
