@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { DatabaseModule } from './shared/database.module';
 import { ResourcesModule } from './contexts/resources/infrastructure/resources.module';
 import { EmergenciesModule } from './contexts/emergencies/infrastructure/emergencies.module';
@@ -31,6 +32,14 @@ const isTestEnv = process.env.NODE_ENV === 'test';
       isTestEnv
         ? [] // disabled — no throttle in test
         : [
+            {
+              // Baseline per-IP limit that applies to EVERY route (the guard is
+              // registered globally below). Generous enough for legitimate map
+              // panning / dashboard use, but caps scraping and volumetric DoS.
+              name: 'default',
+              ttl: 60_000,
+              limit: 200,
+            },
             {
               // auth endpoints: 10 requests per 60 seconds per IP
               name: 'auth',
@@ -65,6 +74,12 @@ const isTestEnv = process.env.NODE_ENV === 'test';
     GroupsModule,
     SuppliesModule,
     EventsModule,
+  ],
+  providers: [
+    // Apply rate limiting to EVERY route by default. Individual routes tighten
+    // it with @Throttle (auth, intake, geocode…). In test env the throttler is
+    // configured with an empty ruleset, so this guard is a no-op there.
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })
 export class AppModule {}
