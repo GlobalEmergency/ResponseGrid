@@ -1,6 +1,6 @@
 import { pgTable, text, timestamp, primaryKey } from 'drizzle-orm/pg-core';
 
-/** Idempotency ledger: (consumer, dedup_key) → already processed. Migration 0048. */
+/** Idempotency ledger: (consumer, dedup_key) → already processed. Migration 0050. */
 export const processedEventsTable = pgTable(
   'processed_events',
   {
