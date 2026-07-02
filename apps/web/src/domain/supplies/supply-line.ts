@@ -49,20 +49,55 @@ export function deriveFromSupply(
   return patch;
 }
 
-/** Serialize a line to the API request shape: trim, drop empty unit, pass supplyId. */
-export function toDto(line: SupplyLine): SupplyLineDto {
-  const name = line.name.trim();
-  const unit = line.unit.trim();
-  const presentation = line.presentation?.trim() ?? '';
+/**
+ * The full set of per-line fields, before assembly into the wire DTO. Listing
+ * every field here (all required) is the single source of truth for the SHAPE
+ * of a supply line: add a field to `SupplyLineDto` and neither `toDto` (trusted
+ * editor path) nor `parseSupplyLines` (untrusted re-parse path) will compile
+ * until both pass it — so the two serializers can never silently drift (the bug
+ * that dropped `presentation`, #61). Optional-value fields are `unknown` so this
+ * is also the one place that narrows/trims them.
+ */
+export interface SupplyLineFields {
+  name: string;
+  quantity: number;
+  category: string;
+  unit: unknown;
+  supplyId: unknown;
+  presentation: unknown;
+  expiresAt: unknown;
+}
+
+const trimmed = (v: unknown): string => (typeof v === 'string' ? v.trim() : '');
+
+/** Assemble a clean {@link SupplyLineDto}: trim strings and drop empty optionals. */
+export function buildSupplyLineDto(f: SupplyLineFields): SupplyLineDto {
+  const unit = trimmed(f.unit);
+  const supplyId = trimmed(f.supplyId);
+  const presentation = trimmed(f.presentation);
+  const expiresAt = trimmed(f.expiresAt);
   return {
-    name,
-    quantity: line.quantity,
-    category: line.category as SupplyLineDto['category'],
-    ...(line.supplyId !== null && line.supplyId !== '' ? { supplyId: line.supplyId } : {}),
+    name: f.name.trim(),
+    quantity: f.quantity,
+    category: f.category as SupplyLineDto['category'],
     ...(unit !== '' ? { unit } : {}),
+    ...(supplyId !== '' ? { supplyId } : {}),
     ...(presentation !== '' ? { presentation } : {}),
-    ...(line.expiresAt !== undefined && line.expiresAt !== '' ? { expiresAt: line.expiresAt } : {}),
+    ...(expiresAt !== '' ? { expiresAt } : {}),
   };
+}
+
+/** Serialize a (complete) editor line to the API request shape. */
+export function toDto(line: SupplyLine): SupplyLineDto {
+  return buildSupplyLineDto({
+    name: line.name,
+    quantity: line.quantity,
+    category: line.category,
+    unit: line.unit,
+    supplyId: line.supplyId,
+    presentation: line.presentation,
+    expiresAt: line.expiresAt,
+  });
 }
 
 /** A line is complete when it has a non-empty name, a positive integer quantity, and a category. */

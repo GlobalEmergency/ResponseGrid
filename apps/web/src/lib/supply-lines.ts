@@ -1,4 +1,7 @@
 import type { components } from '@reliefhub/api-client';
+// Relative + .ts extension (not the `@/` alias) so the `node --test` runner,
+// which does not resolve tsconfig paths, can load this value import.
+import { buildSupplyLineDto } from '../domain/supplies/supply-line.ts';
 
 type SupplyLineDto = components['schemas']['SupplyLineDto'];
 
@@ -69,23 +72,19 @@ export function parseSupplyLines(
     ) {
       return null;
     }
-    items.push({
-      name: name.trim(),
-      quantity,
-      category: category as SupplyLineDto['category'],
-      ...(typeof unit === 'string' && unit.trim() !== ''
-        ? { unit: unit.trim() }
-        : {}),
-      ...(typeof supplyId === 'string' && supplyId.trim() !== ''
-        ? { supplyId: supplyId.trim() }
-        : {}),
-      ...(typeof presentation === 'string' && presentation.trim() !== ''
-        ? { presentation: presentation.trim() }
-        : {}),
-      ...(typeof expiresAt === 'string' && expiresAt !== ''
-        ? { expiresAt }
-        : {}),
-    });
+    // Validation (above) is the untrusted-input boundary; assembly/trim/drop-empty
+    // is shared with the editor path via buildSupplyLineDto so the shape can't drift.
+    items.push(
+      buildSupplyLineDto({
+        name,
+        quantity,
+        category,
+        unit,
+        supplyId,
+        presentation,
+        expiresAt,
+      }),
+    );
   }
   return items;
 }
