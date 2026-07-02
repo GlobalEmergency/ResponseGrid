@@ -4061,6 +4061,9 @@
                 }
               }
             }
+          },
+          "429": {
+            "description": "Rate limit exceeded"
           }
         },
         "summary": "Geocode a free-text address query (Nominatim / OpenStreetMap)",
@@ -4857,7 +4860,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DonationIntakeViewDto"
+                  "$ref": "#/components/schemas/PublicDonationIntakeDto"
                 }
               }
             }
@@ -7885,7 +7888,12 @@
             "description": "File content streamed"
           }
         },
-        "summary": "Download a stored file by key",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Download a stored file by key (authenticated)",
         "tags": [
           "files"
         ]
@@ -11749,7 +11757,9 @@
         "properties": {
           "address": {
             "type": "string",
-            "example": "123 Main Street, Caracas"
+            "example": "Caracas",
+            "nullable": true,
+            "description": "Street line is coarsened (locality only) or dropped for needs with approximate location sensitivity to protect the requester’s privacy."
           },
           "latitude": {
             "type": "number",
@@ -11761,7 +11771,6 @@
           }
         },
         "required": [
-          "address",
           "latitude",
           "longitude"
         ]
@@ -13114,14 +13123,6 @@
             "type": "string",
             "format": "uuid"
           },
-          "intakeCode": {
-            "type": "string",
-            "example": "ACO-7F3K"
-          },
-          "targetResourceId": {
-            "type": "string",
-            "format": "uuid"
-          },
           "itemCount": {
             "type": "number",
             "example": 2
@@ -13133,8 +13134,6 @@
         },
         "required": [
           "id",
-          "intakeCode",
-          "targetResourceId",
           "itemCount",
           "createdAt"
         ]
@@ -13425,6 +13424,130 @@
           "sortOrder"
         ]
       },
+      "PublicDonationIntakeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetResourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "intakeCode": {
+            "type": "string",
+            "example": "ACO-7F3K"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "received",
+              "rejected",
+              "incomplete"
+            ]
+          },
+          "donorName": {
+            "type": "string"
+          },
+          "donorPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "donorEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IntakeLineViewDto"
+            }
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "emergencyId",
+          "targetResourceId",
+          "intakeCode",
+          "status",
+          "donorName",
+          "lines",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "DonationIntakeSearchHitDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "intakeCode": {
+            "type": "string",
+            "example": "ACO-7F3K"
+          },
+          "donorName": {
+            "type": "string"
+          },
+          "donorPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "donorEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "received",
+              "rejected",
+              "incomplete"
+            ]
+          },
+          "targetResourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemCount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "intakeCode",
+          "donorName",
+          "status",
+          "targetResourceId",
+          "itemCount",
+          "createdAt"
+        ]
+      },
       "DonationIntakeViewDto": {
         "type": "object",
         "properties": {
@@ -13517,59 +13640,6 @@
           "lines",
           "createdAt",
           "updatedAt"
-        ]
-      },
-      "DonationIntakeSearchHitDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "intakeCode": {
-            "type": "string",
-            "example": "ACO-7F3K"
-          },
-          "donorName": {
-            "type": "string"
-          },
-          "donorPhone": {
-            "type": "string",
-            "nullable": true
-          },
-          "donorEmail": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "pending",
-              "received",
-              "rejected",
-              "incomplete"
-            ]
-          },
-          "targetResourceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "itemCount": {
-            "type": "number"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "id",
-          "intakeCode",
-          "donorName",
-          "status",
-          "targetResourceId",
-          "itemCount",
-          "createdAt"
         ]
       },
       "IntakeDeepLinkDto": {

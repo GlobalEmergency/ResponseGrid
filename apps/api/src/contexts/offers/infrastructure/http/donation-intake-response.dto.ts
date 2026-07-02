@@ -20,12 +20,6 @@ export class PendingIntakeSummaryDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
-  @ApiProperty({ example: 'ACO-7F3K' })
-  intakeCode!: string;
-
-  @ApiProperty({ format: 'uuid' })
-  targetResourceId!: string;
-
   @ApiProperty({ example: 2 })
   itemCount!: number;
 
@@ -121,6 +115,77 @@ export class DonationIntakeViewDto {
 
   @ApiProperty({ type: String, format: 'date-time' })
   updatedAt!: Date;
+}
+
+/**
+ * Public-safe projection returned by the anonymous PATCH /donation-intakes/:id.
+ *
+ * The caller proved ownership (code + contact) so we echo back their OWN
+ * submitted data + status, but we deliberately DROP the coordinator-only,
+ * internal fields that the donor never supplied: `donorUserId`,
+ * `receivedByUserId`, `evidenceFileKey`, `volunteerNotes` and
+ * `receptionAdjustmentReason`.
+ */
+export class PublicDonationIntakeDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  emergencyId!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  targetResourceId!: string;
+
+  @ApiProperty({ example: 'ACO-7F3K' })
+  intakeCode!: string;
+
+  @ApiProperty({ enum: DonationIntakeStatus })
+  status!: string;
+
+  @ApiProperty()
+  donorName!: string;
+
+  @ApiPropertyOptional({ nullable: true, type: String })
+  donorPhone!: string | null;
+
+  @ApiPropertyOptional({ nullable: true, type: String })
+  donorEmail!: string | null;
+
+  @ApiProperty({ type: [IntakeLineViewDto] })
+  lines!: IntakeLineViewDto[];
+
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  receivedAt!: Date | null;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  createdAt!: Date;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  updatedAt!: Date;
+}
+
+/**
+ * Map the full (coordinator) intake view to the public-safe projection,
+ * stripping internal fields. Keep this in the DTO module so the whitelist of
+ * exposed fields lives next to the DTO definition.
+ */
+export function toPublicDonationIntakeDto(
+  view: DonationIntakeViewDto,
+): PublicDonationIntakeDto {
+  return {
+    id: view.id,
+    emergencyId: view.emergencyId,
+    targetResourceId: view.targetResourceId,
+    intakeCode: view.intakeCode,
+    status: view.status,
+    donorName: view.donorName,
+    donorPhone: view.donorPhone,
+    donorEmail: view.donorEmail,
+    lines: view.lines,
+    receivedAt: view.receivedAt,
+    createdAt: view.createdAt,
+    updatedAt: view.updatedAt,
+  };
 }
 
 export class DonationIntakeSearchHitDto {

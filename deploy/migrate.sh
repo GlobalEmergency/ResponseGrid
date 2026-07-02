@@ -20,14 +20,17 @@ $PSQL -c "CREATE TABLE IF NOT EXISTS _migrations (name text PRIMARY KEY, applied
 for f in /migrations/*.sql; do
   [ -e "$f" ] || continue
   name=$(basename "$f")
-  applied=$($PSQL -tAc "SELECT 1 FROM _migrations WHERE name = '$name'")
+  # Pass the filename as a bound psql variable and quote it with :'mname' so a
+  # filename containing a quote can neither break the statement nor inject SQL
+  # into the _migrations table (defense-in-depth; filenames are repo-controlled).
+  applied=$($PSQL -v mname="$name" -tAc "SELECT 1 FROM _migrations WHERE name = :'mname'")
   if [ "$applied" = "1" ]; then
     echo "skip   $name"
     continue
   fi
   echo "apply  $name"
   $PSQL -f "$f"
-  $PSQL -c "INSERT INTO _migrations (name) VALUES ('$name');"
+  $PSQL -v mname="$name" -c "INSERT INTO _migrations (name) VALUES (:'mname');"
 done
 
 echo "migrations up to date"

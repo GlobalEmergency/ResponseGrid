@@ -6,6 +6,7 @@ import { markNotificationReadAction } from '@/app/dashboard/notifications/action
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
 import { LocalDate } from '@/components/atoms/local-date';
+import { safeNextPath } from '@/lib/safe-next';
 
 export interface NotificationItemProps {
   id: string;
@@ -31,6 +32,12 @@ export function NotificationItem({
       await markNotificationReadAction(id);
     });
   };
+
+  // SECURITY: notification links come from the backend (stored data). Render
+  // them only when they are safe internal app routes; reject absolute /
+  // protocol-relative / `javascript:` targets that could enable DOM XSS or
+  // open redirects. Falls back to non-linked content when unsafe.
+  const safeLink = safeNextPath(link);
 
   const innerContent = (
     <div className="flex flex-col gap-1 flex-1 min-w-0">
@@ -63,9 +70,9 @@ export function NotificationItem({
         aria-hidden="true"
       />
 
-      {link != null ? (
+      {safeLink != null ? (
         <Link
-          href={link}
+          href={safeLink}
           onClick={read ? undefined : handleMarkRead}
           className="flex-1 min-w-0 hover:opacity-70 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 rounded transition-opacity"
         >
@@ -75,9 +82,9 @@ export function NotificationItem({
         innerContent
       )}
 
-      {/* Mark read button — only shown for unread notifications without a link
-          (linked notifications mark themselves read on click) */}
-      {!read && link === null && (
+      {/* Mark read button — only shown for unread notifications without a
+          (safe) link (linked notifications mark themselves read on click) */}
+      {!read && safeLink === null && (
         <button
           type="button"
           onClick={handleMarkRead}
