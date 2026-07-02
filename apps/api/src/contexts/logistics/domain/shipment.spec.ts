@@ -44,6 +44,7 @@ function makeShipment(
 ): Shipment {
   return Shipment.create({
     id: ShipmentId.create(),
+    code: 'EXP-0001',
     emergencyId: EmergencyId.fromString(EM),
     originResourceId: overrides?.originResourceId ?? ORIGIN,
     destinationResourceId: overrides?.destinationResourceId ?? DEST,

@@ -1,6 +1,6 @@
-import { and, desc, eq, type SQL } from 'drizzle-orm';
+import { and, desc, eq, sql, type SQL } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
-import { shipmentsTable } from './schema';
+import { shipmentCodeSequencesTable, shipmentsTable } from './schema';
 import {
   ListShipmentsFilter,
   ShipmentRepository,
@@ -15,6 +15,7 @@ type ShipmentRow = typeof shipmentsTable.$inferSelect;
 function rowToSnapshot(row: ShipmentRow): ShipmentSnapshot {
   return {
     id: row.id,
+    code: row.code,
     emergencyId: row.emergencyId,
     originResourceId: row.originResourceId,
     destinationResourceId: row.destinationResourceId,
@@ -39,6 +40,7 @@ export class DrizzleShipmentRepository implements ShipmentRepository {
       .insert(shipmentsTable)
       .values({
         id: s.id,
+        code: s.code,
         emergencyId: s.emergencyId,
         originResourceId: s.originResourceId,
         destinationResourceId: s.destinationResourceId,
@@ -62,6 +64,21 @@ export class DrizzleShipmentRepository implements ShipmentRepository {
           updatedAt: s.updatedAt,
         },
       });
+  }
+
+  async nextSequence(emergencyId: EmergencyId): Promise<number> {
+    const [row] = await this.db
+      .insert(shipmentCodeSequencesTable)
+      .values({ emergencyId: emergencyId.value, lastValue: 1 })
+      .onConflictDoUpdate({
+        target: shipmentCodeSequencesTable.emergencyId,
+        set: { lastValue: sql`${shipmentCodeSequencesTable.lastValue} + 1` },
+      })
+      .returning({ value: shipmentCodeSequencesTable.lastValue });
+    if (!row) {
+      throw new Error('Shipment code sequence allocation returned no row');
+    }
+    return row.value;
   }
 
   async findById(id: ShipmentId): Promise<Shipment | null> {

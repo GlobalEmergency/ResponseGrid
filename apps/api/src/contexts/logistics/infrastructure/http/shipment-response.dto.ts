@@ -14,6 +14,12 @@ export class ShipmentViewDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
+  @ApiProperty({
+    description: 'Legible/QR "Código Único" of the expedition (#163)',
+    example: 'EXP-0001',
+  })
+  code!: string;
+
   @ApiProperty({ format: 'uuid' })
   emergencyId!: string;
 

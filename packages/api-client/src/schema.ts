@@ -830,6 +830,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/emergencies/{emergencyId}/resource-dispute-threshold": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Fijar (o limpiar) el umbral de disputa por reportes para una emergencia */
+        put: operations["EmergenciesController_setResourceDisputeThreshold"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/emergencies/{emergencyId}/needs": {
         parameters: {
             query?: never;
@@ -3843,6 +3860,11 @@ export interface components {
              *     ]
              */
             roleIds: string[];
+            /**
+             * @description Umbral de disputa configurado para esta emergencia, o null cuando usa el global. Solo se expone en la vista autenticada.
+             * @example 5
+             */
+            resourceDisputeThreshold: number | null;
         };
         CreateEmergencyFromTemplateDto: {
             /** @example aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa */
@@ -3860,6 +3882,13 @@ export interface components {
         PublishAnnouncementDto: {
             /** @example Se suspenden las operaciones de rescate hasta nuevo aviso. */
             message: string;
+        };
+        SetDisputeThresholdDto: {
+            /**
+             * @description Número mínimo de reportantes distintos para marcar el punto como disputado (entero entre 1 y 1000). Enviar null explícito elimina el umbral específico y vuelve al global (RESOURCE_DISPUTE_THRESHOLD / 3). El campo es obligatorio: un body vacío es 400.
+             * @example 5
+             */
+            threshold: number | null;
         };
         NeedLocationDto: {
             /** @example 123 Main Street, Caracas, Venezuela */
@@ -4950,6 +4979,11 @@ export interface components {
         ShipmentViewDto: {
             /** Format: uuid */
             id: string;
+            /**
+             * @description Legible/QR "Código Único" of the expedition (#163)
+             * @example EXP-0001
+             */
+            code: string;
             /** Format: uuid */
             emergencyId: string;
             /** Format: uuid */
@@ -7815,6 +7849,59 @@ export interface operations {
                 content?: never;
             };
             /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Emergency not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EmergenciesController_setResourceDisputeThreshold: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetDisputeThresholdDto"];
+            };
+        };
+        responses: {
+            /** @description Umbral actualizado */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description emergency:configure permission required */
             403: {
                 headers: {
                     [name: string]: unknown;

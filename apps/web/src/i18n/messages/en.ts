@@ -2489,6 +2489,9 @@ export const en = {
 
     ship_route: '{origin} → {destination}',
     ship_drawer_open: 'View shipment detail: {route}',
+    ship_section_code: 'Unique code',
+    ship_field_code: 'Code',
+    ship_code_qr_alt: 'QR code for shipment {code}',
     ship_section_route: 'Route',
     ship_section_items: 'Cargo',
     ship_section_assignment: 'Assignment',

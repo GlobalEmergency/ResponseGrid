@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, integer } from 'drizzle-orm/pg-core';
 
 export const emergenciesTable = pgTable('emergencies', {
   id: uuid('id').primaryKey(),
@@ -8,6 +8,7 @@ export const emergenciesTable = pgTable('emergencies', {
   status: text('status').notNull(),
   announcement: text('announcement'),
   dontBringList: text('dont_bring_list').array().notNull().default([]),
+  resourceDisputeThreshold: integer('resource_dispute_threshold'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .notNull()

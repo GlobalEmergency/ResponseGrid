@@ -58,6 +58,20 @@ describe('CreateShipment', () => {
     expect(saved!.assignedCapacityId).toBeNull();
     expect(saved!.carrier).toBeNull();
     expect(saved!.items[0].name).toBe('Agua');
+    expect(saved!.code).toBe('EXP-0001');
+  });
+
+  it('assigns sequential per-emergency codes (código único, #163)', async () => {
+    const repo = new InMemoryShipmentRepository();
+    const { useCase } = makeUseCase(repo, 'active');
+
+    const first = await useCase.execute(baseCmd());
+    const second = await useCase.execute(baseCmd());
+
+    const a = await repo.findById(ShipmentId.fromString(first.id));
+    const b = await repo.findById(ShipmentId.fromString(second.id));
+    expect(a!.code).toBe('EXP-0001');
+    expect(b!.code).toBe('EXP-0002');
   });
 
   it('rejects creation in a paused emergency', async () => {
