@@ -103,6 +103,13 @@ export class DonationIntakeViewDto {
   @ApiPropertyOptional({ nullable: true, type: String })
   evidenceFileKey!: string | null;
 
+  @ApiPropertyOptional({
+    nullable: true,
+    type: String,
+    description: 'Reason recorded when received lines differed from declared',
+  })
+  receptionAdjustmentReason!: string | null;
+
   @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
   receivedAt!: Date | null;
 

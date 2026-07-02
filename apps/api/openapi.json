@@ -13193,6 +13193,11 @@
             "type": "string",
             "nullable": true
           },
+          "receptionAdjustmentReason": {
+            "type": "string",
+            "nullable": true,
+            "description": "Reason recorded when received lines differed from declared"
+          },
           "receivedAt": {
             "type": "string",
             "format": "date-time",
@@ -13314,6 +13319,18 @@
           "evidenceFileKey": {
             "type": "string",
             "description": "File key from POST /files",
+            "nullable": true
+          },
+          "items": {
+            "description": "Lines actually received; when omitted the declared lines stand (#129)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyLineDto"
+            }
+          },
+          "adjustmentReason": {
+            "type": "string",
+            "description": "Required when received lines differ from the declared ones",
             "nullable": true
           }
         }

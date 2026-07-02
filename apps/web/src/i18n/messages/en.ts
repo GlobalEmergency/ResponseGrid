@@ -806,6 +806,17 @@ export const en = {
     received_meta: 'Received',
     already_processed: 'This delivery has already been processed.',
 
+    // Content verification (#129)
+    verify_heading: 'Verify what arrived',
+    verify_hint:
+      'Adjust the quantities actually received. If they differ from what was declared, give a reason.',
+    qty_received_label: 'Received quantity',
+    line_excluded: 'Did not arrive',
+    reason_label: 'Adjustment reason',
+    reason_placeholder: 'Explain why it differs from the declared amount…',
+    err_reason_required:
+      'Give a reason: what was received differs from what was declared.',
+
     // Actions
     notes_label: 'Notes (optional)',
     notes_placeholder: 'Reception remarks…',

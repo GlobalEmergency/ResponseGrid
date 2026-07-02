@@ -28,6 +28,7 @@ export interface DonationIntakeView {
   lines: DonationIntakeLineView[];
   volunteerNotes: string | null;
   evidenceFileKey: string | null;
+  receptionAdjustmentReason: string | null;
   receivedAt: Date | null;
   receivedByUserId: string | null;
   createdAt: Date;
@@ -67,6 +68,7 @@ export class GetDonationIntakeById {
       })),
       volunteerNotes: snap.volunteerNotes,
       evidenceFileKey: snap.evidenceFileKey,
+      receptionAdjustmentReason: snap.receptionAdjustmentReason,
       receivedAt: snap.receivedAt,
       receivedByUserId: snap.receivedByUserId,
       createdAt: snap.createdAt,

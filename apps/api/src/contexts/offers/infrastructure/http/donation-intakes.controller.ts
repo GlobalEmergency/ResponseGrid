@@ -356,6 +356,8 @@ export class DonationIntakesController {
       receivedByUserId: req.user.id,
       volunteerNotes: dto.volunteerNotes ?? null,
       evidenceFileKey: dto.evidenceFileKey ?? null,
+      receivedItems: dto.items ? mapItems(dto.items) : null,
+      adjustmentReason: dto.adjustmentReason ?? null,
     });
   }
 

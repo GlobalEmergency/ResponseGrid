@@ -15,6 +15,7 @@ export const donationIntakesTable = pgTable('donation_intakes', {
   contactNormalized: text('contact_normalized').notNull(),
   volunteerNotes: text('volunteer_notes'),
   evidenceFileKey: text('evidence_file_key'),
+  receptionAdjustmentReason: text('reception_adjustment_reason'),
   receivedAt: timestamp('received_at', { withTimezone: true }),
   receivedByUserId: uuid('received_by_user_id'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull(),

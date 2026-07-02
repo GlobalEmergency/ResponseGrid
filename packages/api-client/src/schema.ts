@@ -4611,6 +4611,8 @@ export interface components {
             lines: components["schemas"]["IntakeLineViewDto"][];
             volunteerNotes?: string | null;
             evidenceFileKey?: string | null;
+            /** @description Reason recorded when received lines differed from declared */
+            receptionAdjustmentReason?: string | null;
             /** Format: date-time */
             receivedAt?: string | null;
             /** Format: uuid */
@@ -4650,6 +4652,10 @@ export interface components {
             volunteerNotes?: string | null;
             /** @description File key from POST /files */
             evidenceFileKey?: string | null;
+            /** @description Lines actually received; when omitted the declared lines stand (#129) */
+            items?: components["schemas"]["SupplyLineDto"][];
+            /** @description Required when received lines differ from the declared ones */
+            adjustmentReason?: string | null;
         };
         RejectDonationIntakeDto: {
             volunteerNotes?: string | null;
