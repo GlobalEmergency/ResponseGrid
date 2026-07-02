@@ -7787,7 +7787,12 @@
             "description": "File content streamed"
           }
         },
-        "summary": "Download a stored file by key",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Download a stored file by key (authenticated)",
         "tags": [
           "files"
         ]

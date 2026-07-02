@@ -2386,7 +2386,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Download a stored file by key */
+        /** Download a stored file by key (authenticated) */
         get: operations["FilesController_serve"];
         put?: never;
         post?: never;

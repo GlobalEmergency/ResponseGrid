@@ -99,7 +99,7 @@ import { SCOPE_RESOLVER } from './http/scope-resolver';
 import { EntityAwareScopeResolver } from './http/entity-aware-scope-resolver';
 import { DrizzleUserIdentityRepository } from './drizzle/drizzle-user-identity.repository';
 import { BcryptPasswordHasher } from './bcrypt-password-hasher';
-import { JwtTokenService } from './jwt-token.service';
+import { JwtTokenService, JWT_ISSUER, JWT_AUDIENCE } from './jwt-token.service';
 import { JwtAuthGuard } from './http/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from './http/optional-jwt-auth.guard';
 import { RequireAdminGuard } from './http/require-admin.guard';
@@ -460,7 +460,14 @@ const updateProfileProvider = {
       useFactory: () => {
         const secret = process.env.JWT_SECRET;
         if (!secret) throw new Error('JWT_SECRET is required');
-        return { secret, signOptions: { expiresIn: '12h' } };
+        return {
+          secret,
+          signOptions: {
+            expiresIn: '12h',
+            issuer: JWT_ISSUER,
+            audience: JWT_AUDIENCE,
+          },
+        };
       },
     }),
   ],

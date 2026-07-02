@@ -96,6 +96,28 @@ describe('RevokeGrant', () => {
     );
   });
 
+  it('forbids revoking a more-privileged role than the actor holds (attenuation)', async () => {
+    // An org_admin holds role:revoke at their organization, but does NOT hold
+    // the permissions of an emergency_coordinator. They must not be able to
+    // strip a coordinator-grade grant sitting at that org scope.
+    await repo.save(
+      Grant.create({
+        id: GRANT_ID,
+        principalId: TARGET,
+        roleId: 'emergency_coordinator',
+        scope: ScopeRef.organization('o1'),
+      }),
+    );
+    const actor = actorWith({
+      roleId: 'org_admin',
+      scope: ScopeRef.organization('o1'),
+    });
+    await expect(useCase.execute({ actor, grantId: GRANT_ID })).rejects.toThrow(
+      NotAuthorizedToRevokeError,
+    );
+    expect(await repo.findById(GRANT_ID)).not.toBeNull();
+  });
+
   it('uses the owning emergency when revoking a resource entity grant', async () => {
     await seedTargetGrant(repo);
     const actor = actorWith({

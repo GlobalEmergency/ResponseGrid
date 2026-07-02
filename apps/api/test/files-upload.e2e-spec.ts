@@ -136,6 +136,18 @@ describe('Files upload (e2e)', () => {
       .expect(422);
   });
 
+  it('POST /files with a non-image payload mislabelled as image/png returns 422 (magic-byte check)', async () => {
+    const fakePng = Buffer.from('<html><script>alert(1)</script></html>');
+    await request(server)
+      .post('/files')
+      .set('Authorization', `Bearer ${userToken}`)
+      .attach('file', fakePng, {
+        filename: 'fake.png',
+        contentType: 'image/png',
+      })
+      .expect(422);
+  });
+
   it('POST /files with image/svg+xml is rejected with 422 (XSS prevention)', async () => {
     const svgBuf = Buffer.from(
       '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>',
