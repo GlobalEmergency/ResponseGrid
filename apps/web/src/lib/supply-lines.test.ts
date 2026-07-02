@@ -61,6 +61,32 @@ test('preserves a soft supply link when present', () => {
   ]);
 });
 
+test('preserves a trimmed presentation, omits it when blank (#61)', () => {
+  const withPres = JSON.stringify([
+    { name: 'Clindamicina', quantity: 5, category: 'food', presentation: '  EV (intravenoso)  ' },
+  ]);
+  assert.deepEqual(parseSupplyLines(withPres, REQUIRED), [
+    { name: 'Clindamicina', quantity: 5, category: 'food', presentation: 'EV (intravenoso)' },
+  ]);
+
+  const blankPres = JSON.stringify([
+    { name: 'Agua', quantity: 1, category: 'water', presentation: '   ' },
+  ]);
+  assert.deepEqual(parseSupplyLines(blankPres, REQUIRED), [
+    { name: 'Agua', quantity: 1, category: 'water' },
+  ]);
+});
+
+test('rejects a non-string presentation', () => {
+  assert.equal(
+    parseSupplyLines(
+      JSON.stringify([{ name: 'X', quantity: 1, category: 'food', presentation: 5 }]),
+      REQUIRED,
+    ),
+    null,
+  );
+});
+
 test('returns null on malformed JSON or a non-array root', () => {
   assert.equal(parseSupplyLines('{not json', REQUIRED), null);
   assert.equal(parseSupplyLines('{"a":1}', REQUIRED), null);
