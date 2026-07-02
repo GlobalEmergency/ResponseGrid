@@ -26,6 +26,8 @@ interface PeticionFormProps {
   itemsField: ReactNode;
   t: Messages['peticion'];
   backToEmergencyLabel: string;
+  /** Optional resource / final recipient this need is filed for (#60). */
+  resourceId?: string;
 }
 
 export function PeticionForm({
@@ -36,6 +38,7 @@ export function PeticionForm({
   itemsField,
   t,
   backToEmergencyLabel,
+  resourceId,
 }: PeticionFormProps) {
   const [state, formAction, pending] = useActionState<PeticionState, FormData>(
     action,
@@ -69,11 +72,16 @@ export function PeticionForm({
     { value: 'urgent', label: t.priority_urgent },
   ] as const;
 
+  const peticionHref =
+    resourceId !== undefined
+      ? `/e/${slug}/peticion?resourceId=${resourceId}`
+      : `/e/${slug}/peticion`;
+
   if (state.status === 'success') {
     return (
       <FormSuccessScreen
         message={t.success_message}
-        primaryHref={`/e/${slug}/peticion`}
+        primaryHref={peticionHref}
         primaryLabel={t.success_send_another}
         secondaryHref={`/e/${slug}`}
         secondaryLabel={backToEmergencyLabel}
@@ -83,6 +91,9 @@ export function PeticionForm({
 
   return (
     <form action={formAction} className="flex flex-col gap-6" noValidate>
+      {resourceId !== undefined && (
+        <input type="hidden" name="resourceId" value={resourceId} />
+      )}
       {wasRestored && <DraftRestoredBanner />}
 
       {state.status === 'error' && (
