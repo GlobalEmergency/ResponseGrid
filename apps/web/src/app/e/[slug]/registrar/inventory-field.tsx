@@ -44,6 +44,23 @@ interface InventoryFieldProps {
    * registrar where declared inventory is fully optional.
    */
   startWithOneRow?: boolean;
+  /** Prefill the editor with existing lines (inventory edit, #263). */
+  initialLines?: SupplyLine[];
+  /**
+   * Serialize every row instead of silently dropping incomplete ones. On edit
+   * surfaces the save REPLACES the persisted inventory, so a half-edited row
+   * must fail validation server-side rather than be deleted without warning;
+   * the create flows keep the lenient filter (an unfinished optional row never
+   * blocks the submit).
+   */
+  strict?: boolean;
+  /**
+   * Offer the full category taxonomy instead of material-only. The API accepts
+   * (and other intakes persist) the whole `Category` enum, so the edit surface
+   * must be able to display and round-trip e.g. health-vertical lines it did
+   * not create.
+   */
+  allowAllCategories?: boolean;
 }
 
 /**
@@ -58,12 +75,17 @@ export function InventoryField({
   locale,
   categories,
   startWithOneRow = false,
+  initialLines,
+  strict = false,
+  allowAllCategories = false,
 }: InventoryFieldProps) {
   const materialCategories = categories.filter(isMaterialCategory);
+  const selectableCategories = allowAllCategories ? categories : materialCategories;
+  // New rows still default to the first MATERIAL category on every surface.
   const defaultCategory = materialCategories[0]?.slug ?? '';
 
   const [lines, setLines] = useState<SupplyLine[]>(
-    startWithOneRow ? [emptyLine(defaultCategory)] : [],
+    initialLines ?? (startWithOneRow ? [emptyLine(defaultCategory)] : []),
   );
 
   const labels = {
@@ -84,9 +106,13 @@ export function InventoryField({
     legend: t.inventory_heading,
   };
 
-  // Serialize only complete rows — empty rows are ignored so the field stays
-  // optional and never blocks the submit.
-  const serialized = JSON.stringify(lines.filter(isComplete).map(toDto));
+  // Lenient (create) surfaces serialize only complete rows so an unfinished
+  // optional row never blocks the submit; strict (edit) surfaces serialize
+  // everything so an incomplete row surfaces a validation error instead of
+  // being silently deleted by the replace-style save.
+  const serialized = JSON.stringify(
+    (strict ? lines : lines.filter(isComplete)).map(toDto),
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -95,7 +121,7 @@ export function InventoryField({
       <SupplyLineList
         value={lines}
         onChange={setLines}
-        categories={materialCategories}
+        categories={selectableCategories}
         locale={locale}
         idPrefix="inv"
         required={false}

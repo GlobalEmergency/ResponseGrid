@@ -23,6 +23,8 @@ import { EditResource } from '../application/edit-resource';
 import { DiscardResource } from '../application/discard-resource';
 import { UpdateResourcePublicStatus } from '../application/update-resource-public-status';
 import { RecordInventoryEntry } from '../application/record-inventory-entry';
+import { GetMyInventory } from '../application/get-my-inventory';
+import { UpdateMyInventory } from '../application/update-my-inventory';
 import { ReceiveDonationIntoInventory } from '../application/receive-donation-into-inventory';
 import { ConsumerWorker } from '../../../shared/events/consumer-worker';
 import { DrizzleProcessedEventStore } from '../../../shared/events/drizzle-processed-event-store';
@@ -207,6 +209,24 @@ const updateStatusProvider = {
   ) => new UpdateResourcePublicStatus(repo, membershipReader),
 };
 
+const getMyInventoryProvider = {
+  provide: GetMyInventory,
+  inject: [RESOURCE_REPOSITORY, RESOURCE_MEMBERSHIP_READER],
+  useFactory: (
+    repo: ResourceRepository,
+    membershipReader: ResourceMembershipReader,
+  ) => new GetMyInventory(repo, membershipReader),
+};
+
+const updateMyInventoryProvider = {
+  provide: UpdateMyInventory,
+  inject: [RESOURCE_REPOSITORY, RESOURCE_MEMBERSHIP_READER],
+  useFactory: (
+    repo: ResourceRepository,
+    membershipReader: ResourceMembershipReader,
+  ) => new UpdateMyInventory(repo, membershipReader),
+};
+
 const getNearbyResourcesProvider = {
   provide: GetNearbyResources,
   inject: [RESOURCE_REPOSITORY],
@@ -383,6 +403,8 @@ const recordInventoryEntryProvider = {
     getResourceFacetsProvider,
     getNearbyResourcesProvider,
     updateStatusProvider,
+    getMyInventoryProvider,
+    updateMyInventoryProvider,
     getMyResourcesProvider,
     getResourcesInBoundsProvider,
     getPublicResourceProvider,

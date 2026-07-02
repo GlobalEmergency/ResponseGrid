@@ -7,6 +7,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -37,6 +38,8 @@ import {
 } from '../../application/edit-resource';
 import { DiscardResource } from '../../application/discard-resource';
 import { RecordInventoryEntry } from '../../application/record-inventory-entry';
+import { GetMyInventory } from '../../application/get-my-inventory';
+import { UpdateMyInventory } from '../../application/update-my-inventory';
 import { ReportResourceValidity } from '../../application/report-resource-validity';
 import { ResolveResourceDispute } from '../../application/resolve-resource-dispute';
 import { GetResourceValidityReports } from '../../application/get-resource-validity-reports';
@@ -51,7 +54,13 @@ import {
   RecordInventoryEntryDto,
   ReportResourceValidityDto,
   ResolveResourceDisputeDto,
+  UpdateInventoryDto,
 } from './dto';
+import { SupplyLineResponseDto } from '../../../supplies/infrastructure/http/supply-line.dto';
+import {
+  toSupplyLineProps,
+  toSupplyLineResponse,
+} from '../../../supplies/infrastructure/http/supply-line.mapper';
 import { setAuditContext } from '../../../audit/infrastructure/http/audit-context';
 import {
   RegisterResourceResponseDto,
@@ -82,6 +91,8 @@ export class ResourcesController {
     private readonly editResource: EditResource,
     private readonly discardResource: DiscardResource,
     private readonly recordInventoryEntry: RecordInventoryEntry,
+    private readonly getMyInventory: GetMyInventory,
+    private readonly updateMyInventory: UpdateMyInventory,
     private readonly reportValidity: ReportResourceValidity,
     private readonly resolveDispute: ResolveResourceDispute,
     private readonly validityReports: GetResourceValidityReports,
@@ -141,15 +152,7 @@ export class ResourcesController {
       city: dto.city ?? null,
       isFinalRecipient: dto.isFinalRecipient ?? false,
       recipientType: dto.recipientType ?? null,
-      items: (dto.items ?? []).map((i) => ({
-        name: i.name,
-        quantity: i.quantity,
-        unit: i.unit ?? null,
-        category: i.category,
-        supplyId: i.supplyId ?? null,
-        presentation: i.presentation ?? null,
-        expiresAt: i.expiresAt ?? null,
-      })),
+      items: (dto.items ?? []).map(toSupplyLineProps),
       author: dto.author ?? null,
     });
   }
@@ -179,16 +182,66 @@ export class ResourcesController {
     @Param('resourceId', ParseUUIDPipe) resourceId: string,
     @Body() dto: RecordInventoryEntryDto,
   ): Promise<void> {
+    // toSupplyLineProps also fixes the drift this copy had: it silently
+    // dropped a client-provided `expiresAt` from manual entries.
     await this.recordInventoryEntry.execute({
       resourceId,
-      lines: dto.items.map((i) => ({
-        name: i.name,
-        quantity: i.quantity,
-        unit: i.unit ?? null,
-        category: i.category,
-        supplyId: i.supplyId ?? null,
-        presentation: i.presentation ?? null,
-      })),
+      lines: dto.items.map(toSupplyLineProps),
+    });
+  }
+
+  @Get('resources/:resourceId/inventory')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Read a point declared inventory in full (owner or coordinator)',
+  })
+  @ApiParam({
+    name: 'resourceId',
+    description: 'Resource UUID',
+    format: 'uuid',
+  })
+  @ApiOkResponse({ type: SupplyLineResponseDto, isArray: true })
+  @ApiNotFoundResponse({ description: 'Resource not found' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Not owner nor coordinator' })
+  async getMyInventoryAction(
+    @Param('resourceId', ParseUUIDPipe) resourceId: string,
+    @Req() req: Request & { user?: AuthenticatedUser },
+  ): Promise<SupplyLineResponseDto[]> {
+    const lines = await this.getMyInventory.execute({
+      resourceId,
+      requesterUserId: req.user!.id,
+    });
+    return lines.map(toSupplyLineResponse);
+  }
+
+  @Put('resources/:resourceId/inventory')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Replace a point declared inventory (owner or coordinator) — #263',
+  })
+  @ApiParam({
+    name: 'resourceId',
+    description: 'Resource UUID',
+    format: 'uuid',
+  })
+  @ApiNoContentResponse({ description: 'Inventory replaced' })
+  @ApiNotFoundResponse({ description: 'Resource not found' })
+  @ApiBadRequestResponse({ description: 'Invalid request body or UUID' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Not owner nor coordinator' })
+  async updateMyInventoryAction(
+    @Param('resourceId', ParseUUIDPipe) resourceId: string,
+    @Body() dto: UpdateInventoryDto,
+    @Req() req: Request & { user?: AuthenticatedUser },
+  ): Promise<void> {
+    await this.updateMyInventory.execute({
+      resourceId,
+      requesterUserId: req.user!.id,
+      lines: dto.items.map(toSupplyLineProps),
     });
   }
 

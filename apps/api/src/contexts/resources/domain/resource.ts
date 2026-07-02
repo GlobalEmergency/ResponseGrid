@@ -311,11 +311,19 @@ export class Resource {
    * pre-registered donation is received at the point (#129). Order is stable:
    * existing lines keep their position (with updated quantity), new lines are
    * appended in arrival order.
+   *
+   * Non-identity fields survive the merge instead of being rebuilt blank:
+   * `supplyId` keeps the existing soft link (falling back to the incoming one)
+   * and `expiresAt` keeps the EARLIEST of both dates — merged stock is only as
+   * fresh as its oldest batch, and an intake must never erase a freshness date
+   * the owner declared via the inventory edit (#263).
    */
   receiveInventory(lines: SupplyLine[]): void {
     if (lines.length === 0) return;
     const keyOf = (l: SupplyLine): string =>
       JSON.stringify([l.name, l.category, l.unit, l.presentation]);
+    const earliest = (a: string | null, b: string | null): string | null =>
+      a !== null && b !== null ? (a < b ? a : b) : (a ?? b);
     const byKey = new Map<string, SupplyLine>();
     for (const item of this._items) byKey.set(keyOf(item), item);
     for (const incoming of lines) {
@@ -329,10 +337,18 @@ export class Resource {
           unit: incoming.unit,
           category: incoming.category,
           presentation: incoming.presentation,
+          supplyId: current?.supplyId ?? incoming.supplyId,
+          expiresAt: earliest(incoming.expiresAt, current?.expiresAt ?? null),
         }),
       );
     }
     this._items = [...byKey.values()];
+  }
+
+  /** Owner/coordinator overwrites the declared inventory (#263). Replaces, not
+   *  merges — unlike receiveInventory (donation/intake). Empty list clears it. */
+  replaceInventory(lines: SupplyLine[]): void {
+    this._items = [...lines];
   }
 
   /**

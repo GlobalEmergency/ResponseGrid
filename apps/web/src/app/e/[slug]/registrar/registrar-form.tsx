@@ -77,9 +77,24 @@ export function RegistrarForm({
   ] as const;
 
   if (state.status === 'success') {
+    const id = state.id;
     return (
       <FormSuccessScreen
         message={t.success_message}
+        extraLinks={[
+          // A freshly registered point is `hidden` until a coordinator
+          // validates it, so the public detail page (/recursos/{id}) 404s.
+          // The owner's self-service panel (/mis-puntos) shows it immediately.
+          { href: `/e/${slug}/mis-puntos`, label: t.success_manage_point },
+          {
+            href: `/e/${slug}/mis-puntos/${id}/inventario`,
+            label: t.success_manage_inventory,
+          },
+          {
+            href: `/e/${slug}/peticion?resourceId=${id}`,
+            label: t.success_declare_needs,
+          },
+        ]}
         primaryHref={`/e/${slug}/registrar`}
         primaryLabel={t.success_register_another}
         secondaryHref={`/e/${slug}`}

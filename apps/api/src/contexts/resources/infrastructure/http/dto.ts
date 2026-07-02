@@ -193,6 +193,22 @@ export class RecordInventoryEntryDto {
   items!: SupplyLineDto[];
 }
 
+/**
+ * Body for the owner/coordinator declared-inventory edit (#263): the FULL set
+ * of lines. Replaces (not merges) the resource inventory; empty list clears it,
+ * so no @ArrayNotEmpty.
+ */
+export class UpdateInventoryDto {
+  @ApiProperty({
+    type: [SupplyLineDto],
+    description: 'Full declared inventory (replaces current; empty clears it)',
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SupplyLineDto)
+  items!: SupplyLineDto[];
+}
+
 export class UpdateResourcePublicStatusDto {
   @ApiProperty({
     enum: ['active', 'saturated', 'paused', 'closed'],
