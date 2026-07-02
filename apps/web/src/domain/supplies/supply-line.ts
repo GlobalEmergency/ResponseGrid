@@ -17,6 +17,8 @@ export interface SupplyLine {
   quantity: number;
   unit: string;
   category: string;
+  /** Presentation / route of administration (health vertical, #61). Free-form. */
+  presentation?: string;
   expiresAt?: string;
 }
 
@@ -51,12 +53,14 @@ export function deriveFromSupply(
 export function toDto(line: SupplyLine): SupplyLineDto {
   const name = line.name.trim();
   const unit = line.unit.trim();
+  const presentation = line.presentation?.trim() ?? '';
   return {
     name,
     quantity: line.quantity,
     category: line.category as SupplyLineDto['category'],
     ...(line.supplyId !== null && line.supplyId !== '' ? { supplyId: line.supplyId } : {}),
     ...(unit !== '' ? { unit } : {}),
+    ...(presentation !== '' ? { presentation } : {}),
     ...(line.expiresAt !== undefined && line.expiresAt !== '' ? { expiresAt: line.expiresAt } : {}),
   };
 }
