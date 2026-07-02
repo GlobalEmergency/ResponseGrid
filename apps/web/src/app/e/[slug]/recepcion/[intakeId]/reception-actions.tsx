@@ -7,6 +7,7 @@ import { Input } from '@/components/atoms/input';
 import { Textarea } from '@/components/atoms/textarea';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { FormField } from '@/components/molecules/form-field';
+import { EvidenceUploader } from '@/components/molecules/evidence-uploader';
 import type { Messages } from '@/i18n/messages/es';
 
 const INITIAL: ReceptionActionState = { status: 'idle' };
@@ -63,6 +64,7 @@ export function ReceptionActions({ action, lines, t }: ReceptionActionsProps) {
     lines.map((line) => ({ line, qty: String(line.quantity), included: true })),
   );
   const [reason, setReason] = useState('');
+  const [evidenceKey, setEvidenceKey] = useState<string | null>(null);
 
   const includedRows = rows.filter((r) => r.included);
 
@@ -169,6 +171,11 @@ export function ReceptionActions({ action, lines, t }: ReceptionActionsProps) {
       </section>
 
       <input type="hidden" name="items" value={JSON.stringify(items)} />
+      {evidenceKey != null && (
+        <input type="hidden" name="evidenceFileKey" value={evidenceKey} />
+      )}
+
+      <EvidenceUploader onKeyChange={setEvidenceKey} label={t.photo_label} />
 
       <FormField htmlFor="volunteerNotes" label={t.notes_label}>
         <Textarea

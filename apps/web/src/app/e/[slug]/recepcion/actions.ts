@@ -69,6 +69,12 @@ export async function submitReception(
         : null;
   }
 
+  const rawEvidence = formData.get('evidenceFileKey');
+  const evidenceFileKey =
+    typeof rawEvidence === 'string' && rawEvidence.trim() !== ''
+      ? rawEvidence.trim()
+      : null;
+
   // Literal paths (not a computed union) keep the typed client happy.
   const params = { path: { intakeId } } as const;
   const result =
@@ -81,6 +87,7 @@ export async function submitReception(
             // Empty → keep the declared lines (undefined omits the field).
             items: items && items.length > 0 ? items : undefined,
             adjustmentReason,
+            evidenceFileKey,
           },
         })
       : intent === 'reject'

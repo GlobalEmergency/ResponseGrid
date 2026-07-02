@@ -816,6 +816,7 @@ export const en = {
     reason_placeholder: 'Explain why it differs from the declared amount…',
     err_reason_required:
       'Give a reason: what was received differs from what was declared.',
+    photo_label: 'Delivery photo (optional)',
 
     // Actions
     notes_label: 'Notes (optional)',

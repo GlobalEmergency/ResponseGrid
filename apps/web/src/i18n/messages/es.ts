@@ -845,6 +845,7 @@ export const es = {
     reason_placeholder: 'Explica por qué difiere de lo declarado…',
     err_reason_required:
       'Indica el motivo: lo recibido difiere de lo declarado.',
+    photo_label: 'Foto de la entrega (opcional)',
 
     // Acciones
     notes_label: 'Notas (opcional)',
