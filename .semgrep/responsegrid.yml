@@ -1,0 +1,72 @@
+rules:
+  # ── Cookies sin httpOnly ────────────────────────────────────────────────────
+  - id: rg-cookie-without-httponly
+    languages: [typescript, javascript]
+    severity: WARNING
+    message: >-
+      res.cookie(...) sin httpOnly: la cookie queda accesible desde JavaScript y
+      es robable vía XSS. Añade httpOnly: true (y secure/sameSite según el caso).
+    # Only inline option objects — if options are passed as a variable we can't
+    # see the flags here and would false-positive on secure code that centralises
+    # them, so we skip that case (kept low-noise on purpose).
+    patterns:
+      - pattern: "$RES.cookie($NAME, $VAL, { ... })"
+      - pattern-not: "$RES.cookie($NAME, $VAL, { ..., httpOnly: true, ... })"
+
+  # ── Ejecución dinámica de código / child_process ────────────────────────────
+  - id: rg-dynamic-code-execution
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: >-
+      Ejecución dinámica de código o child_process detectada. Es un vector de RCE;
+      si es imprescindible, aísla y valida estrictamente la entrada (o añade
+      // nosemgrep con justificación).
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)
+      - pattern: require('child_process')
+      - pattern: require("child_process")
+
+  # ── RegExp construida desde una variable (ReDoS / inyección de patrón) ───────
+  - id: rg-regexp-from-variable
+    languages: [typescript, javascript]
+    severity: WARNING
+    message: >-
+      new RegExp() con un patrón no literal: si el patrón viene de entrada de
+      usuario puede causar ReDoS o inyección de patrón. Usa un literal o valida/
+      escapa la entrada.
+    patterns:
+      - pattern: new RegExp($X, ...)
+      - pattern-not: new RegExp("...", ...)
+      - pattern-not: new RegExp('...', ...)
+
+  # ── Drizzle: sql.raw evita el parametrizado ─────────────────────────────────
+  - id: rg-drizzle-sql-raw
+    languages: [typescript]
+    severity: WARNING
+    message: >-
+      sql.raw()/sql.identifier() saltan el parametrizado de Drizzle. Verifica que
+      NO interpolan entrada de usuario (riesgo de SQL injection); prefiere la
+      plantilla `sql`...`` con ${valor} (parámetro ligado).
+    pattern-either:
+      - pattern: sql.raw(...)
+      - pattern: sql.identifier(...)
+
+  # ── React: dangerouslySetInnerHTML ──────────────────────────────────────────
+  - id: rg-dangerously-set-inner-html
+    languages: [typescript]
+    severity: WARNING
+    message: >-
+      dangerouslySetInnerHTML: asegúrate de que el contenido está saneado/escapado
+      y nunca proviene sin filtrar de datos de usuario o de backend (XSS DOM).
+    pattern: dangerouslySetInnerHTML={...}
+
+  # ── NestJS: @Body() sin DTO tipado ──────────────────────────────────────────
+  - id: rg-nest-body-any
+    languages: [typescript]
+    severity: WARNING
+    message: >-
+      @Body() tipado como any: el ValidationPipe (whitelist) no puede filtrar
+      propiedades desconocidas, abriendo la puerta a mass assignment. Usa una
+      clase DTO con class-validator.
+    pattern: "@Body() $PARAM: any"

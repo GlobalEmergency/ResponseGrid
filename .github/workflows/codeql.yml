@@ -25,10 +25,10 @@ jobs:
       security-events: write # required to upload the SARIF results
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@703b9949c65fcfced30e2f9f41569c4adfcb657f # v3.36.3
         with:
           languages: javascript-typescript
           # No compilation needed for JS/TS — skip the (fragile, slow) autobuild.
@@ -37,6 +37,6 @@ jobs:
           queries: security-and-quality
 
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@703b9949c65fcfced30e2f9f41569c4adfcb657f # v3.36.3
         with:
           category: "/language:javascript-typescript"
