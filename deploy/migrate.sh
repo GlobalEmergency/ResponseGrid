@@ -4,8 +4,16 @@
 # Safe to re-run on every `docker compose up`.
 set -e
 
+# Connection + migrations dir default to the prod container layout, but are
+# overridable so the exact same script can be smoke-tested in CI against a
+# port-mapped Postgres (see the "Migrate smoke test" job). Prod sets none of
+# these, so the defaults below preserve the original behaviour.
+PGHOST="${PGHOST:-postgres}"
+PGPORT="${PGPORT:-5432}"
+MIGRATIONS_DIR="${MIGRATIONS_DIR:-/migrations}"
+
 export PGPASSWORD="$POSTGRES_PASSWORD"
-PSQL="psql -h postgres -U $POSTGRES_USER -d $POSTGRES_DB -v ON_ERROR_STOP=1"
+PSQL="psql -h $PGHOST -p $PGPORT -U $POSTGRES_USER -d $POSTGRES_DB -v ON_ERROR_STOP=1"
 
 # Wait for Postgres (compose healthcheck already gates us, this is a belt-and-braces retry).
 i=0
@@ -17,7 +25,7 @@ done
 
 $PSQL -c "CREATE TABLE IF NOT EXISTS _migrations (name text PRIMARY KEY, applied_at timestamptz DEFAULT now());"
 
-for f in /migrations/*.sql; do
+for f in "$MIGRATIONS_DIR"/*.sql; do
   [ -e "$f" ] || continue
   name=$(basename "$f")
   # Pass the filename as a bound psql variable and quote it with :'mname' so a
