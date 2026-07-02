@@ -1,3 +1,10 @@
+/**
+ * Upper bound for a per-emergency dispute threshold. Keeps the value sane and,
+ * crucially, below Postgres `integer` range so a valid-looking but huge number
+ * can never overflow the column at persistence time.
+ */
+export const MAX_RESOURCE_DISPUTE_THRESHOLD = 1000;
+
 export class InvalidDisputeThresholdError extends Error {
   constructor(value: number) {
     super(
@@ -6,10 +13,3 @@ export class InvalidDisputeThresholdError extends Error {
     this.name = 'InvalidDisputeThresholdError';
   }
 }
-
-/**
- * Upper bound for a per-emergency dispute threshold. Keeps the value sane and,
- * crucially, below Postgres `integer` range so a valid-looking but huge number
- * can never overflow the column at persistence time.
- */
-export const MAX_RESOURCE_DISPUTE_THRESHOLD = 1000;

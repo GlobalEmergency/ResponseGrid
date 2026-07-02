@@ -84,18 +84,18 @@ export class ReportResourceValidity {
     }
     await this.reports.save(report);
 
+    // Already disputed: the flag never toggles back here, so the report is still
+    // recorded but there is nothing to re-decide. Skip the open-reports query,
+    // the per-emergency threshold read and the re-read on this hot path.
+    if (resource.disputed) {
+      return { id: report.id, disputed: true };
+    }
+
     const open = await this.reports.findOpenByResource(cmd.resourceId);
     const cutoff = new Date(
       Date.now() - FRESHNESS_WINDOW_DAYS * 24 * 60 * 60 * 1000,
     );
     const freshDistinct = open.filter((r) => r.createdAt >= cutoff).length;
-
-    // Already disputed: the flag never toggles back here, so there is nothing to
-    // re-decide and no need to read the per-emergency threshold. Skip both the
-    // extra query and the re-read on this hot path.
-    if (resource.disputed) {
-      return { id: report.id, disputed: true };
-    }
 
     const emergencyThreshold = this.emergencyThresholds
       ? await this.emergencyThresholds.getThreshold(resource.emergencyId.value)
