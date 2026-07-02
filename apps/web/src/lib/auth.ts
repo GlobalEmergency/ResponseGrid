@@ -47,12 +47,20 @@ export async function setToken(token: string): Promise<void> {
 }
 
 /**
- * Removes the auth token cookie (logout).
- * Must only be called from Server Actions.
+ * Removes the auth token cookie (logout). Best-effort: Next.js only allows
+ * cookie mutation in Server Actions and Route Handlers, so when this runs
+ * during Server Component render (a fetch helper reacting to a 401 from an
+ * expired token) the deletion is skipped instead of crashing the render —
+ * callers redirect to login right after, and the stale cookie is overwritten
+ * by the next successful login.
  */
 export async function clearToken(): Promise<void> {
   const jar = await cookies();
-  jar.delete(COOKIE_NAME);
+  try {
+    jar.delete(COOKIE_NAME);
+  } catch {
+    // Server Component render: cookies are read-only here.
+  }
 }
 
 /**
