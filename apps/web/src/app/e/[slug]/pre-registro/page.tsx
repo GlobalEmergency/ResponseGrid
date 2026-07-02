@@ -1,18 +1,19 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import Link from 'next/link';
-import { getEmergencyBySlug } from '@/lib/emergencies';
-import { api } from '@/lib/api';
-import { getMe } from '@/lib/navigation-data';
-import { getT } from '@/i18n/server';
-import { AppBar } from '@/components/organisms/app-bar';
-import { PageHeading } from '@/components/atoms/page-heading';
-import { EmptyState } from '@/components/molecules/empty-state';
-import { submitPreRegistration } from './actions';
-import { PreRegistroForm } from './pre-registro-form';
-import { getCategories } from '@/adapters/get-categories';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { LinkButton } from "@/components/atoms/link-button";
+import { getEmergencyBySlug } from "@/lib/emergencies";
+import { api } from "@/lib/api";
+import { getMe } from "@/lib/navigation-data";
+import { getT } from "@/i18n/server";
+import { AppBar } from "@/components/organisms/app-bar";
+import { PageHeading } from "@/components/atoms/page-heading";
+import { EmptyState } from "@/components/molecules/empty-state";
+import { submitPreRegistration } from "./actions";
+import { PreRegistroForm } from "./pre-registro-form";
+import { getCategories } from "@/adapters/get-categories";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -20,7 +21,10 @@ type Props = {
 };
 
 /** Resource types that accept donation pre-registration (mirrors the API). */
-const COLLECTION_TYPES = new Set(['collection_point', 'collection_and_delivery']);
+const COLLECTION_TYPES = new Set([
+  "collection_point",
+  "collection_and_delivery",
+]);
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -28,13 +32,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { t } = await getT();
 
   if (!emergency) {
-    return { title: 'Emergencia no encontrada · ResponseGrid' };
+    return { title: "Emergencia no encontrada · ResponseGrid" };
   }
 
   return {
-    title: t.prereg.meta_title.replace('{emergencyName}', emergency.name),
+    title: t.prereg.meta_title.replace("{emergencyName}", emergency.name),
     description: t.prereg.meta_description.replace(
-      '{emergencyName}',
+      "{emergencyName}",
       emergency.name,
     ),
   };
@@ -52,26 +56,26 @@ export default async function PreRegistroPage({ params, searchParams }: Props) {
   }
 
   const resourceId =
-    typeof sp.resourceId === 'string' ? sp.resourceId.trim() : '';
+    typeof sp.resourceId === "string" ? sp.resourceId.trim() : "";
 
   // ── Step 1 — choose the delivery point (no resourceId yet) ────────────────
   // The donation flow always starts by picking where the material is going.
   // Server-side search (`q`) over name/address/city scales past the hundreds of
   // points an emergency can have; results are filtered to active collection
   // points (the only targets the API accepts for an intake).
-  if (resourceId === '') {
-    const q = typeof sp.q === 'string' ? sp.q.trim() : '';
+  if (resourceId === "") {
+    const q = typeof sp.q === "string" ? sp.q.trim() : "";
     const { data: page } = await api.GET(
-      '/emergencies/{emergencyId}/public/resources',
+      "/emergencies/{emergencyId}/public/resources",
       {
         params: {
           path: { emergencyId: emergency.id },
-          query: { page: 1, limit: 50, ...(q !== '' ? { q } : {}) },
+          query: { page: 1, limit: 50, ...(q !== "" ? { q } : {}) },
         },
       },
     );
     const points = (page?.items ?? []).filter(
-      (r) => COLLECTION_TYPES.has(r.type) && r.publicStatus === 'active',
+      (r) => COLLECTION_TYPES.has(r.type) && r.publicStatus === "active",
     );
 
     return (
@@ -113,7 +117,7 @@ export default async function PreRegistroPage({ params, searchParams }: Props) {
                           <span className="truncate text-[15px] font-semibold text-ink">
                             {p.name}
                           </span>
-                          {p.city !== null && p.city !== '' && (
+                          {p.city !== null && p.city !== "" && (
                             <span className="truncate text-[12.5px] text-muted">
                               {p.city}
                             </span>
@@ -136,14 +140,14 @@ export default async function PreRegistroPage({ params, searchParams }: Props) {
 
   // ── Step 2 — point chosen → validate it, then show the pre-registration form ─
   const { data: resource } = await api.GET(
-    '/emergencies/{emergencyId}/public/resources/{resourceId}',
+    "/emergencies/{emergencyId}/public/resources/{resourceId}",
     { params: { path: { emergencyId: emergency.id, resourceId } } },
   );
 
   const eligible =
     resource !== undefined &&
     COLLECTION_TYPES.has(resource.type) &&
-    resource.publicStatus === 'active';
+    resource.publicStatus === "active";
 
   // If the donor is logged in, their pre-registration reuses their account
   // contact (name/email, and phone when set) instead of free-typed fields.
@@ -165,7 +169,7 @@ export default async function PreRegistroPage({ params, searchParams }: Props) {
           title={tp.page_title}
           {...(eligible &&
             resource !== undefined && {
-              subtitle: tp.page_subtitle.replace('{pointName}', resource.name),
+              subtitle: tp.page_subtitle.replace("{pointName}", resource.name),
             })}
         />
         <div className="flex flex-col gap-6 px-4 pb-12 pt-6">
@@ -194,15 +198,14 @@ export default async function PreRegistroPage({ params, searchParams }: Props) {
                     : tp.not_eligible_title
                 }
                 description={
-                  resource === undefined ? tp.no_point_body : tp.not_eligible_body
+                  resource === undefined
+                    ? tp.no_point_body
+                    : tp.not_eligible_body
                 }
               />
-              <Link
-                href={`/e/${slug}/pre-registro`}
-                className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-white bg-navy rounded-lg hover:bg-navy-700 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors"
-              >
+              <LinkButton href={`/e/${slug}/pre-registro`} fullWidth>
                 {tp.no_point_cta}
-              </Link>
+              </LinkButton>
             </>
           )}
         </div>
