@@ -55,6 +55,8 @@ import {
   CreateDonationIntakeResponseDto,
   LookupDonorByContactResponseDto,
   DonationIntakeViewDto,
+  PublicDonationIntakeDto,
+  toPublicDonationIntakeDto,
   DonationIntakeSearchHitDto,
   IntakeDeepLinkDto,
   DonationIntakeTrackingDto,
@@ -210,7 +212,7 @@ export class DonationIntakesController {
     summary: 'Update a pending intake (public, requires code + contact)',
   })
   @ApiParam({ name: 'intakeId', format: 'uuid' })
-  @ApiOkResponse({ type: DonationIntakeViewDto })
+  @ApiOkResponse({ type: PublicDonationIntakeDto })
   @ApiBadRequestResponse({ description: 'Invalid request body' })
   @ApiForbiddenResponse({ description: 'Contact or code mismatch' })
   @ApiNotFoundResponse({ description: 'Intake not found' })
@@ -219,7 +221,7 @@ export class DonationIntakesController {
   async update(
     @Param('intakeId', ParseUUIDPipe) intakeId: string,
     @Body() dto: UpdateDonationIntakeDto,
-  ): Promise<DonationIntakeViewDto> {
+  ): Promise<PublicDonationIntakeDto> {
     await this.updateDonationIntake.execute({
       intakeId,
       intakeCode: dto.intakeCode,
@@ -228,7 +230,10 @@ export class DonationIntakesController {
       donorEmail: dto.donorEmail ?? null,
       items: mapItems(dto.items),
     });
-    return this.getDonationIntakeById.execute(intakeId);
+    // Public caller: return a projection without coordinator-only internal
+    // fields (evidenceFileKey, volunteerNotes, receivedByUserId, donorUserId…).
+    const full = await this.getDonationIntakeById.execute(intakeId);
+    return toPublicDonationIntakeDto(full);
   }
 
   @Get('emergencies/:emergencyId/donation-intakes/search')

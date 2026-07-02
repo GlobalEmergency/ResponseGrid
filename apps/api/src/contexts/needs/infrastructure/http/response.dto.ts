@@ -13,8 +13,15 @@ export class CreateNeedResponseDto {
 }
 
 export class NeedLocationResponseDto {
-  @ApiProperty({ example: '123 Main Street, Caracas' })
-  address!: string;
+  @ApiPropertyOptional({
+    example: 'Caracas',
+    nullable: true,
+    type: String,
+    description:
+      'Street line is coarsened (locality only) or dropped for needs with ' +
+      'approximate location sensitivity to protect the requester’s privacy.',
+  })
+  address!: string | null;
 
   @ApiProperty({ example: 10.4806 })
   latitude!: number;
