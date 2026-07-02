@@ -3,7 +3,9 @@ import { InMemoryNeedRepository } from '../infrastructure/in-memory-need.reposit
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { Category, Priority, NeedStatus } from '../domain/need-enums';
 import { NeedEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
+import { NeedResourceReader } from '../domain/ports/resource-reader';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
+import { NeedResourceNotInEmergencyError } from '../domain/need-errors';
 import { LocationSensitivity } from '../../../shared/domain/location-sensitivity';
 
 const EM = '11111111-1111-4111-8111-111111111111';
@@ -33,6 +35,16 @@ class FakeNeedEmergencyStatusReader implements NeedEmergencyStatusReader {
 }
 
 const activeReader = new FakeNeedEmergencyStatusReader('active');
+
+/** Fake resource reader backed by a resourceId → emergencyId map. */
+class FakeNeedResourceReader implements NeedResourceReader {
+  constructor(private readonly byId: Record<string, string>) {}
+  getEmergencyId(resourceId: string): Promise<string | null> {
+    return Promise.resolve(this.byId[resourceId] ?? null);
+  }
+}
+
+const RESOURCE_ID = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
 
 function makeCmd(overrides?: Partial<CreateNeedCommand>): CreateNeedCommand {
   return {
@@ -159,6 +171,57 @@ describe('CreateNeed', () => {
       );
       const saved = await repo.findById({ value: result.id } as never);
       expect(saved!.locationSensitivity).toBe(LocationSensitivity.Public);
+    });
+  });
+
+  describe('resource / final-recipient link (#60)', () => {
+    it('stores resourceId when the resource belongs to the same emergency', async () => {
+      const resourceReader = new FakeNeedResourceReader({ [RESOURCE_ID]: EM });
+      const uc = new CreateNeed(repo, bus, activeReader, resourceReader);
+
+      const result = await uc.execute(makeCmd({ resourceId: RESOURCE_ID }));
+
+      const saved = await repo.findById({ value: result.id } as never);
+      expect(saved!.resourceId).toBe(RESOURCE_ID);
+    });
+
+    it('does not consult the resource reader when no resourceId is provided', async () => {
+      const resourceReader = new FakeNeedResourceReader({});
+      const spy = jest.spyOn(resourceReader, 'getEmergencyId');
+      const uc = new CreateNeed(repo, bus, activeReader, resourceReader);
+
+      await uc.execute(makeCmd());
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('rejects a resourceId that does not exist', async () => {
+      const resourceReader = new FakeNeedResourceReader({});
+      const uc = new CreateNeed(repo, bus, activeReader, resourceReader);
+
+      await expect(
+        uc.execute(makeCmd({ resourceId: RESOURCE_ID })),
+      ).rejects.toThrow(NeedResourceNotInEmergencyError);
+    });
+
+    it('rejects a resourceId that belongs to another emergency', async () => {
+      const OTHER_EM = '22222222-2222-4222-8222-222222222222';
+      const resourceReader = new FakeNeedResourceReader({
+        [RESOURCE_ID]: OTHER_EM,
+      });
+      const uc = new CreateNeed(repo, bus, activeReader, resourceReader);
+
+      await expect(
+        uc.execute(makeCmd({ resourceId: RESOURCE_ID })),
+      ).rejects.toThrow(NeedResourceNotInEmergencyError);
+    });
+
+    it('rejects a resourceId link when no resource reader is wired (misconfiguration)', async () => {
+      const uc = new CreateNeed(repo, bus, activeReader);
+
+      await expect(
+        uc.execute(makeCmd({ resourceId: RESOURCE_ID })),
+      ).rejects.toThrow(NeedResourceNotInEmergencyError);
     });
   });
 
