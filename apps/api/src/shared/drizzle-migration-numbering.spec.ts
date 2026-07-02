@@ -19,6 +19,7 @@ const GRANDFATHERED_DUPLICATE_PREFIXES = new Set([
   '0029',
   '0032',
   '0034',
+  '0049',
 ]);
 
 describe('numeración de migraciones drizzle', () => {
