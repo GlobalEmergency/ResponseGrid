@@ -24,6 +24,7 @@ import {
   DonationIntakeAlreadyProcessedError,
 } from '../domain/donation-intake-errors';
 import { FakeOfferEventBus } from '../infrastructure/fake-event-bus';
+import { DonationIntakeReceived } from '../domain/events/donation-intake-received.event';
 import { DonationIntakeId } from '../domain/donation-intake-id';
 import { GetIntakeDeepLink } from './get-intake-deep-link';
 import { IntakeQrEncoder } from '../domain/ports/intake-qr-encoder';
@@ -344,9 +345,45 @@ describe('DonationIntake use cases', () => {
       const saved = await repo.findById(
         DonationIntakeId.fromString(created.id),
       );
-      expect(() => saved!.confirmReception('vol-2', null, null)).toThrow(
-        DonationIntakeAlreadyProcessedError,
+      expect(() =>
+        saved!.confirmReception({
+          receivedByUserId: 'vol-2',
+          volunteerNotes: null,
+          evidenceFileKey: null,
+        }),
+      ).toThrow(DonationIntakeAlreadyProcessedError);
+    });
+
+    it('confirms with adjusted received lines and records the reason', async () => {
+      const created = await create.execute(makeCmd());
+      const bus = new FakeOfferEventBus();
+      const confirm = new ConfirmIntakeReception(repo, bus);
+      await confirm.execute({
+        intakeId: created.id,
+        receivedByUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        volunteerNotes: null,
+        evidenceFileKey: null,
+        receivedItems: [
+          {
+            name: 'Arroz 1kg',
+            quantity: 3,
+            unit: 'bolsas',
+            category: Category.Food,
+            supplyId: null,
+            presentation: null,
+            expiresAt: null,
+          },
+        ],
+        adjustmentReason: 'Solo llegaron 3 bolsas',
+      });
+
+      const saved = await repo.findById(
+        DonationIntakeId.fromString(created.id),
       );
+      expect(saved!.lines[0]?.supplyLine.quantity).toBe(3);
+      expect(saved!.receptionAdjustmentReason).toBe('Solo llegaron 3 bolsas');
+      const event = bus.published[0] as DonationIntakeReceived;
+      expect(event.payload.lines[0]?.quantity).toBe(3);
     });
   });
 

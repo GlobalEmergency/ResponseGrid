@@ -869,6 +869,18 @@ export const es = {
     received_meta: 'Recibida',
     already_processed: 'Esta entrega ya ha sido procesada.',
 
+    // Verificación de contenido (#129)
+    verify_heading: 'Verificar lo recibido',
+    verify_hint:
+      'Ajusta las cantidades realmente recibidas. Si difieren de lo declarado, indica el motivo.',
+    qty_received_label: 'Cantidad recibida',
+    line_excluded: 'No llegó',
+    reason_label: 'Motivo del ajuste',
+    reason_placeholder: 'Explica por qué difiere de lo declarado…',
+    err_reason_required:
+      'Indica el motivo: lo recibido difiere de lo declarado.',
+    photo_label: 'Foto de la entrega (opcional)',
+
     // Acciones
     notes_label: 'Notas (opcional)',
     notes_placeholder: 'Observaciones de la recepción…',

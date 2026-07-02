@@ -95,6 +95,38 @@ describe('DrizzleDonationIntakeRepository (integration)', () => {
     );
   });
 
+  it('persists received lines and the adjustment reason on reception', async () => {
+    const intake = makeIntake('ACO-RCV1');
+    await repo.save(intake);
+    intake.confirmReception({
+      receivedByUserId: VOL_USER,
+      volunteerNotes: null,
+      evidenceFileKey: null,
+      receivedLines: [
+        {
+          sortOrder: 0,
+          line: {
+            category: Category.Food,
+            name: 'Harina',
+            quantity: 2,
+            unit: 'sacos',
+            presentation: null,
+            expiresAt: '2026-07-01',
+            supplyId: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
+          },
+        },
+      ],
+      adjustmentReason: 'Solo llegaron 2 sacos',
+    });
+    await repo.save(intake);
+
+    const found = await repo.findById(intake.id);
+    expect(found).not.toBeNull();
+    if (!found) return;
+    expect(found.lines[0]?.supplyLine.quantity).toBe(2);
+    expect(found.receptionAdjustmentReason).toBe('Solo llegaron 2 sacos');
+  });
+
   it('updates lines on save (replace)', async () => {
     const intake = makeIntake('ACO-UPD1');
     await repo.save(intake);

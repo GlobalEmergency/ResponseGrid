@@ -92,9 +92,21 @@ export default async function IntakeDetailPage({ params }: Props) {
           : tr.status_pending;
 
   const isPending = intake.status === 'pending';
+  const canEdit = isPending && access.canReceiveIntakes;
   const contact = [intake.donorPhone, intake.donorEmail]
     .filter((v): v is string => typeof v === 'string' && v !== '')
     .join(' · ');
+
+  const declaredLines = intake.lines.map((line) => ({
+    id: line.id,
+    name: line.name,
+    quantity: line.quantity,
+    unit: line.unit ?? null,
+    category: line.category,
+    supplyId: line.supplyId ?? null,
+    presentation: line.presentation ?? null,
+    expiresAt: line.expiresAt ?? null,
+  }));
 
   const sectionTitle = 'font-display text-base font-bold text-navy';
 
@@ -120,6 +132,7 @@ export default async function IntakeDetailPage({ params }: Props) {
             </p>
           </section>
 
+          {!canEdit && (
           <section className="flex flex-col gap-3">
             <h2 className={sectionTitle}>{tr.lines_heading}</h2>
             <ul className="flex flex-col gap-2" role="list">
@@ -149,18 +162,29 @@ export default async function IntakeDetailPage({ params }: Props) {
               ))}
             </ul>
           </section>
+          )}
 
-          {isPending && access.canReceiveIntakes ? (
+          {canEdit ? (
             <ReceptionActions
               action={submitReception.bind(null, slug, intakeId)}
+              lines={declaredLines}
               t={tr}
             />
           ) : (
-            <p className="rounded-lg border-2 border-line bg-surface-alt px-4 py-3 text-sm text-muted">
-              {intake.status === 'received' && intake.receivedAt != null
-                ? `${tr.received_meta} · ${formatDate(intake.receivedAt, locale)}`
-                : tr.already_processed}
-            </p>
+            <div className="flex flex-col gap-2">
+              <p className="rounded-lg border-2 border-line bg-surface-alt px-4 py-3 text-sm text-muted">
+                {intake.status === 'received' && intake.receivedAt != null
+                  ? `${tr.received_meta} · ${formatDate(intake.receivedAt, locale)}`
+                  : tr.already_processed}
+              </p>
+              {intake.receptionAdjustmentReason != null &&
+              intake.receptionAdjustmentReason !== '' ? (
+                <p className="rounded-lg border-2 border-line bg-white px-4 py-3 text-sm text-ink">
+                  <span className="font-semibold">{tr.reason_label}:</span>{' '}
+                  {intake.receptionAdjustmentReason}
+                </p>
+              ) : null}
+            </div>
           )}
         </div>
       </div>
