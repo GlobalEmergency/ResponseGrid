@@ -23,14 +23,19 @@ for f in /migrations/*.sql; do
   # Pass the filename as a bound psql variable and quote it with :'mname' so a
   # filename containing a quote can neither break the statement nor inject SQL
   # into the _migrations table (defense-in-depth; filenames are repo-controlled).
-  applied=$($PSQL -v mname="$name" -tAc "SELECT 1 FROM _migrations WHERE name = :'mname'")
+  # NOTE: psql only performs :'var' interpolation for SQL read from stdin/-f,
+  # NOT for -c strings, so the SQL is piped in (a -c form errors with
+  # "syntax error at or near \":\"").
+  applied=$(printf '%s' "SELECT 1 FROM _migrations WHERE name = :'mname';" \
+    | $PSQL -v mname="$name" -tA)
   if [ "$applied" = "1" ]; then
     echo "skip   $name"
     continue
   fi
   echo "apply  $name"
   $PSQL -f "$f"
-  $PSQL -v mname="$name" -c "INSERT INTO _migrations (name) VALUES (:'mname');"
+  printf '%s' "INSERT INTO _migrations (name) VALUES (:'mname');" \
+    | $PSQL -v mname="$name"
 done
 
 echo "migrations up to date"
