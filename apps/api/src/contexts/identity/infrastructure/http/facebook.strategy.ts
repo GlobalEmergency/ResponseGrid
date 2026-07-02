@@ -53,11 +53,17 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
         .join(' ') ||
       email;
 
+    // SECURITY: passport-facebook does not expose a per-email verification
+    // flag, so we cannot assert the provider verified ownership of this email.
+    // We therefore treat Facebook emails as unverified: the identity can still
+    // create a brand-new account or reuse its own prior link, but it can never
+    // auto-unify into a pre-existing account by email match (takeover vector).
     return this.authenticateWithProvider.execute({
       provider: AuthProvider.Facebook,
       providerUserId: profile.id,
       email,
       name,
+      emailVerified: false,
     });
   }
 }

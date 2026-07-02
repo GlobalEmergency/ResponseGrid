@@ -7,12 +7,19 @@ import { User } from '../domain/user';
 import { UserId } from '../domain/user-id';
 import { Email } from '../domain/email';
 import { AccountLinkRequiresAuthError } from '../domain/account-link-requires-auth.error';
+import { UnverifiedProviderEmailError } from '../domain/unverified-provider-email.error';
 
 export interface AuthenticateWithProviderCommand {
   provider: AuthProvider;
   providerUserId: string;
   email: string;
   name: string;
+  /**
+   * Whether the provider asserted it verified ownership of `email`. When false,
+   * the email cannot be trusted as proof of identity, so unifying by email
+   * (Path 2) is refused to prevent account takeover.
+   */
+  emailVerified: boolean;
 }
 
 /**
@@ -66,7 +73,14 @@ export class AuthenticateWithProvider {
       if (userByEmail.passwordHash !== null) {
         throw new AccountLinkRequiresAuthError(cmd.provider);
       }
-      // Social-only account with matching email — safe to link
+      // SECURITY: even for a social-only account, the email is only trustworthy
+      // as an identity proof if the provider actually verified ownership of it.
+      // An unverified email lets an attacker claim the victim's address on a
+      // second provider and unify into the victim's account. Refuse to link.
+      if (!cmd.emailVerified) {
+        throw new UnverifiedProviderEmailError(cmd.provider);
+      }
+      // Social-only account with a provider-verified matching email — safe to link
       await this.identityRepo.link(userByEmail.id, identity);
       return { accessToken: this.tokenService.sign(this.payload(userByEmail)) };
     }
