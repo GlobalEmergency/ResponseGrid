@@ -238,15 +238,17 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
   citizen: {
     id: 'citizen',
     description:
-      'Ciudadano autenticado (rol por defecto de cualquier usuario).',
+      'Ciudadano autenticado (rol por defecto de cualquier usuario). Solo ' +
+      'acciones de grado ciudadano (crear/registrar). SEGURIDAD: NO incluye ' +
+      'resource:read / need:read / offer:read, porque esos permisos gatean las ' +
+      'colas de coordinación (queue/disputed/expired); concederlos aquí — y este ' +
+      'rol tiene scope por defecto `platform` — expondría datos sin validar de ' +
+      'todas las emergencias. Las lecturas públicas no requieren permiso.',
     defaultScopeType: 'platform',
     permissions: [
       'offer:create',
-      'offer:read',
       'capacity:publish',
       'resource:register',
-      'resource:read',
-      'need:read',
       'campaign:read',
       'volunteer:register',
     ],

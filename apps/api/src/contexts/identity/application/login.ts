@@ -9,6 +9,15 @@ export interface LoginCommand {
   password: string;
 }
 
+/**
+ * A syntactically valid bcrypt hash (cost 12) that no real password produces.
+ * Used to spend a comparable amount of CPU on the "user missing" / "social-only
+ * account" paths so that login response time does not leak whether an email is
+ * registered with a password (user-enumeration timing side-channel).
+ */
+const DUMMY_PASSWORD_HASH =
+  '$2b$12$d3A2Aawyuk7gBC5LgF1WpObQlzEgXstlefw5U.8kYOzYUU0kiaCEy';
+
 export class Login {
   constructor(
     private readonly userRepo: UserRepository,
@@ -25,13 +34,18 @@ export class Login {
     }
 
     const user = await this.userRepo.findByEmail(email);
-    if (!user) throw new InvalidCredentialsError();
 
-    // Social-only accounts have no password — disallow email/password login for them
-    if (user.passwordHash === null) throw new InvalidCredentialsError();
+    // SECURITY: always run a bcrypt comparison, even when the account does not
+    // exist or is social-only (no password). Returning early would make those
+    // paths measurably faster than a real password check, letting an attacker
+    // enumerate registered accounts by timing. We compare against a dummy hash
+    // to keep the timing profile uniform before returning the generic error.
+    const hashToCompare = user?.passwordHash ?? DUMMY_PASSWORD_HASH;
+    const valid = await this.hasher.compare(cmd.password, hashToCompare);
 
-    const valid = await this.hasher.compare(cmd.password, user.passwordHash);
-    if (!valid) throw new InvalidCredentialsError();
+    if (!user || user.passwordHash === null || !valid) {
+      throw new InvalidCredentialsError();
+    }
 
     // Stamp last login for the admin users console (#176). Best-effort: a write
     // failure here must not deny an otherwise-valid login.

@@ -41,10 +41,17 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     _refreshToken: string,
     profile: Profile,
   ): Promise<{ accessToken: string }> {
-    const email = profile.emails?.[0]?.value;
+    const emailEntry = profile.emails?.[0];
+    const email = emailEntry?.value;
     if (!email) {
       throw new Error('Google profile did not return an email address');
     }
+
+    // Google's OIDC userinfo exposes `email_verified`; passport surfaces it as
+    // `emails[].verified` (a boolean or the string 'true'). Only a truthy,
+    // explicit verification counts — anything else is treated as unverified.
+    const verifiedFlag = emailEntry?.verified as boolean | string | undefined;
+    const emailVerified = verifiedFlag === true || verifiedFlag === 'true';
 
     const name =
       profile.displayName ||
@@ -58,6 +65,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       providerUserId: profile.id,
       email,
       name,
+      emailVerified,
     });
   }
 }

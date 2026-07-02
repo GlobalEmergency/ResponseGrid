@@ -41,6 +41,27 @@ describe('redactContact', () => {
     expect(result.hasContact).toBe(true);
   });
 
+  it('hides the manager (personal name) from an anonymous caller for a non-official resource', () => {
+    const result = redactContact(view({ manager: 'Juan Pérez' }), false);
+    expect(result.manager).toBeNull();
+  });
+
+  it('reveals the manager to an authenticated caller', () => {
+    const result = redactContact(view({ manager: 'Juan Pérez' }), true);
+    expect(result.manager).toBe('Juan Pérez');
+  });
+
+  it('reveals the manager of an official resource to anonymous callers', () => {
+    const result = redactContact(
+      view({
+        manager: 'Coordinación Oficial',
+        verificationLevel: VerificationLevel.Official,
+      }),
+      false,
+    );
+    expect(result.manager).toBe('Coordinación Oficial');
+  });
+
   it('reveals the contact to an authenticated caller', () => {
     const result = redactContact(view(), true);
     expect(result.contact).toBe('+58 212 555 0000');

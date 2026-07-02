@@ -2404,7 +2404,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Download a stored file by key */
+        /** Download a stored file by key (authenticated) */
         get: operations["FilesController_serve"];
         put?: never;
         post?: never;
@@ -4007,8 +4007,11 @@ export interface components {
             id: string;
         };
         NeedLocationResponseDto: {
-            /** @example 123 Main Street, Caracas */
-            address: string;
+            /**
+             * @description Street line is coarsened (locality only) or dropped for needs with approximate location sensitivity to protect the requester’s privacy.
+             * @example Caracas
+             */
+            address?: string | null;
             /** @example 10.4806 */
             latitude: number;
             /** @example -66.9036 */
@@ -4580,10 +4583,6 @@ export interface components {
         PendingIntakeSummaryDto: {
             /** Format: uuid */
             id: string;
-            /** @example ACO-7F3K */
-            intakeCode: string;
-            /** Format: uuid */
-            targetResourceId: string;
             /** @example 2 */
             itemCount: number;
             /** Format: date-time */
@@ -4693,6 +4692,44 @@ export interface components {
             id: string;
             sortOrder: number;
         };
+        PublicDonationIntakeDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            emergencyId: string;
+            /** Format: uuid */
+            targetResourceId: string;
+            /** @example ACO-7F3K */
+            intakeCode: string;
+            /** @enum {string} */
+            status: "pending" | "received" | "rejected" | "incomplete";
+            donorName: string;
+            donorPhone?: string | null;
+            donorEmail?: string | null;
+            lines: components["schemas"]["IntakeLineViewDto"][];
+            /** Format: date-time */
+            receivedAt?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        DonationIntakeSearchHitDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example ACO-7F3K */
+            intakeCode: string;
+            donorName: string;
+            donorPhone?: string | null;
+            donorEmail?: string | null;
+            /** @enum {string} */
+            status: "pending" | "received" | "rejected" | "incomplete";
+            /** Format: uuid */
+            targetResourceId: string;
+            itemCount: number;
+            /** Format: date-time */
+            createdAt: string;
+        };
         DonationIntakeViewDto: {
             /** Format: uuid */
             id: string;
@@ -4722,22 +4759,6 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-        };
-        DonationIntakeSearchHitDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example ACO-7F3K */
-            intakeCode: string;
-            donorName: string;
-            donorPhone?: string | null;
-            donorEmail?: string | null;
-            /** @enum {string} */
-            status: "pending" | "received" | "rejected" | "incomplete";
-            /** Format: uuid */
-            targetResourceId: string;
-            itemCount: number;
-            /** Format: date-time */
-            createdAt: string;
         };
         IntakeDeepLinkDto: {
             /** @example http://localhost:3001/e/mexico-demo/pre-registro?resourceId=33333333-3333-4333-8333-333333333331 */
@@ -9040,6 +9061,13 @@ export interface operations {
                     "application/json": components["schemas"]["GeocodeResultDto"][];
                 };
             };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     MetricsController_metrics: {
@@ -9784,7 +9812,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DonationIntakeViewDto"];
+                    "application/json": components["schemas"]["PublicDonationIntakeDto"];
                 };
             };
             /** @description Invalid request body */

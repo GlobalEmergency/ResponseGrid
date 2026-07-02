@@ -11,7 +11,7 @@ import {
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
-import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { Throttle } from '@nestjs/throttler';
 import {
   ApiTags,
   ApiOperation,
@@ -76,7 +76,6 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(ThrottlerGuard)
   @Throttle({ auth: { ttl: 60_000, limit: 10 } })
   @ApiOperation({ summary: 'Authenticate and obtain a JWT access token' })
   @ApiOkResponse({ description: 'Login successful', type: LoginResponseDto })
@@ -91,7 +90,6 @@ export class AuthController {
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @UseGuards(ThrottlerGuard)
   @Throttle({ auth: { ttl: 60_000, limit: 10 } })
   @ApiOperation({
     summary: 'Register a new user account (auto-login returns JWT)',

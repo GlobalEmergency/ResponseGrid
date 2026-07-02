@@ -1,8 +1,19 @@
 import { Need } from '../domain/need';
-import { LocationProps } from '../../../shared/domain/location';
+
+/**
+ * Location as exposed in a NeedView. The address is nullable because the public
+ * view coarsens (and may fully drop) the street line of location-sensitive
+ * needs; coordinators always receive the exact, non-null address.
+ */
+export interface NeedLocationView {
+  address: string | null;
+  latitude: number;
+  longitude: number;
+}
 import { SupplyLineSnapshot } from '../../supplies/domain/supply-line';
 import { LocationSensitivity } from '../../../shared/domain/location-sensitivity';
 import { approximateLocation } from '../../../shared/domain/approximate-location';
+import { coarsenAddress } from '../../../shared/domain/coarsen-address';
 import { PersonnelSkill } from '../domain/need-enums';
 import { AuthorSnapshot } from '../../../shared/domain/author';
 
@@ -11,7 +22,7 @@ export interface NeedView {
   emergencyId: string;
   title: string;
   description: string | null;
-  location: LocationProps;
+  location: NeedLocationView;
   locationSensitivity: LocationSensitivity;
   priority: string;
   requesterOrganizationId: string | null;
@@ -50,7 +61,7 @@ export interface CoordinatorNeedView extends NeedView {
 export function toPublicNeedView(n: Need): NeedView {
   const exactLocation = n.location.toPlain();
 
-  let publicLocation: LocationProps;
+  let publicLocation: NeedLocationView;
   if (n.locationSensitivity === LocationSensitivity.Approximate) {
     const approx = approximateLocation(
       exactLocation.latitude,
@@ -58,7 +69,10 @@ export function toPublicNeedView(n: Need): NeedView {
       n.id.value,
     );
     publicLocation = {
-      address: exactLocation.address,
+      // SECURITY: coarsen the street address too. Jittering the coordinates
+      // while returning the exact street line ("Calle X #123") would defeat the
+      // whole point of Approximate sensitivity and disclose the requester's home.
+      address: coarsenAddress(exactLocation.address),
       latitude: approx.lat,
       longitude: approx.lng,
     };

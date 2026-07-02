@@ -100,8 +100,28 @@ describe('Files upload (e2e)', () => {
     expect(typeof key).toBe('string');
     expect(url).toBe(`/files/${key}`);
 
-    const getRes = await request(server).get(`/files/${key}`).expect(200);
+    const getRes = await request(server)
+      .get(`/files/${key}`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .expect(200);
     expect(getRes.headers['content-type']).toContain('image/png');
+  });
+
+  it('GET /files/:key without a token returns 401 (files are not world-readable)', async () => {
+    const pngBuf = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      'base64',
+    );
+    const uploadRes = await request(server)
+      .post('/files')
+      .set('Authorization', `Bearer ${userToken}`)
+      .attach('file', pngBuf, {
+        filename: 'private.png',
+        contentType: 'image/png',
+      })
+      .expect(201);
+    const { key } = uploadRes.body as { key: string };
+    await request(server).get(`/files/${key}`).expect(401);
   });
 
   it('POST /files with non-image returns 422', async () => {
@@ -112,6 +132,18 @@ describe('Files upload (e2e)', () => {
       .attach('file', txtBuf, {
         filename: 'test.txt',
         contentType: 'text/plain',
+      })
+      .expect(422);
+  });
+
+  it('POST /files with a non-image payload mislabelled as image/png returns 422 (magic-byte check)', async () => {
+    const fakePng = Buffer.from('<html><script>alert(1)</script></html>');
+    await request(server)
+      .post('/files')
+      .set('Authorization', `Bearer ${userToken}`)
+      .attach('file', fakePng, {
+        filename: 'fake.png',
+        contentType: 'image/png',
       })
       .expect(422);
   });
@@ -144,11 +176,17 @@ describe('Files upload (e2e)', () => {
       })
       .expect(201);
     const { key } = uploadRes.body as { key: string; url: string };
-    const getRes = await request(server).get(`/files/${key}`).expect(200);
+    const getRes = await request(server)
+      .get(`/files/${key}`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .expect(200);
     expect(getRes.headers['x-content-type-options']).toBe('nosniff');
   });
 
   it('GET /files/:key with unknown key returns 404', async () => {
-    await request(server).get('/files/nonexistent-key.png').expect(404);
+    await request(server)
+      .get('/files/nonexistent-key.png')
+      .set('Authorization', `Bearer ${userToken}`)
+      .expect(404);
   });
 });

@@ -57,10 +57,21 @@ async function bootstrap(): Promise<void> {
   // The Next.js frontend issues client-side fetches (e.g. the public resource
   // points consumed by the Leaflet map) to this API from a different origin
   // (3001 → 3000). Without CORS the browser blocks those responses ("Failed to
-  // fetch"). credentials:true allows the httpOnly auth cookie on client-side
-  // authenticated calls. Origin is restricted to FRONTEND_URL (no wildcard).
+  // fetch"). credentials:true is required for client-side authenticated calls.
+  // Origin is restricted to FRONTEND_URL (no wildcard, no reflection).
+  //
+  // In production FRONTEND_URL must be set explicitly: falling back to
+  // localhost would silently break the real frontend, so we fail fast instead.
+  if (process.env.NODE_ENV === 'production' && !process.env.FRONTEND_URL) {
+    throw new Error(
+      'FRONTEND_URL must be set in production (CORS allow-list).',
+    );
+  }
   app.enableCors({
-    origin: (process.env.FRONTEND_URL ?? 'http://localhost:3001').split(','),
+    origin: (process.env.FRONTEND_URL ?? 'http://localhost:3001')
+      .split(',')
+      .map((o) => o.trim())
+      .filter((o) => o.length > 0),
     credentials: true,
   });
 

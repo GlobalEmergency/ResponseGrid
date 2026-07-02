@@ -217,6 +217,25 @@ describe('DonationIntake use cases', () => {
       expect(result.pendingIntakes).toHaveLength(1);
       expect(result.pendingIntakes[0]?.id).toBe(created.id);
     });
+
+    it('does NOT expose the intake code or target resource (tamper-credential leak)', async () => {
+      // The endpoint is public and keyed on a guessable contact. Echoing the
+      // intake code back would hand an attacker the exact credential the public
+      // PATCH requires to tamper with the victim's donation. The summary must
+      // stay non-actionable.
+      await create.execute(makeCmd());
+      const lookup = new LookupDonorByContact(repo);
+      const result = await lookup.execute({
+        emergencyId: EM,
+        donorPhone: '+52 55 1234 5678',
+        donorEmail: null,
+      });
+      const summary = result.pendingIntakes[0] as Record<string, unknown>;
+      expect(summary).toBeDefined();
+      expect(summary['intakeCode']).toBeUndefined();
+      expect(summary['targetResourceId']).toBeUndefined();
+      expect(summary['itemCount']).toBe(1);
+    });
   });
 
   describe('UpdateDonationIntake', () => {
