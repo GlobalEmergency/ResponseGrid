@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
 
+# Least privilege by default for every job's GITHUB_TOKEN (jobs opt into more
+# only if they need it). Without this the token defaults to broad write scopes.
+permissions:
+  contents: read
+
 jobs:
   # ── Format check ────────────────────────────────────────────────────────────
   format:
@@ -154,3 +159,94 @@ jobs:
           JWT_SECRET: ci-jwt-secret-32-chars-minimum-ok
           NODE_ENV: test
         run: pnpm --filter api test
+
+  # ── E2E tests ───────────────────────────────────────────────────────────────
+  # The unit/int suite (`Test` job) does NOT cover the HTTP e2e specs under
+  # apps/api/test — they run via a separate jest config. Run them here so an
+  # endpoint/auth regression fails CI instead of reaching prod.
+  e2e:
+    name: Test e2e
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: reliefhub
+          POSTGRES_PASSWORD: reliefhub
+          POSTGRES_DB: reliefhub
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd="pg_isready -U reliefhub"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6380:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run e2e tests — api
+        env:
+          DATABASE_URL: postgres://reliefhub:reliefhub@localhost:5433/reliefhub
+          TEST_DATABASE_URL: postgres://reliefhub:reliefhub@localhost:5433/reliefhub_test
+          REDIS_URL: redis://localhost:6380
+          JWT_SECRET: ci-jwt-secret-32-chars-minimum-ok
+          NODE_ENV: test
+        run: pnpm --filter api test:e2e
+
+  # ── Security ────────────────────────────────────────────────────────────────
+  # Fails the build on a known-vulnerable production dependency, and (on PRs)
+  # reviews the dependency delta the PR introduces.
+  security:
+    name: Security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Blocks a PR that pulls in a dependency with a known CVE or a
+      # disallowed license. PR-only (needs the base ref to diff against).
+      - name: Dependency review
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Fail on a High/Critical advisory in the production dependency tree
+      # (this is exactly what would have caught the multer 2.1.1 DoS advisory).
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level high

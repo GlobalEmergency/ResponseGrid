@@ -1,0 +1,41 @@
+# Dependabot: automated dependency + GitHub Actions updates.
+# - Security updates (CVEs) are opened automatically once Dependabot alerts are
+#   enabled in repo settings; this file adds scheduled *version* updates too.
+# - Grouped to keep PR noise low: one weekly PR per ecosystem for minor/patch.
+version: 2
+updates:
+  # ── npm / pnpm workspace (root lockfile covers apps/* and packages/*) ────────
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+    groups:
+      # Batch non-major bumps into a single PR to avoid a flood.
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - dependencies
+
+  # ── GitHub Actions used in workflows (keeps pinned SHAs fresh) ───────────────
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "chore(ci)"
+    labels:
+      - dependencies
+      - ci
