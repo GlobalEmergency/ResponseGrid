@@ -2,6 +2,10 @@ import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Slug } from './slug';
 import { EmergencyStatus } from './emergency-status';
 import { InvalidEmergencyTransitionError } from './invalid-emergency-transition.error';
+import {
+  InvalidDisputeThresholdError,
+  MAX_RESOURCE_DISPUTE_THRESHOLD,
+} from './invalid-dispute-threshold.error';
 
 export interface CreateEmergencyProps {
   id: EmergencyId;
@@ -20,6 +24,7 @@ export interface EmergencySnapshot {
   status: EmergencyStatus;
   announcement: string | null;
   dontBringList: string[];
+  resourceDisputeThreshold: number | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,6 +38,7 @@ export class Emergency {
     private _status: EmergencyStatus,
     private _announcement: string | null,
     private _dontBringList: string[],
+    private _resourceDisputeThreshold: number | null,
     public readonly createdAt: Date,
     private _updatedAt: Date,
   ) {}
@@ -47,6 +53,7 @@ export class Emergency {
       EmergencyStatus.Active,
       props.announcement ?? null,
       props.dontBringList ?? [],
+      null,
       now,
       now,
     );
@@ -61,6 +68,7 @@ export class Emergency {
       snap.status,
       snap.announcement,
       snap.dontBringList,
+      snap.resourceDisputeThreshold,
       snap.createdAt,
       snap.updatedAt,
     );
@@ -76,6 +84,10 @@ export class Emergency {
 
   get dontBringList(): string[] {
     return this._dontBringList;
+  }
+
+  get resourceDisputeThreshold(): number | null {
+    return this._resourceDisputeThreshold;
   }
 
   get updatedAt(): Date {
@@ -108,6 +120,19 @@ export class Emergency {
     this._updatedAt = new Date();
   }
 
+  setResourceDisputeThreshold(threshold: number | null): void {
+    if (
+      threshold !== null &&
+      (!Number.isInteger(threshold) ||
+        threshold < 1 ||
+        threshold > MAX_RESOURCE_DISPUTE_THRESHOLD)
+    ) {
+      throw new InvalidDisputeThresholdError(threshold);
+    }
+    this._resourceDisputeThreshold = threshold;
+    this._updatedAt = new Date();
+  }
+
   toSnapshot(): EmergencySnapshot {
     return {
       id: this.id.value,
@@ -117,6 +142,7 @@ export class Emergency {
       status: this._status,
       announcement: this._announcement,
       dontBringList: this._dontBringList,
+      resourceDisputeThreshold: this._resourceDisputeThreshold,
       createdAt: this.createdAt,
       updatedAt: this._updatedAt,
     };
