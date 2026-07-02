@@ -1,5 +1,5 @@
 import { createDb, Db } from '../../../../shared/db';
-import { shipmentsTable } from './schema';
+import { shipmentCodeSequencesTable, shipmentsTable } from './schema';
 import { DrizzleShipmentRepository } from './drizzle-shipment.repository';
 import { DrizzleShipmentAuthorizationLookup } from './drizzle-shipment-authorization-lookup';
 import { Shipment } from '../../domain/shipment';
@@ -70,6 +70,21 @@ describe('DrizzleShipmentRepository (integration)', () => {
 
   beforeEach(async () => {
     await db.delete(shipmentsTable);
+    await db.delete(shipmentCodeSequencesTable);
+  });
+
+  it('nextSequence allocates a monotonic per-emergency sequence, never reused', async () => {
+    const em = EmergencyId.fromString(EM);
+    // increments on every call, independent of how many rows exist
+    expect(await repo.nextSequence(em)).toBe(1);
+    expect(await repo.nextSequence(em)).toBe(2);
+    // a different emergency keeps its own sequence
+    expect(await repo.nextSequence(EmergencyId.fromString(OTHER_EM))).toBe(1);
+    // deleting shipments does NOT free a code for reuse — the sequence is
+    // monotonic, decoupled from the live row count.
+    await repo.save(makeShipment());
+    await db.delete(shipmentsTable);
+    expect(await repo.nextSequence(em)).toBe(3);
   });
 
   it('round-trips a planned shipment (jsonb SupplyLine items + container ids) through Postgres', async () => {
@@ -95,6 +110,7 @@ describe('DrizzleShipmentRepository (integration)', () => {
 
     expect(found).not.toBeNull();
     expect(found!.id.value).toBe(s.id.value);
+    expect(found!.code).toBe(s.code);
     expect(found!.status).toBe(ShipmentStatus.Planned);
     expect(found!.originResourceId).toBe(ORIGIN);
     expect(found!.destinationResourceId).toBe(DEST);
