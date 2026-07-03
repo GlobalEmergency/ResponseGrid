@@ -1952,6 +1952,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/supplies/backfill": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Informe de líneas legacy sin enlazar al catálogo (no-casadas) */
+        get: operations["SuppliesAdminController_backfillReport"];
+        put?: never;
+        /** Backfill best-effort del supplyId de las líneas legacy (idempotente) */
+        post: operations["SuppliesAdminController_backfill"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/supplies/{id}": {
         parameters: {
             query?: never;
@@ -5284,6 +5302,48 @@ export interface components {
              *     ]
              */
             aliases: string[];
+        };
+        UnmatchedSupplyLineGroupDto: {
+            /** @example Harina PAN */
+            name: string;
+            /**
+             * @description Líneas sin enlazar con ese texto
+             * @example 12
+             */
+            lines: number;
+            sources: ("need_items" | "offer_items" | "resource_items" | "donation_intake_lines" | "container_lines")[];
+            /**
+             * @description true = el texto casa con varios insumos activos: fusionar duplicados en vez de crear un alias
+             * @example false
+             */
+            ambiguous: boolean;
+        };
+        SupplyLinkReportDto: {
+            /** @example 27 */
+            unmatchedLines: number;
+            unmatched: components["schemas"]["UnmatchedSupplyLineGroupDto"][];
+            /**
+             * @description Textos distintos que un backfill enlazaría ahora
+             * @example 34
+             */
+            pendingNames: number;
+            /** @example 120 */
+            pendingLines: number;
+        };
+        SupplyLinkBackfillResultDto: {
+            /** @example 27 */
+            unmatchedLines: number;
+            unmatched: components["schemas"]["UnmatchedSupplyLineGroupDto"][];
+            /**
+             * @description Textos distintos que casaron contra el catálogo
+             * @example 34
+             */
+            linkedNames: number;
+            /**
+             * @description Líneas realmente actualizadas en esta ejecución (0 al re-correr o si otra ejecución concurrente las enlazó antes)
+             * @example 120
+             */
+            linkedLines: number;
         };
         EditSupplyDto: {
             /** @example Agua mineral */
@@ -11055,6 +11115,58 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CreateSupplyResponseDto"];
+                };
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_backfillReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupplyLinkReportDto"];
+                };
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_backfill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupplyLinkBackfillResultDto"];
                 };
             };
             /** @description Falta el permiso catalogue:manage */
