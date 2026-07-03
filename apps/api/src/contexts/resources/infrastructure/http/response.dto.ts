@@ -18,6 +18,35 @@ export class RegisterResourceResponseDto {
   id!: string;
 }
 
+/**
+ * One resource the authenticated principal manages (owner or entity-scoped
+ * grant), reduced to what a navigation surface needs (issue #285).
+ */
+export class MyManagedResourceDto {
+  @ApiProperty({
+    format: 'uuid',
+    example: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+  })
+  id!: string;
+
+  @ApiProperty({ enum: ResourceType, example: ResourceType.CollectionPoint })
+  type!: ResourceType;
+
+  @ApiProperty({ example: 'Cruz Roja Madrid' })
+  name!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  emergencyId!: string;
+
+  @ApiProperty({
+    example: 'terremoto-venezuela-2026',
+    nullable: true,
+    type: String,
+    description: 'Slug of the owning emergency; null if its row is missing.',
+  })
+  emergencySlug!: string | null;
+}
+
 export class LocationViewDto {
   @ApiProperty({ example: 'Calle Mayor 1, Valencia' })
   address!: string;

@@ -17,6 +17,7 @@ import { GetNearbyResources } from '../application/get-nearby-resources';
 import { GetResourcesInBounds } from '../application/get-resources-in-bounds';
 import { GetPublicResource } from '../application/get-public-resource';
 import { GetMyResources } from '../application/get-my-resources';
+import { GetMyManagedResources } from '../application/get-my-managed-resources';
 import { VerifyResource } from '../application/verify-resource';
 import { PublishResource } from '../application/publish-resource';
 import { EditResource } from '../application/edit-resource';
@@ -239,6 +240,12 @@ const getMyResourcesProvider = {
   useFactory: (repo: ResourceRepository) => new GetMyResources(repo),
 };
 
+const getMyManagedResourcesProvider = {
+  provide: GetMyManagedResources,
+  inject: [RESOURCE_REPOSITORY],
+  useFactory: (repo: ResourceRepository) => new GetMyManagedResources(repo),
+};
+
 const getResourcesInBoundsProvider = {
   provide: GetResourcesInBounds,
   inject: [RESOURCE_REPOSITORY],
@@ -406,6 +413,7 @@ const recordInventoryEntryProvider = {
     getMyInventoryProvider,
     updateMyInventoryProvider,
     getMyResourcesProvider,
+    getMyManagedResourcesProvider,
     getResourcesInBoundsProvider,
     getPublicResourceProvider,
     recipientTypeRepositoryProvider,

@@ -99,24 +99,20 @@ export const getMyGroups = cache(async () => {
   return (data ?? []).map((g) => ({ id: g.id, name: g.name }));
 });
 
-/** Resources are emergency-scoped: aggregate `resources/mine` across the principal's
- *  emergencies. Carries every resource type (collection points, warehouses, transport,
- *  suppliers, venues, …) — the principal manages all of it, not just collection points.
- *  N+1 cached calls (see Global Constraints ceiling). */
+/** The resources the principal manages — owned plus entity-granted — in one call
+ *  to `/resources/mine`. Cross-emergency by design: a `point_manager` whose only
+ *  grant is entity-scoped holds no emergency grant, so the old per-emergency
+ *  aggregation over `getMyEmergencies()` never surfaced their point (#285).
+ *  Carries every resource type (collection points, warehouses, transport,
+ *  suppliers, venues, …) — the principal manages all of it, not just collection
+ *  points. */
 export const getMyResources = cache(async () => {
   const token = await getToken();
   if (token == null) return [];
-  const emergencies = await getMyEmergencies();
-  const perEmergency = await Promise.all(
-    emergencies.map(async (e) => {
-      const { data } = await api.GET('/emergencies/{emergencyId}/resources/mine', {
-        headers: authHeaders(token),
-        params: { path: { emergencyId: e.id } },
-      });
-      return (data ?? []).map((r) => ({ id: r.id, name: r.name, resourceType: r.type }));
-    }),
-  );
-  return perEmergency.flat();
+  const { data } = await api.GET('/resources/mine', {
+    headers: authHeaders(token),
+  });
+  return (data ?? []).map((r) => ({ id: r.id, name: r.name, resourceType: r.type }));
 });
 
 export const getPrincipalContexts = cache(async (): Promise<PrincipalContext[]> => {

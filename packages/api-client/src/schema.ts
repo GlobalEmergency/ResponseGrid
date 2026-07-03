@@ -471,6 +471,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/resources/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the resources the authenticated principal manages, across every emergency
+         * @description Union of the resources the principal owns and the ones reached through an entity-scoped grant (e.g. `point_manager`). Unlike `/emergencies/{emergencyId}/resources/mine`, this needs no emergency in the path, so it also serves principals whose only grant is entity-scoped (#285). Each row carries its emergency id and slug.
+         */
+        get: operations["ResourcesController_listMineAcrossEmergencies"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/emergencies/{emergencyId}/resources/mine": {
         parameters: {
             query?: never;
@@ -3159,6 +3179,27 @@ export interface components {
              * @enum {string}
              */
             status: "active" | "saturated" | "paused" | "closed";
+        };
+        MyManagedResourceDto: {
+            /**
+             * Format: uuid
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            id: string;
+            /**
+             * @example collection_point
+             * @enum {string}
+             */
+            type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
+            /** @example Cruz Roja Madrid */
+            name: string;
+            /** Format: uuid */
+            emergencyId: string;
+            /**
+             * @description Slug of the owning emergency; null if its row is missing.
+             * @example terremoto-venezuela-2026
+             */
+            emergencySlug: string | null;
         };
         LocationViewDto: {
             /** @example Calle Mayor 1, Valencia */
@@ -7006,6 +7047,33 @@ export interface operations {
             };
             /** @description Resource not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ResourcesController_listMineAcrossEmergencies: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Resources the principal manages */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyManagedResourceDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
