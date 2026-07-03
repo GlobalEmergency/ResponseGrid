@@ -1,7 +1,6 @@
 'use server';
 
-import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 
 export type AccreditationStatus = 'global' | 'emergency' | 'none';
@@ -66,8 +65,7 @@ export async function fetchOrganizations(): Promise<OrganizationListItem[]> {
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref('/admin/organizations'));
+      return redirectToLogin('/admin/organizations');
     }
     return [];
   }
@@ -88,8 +86,7 @@ export async function fetchOrganizationDetail(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/admin/organizations/${id}`));
+      return redirectToLogin(`/admin/organizations/${id}`);
     }
     if (response.status === 404) return null;
     return null;

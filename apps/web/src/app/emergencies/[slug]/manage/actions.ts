@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import type { components } from '@reliefhub/api-client';
 import { api } from '@/lib/api';
-import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, clearToken, authHeaders, redirectToLogin } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 /** A reason is mandatory for every edit/discard; mirror the API's min length. */
@@ -57,8 +57,7 @@ export async function matchOffer(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage`));
+      return redirectToLogin(`/emergencies/${slug}/manage`);
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.err_no_permission_match };
@@ -91,8 +90,7 @@ export async function fulfillOffer(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage`));
+      return redirectToLogin(`/emergencies/${slug}/manage`);
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.err_no_permission_fulfill };
@@ -122,8 +120,7 @@ export async function cancelOffer(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage`));
+      return redirectToLogin(`/emergencies/${slug}/manage`);
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.err_no_permission_cancel };
@@ -168,8 +165,7 @@ export async function verifyAndPublish(
 
   if (!verifyResponse.ok) {
     if (verifyResponse.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage`));
+      return redirectToLogin(`/emergencies/${slug}/manage`);
     }
     return {
       status: 'error',
@@ -187,8 +183,7 @@ export async function verifyAndPublish(
 
   if (publishError !== undefined) {
     if (publishResponse.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage`));
+      return redirectToLogin(`/emergencies/${slug}/manage`);
     }
     // The verify step already persisted; refresh so the queue/badge reflect the
     // now-verified state even though publishing failed (avoids a stale "Sin
@@ -221,8 +216,7 @@ export async function validateNeed(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage`));
+      return redirectToLogin(`/emergencies/${slug}/manage`);
     }
     return {
       status: 'error',
@@ -252,8 +246,7 @@ export async function renewNeed(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage`));
+      return redirectToLogin(`/emergencies/${slug}/manage`);
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.err_no_permission_renew };
@@ -292,8 +285,7 @@ export async function pauseEmergency(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage`));
+      return redirectToLogin(`/emergencies/${slug}/manage`);
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.err_no_permission_pause };
@@ -324,8 +316,7 @@ export async function resumeEmergency(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage`));
+      return redirectToLogin(`/emergencies/${slug}/manage`);
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.err_no_permission_resume };
@@ -372,8 +363,7 @@ export async function editNeed(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage`));
+      return redirectToLogin(`/emergencies/${slug}/manage`);
     }
     return { status: 'error', message: t.coord.err_edit_failed };
   }
@@ -402,8 +392,7 @@ export async function discardNeed(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage`));
+      return redirectToLogin(`/emergencies/${slug}/manage`);
     }
     return { status: 'error', message: t.coord.err_discard_failed };
   }
@@ -440,8 +429,7 @@ export async function editResource(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage`));
+      return redirectToLogin(`/emergencies/${slug}/manage`);
     }
     return { status: 'error', message: t.coord.err_edit_failed };
   }
@@ -470,8 +458,7 @@ export async function discardResource(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage`));
+      return redirectToLogin(`/emergencies/${slug}/manage`);
     }
     return { status: 'error', message: t.coord.err_discard_failed };
   }
@@ -515,8 +502,7 @@ export async function resolveDispute(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage/resources/disputes`));
+      return redirectToLogin(`/emergencies/${slug}/manage/resources/disputes`);
     }
     return { status: 'error', message: t.coord.err_resolve_dispute_failed };
   }
@@ -558,8 +544,7 @@ export async function getValidityReports(
 
   if (error !== undefined || data === undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage/resources/disputes`));
+      return redirectToLogin(`/emergencies/${slug}/manage/resources/disputes`);
     }
     return { status: 'error', message: t.coord.err_load_reports_failed };
   }
@@ -590,8 +575,7 @@ export async function editOffer(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage`));
+      return redirectToLogin(`/emergencies/${slug}/manage`);
     }
     return { status: 'error', message: t.coord.err_edit_failed };
   }
@@ -620,8 +604,7 @@ export async function discardOffer(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage`));
+      return redirectToLogin(`/emergencies/${slug}/manage`);
     }
     return { status: 'error', message: t.coord.err_discard_failed };
   }
@@ -654,8 +637,7 @@ export async function editReport(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage`));
+      return redirectToLogin(`/emergencies/${slug}/manage`);
     }
     return { status: 'error', message: t.coord.err_edit_failed };
   }
@@ -684,8 +666,7 @@ export async function discardReport(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage`));
+      return redirectToLogin(`/emergencies/${slug}/manage`);
     }
     return { status: 'error', message: t.coord.err_discard_failed };
   }
@@ -711,8 +692,7 @@ export async function publishAnnouncement(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage`));
+      return redirectToLogin(`/emergencies/${slug}/manage`);
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.err_no_permission_announce };

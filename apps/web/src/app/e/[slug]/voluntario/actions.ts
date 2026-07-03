@@ -1,9 +1,8 @@
 'use server';
 
-import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
-import { requireSession, loginHref, authHeaders, clearToken } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 type Skill = components['schemas']['RegisterVolunteerDto']['skills'][number];
@@ -104,8 +103,7 @@ export async function registerVolunteer(
   );
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(loginHref(`/e/${slug}/voluntario`));
+    return redirectToLogin(`/e/${slug}/voluntario`);
   }
 
   if (response.status === 409) {

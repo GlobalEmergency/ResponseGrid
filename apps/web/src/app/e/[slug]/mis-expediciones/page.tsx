@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
-import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
+import { notFound } from 'next/navigation';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { ShipmentsList } from '@/components/organisms/shipments-list';
@@ -50,8 +50,7 @@ export default async function MisExpedicionesPage({ params }: Props) {
       })
       .then(async (r) => {
         if (r.response.status === 401) {
-          await clearToken();
-          redirect(loginHref(`/e/${slug}/mis-expediciones`));
+          return redirectToLogin(`/e/${slug}/mis-expediciones`);
         }
         return r.data ?? [];
       }),

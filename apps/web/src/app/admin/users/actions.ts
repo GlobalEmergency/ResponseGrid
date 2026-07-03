@@ -1,7 +1,6 @@
 'use server';
 
-import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 
 export interface UserListItem {
@@ -65,8 +64,7 @@ export async function fetchUsers(): Promise<UserListItem[]> {
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref('/admin/users'));
+      return redirectToLogin('/admin/users');
     }
     return [];
   }
@@ -85,8 +83,7 @@ export async function fetchUserDetail(id: string): Promise<UserDetail | null> {
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/admin/users/${id}`));
+      return redirectToLogin(`/admin/users/${id}`);
     }
     if (response.status === 404) return null;
     return null;

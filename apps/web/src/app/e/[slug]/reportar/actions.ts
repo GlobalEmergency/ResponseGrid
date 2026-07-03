@@ -1,7 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { requireSession, loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, getToken, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { getT } from '@/i18n/server';
@@ -83,8 +83,7 @@ export async function submitReport(
   });
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(`/login`);
+    return redirectToLogin();
   }
 
   if (response.status === 403) {
@@ -117,8 +116,7 @@ export async function reviewReport(
   });
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(loginHref(`/emergencies/${slug}/manage/reports`));
+    return redirectToLogin(`/emergencies/${slug}/manage/reports`);
   }
 
   if (response.status === 403) {

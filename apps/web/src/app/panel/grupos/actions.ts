@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { requireSession, loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, getToken, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 
 export type GroupActionResult =
@@ -106,8 +106,7 @@ export async function createGroupAction(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref('/panel/grupos'));
+      return redirectToLogin('/panel/grupos');
     }
     if (response.status === 403) {
       return {

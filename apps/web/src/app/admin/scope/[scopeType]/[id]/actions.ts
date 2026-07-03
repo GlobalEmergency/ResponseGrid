@@ -1,8 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { getToken, requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
+import { getToken, requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { parseDateInput } from '@/lib/parse-date-input';
 
@@ -134,8 +133,7 @@ export async function grantRoleAction(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(path(scopeType, scopeId)));
+      return redirectToLogin(path(scopeType, scopeId));
     }
     if (response.status === 403) {
       return {
@@ -168,8 +166,7 @@ export async function revokeGrantAction(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(path(scopeType, scopeId)));
+      return redirectToLogin(path(scopeType, scopeId));
     }
     if (response.status === 403) {
       return { status: 'error', message: 'No tienes permiso para revocar este rol.' };

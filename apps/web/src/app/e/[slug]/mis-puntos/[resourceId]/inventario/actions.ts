@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
-import { requireSession, loginHref, authHeaders, clearToken } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { parseSupplyLines } from '@/lib/supply-lines';
 import { getT } from '@/i18n/server';
 import { getCategories } from '@/adapters/get-categories';
@@ -29,8 +29,7 @@ export async function fetchMyInventory(
   });
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(loginHref(`/e/${slug}/mis-puntos/${resourceId}/inventario`));
+    return redirectToLogin(`/e/${slug}/mis-puntos/${resourceId}/inventario`);
   }
   // Not the owner/coordinator of this point → back to the caller's own list
   // (same pattern as the intake detail page), never a misleading 404.
@@ -79,8 +78,7 @@ export async function saveMyInventory(
   });
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(loginHref(`/e/${slug}/mis-puntos/${resourceId}/inventario`));
+    return redirectToLogin(`/e/${slug}/mis-puntos/${resourceId}/inventario`);
   }
   if (response.status === 403) {
     return { status: 'error', message: t.account.inventory_update_forbidden };

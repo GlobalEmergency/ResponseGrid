@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { loginHref, clearToken } from '@/lib/auth';
+import { redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { resolveManageAccess } from '@/lib/manage-access';
@@ -87,8 +87,7 @@ export default async function ManageReportsPage({ params, searchParams }: Props)
   });
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(loginHref(`/emergencies/${slug}/manage/reports`));
+    return redirectToLogin(`/emergencies/${slug}/manage/reports`);
   }
 
   if (response.status === 403) {

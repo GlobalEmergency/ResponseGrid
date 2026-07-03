@@ -30,3 +30,17 @@ export function loginHref(next?: string | null): string {
   const safe = safeNextPath(next);
   return safe ? `/login?next=${encodeURIComponent(safe)}` : '/login';
 }
+
+/**
+ * Login redirect for callers that could NOT delete the stale session cookie
+ * (Server Component render, where Next.js forbids cookie mutation): routes
+ * through `GET /api/session/clear`, a Route Handler that deletes the cookie
+ * and then forwards to {@link loginHref} with the same sanitised `next`.
+ * Prefer {@link loginHref} directly when the cookie is already gone.
+ */
+export function sessionClearHref(next?: string | null): string {
+  const safe = safeNextPath(next);
+  return safe
+    ? `/api/session/clear?next=${encodeURIComponent(safe)}`
+    : '/api/session/clear';
+}

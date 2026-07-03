@@ -1,9 +1,8 @@
 'use server';
 
-import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
-import { requireSession, loginHref, authHeaders, clearToken } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 import { getCategories } from '@/adapters/get-categories';
 import { isMaterialCategory } from '@/domain/supplies/category';
@@ -131,8 +130,7 @@ export async function submitOffer(
   );
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(loginHref(`/e/${slug}/donar/ofrecer`));
+    return redirectToLogin(`/e/${slug}/donar/ofrecer`);
   }
 
   if (response.status === 409) {

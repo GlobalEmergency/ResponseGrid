@@ -1,8 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { requireSession, loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+import { requireSession, getToken, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
 
@@ -79,8 +78,7 @@ export async function grantAccreditationAction(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref('/admin/accreditations'));
+      return redirectToLogin('/admin/accreditations');
     }
     if (response.status === 403) {
       return { status: 'error', message: ta.acc_err_grant_forbidden };
@@ -110,8 +108,7 @@ export async function revokeAccreditationAction(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref('/admin/accreditations'));
+      return redirectToLogin('/admin/accreditations');
     }
     if (response.status === 403) {
       return { status: 'error', message: ta.acc_err_revoke_forbidden };

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { authHeaders, clearToken, getToken } from "@/lib/auth";
+import { authHeaders, getToken } from "@/lib/auth";
 import { api } from "@/lib/api";
 import { getEmergencyBySlug } from "@/lib/emergencies";
 import { getMe, getRoles } from "@/lib/navigation-data";
@@ -39,13 +39,17 @@ export default async function RecipientResourcePage({ params }: Props) {
 
   const emergencyId = emergency.id;
   const isActive = emergency.status === "active";
-  const token = await getToken();
+  let token = await getToken();
   let access: EmergencyAccess | null = null;
 
   if (token !== null) {
     const [me, roles] = await Promise.all([getMe(), getRoles()]);
     if (me === null) {
-      await clearToken();
+      // Expired/invalid session on a public page: degrade to the anonymous
+      // view. The cookie can't be deleted from render (it goes away on the
+      // next login or via /api/session/clear from a protected page), so just
+      // stop forwarding the dead token to the fetches below.
+      token = null;
     } else {
       access = resolveEmergencyAccess(
         emergencyId,

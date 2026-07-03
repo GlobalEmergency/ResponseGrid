@@ -1,8 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { requireSession, loginHref, authHeaders, clearToken } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
 import type { components } from '@reliefhub/api-client';
@@ -30,8 +29,7 @@ export async function fetchMyVolunteerProfile(
   );
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(loginHref(`/e/${slug}/mi-voluntariado`));
+    return redirectToLogin(`/e/${slug}/mi-voluntariado`);
   }
 
   if (response.status === 404 || data === undefined) {
@@ -56,8 +54,7 @@ export async function fetchMyTasks(
   );
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(loginHref(`/e/${slug}/mi-voluntariado`));
+    return redirectToLogin(`/e/${slug}/mi-voluntariado`);
   }
 
   return data ?? [];
@@ -77,8 +74,7 @@ export async function checkInTask(
   });
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(loginHref(`/e/${slug}/mi-voluntariado`));
+    return redirectToLogin(`/e/${slug}/mi-voluntariado`);
   }
 
   if (response.status === 403) {
@@ -109,8 +105,7 @@ export async function checkOutTask(
   });
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(loginHref(`/e/${slug}/mi-voluntariado`));
+    return redirectToLogin(`/e/${slug}/mi-voluntariado`);
   }
 
   if (response.status === 403) {

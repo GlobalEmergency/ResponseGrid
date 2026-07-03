@@ -1,8 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { requireSession, loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+import { requireSession, getToken, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
 import type { components } from '@reliefhub/api-client';
@@ -67,8 +66,7 @@ export async function createTemplateAction(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref('/admin/templates'));
+      return redirectToLogin('/admin/templates');
     }
     if (response.status === 403) {
       return { status: 'error', message: t.templates.err_no_permission_create };
@@ -95,8 +93,7 @@ export async function deleteTemplateAction(id: string): Promise<TemplateActionRe
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref('/admin/templates'));
+      return redirectToLogin('/admin/templates');
     }
     if (response.status === 403) {
       return { status: 'error', message: t.templates.err_no_permission_delete };
@@ -149,8 +146,7 @@ export async function createFromTemplateAction(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref('/admin/templates'));
+      return redirectToLogin('/admin/templates');
     }
     if (response.status === 403) {
       return { status: 'error', message: t.templates.err_no_permission_create_emergency };

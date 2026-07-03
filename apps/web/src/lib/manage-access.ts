@@ -1,5 +1,5 @@
-import { notFound, redirect } from 'next/navigation';
-import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
+import { notFound } from 'next/navigation';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { getMe, getRoles } from '@/lib/navigation-data';
 import {
@@ -36,8 +36,7 @@ export async function resolveManageAccess(
 
   const [me, roles] = await Promise.all([getMe(), getRoles()]);
   if (me == null) {
-    await clearToken();
-    redirect(loginHref(returnPath));
+    return redirectToLogin(returnPath);
   }
 
   const access: EmergencyAccess = resolveEmergencyAccess(

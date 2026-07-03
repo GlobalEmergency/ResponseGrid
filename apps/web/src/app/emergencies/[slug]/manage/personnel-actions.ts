@@ -1,9 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 export type PersonnelActionResult =
@@ -31,8 +30,7 @@ export async function createTaskFromNeed(
   });
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(loginHref(`/emergencies/${slug}/manage`));
+    return redirectToLogin(`/emergencies/${slug}/manage`);
   }
 
   if (response.status === 403) {
