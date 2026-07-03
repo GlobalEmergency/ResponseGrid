@@ -6430,6 +6430,64 @@
         ]
       }
     },
+    "/admin/supplies/backfill": {
+      "get": {
+        "operationId": "SuppliesAdminController_backfillReport",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplyLinkReportDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Informe de líneas legacy sin enlazar al catálogo (no-casadas)",
+        "tags": [
+          "supplies-admin"
+        ]
+      },
+      "post": {
+        "operationId": "SuppliesAdminController_backfill",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplyLinkBackfillResultDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Backfill best-effort del supplyId de las líneas legacy (idempotente)",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
     "/admin/supplies/{id}": {
       "get": {
         "operationId": "SuppliesAdminController_get",
@@ -14762,6 +14820,105 @@
           "attributes",
           "status",
           "aliases"
+        ]
+      },
+      "UnmatchedSupplyLineGroupDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Harina PAN"
+          },
+          "lines": {
+            "type": "number",
+            "example": 12,
+            "description": "Líneas sin enlazar con ese texto"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "need_items",
+                "offer_items",
+                "resource_items",
+                "donation_intake_lines",
+                "container_lines"
+              ]
+            }
+          },
+          "ambiguous": {
+            "type": "boolean",
+            "example": false,
+            "description": "true = el texto casa con varios insumos activos: fusionar duplicados en vez de crear un alias"
+          }
+        },
+        "required": [
+          "name",
+          "lines",
+          "sources",
+          "ambiguous"
+        ]
+      },
+      "SupplyLinkReportDto": {
+        "type": "object",
+        "properties": {
+          "unmatchedLines": {
+            "type": "number",
+            "example": 27
+          },
+          "unmatched": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnmatchedSupplyLineGroupDto"
+            }
+          },
+          "pendingNames": {
+            "type": "number",
+            "example": 34,
+            "description": "Textos distintos que un backfill enlazaría ahora"
+          },
+          "pendingLines": {
+            "type": "number",
+            "example": 120
+          }
+        },
+        "required": [
+          "unmatchedLines",
+          "unmatched",
+          "pendingNames",
+          "pendingLines"
+        ]
+      },
+      "SupplyLinkBackfillResultDto": {
+        "type": "object",
+        "properties": {
+          "unmatchedLines": {
+            "type": "number",
+            "example": 27
+          },
+          "unmatched": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnmatchedSupplyLineGroupDto"
+            }
+          },
+          "linkedNames": {
+            "type": "number",
+            "example": 34,
+            "description": "Textos distintos que casaron contra el catálogo"
+          },
+          "linkedLines": {
+            "type": "number",
+            "example": 120,
+            "description": "Líneas realmente actualizadas en esta ejecución (0 al re-correr o si otra ejecución concurrente las enlazó antes)"
+          }
+        },
+        "required": [
+          "unmatchedLines",
+          "unmatched",
+          "linkedNames",
+          "linkedLines"
         ]
       },
       "EditSupplyDto": {

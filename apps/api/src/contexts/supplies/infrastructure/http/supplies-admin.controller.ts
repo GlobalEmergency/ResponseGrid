@@ -30,6 +30,11 @@ import { RemoveSupplyAlias } from '../../application/remove-supply-alias';
 import { MergeSupplies } from '../../application/merge-supplies';
 import { ListSuppliesAdmin } from '../../application/list-supplies-admin';
 import { GetSupplyAdmin } from '../../application/get-supply-admin';
+import {
+  BackfillSupplyLinks,
+  SupplyLinkBackfillResult,
+  SupplyLinkReport,
+} from '../../application/backfill-supply-links';
 import { AdminSupplyView } from '../../application/admin-supply-view';
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
 import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
@@ -47,6 +52,10 @@ import {
   AdminSupplyDto,
   CreateSupplyResponseDto,
 } from './admin-supply-response.dto';
+import {
+  SupplyLinkBackfillResultDto,
+  SupplyLinkReportDto,
+} from './supply-link-backfill.dto';
 
 /**
  * API de gestión del catálogo maestro de insumos (#222). Cerrada a admins
@@ -73,6 +82,7 @@ export class SuppliesAdminController {
     private readonly mergeSupplies: MergeSupplies,
     private readonly listSuppliesAdmin: ListSuppliesAdmin,
     private readonly getSupplyAdmin: GetSupplyAdmin,
+    private readonly backfillSupplyLinks: BackfillSupplyLinks,
     private readonly cache: CachingSupplyCatalogReadModel,
   ) {}
 
@@ -103,6 +113,28 @@ export class SuppliesAdminController {
     // tal cual para no introducir claves con `undefined` explícito
     // (exactOptionalPropertyTypes).
     return this.listSuppliesAdmin.execute(query);
+  }
+
+  // Rutas literales ANTES de `:id`: Nest resuelve en orden de declaración y
+  // el ParseUUIDPipe de `:id` respondería 400 a `GET backfill`.
+  @Get('backfill')
+  @ApiOperation({
+    summary: 'Informe de líneas legacy sin enlazar al catálogo (no-casadas)',
+  })
+  @ApiOkResponse({ type: SupplyLinkReportDto })
+  async backfillReport(): Promise<SupplyLinkReport> {
+    return this.backfillSupplyLinks.report();
+  }
+
+  @Post('backfill')
+  @HttpCode(200)
+  @ApiOperation({
+    summary:
+      'Backfill best-effort del supplyId de las líneas legacy (idempotente)',
+  })
+  @ApiOkResponse({ type: SupplyLinkBackfillResultDto })
+  async backfill(): Promise<SupplyLinkBackfillResult> {
+    return this.backfillSupplyLinks.execute();
   }
 
   @Get(':id')

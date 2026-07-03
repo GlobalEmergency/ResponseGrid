@@ -21,11 +21,16 @@ import {
   CONTAINER_AUTHORIZATION_LOOKUP,
   ContainerAuthorizationLookup,
 } from './domain/ports/container-authorization-lookup';
+import {
+  SUPPLY_LINK_BACKFILL_REPOSITORY,
+  SupplyLinkBackfillRepository,
+} from './domain/ports/supply-link-backfill.repository';
 import { DrizzleCategoryRepository } from './infrastructure/drizzle/drizzle-category.repository';
 import { DrizzleSupplyRepository } from './infrastructure/drizzle/drizzle-supply.repository';
 import { DrizzleSupplyCatalogReadModel } from './infrastructure/drizzle/drizzle-supply-catalog.read-model';
 import { CachingSupplyCatalogReadModel } from './infrastructure/caching-supply-catalog.read-model';
 import { DrizzleContainerRepository } from './infrastructure/drizzle/drizzle-container.repository';
+import { DrizzleSupplyLinkBackfillRepository } from './infrastructure/drizzle/drizzle-supply-link-backfill.repository';
 import { DrizzleContainerAuthorizationLookup } from './infrastructure/drizzle/drizzle-container-authorization-lookup';
 import { ListCategories } from './application/list-categories';
 import { CreateCategory } from './application/create-category';
@@ -41,6 +46,7 @@ import { RemoveSupplyAlias } from './application/remove-supply-alias';
 import { MergeSupplies } from './application/merge-supplies';
 import { ListSuppliesAdmin } from './application/list-supplies-admin';
 import { GetSupplyAdmin } from './application/get-supply-admin';
+import { BackfillSupplyLinks } from './application/backfill-supply-links';
 import { CreateContainer } from './application/create-container';
 import { AddLineToContainer } from './application/add-line-to-container';
 import { RemoveLineFromContainer } from './application/remove-line-from-container';
@@ -187,6 +193,22 @@ const getSupplyAdminProvider = {
   useFactory: (repo: SupplyRepository) => new GetSupplyAdmin(repo),
 };
 
+const supplyLinkBackfillRepositoryProvider = {
+  provide: SUPPLY_LINK_BACKFILL_REPOSITORY,
+  inject: [DB],
+  useFactory: (db: Db): SupplyLinkBackfillRepository =>
+    new DrizzleSupplyLinkBackfillRepository(db),
+};
+
+const backfillSupplyLinksProvider = {
+  provide: BackfillSupplyLinks,
+  inject: [SUPPLY_CATALOG_READ_MODEL, SUPPLY_LINK_BACKFILL_REPOSITORY],
+  useFactory: (
+    catalog: SupplyCatalogReadModel,
+    repo: SupplyLinkBackfillRepository,
+  ) => new BackfillSupplyLinks(catalog, repo),
+};
+
 const createContainerProvider = {
   provide: CreateContainer,
   inject: [CONTAINER_REPOSITORY],
@@ -271,6 +293,8 @@ const listContainersProvider = {
     mergeSuppliesProvider,
     listSuppliesAdminProvider,
     getSupplyAdminProvider,
+    supplyLinkBackfillRepositoryProvider,
+    backfillSupplyLinksProvider,
     createContainerProvider,
     addLineToContainerProvider,
     removeLineFromContainerProvider,

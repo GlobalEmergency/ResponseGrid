@@ -15,6 +15,10 @@ function makeController(overrides: Record<string, { execute: jest.Mock }>) {
     getSupplyAdmin: { execute: jest.fn().mockResolvedValue({ id: 'i' }) },
     ...overrides,
   };
+  const backfillSupplyLinks = {
+    execute: jest.fn().mockResolvedValue({ linkedLines: 3 }),
+    report: jest.fn().mockResolvedValue({ unmatched: [] }),
+  };
   const cache = { invalidate: jest.fn() };
   const controller = new SuppliesAdminController(
     useCases.createSupply as never,
@@ -26,9 +30,10 @@ function makeController(overrides: Record<string, { execute: jest.Mock }>) {
     useCases.mergeSupplies as never,
     useCases.listSuppliesAdmin as never,
     useCases.getSupplyAdmin as never,
+    backfillSupplyLinks as never,
     cache as never,
   );
-  return { controller, useCases, cache };
+  return { controller, useCases, backfillSupplyLinks, cache };
 }
 
 describe('SuppliesAdminController', () => {
@@ -77,6 +82,21 @@ describe('SuppliesAdminController', () => {
       sourceId: 's',
       targetId: 't',
     });
+  });
+
+  it('backfill ejecuta el caso de uso y devuelve su resultado', async () => {
+    const { controller, backfillSupplyLinks } = makeController({});
+    const result = await controller.backfill();
+    expect(backfillSupplyLinks.execute).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ linkedLines: 3 });
+  });
+
+  it('backfillReport devuelve el informe sin ejecutar el backfill', async () => {
+    const { controller, backfillSupplyLinks } = makeController({});
+    const report = await controller.backfillReport();
+    expect(backfillSupplyLinks.report).toHaveBeenCalledTimes(1);
+    expect(backfillSupplyLinks.execute).not.toHaveBeenCalled();
+    expect(report).toEqual({ unmatched: [] });
   });
 
   it('archive/restore delegan el id', async () => {

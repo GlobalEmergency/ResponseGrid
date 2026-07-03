@@ -68,6 +68,20 @@ describe('SupplyResolver', () => {
     expect(resolver.resolve('insumo generico')).toBeNull();
   });
 
+  it('isAmbiguous distingue etiqueta ambigua de etiqueta desconocida', () => {
+    const resolver = new SupplyResolver(
+      [water, diapers],
+      [
+        SupplyAlias.create({ alias: 'insumo generico', supplyId: water.id }),
+        SupplyAlias.create({ alias: 'insumo generico', supplyId: diapers.id }),
+      ],
+    );
+
+    expect(resolver.isAmbiguous('INSUMO Generico')).toBe(true);
+    expect(resolver.isAmbiguous('arbol raro')).toBe(false);
+    expect(resolver.isAmbiguous('agua potable')).toBe(false);
+  });
+
   it('resolveMany deduplica resultados', () => {
     const resolver = new SupplyResolver(
       [water, diapers],

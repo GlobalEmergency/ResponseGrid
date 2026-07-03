@@ -1,7 +1,5 @@
-import { Supply } from '../domain/supply';
-import { SupplyAlias } from '../domain/supply-alias';
 import { normalizeSupplyText } from '../domain/supply-normalize';
-import { SupplyResolver } from '../domain/supply-resolver';
+import { supplyResolverFromCatalog } from '../domain/supply-resolver';
 import {
   PublicSupplyRecord,
   SupplyCatalogReadModel,
@@ -91,40 +89,6 @@ function getMatchScore(
   return score;
 }
 
-/**
- * Índice de resolución exacta (nombre canónico es/en, código y alias). Los
- * registros ya son `active`, así que los campos de gestión del agregado se
- * rellenan con placeholders neutros: el resolver solo lee id/nombre/código.
- */
-function toSupplyResolver(
-  records: readonly PublicSupplyRecord[],
-): SupplyResolver {
-  const make = (record: PublicSupplyRecord, name: string): Supply =>
-    Supply.fromSnapshot({
-      id: record.id,
-      code: record.code,
-      name,
-      categorySlug: record.categorySlug,
-      defaultUnit: record.defaultUnit,
-      attributes: record.attributes,
-      variantOfId: record.variantOfId,
-      status: 'active',
-      registrationNotes: null,
-    });
-
-  const supplies = records.flatMap((record) =>
-    record.nameEn
-      ? [make(record, record.nameEs), make(record, record.nameEn)]
-      : [make(record, record.nameEs)],
-  );
-  const aliases = records.flatMap((record) =>
-    record.aliases.map((alias) =>
-      SupplyAlias.create({ alias, supplyId: record.id }),
-    ),
-  );
-  return new SupplyResolver(supplies, aliases);
-}
-
 export class ListSupplies {
   constructor(private readonly catalog: SupplyCatalogReadModel) {}
 
@@ -133,7 +97,7 @@ export class ListSupplies {
     const resolvedLocale = query.locale === 'en' ? 'en' : 'es';
     const normalizedQuery = query.q ? normalizeSupplyText(query.q) : '';
     const exactMatchId = query.q
-      ? toSupplyResolver(records).resolve(query.q)
+      ? supplyResolverFromCatalog(records).resolve(query.q)
       : null;
 
     if (!normalizedQuery) {
