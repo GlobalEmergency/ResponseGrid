@@ -23,17 +23,11 @@ export function resolveLocale(
   return 'es';
 }
 
-export function localizedText(
-  baseEs: string,
-  translated: string | null | undefined,
-  locale: string,
-): string {
-  if (locale === 'en' && translated && translated.trim().length > 0) {
-    return translated;
-  }
-  return baseEs;
-}
-
+/**
+ * Etiqueta de una categoría en el locale pedido (cualquier idioma), con
+ * fallback a la etiqueta base `es`. Las traducciones viven en
+ * `category_translations`; el `en` está sembrado y el resto lo añade el admin.
+ */
 export function localizedCategoryText(
   category: CategoryDefinition,
   locale: CategoryLocale,
@@ -41,11 +35,8 @@ export function localizedCategoryText(
   const translated = category.translations?.find(
     (item) => item.locale === locale,
   );
-  if (translated) {
+  if (translated && translated.label.trim().length > 0) {
     return translated.label;
-  }
-  if (locale === 'en') {
-    return category.labelEn;
   }
   return category.labelEs;
 }

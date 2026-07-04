@@ -15,30 +15,20 @@ export class SupplyDto {
   @ApiProperty({ example: 'WAT-0001' })
   code!: string;
 
-  @ApiProperty({ example: 'Agua potable (botellón 18L)' })
-  name!: string;
-
-  @ApiProperty({ example: 'Agua potable (botellón 18L)' })
-  nameEs!: string;
-
-  @ApiPropertyOptional({
-    example: 'Water (18L jug)',
-    nullable: true,
-    type: String,
+  @ApiProperty({
+    example: 'Agua potable (botellón 18L)',
+    description: 'Nombre resuelto en el locale pedido (fallback a `es`)',
   })
-  nameEn!: string | null;
+  name!: string;
 
   @ApiProperty({ example: 'food' })
   categorySlug!: string;
 
-  @ApiProperty({ example: 'Alimentos' })
+  @ApiProperty({
+    example: 'Alimentos',
+    description: 'Etiqueta de categoría resuelta en el locale pedido',
+  })
   categoryLabel!: string;
-
-  @ApiProperty({ example: 'Alimentos' })
-  categoryLabelEs!: string;
-
-  @ApiPropertyOptional({ example: 'Food', nullable: true, type: String })
-  categoryLabelEn!: string | null;
 
   @ApiPropertyOptional({ example: 'und', nullable: true, type: String })
   defaultUnit!: string | null;

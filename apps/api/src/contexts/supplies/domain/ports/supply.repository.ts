@@ -14,7 +14,7 @@ export interface SupplyListFilter {
 /**
  * Traducción del nombre de un insumo a un locale concreto (i18n admin, #320).
  * El nombre base (`es`) vive en `supplies.name`; estas filas alimentan
- * `supply_translations` y la proyección `nameEn`/`name` locale-aware del
+ * `supply_translations` y la proyección `name` locale-aware (N idiomas) del
  * catálogo público. El locale se normaliza (trim + lowercase) en infraestructura.
  */
 export interface SupplyTranslationInput {

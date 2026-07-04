@@ -241,6 +241,20 @@ export class DrizzleSupplyRepository implements SupplyRepository {
             eq(suppliesTable.variantOfId, sourceId),
           ),
         );
+      // Mueve las traducciones de nombre de A a B: el canónico (B) gana en
+      // conflicto de locale (ON CONFLICT DO NOTHING), y las de A se borran para
+      // no dejar i18n huérfana en un insumo archivado. Así el nombre queda
+      // enriquecido en todos los idiomas que aportaba el duplicado.
+      await tx.execute(sql`
+        INSERT INTO supply_translations (supply_id, locale, name)
+        SELECT ${targetId}, locale, name
+        FROM supply_translations
+        WHERE supply_id = ${sourceId}
+        ON CONFLICT (supply_id, locale) DO NOTHING
+      `);
+      await tx
+        .delete(supplyTranslationsTable)
+        .where(eq(supplyTranslationsTable.supplyId, sourceId));
       // Archiva A (no se borra: preserva referencias legadas para #223/#226).
       await tx
         .update(suppliesTable)

@@ -14600,15 +14600,7 @@
           "label": {
             "type": "string",
             "example": "Medicamentos",
-            "description": "Localized category label"
-          },
-          "labelEs": {
-            "type": "string",
-            "example": "Medicamentos"
-          },
-          "labelEn": {
-            "type": "string",
-            "example": "Medicines"
+            "description": "Etiqueta resuelta en el locale pedido (fallback a `es`)"
           },
           "parentSlug": {
             "type": "string",
@@ -14644,8 +14636,6 @@
         "required": [
           "slug",
           "label",
-          "labelEs",
-          "labelEn",
           "parentSlug",
           "vertical",
           "sort",
@@ -14827,16 +14817,8 @@
           },
           "name": {
             "type": "string",
-            "example": "Agua potable (botellón 18L)"
-          },
-          "nameEs": {
-            "type": "string",
-            "example": "Agua potable (botellón 18L)"
-          },
-          "nameEn": {
-            "type": "string",
-            "example": "Water (18L jug)",
-            "nullable": true
+            "example": "Agua potable (botellón 18L)",
+            "description": "Nombre resuelto en el locale pedido (fallback a `es`)"
           },
           "categorySlug": {
             "type": "string",
@@ -14844,16 +14826,8 @@
           },
           "categoryLabel": {
             "type": "string",
-            "example": "Alimentos"
-          },
-          "categoryLabelEs": {
-            "type": "string",
-            "example": "Alimentos"
-          },
-          "categoryLabelEn": {
-            "type": "string",
-            "example": "Food",
-            "nullable": true
+            "example": "Alimentos",
+            "description": "Etiqueta de categoría resuelta en el locale pedido"
           },
           "defaultUnit": {
             "type": "string",
@@ -14890,10 +14864,8 @@
           "id",
           "code",
           "name",
-          "nameEs",
           "categorySlug",
           "categoryLabel",
-          "categoryLabelEs",
           "attributes",
           "aliases"
         ]

@@ -1,5 +1,6 @@
 import { normalizeSupplyText } from '../domain/supply-normalize';
 import { supplyResolverFromCatalog } from '../domain/supply-resolver';
+import { allLocalizedVariants, localize } from '../domain/localized-text';
 import {
   PublicSupplyRecord,
   SupplyCatalogReadModel,
@@ -45,11 +46,10 @@ function getMatchScore(
   const queryWords = query.toLowerCase().split(/\s+/).filter(Boolean);
   if (queryWords.length === 0) return 0;
 
-  const nameEsWords = record.nameEs.toLowerCase().split(/\s+/).filter(Boolean);
-  const nameEnWords = (record.nameEn ?? '')
-    .toLowerCase()
-    .split(/\s+/)
-    .filter(Boolean);
+  const nameWords = allLocalizedVariants(
+    record.name,
+    record.translations,
+  ).flatMap((variant) => variant.toLowerCase().split(/\s+/).filter(Boolean));
   const aliasWords = record.aliases.flatMap((a) =>
     a.toLowerCase().split(/\s+/).filter(Boolean),
   );
@@ -75,8 +75,7 @@ function getMatchScore(
       }
     };
 
-    for (const tWord of nameEsWords) check(tWord, 2);
-    for (const tWord of nameEnWords) check(tWord, 2);
+    for (const tWord of nameWords) check(tWord, 2);
     for (const tWord of aliasWords) check(tWord, 1.5);
 
     if (bestWordScore === 0) {
@@ -89,16 +88,31 @@ function getMatchScore(
   return score;
 }
 
+/**
+ * Colador tolerante a cualquier locale: un tag de idioma no válido (p. ej.
+ * derivado de un `Accept-Language` raro) haría `RangeError`; caemos a `es`.
+ */
+function safeCollator(locale: string): Intl.Collator {
+  try {
+    return new Intl.Collator(locale, { sensitivity: 'base' });
+  } catch {
+    return new Intl.Collator('es', { sensitivity: 'base' });
+  }
+}
+
 export class ListSupplies {
   constructor(private readonly catalog: SupplyCatalogReadModel) {}
 
   async execute(query: SupplyCatalogQuery): Promise<PublicSupplyRecord[]> {
     const records = await this.catalog.listActive();
-    const resolvedLocale = query.locale === 'en' ? 'en' : 'es';
+    const locale = query.locale;
+    const label = (record: PublicSupplyRecord): string =>
+      localize(record.name, record.translations, locale);
     const normalizedQuery = query.q ? normalizeSupplyText(query.q) : '';
     const exactMatchId = query.q
       ? supplyResolverFromCatalog(records).resolve(query.q)
       : null;
+    const collator = safeCollator(locale);
 
     if (!normalizedQuery) {
       const filtered = records.filter((record) => {
@@ -106,16 +120,9 @@ export class ListSupplies {
           !query.categorySlug || record.categorySlug === query.categorySlug
         );
       });
-      const collator = new Intl.Collator(resolvedLocale, {
-        sensitivity: 'base',
-      });
-      const sorted = [...filtered].sort((a, b) => {
-        const aLabel =
-          resolvedLocale === 'en' && a.nameEn ? a.nameEn : a.nameEs;
-        const bLabel =
-          resolvedLocale === 'en' && b.nameEn ? b.nameEn : b.nameEs;
-        return collator.compare(aLabel, bLabel);
-      });
+      const sorted = [...filtered].sort((a, b) =>
+        collator.compare(label(a), label(b)),
+      );
       return sorted.slice(query.offset, query.offset + query.limit);
     }
 
@@ -131,20 +138,11 @@ export class ListSupplies {
             item.record.categorySlug === query.categorySlug),
       );
 
-    const collator = new Intl.Collator(resolvedLocale, { sensitivity: 'base' });
     const sorted = scored.sort((a, b) => {
       if (b.score !== a.score) {
         return b.score - a.score;
       }
-      const aLabel =
-        resolvedLocale === 'en' && a.record.nameEn
-          ? a.record.nameEn
-          : a.record.nameEs;
-      const bLabel =
-        resolvedLocale === 'en' && b.record.nameEn
-          ? b.record.nameEn
-          : b.record.nameEs;
-      return collator.compare(aLabel, bLabel);
+      return collator.compare(label(a.record), label(b.record));
     });
 
     return sorted

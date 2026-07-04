@@ -14,15 +14,9 @@ export class CategoryDto {
 
   @ApiProperty({
     example: 'Medicamentos',
-    description: 'Localized category label',
+    description: 'Etiqueta resuelta en el locale pedido (fallback a `es`)',
   })
   label!: string;
-
-  @ApiProperty({ example: 'Medicamentos' })
-  labelEs!: string;
-
-  @ApiProperty({ example: 'Medicines' })
-  labelEn!: string;
 
   @ApiProperty({
     example: 'medical',

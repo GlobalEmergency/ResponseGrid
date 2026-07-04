@@ -16,7 +16,8 @@ import {
 import { GetSupply } from '../../application/get-supply';
 import { ListSupplies } from '../../application/list-supplies';
 import { PublicSupplyRecord } from '../../domain/ports/supply-catalog.read-model';
-import { localizedText, resolveLocale } from './locale';
+import { localize } from '../../domain/localized-text';
+import { resolveLocale } from './locale';
 import { SuppliesQueryDto } from './supplies-query.dto';
 import { SupplyDto } from './supply-response.dto';
 
@@ -105,17 +106,13 @@ export class SuppliesController {
     return {
       id: record.id,
       code: record.code,
-      name: localizedText(record.nameEs, record.nameEn, locale),
-      nameEs: record.nameEs,
-      nameEn: record.nameEn,
+      name: localize(record.name, record.translations, locale),
       categorySlug: record.categorySlug,
-      categoryLabel: localizedText(
-        record.categoryLabelEs,
-        record.categoryLabelEn,
+      categoryLabel: localize(
+        record.categoryLabel,
+        record.categoryTranslations,
         locale,
       ),
-      categoryLabelEs: record.categoryLabelEs,
-      categoryLabelEn: record.categoryLabelEn,
       defaultUnit: record.defaultUnit,
       attributes: record.attributes,
       variantOfId: record.variantOfId,

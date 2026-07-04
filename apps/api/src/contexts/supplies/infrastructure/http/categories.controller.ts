@@ -40,8 +40,6 @@ export class CategoriesController {
     return categories.map((category) => ({
       slug: category.slug,
       label: localizedCategoryText(category, locale),
-      labelEs: category.labelEs,
-      labelEn: category.labelEn,
       parentSlug: category.parentSlug,
       vertical: category.vertical,
       sort: category.sort,

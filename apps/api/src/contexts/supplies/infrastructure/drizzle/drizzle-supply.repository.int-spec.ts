@@ -169,4 +169,24 @@ describe('DrizzleSupplyRepository (integration)', () => {
     const source = await repo.findById(A);
     expect(source!.status).toBe('archived');
   });
+
+  it('merge mueve las traducciones al canónico (target gana el conflicto de locale)', async () => {
+    await repo.save(makeSupply({ id: A, code: 'INS-9001' }), [
+      { locale: 'en', name: 'From A' },
+      { locale: 'fr', name: 'Depuis A' },
+    ]);
+    await repo.save(makeSupply({ id: B, code: 'INS-9002' }), [
+      { locale: 'en', name: 'From B' },
+    ]);
+
+    await repo.merge(A, B);
+
+    // B conserva su 'en' (gana el canónico) y hereda 'fr' de A.
+    expect(await repo.listTranslations(B)).toEqual([
+      { locale: 'en', name: 'From B' },
+      { locale: 'fr', name: 'Depuis A' },
+    ]);
+    // A queda sin traducciones huérfanas.
+    expect(await repo.listTranslations(A)).toEqual([]);
+  });
 });

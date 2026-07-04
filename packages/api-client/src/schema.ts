@@ -5212,14 +5212,10 @@ export interface components {
              */
             slug: string;
             /**
-             * @description Localized category label
+             * @description Etiqueta resuelta en el locale pedido (fallback a `es`)
              * @example Medicamentos
              */
             label: string;
-            /** @example Medicamentos */
-            labelEs: string;
-            /** @example Medicines */
-            labelEn: string;
             /**
              * @description Parent category slug, or null for a top-level category
              * @example medical
@@ -5327,20 +5323,18 @@ export interface components {
             id: string;
             /** @example WAT-0001 */
             code: string;
-            /** @example Agua potable (botellón 18L) */
+            /**
+             * @description Nombre resuelto en el locale pedido (fallback a `es`)
+             * @example Agua potable (botellón 18L)
+             */
             name: string;
-            /** @example Agua potable (botellón 18L) */
-            nameEs: string;
-            /** @example Water (18L jug) */
-            nameEn?: string | null;
             /** @example food */
             categorySlug: string;
-            /** @example Alimentos */
+            /**
+             * @description Etiqueta de categoría resuelta en el locale pedido
+             * @example Alimentos
+             */
             categoryLabel: string;
-            /** @example Alimentos */
-            categoryLabelEs: string;
-            /** @example Food */
-            categoryLabelEn?: string | null;
             /** @example und */
             defaultUnit?: string | null;
             /**
