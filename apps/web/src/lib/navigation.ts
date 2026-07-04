@@ -73,6 +73,13 @@ export interface PrincipalContext {
   roleIds: string[];
   /** Only set for `resource` contexts — the `ResourceViewDto` type enum value. */
   resourceType?: ResourceType;
+  /**
+   * Only set for `resource` contexts — the slug of the resource's emergency, so
+   * the switcher can deep-link into that emergency's `mis-puntos` surface (a
+   * managed point has no standalone workspace route). Rides on the context from
+   * `/resources/mine`; null only when the emergency row is missing (#323).
+   */
+  emergencySlug?: string | null;
 }
 
 export function contextHref(c: PrincipalContext): string {
@@ -80,7 +87,15 @@ export function contextHref(c: PrincipalContext): string {
     case 'emergency':
       return `/emergencies/${c.slug}/manage`;
     case 'resource':
-      return `/resources/${c.id}/manage`;
+      // A managed point has no standalone workspace route (`/resources/:id/manage`
+      // never existed → 404). Deep-link into its emergency's `mis-puntos`
+      // inventory surface, where owner, coordinator and `point_manager` are all
+      // authorized after #316. `emergencySlug` is effectively always present
+      // (emergencies always have a slug); the `/dashboard` fallback only guards
+      // the impossible null so the switcher never emits a 404 (#323).
+      return c.emergencySlug != null
+        ? `/e/${c.emergencySlug}/mis-puntos/${c.id}/inventario`
+        : '/dashboard';
     case 'organization':
       return `/organizations/${c.id}/manage`;
     case 'group':
@@ -95,7 +110,12 @@ export function contextHref(c: PrincipalContext): string {
 
 export interface RawPrincipalContexts {
   emergencies: { id: string; slug: string; name: string; roleIds: string[] }[];
-  resources: { id: string; name: string; resourceType: ResourceType }[];
+  resources: {
+    id: string;
+    name: string;
+    resourceType: ResourceType;
+    emergencySlug: string | null;
+  }[];
   organizations: { id: string; name: string }[];
   groups: { id: string; name: string }[];
 }
@@ -107,7 +127,7 @@ export function buildPrincipalContexts(raw: RawPrincipalContexts): PrincipalCont
       type: 'emergency', id: e.id, slug: e.slug, name: e.name, roleIds: e.roleIds,
     })),
     ...raw.resources.map((r): PrincipalContext => ({
-      type: 'resource', id: r.id, name: r.name, roleIds: [], resourceType: r.resourceType,
+      type: 'resource', id: r.id, name: r.name, roleIds: [], resourceType: r.resourceType, emergencySlug: r.emergencySlug,
     })),
     ...raw.organizations.map((o): PrincipalContext => ({
       type: 'organization', id: o.id, name: o.name, roleIds: [],

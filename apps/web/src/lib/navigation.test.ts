@@ -54,7 +54,8 @@ test('no permissions → just the overview', () => {
 test('contextHref points each context type at its workspace', () => {
   const cases: [PrincipalContext, string][] = [
     [{ type: 'emergency', id: 'e1', slug: 'terremoto', name: 'T', roleIds: [] }, '/emergencies/terremoto/manage'],
-    [{ type: 'resource', id: 'p1', name: 'Almacén', roleIds: [] }, '/resources/p1/manage'],
+    [{ type: 'resource', id: 'p1', name: 'Almacén', roleIds: [], emergencySlug: 'terremoto' }, '/e/terremoto/mis-puntos/p1/inventario'],
+    [{ type: 'resource', id: 'p2', name: 'Sin slug', roleIds: [], emergencySlug: null }, '/dashboard'],
     [{ type: 'organization', id: 'o1', name: 'Cruz Roja', roleIds: [] }, '/organizations/o1/manage'],
     [{ type: 'group', id: 'g1', name: 'Logística B', roleIds: [] }, '/dashboard/groups/g1'],
   ];
@@ -63,7 +64,7 @@ test('contextHref points each context type at its workspace', () => {
 
 const MARIA: PrincipalContext[] = [
   { type: 'emergency', id: 'e1', slug: 'terremoto', name: 'Terremoto Venezuela 2026', roleIds: ['emergency_verifier'] },
-  { type: 'resource', id: 'p1', name: 'Almacén Central Caracas', roleIds: ['point_manager'], resourceType: 'warehouse' },
+  { type: 'resource', id: 'p1', name: 'Almacén Central Caracas', roleIds: ['point_manager'], resourceType: 'warehouse', emergencySlug: 'terremoto' },
   { type: 'organization', id: 'o1', name: 'Cruz Roja Local', roleIds: ['org_admin'] },
 ];
 
@@ -142,7 +143,7 @@ test('admin group appears for platform admins', () => {
 test('buildPrincipalContexts maps each source to a typed context', () => {
   const ctx = buildPrincipalContexts({
     emergencies: [{ id: 'e1', slug: 'terremoto', name: 'Terremoto', roleIds: ['emergency_verifier'] }],
-    resources: [{ id: 'p1', name: 'Almacén', resourceType: 'warehouse' }],
+    resources: [{ id: 'p1', name: 'Almacén', resourceType: 'warehouse', emergencySlug: 'terremoto' }],
     organizations: [{ id: 'o1', name: 'Cruz Roja' }],
     groups: [{ id: 'g1', name: 'Logística B' }],
   });
@@ -156,6 +157,7 @@ test('buildPrincipalContexts maps each source to a typed context', () => {
   assert.equal(resource?.slug, undefined);
   assert.deepEqual(resource?.roleIds, []);
   assert.equal(resource?.resourceType, 'warehouse');
+  assert.equal(resource?.emergencySlug, 'terremoto');
 });
 
 test('empty sources produce an empty context list', () => {
