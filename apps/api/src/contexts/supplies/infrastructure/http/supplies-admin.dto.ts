@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsIn,
   IsNotEmpty,
   IsObject,
@@ -8,7 +10,26 @@ import {
   IsUUID,
   MaxLength,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
+
+/**
+ * Traducción del nombre de un insumo a un idioma (#320). El nombre base (`es`)
+ * es el campo `name` del insumo; aquí se declaran los idiomas adicionales.
+ */
+export class SupplyTranslationDto {
+  @ApiProperty({ example: 'en' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(10)
+  locale!: string;
+
+  @ApiProperty({ example: 'Drinking water (1.5L bottle)' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(200)
+  name!: string;
+}
 
 /** Alta de un insumo. `code` lo asigna el servidor (secuencia INS-NNNN). */
 export class CreateSupplyDto {
@@ -50,6 +71,17 @@ export class CreateSupplyDto {
   @IsOptional()
   @IsUUID()
   variantOfId?: string | null;
+
+  @ApiPropertyOptional({
+    type: [SupplyTranslationDto],
+    description:
+      'Traducciones del nombre por idioma (i18n). El nombre base es `es`.',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SupplyTranslationDto)
+  translations?: SupplyTranslationDto[];
 }
 
 /** Edición parcial de un insumo. `code` no es editable. */
@@ -87,6 +119,17 @@ export class EditSupplyDto {
   @IsOptional()
   @IsUUID()
   variantOfId?: string | null;
+
+  @ApiPropertyOptional({
+    type: [SupplyTranslationDto],
+    description:
+      'Reemplaza el conjunto de traducciones del insumo; omitir para no tocarlas.',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SupplyTranslationDto)
+  translations?: SupplyTranslationDto[];
 }
 
 export class AddSupplyAliasDto {

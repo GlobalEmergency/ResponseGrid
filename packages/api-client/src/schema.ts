@@ -5365,6 +5365,12 @@ export interface components {
              */
             aliases: string[];
         };
+        SupplyTranslationDto: {
+            /** @example en */
+            locale: string;
+            /** @example Drinking water (1.5L bottle) */
+            name: string;
+        };
         CreateSupplyDto: {
             /** @example Agua potable (botella 1.5L) */
             name: string;
@@ -5386,6 +5392,8 @@ export interface components {
              * @description Si es variante, id del insumo padre (debe existir)
              */
             variantOfId?: Record<string, never>;
+            /** @description Traducciones del nombre por idioma (i18n). El nombre base es `es`. */
+            translations?: components["schemas"]["SupplyTranslationDto"][];
         };
         CreateSupplyResponseDto: {
             /** Format: uuid */
@@ -5425,6 +5433,16 @@ export interface components {
              *     ]
              */
             aliases: string[];
+            /**
+             * @description Traducciones del nombre por idioma (i18n, #320)
+             * @example [
+             *       {
+             *         "locale": "en",
+             *         "name": "Drinking water (1.5L bottle)"
+             *       }
+             *     ]
+             */
+            translations: components["schemas"]["SupplyTranslationDto"][];
         };
         UnmatchedSupplyLineGroupDto: {
             /** @example Harina PAN */
@@ -5481,6 +5499,8 @@ export interface components {
             registrationNotes?: Record<string, never>;
             /** Format: uuid */
             variantOfId?: Record<string, never>;
+            /** @description Reemplaza el conjunto de traducciones del insumo; omitir para no tocarlas. */
+            translations?: components["schemas"]["SupplyTranslationDto"][];
         };
         AddSupplyAliasDto: {
             /**

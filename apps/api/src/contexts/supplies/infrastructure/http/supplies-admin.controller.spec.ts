@@ -50,6 +50,20 @@ describe('SuppliesAdminController', () => {
     expect(cache.invalidate).toHaveBeenCalledTimes(1);
   });
 
+  it('create propaga las traducciones al caso de uso (#320)', async () => {
+    const { controller, useCases } = makeController({});
+    await controller.create({
+      name: 'Agua',
+      categorySlug: 'water',
+      translations: [{ locale: 'en', name: 'Water' }],
+    });
+    expect(useCases.createSupply.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        translations: [{ locale: 'en', name: 'Water' }],
+      }),
+    );
+  });
+
   it('edit inyecta el id de la ruta en el comando', async () => {
     const { controller, useCases } = makeController({});
     await controller.edit('abc', { name: 'X' });

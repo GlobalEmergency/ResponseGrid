@@ -14898,6 +14898,23 @@
           "aliases"
         ]
       },
+      "SupplyTranslationDto": {
+        "type": "object",
+        "properties": {
+          "locale": {
+            "type": "string",
+            "example": "en"
+          },
+          "name": {
+            "type": "string",
+            "example": "Drinking water (1.5L bottle)"
+          }
+        },
+        "required": [
+          "locale",
+          "name"
+        ]
+      },
       "CreateSupplyDto": {
         "type": "object",
         "properties": {
@@ -14927,6 +14944,13 @@
             "type": "object",
             "format": "uuid",
             "description": "Si es variante, id del insumo padre (debe existir)"
+          },
+          "translations": {
+            "description": "Traducciones del nombre por idioma (i18n). El nombre base es `es`.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyTranslationDto"
+            }
           }
         },
         "required": [
@@ -15007,6 +15031,19 @@
             "items": {
               "type": "string"
             }
+          },
+          "translations": {
+            "description": "Traducciones del nombre por idioma (i18n, #320)",
+            "example": [
+              {
+                "locale": "en",
+                "name": "Drinking water (1.5L bottle)"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyTranslationDto"
+            }
           }
         },
         "required": [
@@ -15016,7 +15053,8 @@
           "categorySlug",
           "attributes",
           "status",
-          "aliases"
+          "aliases",
+          "translations"
         ]
       },
       "UnmatchedSupplyLineGroupDto": {
@@ -15143,6 +15181,13 @@
           "variantOfId": {
             "type": "object",
             "format": "uuid"
+          },
+          "translations": {
+            "description": "Reemplaza el conjunto de traducciones del insumo; omitir para no tocarlas.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyTranslationDto"
+            }
           }
         }
       },

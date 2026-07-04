@@ -4,7 +4,10 @@ import {
   VariantTargetNotFoundError,
   CategoryNotFoundError,
 } from '../domain/supply-errors';
-import { SupplyRepository } from '../domain/ports/supply.repository';
+import {
+  SupplyRepository,
+  SupplyTranslationInput,
+} from '../domain/ports/supply.repository';
 import { CategoryRepository } from '../domain/ports/category.repository';
 import { getCategoryPrefix } from '../domain/category';
 
@@ -16,6 +19,11 @@ export interface EditSupplyCommand {
   attributes?: Record<string, unknown>;
   registrationNotes?: string | null;
   variantOfId?: string | null;
+  /**
+   * Traducciones de nombre por idioma (#320). Si se indica, REEMPLAZA el set
+   * completo (quitar una locale la borra); si se omite, no se tocan.
+   */
+  translations?: readonly SupplyTranslationInput[];
 }
 
 /**
@@ -67,6 +75,6 @@ export class EditSupply {
     const prefix = getCategoryPrefix(next.categorySlug, categories);
     next = next.updateCodePrefix(prefix);
 
-    await this.repo.save(next);
+    await this.repo.save(next, cmd.translations);
   }
 }

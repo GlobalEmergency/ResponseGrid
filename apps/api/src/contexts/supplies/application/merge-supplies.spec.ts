@@ -26,6 +26,7 @@ function makeRepo(
     save: jest.fn().mockResolvedValue(undefined),
     allocateCode: jest.fn().mockResolvedValue('INS-0212'),
     list: jest.fn().mockResolvedValue([]),
+    listTranslations: jest.fn().mockResolvedValue([]),
     listAliases: jest.fn().mockResolvedValue([]),
     addAlias: jest.fn().mockResolvedValue(undefined),
     removeAlias: jest.fn().mockResolvedValue(undefined),
