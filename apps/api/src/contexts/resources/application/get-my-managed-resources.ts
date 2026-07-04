@@ -1,19 +1,16 @@
-import { ResourceRepository } from '../domain/ports/resource.repository';
-import { ResourceType } from '../domain/resource-enums';
+import {
+  ManagedResourceRow,
+  ResourceRepository,
+} from '../domain/ports/resource.repository';
 
 /**
  * One resource the principal manages, reduced to what the app shell needs to
  * list and link it (issue #285). Deliberately NOT the full ResourceView: this
  * backs a navigation surface, so it carries no address/contact/inventory.
+ * Same shape the repository already projects (#318) — aliased so the HTTP
+ * layer keeps depending on an application type, not on the port directly.
  */
-export interface MyManagedResourceView {
-  id: string;
-  type: ResourceType;
-  name: string;
-  emergencyId: string;
-  /** Null when the owning emergency row is missing. */
-  emergencySlug: string | null;
-}
+export type MyManagedResourceView = ManagedResourceRow;
 
 /**
  * A grant as it reaches this use case — the controller passes the
@@ -59,13 +56,6 @@ export class GetMyManagedResources {
       grantedIds.add(scopeId);
     }
 
-    const rows = await this.repo.findOwnedOrGranted(userId, [...grantedIds]);
-    return rows.map(({ resource, emergencySlug }) => ({
-      id: resource.id.value,
-      type: resource.type,
-      name: resource.name,
-      emergencyId: resource.emergencyId.value,
-      emergencySlug,
-    }));
+    return this.repo.findOwnedOrGranted(userId, [...grantedIds]);
   }
 }
