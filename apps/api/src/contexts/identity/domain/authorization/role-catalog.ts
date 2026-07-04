@@ -235,6 +235,18 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'resource:read',
     ],
   },
+  trusted_channel_bot: {
+    id: 'trusted_channel_bot',
+    description:
+      'Cuenta de servicio de un canal de mensajería de confianza (bot de ' +
+      'Telegram/WhatsApp) que ya verifica el teléfono en el cliente. Rol de un ' +
+      'solo permiso: emitir un JWT de usuario por teléfono verificado ' +
+      '(login/alta). Se concede uno-a-uno vía Grant explícito por Service ' +
+      'Account; NO se hereda de integration_partner ni de ningún rol general — ' +
+      'el vehículo del permiso `auth:trusted-phone-login` (#315).',
+    defaultScopeType: 'platform',
+    permissions: ['auth:trusted-phone-login'],
+  },
   citizen: {
     id: 'citizen',
     description:

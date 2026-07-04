@@ -54,6 +54,12 @@ export const PERMISSION_CATALOG = {
   // de categorías/subcategorías (#221) — gobernanza admins-only del catálogo
   // cerrado. 'read' queda reservado para lecturas internas del catálogo.
   catalogue: ['manage', 'read'],
+  // Login/alta confiable por teléfono desde canales de mensajería (#315). NO
+  // pertenece a ningún rol del catálogo: se concede uno-a-uno, vía Grant, a las
+  // Service Accounts de los bots (Telegram/WhatsApp) que ya verifican el número
+  // en el cliente. El JWT emitido nunca da más permisos que los del usuario
+  // encontrado — acota el blast radius de una fuga de la API key del bot.
+  auth: ['trusted-phone-login'],
 } as const;
 
 type Catalog = typeof PERMISSION_CATALOG;
