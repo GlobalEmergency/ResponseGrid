@@ -36,6 +36,7 @@ import {
   GetMyManagedResources,
   MyManagedResourceView,
 } from '../../application/get-my-managed-resources';
+import { PrincipalGrant } from '../../application/principal-grant';
 import {
   EditResource,
   EditResourceCommand,
@@ -103,6 +104,20 @@ export class ResourcesController {
     private readonly resolveDispute: ResolveResourceDispute,
     private readonly validityReports: GetResourceValidityReports,
   ) {}
+
+  /**
+   * Maps the request's identity grants to the minimal application shape the
+   * resource use cases consume, so an entity-scoped point manager is authorized
+   * on the management surfaces without the application layer importing identity
+   * (issue #316).
+   */
+  private principalGrants(user: AuthenticatedUser): PrincipalGrant[] {
+    return user.grants.map((g) => ({
+      roleId: g.roleId,
+      scope: g.scope,
+      expiresAt: g.expiresAt,
+    }));
+  }
 
   @Post('emergencies/:emergencyId/resources')
   @HttpCode(201)
@@ -218,6 +233,7 @@ export class ResourcesController {
     const lines = await this.getMyInventory.execute({
       resourceId,
       requesterUserId: req.user!.id,
+      grants: this.principalGrants(req.user!),
     });
     return lines.map(toSupplyLineResponse);
   }
@@ -248,6 +264,7 @@ export class ResourcesController {
       resourceId,
       requesterUserId: req.user!.id,
       lines: dto.items.map(toSupplyLineProps),
+      grants: this.principalGrants(req.user!),
     });
   }
 
@@ -415,6 +432,7 @@ export class ResourcesController {
       resourceId,
       targetStatus: statusMap[dto.status],
       requesterUserId: req.user!.id,
+      grants: this.principalGrants(req.user!),
     });
   }
 
@@ -443,11 +461,7 @@ export class ResourcesController {
     const user = req.user!;
     return this.getMyManagedResources.execute(
       user.id,
-      user.grants.map((g) => ({
-        roleId: g.roleId,
-        scope: g.scope,
-        expiresAt: g.expiresAt,
-      })),
+      this.principalGrants(user),
     );
   }
 

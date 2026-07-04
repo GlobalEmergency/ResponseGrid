@@ -16,6 +16,7 @@ const EM = '11111111-1111-4111-8111-111111111111';
 const OWNER_ID = 'owner-user-0000-0000-000000000000';
 const COORD_ID = 'coord-user-0000-0000-000000000000';
 const THIRD_ID = 'third-user-0000-0000-000000000000';
+const MANAGER_ID = 'manager-user-0000-0000-000000000000';
 const baseLocation = {
   address: 'Calle Test 1, Madrid',
   latitude: 40.4168,
@@ -84,6 +85,28 @@ describe('UpdateMyInventory', () => {
 
     const found = await repo.findById(ResourceId.fromString(id));
     expect(found?.items.map((i) => i.name)).toEqual(['Mantas']);
+  });
+
+  it('point manager (entity-scoped grant, not owner/coordinator) can replace inventory (#316)', async () => {
+    const repo = new InMemoryResourceRepository();
+    const bus = new FakeEventBus();
+    const id = await makeResource(repo, bus, [line('Agua', 10)]);
+
+    await new UpdateMyInventory(repo, noMembership).execute({
+      resourceId: id,
+      requesterUserId: MANAGER_ID,
+      lines: [line('Kits', 7)],
+      grants: [
+        {
+          roleId: 'point_manager',
+          scope: { type: 'entity', entityType: 'resource', id },
+          expiresAt: null,
+        },
+      ],
+    });
+
+    const found = await repo.findById(ResourceId.fromString(id));
+    expect(found?.items.map((i) => i.name)).toEqual(['Kits']);
   });
 
   it('owner path does not query coordinator membership', async () => {

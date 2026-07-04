@@ -19,6 +19,7 @@ const EM = '11111111-1111-4111-8111-111111111111';
 const OWNER_ID = 'owner-user-0000-0000-000000000000';
 const COORD_ID = 'coord-user-0000-0000-000000000000';
 const THIRD_ID = 'third-user-0000-0000-000000000000';
+const MANAGER_ID = 'manager-user-0000-0000-000000000000';
 const baseLocation = {
   address: 'Calle Test 1, Madrid',
   latitude: 40.4168,
@@ -92,6 +93,28 @@ describe('UpdateResourcePublicStatus', () => {
 
     const found = await repo.findById(ResourceId.fromString(id));
     expect(found?.publicStatus).toBe(PublicStatus.Paused);
+  });
+
+  it('point manager (entity-scoped grant, not owner/coordinator) can change status (#316)', async () => {
+    const repo = new InMemoryResourceRepository();
+    const bus = new FakeEventBus();
+    const id = await makePublishedResource(repo, bus);
+
+    await new UpdateResourcePublicStatus(repo, noMembership).execute({
+      resourceId: id,
+      targetStatus: PublicStatus.Saturated,
+      requesterUserId: MANAGER_ID,
+      grants: [
+        {
+          roleId: 'point_manager',
+          scope: { type: 'entity', entityType: 'resource', id },
+          expiresAt: null,
+        },
+      ],
+    });
+
+    const found = await repo.findById(ResourceId.fromString(id));
+    expect(found?.publicStatus).toBe(PublicStatus.Saturated);
   });
 
   it('third-party user (not owner, not coordinator) → UnauthorizedStatusChangeError (→ 403)', async () => {

@@ -2,6 +2,7 @@ import {
   ManagedResourceRow,
   ResourceRepository,
 } from '../domain/ports/resource.repository';
+import { PrincipalGrant, grantedResourceIds } from './principal-grant';
 
 /**
  * One resource the principal manages, reduced to what the app shell needs to
@@ -12,16 +13,10 @@ import {
  */
 export type MyManagedResourceView = ManagedResourceRow;
 
-/**
- * A grant as it reaches this use case — the controller passes the
- * already-resolved request grants (see {@link AuthenticatedUser}). Only the
- * fields needed to resolve resource entity scope are required.
- */
-export interface PrincipalGrant {
-  roleId: string;
-  scope: { type: string; entityType?: string; id?: string };
-  expiresAt: string | null;
-}
+// Re-exported so existing importers keep resolving `PrincipalGrant` from here;
+// the type and its resource-scope filter now live in ./principal-grant, shared
+// with the inventory/status gate (issue #316).
+export type { PrincipalGrant } from './principal-grant';
 
 /**
  * Lists the resources the authenticated principal manages, across every
@@ -40,22 +35,8 @@ export class GetMyManagedResources {
     grants: PrincipalGrant[],
     now: Date = new Date(),
   ): Promise<MyManagedResourceView[]> {
-    const grantedIds = new Set<string>();
-    for (const g of grants) {
-      if (g.scope.type !== 'entity' || g.scope.entityType !== 'resource') {
-        continue;
-      }
-      const scopeId = g.scope.id;
-      if (scopeId == null || scopeId === '') continue;
-      if (
-        g.expiresAt != null &&
-        new Date(g.expiresAt).getTime() <= now.getTime()
-      ) {
-        continue;
-      }
-      grantedIds.add(scopeId);
-    }
-
-    return this.repo.findOwnedOrGranted(userId, [...grantedIds]);
+    return this.repo.findOwnedOrGranted(userId, [
+      ...grantedResourceIds(grants, now),
+    ]);
   }
 }
