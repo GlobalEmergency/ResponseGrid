@@ -1776,9 +1776,11 @@ describe('DrizzleResourceRepository (integration)', () => {
       const rows = await repo.findOwnedOrGranted(OWNER_ID, [granted, owned]);
 
       expect(rows).toHaveLength(2);
-      const byId = new Map(rows.map((r) => [r.resource.id.value, r]));
+      const byId = new Map(rows.map((r) => [r.id, r]));
       expect(byId.get(owned)?.emergencySlug).toBe('terremoto-test-285');
-      expect(byId.get(granted)?.resource.name).toBe('Acopio gestionado');
+      expect(byId.get(owned)?.emergencyId).toBe(EM3);
+      expect(byId.get(granted)?.name).toBe('Acopio gestionado');
+      expect(byId.get(granted)?.type).toBe(ResourceType.CollectionPoint);
     });
 
     it('with no granted ids returns only the owned resources', async () => {
@@ -1796,7 +1798,7 @@ describe('DrizzleResourceRepository (integration)', () => {
       const rows = await repo.findOwnedOrGranted(OWNER_ID, []);
 
       expect(rows).toHaveLength(1);
-      expect(rows[0]?.resource.name).toBe('Solo propio');
+      expect(rows[0]?.name).toBe('Solo propio');
     });
   });
 });

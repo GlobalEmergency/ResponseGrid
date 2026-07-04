@@ -6,7 +6,7 @@ import { emergenciesTable } from '../../../emergencies/infrastructure/drizzle/sc
 import {
   ResourceRepository,
   ResourceWithEmergency,
-  ResourceWithEmergencySlug,
+  ManagedResourceRow,
 } from '../../domain/ports/resource.repository';
 import { Resource, ResourceSnapshot, Provenance } from '../../domain/resource';
 import { AuthorSnapshot } from '../../../../shared/domain/author';
@@ -408,7 +408,7 @@ export class DrizzleResourceRepository implements ResourceRepository {
   async findOwnedOrGranted(
     ownerUserId: string,
     grantedResourceIds: string[],
-  ): Promise<ResourceWithEmergencySlug[]> {
+  ): Promise<ManagedResourceRow[]> {
     // A single OR keeps a resource that is both owned and granted as one row.
     // Guard the inArray: drizzle rejects an empty id list.
     const whereClause =
@@ -421,9 +421,14 @@ export class DrizzleResourceRepository implements ResourceRepository {
 
     // LEFT JOIN resolves the emergency slug in the same query (no N+1); LEFT so
     // an orphaned resource still appears (slug → null) instead of vanishing.
+    // Projection only — this read runs on every authenticated page render, so
+    // it must not drag the wide columns (raw/author jsonb) over the wire (#318).
     const rows = await this.db
       .select({
-        resource: resourcesTable,
+        id: resourcesTable.id,
+        type: resourcesTable.type,
+        name: resourcesTable.name,
+        emergencyId: resourcesTable.emergencyId,
         emergencySlug: emergenciesTable.slug,
       })
       .from(resourcesTable)
@@ -435,7 +440,10 @@ export class DrizzleResourceRepository implements ResourceRepository {
       .orderBy(asc(resourcesTable.name), asc(resourcesTable.id));
 
     return rows.map((r) => ({
-      resource: Resource.fromSnapshot(rowToSnapshot(r.resource)),
+      id: r.id,
+      type: r.type as ResourceType,
+      name: r.name,
+      emergencyId: r.emergencyId,
       emergencySlug: r.emergencySlug ?? null,
     }));
   }

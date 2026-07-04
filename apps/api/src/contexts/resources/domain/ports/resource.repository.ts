@@ -21,14 +21,21 @@ export interface ResourceWithEmergency {
 }
 
 /**
- * A resource the principal manages, labelled with its emergency slug so the
- * caller can build per-emergency links without an extra lookup. Cross-emergency
- * by design: it backs `GET /resources/mine`, which must surface a point whose
- * manager holds only an entity-scoped grant (no emergency grant, issue #285).
- * `emergencySlug` is null when the emergency row is missing.
+ * A resource the principal manages, reduced to the fields the navigation
+ * surface needs and labelled with its emergency slug so the caller can build
+ * per-emergency links without an extra lookup. Cross-emergency by design: it
+ * backs `GET /resources/mine`, which must surface a point whose manager holds
+ * only an entity-scoped grant (no emergency grant, issue #285). A flat
+ * projection — NOT the full aggregate — because the read runs on every
+ * authenticated page render (#318): hydrating `Resource` (Location validation,
+ * value objects, jsonb columns) per row was pure waste. `emergencySlug` is
+ * null when the emergency row is missing.
  */
-export interface ResourceWithEmergencySlug {
-  resource: Resource;
+export interface ManagedResourceRow {
+  id: string;
+  type: ResourceType;
+  name: string;
+  emergencyId: string;
   emergencySlug: string | null;
 }
 
@@ -65,12 +72,12 @@ export interface ResourceRepository {
    * Resources the principal manages, across ALL emergencies (any status):
    * the ones they own (`ownerUserId`) plus the ones reached through an
    * entity-scoped grant (`grantedResourceIds`). Each row carries its emergency
-   * slug (see {@link ResourceWithEmergencySlug}).
+   * slug (see {@link ManagedResourceRow}).
    */
   findOwnedOrGranted(
     ownerUserId: string,
     grantedResourceIds: string[],
-  ): Promise<ResourceWithEmergencySlug[]>;
+  ): Promise<ManagedResourceRow[]>;
   /** Visible public resources: Active, Saturated, Paused (excludes Hidden and Closed). */
   findVisibleByEmergency(emergencyId: EmergencyId): Promise<Resource[]>;
   /** Resources currently flagged `disputed` (citizen reports pending review). */

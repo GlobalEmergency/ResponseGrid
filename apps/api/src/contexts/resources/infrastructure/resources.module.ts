@@ -386,6 +386,10 @@ const recordInventoryEntryProvider = {
 @Module({
   imports: [DatabaseModule, IdentityModule, NotificationsModule],
   controllers: [
+    // ORDER MATTERS: ResourcesController declares the static GET /resources/mine
+    // and must register before AdminResourcesController's GET /resources/:id, or
+    // Express matches the param route first and "mine" 400s in ParseUUIDPipe
+    // (#318; pinned by test/resources-mine.e2e-spec.ts).
     ResourcesController,
     CoordinationController,
     PublicController,
