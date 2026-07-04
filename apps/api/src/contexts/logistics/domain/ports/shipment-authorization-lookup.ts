@@ -7,6 +7,11 @@ export interface ShipmentAuthorizationFacts {
   emergencyId: string;
   /** The carrier principal id, or null on an internal transfer / unassigned. */
   carrierId: string | null;
+  /**
+   * The logistics hub this expedition transits, or null. A `hub_manager` grant
+   * scoped to it confers cross-emergency authority over the shipment (#150).
+   */
+  hubId: string | null;
 }
 
 /**

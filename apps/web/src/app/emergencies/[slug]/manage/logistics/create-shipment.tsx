@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createShipment } from './actions';
 import { Button } from '@/components/atoms/button';
 import { Select } from '@/components/atoms/select';
+import { Input } from '@/components/atoms/input';
 import { Textarea } from '@/components/atoms/textarea';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { FormField } from '@/components/molecules/form-field';
@@ -49,6 +50,7 @@ export function CreateShipment({
   const [destinationId, setDestinationId] = useState('');
   const [lines, setLines] = useState<SupplyLine[]>([emptyLine(defaultCategory)]);
   const [manifest, setManifest] = useState('');
+  const [hubId, setHubId] = useState('');
   const [error, setError] = useState<string | undefined>(undefined);
 
   const labels = {
@@ -68,6 +70,7 @@ export function CreateShipment({
     setDestinationId('');
     setLines([emptyLine(defaultCategory)]);
     setManifest('');
+    setHubId('');
     setError(undefined);
   }
 
@@ -87,6 +90,7 @@ export function CreateShipment({
         destinationResourceId: destinationId,
         items,
         ...(manifest.trim() !== '' ? { manifest: manifest.trim() } : {}),
+        ...(hubId.trim() !== '' ? { hubId: hubId.trim() } : {}),
       });
       if (result.status === 'success') {
         reset();
@@ -203,6 +207,26 @@ export function CreateShipment({
                 placeholder={tc.ship_manifest_placeholder}
                 value={manifest}
                 onChange={(e) => setManifest(e.target.value)}
+              />
+            </FormField>
+
+            <FormField
+              htmlFor="ship-hub"
+              label={
+                <>
+                  {tc.ship_field_hub}{' '}
+                  <span className="text-muted-soft font-normal normal-case">
+                    {tc.optional}
+                  </span>
+                </>
+              }
+            >
+              <Input
+                id="ship-hub"
+                type="text"
+                placeholder={tc.ship_hub_placeholder}
+                value={hubId}
+                onChange={(e) => setHubId(e.target.value)}
               />
             </FormField>
           </div>

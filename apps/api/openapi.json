@@ -14227,6 +14227,11 @@
               "format": "uuid"
             }
           },
+          "hubId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Optional logistics hub (#150) this expedition transits. A hub_manager grant scoped to it may operate the shipment cross-emergency (§16.3). No FK."
+          },
           "manifest": {
             "type": "string",
             "example": "Carga frágil, manipular con cuidado",
@@ -14352,6 +14357,12 @@
             "type": "string",
             "format": "uuid",
             "nullable": true
+          },
+          "hubId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Logistics hub (#150) this expedition transits, or null. Grants scoped to it confer cross-emergency authority over the shipment (§16.3)."
           },
           "manifest": {
             "type": "string",

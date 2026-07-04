@@ -56,6 +56,16 @@ export class ShipmentViewDto {
   carrierId!: string | null;
 
   @ApiPropertyOptional({
+    format: 'uuid',
+    nullable: true,
+    type: String,
+    description:
+      'Logistics hub (#150) this expedition transits, or null. Grants scoped to ' +
+      'it confer cross-emergency authority over the shipment (§16.3).',
+  })
+  hubId!: string | null;
+
+  @ApiPropertyOptional({
     example: 'Carga frágil',
     nullable: true,
     type: String,

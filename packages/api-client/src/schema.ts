@@ -5051,6 +5051,11 @@ export interface components {
             /** @description Trackable containers (#140) loaded onto the expedition. Optional when loose lines are provided. */
             containerIds?: string[];
             /**
+             * Format: uuid
+             * @description Optional logistics hub (#150) this expedition transits. A hub_manager grant scoped to it may operate the shipment cross-emergency (§16.3). No FK.
+             */
+            hubId?: string;
+            /**
              * @description Free-text cargo manifest note
              * @example Carga frágil, manipular con cuidado
              */
@@ -5111,6 +5116,11 @@ export interface components {
             carrierType?: "volunteer" | "organization" | null;
             /** Format: uuid */
             carrierId?: string | null;
+            /**
+             * Format: uuid
+             * @description Logistics hub (#150) this expedition transits, or null. Grants scoped to it confer cross-emergency authority over the shipment (§16.3).
+             */
+            hubId?: string | null;
             /** @example Carga frágil */
             manifest?: string | null;
             /**

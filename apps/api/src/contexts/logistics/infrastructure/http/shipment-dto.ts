@@ -56,6 +56,16 @@ export class CreateShipmentDto {
   containerIds?: string[];
 
   @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Optional logistics hub (#150) this expedition transits. A hub_manager ' +
+      'grant scoped to it may operate the shipment cross-emergency (§16.3). No FK.',
+  })
+  @IsOptional()
+  @IsUUID()
+  hubId?: string;
+
+  @ApiPropertyOptional({
     example: 'Carga frágil, manipular con cuidado',
     description: 'Free-text cargo manifest note',
   })

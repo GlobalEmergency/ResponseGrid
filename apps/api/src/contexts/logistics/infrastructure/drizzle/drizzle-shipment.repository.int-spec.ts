@@ -27,10 +27,13 @@ const CONTAINER_B = '22222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 // (the unique (emergency_id, code) index rejects collisions).
 let codeSeq = 0;
 
+const HUB = '77777777-7777-4777-8777-777777777777';
+
 function makeShipment(opts?: {
   emergencyId?: string;
   items?: SupplyLine[];
   containerIds?: string[];
+  hubId?: string | null;
   manifest?: string | null;
 }): Shipment {
   return Shipment.create({
@@ -48,6 +51,7 @@ function makeShipment(opts?: {
       }),
     ],
     containerIds: opts?.containerIds ?? [],
+    hubId: opts?.hubId ?? null,
     manifest: opts?.manifest ?? 'Manifiesto',
   });
 }
@@ -199,11 +203,26 @@ describe('DrizzleShipmentRepository (integration)', () => {
     await repo.save(s);
 
     const facts = await lookup.findAuthorizationFacts(s.id.value);
-    expect(facts).toEqual({ emergencyId: EM, carrierId: CARRIER_ID });
+    expect(facts).toEqual({
+      emergencyId: EM,
+      carrierId: CARRIER_ID,
+      hubId: null,
+    });
 
     const missing = await lookup.findAuthorizationFacts(
       '99999999-9999-4999-8999-999999999999',
     );
     expect(missing).toBeNull();
+  });
+
+  it('persists and resolves the logistics hub (#150)', async () => {
+    const s = makeShipment({ hubId: HUB });
+    await repo.save(s);
+
+    const found = await repo.findById(s.id);
+    expect(found!.hubId).toBe(HUB);
+
+    const facts = await lookup.findAuthorizationFacts(s.id.value);
+    expect(facts).toEqual({ emergencyId: EM, carrierId: null, hubId: HUB });
   });
 });
