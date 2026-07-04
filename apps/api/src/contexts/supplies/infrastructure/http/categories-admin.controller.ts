@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Controller,
   Body,
   Delete,
@@ -31,7 +30,6 @@ import {
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
 import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
 import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
-import { isCoreCategory } from '../../domain/category';
 import { CategoryDefinition } from '../../domain/category-definition';
 import { CreateCategory } from '../../application/create-category';
 import { ListCategories } from '../../application/list-categories';
@@ -139,17 +137,14 @@ export class CategoriesAdminController {
   @ApiParam({ name: 'slug', description: 'Category slug to archive' })
   @ApiNoContentResponse({ description: 'Category archived' })
   @ApiNotFoundResponse({ description: 'Category not found' })
-  @ApiBadRequestResponse({
-    description: 'Core category slug cannot be archived by delete',
+  @ApiConflictResponse({
+    description: 'Core category slug is protected and cannot be archived',
   })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
   @ApiForbiddenResponse({ description: 'Missing catalogue:manage permission' })
   async delete(@Param('slug') slug: string): Promise<void> {
-    if (isCoreCategory(slug)) {
-      throw new BadRequestException(
-        `Core category slug cannot be deleted: ${slug}`,
-      );
-    }
+    // La protección de slugs núcleo vive en el caso de uso (regla de dominio),
+    // que lanza CategoryProtectedError → 409 vía el filtro global.
     await this.updateCategory.execute(slug, { archived: true });
   }
 

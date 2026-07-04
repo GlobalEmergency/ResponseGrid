@@ -6270,9 +6270,6 @@
           "204": {
             "description": "Category archived"
           },
-          "400": {
-            "description": "Core category slug cannot be archived by delete"
-          },
           "401": {
             "description": "Missing or invalid token"
           },
@@ -6281,6 +6278,9 @@
           },
           "404": {
             "description": "Category not found"
+          },
+          "409": {
+            "description": "Core category slug is protected and cannot be archived"
           }
         },
         "security": [

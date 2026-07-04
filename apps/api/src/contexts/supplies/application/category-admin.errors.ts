@@ -25,3 +25,16 @@ export class CategoryValidationError extends Error {
     this.name = 'CategoryValidationError';
   }
 }
+
+/**
+ * Una categoría núcleo (slug del enum {@link Category}, referenciado por el
+ * código y por otras tablas) está protegida: no se puede borrar ni archivar.
+ * Error de negocio propio para que el mapeo HTTP (409) viva en el filtro y no
+ * en el controller.
+ */
+export class CategoryProtectedError extends Error {
+  constructor(slug: string) {
+    super(`Core category is protected and cannot be deleted: ${slug}`);
+    this.name = 'CategoryProtectedError';
+  }
+}
