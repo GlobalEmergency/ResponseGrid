@@ -3,11 +3,14 @@ import { ResourceMembershipReader } from '../domain/ports/membership-reader';
 import { SupplyLine, SupplyLineProps } from '../../supplies/domain/supply-line';
 import { UnauthorizedInventoryChangeError } from './unauthorized-inventory-change.error';
 import { loadResourceForManagement } from './load-resource-for-management';
+import { PrincipalGrant } from './principal-grant';
 
 export interface UpdateMyInventoryCommand {
   resourceId: string;
   requesterUserId: string;
   lines: SupplyLineProps[];
+  /** Request grants, so an entity-scoped point manager is authorized (#316). */
+  grants?: PrincipalGrant[];
 }
 
 export class UpdateMyInventory {
@@ -22,6 +25,7 @@ export class UpdateMyInventory {
       membershipReader: this.membershipReader,
       resourceId: cmd.resourceId,
       requesterUserId: cmd.requesterUserId,
+      grants: cmd.grants ?? [],
       makeForbidden: () => new UnauthorizedInventoryChangeError(),
     });
 

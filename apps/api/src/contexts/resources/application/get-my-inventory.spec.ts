@@ -14,6 +14,7 @@ const EM = '11111111-1111-4111-8111-111111111111';
 const OWNER_ID = 'owner-user-0000-0000-000000000000';
 const COORD_ID = 'coord-user-0000-0000-000000000000';
 const THIRD_ID = 'third-user-0000-0000-000000000000';
+const MANAGER_ID = 'manager-user-0000-0000-000000000000';
 const baseLocation = {
   address: 'Calle Test 1, Madrid',
   latitude: 40.4168,
@@ -75,6 +76,26 @@ describe('GetMyInventory', () => {
     const lines = await new GetMyInventory(repo, coordOnlyMembership).execute({
       resourceId: id,
       requesterUserId: COORD_ID,
+    });
+
+    expect(lines).toHaveLength(1);
+  });
+
+  it('point manager (entity-scoped grant, not owner/coordinator) can read (#316)', async () => {
+    const repo = new InMemoryResourceRepository();
+    const bus = new FakeEventBus();
+    const id = await makeResource(repo, bus);
+
+    const lines = await new GetMyInventory(repo, noMembership).execute({
+      resourceId: id,
+      requesterUserId: MANAGER_ID,
+      grants: [
+        {
+          roleId: 'point_manager',
+          scope: { type: 'entity', entityType: 'resource', id },
+          expiresAt: null,
+        },
+      ],
     });
 
     expect(lines).toHaveLength(1);
