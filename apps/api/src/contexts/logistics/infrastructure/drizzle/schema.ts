@@ -53,6 +53,10 @@ export const shipmentsTable = pgTable('shipments', {
   // an internal inventory transfer.
   carrierType: text('carrier_type'),
   carrierId: uuid('carrier_id'),
+  // Optional logistics hub (#150) this expedition transits. Opaque scope id, no
+  // FK (there is no hubs table): a `hub_manager` grant scoped to it may operate
+  // the shipment cross-emergency (§16.3 / #108). Null when no hub applies.
+  hubId: uuid('hub_id'),
   // Free-text cargo manifest note (pragmatic; structured lines live in `items`).
   manifest: text('manifest'),
   status: text('status').notNull(),

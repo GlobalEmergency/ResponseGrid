@@ -2577,6 +2577,7 @@ export const es = {
     ship_field_destination: 'Destino',
     ship_field_items: 'Artículos',
     ship_field_manifest: 'Manifiesto',
+    ship_field_hub: 'Hub logístico',
     ship_field_capacity: 'Capacidad asignada',
     ship_field_carrier: 'Transportista',
 
@@ -2627,6 +2628,8 @@ export const es = {
     ship_item_add: '+ Añadir artículo',
     ship_item_remove: 'Quitar',
     ship_manifest_placeholder: 'Notas del manifiesto: carga frágil, instrucciones…',
+    ship_hub_placeholder:
+      'ID del hub (opcional) — da autoridad transversal a emergencias',
 
     // Capacidades disponibles (read-only, #105)
     cap_heading: 'Capacidades disponibles',

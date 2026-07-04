@@ -21,12 +21,17 @@ export class DrizzleShipmentAuthorizationLookup implements ShipmentAuthorization
       .select({
         emergencyId: shipmentsTable.emergencyId,
         carrierId: shipmentsTable.carrierId,
+        hubId: shipmentsTable.hubId,
       })
       .from(shipmentsTable)
       .where(eq(shipmentsTable.id, shipmentId))
       .limit(1);
     const row = rows[0];
     if (!row) return null;
-    return { emergencyId: row.emergencyId, carrierId: row.carrierId ?? null };
+    return {
+      emergencyId: row.emergencyId,
+      carrierId: row.carrierId ?? null,
+      hubId: row.hubId ?? null,
+    };
   }
 }

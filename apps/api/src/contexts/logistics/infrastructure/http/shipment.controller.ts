@@ -61,9 +61,23 @@ import {
 } from '../../../identity/domain/ports/membership.repository';
 import { UserId } from '../../../identity/domain/user-id';
 import { Role } from '../../../identity/domain/role';
+import {
+  ACCESS_CONTROL,
+  type AccessControl,
+} from '../../../identity/domain/authorization/access-control';
+import type { Permission } from '../../../identity/domain/authorization/permission';
+import type { GrantSnapshot } from '../../../identity/domain/authorization/grant';
+import type { ScopeRefProps } from '../../../identity/domain/authorization/scope-ref';
 
 interface AuthenticatedRequest extends Express.Request {
-  user: { id: string; email: string; isAdmin: boolean };
+  user: {
+    id: string;
+    email: string;
+    isAdmin: boolean;
+    /** Effective request grants (populated by JwtAuthGuard) — used for the
+     * hub-authority PDP check (#150). */
+    grants: GrantSnapshot[];
+  };
 }
 
 @ApiTags('logistics')
@@ -82,43 +96,77 @@ export class ShipmentController {
     private readonly shipmentAuthLookup: ShipmentAuthorizationLookup,
     @Inject(MEMBERSHIP_REPOSITORY)
     private readonly membershipRepo: MembershipRepository,
+    @Inject(ACCESS_CONTROL)
+    private readonly accessControl: AccessControl,
   ) {}
 
   /**
-   * Resolves whether the requester may mark transit/delivery on a shipment:
-   * admin, a coordinator of the shipment's emergency, or its assigned carrier.
-   * Returns the carrier-id so the use case can do the owner check, mirroring
-   * how the capacity withdraw resolves coordinator-ship.
+   * Cross-emergency hub authority (#150 Hueco 2, §16.3 / #108): a principal
+   * whose grant confers `permission` at a scope covering the shipment's
+   * logistics hub may operate it WITHOUT being a coordinator of its emergency.
+   * The hub id is an opaque scope reference — the PDP matches the grant's `hub`
+   * scope against the shipment's `hubId` over the hub → platform chain, so a
+   * `hub_manager` is allowed exactly for the permissions its role confers
+   * (create/read/track) and denied the rest (assign/update). Returns false when
+   * the shipment has no hub (nothing to manage).
+   */
+  private hasHubAuthority(
+    hubId: string | null,
+    permission: Permission,
+    req: AuthenticatedRequest,
+  ): Promise<boolean> {
+    if (hubId === null) return Promise.resolve(false);
+    const scopeChain: ScopeRefProps[] = [
+      { type: 'hub', id: hubId },
+      { type: 'platform' },
+    ];
+    return this.accessControl.can(
+      { principalId: req.user.id, grants: req.user.grants },
+      permission,
+      { scopeChain },
+    );
+  }
+
+  /**
+   * Resolves whether the requester may mark transit/delivery on a shipment
+   * without being its assigned carrier: admin, a coordinator of the shipment's
+   * emergency, or a manager of its hub (#150). Returned as `isCoordinator` so
+   * the use case keeps its carrier-or-authority check unchanged.
    */
   private async resolveActor(
     shipmentId: string,
     req: AuthenticatedRequest,
   ): Promise<{ isCoordinator: boolean }> {
-    let isCoordinator = req.user.isAdmin;
-    if (!isCoordinator) {
-      const facts =
-        await this.shipmentAuthLookup.findAuthorizationFacts(shipmentId);
-      if (facts !== null) {
-        isCoordinator = await this.membershipRepo.hasRole(
-          UserId.fromString(req.user.id),
-          facts.emergencyId,
-          Role.Coordinator,
-        );
-      }
+    if (req.user.isAdmin) return { isCoordinator: true };
+    const facts =
+      await this.shipmentAuthLookup.findAuthorizationFacts(shipmentId);
+    if (facts === null) return { isCoordinator: false };
+    let authorized = await this.membershipRepo.hasRole(
+      UserId.fromString(req.user.id),
+      facts.emergencyId,
+      Role.Coordinator,
+    );
+    if (!authorized) {
+      authorized = await this.hasHubAuthority(
+        facts.hubId,
+        'shipment:track',
+        req,
+      );
     }
-    return { isCoordinator };
+    return { isCoordinator: authorized };
   }
 
   /**
-   * Coordinator-or-admin gate for shipment writes whose route carries no
-   * scope-resolvable param (the global PermissionGuard would otherwise fall
-   * back to the platform scope and 403 a legitimate emergency coordinator).
-   * Mirrors how markInTransit/deliver resolve coordinator-ship from the
-   * shipment itself. 404s an unknown shipment before the 403, like the use
-   * cases do.
+   * Authority gate for shipment writes whose route carries no scope-resolvable
+   * param (the global PermissionGuard would otherwise fall back to the platform
+   * scope and 403 a legitimate coordinator — #150 Hueco 1). Admin, a coordinator
+   * of the shipment's emergency, or — for a `permission` the principal's role
+   * confers — a manager of the shipment's hub (Hueco 2). 404s an unknown
+   * shipment before the 403, like the use cases do.
    */
-  private async assertShipmentCoordinator(
+  private async assertMayActOnShipment(
     shipmentId: string,
+    permission: Permission,
     req: AuthenticatedRequest,
   ): Promise<void> {
     if (req.user.isAdmin) return;
@@ -132,16 +180,21 @@ export class ShipmentController {
       facts.emergencyId,
       Role.Coordinator,
     );
-    if (!isCoordinator) {
-      throw new ForbiddenException(
-        'Only a coordinator of the shipment emergency can perform this action',
-      );
-    }
+    if (isCoordinator) return;
+    if (await this.hasHubAuthority(facts.hubId, permission, req)) return;
+    throw new ForbiddenException(
+      'Only a coordinator of the shipment emergency or a manager of its hub can perform this action',
+    );
   }
 
-  /** Coordinator-or-admin gate for creating a shipment in an emergency. */
-  private async assertEmergencyCoordinator(
+  /**
+   * Authority gate for creating a shipment: admin, a coordinator of the target
+   * emergency, or a manager of the hub the expedition will transit (#150). The
+   * hub comes from the body — there is no shipment row yet.
+   */
+  private async assertMayCreate(
     emergencyId: string,
+    hubId: string | null,
     req: AuthenticatedRequest,
   ): Promise<void> {
     if (req.user.isAdmin) return;
@@ -150,11 +203,11 @@ export class ShipmentController {
       emergencyId,
       Role.Coordinator,
     );
-    if (!isCoordinator) {
-      throw new ForbiddenException(
-        'Only a coordinator of the emergency can create a shipment',
-      );
-    }
+    if (isCoordinator) return;
+    if (await this.hasHubAuthority(hubId, 'shipment:create', req)) return;
+    throw new ForbiddenException(
+      'Only a coordinator of the emergency or a manager of the shipment hub can create a shipment',
+    );
   }
 
   @Post('logistics/shipments')
@@ -180,7 +233,7 @@ export class ShipmentController {
     @Body() dto: CreateShipmentDto,
     @Request() req: AuthenticatedRequest,
   ): Promise<CreateShipmentResponseDto> {
-    await this.assertEmergencyCoordinator(dto.emergencyId, req);
+    await this.assertMayCreate(dto.emergencyId, dto.hubId ?? null, req);
     return this.createShipment.execute({
       emergencyId: dto.emergencyId,
       originResourceId: dto.originResourceId,
@@ -193,6 +246,7 @@ export class ShipmentController {
         presentation: i.presentation ?? null,
       })),
       containerIds: dto.containerIds ?? [],
+      hubId: dto.hubId ?? null,
       manifest: dto.manifest ?? null,
     });
   }
@@ -218,7 +272,7 @@ export class ShipmentController {
     @Body() dto: AssignCapacityToShipmentDto,
     @Request() req: AuthenticatedRequest,
   ): Promise<void> {
-    await this.assertShipmentCoordinator(id, req);
+    await this.assertMayActOnShipment(id, 'shipment:assign', req);
     await this.assignCapacityToShipment.execute({
       shipmentId: id,
       assignedCapacityId: dto.assignedCapacityId,
@@ -301,7 +355,7 @@ export class ShipmentController {
     @Param('id', ParseUUIDPipe) id: string,
     @Request() req: AuthenticatedRequest,
   ): Promise<void> {
-    await this.assertShipmentCoordinator(id, req);
+    await this.assertMayActOnShipment(id, 'shipment:update', req);
     await this.cancelShipment.execute({ shipmentId: id });
   }
 
@@ -369,7 +423,7 @@ export class ShipmentController {
     @Param('id', ParseUUIDPipe) id: string,
     @Request() req: AuthenticatedRequest,
   ): Promise<CapacityView[]> {
-    await this.assertShipmentCoordinator(id, req);
+    await this.assertMayActOnShipment(id, 'shipment:read', req);
     return this.suggestCapacitiesForShipment.execute({ shipmentId: id });
   }
 }

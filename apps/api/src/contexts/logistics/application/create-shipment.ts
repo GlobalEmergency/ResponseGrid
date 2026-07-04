@@ -18,6 +18,8 @@ export interface CreateShipmentCommand {
   items: SupplyLineProps[];
   /** Trackable containers (#140) loaded onto the expedition. May be empty. */
   containerIds: string[];
+  /** Optional logistics hub this expedition transits (#150). Defaults to null. */
+  hubId?: string | null;
   manifest: string | null;
 }
 
@@ -48,6 +50,7 @@ export class CreateShipment {
       destinationResourceId: cmd.destinationResourceId,
       items: cmd.items.map((i) => SupplyLine.create(i)),
       containerIds: cmd.containerIds,
+      hubId: cmd.hubId ?? null,
       manifest: cmd.manifest,
     });
 

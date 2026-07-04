@@ -30,6 +30,7 @@ export async function createShipment(
     destinationResourceId: string;
     items: ShipmentItemInput[];
     manifest?: string;
+    hubId?: string;
   },
 ): Promise<ActionResult> {
   const token = await requireSession(`/emergencies/${slug}/manage/logistics`);
@@ -55,6 +56,9 @@ export async function createShipment(
       items: input.items,
       ...(input.manifest !== undefined && input.manifest !== ''
         ? { manifest: input.manifest }
+        : {}),
+      ...(input.hubId !== undefined && input.hubId !== ''
+        ? { hubId: input.hubId }
         : {}),
     },
     headers: authHeaders(token),

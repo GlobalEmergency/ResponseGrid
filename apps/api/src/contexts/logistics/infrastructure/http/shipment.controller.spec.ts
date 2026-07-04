@@ -11,6 +11,8 @@ import { ListShipments } from '../../application/list-shipments';
 import { GetMyShipments } from '../../application/get-my-shipments';
 import { SuggestCapacitiesForShipment } from '../../application/suggest-capacities-for-shipment';
 import { MembershipRepository } from '../../../identity/domain/ports/membership.repository';
+import { AccessControl } from '../../../identity/domain/authorization/access-control';
+import type { GrantSnapshot } from '../../../identity/domain/authorization/grant';
 
 /**
  * Regression tests for #150: the shipment write routes carry no scope-resolvable
@@ -25,9 +27,9 @@ const USER = '11111111-1111-4111-8111-111111111111';
 
 type ReqArg = Parameters<ShipmentController['create']>[1];
 
-function req(isAdmin = false): ReqArg {
+function req(isAdmin = false, grants: GrantSnapshot[] = []): ReqArg {
   return {
-    user: { id: USER, email: 'coord@example.com', isAdmin },
+    user: { id: USER, email: 'coord@example.com', isAdmin, grants },
   } as unknown as ReqArg;
 }
 
@@ -52,6 +54,9 @@ function setup() {
   const noop = { execute: jest.fn() };
   const shipmentAuthLookup = { findAuthorizationFacts: jest.fn() };
   const membershipRepo = { hasRole: jest.fn() };
+  // PDP mock: denies by default, so a plain non-coordinator with no hub grant
+  // is 403'd. Hub-authority tests flip it to true.
+  const accessControl = { can: jest.fn().mockResolvedValue(false) };
 
   const controller = new ShipmentController(
     createShipment as unknown as CreateShipment,
@@ -64,6 +69,7 @@ function setup() {
     suggest as unknown as SuggestCapacitiesForShipment,
     shipmentAuthLookup,
     membershipRepo as unknown as MembershipRepository,
+    accessControl as unknown as AccessControl,
   );
 
   return {
@@ -74,6 +80,7 @@ function setup() {
     suggest,
     shipmentAuthLookup,
     membershipRepo,
+    accessControl,
   };
 }
 
@@ -119,6 +126,7 @@ describe('ShipmentController — authorization gating (#150)', () => {
       t.shipmentAuthLookup.findAuthorizationFacts.mockResolvedValue({
         emergencyId: EM,
         carrierId: null,
+        hubId: null,
       });
       t.membershipRepo.hasRole.mockResolvedValue(false);
       await expect(
@@ -132,6 +140,7 @@ describe('ShipmentController — authorization gating (#150)', () => {
       t.shipmentAuthLookup.findAuthorizationFacts.mockResolvedValue({
         emergencyId: EM,
         carrierId: null,
+        hubId: null,
       });
       t.membershipRepo.hasRole.mockResolvedValue(true);
       await t.controller.assignCapacity(SHIP, ASSIGN_DTO, req());
@@ -145,6 +154,7 @@ describe('ShipmentController — authorization gating (#150)', () => {
       t.shipmentAuthLookup.findAuthorizationFacts.mockResolvedValue({
         emergencyId: EM,
         carrierId: null,
+        hubId: null,
       });
       t.membershipRepo.hasRole.mockResolvedValue(false);
       await expect(t.controller.cancel(SHIP, req())).rejects.toBeInstanceOf(
@@ -158,11 +168,94 @@ describe('ShipmentController — authorization gating (#150)', () => {
       t.shipmentAuthLookup.findAuthorizationFacts.mockResolvedValue({
         emergencyId: EM,
         carrierId: null,
+        hubId: null,
       });
       t.membershipRepo.hasRole.mockResolvedValue(true);
       const res = await t.controller.capacitySuggestions(SHIP, req());
       expect(res).toEqual([]);
       expect(t.suggest.execute).toHaveBeenCalledWith({ shipmentId: SHIP });
+    });
+  });
+
+  // Hueco 2 (#150): a hub manager operates a shipment transiting their hub
+  // without coordinating its emergency. The controller delegates the decision to
+  // the PDP over the shipment's hub scope chain; here we assert the WIRING (the
+  // right permission + scope chain reach the PDP and its verdict is honoured).
+  describe('hub authority (#150 Hueco 2)', () => {
+    const HUB = '77777777-7777-4777-8777-777777777777';
+
+    it('create: a hub manager authorized by the PDP creates without being coordinator', async () => {
+      const t = setup();
+      t.membershipRepo.hasRole.mockResolvedValue(false);
+      t.accessControl.can.mockResolvedValue(true);
+
+      const res = await t.controller.create(
+        { ...createDto(), hubId: HUB },
+        req(),
+      );
+
+      expect(res).toEqual({ id: SHIP });
+      expect(t.accessControl.can).toHaveBeenCalledWith(
+        expect.objectContaining({ principalId: USER }),
+        'shipment:create',
+        { scopeChain: [{ type: 'hub', id: HUB }, { type: 'platform' }] },
+      );
+    });
+
+    it('assignCapacity: a hub manager authorized by the PDP (shipment:assign) can assign', async () => {
+      const t = setup();
+      t.shipmentAuthLookup.findAuthorizationFacts.mockResolvedValue({
+        emergencyId: EM,
+        carrierId: null,
+        hubId: HUB,
+      });
+      t.membershipRepo.hasRole.mockResolvedValue(false);
+      t.accessControl.can.mockResolvedValue(true);
+
+      await t.controller.assignCapacity(SHIP, ASSIGN_DTO, req());
+
+      expect(t.assignCapacity.execute).toHaveBeenCalledTimes(1);
+      expect(t.accessControl.can).toHaveBeenCalledWith(
+        expect.anything(),
+        'shipment:assign',
+        { scopeChain: [{ type: 'hub', id: HUB }, { type: 'platform' }] },
+      );
+    });
+
+    it('cancel: 403 when the PDP denies (role lacks the permission over the hub)', async () => {
+      const t = setup();
+      t.shipmentAuthLookup.findAuthorizationFacts.mockResolvedValue({
+        emergencyId: EM,
+        carrierId: null,
+        hubId: HUB,
+      });
+      t.membershipRepo.hasRole.mockResolvedValue(false);
+      t.accessControl.can.mockResolvedValue(false);
+
+      await expect(t.controller.cancel(SHIP, req())).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+      expect(t.cancelShipment.execute).not.toHaveBeenCalled();
+      expect(t.accessControl.can).toHaveBeenCalledWith(
+        expect.anything(),
+        'shipment:update',
+        { scopeChain: [{ type: 'hub', id: HUB }, { type: 'platform' }] },
+      );
+    });
+
+    it('does not consult the PDP when the shipment has no hub', async () => {
+      const t = setup();
+      t.shipmentAuthLookup.findAuthorizationFacts.mockResolvedValue({
+        emergencyId: EM,
+        carrierId: null,
+        hubId: null,
+      });
+      t.membershipRepo.hasRole.mockResolvedValue(false);
+
+      await expect(t.controller.cancel(SHIP, req())).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+      expect(t.accessControl.can).not.toHaveBeenCalled();
     });
   });
 });

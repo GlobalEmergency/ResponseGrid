@@ -2537,6 +2537,7 @@ export const en = {
     ship_field_destination: 'Destination',
     ship_field_items: 'Items',
     ship_field_manifest: 'Manifest',
+    ship_field_hub: 'Logistics hub',
     ship_field_capacity: 'Assigned capacity',
     ship_field_carrier: 'Carrier',
 
@@ -2587,6 +2588,8 @@ export const en = {
     ship_item_add: '+ Add item',
     ship_item_remove: 'Remove',
     ship_manifest_placeholder: 'Manifest notes: fragile cargo, instructions…',
+    ship_hub_placeholder:
+      'Hub id (optional) — grants cross-emergency authority',
 
     // Available capacities (read-only, #105)
     cap_heading: 'Available capacities',
