@@ -489,6 +489,7 @@ export class ResourcesController {
     return this.getMyResources.execute({
       emergencyId,
       userId: req.user!.id,
+      grants: this.principalGrants(req.user!),
     });
   }
 

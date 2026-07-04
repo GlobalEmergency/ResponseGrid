@@ -112,7 +112,12 @@ export const getMyResources = cache(async () => {
   const { data } = await api.GET('/resources/mine', {
     headers: authHeaders(token),
   });
-  return (data ?? []).map((r) => ({ id: r.id, name: r.name, resourceType: r.type }));
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    name: r.name,
+    resourceType: r.type,
+    emergencySlug: r.emergencySlug,
+  }));
 });
 
 export const getPrincipalContexts = cache(async (): Promise<PrincipalContext[]> => {

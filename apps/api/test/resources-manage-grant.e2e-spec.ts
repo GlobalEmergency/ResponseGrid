@@ -276,6 +276,18 @@ describe('Resource management by entity-scoped grant (e2e, #316)', () => {
     expect(found?.publicStatus).toBe('saturated');
   });
 
+  it('the manager point appears in the per-emergency mis-puntos list (#323)', async () => {
+    // Before #323 this endpoint was owner-only, so a pure point_manager saw an
+    // empty list here while the panel already showed the point (#285).
+    const res = await request(server)
+      .get(`/emergencies/${EM}/resources/mine`)
+      .set('Authorization', `Bearer ${managerToken}`)
+      .expect(200);
+
+    const ids = (res.body as Array<{ id: string }>).map((r) => r.id);
+    expect(ids).toContain(managedResourceId);
+  });
+
   it('a stranger (no owner/grant/coordinator) cannot replace the inventory → 403', async () => {
     await request(server)
       .put(`/resources/${managedResourceId}/inventory`)
