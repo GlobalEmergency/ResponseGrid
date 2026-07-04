@@ -1,8 +1,7 @@
 'use server';
 
-import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { getToken, redirectToLogin, authHeaders, loginHref } from '@/lib/auth';
+import { requireSession, redirectToLogin, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { getT } from '@/i18n/server';
@@ -32,10 +31,7 @@ export async function reportValidity(
   formData: FormData,
 ): Promise<ReportValidityState> {
   const next = `/e/${slug}/recursos/${resourceId}/reportar-estado`;
-  const token = await getToken();
-  if (token === null) {
-    redirect(loginHref(next));
-  }
+  const token = await requireSession(next);
 
   const { t } = await getT();
 

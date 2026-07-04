@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect, notFound } from 'next/navigation';
-import { requireSession, loginHref, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { PageHeader } from '@/components/molecules/page-header';
 import { EmptyState } from '@/components/molecules/empty-state';
@@ -51,7 +51,7 @@ export default async function ScopeAdminPage({ params }: PageProps) {
     fetchRoles(),
   ]);
   const me = meRes.data;
-  if (meRes.response.status === 401 || !me) redirect(loginHref(next));
+  if (meRes.response.status === 401 || !me) return redirectToLogin(next);
 
   // Authorize: the caller must actually administer THIS scope.
   const scope = administrableScopes(me.grants ?? [], roles).find(

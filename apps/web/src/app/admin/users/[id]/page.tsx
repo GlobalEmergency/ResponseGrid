@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { requireSession, loginHref, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { PageHeader } from '@/components/molecules/page-header';
 import { EmptyState } from '@/components/molecules/empty-state';
@@ -30,7 +30,7 @@ export default async function UsuarioDetailPage({ params }: Props) {
     headers: authHeaders(token),
   });
   if (meResponse.status === 401 || !me) {
-    redirect(loginHref(`/admin/users/${id}`));
+    return redirectToLogin(`/admin/users/${id}`);
   }
   if (!me.isAdmin) redirect('/');
 

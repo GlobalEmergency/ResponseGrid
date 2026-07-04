@@ -47,16 +47,16 @@ export async function setToken(token: string): Promise<void> {
 }
 
 /**
- * Removes the auth token cookie (logout). Best-effort: Next.js only allows
- * cookie mutation in Server Actions and Route Handlers, so when this runs
- * during Server Component render (a fetch helper reacting to a 401 from an
- * expired token) the deletion is skipped instead of crashing the render.
+ * Removes the auth token cookie. Best-effort: Next.js only allows cookie
+ * mutation in Server Actions and Route Handlers, so when this runs during
+ * Server Component render (a fetch helper reacting to a 401 from an expired
+ * token) the deletion is skipped instead of crashing the render.
  *
- * Returns whether the cookie was actually deleted, so callers can route the
- * real cleanup elsewhere when it wasn't — {@link redirectToLogin} sends those
- * through `GET /api/session/clear`, the Route Handler that CAN delete it.
+ * Returns whether the cookie was actually deleted, so {@link redirectToLogin}
+ * — the only consumer, including logout — can route the real cleanup through
+ * `GET /api/session/clear` (the Route Handler that CAN delete it) when not.
  */
-export async function clearToken(): Promise<boolean> {
+async function clearToken(): Promise<boolean> {
   const jar = await cookies();
   try {
     jar.delete(COOKIE_NAME);
@@ -96,7 +96,8 @@ export function authHeaders(token: string): { Authorization: string } {
  *
  * It only checks for the presence of the cookie; it does NOT validate the token
  * against the API. Callers that additionally call `/auth/me` still handle a 401
- * from that call and redirect via {@link loginHref}.
+ * from that call — via {@link redirectToLogin}, so the stale cookie is also
+ * cleaned up.
  */
 export async function requireSession(next?: string | null): Promise<string> {
   const token = await getToken();

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { requireSession, loginHref, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { fetchRoles, fetchGrants, resolvePrincipal } from './actions';
 import { GrantRoleForm } from './grant-role-form';
@@ -25,7 +25,7 @@ export default async function PermisosPage({ searchParams }: Props) {
   const { data: me, response: meRes } = await api.GET('/auth/me', {
     headers: authHeaders(token),
   });
-  if (meRes.status === 401 || !me) redirect(loginHref('/admin/permissions'));
+  if (meRes.status === 401 || !me) return redirectToLogin('/admin/permissions');
   if (!me.isAdmin) redirect('/');
 
   const { principalId } = await searchParams;

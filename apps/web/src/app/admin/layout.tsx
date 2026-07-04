@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
-import { redirect } from 'next/navigation';
-import { loginHref } from '@/lib/auth';
+import { redirectToLogin } from '@/lib/auth';
 import { getMe } from '@/lib/navigation-data';
 import { DashboardLayout } from '@/lib/dashboard-layout';
 import { PageContainer } from '@/components/molecules/page-container';
@@ -22,7 +21,7 @@ export default async function AdminLayout({
   children: ReactNode;
 }) {
   const me = await getMe();
-  if (me == null) redirect(loginHref('/admin'));
+  if (me == null) return redirectToLogin('/admin');
 
   return (
     <DashboardLayout>

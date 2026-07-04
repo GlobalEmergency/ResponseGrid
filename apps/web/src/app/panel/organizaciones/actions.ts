@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { requireSession, loginHref, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 export type OrgActionResult =
@@ -38,7 +38,7 @@ export async function createOrganizationAction(
   });
 
   if (error !== undefined || data === undefined) {
-    if (response.status === 401) redirect(loginHref('/panel/organizaciones'));
+    if (response.status === 401) return redirectToLogin('/panel/organizaciones');
     return { status: 'error', message: t.organizaciones.err_create_failed };
   }
 

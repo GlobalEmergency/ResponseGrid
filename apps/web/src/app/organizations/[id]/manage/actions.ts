@@ -1,9 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { requireSession, loginHref, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 export type OrgActionResult =
@@ -32,7 +31,7 @@ export async function addMemberAction(
   });
 
   if (error !== undefined) {
-    if (response.status === 401) redirect(loginHref(`/organizations/${orgId}/manage`));
+    if (response.status === 401) return redirectToLogin(`/organizations/${orgId}/manage`);
     if (response.status === 403) {
       return { status: 'error', message: t.organizaciones.err_owner_only };
     }
@@ -63,7 +62,7 @@ export async function removeMemberAction(
   });
 
   if (error !== undefined) {
-    if (response.status === 401) redirect(loginHref(`/organizations/${orgId}/manage`));
+    if (response.status === 401) return redirectToLogin(`/organizations/${orgId}/manage`);
     if (response.status === 403) {
       return { status: 'error', message: t.organizaciones.err_owner_only };
     }

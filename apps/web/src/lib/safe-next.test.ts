@@ -22,6 +22,20 @@ test('rejects open-redirect targets', () => {
 });
 
 /**
+ * `next` must land on a page, never on an API route: /api/session/clear
+ * deletes the session cookie, so /login?next=%2Fapi%2Fsession%2Fclear would
+ * log the user straight back out after every successful login (login-loop
+ * trap found in the #312 review).
+ */
+test('rejects API routes as next targets', () => {
+  assert.equal(safeNextPath('/api/session/clear'), null);
+  assert.equal(safeNextPath('/api'), null);
+  assert.equal(safeNextPath('/API/session/clear'), null); // case-insensitive
+  assert.equal(loginHref('/api/session/clear'), '/login');
+  assert.equal(sessionClearHref('/api/session/clear'), '/api/session/clear');
+});
+
+/**
  * loginHref is the single source of truth for the `?next=` contract: every
  * login redirect goes through it, so a safe origin round-trips and an unsafe or
  * absent one collapses to a plain `/login` (never an open redirect).

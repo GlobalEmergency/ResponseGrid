@@ -1,9 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { requireSession, loginHref, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 export type NotificationActionResult =
@@ -28,7 +27,7 @@ export async function markNotificationReadAction(
   });
 
   if (error !== undefined) {
-    if (response.status === 401) redirect(loginHref('/dashboard/notifications'));
+    if (response.status === 401) return redirectToLogin('/dashboard/notifications');
     if (response.status === 403) {
       return { status: 'error', message: t.notificaciones.err_mark_read_forbidden };
     }
@@ -53,7 +52,7 @@ export async function markAllNotificationsReadAction(): Promise<NotificationActi
   });
 
   if (error !== undefined) {
-    if (response.status === 401) redirect(loginHref('/dashboard/notifications'));
+    if (response.status === 401) return redirectToLogin('/dashboard/notifications');
     return { status: 'error', message: t.notificaciones.err_mark_all_read_failed };
   }
 

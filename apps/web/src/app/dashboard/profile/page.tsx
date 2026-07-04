@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
-import { requireSession, loginHref, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
 import { PageContainer } from '@/components/molecules/page-container';
@@ -27,7 +26,7 @@ export default async function MiPerfilPage() {
     headers: authHeaders(token),
   });
 
-  if (me === undefined) redirect(loginHref('/dashboard/profile'));
+  if (me === undefined) return redirectToLogin('/dashboard/profile');
 
   return (
     <main className="flex-1 bg-surface">

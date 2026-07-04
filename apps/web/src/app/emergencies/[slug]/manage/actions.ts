@@ -1,10 +1,9 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import type { components } from '@reliefhub/api-client';
 import { api } from '@/lib/api';
-import { requireSession, clearToken, authHeaders, redirectToLogin } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 /** A reason is mandatory for every edit/discard; mirror the API's min length. */
@@ -262,8 +261,7 @@ export async function renewNeed(
 }
 
 export async function logout(): Promise<never> {
-  await clearToken();
-  redirect('/login');
+  return redirectToLogin();
 }
 
 /**

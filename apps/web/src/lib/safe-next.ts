@@ -11,6 +11,11 @@ export function safeNextPath(value: unknown): string | null {
   if (!value.startsWith('/')) return null;
   if (value.startsWith('//')) return null;
   if (value.includes('\\')) return null;
+  // Only pages are valid return targets. API routes are state-changing GETs
+  // (e.g. /api/session/clear deletes the session cookie, so a crafted
+  // /login?next=%2Fapi%2Fsession%2Fclear would undo every successful login).
+  const lower = value.toLowerCase();
+  if (lower === '/api' || lower.startsWith('/api/')) return null;
   return value;
 }
 

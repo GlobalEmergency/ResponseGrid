@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { requireSession, loginHref, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { PageHeader } from '@/components/molecules/page-header';
 import { getT } from '@/i18n/server';
@@ -25,7 +25,7 @@ export default async function CentrosPage() {
   });
 
   if (meResponse.status === 401 || !me) {
-    redirect(loginHref('/admin/points'));
+    return redirectToLogin('/admin/points');
   }
 
   if (!me.isAdmin) {

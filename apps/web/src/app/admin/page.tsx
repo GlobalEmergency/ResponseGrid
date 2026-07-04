@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { requireSession, loginHref, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { PageHeader } from '@/components/molecules/page-header';
 import { Card } from '@/components/atoms/card';
@@ -39,7 +39,7 @@ export default async function AdministracionPage() {
   ]);
 
   const me = meRes.data;
-  if (meRes.response.status === 401 || !me) redirect(loginHref('/admin'));
+  if (meRes.response.status === 401 || !me) return redirectToLogin('/admin');
 
   const roles = (rolesRes.data ?? []) as { id: string; permissions: string[] }[];
   const scopes = sortAdminScopes(administrableScopes(me.grants ?? [], roles));

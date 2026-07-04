@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { requireSession, loginHref, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { fetchServiceAccounts } from './actions';
 import { CreateServiceAccountForm } from './create-sa-form';
@@ -22,7 +22,7 @@ export default async function ApiKeysPage() {
   const { data: me, response: meRes } = await api.GET('/auth/me', {
     headers: authHeaders(token),
   });
-  if (meRes.status === 401 || !me) redirect(loginHref('/admin/api-keys'));
+  if (meRes.status === 401 || !me) return redirectToLogin('/admin/api-keys');
   if (!me.isAdmin) redirect('/');
 
   const accounts = await fetchServiceAccounts();
