@@ -59,7 +59,7 @@ export const PERMISSION_CATALOG = {
   // Service Accounts de los bots (Telegram/WhatsApp) que ya verifican el número
   // en el cliente. El JWT emitido nunca da más permisos que los del usuario
   // encontrado — acota el blast radius de una fuga de la API key del bot.
-  auth: ['trusted-phone-login'],
+  auth: ['trusted_phone_login'],
 } as const;
 
 type Catalog = typeof PERMISSION_CATALOG;

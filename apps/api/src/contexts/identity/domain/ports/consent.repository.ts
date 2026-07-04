@@ -12,6 +12,12 @@ export interface ConsentEntry {
 export interface ConsentContext {
   ip: string | null;
   userAgent: string | null;
+  /**
+   * The service account that recorded this consent on the user's behalf, when
+   * the acceptance came through a trusted channel (bot) rather than a browser
+   * (#315). Null/absent for the normal web flows.
+   */
+  serviceAccountId?: string | null;
 }
 
 export interface ConsentRepository {

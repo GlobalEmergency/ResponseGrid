@@ -243,9 +243,9 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'solo permiso: emitir un JWT de usuario por teléfono verificado ' +
       '(login/alta). Se concede uno-a-uno vía Grant explícito por Service ' +
       'Account; NO se hereda de integration_partner ni de ningún rol general — ' +
-      'el vehículo del permiso `auth:trusted-phone-login` (#315).',
+      'el vehículo del permiso `auth:trusted_phone_login` (#315).',
     defaultScopeType: 'platform',
-    permissions: ['auth:trusted-phone-login'],
+    permissions: ['auth:trusted_phone_login'],
   },
   citizen: {
     id: 'citizen',
