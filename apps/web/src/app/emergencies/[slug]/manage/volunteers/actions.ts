@@ -1,9 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 import { VALID_SKILLS, type VolunteerSkill } from './skills';
 
@@ -29,8 +28,7 @@ export async function updateVolunteerStatus(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage/volunteers`));
+      return redirectToLogin(`/emergencies/${slug}/manage/volunteers`);
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.vol_err_no_permission_status };
@@ -94,8 +92,7 @@ export async function createTask(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage/volunteers`));
+      return redirectToLogin(`/emergencies/${slug}/manage/volunteers`);
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.vol_err_no_permission_create };
@@ -124,8 +121,7 @@ export async function assignVolunteer(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage/volunteers`));
+      return redirectToLogin(`/emergencies/${slug}/manage/volunteers`);
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.vol_err_no_permission_assign };
@@ -160,8 +156,7 @@ export async function unassignVolunteer(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage/volunteers`));
+      return redirectToLogin(`/emergencies/${slug}/manage/volunteers`);
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.vol_err_no_permission_unassign };
@@ -194,8 +189,7 @@ export async function completeTask(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage/volunteers`));
+      return redirectToLogin(`/emergencies/${slug}/manage/volunteers`);
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.vol_err_no_permission_complete };
@@ -225,8 +219,7 @@ export async function cancelTask(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage/volunteers`));
+      return redirectToLogin(`/emergencies/${slug}/manage/volunteers`);
     }
     if (response.status === 403) {
       return { status: 'error', message: t.coord.vol_err_no_permission_cancel };

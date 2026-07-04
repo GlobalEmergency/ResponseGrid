@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { requireSession, loginHref } from '@/lib/auth';
+import { requireSession, redirectToLogin } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 import { getMe, getRoles, getPrincipalContexts } from '@/lib/navigation-data';
 import { contextHref, type PrincipalContext } from '@/lib/navigation';
@@ -26,7 +25,7 @@ export default async function DashboardHomePage() {
   await requireSession('/dashboard');
 
   const me = await getMe();
-  if (me == null) redirect(loginHref('/dashboard'));
+  if (me == null) return redirectToLogin('/dashboard');
 
   const { t } = await getT();
   const tp = t.panel;

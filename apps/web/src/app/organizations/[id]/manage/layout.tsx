@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
-import { redirect } from 'next/navigation';
-import { loginHref, clearToken } from '@/lib/auth';
+import { redirectToLogin } from '@/lib/auth';
 import { getMe } from '@/lib/navigation-data';
 import { DashboardLayout } from '@/lib/dashboard-layout';
 
@@ -21,8 +20,7 @@ export default async function OrganizationManageLayout({
 
   const me = await getMe();
   if (me == null) {
-    await clearToken();
-    redirect(loginHref(`/organizations/${id}/manage`));
+    return redirectToLogin(`/organizations/${id}/manage`);
   }
 
   return (

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
+import { redirectToLogin } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 import { getNavContext } from '@/lib/navigation-data';
 import { buildNavModel, type NavItem } from '@/lib/navigation';
@@ -17,7 +18,7 @@ export async function DashboardLayout({
   emergencyContext?: ReactNode;
 }) {
   const { me, roles, notificationUnread, contexts } = await getNavContext();
-  if (me == null) redirect('/login');
+  if (me == null) return redirectToLogin();
   // Force onboarding for any incomplete profile (missing phone/consent or an
   // outdated consent version) before granting access to the panel.
   if (me.profileComplete === false) redirect('/auth/onboarding?next=/dashboard');

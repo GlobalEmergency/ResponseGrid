@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { requireSession, loginHref, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { fetchAuditEntries } from './actions';
 import { AuditFilter } from './audit-filter';
@@ -38,7 +38,7 @@ export default async function AuditoriaPage({ searchParams }: PageProps) {
   });
 
   if (meResponse.status === 401 || !me) {
-    redirect(loginHref('/admin/audit'));
+    return redirectToLogin('/admin/audit');
   }
 
   if (!me.isAdmin) {

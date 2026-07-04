@@ -1,8 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { requireSession, loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, getToken, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { parseDateInput } from '@/lib/parse-date-input';
 
@@ -123,8 +122,7 @@ export async function grantRoleAction(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref('/admin/permissions'));
+      return redirectToLogin('/admin/permissions');
     }
     if (response.status === 403) {
       return {

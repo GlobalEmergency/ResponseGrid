@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { requireSession, loginHref, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { fetchMyGroups } from './actions';
 import { CreateGroupForm } from './create-group-form';
@@ -28,7 +27,7 @@ export default async function GruposPage() {
     ]);
 
   if (meRes.status === 401 || !me) {
-    redirect(loginHref('/panel/grupos'));
+    return redirectToLogin('/panel/grupos');
   }
 
   const roleMap = new Map((roles ?? []).map((r) => [r.id, r]));

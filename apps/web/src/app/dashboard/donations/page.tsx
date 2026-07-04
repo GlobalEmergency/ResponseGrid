@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
 import { PageContainer } from '@/components/molecules/page-container';
@@ -36,8 +35,7 @@ export default async function MisDonacionesPage() {
     headers: authHeaders(token),
   });
   if (res.response.status === 401) {
-    await clearToken();
-    redirect(loginHref('/dashboard/donations'));
+    return redirectToLogin('/dashboard/donations');
   }
   const donations = res.data ?? [];
 

@@ -1,8 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
 import type { components } from '@reliefhub/api-client';
@@ -29,8 +28,7 @@ export async function fetchMyResources(
   );
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(loginHref(`/e/${slug}/mis-puntos`));
+    return redirectToLogin(`/e/${slug}/mis-puntos`);
   }
 
   if (!response.ok || data == null) {
@@ -55,8 +53,7 @@ export async function updateResourceStatus(
   });
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(loginHref(`/e/${slug}/mis-puntos`));
+    return redirectToLogin(`/e/${slug}/mis-puntos`);
   }
 
   if (response.status === 403) {

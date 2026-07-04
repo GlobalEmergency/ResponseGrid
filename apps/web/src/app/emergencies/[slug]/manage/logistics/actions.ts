@@ -1,9 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 import type { components } from '@reliefhub/api-client';
 
@@ -63,8 +62,7 @@ export async function createShipment(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage/logistics`));
+      return redirectToLogin(`/emergencies/${slug}/manage/logistics`);
     }
     if (response.status === 403) {
       return { status: 'error', message: ts.ship_err_no_permission_create };
@@ -110,8 +108,7 @@ export async function assignCapacity(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage/logistics`));
+      return redirectToLogin(`/emergencies/${slug}/manage/logistics`);
     }
     if (response.status === 403) {
       return { status: 'error', message: ts.ship_err_no_permission_assign };
@@ -153,8 +150,7 @@ export async function getCapacitySuggestions(
 
   if (error !== undefined || data === undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage/logistics`));
+      return redirectToLogin(`/emergencies/${slug}/manage/logistics`);
     }
     if (response.status === 403) {
       return { status: 'error', message: ts.ship_err_no_permission_assign };
@@ -191,8 +187,7 @@ export async function markInTransit(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(loginNext));
+      return redirectToLogin(loginNext);
     }
     if (response.status === 403) {
       return { status: 'error', message: ts.ship_err_no_permission_act };
@@ -231,8 +226,7 @@ export async function confirmDelivery(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(loginNext));
+      return redirectToLogin(loginNext);
     }
     if (response.status === 403) {
       return { status: 'error', message: ts.ship_err_no_permission_act };
@@ -269,8 +263,7 @@ export async function cancelShipment(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/emergencies/${slug}/manage/logistics`));
+      return redirectToLogin(`/emergencies/${slug}/manage/logistics`);
     }
     if (response.status === 403) {
       return { status: 'error', message: ts.ship_err_no_permission_cancel };

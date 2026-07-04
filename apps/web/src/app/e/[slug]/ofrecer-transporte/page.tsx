@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { requireSession, loginHref } from '@/lib/auth';
+import { requireSession, redirectToLogin } from '@/lib/auth';
 import { getMe } from '@/lib/navigation-data';
 import { submitCapacity } from './actions';
 import { OfrecerTransporteForm } from './ofrecer-transporte-form';
@@ -42,7 +42,7 @@ export default async function OfrecerTransportePage({ params }: Props) {
   // Resolve the current user — they are the provider (type: volunteer).
   const me = await getMe();
   if (me == null) {
-    redirect(loginHref(`/e/${slug}/ofrecer-transporte`));
+    return redirectToLogin(`/e/${slug}/ofrecer-transporte`);
   }
 
   const emergency = await getEmergencyBySlug(slug);

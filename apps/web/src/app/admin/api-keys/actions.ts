@@ -1,8 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { requireSession, loginHref, getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, getToken, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 
 export type ApiKeyActionResult =
@@ -82,8 +81,7 @@ export async function createServiceAccountAction(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref('/admin/api-keys'));
+      return redirectToLogin('/admin/api-keys');
     }
     if (response.status === 403) {
       return {

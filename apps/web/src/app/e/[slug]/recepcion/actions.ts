@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { requireSession, loginHref, authHeaders, clearToken } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 import { parseSupplyLines } from '@/lib/supply-lines';
 import { getCategories } from '@/adapters/get-categories';
@@ -103,8 +103,7 @@ export async function submitReception(
           });
 
   if (result.response.status === 401) {
-    await clearToken();
-    redirect(loginHref(`/e/${slug}/recepcion`));
+    return redirectToLogin(`/e/${slug}/recepcion`);
   }
   if (result.response.status === 409) {
     return { status: 'error', message: tr.err_already_processed };

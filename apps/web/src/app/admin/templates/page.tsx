@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { requireSession, loginHref, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
 import { fetchTemplates } from './actions';
@@ -29,7 +29,7 @@ export default async function TemplatesPage() {
   });
 
   if (meResponse.status === 401 || !me) {
-    redirect(loginHref('/admin/templates'));
+    return redirectToLogin('/admin/templates');
   }
 
   if (!me.isAdmin) {

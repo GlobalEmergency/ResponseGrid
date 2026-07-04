@@ -1,7 +1,6 @@
 'use server';
 
-import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
@@ -32,8 +31,7 @@ export async function fetchAdminResources(): Promise<ResourceAdminListItem[]> {
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref('/admin/points'));
+      return redirectToLogin('/admin/points');
     }
     return [];
   }
@@ -54,8 +52,7 @@ export async function fetchAdminResourceDetail(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/admin/points/${id}`));
+      return redirectToLogin(`/admin/points/${id}`);
     }
     if (response.status === 404) return null;
     return null;
@@ -91,8 +88,7 @@ export async function recordInventoryEntry(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(`/admin/points/${resourceId}`));
+      return redirectToLogin(`/admin/points/${resourceId}`);
     }
     if (response.status === 403) {
       return { status: 'error', message: ta.centros_detail_inv_err_forbidden };

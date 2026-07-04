@@ -1,9 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { api } from "@/lib/api";
-import { authHeaders, clearToken, getToken, requireSession, loginHref } from "@/lib/auth";
+import { authHeaders, getToken, requireSession, redirectToLogin } from "@/lib/auth";
 
 export interface ResourceGrantView {
   id: string;
@@ -120,8 +119,7 @@ export async function grantResourceRoleAction(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(resourcePath(slug, resourceId)));
+      return redirectToLogin(resourcePath(slug, resourceId));
     }
     if (response.status === 403) {
       return {
@@ -157,8 +155,7 @@ export async function revokeResourceGrantAction(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(loginHref(resourcePath(slug, resourceId)));
+      return redirectToLogin(resourcePath(slug, resourceId));
     }
     if (response.status === 403) {
       return {

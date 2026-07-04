@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
-import { requireSession, loginHref, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { getMe, getRoles } from '@/lib/navigation-data';
@@ -55,8 +55,7 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
 
   const [me, roles] = await Promise.all([getMe(), getRoles()]);
   if (me == null) {
-    await clearToken();
-    redirect(loginHref(`/e/${slug}/recepcion`));
+    return redirectToLogin(`/e/${slug}/recepcion`);
   }
 
   const access: EmergencyAccess = resolveEmergencyAccess(
@@ -81,8 +80,7 @@ export default async function RecepcionPage({ params, searchParams }: Props) {
     headers,
   });
   if (mineRes.response.status === 401) {
-    await clearToken();
-    redirect(loginHref(`/e/${slug}/recepcion`));
+    return redirectToLogin(`/e/${slug}/recepcion`);
   }
   const myPoints = (mineRes.data ?? []).filter((r) =>
     COLLECTION_TYPES.has(r.type),

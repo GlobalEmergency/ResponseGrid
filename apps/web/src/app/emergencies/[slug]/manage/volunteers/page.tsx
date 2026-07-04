@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { loginHref, clearToken } from '@/lib/auth';
+import { redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { resolveManageAccess } from '@/lib/manage-access';
@@ -84,8 +84,7 @@ export default async function ManageVolunteersPage({ params, searchParams }: Pro
   ]);
 
   if (rosterResult.response.status === 401 || tasksResult.response.status === 401) {
-    await clearToken();
-    redirect(loginHref(`/emergencies/${slug}/manage/volunteers`));
+    return redirectToLogin(`/emergencies/${slug}/manage/volunteers`);
   }
 
   if (rosterResult.response.status === 403 || tasksResult.response.status === 403) {

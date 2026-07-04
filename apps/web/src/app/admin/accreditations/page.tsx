@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { requireSession, loginHref, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { fetchAccreditations } from './actions';
 import { GrantAccreditationForm } from './grant-form';
@@ -29,7 +29,7 @@ export default async function AcreditacionesPage() {
   });
 
   if (meResponse.status === 401 || !me) {
-    redirect(loginHref('/admin/accreditations'));
+    return redirectToLogin('/admin/accreditations');
   }
 
   if (!me.isAdmin) {
