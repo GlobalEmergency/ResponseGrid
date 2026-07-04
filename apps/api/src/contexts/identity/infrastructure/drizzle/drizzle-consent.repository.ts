@@ -39,6 +39,7 @@ export class DrizzleConsentRepository implements ConsentRepository {
         version: e.version,
         ip: context.ip,
         userAgent: context.userAgent,
+        serviceAccountId: context.serviceAccountId ?? null,
       })),
     );
   }

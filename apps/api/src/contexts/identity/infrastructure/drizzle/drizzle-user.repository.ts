@@ -1,10 +1,11 @@
-import { eq } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
 import { usersTable } from './schema';
 import { UserRepository } from '../../domain/ports/user.repository';
 import { User, UserSnapshot } from '../../domain/user';
 import { UserId } from '../../domain/user-id';
 import { Email } from '../../domain/email';
+import { normalizePhone } from '../../domain/phone-normalization';
 
 type Row = typeof usersTable.$inferSelect;
 
@@ -47,6 +48,24 @@ export class DrizzleUserRepository implements UserRepository {
       .from(usersTable)
       .where(eq(usersTable.id, id.value));
     return rows[0] ? User.fromSnapshot(rowToSnapshot(rows[0])) : null;
+  }
+
+  async findByPhone(phone: string): Promise<User[]> {
+    const digits = normalizePhone(phone);
+    if (digits === '') return [];
+    // Compare STORED phone stripped of every non-digit against the normalised
+    // input, so `+58 412 555 0101`, `(58) 412.555.0101` and `+584125550101` all
+    // match. `digits` is bound as a parameter and only ever contains [0-9], so
+    // there is no injection surface. Null phones drop out (regexp_replace(NULL)
+    // is NULL). Most recent first for the ambiguous-match tie-break (#315).
+    const rows = await this.db
+      .select()
+      .from(usersTable)
+      .where(
+        sql`regexp_replace(${usersTable.phone}, '[^0-9]', '', 'g') = ${digits}`,
+      )
+      .orderBy(desc(usersTable.createdAt));
+    return rows.map((r) => User.fromSnapshot(rowToSnapshot(r)));
   }
 
   async recordLogin(id: UserId, at: Date): Promise<void> {

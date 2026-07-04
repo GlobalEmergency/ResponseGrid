@@ -4,6 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { DB, DatabaseModule } from '../../../shared/database.module';
 import { Db } from '../../../shared/db';
 import { AuthController } from './http/auth.controller';
+import { TrustedAuthController } from './http/trusted-auth.controller';
 import { OAuthController } from './http/oauth.controller';
 import { GrantsController } from './http/grants.controller';
 import { ApiKeysController } from './http/api-keys.controller';
@@ -12,6 +13,8 @@ import { RolesController } from './http/roles.controller';
 import { UsersController } from './http/users.controller';
 import { Login } from '../application/login';
 import { RegisterUser } from '../application/register-user';
+import { LoginByPhone } from '../application/login-by-phone';
+import { RegisterByPhone } from '../application/register-by-phone';
 import { CompleteRegistration } from '../application/complete-registration';
 import { AuthenticateWithProvider } from '../application/authenticate-with-provider';
 import { GrantRole } from '../application/grant-role';
@@ -417,6 +420,23 @@ const registerUserProvider = {
   ) => new RegisterUser(userRepo, hasher, tokenService, consentRepo),
 };
 
+const loginByPhoneProvider = {
+  provide: LoginByPhone,
+  inject: [USER_REPOSITORY, TOKEN_SERVICE],
+  useFactory: (userRepo: UserRepository, tokenService: JwtTokenService) =>
+    new LoginByPhone(userRepo, tokenService),
+};
+
+const registerByPhoneProvider = {
+  provide: RegisterByPhone,
+  inject: [USER_REPOSITORY, TOKEN_SERVICE, CONSENT_REPOSITORY],
+  useFactory: (
+    userRepo: UserRepository,
+    tokenService: JwtTokenService,
+    consentRepo: ConsentRepository,
+  ) => new RegisterByPhone(userRepo, tokenService, consentRepo),
+};
+
 const completeRegistrationProvider = {
   provide: CompleteRegistration,
   inject: [USER_REPOSITORY, CONSENT_REPOSITORY],
@@ -473,6 +493,7 @@ const updateProfileProvider = {
   ],
   controllers: [
     AuthController,
+    TrustedAuthController,
     OAuthController,
     GrantsController,
     ApiKeysController,
@@ -490,6 +511,8 @@ const updateProfileProvider = {
     tokenServiceProvider,
     loginProvider,
     registerUserProvider,
+    loginByPhoneProvider,
+    registerByPhoneProvider,
     completeRegistrationProvider,
     authenticateWithProviderProvider,
     setPasswordInviterProvider,

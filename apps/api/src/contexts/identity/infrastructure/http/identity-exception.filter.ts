@@ -10,13 +10,15 @@ import { EmailAlreadyRegisteredError } from '../../domain/email-already-register
 import { AccountLinkRequiresAuthError } from '../../domain/account-link-requires-auth.error';
 import { ConsentRequiredError } from '../../domain/consent-required.error';
 import { PhoneRequiredError } from '../../domain/phone-required.error';
+import { UserNotFoundByPhoneError } from '../../domain/user-not-found-by-phone.error';
 
 type IdentityError =
   | InvalidCredentialsError
   | EmailAlreadyRegisteredError
   | AccountLinkRequiresAuthError
   | ConsentRequiredError
-  | PhoneRequiredError;
+  | PhoneRequiredError
+  | UserNotFoundByPhoneError;
 
 @Catch(
   InvalidCredentialsError,
@@ -24,6 +26,7 @@ type IdentityError =
   AccountLinkRequiresAuthError,
   ConsentRequiredError,
   PhoneRequiredError,
+  UserNotFoundByPhoneError,
 )
 export class IdentityExceptionFilter implements ExceptionFilter {
   catch(exception: IdentityError, host: ArgumentsHost): void {
@@ -40,6 +43,9 @@ export class IdentityExceptionFilter implements ExceptionFilter {
       exception instanceof PhoneRequiredError
     ) {
       status = HttpStatus.BAD_REQUEST;
+    } else if (exception instanceof UserNotFoundByPhoneError) {
+      // 404: no account for that phone → the bot falls back to register-by-phone.
+      status = HttpStatus.NOT_FOUND;
     } else {
       status = HttpStatus.UNAUTHORIZED;
     }

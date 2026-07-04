@@ -79,6 +79,76 @@ describe('DrizzleUserRepository (integration)', () => {
     expect(result).toBeNull();
   });
 
+  it('findByPhone matches after normalisation, format-insensitively (#315)', async () => {
+    await repo.save(
+      User.create({
+        id: UserId.fromString(USER_ID),
+        email: Email.fromString('ana@reliefhub.org'),
+        passwordHash: null,
+        name: 'Ana',
+        isAdmin: false,
+        phone: '+58 412 555 0101',
+      }),
+    );
+
+    for (const input of [
+      '584125550101',
+      '+58-412-555.0101',
+      '(58)4125550101',
+    ]) {
+      const found = await repo.findByPhone(input);
+      expect(found.map((u) => u.email.value)).toEqual(['ana@reliefhub.org']);
+    }
+  });
+
+  it('findByPhone returns [] for no match, null phones, or empty input', async () => {
+    await repo.save(
+      User.create({
+        id: UserId.fromString(USER_ID),
+        email: Email.fromString('nophone@reliefhub.org'),
+        passwordHash: null,
+        name: 'No Phone',
+        isAdmin: false,
+        // phone omitted → null
+      }),
+    );
+
+    expect(await repo.findByPhone('584125550101')).toEqual([]);
+    expect(await repo.findByPhone('   ')).toEqual([]);
+  });
+
+  it('findByPhone returns the most recent first when several accounts share a phone (#315)', async () => {
+    const OLD = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+    const NEW = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+    // Explicit createdAt so recency ordering is deterministic.
+    await db.insert(usersTable).values([
+      {
+        id: OLD,
+        email: 'old@reliefhub.org',
+        passwordHash: null,
+        name: 'Old',
+        isAdmin: false,
+        phone: '+58 412 555 0101',
+        createdAt: new Date('2026-01-01T00:00:00Z'),
+      },
+      {
+        id: NEW,
+        email: 'new@reliefhub.org',
+        passwordHash: null,
+        name: 'New',
+        isAdmin: false,
+        phone: '(58) 412.555.0101',
+        createdAt: new Date('2026-06-01T00:00:00Z'),
+      },
+    ]);
+
+    const found = await repo.findByPhone('+584125550101');
+    expect(found.map((u) => u.email.value)).toEqual([
+      'new@reliefhub.org',
+      'old@reliefhub.org',
+    ]);
+  });
+
   it('upserts on duplicate id (updates name)', async () => {
     const user = User.create({
       id: UserId.fromString(USER_ID),
