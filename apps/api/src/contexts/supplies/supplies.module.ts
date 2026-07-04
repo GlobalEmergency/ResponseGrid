@@ -6,6 +6,10 @@ import {
   CategoryRepository,
 } from './domain/ports/category.repository';
 import {
+  CATEGORY_ADMIN_REPOSITORY,
+  CategoryAdminRepository,
+} from './domain/ports/category-admin.repository';
+import {
   SUPPLY_REPOSITORY,
   SupplyRepository,
 } from './domain/ports/supply.repository';
@@ -22,12 +26,17 @@ import {
   ContainerAuthorizationLookup,
 } from './domain/ports/container-authorization-lookup';
 import { DrizzleCategoryRepository } from './infrastructure/drizzle/drizzle-category.repository';
+import { DrizzleCategoryAdminRepository } from './infrastructure/drizzle/drizzle-category-admin.repository';
 import { DrizzleSupplyRepository } from './infrastructure/drizzle/drizzle-supply.repository';
 import { DrizzleSupplyCatalogReadModel } from './infrastructure/drizzle/drizzle-supply-catalog.read-model';
 import { CachingSupplyCatalogReadModel } from './infrastructure/caching-supply-catalog.read-model';
 import { DrizzleContainerRepository } from './infrastructure/drizzle/drizzle-container.repository';
 import { DrizzleContainerAuthorizationLookup } from './infrastructure/drizzle/drizzle-container-authorization-lookup';
 import { ListCategories } from './application/list-categories';
+import { ListAdminCategories } from './application/list-admin-categories';
+import { CreateCategory } from './application/create-category';
+import { UpdateCategory } from './application/update-category';
+import { DeleteCategory } from './application/delete-category';
 import { ListSupplies } from './application/list-supplies';
 import { GetSupply } from './application/get-supply';
 import { CreateContainer } from './application/create-container';
@@ -39,6 +48,7 @@ import { MoveContainer } from './application/move-container';
 import { GetContainer } from './application/get-container';
 import { ListContainers } from './application/list-containers';
 import { CategoriesController } from './infrastructure/http/categories.controller';
+import { CategoriesAdminController } from './infrastructure/http/categories-admin.controller';
 import { SuppliesController } from './infrastructure/http/supplies.controller';
 import { ContainerController } from './infrastructure/http/containers.controller';
 import { IdentityModule } from '../identity/infrastructure/identity.module';
@@ -81,6 +91,41 @@ const listCategoriesProvider = {
   inject: [CATEGORY_REPOSITORY],
   useFactory: (repo: CategoryRepository): ListCategories =>
     new ListCategories(repo),
+};
+
+const categoryAdminRepositoryProvider = {
+  provide: CATEGORY_ADMIN_REPOSITORY,
+  inject: [DB],
+  useFactory: (db: Db): CategoryAdminRepository =>
+    new DrizzleCategoryAdminRepository(db),
+};
+
+const listAdminCategoriesProvider = {
+  provide: ListAdminCategories,
+  inject: [CATEGORY_ADMIN_REPOSITORY],
+  useFactory: (repo: CategoryAdminRepository): ListAdminCategories =>
+    new ListAdminCategories(repo),
+};
+
+const createCategoryProvider = {
+  provide: CreateCategory,
+  inject: [CATEGORY_ADMIN_REPOSITORY],
+  useFactory: (repo: CategoryAdminRepository): CreateCategory =>
+    new CreateCategory(repo),
+};
+
+const updateCategoryProvider = {
+  provide: UpdateCategory,
+  inject: [CATEGORY_ADMIN_REPOSITORY],
+  useFactory: (repo: CategoryAdminRepository): UpdateCategory =>
+    new UpdateCategory(repo),
+};
+
+const deleteCategoryProvider = {
+  provide: DeleteCategory,
+  inject: [CATEGORY_ADMIN_REPOSITORY],
+  useFactory: (repo: CategoryAdminRepository): DeleteCategory =>
+    new DeleteCategory(repo),
 };
 
 const listSuppliesProvider = {
@@ -152,14 +197,24 @@ const listContainersProvider = {
  */
 @Module({
   imports: [DatabaseModule, IdentityModule],
-  controllers: [CategoriesController, SuppliesController, ContainerController],
+  controllers: [
+    CategoriesController,
+    CategoriesAdminController,
+    SuppliesController,
+    ContainerController,
+  ],
   providers: [
     categoryRepositoryProvider,
+    categoryAdminRepositoryProvider,
     supplyRepositoryProvider,
     supplyCatalogReadModelProvider,
     containerRepositoryProvider,
     containerAuthorizationLookupProvider,
     listCategoriesProvider,
+    listAdminCategoriesProvider,
+    createCategoryProvider,
+    updateCategoryProvider,
+    deleteCategoryProvider,
     listSuppliesProvider,
     getSupplyProvider,
     createContainerProvider,

@@ -1,8 +1,9 @@
-import { asc } from 'drizzle-orm';
+import { asc, isNull } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
 import { categoriesTable, categoryAliasesTable } from './schema';
 import { CategoryRepository } from '../../domain/ports/category.repository';
 import { CategoryDefinition } from '../../domain/category-definition';
+import { loadTranslationsBySlug } from './category-translations.query';
 
 export class DrizzleCategoryRepository implements CategoryRepository {
   constructor(private readonly db: Db) {}
@@ -14,10 +15,9 @@ export class DrizzleCategoryRepository implements CategoryRepository {
 
   async listCategories(): Promise<CategoryDefinition[]> {
     // Proyección PÚBLICA de la taxonomía: allow-list explícito de columnas. NO
-    // hacemos `select()` de toda la fila para que campos internos que se añadan
-    // a `categories` en el futuro (p.ej. notas de gestión o un flag de
-    // desactivación) no se traigan ni se filtren por accidente. Cuando exista
-    // un estado de categoría, las desactivadas se excluyen aquí (`.where(...)`).
+    // hacemos `select()` de toda la fila para que campos internos (p.ej.
+    // `archived_at`, notas de gestión) no se traigan ni se filtren por
+    // accidente. Las categorías archivadas se excluyen aquí.
     const rows = await this.db
       .select({
         slug: categoriesTable.slug,
@@ -28,7 +28,13 @@ export class DrizzleCategoryRepository implements CategoryRepository {
         sort: categoriesTable.sort,
       })
       .from(categoriesTable)
+      .where(isNull(categoriesTable.archivedAt))
       .orderBy(asc(categoriesTable.sort));
+
+    const translations = await loadTranslationsBySlug(
+      this.db,
+      rows.map((r) => r.slug),
+    );
     return rows.map((r) => ({
       slug: r.slug,
       labelEs: r.labelEs,
@@ -36,6 +42,7 @@ export class DrizzleCategoryRepository implements CategoryRepository {
       parentSlug: r.parentSlug ?? null,
       vertical: r.vertical,
       sort: r.sort,
+      translations: translations.get(r.slug) ?? [],
     }));
   }
 }

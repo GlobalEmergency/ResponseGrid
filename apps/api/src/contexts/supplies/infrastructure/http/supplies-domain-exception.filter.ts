@@ -13,6 +13,13 @@ import {
   ContainerValidationError,
 } from '../../domain/container-errors';
 import { SupplyLineValidationError } from '../../domain/supply-line';
+import {
+  CategoryAlreadyExistsError,
+  CategoryNotFoundError,
+  CategoryParentNotFoundError,
+  CategoryProtectedError,
+  CategoryValidationError,
+} from '../../domain/category-errors';
 
 type DomainError =
   | ContainerNotFoundError
@@ -20,7 +27,12 @@ type DomainError =
   | ContainerCycleError
   | ContainerEmergencyMismatchError
   | ContainerValidationError
-  | SupplyLineValidationError;
+  | SupplyLineValidationError
+  | CategoryNotFoundError
+  | CategoryAlreadyExistsError
+  | CategoryParentNotFoundError
+  | CategoryProtectedError
+  | CategoryValidationError;
 
 /**
  * Maps supplies domain errors to HTTP codes. The supplies context owns the
@@ -33,6 +45,12 @@ type DomainError =
  *   (matches how the codebase maps "wrong emergency", e.g. offers'
  *   TargetNeedWrongEmergencyError → 422)
  * - SupplyLineValidationError (e.g. a whitespace-only line name) → 400
+ *
+ * Category admin (#221):
+ * - CategoryNotFoundError → 404
+ * - CategoryAlreadyExistsError / CategoryProtectedError (core slug) → 409
+ * - CategoryValidationError (empty label/vertical, own-parent) → 400
+ * - CategoryParentNotFoundError → 422 (bad reference; default bucket)
  */
 @Catch(
   ContainerNotFoundError,
@@ -41,6 +59,11 @@ type DomainError =
   ContainerEmergencyMismatchError,
   ContainerValidationError,
   SupplyLineValidationError,
+  CategoryNotFoundError,
+  CategoryAlreadyExistsError,
+  CategoryParentNotFoundError,
+  CategoryProtectedError,
+  CategoryValidationError,
 )
 export class SuppliesDomainExceptionFilter implements ExceptionFilter {
   catch(exception: DomainError, host: ArgumentsHost): void {
@@ -52,13 +75,23 @@ export class SuppliesDomainExceptionFilter implements ExceptionFilter {
   }
 
   private statusFor(exception: DomainError): HttpStatus {
-    if (exception instanceof ContainerNotFoundError) {
+    if (
+      exception instanceof ContainerNotFoundError ||
+      exception instanceof CategoryNotFoundError
+    ) {
       return HttpStatus.NOT_FOUND;
     }
-    if (exception instanceof ContainerSealedError) {
+    if (
+      exception instanceof ContainerSealedError ||
+      exception instanceof CategoryAlreadyExistsError ||
+      exception instanceof CategoryProtectedError
+    ) {
       return HttpStatus.CONFLICT;
     }
-    if (exception instanceof SupplyLineValidationError) {
+    if (
+      exception instanceof SupplyLineValidationError ||
+      exception instanceof CategoryValidationError
+    ) {
       return HttpStatus.BAD_REQUEST;
     }
     return HttpStatus.UNPROCESSABLE_ENTITY;

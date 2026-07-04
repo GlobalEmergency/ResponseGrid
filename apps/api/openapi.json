@@ -5653,7 +5653,7 @@
           {
             "name": "Accept-Language",
             "in": "header",
-            "description": "Fallback locale header (es or en)",
+            "description": "Fallback locale header (es, en o cualquier idioma traducido)",
             "required": false,
             "schema": {
               "type": "string"
@@ -5678,6 +5678,223 @@
         "summary": "List the shared category taxonomy (slug + labels + hierarchy)",
         "tags": [
           "categories"
+        ]
+      }
+    },
+    "/admin/categories": {
+      "get": {
+        "operationId": "CategoriesAdminController_list",
+        "parameters": [
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "description": "Preferred locale",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryAdminDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing catalogue:manage permission"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the full category taxonomy for admin (archived included)",
+        "tags": [
+          "categories-admin"
+        ]
+      },
+      "post": {
+        "operationId": "CategoriesAdminController_create",
+        "parameters": [
+          {
+            "name": "locale",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryAdminDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid category payload"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing catalogue:manage permission"
+          },
+          "409": {
+            "description": "Category slug already exists"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a category or subcategory",
+        "tags": [
+          "categories-admin"
+        ]
+      }
+    },
+    "/admin/categories/{slug}": {
+      "patch": {
+        "operationId": "CategoriesAdminController_update",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "description": "Category slug (immutable)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryAdminDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid category payload"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing catalogue:manage permission"
+          },
+          "404": {
+            "description": "Category not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a category (labels, order, parent, translations, archive)",
+        "tags": [
+          "categories-admin"
+        ]
+      },
+      "delete": {
+        "operationId": "CategoriesAdminController_remove",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "description": "Category slug to archive",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Category archived"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing catalogue:manage permission"
+          },
+          "404": {
+            "description": "Category not found"
+          },
+          "409": {
+            "description": "Core category slug cannot be deleted"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Archive a category (core slugs are protected → 4xx)",
+        "tags": [
+          "categories-admin"
         ]
       }
     },
@@ -13140,6 +13357,166 @@
           "vertical",
           "sort"
         ]
+      },
+      "CategoryTranslationDto": {
+        "type": "object",
+        "properties": {
+          "locale": {
+            "type": "string",
+            "example": "fr"
+          },
+          "label": {
+            "type": "string",
+            "example": "Nourriture"
+          }
+        },
+        "required": [
+          "locale",
+          "label"
+        ]
+      },
+      "CategoryAdminDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "example": "baby_food"
+          },
+          "label": {
+            "type": "string",
+            "example": "Alimentos para bebé",
+            "description": "Localized label"
+          },
+          "labelEs": {
+            "type": "string",
+            "example": "Alimentos para bebé"
+          },
+          "labelEn": {
+            "type": "string",
+            "example": "Baby food"
+          },
+          "parentSlug": {
+            "type": "string",
+            "example": "food",
+            "nullable": true,
+            "description": "Parent category slug, or null for a top-level category"
+          },
+          "vertical": {
+            "type": "string",
+            "example": "general"
+          },
+          "sort": {
+            "type": "number",
+            "example": 140
+          },
+          "archivedAt": {
+            "type": "string",
+            "example": null,
+            "nullable": true,
+            "description": "Soft-archive timestamp (ISO-8601), or null if active"
+          },
+          "translations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryTranslationDto"
+            }
+          }
+        },
+        "required": [
+          "slug",
+          "label",
+          "labelEs",
+          "labelEn",
+          "parentSlug",
+          "vertical",
+          "sort",
+          "archivedAt",
+          "translations"
+        ]
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "example": "baby_food"
+          },
+          "labelEs": {
+            "type": "string",
+            "example": "Alimentos para bebé"
+          },
+          "labelEn": {
+            "type": "string",
+            "example": "Baby food"
+          },
+          "parentSlug": {
+            "type": "object",
+            "example": "food",
+            "nullable": true,
+            "description": "Parent category slug, or null for a top-level category"
+          },
+          "vertical": {
+            "type": "string",
+            "example": "general"
+          },
+          "sort": {
+            "type": "number",
+            "example": 140
+          },
+          "translations": {
+            "description": "Additional locale labels (beyond es/en) for category_translations",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryTranslationDto"
+            }
+          }
+        },
+        "required": [
+          "slug",
+          "labelEs",
+          "labelEn",
+          "vertical",
+          "sort"
+        ]
+      },
+      "UpdateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "labelEs": {
+            "type": "string",
+            "example": "Alimentos para bebé"
+          },
+          "labelEn": {
+            "type": "string",
+            "example": "Baby food"
+          },
+          "parentSlug": {
+            "type": "object",
+            "example": "food",
+            "nullable": true,
+            "description": "Parent category slug, or null for a top-level category"
+          },
+          "vertical": {
+            "type": "string",
+            "example": "general"
+          },
+          "sort": {
+            "type": "number",
+            "example": 140
+          },
+          "translations": {
+            "description": "Replace the category_translations rows with this set",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryTranslationDto"
+            }
+          },
+          "archived": {
+            "type": "boolean",
+            "example": false,
+            "description": "True to hide/archive the category, false to restore it"
+          }
+        }
       },
       "SupplyDto": {
         "type": "object",

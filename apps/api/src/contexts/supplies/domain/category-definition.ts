@@ -5,9 +5,16 @@
  * the schema can carry both core categories and finer subcategories.
  *
  * Es la proyección PÚBLICA de la taxonomía (la que sirve `GET /categories`):
- * solo campos publicables. NO debe crecer con datos de gestión interna (notas,
- * flag de desactivación, etc.); esos quedan para la API interna.
+ * solo campos publicables. Incluye `translations` (etiquetas localizadas: son
+ * dato publicable, alimentan la localización multi-idioma del `label`). NO debe
+ * crecer con datos de gestión INTERNA (notas, flag de desactivación/archivado,
+ * etc.); esos viven en {@link CategoryRecord} y solo salen por la API interna.
  */
+export interface CategoryTranslation {
+  locale: string;
+  label: string;
+}
+
 export interface CategoryDefinition {
   slug: string;
   labelEs: string;
@@ -15,4 +22,6 @@ export interface CategoryDefinition {
   parentSlug: string | null;
   vertical: string;
   sort: number;
+  /** Etiquetas en idiomas adicionales a es/en (tabla category_translations). */
+  translations: readonly CategoryTranslation[];
 }

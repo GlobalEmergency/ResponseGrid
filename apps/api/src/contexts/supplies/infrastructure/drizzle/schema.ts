@@ -23,6 +23,9 @@ export const categoriesTable = pgTable('categories', {
   ),
   vertical: text('vertical').notNull().default('general'),
   sort: integer('sort').notNull().default(0),
+  // Soft-archive de gestión (#221): oculta la categoría sin perder la taxonomía
+  // ni romper los slugs núcleo. Campo INTERNO: no se proyecta al público.
+  archivedAt: timestamp('archived_at', { withTimezone: true }),
 });
 
 export const categoryAliasesTable = pgTable('category_aliases', {

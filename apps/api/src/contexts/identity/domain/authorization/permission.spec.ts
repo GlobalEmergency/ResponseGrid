@@ -12,10 +12,12 @@ describe('permission catalog', () => {
       'role:grant',
       'group:manage_members',
       'apikey:create',
+      'catalogue:manage',
     ];
     for (const p of known) {
       expect(ALL_PERMISSIONS).toContain(p);
     }
+    expect(isPermission('catalogue:manage')).toBe(true);
   });
 
   it('includes the transport logistics permissions (EPIC #103)', () => {

@@ -13,6 +13,7 @@ describe('ListCategories', () => {
         parentSlug: null,
         vertical: 'general',
         sort: 10,
+        translations: [],
       },
     ];
     const repo: CategoryRepository = {

@@ -81,6 +81,14 @@ async function bootstrap(): Promise<void> {
     // `X-API-Key: rh_live_…` header (issue #96).
     .addApiKey({ type: 'apiKey', name: 'X-API-Key', in: 'header' }, 'api-key')
     .addTag('resources')
+    // Superficie interna/admin separada de la API pública. `categories` es la
+    // taxonomía pública (GET /categories); `categories-admin` es el CRUD
+    // privilegiado (catalogue:manage), documentado como grupo aparte.
+    .addTag('categories', 'Taxonomía pública compartida (solo lectura)')
+    .addTag(
+      'categories-admin',
+      'Gestión interna del catálogo (catalogue:manage)',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
