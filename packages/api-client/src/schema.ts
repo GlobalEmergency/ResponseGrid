@@ -73,6 +73,40 @@ export interface paths {
         patch: operations["AuthController_updateMe"];
         trace?: never;
     };
+    "/auth/trusted/login-by-phone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Emitir un JWT de usuario a partir de su teléfono verificado (bot de confianza) */
+        post: operations["TrustedAuthController_loginByPhoneRoute"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/trusted/register-by-phone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Alta passwordless de un usuario por teléfono verificado (bot de confianza) */
+        post: operations["TrustedAuthController_registerByPhoneRoute"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/grants/at-scope": {
         parameters: {
             query?: never;
@@ -2794,6 +2828,44 @@ export interface components {
             phone?: string | null;
             /** @example Nuevo Nombre */
             name?: string;
+        };
+        LoginByPhoneDto: {
+            /**
+             * @description Teléfono verificado por el canal de confianza (bot). Se normaliza (espacios, guiones, prefijo +) antes de buscar la cuenta.
+             * @example +58 412 555 0101
+             */
+            phone: string;
+        };
+        TrustedAuthUserDto: {
+            /** @description User UUID */
+            id: string;
+            /** @example Jane Doe */
+            name: string;
+            /** @example jane@example.com */
+            email: string;
+        };
+        TrustedAuthResponseDto: {
+            /** @description JWT del usuario — mismos claims que /auth/login; nunca confiere más permisos que los del propio usuario. */
+            accessToken: string;
+            user: components["schemas"]["TrustedAuthUserDto"];
+        };
+        RegisterByPhoneDto: {
+            /** @example +58 412 555 0101 */
+            phone: string;
+            /** @example Jane Doe */
+            name: string;
+            /** @example jane@example.com */
+            email: string;
+            /**
+             * @description Aceptación de las condiciones del servicio (debe ser true; el bot la recogió en la conversación).
+             * @example true
+             */
+            acceptedTerms: boolean;
+            /**
+             * @description Aceptación de la política de privacidad (debe ser true).
+             * @example true
+             */
+            acceptedPrivacy: boolean;
         };
         GrantListItemDto: {
             /** Format: uuid */
@@ -6041,6 +6113,117 @@ export interface operations {
             };
             /** @description Token inválido o ausente */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TrustedAuthController_loginByPhoneRoute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginByPhoneDto"];
+            };
+        };
+        responses: {
+            /** @description Login correcto */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrustedAuthResponseDto"];
+                };
+            };
+            /** @description Falta o es inválida la API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La Service Account no tiene el permiso auth:trusted_phone_login */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No existe usuario con ese teléfono */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Límite de peticiones excedido */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TrustedAuthController_registerByPhoneRoute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterByPhoneDto"];
+            };
+        };
+        responses: {
+            /** @description Usuario creado (auto-login) */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrustedAuthResponseDto"];
+                };
+            };
+            /** @description Falta la aceptación de términos/privacidad o un campo inválido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta o es inválida la API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La Service Account no tiene el permiso auth:trusted_phone_login */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ya existe una cuenta con ese email */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Límite de peticiones excedido */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };

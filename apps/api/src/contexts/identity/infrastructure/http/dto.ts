@@ -169,6 +169,75 @@ export class MeResponseDto {
   grants!: MeGrantDto[];
 }
 
+export class LoginByPhoneDto {
+  @ApiProperty({
+    example: '+58 412 555 0101',
+    description:
+      'Teléfono verificado por el canal de confianza (bot). Se normaliza ' +
+      '(espacios, guiones, prefijo +) antes de buscar la cuenta.',
+  })
+  @IsString()
+  @IsNotEmpty()
+  phone!: string;
+}
+
+export class RegisterByPhoneDto {
+  @ApiProperty({ example: '+58 412 555 0101' })
+  @IsString()
+  @IsNotEmpty()
+  phone!: string;
+
+  @ApiProperty({ example: 'Jane Doe' })
+  @IsString()
+  @IsNotEmpty()
+  name!: string;
+
+  @ApiProperty({ example: 'jane@example.com' })
+  @IsEmail()
+  email!: string;
+
+  @ApiProperty({
+    example: true,
+    description:
+      'Aceptación de las condiciones del servicio (debe ser true; el bot la ' +
+      'recogió en la conversación).',
+  })
+  @IsBoolean()
+  @Equals(true)
+  acceptedTerms!: boolean;
+
+  @ApiProperty({
+    example: true,
+    description: 'Aceptación de la política de privacidad (debe ser true).',
+  })
+  @IsBoolean()
+  @Equals(true)
+  acceptedPrivacy!: boolean;
+}
+
+export class TrustedAuthUserDto {
+  @ApiProperty({ description: 'User UUID' })
+  id!: string;
+
+  @ApiProperty({ example: 'Jane Doe' })
+  name!: string;
+
+  @ApiProperty({ example: 'jane@example.com' })
+  email!: string;
+}
+
+export class TrustedAuthResponseDto {
+  @ApiProperty({
+    description:
+      'JWT del usuario — mismos claims que /auth/login; nunca confiere más ' +
+      'permisos que los del propio usuario.',
+  })
+  accessToken!: string;
+
+  @ApiProperty({ type: TrustedAuthUserDto })
+  user!: TrustedAuthUserDto;
+}
+
 export class UpdateProfileDto {
   @ApiProperty({
     example: '+58 412 555 0101',

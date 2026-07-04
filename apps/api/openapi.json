@@ -194,6 +194,107 @@
         ]
       }
     },
+    "/auth/trusted/login-by-phone": {
+      "post": {
+        "operationId": "TrustedAuthController_loginByPhoneRoute",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginByPhoneDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login correcto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustedAuthResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta o es inválida la API key"
+          },
+          "403": {
+            "description": "La Service Account no tiene el permiso auth:trusted_phone_login"
+          },
+          "404": {
+            "description": "No existe usuario con ese teléfono"
+          },
+          "429": {
+            "description": "Límite de peticiones excedido"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Emitir un JWT de usuario a partir de su teléfono verificado (bot de confianza)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/trusted/register-by-phone": {
+      "post": {
+        "operationId": "TrustedAuthController_registerByPhoneRoute",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterByPhoneDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuario creado (auto-login)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustedAuthResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Falta la aceptación de términos/privacidad o un campo inválido"
+          },
+          "401": {
+            "description": "Falta o es inválida la API key"
+          },
+          "403": {
+            "description": "La Service Account no tiene el permiso auth:trusted_phone_login"
+          },
+          "409": {
+            "description": "Ya existe una cuenta con ese email"
+          },
+          "429": {
+            "description": "Límite de peticiones excedido"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Alta passwordless de un usuario por teléfono verificado (bot de confianza)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/grants/at-scope": {
       "get": {
         "operationId": "GrantsController_listAtScope",
@@ -9073,6 +9174,91 @@
             "example": "Nuevo Nombre"
           }
         }
+      },
+      "LoginByPhoneDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+58 412 555 0101",
+            "description": "Teléfono verificado por el canal de confianza (bot). Se normaliza (espacios, guiones, prefijo +) antes de buscar la cuenta."
+          }
+        },
+        "required": [
+          "phone"
+        ]
+      },
+      "TrustedAuthUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "User UUID"
+          },
+          "name": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "email": {
+            "type": "string",
+            "example": "jane@example.com"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email"
+        ]
+      },
+      "TrustedAuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "JWT del usuario — mismos claims que /auth/login; nunca confiere más permisos que los del propio usuario."
+          },
+          "user": {
+            "$ref": "#/components/schemas/TrustedAuthUserDto"
+          }
+        },
+        "required": [
+          "accessToken",
+          "user"
+        ]
+      },
+      "RegisterByPhoneDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+58 412 555 0101"
+          },
+          "name": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "email": {
+            "type": "string",
+            "example": "jane@example.com"
+          },
+          "acceptedTerms": {
+            "type": "boolean",
+            "example": true,
+            "description": "Aceptación de las condiciones del servicio (debe ser true; el bot la recogió en la conversación)."
+          },
+          "acceptedPrivacy": {
+            "type": "boolean",
+            "example": true,
+            "description": "Aceptación de la política de privacidad (debe ser true)."
+          }
+        },
+        "required": [
+          "phone",
+          "name",
+          "email",
+          "acceptedTerms",
+          "acceptedPrivacy"
+        ]
       },
       "GrantListItemDto": {
         "type": "object",
