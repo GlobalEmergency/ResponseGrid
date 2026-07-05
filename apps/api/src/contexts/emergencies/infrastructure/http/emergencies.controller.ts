@@ -27,7 +27,6 @@ import {
   ApiForbiddenResponse,
   ApiParam,
 } from '@nestjs/swagger';
-import { SkipThrottle } from '@nestjs/throttler';
 import { CreateEmergency } from '../../application/create-emergency';
 import { ListActiveEmergencies } from '../../application/list-active-emergencies';
 import { ListMyEmergencies } from '../../application/list-my-emergencies';
@@ -56,10 +55,6 @@ import { RequirePermission } from '../../../identity/infrastructure/http/require
 
 @ApiTags('emergencies')
 @Controller('emergencies')
-// Public read routes (GET /emergencies, by-slug) must not inherit the
-// specialized throttlers (auth/intake/trusted-auth) the global guard applies to
-// every route — only `default` 200/min. Prevents 429 on the public API (#331).
-@SkipThrottle({ auth: true, intake: true, 'trusted-auth': true })
 @UseFilters(EmergencyExceptionFilter)
 export class EmergenciesController {
   constructor(

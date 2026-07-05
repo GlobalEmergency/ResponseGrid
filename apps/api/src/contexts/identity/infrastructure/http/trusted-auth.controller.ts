@@ -41,7 +41,8 @@ type AuthedRequest = ExpressRequest & { user: AuthenticatedUser };
 
 // 20 requests / 60 s. Keyed per API-key prefix (not IP) by
 // ApiKeyAwareThrottlerGuard, since all of a bot's traffic shares one server.
-const TRUSTED_THROTTLE = { 'trusted-auth': { ttl: 60_000, limit: 20 } };
+// Overrides the per-route `default` bucket (the only named throttler; #331).
+const TRUSTED_THROTTLE = { default: { ttl: 60_000, limit: 20 } };
 
 /**
  * Trusted-channel authentication for messaging bots (Telegram/WhatsApp) that

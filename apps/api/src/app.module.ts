@@ -34,31 +34,18 @@ const isTestEnv = process.env.NODE_ENV === 'test';
         ? [] // disabled — no throttle in test
         : [
             {
-              // Baseline per-IP limit that applies to EVERY route (the guard is
-              // registered globally below). Generous enough for legitimate map
-              // panning / dashboard use, but caps scraping and volumetric DoS.
+              // SINGLE global throttler, applied per-route by the guard below.
+              // Baseline 200/min per client; routes needing a tighter cap
+              // OVERRIDE it per-route with @Throttle({ default: {…} }) (see
+              // auth / donation-intakes / trusted-auth / geocoding).
+              //
+              // Named throttlers (auth/intake/trusted-auth) were removed (#331):
+              // the guard applies EVERY named throttler to EVERY route unless
+              // @SkipThrottle'd, so extra names leaked their tight limits (e.g.
+              // intake 5/min) onto unrelated routes and 429'd the public API.
               name: 'default',
               ttl: 60_000,
               limit: 200,
-            },
-            {
-              // auth endpoints: 10 requests per 60 seconds per IP
-              name: 'auth',
-              ttl: 60_000,
-              limit: 10,
-            },
-            {
-              // public donation-intake endpoints: 5 requests per 60 seconds per IP
-              name: 'intake',
-              ttl: 60_000,
-              limit: 5,
-            },
-            {
-              // trusted-channel bot auth (#315): 20 req / 60 s, keyed per
-              // API-key prefix (not IP) by ApiKeyAwareThrottlerGuard.
-              name: 'trusted-auth',
-              ttl: 60_000,
-              limit: 20,
             },
           ],
     ),
@@ -84,10 +71,12 @@ const isTestEnv = process.env.NODE_ENV === 'test';
     EventsModule,
   ],
   providers: [
-    // Apply rate limiting to EVERY route by default. Individual routes tighten
-    // it with @Throttle (auth, intake, trusted-auth…). Keys API-key traffic by
-    // key prefix and everything else by IP (#315). In test env the throttler is
-    // configured with an empty ruleset, so this guard is a no-op there.
+    // Apply rate limiting to EVERY route by default (the single `default`
+    // throttler, 200/min). Individual routes tighten it per-route with
+    // @Throttle({ default: {…} }). Keys API-key traffic by key prefix and
+    // everything else by the real client IP (CF-Connecting-IP behind Cloudflare;
+    // #315/#331). In test env the throttler is configured with an empty ruleset,
+    // so this guard is a no-op there.
     { provide: APP_GUARD, useClass: ApiKeyAwareThrottlerGuard },
   ],
 })
