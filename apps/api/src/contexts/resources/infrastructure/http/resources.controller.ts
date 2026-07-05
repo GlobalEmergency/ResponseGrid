@@ -11,7 +11,8 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { Throttle } from '@nestjs/throttler';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
+import { UserAwareThrottlerGuard } from '../../../identity/infrastructure/http/user-aware-throttler.guard';
 import {
   ApiTags,
   ApiOperation,
@@ -496,12 +497,18 @@ export class ResourcesController {
 
   @Post('resources/:resourceId/validity-reports')
   @HttpCode(201)
-  @UseGuards(JwtAuthGuard)
-  // Anti-abuso volumétrico: 20 reportes de validez / hora. Se sobreescribe SOLO
-  // el bucket `default` de esta ruta (el keying del throttler es por-ruta), así
-  // el resto de endpoints conserva su baseline de 200/min. El guard global
-  // (ApiKeyAwareThrottlerGuard) ya throttlea; keyeo por IP. El límite por-usuario
-  // real lo garantiza el índice único (1 reporte abierto por usuario+recurso).
+  // Anti-overflood en DOS dimensiones, ambas a 20 reportes/hora sobre el bucket
+  // `default` (keying del throttler por-ruta → no afecta a otros endpoints):
+  //  · por IP    → el guard global (ApiKeyAwareThrottlerGuard) corre antes de
+  //                autenticar, así que incluso las peticiones sin token válido
+  //                cuentan y se cortan antes del 401.
+  //  · por usuario → UserAwareThrottlerGuard corre DESPUÉS de JwtAuthGuard y
+  //                keyea por user.id, de modo que rotar de IP no evade el tope.
+  // Se saltan los throttlers per-IP ajenos (auth/intake/trusted-auth) para que
+  // solo gobierne este límite. Índice único (1 reporte abierto por usuario+
+  // recurso) como defensa adicional.
+  @UseGuards(JwtAuthGuard, UserAwareThrottlerGuard)
+  @SkipThrottle({ auth: true, intake: true, 'trusted-auth': true })
   @Throttle({ default: { ttl: 3_600_000, limit: 20 } })
   @ApiBearerAuth()
   @ApiOperation({
