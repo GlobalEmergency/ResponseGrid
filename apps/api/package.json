@@ -37,6 +37,7 @@
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "helmet": "^8.2.0",
+    "ipaddr.js": "^1.9.1",
     "ioredis": "^5.11.1",
     "multer": "^2.2.0",
     "passport": "^0.7.0",

@@ -66,15 +66,29 @@ describe('ValidityReportThrottlerGuard', () => {
     ]);
   });
 
-  it('keys the IP bucket by CF-Connecting-IP behind Cloudflare (not req.ip)', async () => {
+  it('keys the IP bucket by CF-Connecting-IP when the peer is a Cloudflare edge', async () => {
     const { guard, hits } = buildGuard({ canVerify: false });
     await expect(
       guard.canActivate(
-        contextFor(USER, '10.0.0.1', { 'cf-connecting-ip': '203.0.113.9' }),
+        // peer 104.16.0.1 ∈ Cloudflare → the forwarded client IP is trusted.
+        contextFor(USER, '104.16.0.1', { 'cf-connecting-ip': '203.0.113.9' }),
       ),
     ).resolves.toBe(true);
     expect(hits).toEqual([
       'validity-report:ip:203.0.113.9',
+      'validity-report:user:user-1',
+    ]);
+  });
+
+  it('ignores a forged CF-Connecting-IP on a direct (non-Cloudflare) hit', async () => {
+    const { guard, hits } = buildGuard({ canVerify: false });
+    await expect(
+      guard.canActivate(
+        contextFor(USER, '203.0.113.50', { 'cf-connecting-ip': '1.1.1.1' }),
+      ),
+    ).resolves.toBe(true);
+    expect(hits).toEqual([
+      'validity-report:ip:203.0.113.50',
       'validity-report:user:user-1',
     ]);
   });

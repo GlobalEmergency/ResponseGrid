@@ -21,13 +21,22 @@ describe('apiKeyThrottleTracker', () => {
     );
   });
 
-  it('uses CF-Connecting-IP (real client) over req.ip when no API key', () => {
+  it('uses CF-Connecting-IP (real client) when the peer is a Cloudflare edge', () => {
     expect(
       apiKeyThrottleTracker({
         headers: { 'cf-connecting-ip': '203.0.113.9' },
-        ip: '9.9.9.9',
+        ip: '104.16.0.1', // Cloudflare range
       }),
     ).toBe('203.0.113.9');
+  });
+
+  it('ignores a forged CF-Connecting-IP on a direct (non-Cloudflare) hit', () => {
+    expect(
+      apiKeyThrottleTracker({
+        headers: { 'cf-connecting-ip': '1.1.1.1' },
+        ip: '9.9.9.9', // direct peer, not Cloudflare
+      }),
+    ).toBe('9.9.9.9');
   });
 
   it('falls back to the IP when the API key is malformed', () => {
