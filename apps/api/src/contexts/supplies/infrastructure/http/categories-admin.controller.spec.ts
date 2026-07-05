@@ -1,4 +1,3 @@
-import { BadRequestException } from '@nestjs/common';
 import { CategoriesAdminController } from './categories-admin.controller';
 import { CategoryDefinition } from '../../domain/category-definition';
 
@@ -70,19 +69,9 @@ describe('CategoriesAdminController', () => {
     expect(result.label).toBe('Nourriture pour bébé');
   });
 
-  it('rejects delete for core slugs', async () => {
-    const controller = new CategoriesAdminController(
-      { execute: jest.fn() } as never,
-      { execute: jest.fn() } as never,
-      { execute: jest.fn() } as never,
-    );
-
-    await expect(controller.delete('food')).rejects.toBeInstanceOf(
-      BadRequestException,
-    );
-  });
-
-  it('archiva una categoría no-núcleo vía DELETE', async () => {
+  // La protección de slugs núcleo ya NO vive en el controller (que solo
+  // delega): la aplica el caso de uso UpdateCategory (ver update-category.spec).
+  it('archiva vía DELETE delegando en el caso de uso (sin regla en el controller)', async () => {
     const archived = { ...category, archivedAt: new Date().toISOString() };
     const updateCategory = { execute: jest.fn().mockResolvedValue(archived) };
     const controller = new CategoriesAdminController(

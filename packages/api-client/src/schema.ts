@@ -11182,13 +11182,6 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Core category slug cannot be archived by delete */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
             /** @description Missing or invalid token */
             401: {
                 headers: {
@@ -11205,6 +11198,13 @@ export interface operations {
             };
             /** @description Category not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Core category slug is protected and cannot be archived */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

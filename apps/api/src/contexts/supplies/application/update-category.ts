@@ -1,6 +1,7 @@
 import {
   CategoryNotFoundError,
   CategoryParentNotFoundError,
+  CategoryProtectedError,
   CategoryValidationError,
 } from './category-admin.errors';
 import { isCoreCategory } from '../domain/category';
@@ -52,7 +53,7 @@ export class UpdateCategory {
       }
     }
     if (cmd.archived === true && isCoreCategory(current.slug)) {
-      throw new CategoryValidationError('Core categories cannot be archived');
+      throw new CategoryProtectedError(current.slug);
     }
 
     return await this.repo.updateCategory(currentSlug, {

@@ -25,7 +25,9 @@ import {
 } from '../../domain/supply-errors';
 import {
   CategoryAlreadyExistsError,
+  CategoryNotFoundError as CategoryAdminNotFoundError,
   CategoryParentNotFoundError,
+  CategoryProtectedError,
   CategoryValidationError,
 } from '../../application/category-admin.errors';
 
@@ -45,7 +47,9 @@ type DomainError =
   | MergeIntoSelfError
   | AliasConflictError
   | CategoryAlreadyExistsError
+  | CategoryAdminNotFoundError
   | CategoryParentNotFoundError
+  | CategoryProtectedError
   | CategoryValidationError;
 
 /**
@@ -74,7 +78,9 @@ type DomainError =
   MergeIntoSelfError,
   AliasConflictError,
   CategoryAlreadyExistsError,
+  CategoryAdminNotFoundError,
   CategoryParentNotFoundError,
+  CategoryProtectedError,
   CategoryValidationError,
 )
 export class SuppliesDomainExceptionFilter implements ExceptionFilter {
@@ -92,6 +98,7 @@ export class SuppliesDomainExceptionFilter implements ExceptionFilter {
       exception instanceof SupplyNotFoundError ||
       exception instanceof VariantTargetNotFoundError ||
       exception instanceof CategoryNotFoundError ||
+      exception instanceof CategoryAdminNotFoundError ||
       exception instanceof CategoryParentNotFoundError
     ) {
       return HttpStatus.NOT_FOUND;
@@ -100,7 +107,8 @@ export class SuppliesDomainExceptionFilter implements ExceptionFilter {
       exception instanceof ContainerSealedError ||
       exception instanceof SupplyCodeConflictError ||
       exception instanceof AliasConflictError ||
-      exception instanceof CategoryAlreadyExistsError
+      exception instanceof CategoryAlreadyExistsError ||
+      exception instanceof CategoryProtectedError
     ) {
       return HttpStatus.CONFLICT;
     }

@@ -1,5 +1,5 @@
 import { UpdateCategory } from './update-category';
-import { CategoryValidationError } from './category-admin.errors';
+import { CategoryProtectedError } from './category-admin.errors';
 import { Category } from '../domain/category';
 import { CategoryDefinition } from '../domain/category-definition';
 import { CategoryRepository } from '../domain/ports/category.repository';
@@ -79,6 +79,6 @@ describe('UpdateCategory — archive / restore', () => {
 
     await expect(
       new UpdateCategory(repo).execute(Category.Food, { archived: true }),
-    ).rejects.toBeInstanceOf(CategoryValidationError);
+    ).rejects.toBeInstanceOf(CategoryProtectedError);
   });
 });
