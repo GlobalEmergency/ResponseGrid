@@ -11,8 +11,8 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { SkipThrottle, Throttle } from '@nestjs/throttler';
-import { UserAwareThrottlerGuard } from '../../../identity/infrastructure/http/user-aware-throttler.guard';
+import { SkipThrottle } from '@nestjs/throttler';
+import { ValidityReportThrottlerGuard } from './validity-report-throttler.guard';
 import {
   ApiTags,
   ApiOperation,
@@ -497,19 +497,13 @@ export class ResourcesController {
 
   @Post('resources/:resourceId/validity-reports')
   @HttpCode(201)
-  // Anti-overflood en DOS dimensiones, ambas a 20 reportes/hora sobre el bucket
-  // `default` (keying del throttler por-ruta → no afecta a otros endpoints):
-  //  · por IP    → el guard global (ApiKeyAwareThrottlerGuard) corre antes de
-  //                autenticar, así que incluso las peticiones sin token válido
-  //                cuentan y se cortan antes del 401.
-  //  · por usuario → UserAwareThrottlerGuard corre DESPUÉS de JwtAuthGuard y
-  //                keyea por user.id, de modo que rotar de IP no evade el tope.
-  // Se saltan los throttlers per-IP ajenos (auth/intake/trusted-auth) para que
-  // solo gobierne este límite. Índice único (1 reporte abierto por usuario+
-  // recurso) como defensa adicional.
-  @UseGuards(JwtAuthGuard, UserAwareThrottlerGuard)
+  // Anti-overflood: ValidityReportThrottlerGuard (post-auth) aplica dos buckets
+  // de 20/hora —por IP y por usuario, así rotar de IP no evade el tope— y exime
+  // a los verificadores de confianza (permiso resource:verify vía el PDP). Se
+  // saltan los throttlers per-IP ajenos (auth/intake/trusted-auth); el `default`
+  // global (200/min por IP) sigue activo pre-auth como suelo anti-DoS para todos.
+  @UseGuards(JwtAuthGuard, ValidityReportThrottlerGuard)
   @SkipThrottle({ auth: true, intake: true, 'trusted-auth': true })
-  @Throttle({ default: { ttl: 3_600_000, limit: 20 } })
   @ApiBearerAuth()
   @ApiOperation({
     summary:
