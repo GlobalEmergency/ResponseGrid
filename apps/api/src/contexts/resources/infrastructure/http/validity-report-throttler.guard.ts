@@ -17,6 +17,7 @@ import type { AccessControl } from '../../../identity/domain/authorization/acces
 import { SCOPE_RESOLVER } from '../../../identity/infrastructure/http/scope-resolver';
 import type { ScopeResolver } from '../../../identity/infrastructure/http/scope-resolver';
 import type { AuthenticatedUser } from '../../../identity/infrastructure/http/jwt-auth.guard';
+import { clientIp } from '../../../../shared/http/client-ip';
 
 /** Reports allowed per rolling window, applied independently to IP and user. */
 const LIMIT = 20;
@@ -73,8 +74,9 @@ export class ValidityReportThrottlerGuard implements CanActivate {
     );
     if (isVerifier) return true;
 
-    // 2. Enforce per-IP and per-user buckets; either overflow → 429.
-    const ip = req.ip ?? '';
+    // 2. Enforce per-IP and per-user buckets; either overflow → 429. Behind
+    // Cloudflare the real client IP is in CF-Connecting-IP, not req.ip.
+    const ip = clientIp(req);
     await this.hit(`validity-report:ip:${ip}`);
     await this.hit(`validity-report:user:${user.id}`);
     return true;

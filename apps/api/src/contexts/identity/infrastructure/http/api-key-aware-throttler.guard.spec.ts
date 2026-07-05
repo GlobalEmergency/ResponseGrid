@@ -21,6 +21,15 @@ describe('apiKeyThrottleTracker', () => {
     );
   });
 
+  it('uses CF-Connecting-IP (real client) over req.ip when no API key', () => {
+    expect(
+      apiKeyThrottleTracker({
+        headers: { 'cf-connecting-ip': '203.0.113.9' },
+        ip: '9.9.9.9',
+      }),
+    ).toBe('203.0.113.9');
+  });
+
   it('falls back to the IP when the API key is malformed', () => {
     expect(
       apiKeyThrottleTracker({

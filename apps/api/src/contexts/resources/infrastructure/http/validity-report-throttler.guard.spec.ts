@@ -7,8 +7,9 @@ type IncrementResult = { isBlocked: boolean };
 function contextFor(
   user: { id: string; grants: unknown[] } | undefined,
   ip = '1.2.3.4',
+  headers: Record<string, string | string[] | undefined> = {},
 ): ExecutionContext {
-  const req = { ip, user };
+  const req = { ip, user, headers };
   return {
     switchToHttp: () => ({ getRequest: () => req }),
   } as unknown as ExecutionContext;
@@ -61,6 +62,19 @@ describe('ValidityReportThrottlerGuard', () => {
     await expect(guard.canActivate(contextFor(USER))).resolves.toBe(true);
     expect(hits).toEqual([
       'validity-report:ip:1.2.3.4',
+      'validity-report:user:user-1',
+    ]);
+  });
+
+  it('keys the IP bucket by CF-Connecting-IP behind Cloudflare (not req.ip)', async () => {
+    const { guard, hits } = buildGuard({ canVerify: false });
+    await expect(
+      guard.canActivate(
+        contextFor(USER, '10.0.0.1', { 'cf-connecting-ip': '203.0.113.9' }),
+      ),
+    ).resolves.toBe(true);
+    expect(hits).toEqual([
+      'validity-report:ip:203.0.113.9',
       'validity-report:user:user-1',
     ]);
   });
