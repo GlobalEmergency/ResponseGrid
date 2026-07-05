@@ -76,7 +76,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @Throttle({ auth: { ttl: 60_000, limit: 10 } })
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiOperation({ summary: 'Authenticate and obtain a JWT access token' })
   @ApiOkResponse({ description: 'Login successful', type: LoginResponseDto })
   @ApiBadRequestResponse({ description: 'Invalid request body' })
@@ -90,7 +90,7 @@ export class AuthController {
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @Throttle({ auth: { ttl: 60_000, limit: 10 } })
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiOperation({
     summary: 'Register a new user account (auto-login returns JWT)',
   })

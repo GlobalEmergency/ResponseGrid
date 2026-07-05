@@ -11,7 +11,6 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { SkipThrottle } from '@nestjs/throttler';
 import { ValidityReportThrottlerGuard } from './validity-report-throttler.guard';
 import {
   ApiTags,
@@ -503,7 +502,6 @@ export class ResourcesController {
   // saltan los throttlers per-IP ajenos (auth/intake/trusted-auth); el `default`
   // global (200/min por IP) sigue activo pre-auth como suelo anti-DoS para todos.
   @UseGuards(JwtAuthGuard, ValidityReportThrottlerGuard)
-  @SkipThrottle({ auth: true, intake: true, 'trusted-auth': true })
   @ApiBearerAuth()
   @ApiOperation({
     summary:

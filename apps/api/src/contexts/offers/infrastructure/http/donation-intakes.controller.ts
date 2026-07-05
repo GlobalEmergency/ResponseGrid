@@ -110,7 +110,7 @@ export class DonationIntakesController {
   @Post('emergencies/:emergencyId/donation-intakes')
   @HttpCode(201)
   @UseGuards(OptionalJwtAuthGuard)
-  @Throttle({ intake: { ttl: 60_000, limit: 5 } })
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @ApiOperation({
     summary: 'Pre-register a donation at a collection point (public)',
   })
@@ -143,7 +143,7 @@ export class DonationIntakesController {
 
   @Post('emergencies/:emergencyId/donation-intakes/lookup-contact')
   @HttpCode(200)
-  @Throttle({ intake: { ttl: 60_000, limit: 5 } })
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @ApiOperation({
     summary: 'Recognize a returning donor by phone or email (public)',
   })
@@ -163,7 +163,7 @@ export class DonationIntakesController {
   }
 
   @Get('emergencies/:emergencyId/donation-intakes/by-code/:code')
-  @Throttle({ intake: { ttl: 60_000, limit: 10 } })
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiOperation({ summary: 'Track a donation by its code (public, no PII)' })
   @ApiParam({ name: 'emergencyId', format: 'uuid' })
   @ApiParam({ name: 'code', example: 'ACO-7F3K' })
@@ -207,7 +207,7 @@ export class DonationIntakesController {
   }
 
   @Patch('donation-intakes/:intakeId')
-  @Throttle({ intake: { ttl: 60_000, limit: 5 } })
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @ApiOperation({
     summary: 'Update a pending intake (public, requires code + contact)',
   })
