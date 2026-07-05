@@ -141,4 +141,18 @@ describe('Resource dispute', () => {
     const back = Resource.fromSnapshot(r.toSnapshot());
     expect(back.disputeDismissedAt).toBeInstanceOf(Date);
   });
+
+  it('a non-dismiss resolution clears a stale dismiss anchor from an earlier cycle', () => {
+    // Cycle 1: dismiss arms the cooldown anchor.
+    const r = published();
+    r.flagDisputed();
+    r.clearDispute('dismiss');
+    expect(r.disputeDismissedAt).toBeInstanceOf(Date);
+
+    // Cycle 2: re-disputed and this time confirmed closed (not dismissed) →
+    // the anchor must be cleared so it can never suppress a future dispute.
+    r.flagDisputed();
+    r.clearDispute('confirm_closed');
+    expect(r.disputeDismissedAt).toBeNull();
+  });
 });

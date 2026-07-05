@@ -101,6 +101,13 @@ export interface ResourceSnapshot {
   author?: AuthorSnapshot | null;
 }
 
+/**
+ * How a coordinator resolves a dispute. Canonical in the domain so the
+ * `'dismiss'` literal that arms the re-dispute cooldown cannot drift silently
+ * (a rename breaks compilation everywhere it is used).
+ */
+export type DisputeResolution = 'confirm_closed' | 'mark_invalid' | 'dismiss';
+
 export class Resource {
   private events: DomainEvent[] = [];
 
@@ -411,12 +418,14 @@ export class Resource {
   }
 
   /** Clear the disputed flag when a coordinator resolves it. */
-  clearDispute(resolution: string): void {
+  clearDispute(resolution: DisputeResolution): void {
     this._disputed = false;
     this._disputedAt = null;
-    if (resolution === 'dismiss') {
-      this._disputeDismissedAt = new Date();
-    }
+    // Only a `dismiss` arms the re-dispute cooldown. Any other resolution clears
+    // the anchor so a stale dismiss from an earlier cycle can't keep suppressing
+    // a later legitimate dispute (the field means "the currently-relevant
+    // dismiss", not "the last dismiss that ever happened").
+    this._disputeDismissedAt = resolution === 'dismiss' ? new Date() : null;
     this.events.push(
       new ResourceDisputeResolved(this.id.value, {
         emergencyId: this.emergencyId.value,

@@ -9,8 +9,10 @@ import {
   MutationAuditResult,
   diffFields,
 } from '../../../shared/domain/mutation-audit';
+import type { DisputeResolution } from '../domain/resource';
 
-export type DisputeResolution = 'confirm_closed' | 'mark_invalid' | 'dismiss';
+// Canonical definition lives in the domain; re-exported for existing importers.
+export type { DisputeResolution } from '../domain/resource';
 
 export interface ResolveResourceDisputeCommand {
   resourceId: string;
