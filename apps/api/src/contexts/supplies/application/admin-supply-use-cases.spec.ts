@@ -27,8 +27,9 @@ function makeRepo(overrides: Partial<SupplyRepository> = {}): SupplyRepository {
     findById: jest.fn().mockResolvedValue(supply()),
     findByCode: jest.fn().mockResolvedValue(null),
     save: jest.fn().mockResolvedValue(undefined),
-    allocateCode: jest.fn().mockResolvedValue('INS-0212'),
+    nextSequenceValue: jest.fn().mockResolvedValue(212),
     list: jest.fn().mockResolvedValue([]),
+    listTranslations: jest.fn().mockResolvedValue([]),
     listAliases: jest.fn().mockResolvedValue([]),
     addAlias: jest.fn().mockResolvedValue(undefined),
     removeAlias: jest.fn().mockResolvedValue(undefined),
@@ -122,5 +123,17 @@ describe('ListSuppliesAdmin / GetSupplyAdmin', () => {
     await expect(new GetSupplyAdmin(repo).execute(ID)).rejects.toBeInstanceOf(
       SupplyNotFoundError,
     );
+  });
+
+  it('get proyecta las traducciones del insumo (#320)', async () => {
+    const repo = makeRepo({
+      listTranslations: jest
+        .fn()
+        .mockResolvedValue([{ locale: 'en', name: 'Drinking water' }]),
+    });
+    const view = await new GetSupplyAdmin(repo).execute(ID);
+    expect(view.translations).toEqual([
+      { locale: 'en', name: 'Drinking water' },
+    ]);
   });
 });

@@ -12,6 +12,17 @@ export interface SupplyListFilter {
 }
 
 /**
+ * Traducción del nombre de un insumo a un locale concreto (i18n admin, #320).
+ * El nombre base (`es`) vive en `supplies.name`; estas filas alimentan
+ * `supply_translations` y la proyección `name` locale-aware (N idiomas) del
+ * catálogo público. El locale se normaliza (trim + lowercase) en infraestructura.
+ */
+export interface SupplyTranslationInput {
+  locale: string;
+  name: string;
+}
+
+/**
  * Puerto de persistencia del agregado `Supply` (escritura / gestión interna).
  * La implementación Drizzle vive en infrastructure; el dominio/aplicación solo
  * dependen de esta interfaz (DIP). Mockeable en tests.
@@ -26,11 +37,22 @@ export interface SupplyListFilter {
 export interface SupplyRepository {
   findById(id: string): Promise<Supply | null>;
   findByCode(code: string): Promise<Supply | null>;
-  save(supply: Supply): Promise<void>;
+  /**
+   * Persiste el agregado. Si `translations` se indica, REEMPLAZA por completo el
+   * conjunto de traducciones del insumo en `supply_translations` (quitar una
+   * locale del array la borra); si es `undefined`, las deja intactas —así el
+   * alta/archivado/edición sin i18n no toca las traducciones existentes.
+   */
+  save(
+    supply: Supply,
+    translations?: readonly SupplyTranslationInput[],
+  ): Promise<void>;
   /** Obtiene el siguiente valor de la secuencia para códigos de insumos. */
   nextSequenceValue(): Promise<number>;
   /** Listado de gestión: incluye archivados; filtra por categoría/estado/búsqueda. */
   list(filter: SupplyListFilter): Promise<Supply[]>;
+  /** Traducciones de nombre del insumo (i18n admin, #320), ordenadas por locale. */
+  listTranslations(supplyId: string): Promise<SupplyTranslationInput[]>;
   listAliases(supplyId: string): Promise<SupplyAlias[]>;
   addAlias(alias: SupplyAlias): Promise<void>;
   removeAlias(aliasNorm: string): Promise<void>;

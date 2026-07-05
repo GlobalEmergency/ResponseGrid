@@ -14600,15 +14600,7 @@
           "label": {
             "type": "string",
             "example": "Medicamentos",
-            "description": "Localized category label"
-          },
-          "labelEs": {
-            "type": "string",
-            "example": "Medicamentos"
-          },
-          "labelEn": {
-            "type": "string",
-            "example": "Medicines"
+            "description": "Etiqueta resuelta en el locale pedido (fallback a `es`)"
           },
           "parentSlug": {
             "type": "string",
@@ -14644,8 +14636,6 @@
         "required": [
           "slug",
           "label",
-          "labelEs",
-          "labelEn",
           "parentSlug",
           "vertical",
           "sort",
@@ -14827,16 +14817,8 @@
           },
           "name": {
             "type": "string",
-            "example": "Agua potable (botellón 18L)"
-          },
-          "nameEs": {
-            "type": "string",
-            "example": "Agua potable (botellón 18L)"
-          },
-          "nameEn": {
-            "type": "string",
-            "example": "Water (18L jug)",
-            "nullable": true
+            "example": "Agua potable (botellón 18L)",
+            "description": "Nombre resuelto en el locale pedido (fallback a `es`)"
           },
           "categorySlug": {
             "type": "string",
@@ -14844,16 +14826,8 @@
           },
           "categoryLabel": {
             "type": "string",
-            "example": "Alimentos"
-          },
-          "categoryLabelEs": {
-            "type": "string",
-            "example": "Alimentos"
-          },
-          "categoryLabelEn": {
-            "type": "string",
-            "example": "Food",
-            "nullable": true
+            "example": "Alimentos",
+            "description": "Etiqueta de categoría resuelta en el locale pedido"
           },
           "defaultUnit": {
             "type": "string",
@@ -14890,12 +14864,27 @@
           "id",
           "code",
           "name",
-          "nameEs",
           "categorySlug",
           "categoryLabel",
-          "categoryLabelEs",
           "attributes",
           "aliases"
+        ]
+      },
+      "SupplyTranslationDto": {
+        "type": "object",
+        "properties": {
+          "locale": {
+            "type": "string",
+            "example": "en"
+          },
+          "name": {
+            "type": "string",
+            "example": "Drinking water (1.5L bottle)"
+          }
+        },
+        "required": [
+          "locale",
+          "name"
         ]
       },
       "CreateSupplyDto": {
@@ -14927,6 +14916,13 @@
             "type": "object",
             "format": "uuid",
             "description": "Si es variante, id del insumo padre (debe existir)"
+          },
+          "translations": {
+            "description": "Traducciones del nombre por idioma (i18n). El nombre base es `es`.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyTranslationDto"
+            }
           }
         },
         "required": [
@@ -15007,6 +15003,19 @@
             "items": {
               "type": "string"
             }
+          },
+          "translations": {
+            "description": "Traducciones del nombre por idioma (i18n, #320)",
+            "example": [
+              {
+                "locale": "en",
+                "name": "Drinking water (1.5L bottle)"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyTranslationDto"
+            }
           }
         },
         "required": [
@@ -15016,7 +15025,8 @@
           "categorySlug",
           "attributes",
           "status",
-          "aliases"
+          "aliases",
+          "translations"
         ]
       },
       "UnmatchedSupplyLineGroupDto": {
@@ -15143,6 +15153,13 @@
           "variantOfId": {
             "type": "object",
             "format": "uuid"
+          },
+          "translations": {
+            "description": "Reemplaza el conjunto de traducciones del insumo; omitir para no tocarlas.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyTranslationDto"
+            }
           }
         }
       },

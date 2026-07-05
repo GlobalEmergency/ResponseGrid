@@ -6,10 +6,16 @@ import { AliasConflictError } from '../../domain/supply-errors';
 import {
   SupplyListFilter,
   SupplyRepository,
+  SupplyTranslationInput,
 } from '../../domain/ports/supply.repository';
-import { suppliesTable, supplyAliasesTable } from './schema';
+import {
+  suppliesTable,
+  supplyAliasesTable,
+  supplyTranslationsTable,
+} from './schema';
 
 type SupplyRow = typeof suppliesTable.$inferSelect;
+type SupplyTranslationRow = typeof supplyTranslationsTable.$inferInsert;
 
 /**
  * Persistencia del agregado `Supply` (escritura / gestión interna). La cara
@@ -39,14 +45,28 @@ export class DrizzleSupplyRepository implements SupplyRepository {
     return row ? this.toSupply(row) : null;
   }
 
-  async save(supply: Supply): Promise<void> {
+  async save(
+    supply: Supply,
+    translations?: readonly SupplyTranslationInput[],
+  ): Promise<void> {
     const s = supply.toSnapshot();
     const now = new Date();
-    await this.db
-      .insert(suppliesTable)
-      .values({
-        id: s.id,
-        code: s.code,
+    const values = {
+      id: s.id,
+      code: s.code,
+      name: s.name,
+      status: s.status,
+      registrationNotes: s.registrationNotes,
+      categorySlug: s.categorySlug,
+      defaultUnit: s.defaultUnit,
+      attributes: s.attributes,
+      variantOfId: s.variantOfId,
+      createdAt: now,
+      updatedAt: now,
+    };
+    const onConflict = {
+      target: suppliesTable.id,
+      set: {
         name: s.name,
         status: s.status,
         registrationNotes: s.registrationNotes,
@@ -54,22 +74,68 @@ export class DrizzleSupplyRepository implements SupplyRepository {
         defaultUnit: s.defaultUnit,
         attributes: s.attributes,
         variantOfId: s.variantOfId,
-        createdAt: now,
         updatedAt: now,
-      })
-      .onConflictDoUpdate({
-        target: suppliesTable.id,
-        set: {
-          name: s.name,
-          status: s.status,
-          registrationNotes: s.registrationNotes,
-          categorySlug: s.categorySlug,
-          defaultUnit: s.defaultUnit,
-          attributes: s.attributes,
-          variantOfId: s.variantOfId,
-          updatedAt: now,
-        },
-      });
+      },
+    };
+
+    // Sin traducciones: upsert simple, sin tocar `supply_translations`.
+    if (translations === undefined) {
+      await this.db
+        .insert(suppliesTable)
+        .values(values)
+        .onConflictDoUpdate(onConflict);
+      return;
+    }
+
+    // Con traducciones: upsert + reemplazo atómico del set de i18n.
+    const rows = this.normalizeTranslationRows(s.id, translations);
+    await this.db.transaction(async (tx) => {
+      await tx
+        .insert(suppliesTable)
+        .values(values)
+        .onConflictDoUpdate(onConflict);
+      await tx
+        .delete(supplyTranslationsTable)
+        .where(eq(supplyTranslationsTable.supplyId, s.id));
+      if (rows.length > 0) {
+        await tx.insert(supplyTranslationsTable).values(rows);
+      }
+    });
+  }
+
+  /**
+   * Normaliza y deduplica las traducciones a filas de `supply_translations`:
+   * `locale` a minúsculas, `name` sin espacios sobrantes, descartando entradas
+   * vacías. La última entrada de un mismo locale gana. El nombre base (`es`)
+   * vive en `supplies.name`; aquí se persiste lo que declara el admin.
+   */
+  private normalizeTranslationRows(
+    supplyId: string,
+    translations: readonly SupplyTranslationInput[],
+  ): SupplyTranslationRow[] {
+    const entries = new Map<string, string>();
+    for (const t of translations) {
+      const locale = t.locale.trim().toLowerCase();
+      const name = t.name.trim();
+      if (!locale || !name) {
+        continue;
+      }
+      entries.set(locale, name);
+    }
+    return [...entries.entries()].map(([locale, name]) => ({
+      supplyId,
+      locale,
+      name,
+    }));
+  }
+
+  async listTranslations(supplyId: string): Promise<SupplyTranslationInput[]> {
+    const rows = await this.db
+      .select()
+      .from(supplyTranslationsTable)
+      .where(eq(supplyTranslationsTable.supplyId, supplyId))
+      .orderBy(asc(supplyTranslationsTable.locale));
+    return rows.map((r) => ({ locale: r.locale, name: r.name }));
   }
 
   async nextSequenceValue(): Promise<number> {
@@ -175,6 +241,20 @@ export class DrizzleSupplyRepository implements SupplyRepository {
             eq(suppliesTable.variantOfId, sourceId),
           ),
         );
+      // Mueve las traducciones de nombre de A a B: el canónico (B) gana en
+      // conflicto de locale (ON CONFLICT DO NOTHING), y las de A se borran para
+      // no dejar i18n huérfana en un insumo archivado. Así el nombre queda
+      // enriquecido en todos los idiomas que aportaba el duplicado.
+      await tx.execute(sql`
+        INSERT INTO supply_translations (supply_id, locale, name)
+        SELECT ${targetId}, locale, name
+        FROM supply_translations
+        WHERE supply_id = ${sourceId}
+        ON CONFLICT (supply_id, locale) DO NOTHING
+      `);
+      await tx
+        .delete(supplyTranslationsTable)
+        .where(eq(supplyTranslationsTable.supplyId, sourceId));
       // Archiva A (no se borra: preserva referencias legadas para #223/#226).
       await tx
         .update(suppliesTable)

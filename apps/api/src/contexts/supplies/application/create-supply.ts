@@ -4,7 +4,10 @@ import {
   VariantTargetNotFoundError,
   CategoryNotFoundError,
 } from '../domain/supply-errors';
-import { SupplyRepository } from '../domain/ports/supply.repository';
+import {
+  SupplyRepository,
+  SupplyTranslationInput,
+} from '../domain/ports/supply.repository';
 import { CategoryRepository } from '../domain/ports/category.repository';
 import { getCategoryPrefix } from '../domain/category';
 
@@ -16,6 +19,8 @@ export interface CreateSupplyCommand {
   registrationNotes?: string | null;
   /** Si se indica, el insumo es una variante de otro existente (#222). */
   variantOfId?: string | null;
+  /** Traducciones de nombre por idioma (#320). El nombre base (`name`) es `es`. */
+  translations?: readonly SupplyTranslationInput[];
 }
 
 /**
@@ -61,7 +66,7 @@ export class CreateSupply {
       variantOfId,
     });
 
-    await this.repo.save(supply);
+    await this.repo.save(supply, cmd.translations);
     return { id: supply.id, code: supply.code };
   }
 }

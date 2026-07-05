@@ -26,6 +26,7 @@ function makeRepo(found: Supply | null, save: jest.Mock): SupplyRepository {
     save,
     nextSequenceValue: jest.fn().mockResolvedValue(212),
     list: jest.fn().mockResolvedValue([]),
+    listTranslations: jest.fn().mockResolvedValue([]),
     listAliases: jest.fn().mockResolvedValue([]),
     addAlias: jest.fn().mockResolvedValue(undefined),
     removeAlias: jest.fn().mockResolvedValue(undefined),
@@ -136,6 +137,32 @@ describe('EditSupply', () => {
     const saved = save.mock.calls[0][0] as Supply;
     expect(saved.categorySlug).toBe('food');
     expect(saved.code).toBe('FOD-0001'); // Cambió de WAT-0001 a FOD-0001
+  });
+
+  it('reemplaza el set de traducciones cuando se indican (#320)', async () => {
+    const save = jest.fn().mockResolvedValue(undefined);
+    const repo = makeRepo(existing(), save);
+    const categoryRepo = makeCategoryRepo();
+    await new EditSupply(repo, categoryRepo).execute({
+      id: ID,
+      translations: [{ locale: 'en', name: 'Mineral water' }],
+    });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const translations = save.mock.calls[0][1] as unknown;
+    expect(translations).toEqual([{ locale: 'en', name: 'Mineral water' }]);
+  });
+
+  it('no toca las traducciones cuando se omiten (save recibe undefined)', async () => {
+    const save = jest.fn().mockResolvedValue(undefined);
+    const repo = makeRepo(existing(), save);
+    const categoryRepo = makeCategoryRepo();
+    await new EditSupply(repo, categoryRepo).execute({
+      id: ID,
+      name: 'Agua x',
+    });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const translations = save.mock.calls[0][1] as unknown;
+    expect(translations).toBeUndefined();
   });
 
   it('lanza SupplyNotFoundError si no existe', async () => {

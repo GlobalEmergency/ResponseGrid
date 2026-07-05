@@ -1,5 +1,6 @@
 import { Supply } from './supply';
 import { SupplyAlias } from './supply-alias';
+import { allLocalizedVariants } from './localized-text';
 import { PublicSupplyRecord } from './ports/supply-catalog.read-model';
 
 export class SupplyResolver {
@@ -55,12 +56,12 @@ export class SupplyResolver {
 }
 
 /**
- * Índice de resolución exacta sobre el catálogo activo (nombre canónico
- * es/en, código y alias). Los registros ya son `active`, así que los campos
- * de gestión del agregado se rellenan con placeholders neutros: el resolver
- * solo lee id/nombre/código. Resolver contra el catálogo activo es deliberado
- * — un insumo fusionado/archivado no debe captar líneas nuevas; su texto sale
- * en el informe de no-casados (#226) para dar de alta un alias.
+ * Índice de resolución exacta sobre el catálogo activo (nombre canónico en
+ * todos sus idiomas, código y alias). Los registros ya son `active`, así que
+ * los campos de gestión del agregado se rellenan con placeholders neutros: el
+ * resolver solo lee id/nombre/código. Resolver contra el catálogo activo es
+ * deliberado — un insumo fusionado/archivado no debe captar líneas nuevas; su
+ * texto sale en el informe de no-casados (#226) para dar de alta un alias.
  */
 export function supplyResolverFromCatalog(
   records: readonly PublicSupplyRecord[],
@@ -79,9 +80,9 @@ export function supplyResolverFromCatalog(
     });
 
   const supplies = records.flatMap((record) =>
-    record.nameEn
-      ? [make(record, record.nameEs), make(record, record.nameEn)]
-      : [make(record, record.nameEs)],
+    allLocalizedVariants(record.name, record.translations).map((name) =>
+      make(record, name),
+    ),
   );
   const aliases = records.flatMap((record) =>
     record.aliases.map((alias) =>

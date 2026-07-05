@@ -98,6 +98,9 @@ export class SuppliesAdminController {
       attributes: dto.attributes ?? null,
       registrationNotes: dto.registrationNotes ?? null,
       variantOfId: dto.variantOfId ?? null,
+      ...(dto.translations !== undefined
+        ? { translations: dto.translations }
+        : {}),
     });
     this.cache.invalidate();
     return result;

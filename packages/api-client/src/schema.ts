@@ -5212,14 +5212,10 @@ export interface components {
              */
             slug: string;
             /**
-             * @description Localized category label
+             * @description Etiqueta resuelta en el locale pedido (fallback a `es`)
              * @example Medicamentos
              */
             label: string;
-            /** @example Medicamentos */
-            labelEs: string;
-            /** @example Medicines */
-            labelEn: string;
             /**
              * @description Parent category slug, or null for a top-level category
              * @example medical
@@ -5327,20 +5323,18 @@ export interface components {
             id: string;
             /** @example WAT-0001 */
             code: string;
-            /** @example Agua potable (botellón 18L) */
+            /**
+             * @description Nombre resuelto en el locale pedido (fallback a `es`)
+             * @example Agua potable (botellón 18L)
+             */
             name: string;
-            /** @example Agua potable (botellón 18L) */
-            nameEs: string;
-            /** @example Water (18L jug) */
-            nameEn?: string | null;
             /** @example food */
             categorySlug: string;
-            /** @example Alimentos */
+            /**
+             * @description Etiqueta de categoría resuelta en el locale pedido
+             * @example Alimentos
+             */
             categoryLabel: string;
-            /** @example Alimentos */
-            categoryLabelEs: string;
-            /** @example Food */
-            categoryLabelEn?: string | null;
             /** @example und */
             defaultUnit?: string | null;
             /**
@@ -5365,6 +5359,12 @@ export interface components {
              */
             aliases: string[];
         };
+        SupplyTranslationDto: {
+            /** @example en */
+            locale: string;
+            /** @example Drinking water (1.5L bottle) */
+            name: string;
+        };
         CreateSupplyDto: {
             /** @example Agua potable (botella 1.5L) */
             name: string;
@@ -5386,6 +5386,8 @@ export interface components {
              * @description Si es variante, id del insumo padre (debe existir)
              */
             variantOfId?: Record<string, never>;
+            /** @description Traducciones del nombre por idioma (i18n). El nombre base es `es`. */
+            translations?: components["schemas"]["SupplyTranslationDto"][];
         };
         CreateSupplyResponseDto: {
             /** Format: uuid */
@@ -5425,6 +5427,16 @@ export interface components {
              *     ]
              */
             aliases: string[];
+            /**
+             * @description Traducciones del nombre por idioma (i18n, #320)
+             * @example [
+             *       {
+             *         "locale": "en",
+             *         "name": "Drinking water (1.5L bottle)"
+             *       }
+             *     ]
+             */
+            translations: components["schemas"]["SupplyTranslationDto"][];
         };
         UnmatchedSupplyLineGroupDto: {
             /** @example Harina PAN */
@@ -5481,6 +5493,8 @@ export interface components {
             registrationNotes?: Record<string, never>;
             /** Format: uuid */
             variantOfId?: Record<string, never>;
+            /** @description Reemplaza el conjunto de traducciones del insumo; omitir para no tocarlas. */
+            translations?: components["schemas"]["SupplyTranslationDto"][];
         };
         AddSupplyAliasDto: {
             /**

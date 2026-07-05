@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { SupplyTranslationDto } from './supplies-admin.dto';
 
 /**
  * Proyección de GESTIÓN de un insumo (#222). A diferencia de `SupplyDto`
@@ -35,6 +36,13 @@ export class AdminSupplyDto {
 
   @ApiProperty({ type: [String], example: ['agua embotellada', 'botellon'] })
   aliases!: string[];
+
+  @ApiProperty({
+    type: [SupplyTranslationDto],
+    description: 'Traducciones del nombre por idioma (i18n, #320)',
+    example: [{ locale: 'en', name: 'Drinking water (1.5L bottle)' }],
+  })
+  translations!: SupplyTranslationDto[];
 }
 
 export class CreateSupplyResponseDto {

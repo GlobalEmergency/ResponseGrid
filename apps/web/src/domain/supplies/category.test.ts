@@ -12,8 +12,6 @@ import {
 const dto = {
   slug: 'water',
   label: 'Agua',
-  labelEs: 'Agua',
-  labelEn: 'Water',
   parentSlug: null,
   vertical: 'general',
   sort: 2,

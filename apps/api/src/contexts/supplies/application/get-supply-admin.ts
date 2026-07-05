@@ -14,7 +14,10 @@ export class GetSupplyAdmin {
     if (!supply) {
       throw new SupplyNotFoundError(id);
     }
-    const aliases = await this.repo.listAliases(id);
-    return toAdminSupplyView(supply, aliases);
+    const [aliases, translations] = await Promise.all([
+      this.repo.listAliases(id),
+      this.repo.listTranslations(id),
+    ]);
+    return toAdminSupplyView(supply, aliases, translations);
   }
 }

@@ -12,11 +12,15 @@ export const SUPPLY_CATALOG_READ_MODEL = Symbol('SUPPLY_CATALOG_READ_MODEL');
 export interface PublicSupplyRecord {
   id: string;
   code: string;
-  nameEs: string;
-  nameEn: string | null;
+  /** Nombre canónico base (`es`), la fuente de la verdad. */
+  name: string;
+  /** Traducciones del nombre por idioma (`locale -> name`), N idiomas. */
+  translations: Record<string, string>;
   categorySlug: string;
-  categoryLabelEs: string;
-  categoryLabelEn: string | null;
+  /** Etiqueta base de la categoría (`es`). */
+  categoryLabel: string;
+  /** Traducciones de la etiqueta de categoría (`locale -> label`), N idiomas. */
+  categoryTranslations: Record<string, string>;
   defaultUnit: string | null;
   attributes: Record<string, unknown>;
   variantOfId: string | null;

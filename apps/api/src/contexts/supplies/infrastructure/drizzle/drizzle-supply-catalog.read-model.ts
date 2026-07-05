@@ -13,7 +13,6 @@ import {
 } from './schema';
 
 const ACTIVE = 'active';
-const EN = 'en';
 
 type SupplyRow = typeof suppliesTable.$inferSelect;
 type CategoryRow = typeof categoriesTable.$inferSelect;
@@ -21,6 +20,11 @@ type CategoryRow = typeof categoriesTable.$inferSelect;
 /**
  * Lectura del catálogo público. Solo materializa insumos `active` y proyecta
  * exclusivamente campos publicables (sin `status` ni `registrationNotes`).
+ *
+ * i18n **universal**: carga TODAS las traducciones (no un idioma fijo) y las
+ * proyecta como mapas `locale -> texto`. La resolución al idioma pedido (con
+ * fallback al base `es`) la hace la capa de aplicación/HTTP, así que añadir un
+ * idioma nuevo no requiere tocar código.
  */
 export class DrizzleSupplyCatalogReadModel implements SupplyCatalogReadModel {
   constructor(private readonly db: Db) {}
@@ -39,15 +43,9 @@ export class DrizzleSupplyCatalogReadModel implements SupplyCatalogReadModel {
         .where(eq(suppliesTable.status, ACTIVE))
         .orderBy(asc(suppliesTable.name)),
       this.db.select().from(supplyAliasesTable),
-      this.db
-        .select()
-        .from(supplyTranslationsTable)
-        .where(eq(supplyTranslationsTable.locale, EN)),
+      this.db.select().from(supplyTranslationsTable),
       this.db.select().from(categoriesTable),
-      this.db
-        .select()
-        .from(categoryTranslationsTable)
-        .where(eq(categoryTranslationsTable.locale, EN)),
+      this.db.select().from(categoryTranslationsTable),
     ]);
 
     const aliasesBySupplyId = new Map<string, string[]>();
@@ -57,20 +55,30 @@ export class DrizzleSupplyCatalogReadModel implements SupplyCatalogReadModel {
       aliasesBySupplyId.set(row.supplyId, aliases);
     }
 
-    const nameEnBySupplyId = new Map(
-      supplyTranslationRows.map((row) => [row.supplyId, row.name]),
-    );
+    const translationsBySupplyId = new Map<string, Record<string, string>>();
+    for (const row of supplyTranslationRows) {
+      const map = translationsBySupplyId.get(row.supplyId) ?? {};
+      map[row.locale] = row.name;
+      translationsBySupplyId.set(row.supplyId, map);
+    }
+
     const categoryBySlug = new Map(categoryRows.map((row) => [row.slug, row]));
-    const categoryLabelEnBySlug = new Map(
-      categoryTranslationRows.map((row) => [row.categorySlug, row.label]),
-    );
+    const categoryTranslationsBySlug = new Map<
+      string,
+      Record<string, string>
+    >();
+    for (const row of categoryTranslationRows) {
+      const map = categoryTranslationsBySlug.get(row.categorySlug) ?? {};
+      map[row.locale] = row.label;
+      categoryTranslationsBySlug.set(row.categorySlug, map);
+    }
 
     return supplyRows.map((row) =>
       this.toRecord(
         row,
-        nameEnBySupplyId.get(row.id) ?? null,
+        translationsBySupplyId.get(row.id) ?? {},
         categoryBySlug.get(row.categorySlug),
-        categoryLabelEnBySlug.get(row.categorySlug) ?? null,
+        categoryTranslationsBySlug.get(row.categorySlug) ?? {},
         aliasesBySupplyId.get(row.id) ?? [],
       ),
     );
@@ -78,19 +86,26 @@ export class DrizzleSupplyCatalogReadModel implements SupplyCatalogReadModel {
 
   private toRecord(
     row: SupplyRow,
-    nameEn: string | null,
+    translations: Record<string, string>,
     category: CategoryRow | undefined,
-    categoryLabelEn: string | null,
+    categoryTranslations: Record<string, string>,
     aliases: string[],
   ): PublicSupplyRecord {
+    // La tabla de traducciones de categoría es la fuente principal; sembramos
+    // es/en desde las columnas de la categoría como red de seguridad para que
+    // esos dos idiomas resuelvan aunque falte una fila.
+    const categoryTranslationsWithFallback: Record<string, string> = {
+      ...(category ? { es: category.labelEs, en: category.labelEn } : {}),
+      ...categoryTranslations,
+    };
     return {
       id: row.id,
       code: row.code,
-      nameEs: row.name,
-      nameEn,
+      name: row.name,
+      translations,
       categorySlug: row.categorySlug,
-      categoryLabelEs: category?.labelEs ?? row.categorySlug,
-      categoryLabelEn: categoryLabelEn ?? category?.labelEn ?? null,
+      categoryLabel: category?.labelEs ?? row.categorySlug,
+      categoryTranslations: categoryTranslationsWithFallback,
       defaultUnit: row.defaultUnit ?? null,
       attributes: (row.attributes ?? {}) as Record<string, unknown>,
       variantOfId: row.variantOfId ?? null,

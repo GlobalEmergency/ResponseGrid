@@ -3,14 +3,14 @@ import { PublicSupplyRecord } from '../domain/ports/supply-catalog.read-model';
 import { UnlinkedLineGroup } from '../domain/ports/supply-link-backfill.repository';
 
 function makeRecord(
-  overrides: Partial<PublicSupplyRecord> & { id: string; nameEs: string },
+  overrides: Partial<PublicSupplyRecord> & { id: string; name: string },
 ): PublicSupplyRecord {
   return {
     code: 'INS-9999',
-    nameEn: null,
+    translations: {},
     categorySlug: 'food',
-    categoryLabelEs: 'Alimentos',
-    categoryLabelEn: null,
+    categoryLabel: 'Alimentos',
+    categoryTranslations: {},
     defaultUnit: null,
     attributes: {},
     variantOfId: null,
@@ -35,8 +35,8 @@ function makeUseCase(
 const water = makeRecord({
   id: 'sup-water',
   code: 'INS-0001',
-  nameEs: 'Agua potable',
-  nameEn: 'Drinking water',
+  name: 'Agua potable',
+  translations: { en: 'Drinking water' },
   categorySlug: 'water',
   aliases: ['agua embotellada'],
 });
@@ -117,12 +117,12 @@ describe('BackfillSupplyLinks', () => {
     const gloves = makeRecord({
       id: 'sup-gloves-a',
       code: 'INS-0002',
-      nameEs: 'Guantes',
+      name: 'Guantes',
     });
     const glovesDupe = makeRecord({
       id: 'sup-gloves-b',
       code: 'INS-0003',
-      nameEs: 'GUANTES',
+      name: 'GUANTES',
     });
     const { useCase, repo } = makeUseCase(
       [gloves, glovesDupe],

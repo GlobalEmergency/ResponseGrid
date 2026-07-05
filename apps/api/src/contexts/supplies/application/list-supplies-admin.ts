@@ -15,9 +15,13 @@ export class ListSuppliesAdmin {
   async execute(filter: SupplyListFilter): Promise<AdminSupplyView[]> {
     const supplies = await this.repo.list(filter);
     return Promise.all(
-      supplies.map(async (supply) =>
-        toAdminSupplyView(supply, await this.repo.listAliases(supply.id)),
-      ),
+      supplies.map(async (supply) => {
+        const [aliases, translations] = await Promise.all([
+          this.repo.listAliases(supply.id),
+          this.repo.listTranslations(supply.id),
+        ]);
+        return toAdminSupplyView(supply, aliases, translations);
+      }),
     );
   }
 }

@@ -14,6 +14,7 @@ function makeRepo(overrides: Partial<SupplyRepository> = {}): SupplyRepository {
     save: jest.fn().mockResolvedValue(undefined),
     nextSequenceValue: jest.fn().mockResolvedValue(212),
     list: jest.fn().mockResolvedValue([]),
+    listTranslations: jest.fn().mockResolvedValue([]),
     listAliases: jest.fn().mockResolvedValue([]),
     addAlias: jest.fn().mockResolvedValue(undefined),
     removeAlias: jest.fn().mockResolvedValue(undefined),
@@ -79,6 +80,22 @@ describe('CreateSupply', () => {
     expect(saved.code).toBe('WAT-0212');
     expect(saved.name).toBe('Agua potable');
     expect(saved.id).toBe(result.id);
+  });
+
+  it('reenvía las traducciones al repositorio para persistirlas (#320)', async () => {
+    const save = jest.fn().mockResolvedValue(undefined);
+    const repo = makeRepo({ save });
+    const categoryRepo = makeCategoryRepo();
+
+    await new CreateSupply(repo, categoryRepo).execute({
+      name: 'Agua potable',
+      categorySlug: 'water',
+      translations: [{ locale: 'en', name: 'Drinking water' }],
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const translations = save.mock.calls[0][1] as unknown;
+    expect(translations).toEqual([{ locale: 'en', name: 'Drinking water' }]);
   });
 
   it('resuelve el prefijo correcto de la categoría raíz para subcategorías (ej. medicines -> MED)', async () => {
