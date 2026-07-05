@@ -3,10 +3,7 @@ import { resourcesTable } from '../../../resources/infrastructure/drizzle/schema
 import { DrizzleResourceRepository } from '../../../resources/infrastructure/drizzle/drizzle-resource.repository';
 import { Resource } from '../../../resources/domain/resource';
 import { ResourceId } from '../../../resources/domain/resource-id';
-import {
-  ResourceStage,
-  ResourceType,
-} from '../../../resources/domain/resource-enums';
+import { ResourceType } from '../../../resources/domain/resource-enums';
 import { Location } from '../../../../shared/domain/location';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import { DrizzleResourceLocationLookup } from './drizzle-resource-location-lookup';
@@ -43,7 +40,6 @@ describe('DrizzleResourceLocationLookup (integration)', () => {
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Punto de acopio centro',
       location: Location.create({
         address: 'Av. Bolívar 1, Caracas',

@@ -4,6 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { DB, DatabaseModule } from '../../../shared/database.module';
 import { Db } from '../../../shared/db';
 import { AuthController } from './http/auth.controller';
+import { TrustedAuthController } from './http/trusted-auth.controller';
 import { OAuthController } from './http/oauth.controller';
 import { GrantsController } from './http/grants.controller';
 import { ApiKeysController } from './http/api-keys.controller';
@@ -12,6 +13,9 @@ import { RolesController } from './http/roles.controller';
 import { UsersController } from './http/users.controller';
 import { Login } from '../application/login';
 import { RegisterUser } from '../application/register-user';
+import { LoginByPhone } from '../application/login-by-phone';
+import { RegisterByPhone } from '../application/register-by-phone';
+import { CompleteRegistration } from '../application/complete-registration';
 import { AuthenticateWithProvider } from '../application/authenticate-with-provider';
 import { GrantRole } from '../application/grant-role';
 import { RevokeGrant } from '../application/revoke-grant';
@@ -35,6 +39,10 @@ import {
   USER_REPOSITORY,
   UserRepository,
 } from '../domain/ports/user.repository';
+import {
+  CONSENT_REPOSITORY,
+  ConsentRepository,
+} from '../domain/ports/consent.repository';
 import {
   MEMBERSHIP_REPOSITORY,
   MembershipRepository,
@@ -74,6 +82,7 @@ import {
 import { PASSWORD_HASHER } from '../domain/ports/password-hasher';
 import { TOKEN_SERVICE } from '../domain/ports/token.service';
 import { DrizzleUserRepository } from './drizzle/drizzle-user.repository';
+import { DrizzleConsentRepository } from './drizzle/drizzle-consent.repository';
 import { DrizzleUserAdminRepository } from './drizzle/drizzle-user-admin.repository';
 import { DrizzleOrganizationReader } from './drizzle/drizzle-organization-reader';
 import { DrizzleUserActivityReader } from './drizzle/drizzle-user-activity-reader';
@@ -93,7 +102,7 @@ import { SCOPE_RESOLVER } from './http/scope-resolver';
 import { EntityAwareScopeResolver } from './http/entity-aware-scope-resolver';
 import { DrizzleUserIdentityRepository } from './drizzle/drizzle-user-identity.repository';
 import { BcryptPasswordHasher } from './bcrypt-password-hasher';
-import { JwtTokenService } from './jwt-token.service';
+import { JwtTokenService, JWT_ISSUER, JWT_AUDIENCE } from './jwt-token.service';
 import { JwtAuthGuard } from './http/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from './http/optional-jwt-auth.guard';
 import { RequireAdminGuard } from './http/require-admin.guard';
@@ -139,6 +148,12 @@ const userRepositoryProvider = {
   provide: USER_REPOSITORY,
   inject: [DB],
   useFactory: (db: Db): UserRepository => new DrizzleUserRepository(db),
+};
+
+const consentRepositoryProvider = {
+  provide: CONSENT_REPOSITORY,
+  inject: [DB],
+  useFactory: (db: Db): ConsentRepository => new DrizzleConsentRepository(db),
 };
 
 const membershipRepositoryProvider = {
@@ -396,12 +411,37 @@ const loginProvider = {
 
 const registerUserProvider = {
   provide: RegisterUser,
-  inject: [USER_REPOSITORY, PASSWORD_HASHER, TOKEN_SERVICE],
+  inject: [USER_REPOSITORY, PASSWORD_HASHER, TOKEN_SERVICE, CONSENT_REPOSITORY],
   useFactory: (
     userRepo: UserRepository,
     hasher: BcryptPasswordHasher,
     tokenService: JwtTokenService,
-  ) => new RegisterUser(userRepo, hasher, tokenService),
+    consentRepo: ConsentRepository,
+  ) => new RegisterUser(userRepo, hasher, tokenService, consentRepo),
+};
+
+const loginByPhoneProvider = {
+  provide: LoginByPhone,
+  inject: [USER_REPOSITORY, TOKEN_SERVICE],
+  useFactory: (userRepo: UserRepository, tokenService: JwtTokenService) =>
+    new LoginByPhone(userRepo, tokenService),
+};
+
+const registerByPhoneProvider = {
+  provide: RegisterByPhone,
+  inject: [USER_REPOSITORY, TOKEN_SERVICE, CONSENT_REPOSITORY],
+  useFactory: (
+    userRepo: UserRepository,
+    tokenService: JwtTokenService,
+    consentRepo: ConsentRepository,
+  ) => new RegisterByPhone(userRepo, tokenService, consentRepo),
+};
+
+const completeRegistrationProvider = {
+  provide: CompleteRegistration,
+  inject: [USER_REPOSITORY, CONSENT_REPOSITORY],
+  useFactory: (userRepo: UserRepository, consentRepo: ConsentRepository) =>
+    new CompleteRegistration(userRepo, consentRepo),
 };
 
 const authenticateWithProviderProvider = {
@@ -440,12 +480,20 @@ const updateProfileProvider = {
       useFactory: () => {
         const secret = process.env.JWT_SECRET;
         if (!secret) throw new Error('JWT_SECRET is required');
-        return { secret, signOptions: { expiresIn: '12h' } };
+        return {
+          secret,
+          signOptions: {
+            expiresIn: '12h',
+            issuer: JWT_ISSUER,
+            audience: JWT_AUDIENCE,
+          },
+        };
       },
     }),
   ],
   controllers: [
     AuthController,
+    TrustedAuthController,
     OAuthController,
     GrantsController,
     ApiKeysController,
@@ -455,6 +503,7 @@ const updateProfileProvider = {
   ],
   providers: [
     userRepositoryProvider,
+    consentRepositoryProvider,
     membershipRepositoryProvider,
     grantRepositoryProvider,
     userIdentityRepositoryProvider,
@@ -462,6 +511,9 @@ const updateProfileProvider = {
     tokenServiceProvider,
     loginProvider,
     registerUserProvider,
+    loginByPhoneProvider,
+    registerByPhoneProvider,
+    completeRegistrationProvider,
     authenticateWithProviderProvider,
     setPasswordInviterProvider,
     ensureDonorAccountProvider,

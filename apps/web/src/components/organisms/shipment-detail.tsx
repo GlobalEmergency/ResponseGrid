@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useState, useEffect, useTransition } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import {
   assignCapacity,
   getCapacitySuggestions,
@@ -8,7 +9,7 @@ import {
   confirmDelivery,
   cancelShipment,
   type ActionResult,
-} from '@/app/e/[slug]/coordinacion/expediciones/actions';
+} from '@/app/emergencies/[slug]/manage/logistics/actions';
 import type { components } from '@reliefhub/api-client';
 import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
@@ -97,7 +98,7 @@ export function ShipmentDetail({
   // only steers the 401-redirect + revalidate target — both views also call
   // router.refresh() on success, so the visible list updates either way.
   const carrierBase = `/e/${slug}/mis-expediciones`;
-  const coordBase = `/e/${slug}/coordinacion/expediciones`;
+  const coordBase = `/emergencies/${slug}/manage/logistics`;
   const actorPath = canManage ? coordBase : carrierBase;
 
   // ── Ranked capacity suggestions (#107) ───────────────────────────────────
@@ -380,6 +381,24 @@ export function ShipmentDetail({
       }
       footer={footer}
     >
+      <DetailSection title={tc.ship_section_code}>
+        {/* Código único legible + QR: viaja con el camión/avión (#163). El QR
+            codifica el propio código, resoluble por la consulta pública (#158). */}
+        <div className="flex items-center gap-4 py-2">
+          <div className="rounded-lg border-2 border-navy bg-white p-2">
+            <QRCodeSVG
+              value={shipment.code}
+              size={96}
+              title={tc.ship_code_qr_alt.replace('{code}', shipment.code)}
+              marginSize={0}
+            />
+          </div>
+          <span className="font-display text-2xl font-bold tracking-widest text-navy break-all">
+            {shipment.code}
+          </span>
+        </div>
+      </DetailSection>
+
       <DetailSection title={tc.ship_section_route}>
         <DetailField label={tc.ship_field_origin} value={originName} />
         <DetailField

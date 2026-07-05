@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, loginHref, getToken, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 
 export type GroupActionResult =
@@ -79,8 +79,7 @@ export async function createGroupAction(
   _prev: GroupActionResult,
   formData: FormData,
 ): Promise<GroupActionResult> {
-  const token = await getToken();
-  if (!token) redirect('/login?next=/panel/grupos');
+  const token = await requireSession('/panel/grupos');
 
   const name = String(formData.get('name') ?? '').trim();
   const visibility = String(formData.get('visibility') ?? 'private');
@@ -107,8 +106,7 @@ export async function createGroupAction(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect('/login?next=/panel/grupos');
+      return redirectToLogin('/panel/grupos');
     }
     if (response.status === 403) {
       return {
@@ -126,8 +124,7 @@ export async function createGroupAction(
 export async function requestToJoinAction(
   groupId: string,
 ): Promise<GroupActionResult> {
-  const token = await getToken();
-  if (!token) redirect(`/login?next=/panel/grupos/${groupId}`);
+  const token = await requireSession(`/panel/grupos/${groupId}`);
 
   const { error, response } = await api.POST('/groups/{groupId}/join', {
     params: { path: { groupId } },
@@ -152,8 +149,7 @@ export async function approveMemberAction(
   groupId: string,
   userId: string,
 ): Promise<GroupActionResult> {
-  const token = await getToken();
-  if (!token) redirect(`/login?next=/panel/grupos/${groupId}`);
+  const token = await requireSession(`/panel/grupos/${groupId}`);
 
   const { error } = await api.POST(
     '/groups/{groupId}/members/{userId}/approve',
@@ -176,7 +172,7 @@ export async function addMemberByEmailAction(
 ): Promise<GroupActionResult> {
   const token = await getToken();
   const groupId = String(formData.get('groupId') ?? '');
-  if (!token) redirect(`/login?next=/panel/grupos/${groupId}`);
+  if (!token) redirect(loginHref(`/panel/grupos/${groupId}`));
 
   const email = String(formData.get('email') ?? '').trim();
   if (!email) return { status: 'error', message: 'El email es obligatorio.' };
@@ -211,8 +207,7 @@ export async function assignManagerAction(
   groupId: string,
   userId: string,
 ): Promise<GroupActionResult> {
-  const token = await getToken();
-  if (!token) redirect(`/login?next=/panel/grupos/${groupId}`);
+  const token = await requireSession(`/panel/grupos/${groupId}`);
 
   const { error, response } = await api.POST('/groups/{groupId}/managers', {
     params: { path: { groupId } },

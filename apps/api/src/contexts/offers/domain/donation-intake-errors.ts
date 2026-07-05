@@ -39,3 +39,12 @@ export class DonationIntakeLineLimitError extends Error {
     this.name = 'DonationIntakeLineLimitError';
   }
 }
+
+export class DonationIntakeReceptionReasonRequiredError extends Error {
+  constructor() {
+    super(
+      'A reason is required when the received lines differ from the declared ones',
+    );
+    this.name = 'DonationIntakeReceptionReasonRequiredError';
+  }
+}

@@ -4,7 +4,7 @@ import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { getToken } from '@/lib/auth';
 import { type ResourceViewDto } from '@/lib/group-by-country';
-import { OfficialHeaderBand } from '@/components/organisms/official-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
 import { ResourceList } from '@/components/organisms/resource-list';
 import { EmergencyMapWrapper } from '@/components/organisms/emergency-map-wrapper';
 import { NeedsFilter } from '@/components/molecules/needs-filter';
@@ -16,6 +16,7 @@ import { HelpActionRow } from '@/components/molecules/help-action-row';
 import { NeedsList } from '@/components/organisms/needs-list';
 import { EmergencyExplorer } from '@/components/organisms/emergency-explorer';
 import { EmergencyQuickLinks } from '@/components/molecules/emergency-quick-links';
+import { JsonLd } from '@/components/atoms/json-ld';
 import type { MapPoint } from '@/components/organisms/emergency-map';
 import { getT } from '@/i18n/server';
 
@@ -37,9 +38,24 @@ export async function generateMetadata(
     return { title: 'Emergencia no encontrada · ResponseGrid' };
   }
 
+  const title = `${emergency.name}: puntos de acopio y cómo ayudar · ResponseGrid`;
+  const description = `Puntos de acopio verificados, necesidades de material validadas y cómo ayudar en ${emergency.name}. Dona material, ofrece recursos o transporte, apúntate como voluntario y consulta qué NO llevar. Información oficial y en tiempo real.`;
+  const url = `/e/${emergency.slug}`;
+
   return {
-    title: `${emergency.name} · ResponseGrid`,
-    description: `Información oficial y puntos activos de ayuda para ${emergency.name}. Coordina la ayuda material: ofrece recursos, consulta las necesidades validadas y evita saturar la logística.`,
+    title,
+    description,
+    keywords: [
+      emergency.name,
+      'puntos de acopio',
+      'cómo ayudar',
+      'donar material',
+      'ayuda humanitaria',
+      'voluntariado',
+    ],
+    alternates: { canonical: url },
+    openGraph: { title, description, url, type: 'article' },
+    twitter: { card: 'summary_large_image', title, description },
   };
 }
 
@@ -62,8 +78,8 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
   }
 
   const emergencyId = emergency.id;
-  const token = await getToken();
   const isActive = emergency.status === 'active';
+  const token = await getToken();
 
   const rawCategory = typeof resolvedSearchParams.category === 'string' ? resolvedSearchParams.category : undefined;
   const rawPriority = typeof resolvedSearchParams.priority === 'string' ? resolvedSearchParams.priority : undefined;
@@ -143,6 +159,52 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
     emergency.dontBringList.length > 0 ? emergency.dontBringList : te.dont_bring_items;
   const sectionTitle = 'font-display text-base font-bold text-navy';
   const announcement = typeof emergency.announcement === 'string' ? emergency.announcement : null;
+  const introBody = te.intro_body.replace('{emergency}', emergency.name);
+
+  // schema.org SpecialAnnouncement — the civic/disaster type search engines and
+  // AI assistants use to understand and cite emergency notices.
+  const specialAnnouncementJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SpecialAnnouncement',
+    name: `${emergency.name} · ResponseGrid`,
+    text: announcement ?? introBody,
+    datePosted: emergency.updatedAt,
+    url: `https://responsegrid.app/e/${slug}`,
+    category: 'https://www.wikidata.org/wiki/Q8065',
+    spatialCoverage: { '@type': 'Place', name: emergency.country },
+    provider: {
+      '@type': 'Organization',
+      name: 'Global Emergency',
+      url: 'https://globalemergency.online',
+    },
+  };
+
+  const faqItems = te.faq.map((item) => ({
+    q: item.q.replace('{emergency}', emergency.name),
+    a: item.a,
+  }));
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: { '@type': 'Answer', text: item.a },
+    })),
+  };
+
+  const statusLabel =
+    emergency.status === 'active'
+      ? te.header_status_active
+      : emergency.status === 'paused'
+        ? te.header_status_paused
+        : te.header_status_closed;
+  const statusDot =
+    emergency.status === 'active'
+      ? 'bg-success-dot'
+      : emergency.status === 'paused'
+        ? 'bg-warning-dot'
+        : 'bg-muted-soft';
 
   const initialTab: 'points' | 'needs' =
     category !== undefined || priority !== undefined ? 'needs' : 'points';
@@ -195,12 +257,9 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
-      <OfficialHeaderBand
-        name={emergency.name}
-        status={emergency.status}
-        updatedAt={emergency.updatedAt}
-        te={te}
-      />
+      <JsonLd data={specialAnnouncementJsonLd} />
+      <JsonLd data={faqJsonLd} />
+      <AppBar variant="emergency" slug={slug} emergency={{ name: emergency.name, status: emergency.status }} />
 
       {!isActive && (
         <div className="px-4 pt-4 lg:px-8">
@@ -211,14 +270,14 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
       <div className="lg:flex lg:items-start">
         <section
           aria-labelledby="map-heading"
-          className="relative lg:sticky lg:top-0 lg:h-screen lg:w-[58%] lg:shrink-0"
+          className="sticky top-16 w-full lg:top-[52px] lg:w-[58%] lg:shrink-0 lg:z-10"
         >
           <h2 id="map-heading" className="sr-only">{te.map_heading}</h2>
           <EmergencyMapWrapper
             points={mapPoints}
             emergencyId={emergencyId}
             slug={slug}
-            containerClassName="h-[44vh] min-h-[300px] max-h-[480px] border-y border-line lg:h-full lg:min-h-0 lg:max-h-none lg:border-y-0 lg:border-r"
+            containerClassName="h-[35vh] min-h-[220px] max-h-[350px] border-y border-line lg:h-[calc(100vh-52px)] lg:min-h-0 lg:max-h-none lg:border-y-0 lg:border-r"
           />
           <div className="pointer-events-none absolute bottom-3 left-3 z-[500] flex max-w-[calc(100%-1.5rem)] flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-line bg-white/95 px-3 py-2 text-[11px] font-medium text-muted shadow-md backdrop-blur-sm">
             {legendItems.map((item) => (
@@ -231,6 +290,22 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
         </section>
 
         <div className="flex min-w-0 flex-1 flex-col gap-6 px-4 pb-12 pt-5 lg:mx-auto lg:max-w-3xl lg:px-8 lg:pt-7">
+          <div className="flex flex-col gap-2">
+            <h1 className="font-display text-2xl font-extrabold leading-tight tracking-tight text-navy lg:text-3xl">
+              {emergency.name}
+            </h1>
+            <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-line bg-surface-alt px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wide text-muted">
+              <span className={`h-2 w-2 rounded-full ${statusDot}`} aria-hidden="true" />
+              {statusLabel}
+            </span>
+          </div>
+
+          <section aria-labelledby="intro-heading" className="flex flex-col gap-1.5">
+            <h2 id="intro-heading" className="sr-only">{te.intro_heading}</h2>
+            <p className="text-[14px] leading-[1.55] text-ink-soft">{introBody}</p>
+            <p className="text-[12.5px] text-muted-soft">{te.intro_source}</p>
+          </section>
+
           {announcement !== null && (
             <AnnouncementCard
               announcement={announcement}
@@ -367,6 +442,18 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
             )}
           </section>
 
+          {token !== null && (
+            <section aria-labelledby="manage-heading" className="flex flex-col gap-3">
+              <h2 id="manage-heading" className={sectionTitle}>{te.manage_heading}</h2>
+              <HelpActionRow
+                href={`/e/${slug}/mis-puntos`}
+                icon="🗂️"
+                title={te.manage_my_points_title}
+                subtitle={te.manage_my_points_subtitle}
+              />
+            </section>
+          )}
+
           <section aria-labelledby="explore-heading" className="flex flex-col gap-3">
             <h2 id="explore-heading" className={sectionTitle}>{te.explore_heading}</h2>
             <EmergencyExplorer
@@ -409,7 +496,30 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
             </ul>
           </details>
 
-          <EmergencyQuickLinks slug={slug} te={te} authed={token !== null} />
+          <section aria-labelledby="faq-heading" className="flex flex-col gap-2.5">
+            <h2 id="faq-heading" className={sectionTitle}>{te.faq_heading}</h2>
+            <div className="flex flex-col gap-2">
+              {faqItems.map((item) => (
+                <details
+                  key={item.q}
+                  className="group rounded-card border border-line bg-surface-alt px-4 py-3 open:pb-3.5"
+                >
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[14px] font-bold text-navy [&::-webkit-details-marker]:hidden">
+                    {item.q}
+                    <span
+                      aria-hidden="true"
+                      className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-line bg-white text-muted transition-transform group-open:rotate-180"
+                    >
+                      ⌄
+                    </span>
+                  </summary>
+                  <p className="mt-2 text-[13.5px] leading-[1.5] text-muted">{item.a}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+
+          <EmergencyQuickLinks slug={slug} te={te} />
         </div>
       </div>
     </main>

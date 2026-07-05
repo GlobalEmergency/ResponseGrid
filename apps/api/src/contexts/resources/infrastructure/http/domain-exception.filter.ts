@@ -7,6 +7,7 @@ import {
 import { Response } from 'express';
 import { ResourceNotFoundError } from '../../application/resource-not-found.error';
 import { UnauthorizedStatusChangeError } from '../../application/unauthorized-status-change.error';
+import { UnauthorizedInventoryChangeError } from '../../application/unauthorized-inventory-change.error';
 import {
   ResourceAlreadyPublishedError,
   ResourceNotVerifiedError,
@@ -31,6 +32,7 @@ type DomainError =
   | InvalidVerificationLevelError
   | EmergencyNotAcceptingIntakeError
   | UnauthorizedStatusChangeError
+  | UnauthorizedInventoryChangeError
   | InvalidPublicStatusTransitionError
   | ResourceNotPublishedError
   | ResourceNotPendingError
@@ -50,6 +52,7 @@ type ErrorCtor = new (...args: never[]) => Error;
 const STATUS_BY_ERROR: ReadonlyArray<readonly [ErrorCtor, HttpStatus]> = [
   [ResourceNotFoundError, HttpStatus.NOT_FOUND],
   [UnauthorizedStatusChangeError, HttpStatus.FORBIDDEN],
+  [UnauthorizedInventoryChangeError, HttpStatus.FORBIDDEN],
   [OwnerCannotReportValidityError, HttpStatus.FORBIDDEN],
   [EmergencyNotAcceptingIntakeError, HttpStatus.CONFLICT],
   [ResourceAlreadyPublishedError, HttpStatus.CONFLICT],
@@ -69,6 +72,7 @@ const STATUS_BY_ERROR: ReadonlyArray<readonly [ErrorCtor, HttpStatus]> = [
   InvalidVerificationLevelError,
   EmergencyNotAcceptingIntakeError,
   UnauthorizedStatusChangeError,
+  UnauthorizedInventoryChangeError,
   InvalidPublicStatusTransitionError,
   ResourceNotPublishedError,
   ResourceNotPendingError,

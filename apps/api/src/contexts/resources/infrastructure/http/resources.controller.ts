@@ -7,10 +7,11 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { Throttle } from '@nestjs/throttler';
 import {
   ApiTags,
   ApiOperation,
@@ -33,11 +34,18 @@ import { PublishResource } from '../../application/publish-resource';
 import { UpdateResourcePublicStatus } from '../../application/update-resource-public-status';
 import { GetMyResources } from '../../application/get-my-resources';
 import {
+  GetMyManagedResources,
+  MyManagedResourceView,
+} from '../../application/get-my-managed-resources';
+import { PrincipalGrant } from '../../application/principal-grant';
+import {
   EditResource,
   EditResourceCommand,
 } from '../../application/edit-resource';
 import { DiscardResource } from '../../application/discard-resource';
 import { RecordInventoryEntry } from '../../application/record-inventory-entry';
+import { GetMyInventory } from '../../application/get-my-inventory';
+import { UpdateMyInventory } from '../../application/update-my-inventory';
 import { ReportResourceValidity } from '../../application/report-resource-validity';
 import { ResolveResourceDispute } from '../../application/resolve-resource-dispute';
 import { GetResourceValidityReports } from '../../application/get-resource-validity-reports';
@@ -52,11 +60,18 @@ import {
   RecordInventoryEntryDto,
   ReportResourceValidityDto,
   ResolveResourceDisputeDto,
+  UpdateInventoryDto,
 } from './dto';
+import { SupplyLineResponseDto } from '../../../supplies/infrastructure/http/supply-line.dto';
+import {
+  toSupplyLineProps,
+  toSupplyLineResponse,
+} from '../../../supplies/infrastructure/http/supply-line.mapper';
 import { setAuditContext } from '../../../audit/infrastructure/http/audit-context';
 import {
   RegisterResourceResponseDto,
   ResourceViewDto,
+  MyManagedResourceDto,
   ReportResourceValidityResponseDto,
   ValidityReportDto,
 } from './response.dto';
@@ -80,13 +95,30 @@ export class ResourcesController {
     private readonly publish: PublishResource,
     private readonly updateStatus: UpdateResourcePublicStatus,
     private readonly getMyResources: GetMyResources,
+    private readonly getMyManagedResources: GetMyManagedResources,
     private readonly editResource: EditResource,
     private readonly discardResource: DiscardResource,
     private readonly recordInventoryEntry: RecordInventoryEntry,
+    private readonly getMyInventory: GetMyInventory,
+    private readonly updateMyInventory: UpdateMyInventory,
     private readonly reportValidity: ReportResourceValidity,
     private readonly resolveDispute: ResolveResourceDispute,
     private readonly validityReports: GetResourceValidityReports,
   ) {}
+
+  /**
+   * Maps the request's identity grants to the minimal application shape the
+   * resource use cases consume, so an entity-scoped point manager is authorized
+   * on the management surfaces without the application layer importing identity
+   * (issue #316).
+   */
+  private principalGrants(user: AuthenticatedUser): PrincipalGrant[] {
+    return user.grants.map((g) => ({
+      roleId: g.roleId,
+      scope: g.scope,
+      expiresAt: g.expiresAt,
+    }));
+  }
 
   @Post('emergencies/:emergencyId/resources')
   @HttpCode(201)
@@ -129,7 +161,6 @@ export class ResourcesController {
     return this.register.execute({
       emergencyId,
       type: dto.type,
-      stage: dto.stage,
       name: dto.name,
       description: dto.description ?? null,
       location: dto.location,
@@ -143,14 +174,7 @@ export class ResourcesController {
       city: dto.city ?? null,
       isFinalRecipient: dto.isFinalRecipient ?? false,
       recipientType: dto.recipientType ?? null,
-      items: (dto.items ?? []).map((i) => ({
-        name: i.name,
-        quantity: i.quantity,
-        unit: i.unit ?? null,
-        category: i.category,
-        presentation: i.presentation ?? null,
-        expiresAt: i.expiresAt ?? null,
-      })),
+      items: (dto.items ?? []).map(toSupplyLineProps),
       author: dto.author ?? null,
     });
   }
@@ -180,15 +204,68 @@ export class ResourcesController {
     @Param('resourceId', ParseUUIDPipe) resourceId: string,
     @Body() dto: RecordInventoryEntryDto,
   ): Promise<void> {
+    // toSupplyLineProps also fixes the drift this copy had: it silently
+    // dropped a client-provided `expiresAt` from manual entries.
     await this.recordInventoryEntry.execute({
       resourceId,
-      lines: dto.items.map((i) => ({
-        name: i.name,
-        quantity: i.quantity,
-        unit: i.unit ?? null,
-        category: i.category,
-        presentation: i.presentation ?? null,
-      })),
+      lines: dto.items.map(toSupplyLineProps),
+    });
+  }
+
+  @Get('resources/:resourceId/inventory')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Read a point declared inventory in full (owner or coordinator)',
+  })
+  @ApiParam({
+    name: 'resourceId',
+    description: 'Resource UUID',
+    format: 'uuid',
+  })
+  @ApiOkResponse({ type: SupplyLineResponseDto, isArray: true })
+  @ApiNotFoundResponse({ description: 'Resource not found' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Not owner nor coordinator' })
+  async getMyInventoryAction(
+    @Param('resourceId', ParseUUIDPipe) resourceId: string,
+    @Req() req: Request & { user?: AuthenticatedUser },
+  ): Promise<SupplyLineResponseDto[]> {
+    const lines = await this.getMyInventory.execute({
+      resourceId,
+      requesterUserId: req.user!.id,
+      grants: this.principalGrants(req.user!),
+    });
+    return lines.map(toSupplyLineResponse);
+  }
+
+  @Put('resources/:resourceId/inventory')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Replace a point declared inventory (owner or coordinator) — #263',
+  })
+  @ApiParam({
+    name: 'resourceId',
+    description: 'Resource UUID',
+    format: 'uuid',
+  })
+  @ApiNoContentResponse({ description: 'Inventory replaced' })
+  @ApiNotFoundResponse({ description: 'Resource not found' })
+  @ApiBadRequestResponse({ description: 'Invalid request body or UUID' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'Not owner nor coordinator' })
+  async updateMyInventoryAction(
+    @Param('resourceId', ParseUUIDPipe) resourceId: string,
+    @Body() dto: UpdateInventoryDto,
+    @Req() req: Request & { user?: AuthenticatedUser },
+  ): Promise<void> {
+    await this.updateMyInventory.execute({
+      resourceId,
+      requesterUserId: req.user!.id,
+      lines: dto.items.map(toSupplyLineProps),
+      grants: this.principalGrants(req.user!),
     });
   }
 
@@ -356,7 +433,37 @@ export class ResourcesController {
       resourceId,
       targetStatus: statusMap[dto.status],
       requesterUserId: req.user!.id,
+      grants: this.principalGrants(req.user!),
     });
+  }
+
+  @Get('resources/mine')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'List the resources the authenticated principal manages, across every emergency',
+    description:
+      'Union of the resources the principal owns and the ones reached through ' +
+      'an entity-scoped grant (e.g. `point_manager`). Unlike ' +
+      '`/emergencies/{emergencyId}/resources/mine`, this needs no emergency in ' +
+      'the path, so it also serves principals whose only grant is ' +
+      'entity-scoped (#285). Each row carries its emergency id and slug.',
+  })
+  @ApiOkResponse({
+    description: 'Resources the principal manages',
+    type: MyManagedResourceDto,
+    isArray: true,
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  async listMineAcrossEmergencies(
+    @Req() req: Request & { user?: AuthenticatedUser },
+  ): Promise<MyManagedResourceView[]> {
+    const user = req.user!;
+    return this.getMyManagedResources.execute(
+      user.id,
+      this.principalGrants(user),
+    );
   }
 
   @Get('emergencies/:emergencyId/resources/mine')
@@ -383,13 +490,19 @@ export class ResourcesController {
     return this.getMyResources.execute({
       emergencyId,
       userId: req.user!.id,
+      grants: this.principalGrants(req.user!),
     });
   }
 
   @Post('resources/:resourceId/validity-reports')
   @HttpCode(201)
-  @UseGuards(ThrottlerGuard, JwtAuthGuard)
-  @Throttle({ validity: { ttl: 3_600_000, limit: 20 } })
+  @UseGuards(JwtAuthGuard)
+  // Anti-abuso volumétrico: 20 reportes de validez / hora. Se sobreescribe SOLO
+  // el bucket `default` de esta ruta (el keying del throttler es por-ruta), así
+  // el resto de endpoints conserva su baseline de 200/min. El guard global
+  // (ApiKeyAwareThrottlerGuard) ya throttlea; keyeo por IP. El límite por-usuario
+  // real lo garantiza el índice único (1 reporte abierto por usuario+recurso).
+  @Throttle({ default: { ttl: 3_600_000, limit: 20 } })
   @ApiBearerAuth()
   @ApiOperation({
     summary:

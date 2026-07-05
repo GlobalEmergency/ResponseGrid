@@ -25,6 +25,40 @@ export const usersTable = pgTable('users', {
   lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
 });
 
+/**
+ * Versioned record of the legal documents a user has accepted (Terms of
+ * Service, Privacy Policy). One row per acceptance so we keep *when* and *which
+ * version* was accepted (migration 0038). Required for every account.
+ */
+export const userConsentsTable = pgTable(
+  'user_consents',
+  {
+    id: uuid('id').primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => usersTable.id, { onDelete: 'cascade' }),
+    /** 'terms' | 'privacy' */
+    document: text('document').notNull(),
+    /** Published version of the document that was accepted, e.g. '2026-07-01'. */
+    version: text('version').notNull(),
+    /** Request IP at the moment of acceptance (audit). Nullable. */
+    ip: text('ip'),
+    /** Request User-Agent at the moment of acceptance (audit). Nullable. */
+    userAgent: text('user_agent'),
+    /**
+     * Service account that recorded this acceptance on the user's behalf when it
+     * came through a trusted channel/bot instead of a browser (#315, migration
+     * 0054). Null for the normal web flows. No FK — historical trace survives SA
+     * deletion.
+     */
+    serviceAccountId: uuid('service_account_id'),
+    acceptedAt: timestamp('accepted_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index('user_consents_user_idx').on(t.userId)],
+);
+
 export const membershipsTable = pgTable(
   'memberships',
   {

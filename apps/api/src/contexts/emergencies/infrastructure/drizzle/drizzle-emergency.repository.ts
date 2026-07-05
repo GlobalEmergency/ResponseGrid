@@ -18,6 +18,7 @@ function rowToSnapshot(row: Row): EmergencySnapshot {
     status: row.status as EmergencyStatus,
     announcement: row.announcement ?? null,
     dontBringList: row.dontBringList,
+    resourceDisputeThreshold: row.resourceDisputeThreshold ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -49,6 +50,7 @@ export class DrizzleEmergencyRepository implements EmergencyRepository {
           country: s.country,
           announcement: s.announcement,
           dontBringList: s.dontBringList,
+          resourceDisputeThreshold: s.resourceDisputeThreshold,
           updatedAt: s.updatedAt,
         },
       });

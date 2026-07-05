@@ -6,6 +6,7 @@ import { User } from '../domain/user';
 import { UserId } from '../domain/user-id';
 import { Email } from '../domain/email';
 import { AccountLinkRequiresAuthError } from '../domain/account-link-requires-auth.error';
+import { UnverifiedProviderEmailError } from '../domain/unverified-provider-email.error';
 import type { TokenService, TokenPayload } from '../domain/ports/token.service';
 
 class FakeTokenService implements TokenService {
@@ -61,6 +62,7 @@ describe('AuthenticateWithProvider', () => {
     providerUserId: 'google-uid-123',
     email: 'social@example.com',
     name: 'Social User',
+    emailVerified: true,
   };
 
   describe('Path 1 — identity already linked', () => {
@@ -227,6 +229,7 @@ describe('AuthenticateWithProvider', () => {
         providerUserId: 'fb-uid-456',
         email: 'fb@example.com',
         name: 'FB User',
+        emailVerified: true,
       });
 
       expect(result.accessToken).toContain('fb@example.com');
@@ -254,6 +257,7 @@ describe('AuthenticateWithProvider', () => {
           providerUserId: 'attacker-google-uid',
           email: 'victim@example.com',
           name: 'Attacker',
+          emailVerified: true,
         }),
       ).rejects.toThrow(AccountLinkRequiresAuthError);
     });
@@ -275,6 +279,7 @@ describe('AuthenticateWithProvider', () => {
           providerUserId: 'attacker-google-uid',
           email: 'victim@example.com',
           name: 'Attacker',
+          emailVerified: true,
         }));
       } catch {
         // expected
@@ -298,6 +303,7 @@ describe('AuthenticateWithProvider', () => {
           providerUserId: 'attacker-google-uid',
           email: 'victim@example.com',
           name: 'Attacker',
+          emailVerified: true,
         });
       } catch {
         // expected
@@ -309,6 +315,63 @@ describe('AuthenticateWithProvider', () => {
         'attacker-google-uid',
       );
       expect(linkedId).toBeNull();
+    });
+
+    it('throws UnverifiedProviderEmailError when a social-only email is NOT provider-verified', async () => {
+      // The victim signed up with Google (social-only) as victim@example.com.
+      // An attacker logs in with a second provider claiming victim@example.com
+      // WITHOUT the provider having verified it. Auto-linking must be refused.
+      const userRepo = await buildRepoWithSocialUser('victim@example.com');
+      const identityRepo = new InMemoryUserIdentityRepository();
+
+      const useCase = new AuthenticateWithProvider(
+        userRepo,
+        identityRepo,
+        tokenService,
+      );
+
+      await expect(
+        useCase.execute({
+          provider: AuthProvider.Facebook,
+          providerUserId: 'attacker-fb-uid',
+          email: 'victim@example.com',
+          name: 'Attacker',
+          emailVerified: false,
+        }),
+      ).rejects.toThrow(UnverifiedProviderEmailError);
+
+      // No identity linked and no token issued.
+      const linkedId = await identityRepo.findByProvider(
+        AuthProvider.Facebook,
+        'attacker-fb-uid',
+      );
+      expect(linkedId).toBeNull();
+    });
+
+    it('links a social-only account when the provider email IS verified (Path 2 happy path)', async () => {
+      const userRepo = await buildRepoWithSocialUser('victim@example.com');
+      const identityRepo = new InMemoryUserIdentityRepository();
+
+      const useCase = new AuthenticateWithProvider(
+        userRepo,
+        identityRepo,
+        tokenService,
+      );
+
+      const result = await useCase.execute({
+        provider: AuthProvider.Facebook,
+        providerUserId: 'owner-fb-uid',
+        email: 'victim@example.com',
+        name: 'Owner',
+        emailVerified: true,
+      });
+
+      expect(result.accessToken).toContain(EXISTING_USER_ID);
+      const linkedId = await identityRepo.findByProvider(
+        AuthProvider.Facebook,
+        'owner-fb-uid',
+      );
+      expect(linkedId?.value).toBe(EXISTING_USER_ID);
     });
 
     it('allows social login for a password account that already has an identity for that provider (Path 1)', async () => {
@@ -331,6 +394,7 @@ describe('AuthenticateWithProvider', () => {
         providerUserId: 'user-own-google-uid',
         email: 'linked@example.com',
         name: 'Linked User',
+        emailVerified: true,
       });
 
       expect(result.accessToken).toContain(EXISTING_USER_ID);

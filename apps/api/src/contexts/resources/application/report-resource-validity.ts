@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { ResourceRepository } from '../domain/ports/resource.repository';
 import { ResourceValidityReportRepository } from '../domain/ports/resource-validity-report.repository';
 import { EventBus } from '../domain/ports/event-bus';
+import { EmergencyDisputeThresholdReader } from '../domain/ports/emergency-dispute-threshold-reader';
 import { ResourceId } from '../domain/resource-id';
 import {
   ResourceValidityReport,
@@ -39,6 +40,7 @@ export class ReportResourceValidity {
     private readonly bus: EventBus,
     private readonly threshold: number = DEFAULT_DISPUTE_THRESHOLD,
     private readonly cooldownMs: number = 0,
+    private readonly emergencyThresholds?: EmergencyDisputeThresholdReader,
   ) {}
 
   async execute(
@@ -83,13 +85,25 @@ export class ReportResourceValidity {
     }
     await this.reports.save(report);
 
+    // Already disputed: the flag never toggles back here, so the report is still
+    // recorded but there is nothing to re-decide. Skip the open-reports query,
+    // the per-emergency threshold read and the re-read on this hot path.
+    if (resource.disputed) {
+      return { id: report.id, disputed: true };
+    }
+
     const open = await this.reports.findOpenByResource(cmd.resourceId);
     const cutoff = new Date(
       Date.now() - FRESHNESS_WINDOW_DAYS * 24 * 60 * 60 * 1000,
     );
     const freshDistinct = open.filter((r) => r.createdAt >= cutoff).length;
-    let disputed = freshDistinct >= this.threshold;
-    if (disputed && !resource.disputed) {
+
+    const emergencyThreshold = this.emergencyThresholds
+      ? await this.emergencyThresholds.getThreshold(resource.emergencyId.value)
+      : null;
+    const effectiveThreshold = emergencyThreshold ?? this.threshold;
+    let disputed = freshDistinct >= effectiveThreshold;
+    if (disputed) {
       // Re-read so the flag decision uses the current persisted state, not the
       // snapshot loaded before this report was saved — two citizens crossing
       // the threshold at once must not each emit a ResourceDisputed event.

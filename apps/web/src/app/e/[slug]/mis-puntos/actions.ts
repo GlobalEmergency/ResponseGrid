@@ -1,8 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
 import type { components } from '@reliefhub/api-client';
@@ -18,10 +17,7 @@ export async function fetchMyResources(
   emergencyId: string,
   slug: string,
 ): Promise<components['schemas']['ResourceViewDto'][]> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/mis-puntos`);
-  }
+  const token = await requireSession(`/e/${slug}/mis-puntos`);
 
   const { data, response } = await api.GET(
     '/emergencies/{emergencyId}/resources/mine',
@@ -32,8 +28,7 @@ export async function fetchMyResources(
   );
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(`/login?next=/e/${slug}/mis-puntos`);
+    return redirectToLogin(`/e/${slug}/mis-puntos`);
   }
 
   if (!response.ok || data == null) {
@@ -48,10 +43,7 @@ export async function updateResourceStatus(
   status: PublicStatus,
   slug: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/mis-puntos`);
-  }
+  const token = await requireSession(`/e/${slug}/mis-puntos`);
 
   const { response } = await api.POST('/resources/{resourceId}/status', {
     params: { path: { resourceId } },
@@ -61,8 +53,7 @@ export async function updateResourceStatus(
   });
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(`/login?next=/e/${slug}/mis-puntos`);
+    return redirectToLogin(`/e/${slug}/mis-puntos`);
   }
 
   if (response.status === 403) {

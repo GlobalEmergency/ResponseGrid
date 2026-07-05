@@ -32,6 +32,7 @@ export const en = {
       nav_orgs: 'Organisations',
       nav_coordination: 'Coordination access',
       resources_heading: 'Resources',
+      resources_features: 'Features',
       resources_about: 'About us',
       resources_how: 'How it works',
       resources_transparency: 'Transparency',
@@ -52,6 +53,30 @@ export const en = {
     intake_paused: 'Intake is paused for this emergency. Please try again later.',
   },
 
+  appbar: {
+    login: 'Log in',
+    offer: 'Offer help',
+    request: 'Request help',
+    see_emergencies: 'See emergencies',
+    account_aria: 'Account menu',
+    menu_aria: 'Menu',
+    open_menu: 'Open menu',
+    close_menu: 'Close menu',
+    section_emergency: 'In this emergency',
+    my_points: 'My points',
+    my_volunteering: 'My volunteering',
+    my_shipments: 'My shipments',
+    notifications: 'Notifications',
+    notifications_with_count: 'Notifications ({count})',
+    my_panel: 'My panel',
+    logout: 'Log out',
+    admin: 'Admin',
+    back: 'Back',
+    how_it_works: 'How it works',
+    verify: 'Verify',
+    info_nav: 'Info',
+  },
+
   home: {
     title: 'ResponseGrid',
     subtitle: 'Emergency resource coordination.',
@@ -59,20 +84,7 @@ export const en = {
     no_emergencies_title: 'No active emergencies at the moment.',
     no_emergencies_description: 'When an emergency is activated it will appear here.',
     emergency_status_active: 'Active',
-    my_orgs: 'My organizations',
-    administration: 'Administration',
-    notifications: 'Notifications',
-    notifications_with_count: 'Notifications ({count})',
-    coordination_access: 'Coordination access',
-    admin: 'Admin',
-    templates: 'Templates',
-    audit: 'Audit',
-    my_permissions: 'My permissions',
-    groups: 'My groups',
-    admin_permissions: 'Permissions & roles',
-    admin_api_keys: 'API keys',
     aria_emergency_list: 'List of active emergencies',
-    aria_secondary_nav: 'Secondary navigation',
     enter_operation: 'Enter the operation',
     active_count: '{count} ongoing',
     closed_label: 'Closed · report available',
@@ -100,17 +112,106 @@ export const en = {
     trust_verified: 'Validated by local coordination',
     trust_official: 'Accredited organisation',
 
-    // Account access (home secondary bar)
-    account_heading: 'Your account',
+    // Everything the platform does (previously untold — for SEO/GEO)
+    features_cta: 'See all features',
+    features_heading: 'The whole operation on a single platform',
+    features_intro:
+      'ResponseGrid is not just another map: it is the full infrastructure to coordinate material aid in a disaster. All free and open source (MIT licence), with data hosted in the EU (GDPR).',
+    features: [
+      {
+        icon: '📍',
+        title: 'Collection points with inventory',
+        body: 'Every verified point declares what supplies it holds and accepts, to avoid duplication and overload.',
+      },
+      {
+        icon: '✅',
+        title: 'Validated needs in real time',
+        body: 'Local coordination validates every supply request. 48h freshness: you only see what is needed now.',
+      },
+      {
+        icon: '🎁',
+        title: 'Supply offers and matching',
+        body: 'Offer what you have and we match it with whoever requests it, by category and proximity.',
+      },
+      {
+        icon: '📦',
+        title: 'Shared supplies catalogue',
+        body: 'A single language of materials and categories reused across the whole operation.',
+      },
+      {
+        icon: '🚚',
+        title: 'Transport and shipments',
+        body: 'Offer load capacity (road, sea, air) and coordination assembles the shipments.',
+      },
+      {
+        icon: '🙋',
+        title: 'Volunteering and tasks',
+        body: 'Sign up with your skills and availability; coordination assigns tasks where they are needed.',
+      },
+      {
+        icon: '🏷️',
+        title: 'Pre-registration with code/QR and tracking',
+        body: 'Declare your delivery, get a code/QR for the desk and track it until it is received.',
+      },
+      {
+        icon: '🗺️',
+        title: 'Real-time map',
+        body: 'Points and needs on a single map, with your location kept only in your browser (never published).',
+      },
+      {
+        icon: '📣',
+        title: 'Field reports',
+        body: 'Incidents, stock and status reported from the ground to decide with real data.',
+      },
+      {
+        icon: '🛡️',
+        title: 'Three trust levels',
+        body: 'Unverified, validated by coordination, or accredited organisation: trust is always visible.',
+      },
+      {
+        icon: '🔌',
+        title: 'Public API and open source',
+        body: 'Read-only open data, developer documentation and fully auditable code (MIT).',
+      },
+    ],
 
-    meta_title: 'ResponseGrid — Active emergencies',
+    meta_title:
+      'ResponseGrid — Coordinate emergency aid | Collection points, needs and volunteering',
     meta_description:
-      'Emergency aid coordination platform. Check active emergencies and how you can help.',
+      'Open source platform to coordinate material aid in disasters: verified collection points, real-time validated needs, donations, transport and volunteering. A Global Emergency project.',
   },
 
   emergency: {
     back_all: '← All emergencies',
     official_source: 'Official source · ResponseGrid',
+
+    // Citable intro (SEO/GEO): summarises the page for search engines and AI
+    intro_heading: 'How to help now',
+    intro_body:
+      'This is the official page for {emergency} on ResponseGrid. Here you will find the verified collection points, the supply needs validated by coordination and what NOT to bring, all updated in real time. Pick an active point, confirm it by phone before going and avoid trips that overload logistics.',
+    intro_source:
+      'Coordinated and verified information. An open source project by Global Emergency.',
+
+    // Visible FAQ + FAQPage schema (content citable by search engines and AI)
+    faq_heading: 'Frequently asked questions',
+    faq: [
+      {
+        q: 'Where can I take donations for {emergency}?',
+        a: 'To the verified collection points shown on the map and in the list on this page. Each point states what it accepts and its status; always confirm by phone before travelling.',
+      },
+      {
+        q: 'What supplies are needed right now in {emergency}?',
+        a: 'The needs validated by coordination appear in the “Needs” tab, with their priority. Only real and recent requests are shown (48h freshness).',
+      },
+      {
+        q: 'What should I NOT bring?',
+        a: 'Avoid unsorted used clothing, medicines outside the authorised health channel, home-made food and supplies without an assigned receiving point. Sending supplies without coordinating overloads logistics.',
+      },
+      {
+        q: 'How can I help beyond donating supplies?',
+        a: 'You can offer a logistics point or warehouse, provide transport capacity, sign up as a volunteer or register a request from “How do you want to help?”.',
+      },
+    ],
     status_active: 'Active emergency',
     status_active_aria: 'Status: active emergency',
 
@@ -175,6 +276,10 @@ export const en = {
     actions_paused:
       'Resource and request registration is paused. Check the available information and come back later.',
 
+    manage_heading: 'Management',
+    manage_my_points_title: 'My points in this emergency',
+    manage_my_points_subtitle: 'View and manage the points you have registered',
+
     quick_access_heading: 'Quick access',
     quick_access_card_label: 'At a glance',
     quick_access_help_intro: 'Go straight to the action area if you want to help right now.',
@@ -213,10 +318,6 @@ export const en = {
     // Privacy (F09)
     privacy_approximate_location: 'Approximate coordinates — verify the address by phone before travelling.',
 
-    footer_my_points: 'My points',
-    footer_my_volunteer: 'My volunteering',
-    footer_my_shipments: 'My shipments',
-    footer_report: 'Report',
     footer_coordination: 'Coordination access',
 
     priority_low: 'Low',
@@ -265,6 +366,8 @@ export const en = {
     subtitle: 'Join ResponseGrid to coordinate emergency resources.',
     name_label: 'Full name',
     email_label: 'Email address',
+    phone_label: 'Contact phone',
+    phone_hint: '(required)',
     password_label: 'Password',
     password_hint: '(min. 8 characters)',
     submit: 'Create account',
@@ -279,7 +382,32 @@ export const en = {
     err_all_fields_required: 'All fields are required.',
     err_password_too_short: 'Password must be at least 8 characters.',
     err_email_exists: 'That email is already registered.',
+    err_phone_required: 'A contact phone is required.',
+    err_consent_required:
+      'You must accept the terms of service and the privacy policy.',
     err_signup_failed: 'Couldn’t create the account. Please try again.',
+  },
+
+  consent: {
+    prefix: 'I accept the ',
+    terms: 'terms of service',
+    and: ' and the ',
+    privacy: 'privacy policy',
+  },
+
+  onboarding: {
+    title: 'Complete your profile',
+    subtitle:
+      'We need your contact phone and your acceptance of the terms before continuing.',
+    phone_label: 'Contact phone',
+    phone_hint: '(required)',
+    submit: 'Continue',
+    submitting: 'Saving…',
+    error_fallback: 'Could not complete your profile.',
+    err_phone_required: 'A contact phone is required.',
+    err_consent_required:
+      'You must accept the terms of service and the privacy policy.',
+    meta_title: 'Complete your profile — ResponseGrid',
   },
 
   needs_filter: {
@@ -300,9 +428,6 @@ export const en = {
     type_transport: 'Transport',
     type_supplier: 'Supplier',
     type_venue: 'Venue / Space',
-    stage_origin: 'Origin',
-    stage_intermediate: 'Intermediate',
-    stage_destination: 'Destination',
     // Rich card extras
     accepts_label: 'Accepts',
     meta_contact: 'Contact:',
@@ -319,12 +444,14 @@ export const en = {
     // Citizen-reported validity (ficha 15)
     disputed_label: 'In review',
     report_cta: 'Something wrong? Let us know',
+    contact_login_required: 'Log in to view',
   },
 
   resource_detail: {
     back: 'Back to the emergency',
     needs_heading: 'Needs of this recipient',
     needs_empty: 'This recipient has no published needs.',
+    add_need_cta: 'Add a need',
     inventory_heading: 'Available materials',
     inventory_empty: 'This point has not declared available materials.',
     prereg_cta: 'Pre-register what I’ll bring',
@@ -404,7 +531,6 @@ export const en = {
     meta_description: 'Register a logistics point (collection, warehouse, space) for {emergencyName}.',
 
     type_label: 'Resource type',
-    stage_label: 'Stage',
     name_label: 'Name',
     name_placeholder: 'e.g. Red Cross Madrid',
     description_label: 'Description',
@@ -419,18 +545,16 @@ export const en = {
     type_supplier: 'Supplier',
     type_venue: 'Venue / Space',
 
-    stage_origin: 'Origin',
-    stage_intermediate: 'Intermediate',
-    stage_destination: 'Destination',
-
     select_type_placeholder: 'Select a type…',
-    select_stage_placeholder: 'Select a stage…',
 
     submit: 'Register resource',
     submitting: 'Sending…',
     success_message:
       'Thank you, you are registered. Do not receive materials or publish anything until we validate you.',
     success_register_another: 'Register another resource',
+    success_manage_point: 'View / manage my point',
+    success_manage_inventory: 'Manage my inventory',
+    success_declare_needs: 'Declare needs',
     error_fallback: 'Error registering resource',
 
     // Inventory / available materials (optional)
@@ -454,7 +578,6 @@ export const en = {
 
     // server-action messages
     err_invalid_type: 'Invalid resource type.',
-    err_invalid_stage: 'Invalid stage.',
     err_name_too_short: 'Name must be at least 2 characters.',
     err_location_required: 'Select a location.',
     err_invalid_items:
@@ -526,11 +649,11 @@ export const en = {
     choose_deliver_subtitle:
       'Choose the point and pre-register your delivery — you get a code/QR for the desk',
     choose_offer_title: 'Offer supplies',
-    choose_offer_subtitle: 'Describe it and the coordination team handles it',
+    choose_offer_subtitle: 'Search the supply and complete the offer',
 
     directed_offer_label: 'Offering for:',
     category_label: 'Supply category',
-    description_label: 'Supply description',
+    description_label: 'Supply / item',
     description_placeholder: 'e.g. 25 kg rice bags',
     quantity_label: 'Quantity',
     quantity_placeholder: '50',
@@ -551,10 +674,47 @@ export const en = {
 
     // server-action messages
     err_invalid_category: 'Invalid category.',
-    err_description_too_short: 'Describe the item (at least 2 characters).',
+    err_description_too_short: 'Specify the supply or item (at least 2 characters).',
     err_invalid_quantity: 'Quantity must be a positive whole number.',
     err_location_required: 'Select a location.',
     err_submit_failed: 'Couldn’t submit the offer. Please try again.',
+  },
+
+  // ── Supply line (supply line) ──────────────────────────────────────────────
+  supplyLine: {
+    itemNumber: 'Item {n}',
+    itemRemove: 'Remove item {n}',
+    itemRemoveLabel: 'Remove',
+    nameLabel: 'Product',
+    namePlaceholder: 'Search by name, alias or code',
+    nameHint: 'Search by name, alias, or code.',
+    otherHint: 'If it is not in the catalog, type it and continue.',
+    searching: 'Searching supplies…',
+    noMatches: 'No matches. Type it if it is not in the catalog.',
+    error: 'We could not load suggestions.',
+    quantityLabel: 'Quantity',
+    qtyDecrease: 'Decrease quantity',
+    qtyIncrease: 'Increase quantity',
+    unitLabel: 'Unit',
+    unitOpt: '(optional)',
+    unitPlaceholder: 'e.g. boxes, liters',
+    categoryLabel: 'Category',
+    presentationLabel: 'Presentation / route',
+    presentationOpt: '(optional)',
+    presentationPlaceholder: 'e.g. ampoule, IV, inhaler',
+    presentationOptions: [
+      'Ampoule',
+      'IV (intravenous)',
+      'Inhaler',
+      'Tablet',
+      'Syrup',
+      'Oxygen',
+    ],
+    expiryLabel: 'Expiry',
+    expiryOpt: '(optional)',
+    addItem: 'Add item',
+    emptyList: 'No items yet.',
+    legend: 'Items',
   },
 
   // ── Citizen delivery pre-registration (#130) ──────────────────────────────
@@ -691,6 +851,18 @@ export const en = {
     no_contact: 'No contact',
     received_meta: 'Received',
     already_processed: 'This delivery has already been processed.',
+
+    // Content verification (#129)
+    verify_heading: 'Verify what arrived',
+    verify_hint:
+      'Adjust the quantities actually received. If they differ from what was declared, give a reason.',
+    qty_received_label: 'Received quantity',
+    line_excluded: 'Did not arrive',
+    reason_label: 'Adjustment reason',
+    reason_placeholder: 'Explain why it differs from the declared amount…',
+    err_reason_required:
+      'Give a reason: what was received differs from what was declared.',
+    photo_label: 'Delivery photo (optional)',
 
     // Actions
     notes_label: 'Notes (optional)',
@@ -943,6 +1115,50 @@ export const en = {
     err_submit_failed: 'Couldn’t send the report. Please try again.',
     err_not_visible: 'This point is no longer visible; it can’t be reported.',
     err_owner: 'You manage this point; use the dashboard to change its status.',
+  },
+
+  // ── Page: Features (/funcionalidades) ─────────────────────────────────────
+  features_page: {
+    meta_title: 'Features — ResponseGrid | Emergency aid coordination',
+    meta_description:
+      'Every ResponseGrid feature: collection points with inventory, validated needs, donations with QR and tracking, logistics and transport, volunteering, real-time map and open API. Free and open source.',
+    overline: 'Features',
+    h1: 'Everything ResponseGrid gives you, for free',
+    lead:
+      'ResponseGrid brings together in a single platform —free and open source— everything needed to coordinate material aid in a disaster: collection points, real needs, traceable donations, logistics, volunteering and real-time coordination. This is everything you can do.',
+    sections: [
+      {
+        heading: 'Collection points with real-time inventory',
+        body: 'Every collection point, warehouse or venue publishes what supplies it holds and accepts. People see the verified points on the map and list, their status (operational, saturated or paused) and their official contact, to avoid duplicating effort or taking supplies where they are already plentiful.',
+      },
+      {
+        heading: 'Validated needs and offer matching',
+        body: 'Local coordination validates every supply need before publishing it, with 48-hour freshness so you only see what is needed now. Anyone who wants to help offers supplies and the platform matches them to needs by category and proximity, over a shared supplies catalogue.',
+      },
+      {
+        heading: 'Logistics: transport and shipments',
+        body: 'Companies and individuals publish their transport capacity —road, sea or air, with weight and volume— and coordination assembles the shipments that move supplies between points. That way aid does not get stuck for lack of logistics.',
+      },
+      {
+        heading: 'Donations traceable end to end',
+        body: 'Before bringing your supplies you pre-register them and get a code/QR for the desk. The point confirms it in its reception console and you follow your donation in real time, from “pre-registered” to “received”.',
+      },
+      {
+        heading: 'Volunteering, crews and accredited organisations',
+        body: 'Sign up as a volunteer with your skills, availability and vehicle; coordination assigns you tasks and organises you into crews. Organisations can get accredited to earn the official badge and operate with more capabilities.',
+      },
+      {
+        heading: 'Real-time coordination and field reports',
+        body: 'A single map brings together points and needs. From the ground, field reports (incidents, stock and status) feed the operation metrics, to decide with real data instead of rumours.',
+      },
+      {
+        heading: 'Trust, open data and developers',
+        body: 'Every resource shows its trust level: unverified, validated by coordination or accredited organisation. The platform is open source (MIT licence), hosts data in the EU (GDPR) and offers a read-only public API with developer documentation.',
+      },
+    ],
+    cta_heading: 'Want to help now?',
+    cta_body: 'Check the active emergencies and choose how to help.',
+    cta_button: 'View active emergencies',
   },
 
   // ── Page: About us (/sobre) ───────────────────────────────────────────────
@@ -1483,6 +1699,18 @@ export const en = {
     no_points_description: 'When you register a resource in this emergency it will appear here.',
     point_card_aria: 'Point: {name}',
     report_incident_cta: 'Report incident',
+    manage_inventory_cta: 'Manage inventory',
+    declare_needs_cta: 'Declare needs',
+    inventory_page_title: 'Point inventory',
+    inventory_page_subtitle:
+      'Declare the material this point holds for delivery. Replaces the current inventory.',
+    inventory_save_cta: 'Save inventory',
+    inventory_saving: 'Saving…',
+    inventory_saved_success: 'Inventory updated.',
+    inventory_update_forbidden: 'You are not allowed to edit this inventory.',
+    inventory_update_failed: 'Could not save the inventory.',
+    inventory_invalid_items:
+      'Check the material: some lines are incomplete or invalid. Fill in the missing fields or remove the empty rows.',
 
     type_collection_point: 'Collection point',
     type_delivery_point: 'Delivery point',
@@ -1491,10 +1719,6 @@ export const en = {
     type_transport: 'Transport',
     type_supplier: 'Supplier',
     type_venue: 'Venue / Space',
-
-    stage_origin: 'Origin',
-    stage_intermediate: 'Intermediate',
-    stage_destination: 'Destination',
 
     current_label: 'Current:',
     change_status_label: 'Change status',
@@ -1757,15 +1981,11 @@ export const en = {
     centros_detail_contact_label: 'Contact:',
     centros_detail_schedule_label: 'Schedule:',
     centros_detail_manager_label: 'Manager:',
-    centros_detail_stage_label: 'Stage:',
     centros_detail_created_label: 'Created:',
     centros_detail_source_label: 'Source:',
     centros_detail_recipient_label: 'Final recipient',
     centros_detail_recipient_type_label: 'Recipient type:',
     centros_detail_none: '—',
-    centros_detail_stage_origin: 'Origin',
-    centros_detail_stage_intermediate: 'Intermediate',
-    centros_detail_stage_destination: 'Destination',
     centros_detail_inventory_heading: 'Declared inventory ({count})',
     centros_detail_inventory_empty: 'This center has not declared any inventory.',
     centros_detail_inventory_note:
@@ -1974,9 +2194,7 @@ export const en = {
     err_edit_failed: 'Could not save the edit.',
     err_discard_failed: 'Could not discard the item.',
     err_reason_required: 'A reason is required.',
-    tab_activity: 'Activity',
     // Disputed points (ficha 15)
-    tab_disputes: 'Disputed points',
     hub_disputes_label: 'Disputed points',
     hub_disputes_description:
       'Points reported by citizens as closed or non-existent.',
@@ -2030,9 +2248,6 @@ export const en = {
     resource_type_transport: 'Transport',
     resource_type_supplier: 'Supplier',
     resource_type_venue: 'Venue / Space',
-    resource_stage_origin: 'Origin',
-    resource_stage_intermediate: 'Intermediate',
-    resource_stage_destination: 'Destination',
 
     offer_card_label: 'Offer: {description}',
     offer_status_open: 'Open',
@@ -2072,7 +2287,6 @@ export const en = {
     detail_field_created: 'Created',
     detail_field_expiry: 'Freshness',
     detail_field_type: 'Type',
-    detail_field_stage: 'Stage',
     detail_field_accepts: 'Accepts',
     detail_field_contact: 'Contact',
     detail_field_schedule: 'Schedule',
@@ -2115,15 +2329,6 @@ export const en = {
     queue_view_detail: 'View detail',
 
     // ── Sub-navigation / hub / search (#117) ──────────────────────────
-    tab_overview: 'Overview',
-    tab_resources: 'Resources',
-    tab_needs: 'Requests',
-    tab_offers: 'Offers',
-    tab_shipments: 'Shipments',
-    tab_volunteers: 'Volunteers',
-    tab_reports: 'Reports',
-    tabs_aria: 'Coordination sections',
-
     hub_sections_label: 'Coordination sections',
     hub_count_aria: 'pending',
     hub_resources_label: 'Resources to verify',
@@ -2322,6 +2527,9 @@ export const en = {
 
     ship_route: '{origin} → {destination}',
     ship_drawer_open: 'View shipment detail: {route}',
+    ship_section_code: 'Unique code',
+    ship_field_code: 'Code',
+    ship_code_qr_alt: 'QR code for shipment {code}',
     ship_section_route: 'Route',
     ship_section_items: 'Cargo',
     ship_section_assignment: 'Assignment',
@@ -2329,6 +2537,7 @@ export const en = {
     ship_field_destination: 'Destination',
     ship_field_items: 'Items',
     ship_field_manifest: 'Manifest',
+    ship_field_hub: 'Logistics hub',
     ship_field_capacity: 'Assigned capacity',
     ship_field_carrier: 'Carrier',
 
@@ -2379,6 +2588,8 @@ export const en = {
     ship_item_add: '+ Add item',
     ship_item_remove: 'Remove',
     ship_manifest_placeholder: 'Manifest notes: fragile cargo, instructions…',
+    ship_hub_placeholder:
+      'Hub id (optional) — grants cross-emergency authority',
 
     // Available capacities (read-only, #105)
     cap_heading: 'Available capacities',
@@ -2508,34 +2719,49 @@ export const en = {
     map_disputed: 'In review · possible closure',
     map_report_cta: 'Something wrong? Tell us',
     map_no_locations: 'No locations on the map yet.',
+    map_geolocate: 'Go to my location',
+    map_geolocate_error: 'Could not get your location',
   },
 
   nav: {
-    panel: 'Dashboard',
-    coordination: 'Coordination',
     administration: 'Administration',
     account_section: 'My account',
     notifications: 'Notifications',
-    my_groups: 'My groups',
-    my_orgs: 'My organizations',
     my_permissions: 'My permissions',
     logout: 'Log out',
     admin_chip: 'Admin',
     open_menu: 'Open menu',
     close_menu: 'Close menu',
+    toggle_section: 'Show or hide sections',
     nav_aria: 'Main navigation',
     emergency_context: 'Operating',
     exit_emergency: 'Exit operation',
     admin_overview: 'Overview',
     admin_users: 'Users',
     admin_orgs: 'Organizations',
-    admin_centros: 'Centers',
+    admin_centros: 'Points',
     admin_permissions: 'Permissions',
     admin_api_keys: 'API keys',
     admin_accreditations: 'Accreditations',
     admin_templates: 'Templates',
     admin_audit: 'Audit log',
-    admin_tabs_aria: 'Administration sections',
+    sec_overview: 'Overview',
+    sec_resources: 'Resources',
+    sec_disputes: 'Disputed points',
+    sec_needs: 'Requests',
+    sec_offers: 'Offers',
+    sec_logistics: 'Logistics',
+    sec_volunteers: 'Volunteers',
+    sec_reports: 'Reports',
+    sec_activity: 'Activity',
+    home: 'Home',
+    cat_emergencies: 'Emergencies',
+    cat_resources: 'Resources',
+    cat_organizations: 'Organizations',
+    cat_groups: 'Crews',
+    my_donations: 'My donations',
+    my_profile: 'My profile',
+    breadcrumb: 'Breadcrumb',
   },
 
   panel: {
@@ -2567,6 +2793,20 @@ export const en = {
     qa_my_donations: 'My donations',
     qa_explore: 'View emergencies',
     qa_my_profile: 'My profile',
+    home_greeting: 'Hi, {name}',
+    home_subtitle: 'Everything you manage, in one place.',
+    home_section_emergencies: 'Your emergencies',
+    home_section_resources: 'Your resources',
+    home_section_orgs_groups: 'Your organizations and crews',
+    home_register_resource: 'Register a resource',
+    role_generic_resource: 'Manager',
+    role_generic_organization: 'Organization',
+    role_generic_group: 'Crew',
+    home_personal_heading: 'Personal shortcuts',
+    personal_donations: 'My donations',
+    personal_notifications: 'Notifications',
+    personal_permissions: 'My permissions',
+    personal_profile: 'My profile',
   },
 
   miPerfil: {

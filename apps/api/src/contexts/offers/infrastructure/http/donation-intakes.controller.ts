@@ -12,7 +12,7 @@ import {
   StreamableFile,
   UseGuards,
 } from '@nestjs/common';
-import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { Throttle } from '@nestjs/throttler';
 import {
   ApiTags,
   ApiOperation,
@@ -55,6 +55,8 @@ import {
   CreateDonationIntakeResponseDto,
   LookupDonorByContactResponseDto,
   DonationIntakeViewDto,
+  PublicDonationIntakeDto,
+  toPublicDonationIntakeDto,
   DonationIntakeSearchHitDto,
   IntakeDeepLinkDto,
   DonationIntakeTrackingDto,
@@ -80,6 +82,7 @@ function mapItems(items: CreateDonationIntakeDto['items']): SupplyLineProps[] {
     quantity: item.quantity,
     unit: item.unit ?? null,
     category: item.category,
+    supplyId: item.supplyId ?? null,
     presentation: item.presentation ?? null,
     expiresAt: item.expiresAt ?? null,
   }));
@@ -106,7 +109,7 @@ export class DonationIntakesController {
 
   @Post('emergencies/:emergencyId/donation-intakes')
   @HttpCode(201)
-  @UseGuards(ThrottlerGuard, OptionalJwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @Throttle({ intake: { ttl: 60_000, limit: 5 } })
   @ApiOperation({
     summary: 'Pre-register a donation at a collection point (public)',
@@ -140,7 +143,6 @@ export class DonationIntakesController {
 
   @Post('emergencies/:emergencyId/donation-intakes/lookup-contact')
   @HttpCode(200)
-  @UseGuards(ThrottlerGuard)
   @Throttle({ intake: { ttl: 60_000, limit: 5 } })
   @ApiOperation({
     summary: 'Recognize a returning donor by phone or email (public)',
@@ -161,7 +163,6 @@ export class DonationIntakesController {
   }
 
   @Get('emergencies/:emergencyId/donation-intakes/by-code/:code')
-  @UseGuards(ThrottlerGuard)
   @Throttle({ intake: { ttl: 60_000, limit: 10 } })
   @ApiOperation({ summary: 'Track a donation by its code (public, no PII)' })
   @ApiParam({ name: 'emergencyId', format: 'uuid' })
@@ -206,13 +207,12 @@ export class DonationIntakesController {
   }
 
   @Patch('donation-intakes/:intakeId')
-  @UseGuards(ThrottlerGuard)
   @Throttle({ intake: { ttl: 60_000, limit: 5 } })
   @ApiOperation({
     summary: 'Update a pending intake (public, requires code + contact)',
   })
   @ApiParam({ name: 'intakeId', format: 'uuid' })
-  @ApiOkResponse({ type: DonationIntakeViewDto })
+  @ApiOkResponse({ type: PublicDonationIntakeDto })
   @ApiBadRequestResponse({ description: 'Invalid request body' })
   @ApiForbiddenResponse({ description: 'Contact or code mismatch' })
   @ApiNotFoundResponse({ description: 'Intake not found' })
@@ -221,7 +221,7 @@ export class DonationIntakesController {
   async update(
     @Param('intakeId', ParseUUIDPipe) intakeId: string,
     @Body() dto: UpdateDonationIntakeDto,
-  ): Promise<DonationIntakeViewDto> {
+  ): Promise<PublicDonationIntakeDto> {
     await this.updateDonationIntake.execute({
       intakeId,
       intakeCode: dto.intakeCode,
@@ -230,7 +230,10 @@ export class DonationIntakesController {
       donorEmail: dto.donorEmail ?? null,
       items: mapItems(dto.items),
     });
-    return this.getDonationIntakeById.execute(intakeId);
+    // Public caller: return a projection without coordinator-only internal
+    // fields (evidenceFileKey, volunteerNotes, receivedByUserId, donorUserId…).
+    const full = await this.getDonationIntakeById.execute(intakeId);
+    return toPublicDonationIntakeDto(full);
   }
 
   @Get('emergencies/:emergencyId/donation-intakes/search')
@@ -355,6 +358,8 @@ export class DonationIntakesController {
       receivedByUserId: req.user.id,
       volunteerNotes: dto.volunteerNotes ?? null,
       evidenceFileKey: dto.evidenceFileKey ?? null,
+      receivedItems: dto.items ? mapItems(dto.items) : null,
+      adjustmentReason: dto.adjustmentReason ?? null,
     });
   }
 

@@ -1,6 +1,6 @@
 import { Inject, Module, OnModuleDestroy } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import IORedis from 'ioredis';
+import IORedis, { type Redis as IORedisConnection } from 'ioredis';
 import { DB, DatabaseModule } from '../../../shared/database.module';
 import { Db } from '../../../shared/db';
 import { NeedsController } from './http/needs.controller';
@@ -24,6 +24,10 @@ import {
   NEED_EMERGENCY_STATUS_READER,
   NeedEmergencyStatusReader,
 } from '../domain/ports/emergency-status-reader';
+import {
+  NEED_RESOURCE_READER,
+  NeedResourceReader,
+} from '../domain/ports/resource-reader';
 import { EVENT_BUS, EventBus } from '../domain/ports/event-bus';
 import {
   VOLUNTEER_MATCHER_PORT,
@@ -34,6 +38,7 @@ import {
   PersonnelTaskCreatorPort,
 } from '../domain/ports/personnel-task-creator.port';
 import { DrizzleNeedRepository } from './drizzle/drizzle-need.repository';
+import { DrizzleNeedResourceReader } from './drizzle/drizzle-need-resource-reader';
 import { DrizzleEmergencyStatusReader } from '../../../shared/drizzle-emergency-status-reader';
 import { BullMqEventBus } from './bullmq-event-bus';
 import { IdentityModule } from '../../identity/infrastructure/identity.module';
@@ -45,12 +50,13 @@ import { VolunteerRepository } from '../../volunteers/domain/ports/volunteer.rep
 import { TaskRepository } from '../../volunteers/domain/ports/task.repository';
 import { DrizzleVolunteerRepository } from '../../volunteers/infrastructure/drizzle/drizzle-volunteer.repository';
 import { DrizzleTaskRepository } from '../../volunteers/infrastructure/drizzle/drizzle-task.repository';
+import { toBullMqConnection } from '../../../shared/bullmq-connection';
 
 export const EVENT_QUEUE = Symbol('NeedsEventQueue');
 
 interface EventQueue {
   queue: Queue;
-  connection: IORedis;
+  connection: IORedisConnection;
 }
 
 const eventQueueProvider = {
@@ -58,8 +64,12 @@ const eventQueueProvider = {
   useFactory: (): EventQueue => {
     const url = process.env.REDIS_URL;
     if (!url) throw new Error('REDIS_URL is required');
-    const connection = new IORedis(url, { maxRetriesPerRequest: null });
-    const queue = new Queue('domain-events', { connection });
+    const connection: IORedisConnection = new IORedis(url, {
+      maxRetriesPerRequest: null,
+    });
+    const queue = new Queue('domain-events', {
+      connection: toBullMqConnection(connection),
+    });
     return { queue, connection };
   },
 };
@@ -84,14 +94,26 @@ const eventBusProvider = {
     new BullMqEventBus(eventQueue.queue),
 };
 
+const resourceReaderProvider = {
+  provide: NEED_RESOURCE_READER,
+  inject: [DB],
+  useFactory: (db: Db): NeedResourceReader => new DrizzleNeedResourceReader(db),
+};
+
 const createNeedProvider = {
   provide: CreateNeed,
-  inject: [NEED_REPOSITORY, EVENT_BUS, NEED_EMERGENCY_STATUS_READER],
+  inject: [
+    NEED_REPOSITORY,
+    EVENT_BUS,
+    NEED_EMERGENCY_STATUS_READER,
+    NEED_RESOURCE_READER,
+  ],
   useFactory: (
     repo: NeedRepository,
     bus: EventBus,
     statusReader: NeedEmergencyStatusReader,
-  ) => new CreateNeed(repo, bus, statusReader),
+    resourceReader: NeedResourceReader,
+  ) => new CreateNeed(repo, bus, statusReader, resourceReader),
 };
 
 const validateNeedProvider = {
@@ -205,6 +227,7 @@ const createTaskFromNeedProvider = {
     eventQueueProvider,
     needRepositoryProvider,
     emergencyStatusReaderProvider,
+    resourceReaderProvider,
     eventBusProvider,
     createNeedProvider,
     validateNeedProvider,

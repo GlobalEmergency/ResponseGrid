@@ -1,6 +1,7 @@
 import { DonationIntakeId } from '../domain/donation-intake-id';
 import { DonationIntakeRepository } from '../domain/ports/donation-intake.repository';
 import { EventBus } from '../domain/ports/event-bus';
+import { SupplyLineProps } from '../../supplies/domain/supply-line';
 import { DonationIntakeNotFoundError } from './donation-intake-not-found.error';
 
 export interface ConfirmIntakeReceptionCommand {
@@ -8,6 +9,10 @@ export interface ConfirmIntakeReceptionCommand {
   receivedByUserId: string;
   volunteerNotes: string | null;
   evidenceFileKey: string | null;
+  /** Lines actually received; when omitted the declared lines stand (#129). */
+  receivedItems?: SupplyLineProps[] | null;
+  /** Required when the received lines differ from the declared ones. */
+  adjustmentReason?: string | null;
 }
 
 export class ConfirmIntakeReception {
@@ -22,11 +27,18 @@ export class ConfirmIntakeReception {
     );
     if (!intake) throw new DonationIntakeNotFoundError(cmd.intakeId);
 
-    intake.confirmReception(
-      cmd.receivedByUserId,
-      cmd.volunteerNotes,
-      cmd.evidenceFileKey,
-    );
+    intake.confirmReception({
+      receivedByUserId: cmd.receivedByUserId,
+      volunteerNotes: cmd.volunteerNotes,
+      evidenceFileKey: cmd.evidenceFileKey,
+      receivedLines: cmd.receivedItems
+        ? cmd.receivedItems.map((item, index) => ({
+            sortOrder: index,
+            line: item,
+          }))
+        : null,
+      adjustmentReason: cmd.adjustmentReason ?? null,
+    });
     await this.repo.save(intake);
     await this.bus.publish(intake.pullDomainEvents());
   }

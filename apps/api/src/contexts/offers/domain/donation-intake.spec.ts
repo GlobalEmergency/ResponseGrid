@@ -6,9 +6,11 @@ import { DonationIntakeStatus } from './donation-intake-enums';
 import {
   DonationIntakeAlreadyProcessedError,
   DonationIntakeLineLimitError,
+  DonationIntakeReceptionReasonRequiredError,
 } from './donation-intake-errors';
 import { InvalidDonationIntakeContactError } from './donation-intake-errors';
 import { SupplyLineValidationError } from '../../supplies/domain/supply-line';
+import { DonationIntakeReceived } from './events/donation-intake-received.event';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const RESOURCE = '33333333-3333-4333-8333-333333333331';
@@ -135,15 +137,63 @@ describe('DonationIntake aggregate', () => {
 
   it('confirmReception() transitions pending → received and emits event', () => {
     const intake = makeIntake();
-    intake.confirmReception('user-1', 'Todo OK', 'photo.jpg');
+    intake.confirmReception({
+      receivedByUserId: 'user-1',
+      volunteerNotes: 'Todo OK',
+      evidenceFileKey: 'photo.jpg',
+    });
     expect(intake.status).toBe(DonationIntakeStatus.Received);
     expect(intake.receivedByUserId).toBe('user-1');
     expect(intake.evidenceFileKey).toBe('photo.jpg');
     expect(intake.receivedAt).toBeInstanceOf(Date);
+    expect(intake.receptionAdjustmentReason).toBeNull();
 
     const events = intake.pullDomainEvents();
     expect(events).toHaveLength(1);
     expect(events[0]?.eventName).toBe('donation_intake.received');
+  });
+
+  it('confirmReception() replaces lines with the received ones and emits them', () => {
+    const intake = makeIntake(); // declared: 10 bolsas
+    intake.confirmReception({
+      receivedByUserId: 'user-1',
+      volunteerNotes: null,
+      evidenceFileKey: null,
+      receivedLines: [makeLine({ quantity: 7 })],
+      adjustmentReason: 'Llegaron 7, no 10',
+    });
+
+    expect(intake.lines).toHaveLength(1);
+    expect(intake.lines[0]?.supplyLine.quantity).toBe(7);
+    expect(intake.receptionAdjustmentReason).toBe('Llegaron 7, no 10');
+
+    const events = intake.pullDomainEvents();
+    const received = events[0] as DonationIntakeReceived;
+    expect(received.payload.lines[0]?.quantity).toBe(7);
+  });
+
+  it('confirmReception() requires a reason when received lines differ from declared', () => {
+    const intake = makeIntake();
+    expect(() =>
+      intake.confirmReception({
+        receivedByUserId: 'user-1',
+        volunteerNotes: null,
+        evidenceFileKey: null,
+        receivedLines: [makeLine({ quantity: 7 })],
+      }),
+    ).toThrow(DonationIntakeReceptionReasonRequiredError);
+  });
+
+  it('confirmReception() keeps declared lines and needs no reason when received match', () => {
+    const intake = makeIntake();
+    intake.confirmReception({
+      receivedByUserId: 'user-1',
+      volunteerNotes: null,
+      evidenceFileKey: null,
+      receivedLines: [makeLine()], // identical to declared
+    });
+    expect(intake.lines[0]?.supplyLine.quantity).toBe(10);
+    expect(intake.receptionAdjustmentReason).toBeNull();
   });
 
   it('reject() transitions pending → rejected', () => {
@@ -161,7 +211,11 @@ describe('DonationIntake aggregate', () => {
 
   it('throws when mutating a processed intake', () => {
     const intake = makeIntake();
-    intake.confirmReception('user-1', null, null);
+    intake.confirmReception({
+      receivedByUserId: 'user-1',
+      volunteerNotes: null,
+      evidenceFileKey: null,
+    });
     expect(() =>
       intake.updateContent(
         {
@@ -176,7 +230,11 @@ describe('DonationIntake aggregate', () => {
 
   it('round-trips through snapshot', () => {
     const intake = makeIntake();
-    intake.confirmReception('user-1', 'ok', null);
+    intake.confirmReception({
+      receivedByUserId: 'user-1',
+      volunteerNotes: 'ok',
+      evidenceFileKey: null,
+    });
     intake.pullDomainEvents();
     const restored = DonationIntake.fromSnapshot(intake.toSnapshot());
     expect(restored.toSnapshot()).toEqual(intake.toSnapshot());

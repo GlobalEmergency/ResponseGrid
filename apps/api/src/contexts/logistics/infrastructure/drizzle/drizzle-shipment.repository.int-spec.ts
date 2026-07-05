@@ -1,9 +1,10 @@
 import { createDb, Db } from '../../../../shared/db';
-import { shipmentsTable } from './schema';
+import { shipmentCodeSequencesTable, shipmentsTable } from './schema';
 import { DrizzleShipmentRepository } from './drizzle-shipment.repository';
 import { DrizzleShipmentAuthorizationLookup } from './drizzle-shipment-authorization-lookup';
 import { Shipment } from '../../domain/shipment';
 import { ShipmentId } from '../../domain/shipment-id';
+import { formatShipmentCode } from '../../domain/shipment-code';
 import { SupplyLine } from '../../../supplies/domain/supply-line';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import { CarrierType, ShipmentStatus } from '../../domain/shipment-enums';
@@ -22,14 +23,22 @@ const CARRIER_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const CONTAINER_A = '11111111-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const CONTAINER_B = '22222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 
+// Monotonic across the file so every created shipment gets a distinct code
+// (the unique (emergency_id, code) index rejects collisions).
+let codeSeq = 0;
+
+const HUB = '77777777-7777-4777-8777-777777777777';
+
 function makeShipment(opts?: {
   emergencyId?: string;
   items?: SupplyLine[];
   containerIds?: string[];
+  hubId?: string | null;
   manifest?: string | null;
 }): Shipment {
   return Shipment.create({
     id: ShipmentId.create(),
+    code: formatShipmentCode(++codeSeq),
     emergencyId: EmergencyId.fromString(opts?.emergencyId ?? EM),
     originResourceId: ORIGIN,
     destinationResourceId: DEST,
@@ -42,6 +51,7 @@ function makeShipment(opts?: {
       }),
     ],
     containerIds: opts?.containerIds ?? [],
+    hubId: opts?.hubId ?? null,
     manifest: opts?.manifest ?? 'Manifiesto',
   });
 }
@@ -64,6 +74,21 @@ describe('DrizzleShipmentRepository (integration)', () => {
 
   beforeEach(async () => {
     await db.delete(shipmentsTable);
+    await db.delete(shipmentCodeSequencesTable);
+  });
+
+  it('nextSequence allocates a monotonic per-emergency sequence, never reused', async () => {
+    const em = EmergencyId.fromString(EM);
+    // increments on every call, independent of how many rows exist
+    expect(await repo.nextSequence(em)).toBe(1);
+    expect(await repo.nextSequence(em)).toBe(2);
+    // a different emergency keeps its own sequence
+    expect(await repo.nextSequence(EmergencyId.fromString(OTHER_EM))).toBe(1);
+    // deleting shipments does NOT free a code for reuse — the sequence is
+    // monotonic, decoupled from the live row count.
+    await repo.save(makeShipment());
+    await db.delete(shipmentsTable);
+    expect(await repo.nextSequence(em)).toBe(3);
   });
 
   it('round-trips a planned shipment (jsonb SupplyLine items + container ids) through Postgres', async () => {
@@ -89,6 +114,7 @@ describe('DrizzleShipmentRepository (integration)', () => {
 
     expect(found).not.toBeNull();
     expect(found!.id.value).toBe(s.id.value);
+    expect(found!.code).toBe(s.code);
     expect(found!.status).toBe(ShipmentStatus.Planned);
     expect(found!.originResourceId).toBe(ORIGIN);
     expect(found!.destinationResourceId).toBe(DEST);
@@ -177,11 +203,26 @@ describe('DrizzleShipmentRepository (integration)', () => {
     await repo.save(s);
 
     const facts = await lookup.findAuthorizationFacts(s.id.value);
-    expect(facts).toEqual({ emergencyId: EM, carrierId: CARRIER_ID });
+    expect(facts).toEqual({
+      emergencyId: EM,
+      carrierId: CARRIER_ID,
+      hubId: null,
+    });
 
     const missing = await lookup.findAuthorizationFacts(
       '99999999-9999-4999-8999-999999999999',
     );
     expect(missing).toBeNull();
+  });
+
+  it('persists and resolves the logistics hub (#150)', async () => {
+    const s = makeShipment({ hubId: HUB });
+    await repo.save(s);
+
+    const found = await repo.findById(s.id);
+    expect(found!.hubId).toBe(HUB);
+
+    const facts = await lookup.findAuthorizationFacts(s.id.value);
+    expect(facts).toEqual({ emergencyId: EM, carrierId: null, hubId: HUB });
   });
 });

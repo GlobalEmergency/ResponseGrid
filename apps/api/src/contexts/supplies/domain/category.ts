@@ -35,3 +35,33 @@ export enum Category {
 export function isCoreCategory(slug: string): boolean {
   return Object.values(Category).includes(slug as Category);
 }
+
+export function getCategoryPrefix(
+  categorySlug: string,
+  categories: {
+    slug: string;
+    parentSlug: string | null;
+    codePrefix: string | null;
+  }[],
+): string {
+  const categoryMap = new Map(categories.map((c) => [c.slug, c]));
+
+  let current: string | null = categorySlug;
+  const visited = new Set<string>();
+
+  while (current !== null) {
+    if (visited.has(current)) {
+      break;
+    }
+    visited.add(current);
+
+    const cat = categoryMap.get(current);
+    if (cat && cat.codePrefix) {
+      return cat.codePrefix;
+    }
+
+    current = cat?.parentSlug ?? null;
+  }
+
+  return 'VAR'; // Fallback
+}

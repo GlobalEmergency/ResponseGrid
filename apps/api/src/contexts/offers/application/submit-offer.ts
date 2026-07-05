@@ -40,6 +40,7 @@ export interface SubmitOfferItemCommand {
   quantity: number;
   unit: string | null;
   category: Category;
+  supplyId?: string | null;
   presentation: string | null;
 }
 
@@ -99,6 +100,7 @@ export class SubmitOffer {
         quantity: i.quantity,
         unit: i.unit,
         category: i.category,
+        supplyId: i.supplyId ?? null,
         presentation: i.presentation,
       }),
     );

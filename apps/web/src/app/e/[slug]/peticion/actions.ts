@@ -1,14 +1,12 @@
 'use server';
 
-import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
-import { getToken, authHeaders, clearToken } from '@/lib/auth';
-import { ALL_CATEGORIES } from '@/lib/categories';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { parseSupplyLines } from '@/lib/supply-lines';
 import { getT } from '@/i18n/server';
+import { getCategories } from '@/adapters/get-categories';
 
-type Category = components['schemas']['SupplyLineDto']['category'];
 type NeedPriority = components['schemas']['CreateNeedDto']['priority'];
 
 export type PeticionState =
@@ -18,27 +16,32 @@ export type PeticionState =
 
 const VALID_PRIORITIES: NeedPriority[] = ['low', 'medium', 'high', 'urgent'];
 
-// Category validation uses the single canonical list (lib/categories), so the
-// server accepts exactly what the form offers (incl. clothing).
-function isCategory(value: unknown): value is Category {
-  return (ALL_CATEGORIES as readonly string[]).includes(value as string);
-}
-
 function isPriority(value: unknown): value is NeedPriority {
   return VALID_PRIORITIES.includes(value as NeedPriority);
 }
 
 export async function submitPeticion(
+  slug: string,
   emergencyId: string,
   _prev: PeticionState,
   formData: FormData,
 ): Promise<PeticionState> {
-  const token = await getToken();
-  if (!token) {
-    redirect('/login');
-  }
+  // Optional link to the resource / final recipient this need belongs to (#60).
+  // Parsed up front so the login round-trip on an expired session keeps it —
+  // the API validates it is a real UUID; garbage is rejected server-side.
+  const rawResourceId = formData.get('resourceId');
+  const resourceId =
+    typeof rawResourceId === 'string' && rawResourceId.trim() !== ''
+      ? rawResourceId.trim()
+      : undefined;
+  const peticionPath =
+    resourceId !== undefined
+      ? `/e/${slug}/peticion?resourceId=${encodeURIComponent(resourceId)}`
+      : `/e/${slug}/peticion`;
 
-  const { t } = await getT();
+  const token = await requireSession(peticionPath);
+
+  const { t, locale } = await getT();
 
   const rawTitle = formData.get('title');
   const rawDescription = formData.get('description');
@@ -76,8 +79,13 @@ export async function submitPeticion(
     return { status: 'error', message: t.peticion.err_items_required };
   }
 
+  // Category validation is sourced from the DB (single source of truth), so
+  // the server accepts exactly what the form offers (incl. clothing and
+  // medical_personnel, which getCategories returns alongside material slugs).
+  const validCategories = new Set((await getCategories(locale)).map((c) => c.slug));
+
   const items = parseSupplyLines(rawItems, {
-    isValidCategory: isCategory,
+    isValidCategory: (c) => validCategories.has(c),
     allowEmpty: false,
   });
   if (items === null) {
@@ -108,14 +116,14 @@ export async function submitPeticion(
         priority: rawPriority,
         location: { address, latitude, longitude },
         ...(requesterOrganizationId !== undefined ? { requesterOrganizationId } : {}),
+        ...(resourceId !== undefined ? { resourceId } : {}),
         items,
       },
     },
   );
 
   if (response.status === 401) {
-    await clearToken();
-    redirect('/login');
+    return redirectToLogin(peticionPath);
   }
 
   if (response.status === 409) {

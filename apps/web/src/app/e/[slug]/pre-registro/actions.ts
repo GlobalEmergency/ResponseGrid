@@ -4,12 +4,9 @@ import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
 import { getToken, authHeaders } from '@/lib/auth';
 import { getMe } from '@/lib/navigation-data';
-import { MATERIAL_CATEGORIES } from '@/lib/categories';
 import { parseSupplyLines } from '@/lib/supply-lines';
-
-function isMaterialCategory(v: string): boolean {
-  return (MATERIAL_CATEGORIES as readonly string[]).includes(v);
-}
+import { getCategories } from '@/adapters/get-categories';
+import { isMaterialCategory } from '@/domain/supplies/category';
 
 export type PreRegState =
   | { status: 'idle' }
@@ -28,7 +25,7 @@ export async function submitPreRegistration(
   _prev: PreRegState,
   formData: FormData,
 ): Promise<PreRegState> {
-  const { t } = await getT();
+  const { t, locale } = await getT();
   const tp = t.prereg;
 
   const rawName = formData.get('donorName');
@@ -69,8 +66,12 @@ export async function submitPreRegistration(
     }
   }
 
+  const validMaterialCategories = new Set(
+    (await getCategories(locale)).filter(isMaterialCategory).map((c) => c.slug),
+  );
+
   const items = parseSupplyLines(formData.get('items'), {
-    isValidCategory: isMaterialCategory,
+    isValidCategory: (c) => validMaterialCategories.has(c),
     allowEmpty: true,
   });
   if (items === null) {

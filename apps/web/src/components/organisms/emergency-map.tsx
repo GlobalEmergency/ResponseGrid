@@ -6,7 +6,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
 import type { Map as LeafletMap } from 'leaflet';
@@ -339,6 +339,7 @@ export default function EmergencyMap({
         <BoundsFitter points={points} />
         <ApproximateCirclesLayer points={points} />
         <ClusteredMarkersLayer points={points} slug={slug} />
+        <GeolocateControl />
       </MapContainer>
 
       {points.length === 0 && (
@@ -349,5 +350,68 @@ export default function EmergencyMap({
         </div>
       )}
     </div>
+  );
+}
+
+function GeolocateControl() {
+  const map = useMap();
+  const t = getMessages(useLocale()).ui;
+  const [loading, setLoading] = useState(false);
+  const [errored, setErrored] = useState(false);
+
+  const handleGeolocate = () => {
+    if (!navigator.geolocation) return;
+    setLoading(true);
+    setErrored(false);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        map.setView([latitude, longitude], 14);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error getting geolocation', error);
+        setLoading(false);
+        setErrored(true);
+      },
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+    );
+  };
+
+  const label = errored ? t.map_geolocate_error : t.map_geolocate;
+
+  return (
+    <button
+      type="button"
+      onClick={handleGeolocate}
+      disabled={loading}
+      className={`absolute bottom-3 right-3 z-[1000] flex h-10 w-10 items-center justify-center rounded-full border bg-white shadow-md transition-colors hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy disabled:opacity-50 ${errored ? 'border-danger' : 'border-line'}`}
+      aria-label={label}
+      title={label}
+    >
+      {loading ? (
+        <span className="h-4 w-4 animate-spin rounded-full border-2 border-muted border-t-navy" />
+      ) : (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={2}
+          stroke="currentColor"
+          className="h-5 w-5 text-ink"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+          />
+        </svg>
+      )}
+    </button>
   );
 }

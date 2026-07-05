@@ -10,6 +10,7 @@ export interface DonationIntakeLineView {
   quantity: number;
   unit: string | null;
   category: Category;
+  supplyId: string | null;
   presentation: string | null;
   expiresAt: string | null;
 }
@@ -27,6 +28,7 @@ export interface DonationIntakeView {
   lines: DonationIntakeLineView[];
   volunteerNotes: string | null;
   evidenceFileKey: string | null;
+  receptionAdjustmentReason: string | null;
   receivedAt: Date | null;
   receivedByUserId: string | null;
   createdAt: Date;
@@ -60,11 +62,13 @@ export class GetDonationIntakeById {
         quantity: line.quantity,
         unit: line.unit,
         category: line.category,
+        supplyId: line.supplyId ?? null,
         presentation: line.presentation ?? null,
         expiresAt: line.expiresAt ?? null,
       })),
       volunteerNotes: snap.volunteerNotes,
       evidenceFileKey: snap.evidenceFileKey,
+      receptionAdjustmentReason: snap.receptionAdjustmentReason,
       receivedAt: snap.receivedAt,
       receivedByUserId: snap.receivedByUserId,
       createdAt: snap.createdAt,

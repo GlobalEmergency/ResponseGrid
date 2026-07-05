@@ -17,6 +17,7 @@ export interface EditOfferItemCommand {
   quantity: number;
   unit: string | null;
   category: Category;
+  supplyId?: string | null;
   presentation: string | null;
 }
 
@@ -59,6 +60,7 @@ export class EditOffer {
           quantity: i.quantity,
           unit: i.unit,
           category: i.category,
+          supplyId: i.supplyId ?? null,
           presentation: i.presentation,
         }),
       );

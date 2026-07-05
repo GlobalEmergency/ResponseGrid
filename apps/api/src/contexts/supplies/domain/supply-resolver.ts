@@ -1,5 +1,7 @@
 import { Supply } from './supply';
 import { SupplyAlias } from './supply-alias';
+import { allLocalizedVariants } from './localized-text';
+import { PublicSupplyRecord } from './ports/supply-catalog.read-model';
 
 export class SupplyResolver {
   private readonly index = new Map<string, string | null>();
@@ -35,10 +37,57 @@ export class SupplyResolver {
     return resolved ?? null;
   }
 
+  /**
+   * Una etiqueta es ambigua cuando su forma normalizada apunta a más de un
+   * insumo. `resolve()` la devuelve como null igual que una desconocida, pero
+   * el remedio operativo es distinto: un alias nuevo nunca la desambigua —
+   * hay que fusionar (o renombrar) los insumos en conflicto.
+   */
+  isAmbiguous(label: string): boolean {
+    return this.index.get(SupplyAlias.normalize(label)) === null;
+  }
+
   resolveMany(labels: string[]): string[] {
     const resolved = labels
       .map((label) => this.resolve(label))
       .filter((s): s is string => s !== null);
     return [...new Set(resolved)];
   }
+}
+
+/**
+ * Índice de resolución exacta sobre el catálogo activo (nombre canónico en
+ * todos sus idiomas, código y alias). Los registros ya son `active`, así que
+ * los campos de gestión del agregado se rellenan con placeholders neutros: el
+ * resolver solo lee id/nombre/código. Resolver contra el catálogo activo es
+ * deliberado — un insumo fusionado/archivado no debe captar líneas nuevas; su
+ * texto sale en el informe de no-casados (#226) para dar de alta un alias.
+ */
+export function supplyResolverFromCatalog(
+  records: readonly PublicSupplyRecord[],
+): SupplyResolver {
+  const make = (record: PublicSupplyRecord, name: string): Supply =>
+    Supply.fromSnapshot({
+      id: record.id,
+      code: record.code,
+      name,
+      categorySlug: record.categorySlug,
+      defaultUnit: record.defaultUnit,
+      attributes: record.attributes,
+      variantOfId: record.variantOfId,
+      status: 'active',
+      registrationNotes: null,
+    });
+
+  const supplies = records.flatMap((record) =>
+    allLocalizedVariants(record.name, record.translations).map((name) =>
+      make(record, name),
+    ),
+  );
+  const aliases = records.flatMap((record) =>
+    record.aliases.map((alias) =>
+      SupplyAlias.create({ alias, supplyId: record.id }),
+    ),
+  );
+  return new SupplyResolver(supplies, aliases);
 }

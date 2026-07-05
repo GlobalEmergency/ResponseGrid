@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { createDb, Db } from '../../../../shared/db';
 import { needsTable, needItemsTable } from './schema';
+import { suppliesTable } from '../../../supplies/infrastructure/drizzle/schema';
 import { DrizzleNeedRepository } from './drizzle-need.repository';
 import { Need } from '../../domain/need';
 import { NeedId } from '../../domain/need-id';
@@ -31,6 +32,7 @@ function makeItems() {
       quantity: 50,
       unit: 'liters',
       category: Category.Water,
+      supplyId: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
     }),
   ];
 }
@@ -66,6 +68,19 @@ describe('DrizzleNeedRepository (integration)', () => {
   beforeEach(async () => {
     await db.delete(needItemsTable);
     await db.delete(needsTable);
+    await db
+      .insert(suppliesTable)
+      .values([
+        {
+          id: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
+          code: 'TEST-0001',
+          name: 'Agua Test',
+          categorySlug: 'water',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ])
+      .onConflictDoNothing();
   });
 
   it('round-trips a need through Postgres (with items and location)', async () => {
@@ -90,6 +105,9 @@ describe('DrizzleNeedRepository (integration)', () => {
     expect(found!.items[0].quantity).toBe(50);
     expect(found!.items[0].unit).toBe('liters');
     expect(found!.items[0].category).toBe(Category.Water);
+    expect(found!.items[0].supplyId).toBe(
+      '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
+    );
   });
 
   it('round-trips the resourceId link to a final recipient (#60)', async () => {

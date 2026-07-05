@@ -11,7 +11,7 @@ import {
   ResourceValidityReport,
   ValidityReason,
 } from '../domain/resource-validity-report';
-import { ResourceType, ResourceStage } from '../domain/resource-enums';
+import { ResourceType } from '../domain/resource-enums';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const RESOURCE_ID = '22222222-2222-4222-8222-222222222222';
@@ -21,7 +21,6 @@ function hiddenResourceWithInventory(): Resource {
     id: RESOURCE_ID,
     emergencyId: EM,
     type: ResourceType.Warehouse,
-    stage: ResourceStage.Origin,
     name: 'Almacén oculto',
     description: null,
     location: { address: 'Calle 1', latitude: 10, longitude: -66 },

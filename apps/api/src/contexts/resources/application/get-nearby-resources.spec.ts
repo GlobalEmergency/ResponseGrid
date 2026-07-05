@@ -5,7 +5,6 @@ import { ResourceId } from '../domain/resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import {
   ResourceType,
-  ResourceStage,
   VerificationLevel,
   PublicStatus,
 } from '../domain/resource-enums';
@@ -29,7 +28,6 @@ const makeVisible = (
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name,
       location: Location.create({
         address: `${name} address`,

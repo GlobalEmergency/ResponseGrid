@@ -88,7 +88,12 @@ export function OAuthInitiateGuard(
         sameSite: 'lax' as const,
         path: '/auth',
         maxAge: STATE_MAX_AGE_MS,
-        secure: process.env.COOKIE_SECURE === 'true',
+        // Secure by default in production (fail-safe); an HTTPS-terminating-
+        // upstream deployment serving plain HTTP can opt out with
+        // COOKIE_SECURE=false. Off outside production for local/proxy runs.
+        secure:
+          process.env.NODE_ENV === 'production' &&
+          process.env.COOKIE_SECURE !== 'false',
       };
 
       res.cookie(STATE_COOKIE, state, cookieOptions);

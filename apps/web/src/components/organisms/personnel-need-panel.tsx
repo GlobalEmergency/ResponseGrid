@@ -5,7 +5,7 @@ import type { components } from '@reliefhub/api-client';
 import { SkillTag } from '@/components/atoms/skill-tag';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { VolunteerSuggestionCard } from '@/components/molecules/volunteer-suggestion-card';
-import { createTaskFromNeed } from '@/app/e/[slug]/coordinacion/personnel-actions';
+import { createTaskFromNeed } from '@/app/emergencies/[slug]/manage/personnel-actions';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
 

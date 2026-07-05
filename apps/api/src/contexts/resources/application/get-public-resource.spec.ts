@@ -4,7 +4,6 @@ import { ResourceId } from '../domain/resource-id';
 import { ResourceRepository } from '../domain/ports/resource.repository';
 import {
   ResourceType,
-  ResourceStage,
   PublicStatus,
   VerificationLevel,
 } from '../domain/resource-enums';
@@ -20,7 +19,6 @@ function snapshot(
     id: overrides.id,
     emergencyId: overrides.emergencyId ?? EM,
     type: ResourceType.Venue,
-    stage: ResourceStage.Destination,
     name: 'Hospital Central',
     description: null,
     location: { address: 'Calle 1', latitude: 10.4, longitude: -66.9 },

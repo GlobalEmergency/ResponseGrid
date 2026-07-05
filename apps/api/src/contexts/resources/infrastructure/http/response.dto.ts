@@ -1,7 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   ResourceType,
-  ResourceStage,
   VerificationLevel,
   PublicStatus,
 } from '../../domain/resource-enums';
@@ -17,6 +16,35 @@ export class RegisterResourceResponseDto {
     example: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
   })
   id!: string;
+}
+
+/**
+ * One resource the authenticated principal manages (owner or entity-scoped
+ * grant), reduced to what a navigation surface needs (issue #285).
+ */
+export class MyManagedResourceDto {
+  @ApiProperty({
+    format: 'uuid',
+    example: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+  })
+  id!: string;
+
+  @ApiProperty({ enum: ResourceType, example: ResourceType.CollectionPoint })
+  type!: ResourceType;
+
+  @ApiProperty({ example: 'Cruz Roja Madrid' })
+  name!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  emergencyId!: string;
+
+  @ApiProperty({
+    example: 'terremoto-venezuela-2026',
+    nullable: true,
+    type: String,
+    description: 'Slug of the owning emergency; null if its row is missing.',
+  })
+  emergencySlug!: string | null;
 }
 
 export class LocationViewDto {
@@ -39,9 +67,6 @@ export class ResourceViewDto {
 
   @ApiProperty({ enum: ResourceType, example: ResourceType.CollectionPoint })
   type!: ResourceType;
-
-  @ApiProperty({ enum: ResourceStage, example: ResourceStage.Origin })
-  stage!: ResourceStage;
 
   @ApiProperty({ example: 'Cruz Roja Madrid' })
   name!: string;
@@ -70,8 +95,21 @@ export class ResourceViewDto {
   @ApiProperty({ type: [String], example: ['water', 'food'] })
   accepts!: string[];
 
-  @ApiProperty({ example: '+58 212 555 0000', nullable: true, type: String })
+  @ApiProperty({
+    example: '+58 212 555 0000',
+    nullable: true,
+    type: String,
+    description:
+      'Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell "hidden" from "absent".',
+  })
   contact!: string | null;
+
+  @ApiProperty({
+    example: true,
+    description:
+      'Whether a contact exists on file, regardless of whether `contact` is revealed to this caller.',
+  })
+  hasContact!: boolean;
 
   @ApiProperty({ example: 'Lun-Vie 08-18', nullable: true, type: String })
   schedule!: string | null;

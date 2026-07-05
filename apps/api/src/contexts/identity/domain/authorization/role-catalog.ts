@@ -39,6 +39,7 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'emergency:resume',
       'emergency:close',
       'emergency:announce',
+      'emergency:configure',
       'emergency:read',
       'accreditation:grant',
       'accreditation:revoke',
@@ -81,6 +82,7 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'emergency:pause',
       'emergency:resume',
       'emergency:announce',
+      'emergency:configure',
       'role:grant',
       'role:revoke',
       'resource:read',
@@ -233,18 +235,32 @@ export const ROLE_CATALOG: Record<string, RoleDefinition> = {
       'resource:read',
     ],
   },
+  trusted_channel_bot: {
+    id: 'trusted_channel_bot',
+    description:
+      'Cuenta de servicio de un canal de mensajería de confianza (bot de ' +
+      'Telegram/WhatsApp) que ya verifica el teléfono en el cliente. Rol de un ' +
+      'solo permiso: emitir un JWT de usuario por teléfono verificado ' +
+      '(login/alta). Se concede uno-a-uno vía Grant explícito por Service ' +
+      'Account; NO se hereda de integration_partner ni de ningún rol general — ' +
+      'el vehículo del permiso `auth:trusted_phone_login` (#315).',
+    defaultScopeType: 'platform',
+    permissions: ['auth:trusted_phone_login'],
+  },
   citizen: {
     id: 'citizen',
     description:
-      'Ciudadano autenticado (rol por defecto de cualquier usuario).',
+      'Ciudadano autenticado (rol por defecto de cualquier usuario). Solo ' +
+      'acciones de grado ciudadano (crear/registrar). SEGURIDAD: NO incluye ' +
+      'resource:read / need:read / offer:read, porque esos permisos gatean las ' +
+      'colas de coordinación (queue/disputed/expired); concederlos aquí — y este ' +
+      'rol tiene scope por defecto `platform` — expondría datos sin validar de ' +
+      'todas las emergencias. Las lecturas públicas no requieren permiso.',
     defaultScopeType: 'platform',
     permissions: [
       'offer:create',
-      'offer:read',
       'capacity:publish',
       'resource:register',
-      'resource:read',
-      'need:read',
       'campaign:read',
       'volunteer:register',
     ],

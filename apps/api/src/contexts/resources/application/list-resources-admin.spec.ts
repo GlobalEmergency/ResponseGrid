@@ -9,7 +9,6 @@ import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Location } from '../../../shared/domain/location';
 import {
   ResourceType,
-  ResourceStage,
   PublicStatus,
   VerificationLevel,
 } from '../domain/resource-enums';
@@ -21,7 +20,6 @@ function makeResource(name: string): Resource {
     id: ResourceId.create(),
     emergencyId: EmergencyId.fromString(EM),
     type: ResourceType.Warehouse,
-    stage: ResourceStage.Origin,
     name,
     location: Location.create({
       address: 'Calle 1',

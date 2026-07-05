@@ -1,10 +1,21 @@
-import { eq, sql } from 'drizzle-orm';
+import { and, asc, eq, ilike, ne, or, sql, type SQL } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
 import { Supply, SupplyStatus } from '../../domain/supply';
-import { SupplyRepository } from '../../domain/ports/supply.repository';
-import { suppliesTable } from './schema';
+import { SupplyAlias } from '../../domain/supply-alias';
+import { AliasConflictError } from '../../domain/supply-errors';
+import {
+  SupplyListFilter,
+  SupplyRepository,
+  SupplyTranslationInput,
+} from '../../domain/ports/supply.repository';
+import {
+  suppliesTable,
+  supplyAliasesTable,
+  supplyTranslationsTable,
+} from './schema';
 
 type SupplyRow = typeof suppliesTable.$inferSelect;
+type SupplyTranslationRow = typeof supplyTranslationsTable.$inferInsert;
 
 /**
  * Persistencia del agregado `Supply` (escritura / gestión interna). La cara
@@ -23,21 +34,233 @@ export class DrizzleSupplyRepository implements SupplyRepository {
   }
 
   async findByCode(code: string): Promise<Supply | null> {
-    // Búsqueda por código insensible a mayúsculas (los códigos canónicos son
-    // 'INS-NNNN', pero no asumimos el casing del llamante).
-    const normalized = code.trim().toLowerCase();
+    // Búsqueda por código normalizada a mayúsculas (los códigos canónicos son
+    // 'INS-NNNN', lo que permite usar el índice único).
+    const normalized = code.trim().toUpperCase();
     const [row] = await this.db
       .select()
       .from(suppliesTable)
-      .where(sql`lower(${suppliesTable.code}) = ${normalized}`)
+      .where(eq(suppliesTable.code, normalized))
       .limit(1);
     return row ? this.toSupply(row) : null;
   }
 
-  save(_supply: Supply): Promise<void> {
-    // Read-only para #220; las APIs internas de alta/edición serán las dueñas
-    // de la persistencia de escritura.
-    return Promise.reject(new Error('SupplyRepository.save not implemented'));
+  async save(
+    supply: Supply,
+    translations?: readonly SupplyTranslationInput[],
+  ): Promise<void> {
+    const s = supply.toSnapshot();
+    const now = new Date();
+    const values = {
+      id: s.id,
+      code: s.code,
+      name: s.name,
+      status: s.status,
+      registrationNotes: s.registrationNotes,
+      categorySlug: s.categorySlug,
+      defaultUnit: s.defaultUnit,
+      attributes: s.attributes,
+      variantOfId: s.variantOfId,
+      createdAt: now,
+      updatedAt: now,
+    };
+    const onConflict = {
+      target: suppliesTable.id,
+      set: {
+        name: s.name,
+        status: s.status,
+        registrationNotes: s.registrationNotes,
+        categorySlug: s.categorySlug,
+        defaultUnit: s.defaultUnit,
+        attributes: s.attributes,
+        variantOfId: s.variantOfId,
+        updatedAt: now,
+      },
+    };
+
+    // Sin traducciones: upsert simple, sin tocar `supply_translations`.
+    if (translations === undefined) {
+      await this.db
+        .insert(suppliesTable)
+        .values(values)
+        .onConflictDoUpdate(onConflict);
+      return;
+    }
+
+    // Con traducciones: upsert + reemplazo atómico del set de i18n.
+    const rows = this.normalizeTranslationRows(s.id, translations);
+    await this.db.transaction(async (tx) => {
+      await tx
+        .insert(suppliesTable)
+        .values(values)
+        .onConflictDoUpdate(onConflict);
+      await tx
+        .delete(supplyTranslationsTable)
+        .where(eq(supplyTranslationsTable.supplyId, s.id));
+      if (rows.length > 0) {
+        await tx.insert(supplyTranslationsTable).values(rows);
+      }
+    });
+  }
+
+  /**
+   * Normaliza y deduplica las traducciones a filas de `supply_translations`:
+   * `locale` a minúsculas, `name` sin espacios sobrantes, descartando entradas
+   * vacías. La última entrada de un mismo locale gana. El nombre base (`es`)
+   * vive en `supplies.name`; aquí se persiste lo que declara el admin.
+   */
+  private normalizeTranslationRows(
+    supplyId: string,
+    translations: readonly SupplyTranslationInput[],
+  ): SupplyTranslationRow[] {
+    const entries = new Map<string, string>();
+    for (const t of translations) {
+      const locale = t.locale.trim().toLowerCase();
+      const name = t.name.trim();
+      if (!locale || !name) {
+        continue;
+      }
+      entries.set(locale, name);
+    }
+    return [...entries.entries()].map(([locale, name]) => ({
+      supplyId,
+      locale,
+      name,
+    }));
+  }
+
+  async listTranslations(supplyId: string): Promise<SupplyTranslationInput[]> {
+    const rows = await this.db
+      .select()
+      .from(supplyTranslationsTable)
+      .where(eq(supplyTranslationsTable.supplyId, supplyId))
+      .orderBy(asc(supplyTranslationsTable.locale));
+    return rows.map((r) => ({ locale: r.locale, name: r.name }));
+  }
+
+  async nextSequenceValue(): Promise<number> {
+    // nextval devuelve bigint -> string; la secuencia se siembra por encima del
+    // máximo sembrado en la migración 0042.
+    const result = await this.db.execute<{ value: string }>(
+      sql`SELECT nextval('supply_code_seq') AS value`,
+    );
+    const next = Number(result.rows[0]?.value);
+    if (!Number.isInteger(next) || next < 1) {
+      throw new Error('Supply code sequence allocation returned no row');
+    }
+    return next;
+  }
+
+  async list(filter: SupplyListFilter): Promise<Supply[]> {
+    const conditions: SQL[] = [];
+    if (filter.status) {
+      conditions.push(eq(suppliesTable.status, filter.status));
+    }
+    if (filter.categorySlug) {
+      conditions.push(eq(suppliesTable.categorySlug, filter.categorySlug));
+    }
+    const q = filter.q?.trim();
+    if (q) {
+      const like = `%${q}%`;
+      conditions.push(
+        or(
+          ilike(suppliesTable.code, like),
+          ilike(suppliesTable.name, like),
+        ) as SQL,
+      );
+    }
+    const rows = await this.db
+      .select()
+      .from(suppliesTable)
+      .where(conditions.length ? and(...conditions) : undefined)
+      .orderBy(asc(suppliesTable.code));
+    return rows.map((row) => this.toSupply(row));
+  }
+
+  async listAliases(supplyId: string): Promise<SupplyAlias[]> {
+    const rows = await this.db
+      .select()
+      .from(supplyAliasesTable)
+      .where(eq(supplyAliasesTable.supplyId, supplyId))
+      .orderBy(asc(supplyAliasesTable.aliasNorm));
+    return rows.map((r) =>
+      SupplyAlias.fromSnapshot({ alias: r.aliasNorm, supplyId: r.supplyId }),
+    );
+  }
+
+  async addAlias(alias: SupplyAlias): Promise<void> {
+    const aliasNorm = SupplyAlias.normalize(alias.alias);
+    const [existing] = await this.db
+      .select()
+      .from(supplyAliasesTable)
+      .where(eq(supplyAliasesTable.aliasNorm, aliasNorm))
+      .limit(1);
+    if (existing) {
+      // Idempotente si ya apunta al mismo insumo; conflicto si apunta a otro.
+      if (existing.supplyId === alias.supplyId) return;
+      throw new AliasConflictError(aliasNorm);
+    }
+    await this.db
+      .insert(supplyAliasesTable)
+      .values({ aliasNorm, supplyId: alias.supplyId });
+  }
+
+  async removeAlias(aliasNorm: string): Promise<void> {
+    await this.db
+      .delete(supplyAliasesTable)
+      .where(
+        eq(supplyAliasesTable.aliasNorm, SupplyAlias.normalize(aliasNorm)),
+      );
+  }
+
+  async merge(sourceId: string, targetId: string): Promise<void> {
+    await this.db.transaction(async (tx) => {
+      // Mueve los alias de A a B. `alias_norm` es PK global (un alias mapea a un
+      // solo insumo), así que A y B nunca comparten alias y el UPDATE no choca.
+      await tx
+        .update(supplyAliasesTable)
+        .set({ supplyId: targetId })
+        .where(eq(supplyAliasesTable.supplyId, sourceId));
+      // Repunta las variantes hijas de A a B (excluyendo al propio B si era hijo de A).
+      await tx
+        .update(suppliesTable)
+        .set({ variantOfId: targetId, updatedAt: new Date() })
+        .where(
+          and(
+            eq(suppliesTable.variantOfId, sourceId),
+            ne(suppliesTable.id, targetId),
+          ),
+        );
+      // Si B era variante de A, ahora B es el canónico y deja de ser variante (se vuelve raíz).
+      await tx
+        .update(suppliesTable)
+        .set({ variantOfId: null, updatedAt: new Date() })
+        .where(
+          and(
+            eq(suppliesTable.id, targetId),
+            eq(suppliesTable.variantOfId, sourceId),
+          ),
+        );
+      // Mueve las traducciones de nombre de A a B: el canónico (B) gana en
+      // conflicto de locale (ON CONFLICT DO NOTHING), y las de A se borran para
+      // no dejar i18n huérfana en un insumo archivado. Así el nombre queda
+      // enriquecido en todos los idiomas que aportaba el duplicado.
+      await tx.execute(sql`
+        INSERT INTO supply_translations (supply_id, locale, name)
+        SELECT ${targetId}, locale, name
+        FROM supply_translations
+        WHERE supply_id = ${sourceId}
+        ON CONFLICT (supply_id, locale) DO NOTHING
+      `);
+      await tx
+        .delete(supplyTranslationsTable)
+        .where(eq(supplyTranslationsTable.supplyId, sourceId));
+      // Archiva A (no se borra: preserva referencias legadas para #223/#226).
+      await tx
+        .update(suppliesTable)
+        .set({ status: 'archived', updatedAt: new Date() })
+        .where(eq(suppliesTable.id, sourceId));
+    });
   }
 
   private toSupply(row: SupplyRow): Supply {

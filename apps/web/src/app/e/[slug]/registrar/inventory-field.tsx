@@ -1,33 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  SupplyLineRowFields,
-  type SupplyLineRowLabels,
-} from '@/components/molecules/supply-line-row-fields';
-import { MATERIAL_CATEGORIES } from '@/lib/categories';
-
-interface Item {
-  id: number;
-  name: string;
-  quantity: number;
-  unit: string;
-  category: string;
-  expiresAt: string;
-}
-
-let nextId = 1;
-
-function makeItem(): Item {
-  return {
-    id: nextId++,
-    name: '',
-    quantity: 1,
-    unit: '',
-    category: MATERIAL_CATEGORIES[0],
-    expiresAt: '',
-  };
-}
+import { SupplyLineList } from '@/components/organisms/supply-line-list';
+import { emptyLine, toDto, isComplete, type SupplyLine } from '@/domain/supplies/supply-line';
+import { isMaterialCategory, type Category } from '@/domain/supplies/category';
 
 /**
  * Labels consumed by {@link InventoryField}. A structural subset shared by the
@@ -61,31 +37,58 @@ export interface InventoryFieldLabels {
 interface InventoryFieldProps {
   t: InventoryFieldLabels;
   locale: 'es' | 'en';
+  categories: readonly Category[];
   /**
    * Start with one empty row instead of an empty list. Used by surfaces where
    * at least one line is expected (citizen pre-registration), versus the
    * registrar where declared inventory is fully optional.
    */
   startWithOneRow?: boolean;
+  /** Prefill the editor with existing lines (inventory edit, #263). */
+  initialLines?: SupplyLine[];
+  /**
+   * Serialize every row instead of silently dropping incomplete ones. On edit
+   * surfaces the save REPLACES the persisted inventory, so a half-edited row
+   * must fail validation server-side rather than be deleted without warning;
+   * the create flows keep the lenient filter (an unfinished optional row never
+   * blocks the submit).
+   */
+  strict?: boolean;
+  /**
+   * Offer the full category taxonomy instead of material-only. The API accepts
+   * (and other intakes persist) the whole `Category` enum, so the edit surface
+   * must be able to display and round-trip e.g. health-vertical lines it did
+   * not create.
+   */
+  allowAllCategories?: boolean;
 }
 
 /**
  * Editable list of supply lines (`SupplyLine[]`). Originally the optional
  * declared inventory for `/registrar`; now also reused by `/pre-registro`.
- * Category options come from the single canonical source (lib/categories), so
+ * Category options come from the DB (`categories` prop, material-only), so
  * needs, offers and inventory stay consistent. Serializes the filled rows
- * (non-empty name) to a hidden `items` input as JSON.
+ * (via `isComplete`/`toDto`) to a hidden `items` input as JSON.
  */
 export function InventoryField({
   t,
   locale,
+  categories,
   startWithOneRow = false,
+  initialLines,
+  strict = false,
+  allowAllCategories = false,
 }: InventoryFieldProps) {
-  const [items, setItems] = useState<Item[]>(
-    startWithOneRow ? [makeItem()] : [],
+  const materialCategories = categories.filter(isMaterialCategory);
+  const selectableCategories = allowAllCategories ? categories : materialCategories;
+  // New rows still default to the first MATERIAL category on every surface.
+  const defaultCategory = materialCategories[0]?.slug ?? '';
+
+  const [lines, setLines] = useState<SupplyLine[]>(
+    initialLines ?? (startWithOneRow ? [emptyLine(defaultCategory)] : []),
   );
 
-  const labels: SupplyLineRowLabels = {
+  const labels = {
     itemNumber: t.item_number,
     itemRemove: t.item_remove,
     itemRemoveLabel: t.item_remove_label,
@@ -96,78 +99,36 @@ export function InventoryField({
     unitOpt: t.item_unit_opt,
     unitPlaceholder: t.item_unit_placeholder,
     categoryLabel: t.item_category_label,
-    expiryLabel: t.item_expiry_label,
-    expiryOpt: t.item_expiry_opt,
+    ...(t.item_expiry_label !== undefined ? { expiryLabel: t.item_expiry_label } : {}),
+    ...(t.item_expiry_opt !== undefined ? { expiryOpt: t.item_expiry_opt } : {}),
+    addItem: t.inventory_add,
+    emptyList: t.inventory_empty,
+    legend: t.inventory_heading,
   };
 
-  // Serialize only rows that have a name — empty rows are ignored so the field
-  // stays optional and never blocks the submit.
+  // Lenient (create) surfaces serialize only complete rows so an unfinished
+  // optional row never blocks the submit; strict (edit) surfaces serialize
+  // everything so an incomplete row surfaces a validation error instead of
+  // being silently deleted by the replace-style save.
   const serialized = JSON.stringify(
-    items
-      .filter((i) => i.name.trim() !== '')
-      .map(({ name, quantity, unit, category, expiresAt }) => ({
-        name: name.trim(),
-        quantity,
-        ...(unit.trim() !== '' ? { unit: unit.trim() } : {}),
-        category,
-        ...(expiresAt !== '' ? { expiresAt } : {}),
-      })),
+    (strict ? lines : lines.filter(isComplete)).map(toDto),
   );
-
-  const updateItem = (id: number, patch: Partial<Omit<Item, 'id'>>) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, ...patch } : item)),
-    );
-  };
-
-  const addItem = () => setItems((prev) => [...prev, makeItem()]);
-
-  const removeItem = (id: number) =>
-    setItems((prev) => prev.filter((item) => item.id !== id));
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-1">
-          <p className="text-sm font-semibold text-ink uppercase tracking-wide">
-            {t.inventory_heading}{' '}
-            <span className="text-muted-soft font-normal normal-case">
-              (opcional)
-            </span>
-          </p>
-          <p className="text-xs text-muted normal-case">{t.inventory_hint}</p>
-        </div>
-        <button
-          type="button"
-          onClick={addItem}
-          className="shrink-0 rounded text-sm font-semibold text-ink underline underline-offset-2 hover:text-muted focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2"
-        >
-          {t.inventory_add}
-        </button>
-      </div>
+      <p className="text-xs text-muted normal-case">{t.inventory_hint}</p>
 
-      {items.length === 0 ? (
-        <p className="rounded-lg border-2 border-dashed border-line px-4 py-3 text-sm text-muted">
-          {t.inventory_empty}
-        </p>
-      ) : (
-        items.map((item, index) => (
-          <SupplyLineRowFields
-            key={item.id}
-            rowId={item.id}
-            index={index}
-            idPrefix="inv"
-            required={false}
-            removable
-            categories={MATERIAL_CATEGORIES}
-            locale={locale}
-            labels={labels}
-            value={item}
-            onChange={(patch) => updateItem(item.id, patch)}
-            onRemove={() => removeItem(item.id)}
-          />
-        ))
-      )}
+      <SupplyLineList
+        value={lines}
+        onChange={setLines}
+        categories={selectableCategories}
+        locale={locale}
+        idPrefix="inv"
+        required={false}
+        defaultCategory={defaultCategory}
+        showExpiry
+        labels={labels}
+      />
 
       {/* Hidden input carries serialized items to the server action */}
       <input type="hidden" name="items" value={serialized} />

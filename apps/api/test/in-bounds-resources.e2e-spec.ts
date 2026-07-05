@@ -14,7 +14,6 @@ import { ResourceId } from '../src/contexts/resources/domain/resource-id';
 import { EmergencyId } from '../src/shared/domain/emergency-id';
 import {
   ResourceType,
-  ResourceStage,
   VerificationLevel,
   PublicStatus,
 } from '../src/contexts/resources/domain/resource-enums';
@@ -40,7 +39,6 @@ const makeVisible = (name: string, lat: number, lng: number) =>
       id: ResourceId.create(),
       emergencyId: EmergencyId.fromString(EM),
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name,
       location: Location.create({
         address: `${name} address`,
@@ -141,7 +139,6 @@ describe('In-bounds resources (e2e)', () => {
         id: ResourceId.create(),
         emergencyId: EmergencyId.fromString(EM),
         type: ResourceType.CollectionPoint,
-        stage: ResourceStage.Origin,
         name: 'Hidden R',
         location: Location.create({
           address: 'addr',

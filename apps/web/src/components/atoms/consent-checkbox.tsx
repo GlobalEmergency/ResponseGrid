@@ -1,10 +1,10 @@
 'use client';
 
-import type { InputHTMLAttributes } from 'react';
+import type { InputHTMLAttributes, ReactNode } from 'react';
 
 interface ConsentCheckboxProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
-  label: string;
+  label: ReactNode;
   id: string;
   name: string;
 }

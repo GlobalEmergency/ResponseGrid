@@ -65,7 +65,7 @@ export function LoginForm({ next, t }: LoginFormProps) {
       <p className="text-center text-sm text-muted">
         {t.no_account}{' '}
         <Link
-          href="/signup"
+          href={`/signup?next=${encodeURIComponent(next)}`}
           className="font-semibold text-ink underline underline-offset-2 hover:text-ink-soft"
         >
           {t.create_account}

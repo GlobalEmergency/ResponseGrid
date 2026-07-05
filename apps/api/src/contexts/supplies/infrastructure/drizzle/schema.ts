@@ -23,6 +23,8 @@ export const categoriesTable = pgTable('categories', {
   ),
   vertical: text('vertical').notNull().default('general'),
   sort: integer('sort').notNull().default(0),
+  codePrefix: text('code_prefix'),
+  kind: text('kind').notNull().default('material'),
   archivedAt: timestamp('archived_at', { withTimezone: true }),
 });
 

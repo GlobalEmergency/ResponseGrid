@@ -27,6 +27,7 @@ import type { Response } from 'express';
 import { JwtAuthGuard } from '../../identity/infrastructure/http/jwt-auth.guard';
 import { FILE_STORAGE } from '../domain/ports/file-storage';
 import type { FileStorage } from '../domain/ports/file-storage';
+import { isSupportedImage } from '../domain/image-signature';
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB
 
@@ -105,6 +106,14 @@ export class FilesController {
     if (!file) {
       throw new UnprocessableEntityException('No file received');
     }
+    // The fileFilter only sees the client-declared MIME type. Verify the actual
+    // bytes are a supported image so a mislabelled payload (HTML/SVG sent as
+    // image/png) can never be stored.
+    if (!isSupportedImage(file.buffer)) {
+      throw new UnprocessableEntityException(
+        'File content is not a supported image (JPEG, PNG, GIF, WebP, BMP, TIFF)',
+      );
+    }
     return this.fileStorage.save({
       buffer: file.buffer,
       contentType: file.mimetype,
@@ -117,7 +126,9 @@ export class FilesController {
    * Streams the file directly from disk.
    */
   @Get(':key')
-  @ApiOperation({ summary: 'Download a stored file by key' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Download a stored file by key (authenticated)' })
   @ApiParam({ name: 'key', description: 'Storage key returned by POST /files' })
   @ApiOkResponse({ description: 'File content streamed' })
   async serve(@Param('key') key: string, @Res() res: Response): Promise<void> {

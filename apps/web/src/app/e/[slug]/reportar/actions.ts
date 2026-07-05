@@ -1,7 +1,6 @@
 'use server';
 
-import { redirect } from 'next/navigation';
-import { getToken, clearToken, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { getT } from '@/i18n/server';
@@ -30,10 +29,7 @@ export async function submitReport(
   _prev: SubmitReportState,
   formData: FormData,
 ): Promise<SubmitReportState> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login`);
-  }
+  const token = await requireSession();
 
   const { t } = await getT();
 
@@ -83,8 +79,7 @@ export async function submitReport(
   });
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(`/login`);
+    return redirectToLogin();
   }
 
   if (response.status === 403) {
@@ -107,10 +102,7 @@ export async function reviewReport(
   reportId: string,
   slug: string,
 ): Promise<ReviewReportResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/coordinacion/reportes`);
-  }
+  const token = await requireSession(`/emergencies/${slug}/manage/reports`);
 
   const { t } = await getT();
 
@@ -120,8 +112,7 @@ export async function reviewReport(
   });
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(`/login?next=/e/${slug}/coordinacion/reportes`);
+    return redirectToLogin(`/emergencies/${slug}/manage/reports`);
   }
 
   if (response.status === 403) {

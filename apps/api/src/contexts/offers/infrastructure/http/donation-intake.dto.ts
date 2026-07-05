@@ -144,6 +144,27 @@ export class ReceiveDonationIntakeDto {
   @IsOptional()
   @IsString()
   evidenceFileKey?: string | null;
+
+  @ApiPropertyOptional({
+    description:
+      'Lines actually received; when omitted the declared lines stand (#129)',
+    type: [SupplyLineDto],
+  })
+  @IsOptional()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(MAX_DONATION_INTAKE_LINES)
+  @ValidateNested({ each: true })
+  @Type(() => SupplyLineDto)
+  items?: SupplyLineDto[];
+
+  @ApiPropertyOptional({
+    description: 'Required when received lines differ from the declared ones',
+    nullable: true,
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  adjustmentReason?: string | null;
 }
 
 export class RejectDonationIntakeDto {

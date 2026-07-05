@@ -42,6 +42,51 @@ test('omits a blank unit instead of sending an empty string', () => {
   ]);
 });
 
+test('preserves a soft supply link when present', () => {
+  const raw = JSON.stringify([
+    {
+      name: 'Agua',
+      quantity: 12,
+      category: 'water',
+      supplyId: ' 1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8 ',
+    },
+  ]);
+  assert.deepEqual(parseSupplyLines(raw, REQUIRED), [
+    {
+      name: 'Agua',
+      quantity: 12,
+      category: 'water',
+      supplyId: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
+    },
+  ]);
+});
+
+test('preserves a trimmed presentation, omits it when blank (#61)', () => {
+  const withPres = JSON.stringify([
+    { name: 'Clindamicina', quantity: 5, category: 'food', presentation: '  EV (intravenoso)  ' },
+  ]);
+  assert.deepEqual(parseSupplyLines(withPres, REQUIRED), [
+    { name: 'Clindamicina', quantity: 5, category: 'food', presentation: 'EV (intravenoso)' },
+  ]);
+
+  const blankPres = JSON.stringify([
+    { name: 'Agua', quantity: 1, category: 'water', presentation: '   ' },
+  ]);
+  assert.deepEqual(parseSupplyLines(blankPres, REQUIRED), [
+    { name: 'Agua', quantity: 1, category: 'water' },
+  ]);
+});
+
+test('rejects a non-string presentation', () => {
+  assert.equal(
+    parseSupplyLines(
+      JSON.stringify([{ name: 'X', quantity: 1, category: 'food', presentation: 5 }]),
+      REQUIRED,
+    ),
+    null,
+  );
+});
+
 test('returns null on malformed JSON or a non-array root', () => {
   assert.equal(parseSupplyLines('{not json', REQUIRED), null);
   assert.equal(parseSupplyLines('{"a":1}', REQUIRED), null);

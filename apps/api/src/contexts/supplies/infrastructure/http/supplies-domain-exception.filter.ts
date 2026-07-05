@@ -13,10 +13,21 @@ import {
   ContainerValidationError,
 } from '../../domain/container-errors';
 import { SupplyLineValidationError } from '../../domain/supply-line';
+import { SupplyValidationError } from '../../domain/supply';
+import { SupplyAliasValidationError } from '../../domain/supply-alias';
+import {
+  AliasConflictError,
+  CategoryNotFoundError,
+  MergeIntoSelfError,
+  SupplyCodeConflictError,
+  SupplyNotFoundError,
+  VariantTargetNotFoundError,
+} from '../../domain/supply-errors';
 import {
   CategoryAlreadyExistsError,
-  CategoryNotFoundError,
+  CategoryNotFoundError as CategoryAdminNotFoundError,
   CategoryParentNotFoundError,
+  CategoryProtectedError,
   CategoryValidationError,
 } from '../../application/category-admin.errors';
 
@@ -27,9 +38,18 @@ type DomainError =
   | ContainerEmergencyMismatchError
   | ContainerValidationError
   | SupplyLineValidationError
-  | CategoryAlreadyExistsError
+  | SupplyValidationError
+  | SupplyAliasValidationError
+  | SupplyNotFoundError
+  | SupplyCodeConflictError
+  | VariantTargetNotFoundError
   | CategoryNotFoundError
+  | MergeIntoSelfError
+  | AliasConflictError
+  | CategoryAlreadyExistsError
+  | CategoryAdminNotFoundError
   | CategoryParentNotFoundError
+  | CategoryProtectedError
   | CategoryValidationError;
 
 /**
@@ -49,9 +69,18 @@ type DomainError =
   ContainerEmergencyMismatchError,
   ContainerValidationError,
   SupplyLineValidationError,
-  CategoryAlreadyExistsError,
+  SupplyValidationError,
+  SupplyAliasValidationError,
+  SupplyNotFoundError,
+  SupplyCodeConflictError,
+  VariantTargetNotFoundError,
   CategoryNotFoundError,
+  MergeIntoSelfError,
+  AliasConflictError,
+  CategoryAlreadyExistsError,
+  CategoryAdminNotFoundError,
   CategoryParentNotFoundError,
+  CategoryProtectedError,
   CategoryValidationError,
 )
 export class SuppliesDomainExceptionFilter implements ExceptionFilter {
@@ -66,18 +95,29 @@ export class SuppliesDomainExceptionFilter implements ExceptionFilter {
   private statusFor(exception: DomainError): HttpStatus {
     if (
       exception instanceof ContainerNotFoundError ||
+      exception instanceof SupplyNotFoundError ||
+      exception instanceof VariantTargetNotFoundError ||
       exception instanceof CategoryNotFoundError ||
+      exception instanceof CategoryAdminNotFoundError ||
       exception instanceof CategoryParentNotFoundError
     ) {
       return HttpStatus.NOT_FOUND;
     }
     if (
       exception instanceof ContainerSealedError ||
-      exception instanceof CategoryAlreadyExistsError
+      exception instanceof SupplyCodeConflictError ||
+      exception instanceof AliasConflictError ||
+      exception instanceof CategoryAlreadyExistsError ||
+      exception instanceof CategoryProtectedError
     ) {
       return HttpStatus.CONFLICT;
     }
-    if (exception instanceof SupplyLineValidationError) {
+    if (
+      exception instanceof SupplyLineValidationError ||
+      exception instanceof SupplyValidationError ||
+      exception instanceof SupplyAliasValidationError ||
+      exception instanceof MergeIntoSelfError
+    ) {
       return HttpStatus.BAD_REQUEST;
     }
     return HttpStatus.UNPROCESSABLE_ENTITY;

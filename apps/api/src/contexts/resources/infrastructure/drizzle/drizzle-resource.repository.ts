@@ -1,4 +1,4 @@
-import { and, asc, between, count, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, between, count, eq, inArray, or, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { Db } from '../../../../shared/db';
 import { resourcesTable, resourceItemsTable } from './schema';
@@ -6,6 +6,7 @@ import { emergenciesTable } from '../../../emergencies/infrastructure/drizzle/sc
 import {
   ResourceRepository,
   ResourceWithEmergency,
+  ManagedResourceRow,
 } from '../../domain/ports/resource.repository';
 import { Resource, ResourceSnapshot, Provenance } from '../../domain/resource';
 import { AuthorSnapshot } from '../../../../shared/domain/author';
@@ -17,7 +18,6 @@ import { ResourceId } from '../../domain/resource-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import {
   ResourceType,
-  ResourceStage,
   VerificationLevel,
   PublicStatus,
 } from '../../domain/resource-enums';
@@ -57,7 +57,6 @@ type RawRow = {
   id: string;
   emergency_id: string;
   type: string;
-  stage: string;
   name: string;
   description: string | null;
   address: string;
@@ -134,7 +133,6 @@ function rawRowToSnapshot(row: RawRow): ResourceSnapshot {
     id: row.id,
     emergencyId: row.emergency_id,
     type: row.type as ResourceType,
-    stage: row.stage as ResourceStage,
     name: row.name,
     description: row.description ?? null,
     location: {
@@ -183,7 +181,6 @@ function rowToSnapshot(row: Row, items: ItemsRow[] = []): ResourceSnapshot {
     id: row.id,
     emergencyId: row.emergencyId,
     type: row.type as ResourceType,
-    stage: row.stage as ResourceStage,
     name: row.name,
     description: row.description ?? null,
     location: {
@@ -238,7 +235,6 @@ export class DrizzleResourceRepository implements ResourceRepository {
           id: s.id,
           emergencyId: s.emergencyId,
           type: s.type,
-          stage: s.stage,
           name: s.name,
           description: s.description,
           address: s.location.address,
@@ -412,6 +408,49 @@ export class DrizzleResourceRepository implements ResourceRepository {
         ),
       );
     return rows.map((r) => Resource.fromSnapshot(rowToSnapshot(r)));
+  }
+
+  async findOwnedOrGranted(
+    ownerUserId: string,
+    grantedResourceIds: string[],
+  ): Promise<ManagedResourceRow[]> {
+    // A single OR keeps a resource that is both owned and granted as one row.
+    // Guard the inArray: drizzle rejects an empty id list.
+    const whereClause =
+      grantedResourceIds.length > 0
+        ? or(
+            eq(resourcesTable.ownerUserId, ownerUserId),
+            inArray(resourcesTable.id, grantedResourceIds),
+          )
+        : eq(resourcesTable.ownerUserId, ownerUserId);
+
+    // LEFT JOIN resolves the emergency slug in the same query (no N+1); LEFT so
+    // an orphaned resource still appears (slug → null) instead of vanishing.
+    // Projection only — this read runs on every authenticated page render, so
+    // it must not drag the wide columns (raw/author jsonb) over the wire (#318).
+    const rows = await this.db
+      .select({
+        id: resourcesTable.id,
+        type: resourcesTable.type,
+        name: resourcesTable.name,
+        emergencyId: resourcesTable.emergencyId,
+        emergencySlug: emergenciesTable.slug,
+      })
+      .from(resourcesTable)
+      .leftJoin(
+        emergenciesTable,
+        eq(resourcesTable.emergencyId, emergenciesTable.id),
+      )
+      .where(whereClause)
+      .orderBy(asc(resourcesTable.name), asc(resourcesTable.id));
+
+    return rows.map((r) => ({
+      id: r.id,
+      type: r.type as ResourceType,
+      name: r.name,
+      emergencyId: r.emergencyId,
+      emergencySlug: r.emergencySlug ?? null,
+    }));
   }
 
   async findAllPaged(q: {

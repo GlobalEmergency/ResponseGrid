@@ -11,6 +11,7 @@ import { IntakeReceipt } from '@/components/molecules/intake-receipt';
 import { InventoryField } from '@/app/e/[slug]/registrar/inventory-field';
 import { useFormDraft } from '@/lib/use-form-draft';
 import type { Messages } from '@/i18n/messages/es';
+import type { Category } from '@/domain/supplies/category';
 
 const INITIAL_STATE: PreRegState = { status: 'idle' };
 
@@ -34,6 +35,7 @@ interface PreRegistroFormProps {
   t: Messages['prereg'];
   locale: 'es' | 'en';
   backToEmergencyLabel: string;
+  categories: readonly Category[];
   /**
    * When set the donor is logged in: name/email come from their account (and so
    * does the phone when they have one), and no local draft is kept.
@@ -49,6 +51,7 @@ export function PreRegistroForm({
   t,
   locale,
   backToEmergencyLabel,
+  categories,
   profile = null,
 }: PreRegistroFormProps) {
   const [state, formAction, pending] = useActionState<PreRegState, FormData>(
@@ -175,7 +178,7 @@ export function PreRegistroForm({
         </FormField>
       </fieldset>
 
-      <InventoryField t={t.lines} locale={locale} startWithOneRow />
+      <InventoryField t={t.lines} locale={locale} categories={categories} startWithOneRow />
 
       <Button type="submit" disabled={pending} fullWidth>
         {pending ? t.submitting : t.submit}

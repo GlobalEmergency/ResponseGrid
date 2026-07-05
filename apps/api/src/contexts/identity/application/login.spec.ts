@@ -111,4 +111,39 @@ describe('Login', () => {
     });
     expect(result.accessToken).toBeTruthy();
   });
+
+  describe('timing side-channel hardening (user enumeration)', () => {
+    it('still performs a password comparison when the email is unknown', async () => {
+      const repo = new InMemoryUserRepository(); // empty
+      const spy = new FakePasswordHasher();
+      const compareSpy = jest.spyOn(spy, 'compare');
+      const login = new Login(repo, spy, tokenService);
+
+      await expect(
+        login.execute({ email: 'unknown@example.com', password: 'pass' }),
+      ).rejects.toThrow(InvalidCredentialsError);
+      // A comparison must run so the miss path is not measurably faster.
+      expect(compareSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('still performs a password comparison for a social-only account (no password)', async () => {
+      const repo = new InMemoryUserRepository();
+      const socialUser = User.create({
+        id: UserId.fromString('22222222-2222-4222-8222-222222222222'),
+        email: Email.fromString('social@example.com'),
+        passwordHash: null,
+        name: 'Social',
+        isAdmin: false,
+      });
+      await repo.save(socialUser);
+      const spy = new FakePasswordHasher();
+      const compareSpy = jest.spyOn(spy, 'compare');
+      const login = new Login(repo, spy, tokenService);
+
+      await expect(
+        login.execute({ email: 'social@example.com', password: 'pass' }),
+      ).rejects.toThrow(InvalidCredentialsError);
+      expect(compareSpy).toHaveBeenCalledTimes(1);
+    });
+  });
 });

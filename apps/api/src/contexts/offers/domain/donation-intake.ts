@@ -8,6 +8,7 @@ import {
 import {
   DonationIntakeAlreadyProcessedError,
   DonationIntakeLineLimitError,
+  DonationIntakeReceptionReasonRequiredError,
 } from './donation-intake-errors';
 import { IntakeLine, IntakeLineProps, IntakeLineSnapshot } from './intake-line';
 import {
@@ -44,10 +45,22 @@ export interface DonationIntakeSnapshot {
   lines: IntakeLineSnapshot[];
   volunteerNotes: string | null;
   evidenceFileKey: string | null;
+  receptionAdjustmentReason: string | null;
   receivedAt: Date | null;
   receivedByUserId: string | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+/** Fields captured when confirming a reception (#129). */
+export interface ConfirmReceptionInput {
+  receivedByUserId: string;
+  volunteerNotes: string | null;
+  evidenceFileKey: string | null;
+  /** Lines actually received; when omitted the declared lines stand. */
+  receivedLines?: IntakeLineProps[] | null;
+  /** Required when `receivedLines` differ from the declared ones. */
+  adjustmentReason?: string | null;
 }
 
 export class DonationIntake {
@@ -64,6 +77,7 @@ export class DonationIntake {
     private _lines: IntakeLine[],
     private _volunteerNotes: string | null,
     private _evidenceFileKey: string | null,
+    private _receptionAdjustmentReason: string | null,
     private _receivedAt: Date | null,
     private _receivedByUserId: string | null,
     public readonly createdAt: Date,
@@ -84,6 +98,7 @@ export class DonationIntake {
       donor,
       props.donorUserId,
       lines,
+      null,
       null,
       null,
       null,
@@ -110,6 +125,7 @@ export class DonationIntake {
       s.lines.map((line) => IntakeLine.fromSnapshot(line)),
       s.volunteerNotes,
       s.evidenceFileKey,
+      s.receptionAdjustmentReason,
       s.receivedAt,
       s.receivedByUserId,
       s.createdAt,
@@ -161,6 +177,10 @@ export class DonationIntake {
     return this._evidenceFileKey;
   }
 
+  get receptionAdjustmentReason(): string | null {
+    return this._receptionAdjustmentReason;
+  }
+
   get receivedAt(): Date | null {
     return this._receivedAt;
   }
@@ -180,19 +200,30 @@ export class DonationIntake {
     this.touch();
   }
 
-  confirmReception(
-    receivedByUserId: string,
-    volunteerNotes: string | null,
-    evidenceFileKey: string | null,
-  ): void {
+  confirmReception(input: ConfirmReceptionInput): void {
     this.assertPending();
+
+    // Replace the declared lines with what actually arrived, if provided.
+    // A reason is mandatory when they differ (auditability); inventory and the
+    // emitted event then reflect the *received* lines, not the declared ones.
+    if (input.receivedLines != null) {
+      const received = DonationIntake.buildLines(input.receivedLines);
+      const reason = input.adjustmentReason?.trim() ?? '';
+      const differ = DonationIntake.linesDiffer(this._lines, received);
+      if (differ && reason.length === 0) {
+        throw new DonationIntakeReceptionReasonRequiredError();
+      }
+      this._lines = received;
+      this._receptionAdjustmentReason = differ ? reason : null;
+    }
+
     this._status = DonationIntakeStatus.Received;
-    this._receivedByUserId = receivedByUserId;
-    this._volunteerNotes = volunteerNotes?.trim()
-      ? volunteerNotes.trim()
+    this._receivedByUserId = input.receivedByUserId;
+    this._volunteerNotes = input.volunteerNotes?.trim()
+      ? input.volunteerNotes.trim()
       : null;
-    this._evidenceFileKey = evidenceFileKey?.trim()
-      ? evidenceFileKey.trim()
+    this._evidenceFileKey = input.evidenceFileKey?.trim()
+      ? input.evidenceFileKey.trim()
       : null;
     this._receivedAt = new Date();
     this.touch();
@@ -200,10 +231,31 @@ export class DonationIntake {
       new DonationIntakeReceived(this.id.value, {
         emergencyId: this.emergencyId.value,
         targetResourceId: this.targetResourceId,
-        receivedByUserId,
+        receivedByUserId: input.receivedByUserId,
+        donorUserId: this.donorUserId,
         lines: this._lines.map((line) => line.supplyLine.toSnapshot()),
       }),
     );
+  }
+
+  /** True when the two line sets differ in content (ignoring id/sort order). */
+  private static linesDiffer(a: IntakeLine[], b: IntakeLine[]): boolean {
+    const key = (line: IntakeLine): string => {
+      const s = line.supplyLine.toSnapshot();
+      return JSON.stringify([
+        s.name,
+        s.quantity,
+        s.unit,
+        s.category,
+        s.presentation ?? null,
+        s.expiresAt ?? null,
+        s.supplyId ?? null,
+      ]);
+    };
+    if (a.length !== b.length) return true;
+    const sortedA = a.map(key).sort();
+    const sortedB = b.map(key).sort();
+    return sortedA.some((k, i) => k !== sortedB[i]);
   }
 
   reject(volunteerNotes: string | null): void {
@@ -255,6 +307,7 @@ export class DonationIntake {
       lines: this._lines.map((line) => line.toSnapshot()),
       volunteerNotes: this._volunteerNotes,
       evidenceFileKey: this._evidenceFileKey,
+      receptionAdjustmentReason: this._receptionAdjustmentReason,
       receivedAt: this._receivedAt,
       receivedByUserId: this._receivedByUserId,
       createdAt: this.createdAt,

@@ -38,6 +38,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/onboarding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Completar el alta: teléfono + aceptación de términos y privacidad (usado tras el login social) */
+        post: operations["AuthController_onboardingRoute"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/me": {
         parameters: {
             query?: never;
@@ -54,6 +71,40 @@ export interface paths {
         head?: never;
         /** Actualizar teléfono y/o nombre del perfil autenticado */
         patch: operations["AuthController_updateMe"];
+        trace?: never;
+    };
+    "/auth/trusted/login-by-phone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Emitir un JWT de usuario a partir de su teléfono verificado (bot de confianza) */
+        post: operations["TrustedAuthController_loginByPhoneRoute"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/trusted/register-by-phone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Alta passwordless de un usuario por teléfono verificado (bot de confianza) */
+        post: operations["TrustedAuthController_registerByPhoneRoute"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/grants/at-scope": {
@@ -351,6 +402,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/resources/{resourceId}/inventory": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read a point declared inventory in full (owner or coordinator) */
+        get: operations["ResourcesController_getMyInventoryAction"];
+        /** Replace a point declared inventory (owner or coordinator) — #263 */
+        put: operations["ResourcesController_updateMyInventoryAction"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/resources/{resourceId}/verify": {
         parameters: {
             query?: never;
@@ -430,6 +499,26 @@ export interface paths {
         put?: never;
         /** Update the operational public status of a resource (owner or coordinator) */
         post: operations["ResourcesController_updateResourceStatus"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/resources/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the resources the authenticated principal manages, across every emergency
+         * @description Union of the resources the principal owns and the ones reached through an entity-scoped grant (e.g. `point_manager`). Unlike `/emergencies/{emergencyId}/resources/mine`, this needs no emergency in the path, so it also serves principals whose only grant is entity-scoped (#285). Each row carries its emergency id and slug.
+         */
+        get: operations["ResourcesController_listMineAcrossEmergencies"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -806,6 +895,23 @@ export interface paths {
         get?: never;
         /** Publish official announcement for an emergency (coordinator only) */
         put: operations["EmergenciesController_publishEmergencyAnnouncement"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emergencies/{emergencyId}/resource-dispute-threshold": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Fijar (o limpiar) el umbral de disputa por reportes para una emergencia */
+        put: operations["EmergenciesController_setResourceDisputeThreshold"];
         post?: never;
         delete?: never;
         options?: never;
@@ -1882,6 +1988,145 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/supplies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar el catálogo (incluye archivados) */
+        get: operations["SuppliesAdminController_list"];
+        put?: never;
+        /** Crear un insumo (asigna código INS-NNNN) */
+        post: operations["SuppliesAdminController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/supplies/backfill": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Informe de líneas legacy sin enlazar al catálogo (no-casadas) */
+        get: operations["SuppliesAdminController_backfillReport"];
+        put?: never;
+        /** Backfill best-effort del supplyId de las líneas legacy (idempotente) */
+        post: operations["SuppliesAdminController_backfill"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/supplies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detalle de gestión de un insumo */
+        get: operations["SuppliesAdminController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Editar un insumo (code no editable) */
+        patch: operations["SuppliesAdminController_edit"];
+        trace?: never;
+    };
+    "/admin/supplies/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Archivar un insumo */
+        post: operations["SuppliesAdminController_archive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/supplies/{id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reactivar un insumo archivado */
+        post: operations["SuppliesAdminController_restore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/supplies/{id}/aliases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Añadir un alias/sinónimo a un insumo */
+        post: operations["SuppliesAdminController_addAlias"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/supplies/{id}/aliases/{aliasNorm}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Eliminar un alias del catálogo */
+        delete: operations["SuppliesAdminController_removeAlias"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/supplies/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Fusionar un insumo duplicado en el canónico */
+        post: operations["SuppliesAdminController_merge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/supplies/containers": {
         parameters: {
             query?: never;
@@ -2231,7 +2476,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Download a stored file by key */
+        /** Download a stored file by key (authenticated) */
         get: operations["FilesController_serve"];
         put?: never;
         post?: never;
@@ -2504,14 +2749,45 @@ export interface components {
             /** @example Jane Doe */
             name: string;
             /**
-             * @description Teléfono de contacto opcional
+             * @description Teléfono de contacto (obligatorio)
              * @example +58 412 555 0101
              */
-            phone?: string | null;
+            phone: string;
+            /**
+             * @description Aceptación de las condiciones del servicio (debe ser true)
+             * @example true
+             */
+            acceptedTerms: boolean;
+            /**
+             * @description Aceptación de la política de privacidad (debe ser true)
+             * @example true
+             */
+            acceptedPrivacy: boolean;
         };
         RegisterResponseDto: {
             /** @description JWT access token (auto-login after registration) */
             accessToken: string;
+        };
+        OnboardingDto: {
+            /**
+             * @description Teléfono de contacto (obligatorio)
+             * @example +58 412 555 0101
+             */
+            phone: string;
+            /**
+             * @description Aceptación de las condiciones del servicio (debe ser true)
+             * @example true
+             */
+            acceptedTerms: boolean;
+            /**
+             * @description Aceptación de la política de privacidad (debe ser true)
+             * @example true
+             */
+            acceptedPrivacy: boolean;
+        };
+        OnboardingResponseDto: {
+            /** @description true una vez el perfil queda completo (teléfono + consentimientos) */
+            profileComplete: boolean;
         };
         MeGrantDto: {
             /**
@@ -2539,6 +2815,8 @@ export interface components {
              * @example +58 412 555 0101
              */
             phone: string | null;
+            /** @description true si el perfil está completo (teléfono + consentimientos vigentes). false obliga a pasar por el onboarding (típico en altas sociales). */
+            profileComplete: boolean;
             /** @description The effective role grants (role @ scope) for this user */
             grants: components["schemas"]["MeGrantDto"][];
         };
@@ -2550,6 +2828,44 @@ export interface components {
             phone?: string | null;
             /** @example Nuevo Nombre */
             name?: string;
+        };
+        LoginByPhoneDto: {
+            /**
+             * @description Teléfono verificado por el canal de confianza (bot). Se normaliza (espacios, guiones, prefijo +) antes de buscar la cuenta.
+             * @example +58 412 555 0101
+             */
+            phone: string;
+        };
+        TrustedAuthUserDto: {
+            /** @description User UUID */
+            id: string;
+            /** @example Jane Doe */
+            name: string;
+            /** @example jane@example.com */
+            email: string;
+        };
+        TrustedAuthResponseDto: {
+            /** @description JWT del usuario — mismos claims que /auth/login; nunca confiere más permisos que los del propio usuario. */
+            accessToken: string;
+            user: components["schemas"]["TrustedAuthUserDto"];
+        };
+        RegisterByPhoneDto: {
+            /** @example +58 412 555 0101 */
+            phone: string;
+            /** @example Jane Doe */
+            name: string;
+            /** @example jane@example.com */
+            email: string;
+            /**
+             * @description Aceptación de las condiciones del servicio (debe ser true; el bot la recogió en la conversación).
+             * @example true
+             */
+            acceptedTerms: boolean;
+            /**
+             * @description Aceptación de la política de privacidad (debe ser true).
+             * @example true
+             */
+            acceptedPrivacy: boolean;
         };
         GrantListItemDto: {
             /** Format: uuid */
@@ -2726,7 +3042,7 @@ export interface components {
             userId: string;
             emergencyId: string | null;
             /** @enum {string} */
-            type: "resource_verified" | "offer_matched" | "task_assigned";
+            type: "resource_verified" | "offer_matched" | "task_assigned" | "donation_received";
             message: string;
             link: string | null;
             read: boolean;
@@ -2757,6 +3073,11 @@ export interface components {
              * @example Water bottles
              */
             name: string;
+            /**
+             * @description Optional soft link to the canonical supply master data.
+             * @example 1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8
+             */
+            supplyId?: string | null;
             /**
              * @description Quantity (positive integer)
              * @example 100
@@ -2814,12 +3135,6 @@ export interface components {
              * @enum {string}
              */
             type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
-            /**
-             * @description Stage of the resource in the emergency supply chain
-             * @example origin
-             * @enum {string}
-             */
-            stage: "origin" | "intermediate" | "destination";
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
@@ -2866,7 +3181,7 @@ export interface components {
              */
             city?: string;
             /**
-             * @description Mark this resource as a final recipient of aid (requires the destination stage)
+             * @description Mark this resource as a final recipient of aid
              * @example true
              */
             isFinalRecipient?: boolean;
@@ -2889,6 +3204,39 @@ export interface components {
         };
         RecordInventoryEntryDto: {
             /** @description Supply lines received into the point stock (at least one) */
+            items: components["schemas"]["SupplyLineDto"][];
+        };
+        SupplyLineResponseDto: {
+            /** @example Water bottles */
+            name: string;
+            /**
+             * @description Optional soft link to the canonical supply master data.
+             * @example 1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8
+             */
+            supplyId: string | null;
+            /** @example 100 */
+            quantity: number;
+            /** @example liters */
+            unit?: string | null;
+            /**
+             * @example water
+             * @enum {string}
+             */
+            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
+            /**
+             * @description Presentation / route of administration (ampolla, EV, inhalador…) — #61.
+             * @example ampolla
+             */
+            presentation?: string | null;
+            /**
+             * Format: date
+             * @description Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD).
+             * @example 2026-07-01
+             */
+            expiresAt?: string | null;
+        };
+        UpdateInventoryDto: {
+            /** @description Full declared inventory (replaces current; empty clears it) */
             items: components["schemas"]["SupplyLineDto"][];
         };
         VerifyResourceDto: Record<string, never>;
@@ -2922,6 +3270,27 @@ export interface components {
              */
             status: "active" | "saturated" | "paused" | "closed";
         };
+        MyManagedResourceDto: {
+            /**
+             * Format: uuid
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            id: string;
+            /**
+             * @example collection_point
+             * @enum {string}
+             */
+            type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
+            /** @example Cruz Roja Madrid */
+            name: string;
+            /** Format: uuid */
+            emergencyId: string;
+            /**
+             * @description Slug of the owning emergency; null if its row is missing.
+             * @example terremoto-venezuela-2026
+             */
+            emergencySlug: string | null;
+        };
         LocationViewDto: {
             /** @example Calle Mayor 1, Valencia */
             address: string;
@@ -2941,11 +3310,6 @@ export interface components {
              * @enum {string}
              */
             type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
-            /**
-             * @example origin
-             * @enum {string}
-             */
-            stage: "origin" | "intermediate" | "destination";
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
@@ -2970,8 +3334,16 @@ export interface components {
              *     ]
              */
             accepts: string[];
-            /** @example +58 212 555 0000 */
+            /**
+             * @description Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell "hidden" from "absent".
+             * @example +58 212 555 0000
+             */
             contact: string | null;
+            /**
+             * @description Whether a contact exists on file, regardless of whether `contact` is revealed to this caller.
+             * @example true
+             */
+            hasContact: boolean;
             /** @example Lun-Vie 08-18 */
             schedule: string | null;
             /** @example Juan Pérez */
@@ -3116,11 +3488,6 @@ export interface components {
              * @enum {string}
              */
             type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
-            /**
-             * @example origin
-             * @enum {string}
-             */
-            stage: "origin" | "intermediate" | "destination";
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
@@ -3145,8 +3512,16 @@ export interface components {
              *     ]
              */
             accepts: string[];
-            /** @example +58 212 555 0000 */
+            /**
+             * @description Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell "hidden" from "absent".
+             * @example +58 212 555 0000
+             */
             contact: string | null;
+            /**
+             * @description Whether a contact exists on file, regardless of whether `contact` is revealed to this caller.
+             * @example true
+             */
+            hasContact: boolean;
             /** @example Lun-Vie 08-18 */
             schedule: string | null;
             /** @example Juan Pérez */
@@ -3227,11 +3602,6 @@ export interface components {
              * @enum {string}
              */
             type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
-            /**
-             * @example origin
-             * @enum {string}
-             */
-            stage: "origin" | "intermediate" | "destination";
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
@@ -3256,8 +3626,16 @@ export interface components {
              *     ]
              */
             accepts: string[];
-            /** @example +58 212 555 0000 */
+            /**
+             * @description Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell "hidden" from "absent".
+             * @example +58 212 555 0000
+             */
             contact: string | null;
+            /**
+             * @description Whether a contact exists on file, regardless of whether `contact` is revealed to this caller.
+             * @example true
+             */
+            hasContact: boolean;
             /** @example Lun-Vie 08-18 */
             schedule: string | null;
             /** @example Juan Pérez */
@@ -3329,11 +3707,6 @@ export interface components {
              * @enum {string}
              */
             type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
-            /**
-             * @example origin
-             * @enum {string}
-             */
-            stage: "origin" | "intermediate" | "destination";
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
@@ -3358,8 +3731,16 @@ export interface components {
              *     ]
              */
             accepts: string[];
-            /** @example +58 212 555 0000 */
+            /**
+             * @description Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell "hidden" from "absent".
+             * @example +58 212 555 0000
+             */
             contact: string | null;
+            /**
+             * @description Whether a contact exists on file, regardless of whether `contact` is revealed to this caller.
+             * @example true
+             */
+            hasContact: boolean;
             /** @example Lun-Vie 08-18 */
             schedule: string | null;
             /** @example Juan Pérez */
@@ -3432,11 +3813,6 @@ export interface components {
              * @enum {string}
              */
             type: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
-            /**
-             * @example origin
-             * @enum {string}
-             */
-            stage: "origin" | "intermediate" | "destination";
             /** @example Cruz Roja Madrid */
             name: string;
             /** @example Centro de acopio principal */
@@ -3461,8 +3837,16 @@ export interface components {
              *     ]
              */
             accepts: string[];
-            /** @example +58 212 555 0000 */
+            /**
+             * @description Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell "hidden" from "absent".
+             * @example +58 212 555 0000
+             */
             contact: string | null;
+            /**
+             * @description Whether a contact exists on file, regardless of whether `contact` is revealed to this caller.
+             * @example true
+             */
+            hasContact: boolean;
             /** @example Lun-Vie 08-18 */
             schedule: string | null;
             /** @example Juan Pérez */
@@ -3658,6 +4042,11 @@ export interface components {
              *     ]
              */
             roleIds: string[];
+            /**
+             * @description Umbral de disputa configurado para esta emergencia, o null cuando usa el global. Solo se expone en la vista autenticada.
+             * @example 5
+             */
+            resourceDisputeThreshold: number | null;
         };
         CreateEmergencyFromTemplateDto: {
             /** @example aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa */
@@ -3675,6 +4064,13 @@ export interface components {
         PublishAnnouncementDto: {
             /** @example Se suspenden las operaciones de rescate hasta nuevo aviso. */
             message: string;
+        };
+        SetDisputeThresholdDto: {
+            /**
+             * @description Número mínimo de reportantes distintos para marcar el punto como disputado (entero entre 1 y 1000). Enviar null explícito elimina el umbral específico y vuelve al global (RESOURCE_DISPUTE_THRESHOLD / 3). El campo es obligatorio: un body vacío es 400.
+             * @example 5
+             */
+            threshold: number | null;
         };
         NeedLocationDto: {
             /** @example 123 Main Street, Caracas, Venezuela */
@@ -3742,36 +4138,15 @@ export interface components {
             id: string;
         };
         NeedLocationResponseDto: {
-            /** @example 123 Main Street, Caracas */
-            address: string;
+            /**
+             * @description Street line is coarsened (locality only) or dropped for needs with approximate location sensitivity to protect the requester’s privacy.
+             * @example Caracas
+             */
+            address?: string | null;
             /** @example 10.4806 */
             latitude: number;
             /** @example -66.9036 */
             longitude: number;
-        };
-        SupplyLineResponseDto: {
-            /** @example Water bottles */
-            name: string;
-            /** @example 100 */
-            quantity: number;
-            /** @example liters */
-            unit?: string | null;
-            /**
-             * @example water
-             * @enum {string}
-             */
-            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
-            /**
-             * @description Presentation / route of administration (ampolla, EV, inhalador…) — #61.
-             * @example ampolla
-             */
-            presentation?: string | null;
-            /**
-             * Format: date
-             * @description Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD).
-             * @example 2026-07-01
-             */
-            expiresAt?: string | null;
         };
         NeedViewDto: {
             /**
@@ -4339,10 +4714,6 @@ export interface components {
         PendingIntakeSummaryDto: {
             /** Format: uuid */
             id: string;
-            /** @example ACO-7F3K */
-            intakeCode: string;
-            /** Format: uuid */
-            targetResourceId: string;
             /** @example 2 */
             itemCount: number;
             /** Format: date-time */
@@ -4423,6 +4794,11 @@ export interface components {
         IntakeLineViewDto: {
             /** @example Water bottles */
             name: string;
+            /**
+             * @description Optional soft link to the canonical supply master data.
+             * @example 1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8
+             */
+            supplyId: string | null;
             /** @example 100 */
             quantity: number;
             /** @example liters */
@@ -4447,7 +4823,7 @@ export interface components {
             id: string;
             sortOrder: number;
         };
-        DonationIntakeViewDto: {
+        PublicDonationIntakeDto: {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
@@ -4461,15 +4837,9 @@ export interface components {
             donorName: string;
             donorPhone?: string | null;
             donorEmail?: string | null;
-            /** Format: uuid */
-            donorUserId?: string | null;
             lines: components["schemas"]["IntakeLineViewDto"][];
-            volunteerNotes?: string | null;
-            evidenceFileKey?: string | null;
             /** Format: date-time */
             receivedAt?: string | null;
-            /** Format: uuid */
-            receivedByUserId?: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -4491,6 +4861,36 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        DonationIntakeViewDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            emergencyId: string;
+            /** Format: uuid */
+            targetResourceId: string;
+            /** @example ACO-7F3K */
+            intakeCode: string;
+            /** @enum {string} */
+            status: "pending" | "received" | "rejected" | "incomplete";
+            donorName: string;
+            donorPhone?: string | null;
+            donorEmail?: string | null;
+            /** Format: uuid */
+            donorUserId?: string | null;
+            lines: components["schemas"]["IntakeLineViewDto"][];
+            volunteerNotes?: string | null;
+            evidenceFileKey?: string | null;
+            /** @description Reason recorded when received lines differed from declared */
+            receptionAdjustmentReason?: string | null;
+            /** Format: date-time */
+            receivedAt?: string | null;
+            /** Format: uuid */
+            receivedByUserId?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         IntakeDeepLinkDto: {
             /** @example http://localhost:3001/e/mexico-demo/pre-registro?resourceId=33333333-3333-4333-8333-333333333331 */
             url: string;
@@ -4505,6 +4905,10 @@ export interface components {
             volunteerNotes?: string | null;
             /** @description File key from POST /files */
             evidenceFileKey?: string | null;
+            /** @description Lines actually received; when omitted the declared lines stand (#129) */
+            items?: components["schemas"]["SupplyLineDto"][];
+            /** @description Required when received lines differ from the declared ones */
+            adjustmentReason?: string | null;
         };
         RejectDonationIntakeDto: {
             volunteerNotes?: string | null;
@@ -4719,6 +5123,11 @@ export interface components {
             /** @description Trackable containers (#140) loaded onto the expedition. Optional when loose lines are provided. */
             containerIds?: string[];
             /**
+             * Format: uuid
+             * @description Optional logistics hub (#150) this expedition transits. A hub_manager grant scoped to it may operate the shipment cross-emergency (§16.3). No FK.
+             */
+            hubId?: string;
+            /**
              * @description Free-text cargo manifest note
              * @example Carga frágil, manipular con cuidado
              */
@@ -4755,6 +5164,11 @@ export interface components {
         ShipmentViewDto: {
             /** Format: uuid */
             id: string;
+            /**
+             * @description Legible/QR "Código Único" of the expedition (#163)
+             * @example EXP-0001
+             */
+            code: string;
             /** Format: uuid */
             emergencyId: string;
             /** Format: uuid */
@@ -4774,6 +5188,11 @@ export interface components {
             carrierType?: "volunteer" | "organization" | null;
             /** Format: uuid */
             carrierId?: string | null;
+            /**
+             * Format: uuid
+             * @description Logistics hub (#150) this expedition transits, or null. Grants scoped to it confer cross-emergency authority over the shipment (§16.3).
+             */
+            hubId?: string | null;
             /** @example Carga frágil */
             manifest?: string | null;
             /**
@@ -4788,14 +5207,15 @@ export interface components {
         };
         CategoryDto: {
             /**
-             * @description Localized category label
+             * @description Canonical category slug (stable identifier)
+             * @example medicines
+             */
+            slug: string;
+            /**
+             * @description Etiqueta resuelta en el locale pedido (fallback a `es`)
              * @example Medicamentos
              */
             label: string;
-            /** @example Medicamentos */
-            labelEs: string;
-            /** @example Medicines */
-            labelEn: string;
             /**
              * @description Parent category slug, or null for a top-level category
              * @example medical
@@ -4808,6 +5228,17 @@ export interface components {
              * @example 41
              */
             sort: number;
+            /**
+             * @description Unique 3-letter prefix for supplies in this category, or null if inherited
+             * @example MED
+             */
+            codePrefix: string | null;
+            /**
+             * @description Whether the category is aid material or personnel. Personnel (medical_personnel) is excluded from material pickers.
+             * @example material
+             * @enum {string}
+             */
+            kind: "material" | "personnel";
         };
         CategoryTranslationDto: {
             /** @example fr */
@@ -4892,20 +5323,18 @@ export interface components {
             id: string;
             /** @example WAT-0001 */
             code: string;
-            /** @example Agua potable (botellón 18L) */
+            /**
+             * @description Nombre resuelto en el locale pedido (fallback a `es`)
+             * @example Agua potable (botellón 18L)
+             */
             name: string;
-            /** @example Agua potable (botellón 18L) */
-            nameEs: string;
-            /** @example Water (18L jug) */
-            nameEn?: string | null;
             /** @example food */
             categorySlug: string;
-            /** @example Alimentos */
+            /**
+             * @description Etiqueta de categoría resuelta en el locale pedido
+             * @example Alimentos
+             */
             categoryLabel: string;
-            /** @example Alimentos */
-            categoryLabelEs: string;
-            /** @example Food */
-            categoryLabelEn?: string | null;
             /** @example und */
             defaultUnit?: string | null;
             /**
@@ -4929,6 +5358,162 @@ export interface components {
              *     ]
              */
             aliases: string[];
+        };
+        SupplyTranslationDto: {
+            /** @example en */
+            locale: string;
+            /** @example Drinking water (1.5L bottle) */
+            name: string;
+        };
+        CreateSupplyDto: {
+            /** @example Agua potable (botella 1.5L) */
+            name: string;
+            /**
+             * @description Slug de categoría existente
+             * @example water
+             */
+            categorySlug: string;
+            /** @example und */
+            defaultUnit?: Record<string, never>;
+            /** @description Atributos estructurados (jsonb) */
+            attributes?: {
+                [key: string]: unknown;
+            };
+            /** @description Notas internas de gestión */
+            registrationNotes?: Record<string, never>;
+            /**
+             * Format: uuid
+             * @description Si es variante, id del insumo padre (debe existir)
+             */
+            variantOfId?: Record<string, never>;
+            /** @description Traducciones del nombre por idioma (i18n). El nombre base es `es`. */
+            translations?: components["schemas"]["SupplyTranslationDto"][];
+        };
+        CreateSupplyResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example INS-0212 */
+            code: string;
+        };
+        AdminSupplyDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example INS-0212 */
+            code: string;
+            /** @example Agua potable (botella 1.5L) */
+            name: string;
+            /** @example water */
+            categorySlug: string;
+            /** @example und */
+            defaultUnit?: string | null;
+            /**
+             * @example {
+             *       "size": "1.5L"
+             *     }
+             */
+            attributes: Record<string, never>;
+            /** Format: uuid */
+            variantOfId?: string | null;
+            /**
+             * @example active
+             * @enum {string}
+             */
+            status: "active" | "archived";
+            registrationNotes?: string | null;
+            /**
+             * @example [
+             *       "agua embotellada",
+             *       "botellon"
+             *     ]
+             */
+            aliases: string[];
+            /**
+             * @description Traducciones del nombre por idioma (i18n, #320)
+             * @example [
+             *       {
+             *         "locale": "en",
+             *         "name": "Drinking water (1.5L bottle)"
+             *       }
+             *     ]
+             */
+            translations: components["schemas"]["SupplyTranslationDto"][];
+        };
+        UnmatchedSupplyLineGroupDto: {
+            /** @example Harina PAN */
+            name: string;
+            /**
+             * @description Líneas sin enlazar con ese texto
+             * @example 12
+             */
+            lines: number;
+            sources: ("need_items" | "offer_items" | "resource_items" | "donation_intake_lines" | "container_lines")[];
+            /**
+             * @description true = el texto casa con varios insumos activos: fusionar duplicados en vez de crear un alias
+             * @example false
+             */
+            ambiguous: boolean;
+        };
+        SupplyLinkReportDto: {
+            /** @example 27 */
+            unmatchedLines: number;
+            unmatched: components["schemas"]["UnmatchedSupplyLineGroupDto"][];
+            /**
+             * @description Textos distintos que un backfill enlazaría ahora
+             * @example 34
+             */
+            pendingNames: number;
+            /** @example 120 */
+            pendingLines: number;
+        };
+        SupplyLinkBackfillResultDto: {
+            /** @example 27 */
+            unmatchedLines: number;
+            unmatched: components["schemas"]["UnmatchedSupplyLineGroupDto"][];
+            /**
+             * @description Textos distintos que casaron contra el catálogo
+             * @example 34
+             */
+            linkedNames: number;
+            /**
+             * @description Líneas realmente actualizadas en esta ejecución (0 al re-correr o si otra ejecución concurrente las enlazó antes)
+             * @example 120
+             */
+            linkedLines: number;
+        };
+        EditSupplyDto: {
+            /** @example Agua mineral */
+            name?: string;
+            /** @example food */
+            categorySlug?: string;
+            /** @example kg */
+            defaultUnit?: Record<string, never>;
+            attributes?: {
+                [key: string]: unknown;
+            };
+            registrationNotes?: Record<string, never>;
+            /** Format: uuid */
+            variantOfId?: Record<string, never>;
+            /** @description Reemplaza el conjunto de traducciones del insumo; omitir para no tocarlas. */
+            translations?: components["schemas"]["SupplyTranslationDto"][];
+        };
+        AddSupplyAliasDto: {
+            /**
+             * @description Término/sinónimo; se normaliza en el servidor
+             * @example agua embotellada
+             */
+            term: string;
+        };
+        MergeSuppliesDto: {
+            /**
+             * Format: uuid
+             * @description Insumo duplicado (se archiva)
+             */
+            sourceId: string;
+            /**
+             * Format: uuid
+             * @description Insumo canónico (conserva todo)
+             */
+            targetId: string;
         };
         ContainerHolderDto: {
             /**
@@ -5453,6 +6038,44 @@ export interface operations {
             };
         };
     };
+    AuthController_onboardingRoute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingDto"];
+            };
+        };
+        responses: {
+            /** @description Perfil completado */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OnboardingResponseDto"];
+                };
+            };
+            /** @description Falta el teléfono o el consentimiento */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Token inválido o ausente */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     AuthController_me: {
         parameters: {
             query?: never;
@@ -5504,6 +6127,117 @@ export interface operations {
             };
             /** @description Token inválido o ausente */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TrustedAuthController_loginByPhoneRoute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginByPhoneDto"];
+            };
+        };
+        responses: {
+            /** @description Login correcto */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrustedAuthResponseDto"];
+                };
+            };
+            /** @description Falta o es inválida la API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La Service Account no tiene el permiso auth:trusted_phone_login */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No existe usuario con ese teléfono */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Límite de peticiones excedido */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TrustedAuthController_registerByPhoneRoute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterByPhoneDto"];
+            };
+        };
+        responses: {
+            /** @description Usuario creado (auto-login) */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrustedAuthResponseDto"];
+                };
+            };
+            /** @description Falta la aceptación de términos/privacidad o un campo inválido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta o es inválida la API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La Service Account no tiene el permiso auth:trusted_phone_login */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ya existe una cuenta con ese email */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Límite de peticiones excedido */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6223,6 +6957,102 @@ export interface operations {
             };
         };
     };
+    ResourcesController_getMyInventoryAction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource UUID */
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupplyLineResponseDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not owner nor coordinator */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ResourcesController_updateMyInventoryAction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource UUID */
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateInventoryDto"];
+            };
+        };
+        responses: {
+            /** @description Inventory replaced */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body or UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not owner nor coordinator */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ResourcesController_verifyResource: {
         parameters: {
             query?: never;
@@ -6484,6 +7314,33 @@ export interface operations {
             };
             /** @description Resource not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ResourcesController_listMineAcrossEmergencies: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Resources the principal manages */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyManagedResourceDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7472,6 +8329,59 @@ export interface operations {
                 content?: never;
             };
             /** @description Coordinator role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Emergency not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EmergenciesController_setResourceDisputeThreshold: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetDisputeThresholdDto"];
+            };
+        };
+        responses: {
+            /** @description Umbral actualizado */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description emergency:configure permission required */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -8486,6 +9396,13 @@ export interface operations {
                     "application/json": components["schemas"]["GeocodeResultDto"][];
                 };
             };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     MetricsController_metrics: {
@@ -9230,7 +10147,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DonationIntakeViewDto"];
+                    "application/json": components["schemas"]["PublicDonationIntakeDto"];
                 };
             };
             /** @description Invalid request body */
@@ -10265,13 +11182,6 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Core category slug cannot be archived by delete */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
             /** @description Missing or invalid token */
             401: {
                 headers: {
@@ -10288,6 +11198,13 @@ export interface operations {
             };
             /** @description Category not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Core category slug is protected and cannot be archived */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10419,6 +11336,315 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["SupplyDto"];
                 };
+            };
+        };
+    };
+    SuppliesAdminController_list: {
+        parameters: {
+            query?: {
+                /** @description Búsqueda por código o nombre */
+                q?: string;
+                /** @description Filtra por categoría */
+                categorySlug?: string;
+                status?: "active" | "archived";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminSupplyDto"][];
+                };
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSupplyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateSupplyResponseDto"];
+                };
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_backfillReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupplyLinkReportDto"];
+                };
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_backfill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupplyLinkBackfillResultDto"];
+                };
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminSupplyDto"];
+                };
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_edit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditSupplyDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_archive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_restore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_addAlias: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddSupplyAliasDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_removeAlias: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                aliasNorm: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SuppliesAdminController_merge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergeSuppliesDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Falta el permiso catalogue:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

@@ -8,10 +8,17 @@ export interface LookupDonorByContactCommand {
   donorEmail: string | null;
 }
 
+/**
+ * Non-actionable summary of a donor's pending intake.
+ *
+ * SECURITY: this endpoint is public and keyed only on a (guessable) phone/email,
+ * so the summary deliberately OMITS the `intakeCode` and `targetResourceId`.
+ * The intake code is the credential the public PATCH requires; re-disclosing it
+ * on a contact-only lookup would let an attacker tamper with a stranger's
+ * donation. The code is delivered to the donor at creation time (receipt) only.
+ */
 export interface PendingIntakeSummary {
   id: string;
-  intakeCode: string;
-  targetResourceId: string;
   itemCount: number;
   createdAt: Date;
 }
@@ -42,8 +49,6 @@ export class LookupDonorByContact {
       donorName,
       pendingIntakes: pending.map((intake) => ({
         id: intake.id.value,
-        intakeCode: intake.intakeCode,
-        targetResourceId: intake.targetResourceId,
         itemCount: intake.lines.length,
         createdAt: intake.createdAt,
       })),

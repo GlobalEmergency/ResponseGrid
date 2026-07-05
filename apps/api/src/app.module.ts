@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ApiKeyAwareThrottlerGuard } from './contexts/identity/infrastructure/http/api-key-aware-throttler.guard';
 import { DatabaseModule } from './shared/database.module';
 import { ResourcesModule } from './contexts/resources/infrastructure/resources.module';
 import { EmergenciesModule } from './contexts/emergencies/infrastructure/emergencies.module';
@@ -19,6 +21,7 @@ import { NotificationsModule } from './contexts/notifications/infrastructure/not
 import { AuditModule } from './contexts/audit/infrastructure/audit.module';
 import { GroupsModule } from './contexts/groups/infrastructure/groups.module';
 import { SuppliesModule } from './contexts/supplies/supplies.module';
+import { EventsModule } from './shared/events/events.module';
 
 // In test environments (NODE_ENV=test) the throttler is disabled to avoid
 // breaking e2e tests that perform many login requests in quick succession.
@@ -30,6 +33,14 @@ const isTestEnv = process.env.NODE_ENV === 'test';
       isTestEnv
         ? [] // disabled — no throttle in test
         : [
+            {
+              // Baseline per-IP limit that applies to EVERY route (the guard is
+              // registered globally below). Generous enough for legitimate map
+              // panning / dashboard use, but caps scraping and volumetric DoS.
+              name: 'default',
+              ttl: 60_000,
+              limit: 200,
+            },
             {
               // auth endpoints: 10 requests per 60 seconds per IP
               name: 'auth',
@@ -43,9 +54,10 @@ const isTestEnv = process.env.NODE_ENV === 'test';
               limit: 5,
             },
             {
-              // validity reports: 20 per hour per IP (anti-abuse)
-              name: 'validity',
-              ttl: 3_600_000,
+              // trusted-channel bot auth (#315): 20 req / 60 s, keyed per
+              // API-key prefix (not IP) by ApiKeyAwareThrottlerGuard.
+              name: 'trusted-auth',
+              ttl: 60_000,
               limit: 20,
             },
           ],
@@ -69,6 +81,14 @@ const isTestEnv = process.env.NODE_ENV === 'test';
     AuditModule,
     GroupsModule,
     SuppliesModule,
+    EventsModule,
+  ],
+  providers: [
+    // Apply rate limiting to EVERY route by default. Individual routes tighten
+    // it with @Throttle (auth, intake, trusted-auth…). Keys API-key traffic by
+    // key prefix and everything else by IP (#315). In test env the throttler is
+    // configured with an empty ruleset, so this guard is a no-op there.
+    { provide: APP_GUARD, useClass: ApiKeyAwareThrottlerGuard },
   ],
 })
 export class AppModule {}

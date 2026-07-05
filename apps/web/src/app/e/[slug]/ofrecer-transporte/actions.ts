@@ -1,9 +1,8 @@
 'use server';
 
-import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
-import { getToken, authHeaders, clearToken } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 type CapacityMode = components['schemas']['PublishCapacityDto']['mode'];
@@ -42,15 +41,13 @@ function parsePositive(raw: FormDataEntryValue | null): number | undefined | nul
  * bound server-side in the page so neither is trusted from the client form.
  */
 export async function submitCapacity(
+  slug: string,
   emergencyId: string,
   providerId: string,
   _prev: CapacityState,
   formData: FormData,
 ): Promise<CapacityState> {
-  const token = await getToken();
-  if (!token) {
-    redirect('/login');
-  }
+  const token = await requireSession(`/e/${slug}/ofrecer-transporte`);
 
   const { t } = await getT();
   const tt = t.ofrecerTransporte;
@@ -134,8 +131,7 @@ export async function submitCapacity(
   });
 
   if (response.status === 401) {
-    await clearToken();
-    redirect('/login');
+    return redirectToLogin(`/e/${slug}/ofrecer-transporte`);
   }
 
   if (response.status === 409) {

@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
-import { getToken } from '@/lib/auth';
+import { notFound } from 'next/navigation';
+import { requireSession } from '@/lib/auth';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { fetchMyResources } from './actions';
 import { StatusForm } from './status-form';
 import { EmptyState } from '@/components/molecules/empty-state';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
@@ -41,16 +42,7 @@ export default async function MisPuntosPage({ params }: Props) {
     venue: ta.type_venue,
   };
 
-  const STAGE_LABELS: Record<string, string> = {
-    origin: ta.stage_origin,
-    intermediate: ta.stage_intermediate,
-    destination: ta.stage_destination,
-  };
-
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/mis-puntos`);
-  }
+  await requireSession(`/e/${slug}/mis-puntos`);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
@@ -62,12 +54,8 @@ export default async function MisPuntosPage({ params }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <PageHeaderBand
-          backHref={`/e/${slug}`}
-          backLabel={emergency.name}
-          title={ta.points_title}
-          subtitle={ta.points_subtitle}
-        />
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <PageHeading title={ta.points_title} subtitle={ta.points_subtitle} />
         <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">
 
         <section aria-labelledby="my-points-heading" className="flex flex-col gap-4">
@@ -94,8 +82,6 @@ export default async function MisPuntosPage({ params }: Props) {
                       </h3>
                       <p className="text-sm text-muted">
                         {TYPE_LABELS[resource.type] ?? resource.type}
-                        {' · '}
-                        {STAGE_LABELS[resource.stage] ?? resource.stage}
                       </p>
                     </div>
 
@@ -105,12 +91,26 @@ export default async function MisPuntosPage({ params }: Props) {
                       slug={slug}
                     />
 
-                    <Link
-                      href={`/e/${slug}/reportar?resourceId=${resource.id}`}
-                      className="inline-flex items-center justify-center rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink bg-white hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors w-fit"
-                    >
-                      {ta.report_incident_cta}
-                    </Link>
+                    <div className="flex flex-wrap gap-3">
+                      <Link
+                        href={`/e/${slug}/mis-puntos/${resource.id}/inventario`}
+                        className="inline-flex items-center justify-center rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink bg-white hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors w-fit"
+                      >
+                        {ta.manage_inventory_cta}
+                      </Link>
+                      <Link
+                        href={`/e/${slug}/peticion?resourceId=${resource.id}`}
+                        className="inline-flex items-center justify-center rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink bg-white hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors w-fit"
+                      >
+                        {ta.declare_needs_cta}
+                      </Link>
+                      <Link
+                        href={`/e/${slug}/reportar?resourceId=${resource.id}`}
+                        className="inline-flex items-center justify-center rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink bg-white hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors w-fit"
+                      >
+                        {ta.report_incident_cta}
+                      </Link>
+                    </div>
                   </article>
                 </li>
               ))}

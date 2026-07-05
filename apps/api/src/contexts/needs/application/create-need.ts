@@ -1,6 +1,8 @@
 import { NeedRepository } from '../domain/ports/need.repository';
 import { EventBus } from '../domain/ports/event-bus';
 import { NeedEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
+import { NeedResourceReader } from '../domain/ports/resource-reader';
+import { NeedResourceNotInEmergencyError } from '../domain/need-errors';
 import { Need } from '../domain/need';
 import { NeedId } from '../domain/need-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
@@ -18,6 +20,7 @@ export interface CreateNeedItemCommand {
   quantity: number;
   unit: string | null;
   category: Category;
+  supplyId?: string | null;
   /** Presentation / route of administration (#61). Optional. */
   presentation?: string | null;
   expiresAt?: string | null;
@@ -56,6 +59,12 @@ export class CreateNeed {
     private readonly repo: NeedRepository,
     private readonly bus: EventBus,
     private readonly emergencyStatusReader: NeedEmergencyStatusReader,
+    /**
+     * Optional — only needed to validate the optional `resourceId` link (#60).
+     * When a link is requested but no reader is wired, the link is rejected
+     * (fail closed) rather than persisted unverified.
+     */
+    private readonly resourceReader?: NeedResourceReader,
   ) {}
 
   async execute(cmd: CreateNeedCommand): Promise<{ id: string }> {
@@ -65,6 +74,19 @@ export class CreateNeed {
         cmd.emergencyId,
         status ?? 'not-found',
       );
+    }
+
+    // A need may link to a resource / final recipient (#60). Enforce that the
+    // link points to a real resource of THIS emergency — a missing reader,
+    // unknown resource, or cross-emergency resource all collapse to the same
+    // rejection, so a spoofed resourceId can never create a dangling link.
+    if (cmd.resourceId != null) {
+      const linkedEmergencyId = await this.resourceReader?.getEmergencyId(
+        cmd.resourceId,
+      );
+      if (linkedEmergencyId !== cmd.emergencyId) {
+        throw new NeedResourceNotInEmergencyError(cmd.resourceId);
+      }
     }
 
     const location = Location.create({
@@ -79,6 +101,7 @@ export class CreateNeed {
         quantity: i.quantity,
         unit: i.unit,
         category: i.category,
+        supplyId: i.supplyId ?? null,
         presentation: i.presentation ?? null,
         expiresAt: i.expiresAt ?? null,
       }),

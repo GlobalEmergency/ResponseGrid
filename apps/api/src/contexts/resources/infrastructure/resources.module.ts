@@ -1,6 +1,6 @@
 import { Inject, Module, OnModuleDestroy } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import IORedis from 'ioredis';
+import IORedis, { type Redis as IORedisConnection } from 'ioredis';
 import { DB, DatabaseModule } from '../../../shared/database.module';
 import { Db } from '../../../shared/db';
 import { ResourcesController } from './http/resources.controller';
@@ -17,14 +17,19 @@ import { GetNearbyResources } from '../application/get-nearby-resources';
 import { GetResourcesInBounds } from '../application/get-resources-in-bounds';
 import { GetPublicResource } from '../application/get-public-resource';
 import { GetMyResources } from '../application/get-my-resources';
+import { GetMyManagedResources } from '../application/get-my-managed-resources';
 import { VerifyResource } from '../application/verify-resource';
 import { PublishResource } from '../application/publish-resource';
 import { EditResource } from '../application/edit-resource';
 import { DiscardResource } from '../application/discard-resource';
 import { UpdateResourcePublicStatus } from '../application/update-resource-public-status';
 import { RecordInventoryEntry } from '../application/record-inventory-entry';
+import { GetMyInventory } from '../application/get-my-inventory';
+import { UpdateMyInventory } from '../application/update-my-inventory';
 import { ReceiveDonationIntoInventory } from '../application/receive-donation-into-inventory';
-import { DonationEventsWorker } from './donation-events.worker';
+import { ConsumerWorker } from '../../../shared/events/consumer-worker';
+import { DrizzleProcessedEventStore } from '../../../shared/events/drizzle-processed-event-store';
+import { receiveDonationHandler } from './donation-received.handler';
 import {
   RESOURCE_REPOSITORY,
   ResourceRepository,
@@ -36,6 +41,11 @@ import {
 import { EVENT_BUS, EventBus } from '../domain/ports/event-bus';
 import { DrizzleResourceRepository } from './drizzle/drizzle-resource.repository';
 import { DrizzleEmergencyStatusReader } from '../../../shared/drizzle-emergency-status-reader';
+import { DrizzleEmergencyDisputeThresholdReader } from '../../../shared/drizzle-emergency-dispute-threshold-reader';
+import {
+  EMERGENCY_DISPUTE_THRESHOLD_READER,
+  EmergencyDisputeThresholdReader,
+} from '../domain/ports/emergency-dispute-threshold-reader';
 import { DrizzleOrganizationAccreditationReader } from '../../../shared/drizzle-organization-accreditation-reader';
 import { BullMqEventBus } from './bullmq-event-bus';
 import { IdentityModule } from '../../identity/infrastructure/identity.module';
@@ -69,12 +79,13 @@ import {
   ResourceValidityReportRepository,
 } from '../domain/ports/resource-validity-report.repository';
 import { DrizzleResourceValidityReportRepository } from './drizzle/drizzle-resource-validity-report.repository';
+import { toBullMqConnection } from '../../../shared/bullmq-connection';
 
 export const EVENT_QUEUE = Symbol('ResourcesEventQueue');
 
 interface EventQueue {
   queue: Queue;
-  connection: IORedis;
+  connection: IORedisConnection;
 }
 
 const eventQueueProvider = {
@@ -82,8 +93,12 @@ const eventQueueProvider = {
   useFactory: (): EventQueue => {
     const url = process.env.REDIS_URL;
     if (!url) throw new Error('REDIS_URL is required');
-    const connection = new IORedis(url, { maxRetriesPerRequest: null });
-    const queue = new Queue('domain-events', { connection });
+    const connection: IORedisConnection = new IORedis(url, {
+      maxRetriesPerRequest: null,
+    });
+    const queue = new Queue('domain-events', {
+      connection: toBullMqConnection(connection),
+    });
     return { queue, connection };
   },
 };
@@ -99,6 +114,13 @@ const emergencyStatusReaderProvider = {
   inject: [DB],
   useFactory: (db: Db): ResourceEmergencyStatusReader =>
     new DrizzleEmergencyStatusReader(db),
+};
+
+const emergencyDisputeThresholdReaderProvider = {
+  provide: EMERGENCY_DISPUTE_THRESHOLD_READER,
+  inject: [DB],
+  useFactory: (db: Db): EmergencyDisputeThresholdReader =>
+    new DrizzleEmergencyDisputeThresholdReader(db),
 };
 
 const busProvider = {
@@ -188,6 +210,24 @@ const updateStatusProvider = {
   ) => new UpdateResourcePublicStatus(repo, membershipReader),
 };
 
+const getMyInventoryProvider = {
+  provide: GetMyInventory,
+  inject: [RESOURCE_REPOSITORY, RESOURCE_MEMBERSHIP_READER],
+  useFactory: (
+    repo: ResourceRepository,
+    membershipReader: ResourceMembershipReader,
+  ) => new GetMyInventory(repo, membershipReader),
+};
+
+const updateMyInventoryProvider = {
+  provide: UpdateMyInventory,
+  inject: [RESOURCE_REPOSITORY, RESOURCE_MEMBERSHIP_READER],
+  useFactory: (
+    repo: ResourceRepository,
+    membershipReader: ResourceMembershipReader,
+  ) => new UpdateMyInventory(repo, membershipReader),
+};
+
 const getNearbyResourcesProvider = {
   provide: GetNearbyResources,
   inject: [RESOURCE_REPOSITORY],
@@ -198,6 +238,12 @@ const getMyResourcesProvider = {
   provide: GetMyResources,
   inject: [RESOURCE_REPOSITORY],
   useFactory: (repo: ResourceRepository) => new GetMyResources(repo),
+};
+
+const getMyManagedResourcesProvider = {
+  provide: GetMyManagedResources,
+  inject: [RESOURCE_REPOSITORY],
+  useFactory: (repo: ResourceRepository) => new GetMyManagedResources(repo),
 };
 
 const getResourcesInBoundsProvider = {
@@ -234,11 +280,17 @@ const validityReportRepositoryProvider = {
 
 const reportResourceValidityProvider = {
   provide: ReportResourceValidity,
-  inject: [RESOURCE_REPOSITORY, RESOURCE_VALIDITY_REPORT_REPOSITORY, EVENT_BUS],
+  inject: [
+    RESOURCE_REPOSITORY,
+    RESOURCE_VALIDITY_REPORT_REPOSITORY,
+    EVENT_BUS,
+    EMERGENCY_DISPUTE_THRESHOLD_READER,
+  ],
   useFactory: (
     repo: ResourceRepository,
     validityRepo: ResourceValidityReportRepository,
     bus: EventBus,
+    thresholdReader: EmergencyDisputeThresholdReader,
   ) => {
     const raw = Number(process.env.RESOURCE_DISPUTE_THRESHOLD);
     const threshold = Number.isFinite(raw) && raw > 0 ? raw : undefined;
@@ -253,6 +305,7 @@ const reportResourceValidityProvider = {
       bus,
       threshold,
       cooldownMs,
+      thresholdReader,
     );
   },
 };
@@ -307,11 +360,25 @@ const receiveDonationIntoInventoryProvider = {
     new ReceiveDonationIntoInventory(repo),
 };
 
+// Idempotency ledger shared by this context's event consumers (#129).
+const processedEventStoreProvider = {
+  provide: DrizzleProcessedEventStore,
+  inject: [DB],
+  useFactory: (db: Db) => new DrizzleProcessedEventStore(db),
+};
+
+// Resources consumer of the domain-event fan-out: applies received donation
+// lines to the target point's inventory, at most once per intake.
 const donationEventsWorkerProvider = {
-  provide: DonationEventsWorker,
-  inject: [ReceiveDonationIntoInventory],
-  useFactory: (receive: ReceiveDonationIntoInventory) =>
-    new DonationEventsWorker(receive),
+  provide: ConsumerWorker,
+  inject: [DrizzleProcessedEventStore, ReceiveDonationIntoInventory],
+  useFactory: (
+    store: DrizzleProcessedEventStore,
+    receive: ReceiveDonationIntoInventory,
+  ) =>
+    new ConsumerWorker('resources', store, {
+      'donation_intake.received': receiveDonationHandler(receive),
+    }),
 };
 
 // Manual inventory entry (#9): an operator records received supply lines into a
@@ -325,6 +392,10 @@ const recordInventoryEntryProvider = {
 @Module({
   imports: [DatabaseModule, IdentityModule, NotificationsModule],
   controllers: [
+    // ORDER MATTERS: ResourcesController declares the static GET /resources/mine
+    // and must register before AdminResourcesController's GET /resources/:id, or
+    // Express matches the param route first and "mine" 400s in ParseUUIDPipe
+    // (#318; pinned by test/resources-mine.e2e-spec.ts).
     ResourcesController,
     CoordinationController,
     PublicController,
@@ -335,6 +406,7 @@ const recordInventoryEntryProvider = {
     eventQueueProvider,
     resourceRepositoryProvider,
     emergencyStatusReaderProvider,
+    emergencyDisputeThresholdReaderProvider,
     organizationAccreditationReaderProvider,
     membershipReaderProvider,
     busProvider,
@@ -348,7 +420,10 @@ const recordInventoryEntryProvider = {
     getResourceFacetsProvider,
     getNearbyResourcesProvider,
     updateStatusProvider,
+    getMyInventoryProvider,
+    updateMyInventoryProvider,
     getMyResourcesProvider,
+    getMyManagedResourcesProvider,
     getResourcesInBoundsProvider,
     getPublicResourceProvider,
     recipientTypeRepositoryProvider,
@@ -361,6 +436,7 @@ const recordInventoryEntryProvider = {
     listResourcesAdminProvider,
     getResourceAdminDetailProvider,
     receiveDonationIntoInventoryProvider,
+    processedEventStoreProvider,
     donationEventsWorkerProvider,
     recordInventoryEntryProvider,
   ],

@@ -114,7 +114,6 @@ describe('Resource flow (e2e)', () => {
       .post(`/emergencies/${EM}/resources`)
       .send({
         type: 'warehouse',
-        stage: 'origin',
         name: 'Almacén Sin Auth',
         location: baseLocation,
       })
@@ -127,7 +126,6 @@ describe('Resource flow (e2e)', () => {
       .set('Authorization', `Bearer ${coordToken}`)
       .send({
         type: 'warehouse',
-        stage: 'intermediate',
         name: 'Almacén E2E',
         location: baseLocation,
       })
@@ -144,7 +142,6 @@ describe('Resource flow (e2e)', () => {
     expect(queueBody.items).toEqual([
       expect.objectContaining({
         id,
-        stage: 'intermediate',
         verificationLevel: 'unverified',
         publicStatus: 'hidden',
         location: expect.objectContaining({
@@ -180,7 +177,6 @@ describe('Resource flow (e2e)', () => {
       expect.arrayContaining([
         expect.objectContaining({
           id,
-          stage: 'intermediate',
           publicStatus: 'active',
           location: expect.objectContaining({
             address: baseLocation.address,
@@ -198,7 +194,6 @@ describe('Resource flow (e2e)', () => {
       .set('Authorization', `Bearer ${coordToken}`)
       .send({
         type: 'collection_and_delivery',
-        stage: 'destination',
         name: 'Punto Mixto E2E',
         location: baseLocation,
       })
@@ -222,7 +217,6 @@ describe('Resource flow (e2e)', () => {
       .set('Authorization', `Bearer ${coordToken}`)
       .send({
         type: 'venue',
-        stage: 'destination',
         name: 'Venue unverified',
         location: baseLocation,
       })

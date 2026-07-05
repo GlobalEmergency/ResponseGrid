@@ -1,11 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { api } from '@/lib/api';
-import { getToken, authHeaders } from '@/lib/auth';
-import { SiteHeaderBand } from '@/components/organisms/site-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
 import { EmergencyDirectoryCard } from '@/components/organisms/emergency-directory-card';
-import { AccountNav } from '@/components/molecules/account-nav';
-import { hasManagerRole } from '@/lib/admin-scopes';
 import { HowItWorksStep } from '@/components/molecules/how-it-works-step';
 import { TrustLevelsCard } from '@/components/molecules/trust-levels-card';
 import { EmptyState } from '@/components/molecules/empty-state';
@@ -19,30 +16,18 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t.home.meta_title,
     description: t.home.meta_description,
+    alternates: { canonical: '/' },
+    openGraph: {
+      title: t.home.meta_title,
+      description: t.home.meta_description,
+      url: '/',
+    },
   };
 }
 
 export default async function HomePage() {
   const { t } = await getT();
   const { data: emergencies } = await api.GET('/emergencies');
-
-  const token = await getToken();
-  let notificationUnreadCount = 0;
-  let isAdmin = false;
-  let canAdminister = false;
-  if (token != null) {
-    const [notifResult, meResult] = await Promise.all([
-      api.GET('/notifications/mine', { headers: authHeaders(token) }),
-      api.GET('/auth/me', { headers: authHeaders(token) }),
-    ]);
-    if (notifResult.data != null) {
-      notificationUnreadCount = notifResult.data.unreadCount;
-    }
-    if (meResult.data != null) {
-      isAdmin = meResult.data.isAdmin === true;
-      canAdminister = isAdmin || hasManagerRole(meResult.data.grants ?? []);
-    }
-  }
 
   const all = emergencies ?? [];
   const activeEmergencies = all.filter((e) => e.status === 'active');
@@ -53,9 +38,9 @@ export default async function HomePage() {
 
   return (
     <main className="flex-1 bg-surface">
-      <div className="mx-auto w-full max-w-3xl bg-surface">
-        <SiteHeaderBand />
+      <AppBar variant="home" />
 
+      <div className="mx-auto w-full max-w-3xl bg-surface">
         <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">
           {/* ── Hero (SEO H1) ───────────────────────────────────────────── */}
           <section>
@@ -136,6 +121,33 @@ export default async function HomePage() {
             </div>
           </section>
 
+          {/* ── Todo lo que hace la plataforma ──────────────────────────── */}
+          <section aria-labelledby="features-heading">
+            <h2 id="features-heading" className={`${sectionHeading} mb-1.5`}>{th.features_heading}</h2>
+            <p className="mb-4 max-w-2xl text-[14px] leading-[1.55] text-ink-soft">{th.features_intro}</p>
+            <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" role="list">
+              {th.features.map((f) => (
+                <li
+                  key={f.title}
+                  className="flex flex-col gap-1.5 rounded-card border border-line bg-surface-alt px-4 py-3.5"
+                >
+                  <span className="flex items-center gap-2">
+                    <span aria-hidden="true" className="text-lg">{f.icon}</span>
+                    <span className="text-[14px] font-bold text-navy">{f.title}</span>
+                  </span>
+                  <span className="text-[13px] leading-snug text-muted">{f.body}</span>
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/funcionalidades"
+              className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-navy transition-colors hover:text-accent focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 rounded"
+            >
+              {th.features_cta}
+              <span aria-hidden="true">→</span>
+            </Link>
+          </section>
+
           {/* ── La confianza es el producto ─────────────────────────────── */}
           <TrustLevelsCard
             heading={th.trust_heading}
@@ -146,14 +158,6 @@ export default async function HomePage() {
               { level: 'official', text: th.trust_official },
             ]}
             tVerification={t.verification_badge}
-          />
-
-          <AccountNav
-            t={th}
-            authed={token !== null}
-            isAdmin={isAdmin}
-            canAdminister={canAdminister}
-            notificationUnreadCount={notificationUnreadCount}
           />
         </div>
       </div>

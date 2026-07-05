@@ -1,21 +1,17 @@
 /**
- * Role-and-scope-aware navigation model.
+ * Context-aware navigation model.
  *
- * Pure, framework-free: given the principal's grants, the role catalog and a
- * little resolved context (emergencies they belong to, unread count), it returns
- * the menu structure. It does NOT fetch — the data layer (navigation-data.ts)
- * loads inputs and the app shell renders the output. Gating is by permission
- * (derived from /roles) and by scope, so new roles inherit menu items for free.
- *
- * Admin/management surfacing reuses the existing `admin-scopes` helper so the
- * sidebar stays consistent with the /administracion hub.
+ * Pure, framework-free: given the principal's resolved contexts (emergencies,
+ * resources, organizations, groups they hold a grant in) and each emergency's
+ * resolved access (keyed by id), it returns the menu structure — Inicio, one
+ * category per context type, every emergency's gated sections nested as
+ * children, personal links and, if applicable, the administration hub. It does
+ * NOT fetch — the data layer (navigation-data.ts) loads inputs and the app
+ * shell renders the output. `isAdmin`/`canAdminister` are passed in so this
+ * module has no dependency on `admin-scopes`.
  */
 import type { Messages } from '@/i18n/messages/es';
-import {
-  canAdminister,
-  type MeGrant,
-  type RoleCatalogEntry,
-} from '@/lib/admin-scopes';
+import type { EmergencyAccess } from '@/lib/emergency-permissions';
 
 /** Static labels live in the `nav` i18n namespace; dynamic ones pass `label`. */
 export type NavLabelKey = keyof Messages['nav'];
@@ -30,6 +26,8 @@ export interface NavItem {
   badgeCount?: number;
   /** Active-match strategy: exact path vs path prefix (default: prefix). */
   exact?: boolean;
+  /** Nested items (e.g. the active emergency's gated sections). */
+  children?: NavItem[];
 }
 
 export interface NavGroup {
@@ -48,90 +46,229 @@ export interface MyEmergencyNav {
   roleIds: string[];
 }
 
-/** Permissions that mean "this person operates this emergency" (coordinator/verifier). */
-const COORDINATION_PERMISSIONS = [
-  'need:validate',
-  'need:prioritize',
-  'offer:match',
-  'report:triage',
-  'task:assign',
-  'task:create',
-  'resource:verify',
+export type ContextType = 'emergency' | 'resource' | 'organization' | 'group' | 'admin';
+
+/**
+ * The `ResourceViewDto.type` enum (see `packages/api-client/src/schema.ts`) —
+ * the single source of truth reused wherever a resource's type is switched on
+ * (nav context icons, the resources queue filter), so a new resource type is
+ * a compile error instead of a silent fallthrough.
+ */
+export type ResourceType =
+  | 'collection_point'
+  | 'delivery_point'
+  | 'collection_and_delivery'
+  | 'warehouse'
+  | 'transport'
+  | 'supplier'
+  | 'venue';
+
+/** A context the principal holds a grant in, resolved for the switcher. */
+export interface PrincipalContext {
+  type: ContextType;
+  id: string;
+  /** Emergencies address by slug; the rest by id. */
+  slug?: string;
+  name: string;
+  roleIds: string[];
+  /** Only set for `resource` contexts — the `ResourceViewDto` type enum value. */
+  resourceType?: ResourceType;
+  /**
+   * Only set for `resource` contexts — the slug of the resource's emergency, so
+   * the switcher can deep-link into that emergency's `mis-puntos` surface (a
+   * managed point has no standalone workspace route). Rides on the context from
+   * `/resources/mine`; null only when the emergency row is missing (#323).
+   */
+  emergencySlug?: string | null;
+}
+
+export function contextHref(c: PrincipalContext): string {
+  switch (c.type) {
+    case 'emergency':
+      return `/emergencies/${c.slug}/manage`;
+    case 'resource':
+      // A managed point has no standalone workspace route (`/resources/:id/manage`
+      // never existed → 404). Deep-link into its emergency's `mis-puntos`
+      // inventory surface, where owner, coordinator and `point_manager` are all
+      // authorized after #316. `emergencySlug` is effectively always present
+      // (emergencies always have a slug); the `/dashboard` fallback only guards
+      // the impossible null so the switcher never emits a 404 (#323).
+      return c.emergencySlug != null
+        ? `/e/${c.emergencySlug}/mis-puntos/${c.id}/inventario`
+        : '/dashboard';
+    case 'organization':
+      return `/organizations/${c.id}/manage`;
+    case 'group':
+      return `/dashboard/groups/${c.id}`;
+    case 'admin':
+      // Unreachable in practice: 'admin' is not a grant a principal holds
+      // (it's platform-wide, not a `PrincipalContext`) — kept only so the
+      // switch stays exhaustive over `ContextType`.
+      return '/admin';
+  }
+}
+
+export interface RawPrincipalContexts {
+  emergencies: { id: string; slug: string; name: string; roleIds: string[] }[];
+  resources: {
+    id: string;
+    name: string;
+    resourceType: ResourceType;
+    emergencySlug: string | null;
+  }[];
+  organizations: { id: string; name: string }[];
+  groups: { id: string; name: string }[];
+}
+
+/** Flatten the principal's raw API results into ordered typed contexts. Pure. */
+export function buildPrincipalContexts(raw: RawPrincipalContexts): PrincipalContext[] {
+  return [
+    ...raw.emergencies.map((e): PrincipalContext => ({
+      type: 'emergency', id: e.id, slug: e.slug, name: e.name, roleIds: e.roleIds,
+    })),
+    ...raw.resources.map((r): PrincipalContext => ({
+      type: 'resource', id: r.id, name: r.name, roleIds: [], resourceType: r.resourceType, emergencySlug: r.emergencySlug,
+    })),
+    ...raw.organizations.map((o): PrincipalContext => ({
+      type: 'organization', id: o.id, name: o.name, roleIds: [],
+    })),
+    ...raw.groups.map((g): PrincipalContext => ({
+      type: 'group', id: g.id, name: g.name, roleIds: [],
+    })),
+  ];
+}
+
+const CATEGORY_ORDER: { type: ContextType; key: string; headingKey: NavLabelKey }[] = [
+  { type: 'emergency', key: 'cat-emergencies', headingKey: 'cat_emergencies' },
+  { type: 'resource', key: 'cat-resources', headingKey: 'cat_resources' },
+  { type: 'organization', key: 'cat-organizations', headingKey: 'cat_organizations' },
+  { type: 'group', key: 'cat-groups', headingKey: 'cat_groups' },
 ];
 
 export interface BuildNavArgs {
-  grants: MeGrant[];
-  roles: RoleCatalogEntry[];
+  contexts: PrincipalContext[];
   isAdmin: boolean;
-  myEmergencies: MyEmergencyNav[];
+  canAdminister: boolean;
   notificationUnread: number;
+  /**
+   * Resolved emergency access keyed by emergency id. The caller (the app
+   * shell) resolves each context's access; this module stays pure and only
+   * consumes the map — every emergency the map has an entry for gets its gated
+   * sections nested as children (regardless of which route is active).
+   */
+  emergencyAccessById: Record<string, EmergencyAccess>;
 }
 
-/** Max per-emergency coordination links shown directly in the sidebar. */
-const MAX_COORDINATION_ITEMS = 8;
-
 export function buildNavModel({
-  grants,
-  roles,
+  contexts,
   isAdmin,
-  myEmergencies,
+  canAdminister,
   notificationUnread,
+  emergencyAccessById,
 }: BuildNavArgs): NavModel {
-  const permsByRole = new Map(roles.map((r) => [r.id, new Set(r.permissions)]));
   const groups: NavModel = [];
 
-  // Top — Panel (always for authenticated users).
+  // Top — Inicio (personal home).
   groups.push({
     key: 'main',
-    items: [{ key: 'panel', href: '/panel', labelKey: 'panel', exact: true }],
+    items: [{ key: 'home', href: '/dashboard', labelKey: 'home', exact: true }],
   });
 
-  // Coordinación — one entry per emergency where the principal's roles confer
-  // operational permissions (coordinator or verifier).
-  const coordinationEmergencies = myEmergencies.filter((e) =>
-    e.roleIds.some((roleId) => {
-      const perms = permsByRole.get(roleId);
-      return perms != null && COORDINATION_PERMISSIONS.some((p) => perms.has(p));
-    }),
-  );
-  if (coordinationEmergencies.length > 0) {
-    groups.push({
-      key: 'coordination',
-      headingKey: 'coordination',
-      items: coordinationEmergencies.slice(0, MAX_COORDINATION_ITEMS).map((e) => ({
-        key: `coord-${e.id}`,
-        href: `/e/${e.slug}/coordinacion`,
-        label: e.name,
-      })),
+  // One collapsible category per context type the principal actually has.
+  for (const cat of CATEGORY_ORDER) {
+    const inCat = contexts.filter((c) => c.type === cat.type);
+    if (inCat.length === 0) continue;
+
+    const items: NavItem[] = inCat.map((c) => {
+      const item: NavItem = { key: `ctx-${c.id}`, href: contextHref(c), label: c.name };
+      const access = emergencyAccessById[c.id];
+      if (c.type === 'emergency' && access != null && c.slug != null) {
+        item.children = emergencySectionItems(c.slug, access).map((s) => ({
+          ...s,
+          key: `sec-${s.key}`,
+        }));
+      }
+      return item;
     });
+
+    groups.push({ key: cat.key, headingKey: cat.headingKey, items });
   }
 
-  // Administración — single entry into the role-aware hub (reuses admin-scopes).
-  if (isAdmin || canAdminister(grants, roles)) {
-    groups.push({
-      key: 'admin',
-      items: [
-        { key: 'administracion', href: '/panel/administracion', labelKey: 'administration' },
-      ],
-    });
-  }
-
-  // Personal — always available to any authenticated user.
+  // Personal — always.
   groups.push({
     key: 'personal',
     headingKey: 'account_section',
     items: [
-      {
-        key: 'notifications',
-        href: '/panel/notificaciones',
-        labelKey: 'notifications',
-        badgeCount: notificationUnread,
-      },
-      { key: 'groups', href: '/panel/grupos', labelKey: 'my_groups' },
-      { key: 'orgs', href: '/panel/organizaciones', labelKey: 'my_orgs' },
-      { key: 'permissions', href: '/panel/mis-permisos', labelKey: 'my_permissions' },
+      { key: 'notifications', href: '/dashboard/notifications', labelKey: 'notifications', badgeCount: notificationUnread },
+      { key: 'donations', href: '/dashboard/donations', labelKey: 'my_donations' },
+      { key: 'permissions', href: '/dashboard/permissions', labelKey: 'my_permissions' },
+      { key: 'profile', href: '/dashboard/profile', labelKey: 'my_profile' },
     ],
   });
 
+  // Administración — platform-level hub.
+  if (isAdmin || canAdminister) {
+    const hub: NavItem = { key: 'admin', href: '/admin', labelKey: 'administration' };
+    if (isAdmin) {
+      hub.children = adminSectionItems();
+    }
+    groups.push({ key: 'admin', items: [hub] });
+  }
+
   return groups;
+}
+
+/**
+ * Admin hub sections — shown nested under the `admin` entry for platform
+ * admins (mirrors an emergency's gated sections, but always fully shown:
+ * there's no per-section gating for platform admin, unlike emergency roles).
+ */
+export function adminSectionItems(): NavItem[] {
+  return [
+    { key: 'admin-overview', href: '/admin', labelKey: 'admin_overview', exact: true },
+    { key: 'admin-users', href: '/admin/users', labelKey: 'admin_users' },
+    { key: 'admin-orgs', href: '/admin/organizations', labelKey: 'admin_orgs' },
+    { key: 'admin-points', href: '/admin/points', labelKey: 'admin_centros' },
+    { key: 'admin-permissions', href: '/admin/permissions', labelKey: 'admin_permissions' },
+    { key: 'admin-api-keys', href: '/admin/api-keys', labelKey: 'admin_api_keys' },
+    { key: 'admin-accreditations', href: '/admin/accreditations', labelKey: 'admin_accreditations' },
+    { key: 'admin-templates', href: '/admin/templates', labelKey: 'admin_templates' },
+    { key: 'admin-audit', href: '/admin/audit', labelKey: 'admin_audit' },
+  ];
+}
+
+/**
+ * Ordered nav items for an emergency's management sections, gated by the
+ * principal's resolved access there. Mirrors the old coordination-tabs gating
+ * (which this replaces) but emits the new English `/manage/...` routes.
+ */
+export function emergencySectionItems(
+  slug: string,
+  access: EmergencyAccess,
+): NavItem[] {
+  const base = `/emergencies/${slug}/manage`;
+  const items: NavItem[] = [
+    { key: 'overview', href: base, labelKey: 'sec_overview', exact: true },
+  ];
+  if (access.canVerifyResources) {
+    items.push({ key: 'resources', href: `${base}/resources`, labelKey: 'sec_resources' });
+    items.push({ key: 'disputes', href: `${base}/resources/disputes`, labelKey: 'sec_disputes' });
+  }
+  if (access.canValidateNeeds) {
+    items.push({ key: 'needs', href: `${base}/needs`, labelKey: 'sec_needs' });
+  }
+  if (access.canMatchOffers) {
+    items.push({ key: 'offers', href: `${base}/offers`, labelKey: 'sec_offers' });
+  }
+  if (access.canCoordinateLogistics) {
+    items.push({ key: 'logistics', href: `${base}/logistics`, labelKey: 'sec_logistics' });
+  }
+  if (access.canCoordinate) {
+    items.push({ key: 'volunteers', href: `${base}/volunteers`, labelKey: 'sec_volunteers' });
+    items.push({ key: 'reports', href: `${base}/reports`, labelKey: 'sec_reports' });
+  }
+  if (access.canViewAudit) {
+    items.push({ key: 'activity', href: `${base}/activity`, labelKey: 'sec_activity' });
+  }
+  return items;
 }

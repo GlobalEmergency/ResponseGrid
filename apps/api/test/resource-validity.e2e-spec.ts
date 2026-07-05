@@ -124,7 +124,6 @@ describe('Resource validity reports (e2e)', () => {
       .set('Authorization', `Bearer ${tok[OWNER_ID]}`)
       .send({
         type: 'warehouse',
-        stage: 'origin',
         name,
         location: baseLocation,
       })

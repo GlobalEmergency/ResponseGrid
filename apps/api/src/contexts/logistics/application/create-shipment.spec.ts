@@ -13,6 +13,7 @@ const EM = '11111111-1111-4111-8111-111111111111';
 const ORIGIN = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
 const DEST = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
 const CONTAINER_A = '11111111-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+const HUB = '77777777-7777-4777-8777-777777777777';
 
 class FakeStatusReader implements LogisticsEmergencyStatusReader {
   constructor(private status: string | null) {}
@@ -58,6 +59,32 @@ describe('CreateShipment', () => {
     expect(saved!.assignedCapacityId).toBeNull();
     expect(saved!.carrier).toBeNull();
     expect(saved!.items[0].name).toBe('Agua');
+    expect(saved!.code).toBe('EXP-0001');
+    // No hub given → null (the common case).
+    expect(saved!.hubId).toBeNull();
+  });
+
+  it('persists the logistics hub the expedition transits (#150)', async () => {
+    const repo = new InMemoryShipmentRepository();
+    const { useCase } = makeUseCase(repo, 'active');
+
+    const { id } = await useCase.execute({ ...baseCmd(), hubId: HUB });
+
+    const saved = await repo.findById(ShipmentId.fromString(id));
+    expect(saved!.hubId).toBe(HUB);
+  });
+
+  it('assigns sequential per-emergency codes (código único, #163)', async () => {
+    const repo = new InMemoryShipmentRepository();
+    const { useCase } = makeUseCase(repo, 'active');
+
+    const first = await useCase.execute(baseCmd());
+    const second = await useCase.execute(baseCmd());
+
+    const a = await repo.findById(ShipmentId.fromString(first.id));
+    const b = await repo.findById(ShipmentId.fromString(second.id));
+    expect(a!.code).toBe('EXP-0001');
+    expect(b!.code).toBe('EXP-0002');
   });
 
   it('rejects creation in a paused emergency', async () => {

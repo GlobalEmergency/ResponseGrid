@@ -83,6 +83,49 @@
         ]
       }
     },
+    "/auth/onboarding": {
+      "post": {
+        "operationId": "AuthController_onboardingRoute",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Perfil completado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Falta el teléfono o el consentimiento"
+          },
+          "401": {
+            "description": "Token inválido o ausente"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Completar el alta: teléfono + aceptación de términos y privacidad (usado tras el login social)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/auth/me": {
       "get": {
         "operationId": "AuthController_me",
@@ -146,6 +189,107 @@
           }
         ],
         "summary": "Actualizar teléfono y/o nombre del perfil autenticado",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/trusted/login-by-phone": {
+      "post": {
+        "operationId": "TrustedAuthController_loginByPhoneRoute",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginByPhoneDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login correcto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustedAuthResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta o es inválida la API key"
+          },
+          "403": {
+            "description": "La Service Account no tiene el permiso auth:trusted_phone_login"
+          },
+          "404": {
+            "description": "No existe usuario con ese teléfono"
+          },
+          "429": {
+            "description": "Límite de peticiones excedido"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Emitir un JWT de usuario a partir de su teléfono verificado (bot de confianza)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/trusted/register-by-phone": {
+      "post": {
+        "operationId": "TrustedAuthController_registerByPhoneRoute",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterByPhoneDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuario creado (auto-login)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustedAuthResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Falta la aceptación de términos/privacidad o un campo inválido"
+          },
+          "401": {
+            "description": "Falta o es inválida la API key"
+          },
+          "403": {
+            "description": "La Service Account no tiene el permiso auth:trusted_phone_login"
+          },
+          "409": {
+            "description": "Ya existe una cuenta con ese email"
+          },
+          "429": {
+            "description": "Límite de peticiones excedido"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Alta passwordless de un usuario por teléfono verificado (bot de confianza)",
         "tags": [
           "auth"
         ]
@@ -978,6 +1122,107 @@
         ]
       }
     },
+    "/resources/{resourceId}/inventory": {
+      "get": {
+        "operationId": "ResourcesController_getMyInventoryAction",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "Resource UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SupplyLineResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not owner nor coordinator"
+          },
+          "404": {
+            "description": "Resource not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Read a point declared inventory in full (owner or coordinator)",
+        "tags": [
+          "resources"
+        ]
+      },
+      "put": {
+        "operationId": "ResourcesController_updateMyInventoryAction",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "Resource UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInventoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Inventory replaced"
+          },
+          "400": {
+            "description": "Invalid request body or UUID"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Not owner nor coordinator"
+          },
+          "404": {
+            "description": "Resource not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Replace a point declared inventory (owner or coordinator) — #263",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
     "/resources/{resourceId}/verify": {
       "post": {
         "operationId": "ResourcesController_verifyResource",
@@ -1231,6 +1476,40 @@
           }
         ],
         "summary": "Update the operational public status of a resource (owner or coordinator)",
+        "tags": [
+          "resources"
+        ]
+      }
+    },
+    "/resources/mine": {
+      "get": {
+        "description": "Union of the resources the principal owns and the ones reached through an entity-scoped grant (e.g. `point_manager`). Unlike `/emergencies/{emergencyId}/resources/mine`, this needs no emergency in the path, so it also serves principals whose only grant is entity-scoped (#285). Each row carries its emergency id and slug.",
+        "operationId": "ResourcesController_listMineAcrossEmergencies",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Resources the principal manages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MyManagedResourceDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the resources the authenticated principal manages, across every emergency",
         "tags": [
           "resources"
         ]
@@ -2555,6 +2834,59 @@
         ]
       }
     },
+    "/emergencies/{emergencyId}/resource-dispute-threshold": {
+      "put": {
+        "operationId": "EmergenciesController_setResourceDisputeThreshold",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetDisputeThresholdDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Umbral actualizado"
+          },
+          "400": {
+            "description": "Invalid body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "emergency:configure permission required"
+          },
+          "404": {
+            "description": "Emergency not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Fijar (o limpiar) el umbral de disputa por reportes para una emergencia",
+        "tags": [
+          "emergencies"
+        ]
+      }
+    },
     "/emergencies/{emergencyId}/needs": {
       "post": {
         "description": "Open to any authenticated user (a citizen submits; a coordinator validates later). A trusted integration may also create on behalf of a third party with its service-account API key when it holds `need:create` and includes the `author` block (#235).",
@@ -3864,6 +4196,9 @@
                 }
               }
             }
+          },
+          "429": {
+            "description": "Rate limit exceeded"
           }
         },
         "summary": "Geocode a free-text address query (Nominatim / OpenStreetMap)",
@@ -4660,7 +4995,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DonationIntakeViewDto"
+                  "$ref": "#/components/schemas/PublicDonationIntakeDto"
                 }
               }
             }
@@ -5935,9 +6270,6 @@
           "204": {
             "description": "Category archived"
           },
-          "400": {
-            "description": "Core category slug cannot be archived by delete"
-          },
           "401": {
             "description": "Missing or invalid token"
           },
@@ -5946,6 +6278,9 @@
           },
           "404": {
             "description": "Category not found"
+          },
+          "409": {
+            "description": "Core category slug is protected and cannot be archived"
           }
         },
         "security": [
@@ -6091,6 +6426,424 @@
         "summary": "Get a supply by id",
         "tags": [
           "supplies"
+        ]
+      }
+    },
+    "/admin/supplies": {
+      "post": {
+        "operationId": "SuppliesAdminController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSupplyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSupplyResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear un insumo (asigna código INS-NNNN)",
+        "tags": [
+          "supplies-admin"
+        ]
+      },
+      "get": {
+        "operationId": "SuppliesAdminController_list",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Búsqueda por código o nombre",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categorySlug",
+            "required": false,
+            "in": "query",
+            "description": "Filtra por categoría",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "archived"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminSupplyDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar el catálogo (incluye archivados)",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/backfill": {
+      "get": {
+        "operationId": "SuppliesAdminController_backfillReport",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplyLinkReportDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Informe de líneas legacy sin enlazar al catálogo (no-casadas)",
+        "tags": [
+          "supplies-admin"
+        ]
+      },
+      "post": {
+        "operationId": "SuppliesAdminController_backfill",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplyLinkBackfillResultDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Backfill best-effort del supplyId de las líneas legacy (idempotente)",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/{id}": {
+      "get": {
+        "operationId": "SuppliesAdminController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSupplyDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Detalle de gestión de un insumo",
+        "tags": [
+          "supplies-admin"
+        ]
+      },
+      "patch": {
+        "operationId": "SuppliesAdminController_edit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditSupplyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar un insumo (code no editable)",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/{id}/archive": {
+      "post": {
+        "operationId": "SuppliesAdminController_archive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Archivar un insumo",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/{id}/restore": {
+      "post": {
+        "operationId": "SuppliesAdminController_restore",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reactivar un insumo archivado",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/{id}/aliases": {
+      "post": {
+        "operationId": "SuppliesAdminController_addAlias",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddSupplyAliasDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Añadir un alias/sinónimo a un insumo",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/{id}/aliases/{aliasNorm}": {
+      "delete": {
+        "operationId": "SuppliesAdminController_removeAlias",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "aliasNorm",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar un alias del catálogo",
+        "tags": [
+          "supplies-admin"
+        ]
+      }
+    },
+    "/admin/supplies/merge": {
+      "post": {
+        "operationId": "SuppliesAdminController_merge",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeSuppliesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Falta el permiso catalogue:manage"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Fusionar un insumo duplicado en el canónico",
+        "tags": [
+          "supplies-admin"
         ]
       }
     },
@@ -7328,7 +8081,12 @@
             "description": "File content streamed"
           }
         },
-        "summary": "Download a stored file by key",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Download a stored file by key (authenticated)",
         "tags": [
           "files"
         ]
@@ -8249,14 +9007,26 @@
           "phone": {
             "type": "string",
             "example": "+58 412 555 0101",
-            "nullable": true,
-            "description": "Teléfono de contacto opcional"
+            "description": "Teléfono de contacto (obligatorio)"
+          },
+          "acceptedTerms": {
+            "type": "boolean",
+            "example": true,
+            "description": "Aceptación de las condiciones del servicio (debe ser true)"
+          },
+          "acceptedPrivacy": {
+            "type": "boolean",
+            "example": true,
+            "description": "Aceptación de la política de privacidad (debe ser true)"
           }
         },
         "required": [
           "email",
           "password",
-          "name"
+          "name",
+          "phone",
+          "acceptedTerms",
+          "acceptedPrivacy"
         ]
       },
       "RegisterResponseDto": {
@@ -8269,6 +9039,43 @@
         },
         "required": [
           "accessToken"
+        ]
+      },
+      "OnboardingDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+58 412 555 0101",
+            "description": "Teléfono de contacto (obligatorio)"
+          },
+          "acceptedTerms": {
+            "type": "boolean",
+            "example": true,
+            "description": "Aceptación de las condiciones del servicio (debe ser true)"
+          },
+          "acceptedPrivacy": {
+            "type": "boolean",
+            "example": true,
+            "description": "Aceptación de la política de privacidad (debe ser true)"
+          }
+        },
+        "required": [
+          "phone",
+          "acceptedTerms",
+          "acceptedPrivacy"
+        ]
+      },
+      "OnboardingResponseDto": {
+        "type": "object",
+        "properties": {
+          "profileComplete": {
+            "type": "boolean",
+            "description": "true una vez el perfil queda completo (teléfono + consentimientos)"
+          }
+        },
+        "required": [
+          "profileComplete"
         ]
       },
       "MeGrantDto": {
@@ -8331,6 +9138,10 @@
             "nullable": true,
             "description": "Optional contact phone, null until the user provides one"
           },
+          "profileComplete": {
+            "type": "boolean",
+            "description": "true si el perfil está completo (teléfono + consentimientos vigentes). false obliga a pasar por el onboarding (típico en altas sociales)."
+          },
           "grants": {
             "description": "The effective role grants (role @ scope) for this user",
             "type": "array",
@@ -8345,6 +9156,7 @@
           "name",
           "isAdmin",
           "phone",
+          "profileComplete",
           "grants"
         ]
       },
@@ -8362,6 +9174,91 @@
             "example": "Nuevo Nombre"
           }
         }
+      },
+      "LoginByPhoneDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+58 412 555 0101",
+            "description": "Teléfono verificado por el canal de confianza (bot). Se normaliza (espacios, guiones, prefijo +) antes de buscar la cuenta."
+          }
+        },
+        "required": [
+          "phone"
+        ]
+      },
+      "TrustedAuthUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "User UUID"
+          },
+          "name": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "email": {
+            "type": "string",
+            "example": "jane@example.com"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email"
+        ]
+      },
+      "TrustedAuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "JWT del usuario — mismos claims que /auth/login; nunca confiere más permisos que los del propio usuario."
+          },
+          "user": {
+            "$ref": "#/components/schemas/TrustedAuthUserDto"
+          }
+        },
+        "required": [
+          "accessToken",
+          "user"
+        ]
+      },
+      "RegisterByPhoneDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+58 412 555 0101"
+          },
+          "name": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "email": {
+            "type": "string",
+            "example": "jane@example.com"
+          },
+          "acceptedTerms": {
+            "type": "boolean",
+            "example": true,
+            "description": "Aceptación de las condiciones del servicio (debe ser true; el bot la recogió en la conversación)."
+          },
+          "acceptedPrivacy": {
+            "type": "boolean",
+            "example": true,
+            "description": "Aceptación de la política de privacidad (debe ser true)."
+          }
+        },
+        "required": [
+          "phone",
+          "name",
+          "email",
+          "acceptedTerms",
+          "acceptedPrivacy"
+        ]
       },
       "GrantListItemDto": {
         "type": "object",
@@ -8937,7 +9834,8 @@
             "enum": [
               "resource_verified",
               "offer_matched",
-              "task_assigned"
+              "task_assigned",
+              "donation_received"
             ]
           },
           "message": {
@@ -9015,6 +9913,12 @@
             "type": "string",
             "example": "Water bottles",
             "description": "Name of the supply"
+          },
+          "supplyId": {
+            "type": "string",
+            "example": "1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8",
+            "nullable": true,
+            "description": "Optional soft link to the canonical supply master data."
           },
           "quantity": {
             "type": "number",
@@ -9122,16 +10026,6 @@
             ],
             "example": "collection_point"
           },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "origin",
-              "intermediate",
-              "destination"
-            ],
-            "example": "origin",
-            "description": "Stage of the resource in the emergency supply chain"
-          },
           "name": {
             "type": "string",
             "example": "Cruz Roja Madrid",
@@ -9194,7 +10088,7 @@
           "isFinalRecipient": {
             "type": "boolean",
             "example": true,
-            "description": "Mark this resource as a final recipient of aid (requires the destination stage)"
+            "description": "Mark this resource as a final recipient of aid"
           },
           "recipientType": {
             "type": "string",
@@ -9219,7 +10113,6 @@
         },
         "required": [
           "type",
-          "stage",
           "name",
           "location"
         ]
@@ -9242,6 +10135,88 @@
         "properties": {
           "items": {
             "description": "Supply lines received into the point stock (at least one)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyLineDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "SupplyLineResponseDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Water bottles"
+          },
+          "supplyId": {
+            "type": "string",
+            "example": "1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8",
+            "nullable": true,
+            "description": "Optional soft link to the canonical supply master data."
+          },
+          "quantity": {
+            "type": "number",
+            "example": 100
+          },
+          "unit": {
+            "type": "string",
+            "example": "liters",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "food",
+              "water",
+              "hygiene",
+              "clothing",
+              "medical",
+              "shelter",
+              "tools",
+              "other",
+              "medicines",
+              "medical_equipment",
+              "medical_supplies",
+              "medical_personnel",
+              "food_fresh",
+              "food_non_perishable",
+              "hygiene_infantile",
+              "hygiene_personal",
+              "tools_extraction",
+              "other_pets"
+            ],
+            "example": "water"
+          },
+          "presentation": {
+            "type": "string",
+            "example": "ampolla",
+            "nullable": true,
+            "description": "Presentation / route of administration (ampolla, EV, inhalador…) — #61."
+          },
+          "expiresAt": {
+            "type": "string",
+            "example": "2026-07-01",
+            "nullable": true,
+            "format": "date",
+            "description": "Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD)."
+          }
+        },
+        "required": [
+          "name",
+          "supplyId",
+          "quantity",
+          "category"
+        ]
+      },
+      "UpdateInventoryDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Full declared inventory (replaces current; empty clears it)",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SupplyLineDto"
@@ -9325,6 +10300,50 @@
           "status"
         ]
       },
+      "MyManagedResourceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "collection_point",
+              "delivery_point",
+              "collection_and_delivery",
+              "warehouse",
+              "transport",
+              "supplier",
+              "venue"
+            ],
+            "example": "collection_point"
+          },
+          "name": {
+            "type": "string",
+            "example": "Cruz Roja Madrid"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emergencySlug": {
+            "type": "string",
+            "example": "terremoto-venezuela-2026",
+            "nullable": true,
+            "description": "Slug of the owning emergency; null if its row is missing."
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "name",
+          "emergencyId",
+          "emergencySlug"
+        ]
+      },
       "LocationViewDto": {
         "type": "object",
         "properties": {
@@ -9367,15 +10386,6 @@
               "venue"
             ],
             "example": "collection_point"
-          },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "origin",
-              "intermediate",
-              "destination"
-            ],
-            "example": "origin"
           },
           "name": {
             "type": "string",
@@ -9428,7 +10438,13 @@
           "contact": {
             "type": "string",
             "example": "+58 212 555 0000",
-            "nullable": true
+            "nullable": true,
+            "description": "Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell \"hidden\" from \"absent\"."
+          },
+          "hasContact": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether a contact exists on file, regardless of whether `contact` is revealed to this caller."
           },
           "schedule": {
             "type": "string",
@@ -9488,7 +10504,6 @@
         "required": [
           "id",
           "type",
-          "stage",
           "name",
           "description",
           "location",
@@ -9497,6 +10512,7 @@
           "ownerOrganizationId",
           "accepts",
           "contact",
+          "hasContact",
           "schedule",
           "manager",
           "sourceName",
@@ -9747,15 +10763,6 @@
             ],
             "example": "collection_point"
           },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "origin",
-              "intermediate",
-              "destination"
-            ],
-            "example": "origin"
-          },
           "name": {
             "type": "string",
             "example": "Cruz Roja Madrid"
@@ -9807,7 +10814,13 @@
           "contact": {
             "type": "string",
             "example": "+58 212 555 0000",
-            "nullable": true
+            "nullable": true,
+            "description": "Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell \"hidden\" from \"absent\"."
+          },
+          "hasContact": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether a contact exists on file, regardless of whether `contact` is revealed to this caller."
           },
           "schedule": {
             "type": "string",
@@ -9872,7 +10885,6 @@
         "required": [
           "id",
           "type",
-          "stage",
           "name",
           "description",
           "location",
@@ -9881,6 +10893,7 @@
           "ownerOrganizationId",
           "accepts",
           "contact",
+          "hasContact",
           "schedule",
           "manager",
           "sourceName",
@@ -9972,15 +10985,6 @@
             ],
             "example": "collection_point"
           },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "origin",
-              "intermediate",
-              "destination"
-            ],
-            "example": "origin"
-          },
           "name": {
             "type": "string",
             "example": "Cruz Roja Madrid"
@@ -10032,7 +11036,13 @@
           "contact": {
             "type": "string",
             "example": "+58 212 555 0000",
-            "nullable": true
+            "nullable": true,
+            "description": "Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell \"hidden\" from \"absent\"."
+          },
+          "hasContact": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether a contact exists on file, regardless of whether `contact` is revealed to this caller."
           },
           "schedule": {
             "type": "string",
@@ -10103,7 +11113,6 @@
         "required": [
           "id",
           "type",
-          "stage",
           "name",
           "description",
           "location",
@@ -10112,6 +11121,7 @@
           "ownerOrganizationId",
           "accepts",
           "contact",
+          "hasContact",
           "schedule",
           "manager",
           "sourceName",
@@ -10182,15 +11192,6 @@
             ],
             "example": "collection_point"
           },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "origin",
-              "intermediate",
-              "destination"
-            ],
-            "example": "origin"
-          },
           "name": {
             "type": "string",
             "example": "Cruz Roja Madrid"
@@ -10242,7 +11243,13 @@
           "contact": {
             "type": "string",
             "example": "+58 212 555 0000",
-            "nullable": true
+            "nullable": true,
+            "description": "Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell \"hidden\" from \"absent\"."
+          },
+          "hasContact": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether a contact exists on file, regardless of whether `contact` is revealed to this caller."
           },
           "schedule": {
             "type": "string",
@@ -10324,7 +11331,6 @@
         "required": [
           "id",
           "type",
-          "stage",
           "name",
           "description",
           "location",
@@ -10333,6 +11339,7 @@
           "ownerOrganizationId",
           "accepts",
           "contact",
+          "hasContact",
           "schedule",
           "manager",
           "sourceName",
@@ -10397,15 +11404,6 @@
             ],
             "example": "collection_point"
           },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "origin",
-              "intermediate",
-              "destination"
-            ],
-            "example": "origin"
-          },
           "name": {
             "type": "string",
             "example": "Cruz Roja Madrid"
@@ -10457,7 +11455,13 @@
           "contact": {
             "type": "string",
             "example": "+58 212 555 0000",
-            "nullable": true
+            "nullable": true,
+            "description": "Contact line. Personal data: nulled for anonymous callers on non-official resources — authenticate to reveal it. Use `hasContact` to tell \"hidden\" from \"absent\"."
+          },
+          "hasContact": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether a contact exists on file, regardless of whether `contact` is revealed to this caller."
           },
           "schedule": {
             "type": "string",
@@ -10557,7 +11561,6 @@
         "required": [
           "id",
           "type",
-          "stage",
           "name",
           "description",
           "location",
@@ -10566,6 +11569,7 @@
           "ownerOrganizationId",
           "accepts",
           "contact",
+          "hasContact",
           "schedule",
           "manager",
           "sourceName",
@@ -10864,6 +11868,12 @@
             "items": {
               "type": "string"
             }
+          },
+          "resourceDisputeThreshold": {
+            "type": "number",
+            "example": 5,
+            "nullable": true,
+            "description": "Umbral de disputa configurado para esta emergencia, o null cuando usa el global. Solo se expone en la vista autenticada."
           }
         },
         "required": [
@@ -10875,7 +11885,8 @@
           "announcement",
           "dontBringList",
           "updatedAt",
-          "roleIds"
+          "roleIds",
+          "resourceDisputeThreshold"
         ]
       },
       "CreateEmergencyFromTemplateDto": {
@@ -10919,6 +11930,22 @@
         },
         "required": [
           "message"
+        ]
+      },
+      "SetDisputeThresholdDto": {
+        "type": "object",
+        "properties": {
+          "threshold": {
+            "type": "number",
+            "example": 5,
+            "nullable": true,
+            "minimum": 1,
+            "maximum": 1000,
+            "description": "Número mínimo de reportantes distintos para marcar el punto como disputado (entero entre 1 y 1000). Enviar null explícito elimina el umbral específico y vuelve al global (RESOURCE_DISPUTE_THRESHOLD / 3). El campo es obligatorio: un body vacío es 400."
+          }
+        },
+        "required": [
+          "threshold"
         ]
       },
       "NeedLocationDto": {
@@ -11052,7 +12079,9 @@
         "properties": {
           "address": {
             "type": "string",
-            "example": "123 Main Street, Caracas"
+            "example": "Caracas",
+            "nullable": true,
+            "description": "Street line is coarsened (locality only) or dropped for needs with approximate location sensitivity to protect the requester’s privacy."
           },
           "latitude": {
             "type": "number",
@@ -11064,69 +12093,8 @@
           }
         },
         "required": [
-          "address",
           "latitude",
           "longitude"
-        ]
-      },
-      "SupplyLineResponseDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "example": "Water bottles"
-          },
-          "quantity": {
-            "type": "number",
-            "example": 100
-          },
-          "unit": {
-            "type": "string",
-            "example": "liters",
-            "nullable": true
-          },
-          "category": {
-            "type": "string",
-            "enum": [
-              "food",
-              "water",
-              "hygiene",
-              "clothing",
-              "medical",
-              "shelter",
-              "tools",
-              "other",
-              "medicines",
-              "medical_equipment",
-              "medical_supplies",
-              "medical_personnel",
-              "food_fresh",
-              "food_non_perishable",
-              "hygiene_infantile",
-              "hygiene_personal",
-              "tools_extraction",
-              "other_pets"
-            ],
-            "example": "water"
-          },
-          "presentation": {
-            "type": "string",
-            "example": "ampolla",
-            "nullable": true,
-            "description": "Presentation / route of administration (ampolla, EV, inhalador…) — #61."
-          },
-          "expiresAt": {
-            "type": "string",
-            "example": "2026-07-01",
-            "nullable": true,
-            "format": "date",
-            "description": "Optional freshness date for the line, expressed as an ISO date (YYYY-MM-DD)."
-          }
-        },
-        "required": [
-          "name",
-          "quantity",
-          "category"
         ]
       },
       "NeedViewDto": {
@@ -12477,14 +13445,6 @@
             "type": "string",
             "format": "uuid"
           },
-          "intakeCode": {
-            "type": "string",
-            "example": "ACO-7F3K"
-          },
-          "targetResourceId": {
-            "type": "string",
-            "format": "uuid"
-          },
           "itemCount": {
             "type": "number",
             "example": 2
@@ -12496,8 +13456,6 @@
         },
         "required": [
           "id",
-          "intakeCode",
-          "targetResourceId",
           "itemCount",
           "createdAt"
         ]
@@ -12719,6 +13677,12 @@
             "type": "string",
             "example": "Water bottles"
           },
+          "supplyId": {
+            "type": "string",
+            "example": "1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8",
+            "nullable": true,
+            "description": "Optional soft link to the canonical supply master data."
+          },
           "quantity": {
             "type": "number",
             "example": 100
@@ -12775,13 +13739,14 @@
         },
         "required": [
           "name",
+          "supplyId",
           "quantity",
           "category",
           "id",
           "sortOrder"
         ]
       },
-      "DonationIntakeViewDto": {
+      "PublicDonationIntakeDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -12820,33 +13785,15 @@
             "type": "string",
             "nullable": true
           },
-          "donorUserId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
           "lines": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/IntakeLineViewDto"
             }
           },
-          "volunteerNotes": {
-            "type": "string",
-            "nullable": true
-          },
-          "evidenceFileKey": {
-            "type": "string",
-            "nullable": true
-          },
           "receivedAt": {
             "type": "string",
             "format": "date-time",
-            "nullable": true
-          },
-          "receivedByUserId": {
-            "type": "string",
-            "format": "uuid",
             "nullable": true
           },
           "createdAt": {
@@ -12923,6 +13870,100 @@
           "createdAt"
         ]
       },
+      "DonationIntakeViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emergencyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetResourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "intakeCode": {
+            "type": "string",
+            "example": "ACO-7F3K"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "received",
+              "rejected",
+              "incomplete"
+            ]
+          },
+          "donorName": {
+            "type": "string"
+          },
+          "donorPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "donorEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "donorUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IntakeLineViewDto"
+            }
+          },
+          "volunteerNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "evidenceFileKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "receptionAdjustmentReason": {
+            "type": "string",
+            "nullable": true,
+            "description": "Reason recorded when received lines differed from declared"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "receivedByUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "emergencyId",
+          "targetResourceId",
+          "intakeCode",
+          "status",
+          "donorName",
+          "lines",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
       "IntakeDeepLinkDto": {
         "type": "object",
         "properties": {
@@ -12960,6 +14001,18 @@
           "evidenceFileKey": {
             "type": "string",
             "description": "File key from POST /files",
+            "nullable": true
+          },
+          "items": {
+            "description": "Lines actually received; when omitted the declared lines stand (#129)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyLineDto"
+            }
+          },
+          "adjustmentReason": {
+            "type": "string",
+            "description": "Required when received lines differ from the declared ones",
             "nullable": true
           }
         }
@@ -13360,6 +14413,11 @@
               "format": "uuid"
             }
           },
+          "hubId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Optional logistics hub (#150) this expedition transits. A hub_manager grant scoped to it may operate the shipment cross-emergency (§16.3). No FK."
+          },
           "manifest": {
             "type": "string",
             "example": "Carga frágil, manipular con cuidado",
@@ -13435,6 +14493,11 @@
             "type": "string",
             "format": "uuid"
           },
+          "code": {
+            "type": "string",
+            "description": "Legible/QR \"Código Único\" of the expedition (#163)",
+            "example": "EXP-0001"
+          },
           "emergencyId": {
             "type": "string",
             "format": "uuid"
@@ -13481,6 +14544,12 @@
             "format": "uuid",
             "nullable": true
           },
+          "hubId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Logistics hub (#150) this expedition transits, or null. Grants scoped to it confer cross-emergency authority over the shipment (§16.3)."
+          },
           "manifest": {
             "type": "string",
             "example": "Carga frágil",
@@ -13509,6 +14578,7 @@
         },
         "required": [
           "id",
+          "code",
           "emergencyId",
           "originResourceId",
           "destinationResourceId",
@@ -13522,18 +14592,15 @@
       "CategoryDto": {
         "type": "object",
         "properties": {
+          "slug": {
+            "type": "string",
+            "example": "medicines",
+            "description": "Canonical category slug (stable identifier)"
+          },
           "label": {
             "type": "string",
             "example": "Medicamentos",
-            "description": "Localized category label"
-          },
-          "labelEs": {
-            "type": "string",
-            "example": "Medicamentos"
-          },
-          "labelEn": {
-            "type": "string",
-            "example": "Medicines"
+            "description": "Etiqueta resuelta en el locale pedido (fallback a `es`)"
           },
           "parentSlug": {
             "type": "string",
@@ -13549,15 +14616,31 @@
             "type": "number",
             "example": 41,
             "description": "Display sort order"
+          },
+          "codePrefix": {
+            "type": "string",
+            "example": "MED",
+            "nullable": true,
+            "description": "Unique 3-letter prefix for supplies in this category, or null if inherited"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "material",
+              "personnel"
+            ],
+            "example": "material",
+            "description": "Whether the category is aid material or personnel. Personnel (medical_personnel) is excluded from material pickers."
           }
         },
         "required": [
+          "slug",
           "label",
-          "labelEs",
-          "labelEn",
           "parentSlug",
           "vertical",
-          "sort"
+          "sort",
+          "codePrefix",
+          "kind"
         ]
       },
       "CategoryTranslationDto": {
@@ -13734,16 +14817,8 @@
           },
           "name": {
             "type": "string",
-            "example": "Agua potable (botellón 18L)"
-          },
-          "nameEs": {
-            "type": "string",
-            "example": "Agua potable (botellón 18L)"
-          },
-          "nameEn": {
-            "type": "string",
-            "example": "Water (18L jug)",
-            "nullable": true
+            "example": "Agua potable (botellón 18L)",
+            "description": "Nombre resuelto en el locale pedido (fallback a `es`)"
           },
           "categorySlug": {
             "type": "string",
@@ -13751,16 +14826,8 @@
           },
           "categoryLabel": {
             "type": "string",
-            "example": "Alimentos"
-          },
-          "categoryLabelEs": {
-            "type": "string",
-            "example": "Alimentos"
-          },
-          "categoryLabelEn": {
-            "type": "string",
-            "example": "Food",
-            "nullable": true
+            "example": "Alimentos",
+            "description": "Etiqueta de categoría resuelta en el locale pedido"
           },
           "defaultUnit": {
             "type": "string",
@@ -13797,12 +14864,335 @@
           "id",
           "code",
           "name",
-          "nameEs",
           "categorySlug",
           "categoryLabel",
-          "categoryLabelEs",
           "attributes",
           "aliases"
+        ]
+      },
+      "SupplyTranslationDto": {
+        "type": "object",
+        "properties": {
+          "locale": {
+            "type": "string",
+            "example": "en"
+          },
+          "name": {
+            "type": "string",
+            "example": "Drinking water (1.5L bottle)"
+          }
+        },
+        "required": [
+          "locale",
+          "name"
+        ]
+      },
+      "CreateSupplyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Agua potable (botella 1.5L)"
+          },
+          "categorySlug": {
+            "type": "string",
+            "example": "water",
+            "description": "Slug de categoría existente"
+          },
+          "defaultUnit": {
+            "type": "object",
+            "example": "und"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Atributos estructurados (jsonb)"
+          },
+          "registrationNotes": {
+            "type": "object",
+            "description": "Notas internas de gestión"
+          },
+          "variantOfId": {
+            "type": "object",
+            "format": "uuid",
+            "description": "Si es variante, id del insumo padre (debe existir)"
+          },
+          "translations": {
+            "description": "Traducciones del nombre por idioma (i18n). El nombre base es `es`.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyTranslationDto"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "categorySlug"
+        ]
+      },
+      "CreateSupplyResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "example": "INS-0212"
+          }
+        },
+        "required": [
+          "id",
+          "code"
+        ]
+      },
+      "AdminSupplyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "example": "INS-0212"
+          },
+          "name": {
+            "type": "string",
+            "example": "Agua potable (botella 1.5L)"
+          },
+          "categorySlug": {
+            "type": "string",
+            "example": "water"
+          },
+          "defaultUnit": {
+            "type": "string",
+            "example": "und",
+            "nullable": true
+          },
+          "attributes": {
+            "type": "object",
+            "example": {
+              "size": "1.5L"
+            }
+          },
+          "variantOfId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "archived"
+            ],
+            "example": "active"
+          },
+          "registrationNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "aliases": {
+            "example": [
+              "agua embotellada",
+              "botellon"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "translations": {
+            "description": "Traducciones del nombre por idioma (i18n, #320)",
+            "example": [
+              {
+                "locale": "en",
+                "name": "Drinking water (1.5L bottle)"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyTranslationDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "categorySlug",
+          "attributes",
+          "status",
+          "aliases",
+          "translations"
+        ]
+      },
+      "UnmatchedSupplyLineGroupDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Harina PAN"
+          },
+          "lines": {
+            "type": "number",
+            "example": 12,
+            "description": "Líneas sin enlazar con ese texto"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "need_items",
+                "offer_items",
+                "resource_items",
+                "donation_intake_lines",
+                "container_lines"
+              ]
+            }
+          },
+          "ambiguous": {
+            "type": "boolean",
+            "example": false,
+            "description": "true = el texto casa con varios insumos activos: fusionar duplicados en vez de crear un alias"
+          }
+        },
+        "required": [
+          "name",
+          "lines",
+          "sources",
+          "ambiguous"
+        ]
+      },
+      "SupplyLinkReportDto": {
+        "type": "object",
+        "properties": {
+          "unmatchedLines": {
+            "type": "number",
+            "example": 27
+          },
+          "unmatched": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnmatchedSupplyLineGroupDto"
+            }
+          },
+          "pendingNames": {
+            "type": "number",
+            "example": 34,
+            "description": "Textos distintos que un backfill enlazaría ahora"
+          },
+          "pendingLines": {
+            "type": "number",
+            "example": 120
+          }
+        },
+        "required": [
+          "unmatchedLines",
+          "unmatched",
+          "pendingNames",
+          "pendingLines"
+        ]
+      },
+      "SupplyLinkBackfillResultDto": {
+        "type": "object",
+        "properties": {
+          "unmatchedLines": {
+            "type": "number",
+            "example": 27
+          },
+          "unmatched": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnmatchedSupplyLineGroupDto"
+            }
+          },
+          "linkedNames": {
+            "type": "number",
+            "example": 34,
+            "description": "Textos distintos que casaron contra el catálogo"
+          },
+          "linkedLines": {
+            "type": "number",
+            "example": 120,
+            "description": "Líneas realmente actualizadas en esta ejecución (0 al re-correr o si otra ejecución concurrente las enlazó antes)"
+          }
+        },
+        "required": [
+          "unmatchedLines",
+          "unmatched",
+          "linkedNames",
+          "linkedLines"
+        ]
+      },
+      "EditSupplyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Agua mineral"
+          },
+          "categorySlug": {
+            "type": "string",
+            "example": "food"
+          },
+          "defaultUnit": {
+            "type": "object",
+            "example": "kg"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "registrationNotes": {
+            "type": "object"
+          },
+          "variantOfId": {
+            "type": "object",
+            "format": "uuid"
+          },
+          "translations": {
+            "description": "Reemplaza el conjunto de traducciones del insumo; omitir para no tocarlas.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyTranslationDto"
+            }
+          }
+        }
+      },
+      "AddSupplyAliasDto": {
+        "type": "object",
+        "properties": {
+          "term": {
+            "type": "string",
+            "example": "agua embotellada",
+            "description": "Término/sinónimo; se normaliza en el servidor"
+          }
+        },
+        "required": [
+          "term"
+        ]
+      },
+      "MergeSuppliesDto": {
+        "type": "object",
+        "properties": {
+          "sourceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Insumo duplicado (se archiva)"
+          },
+          "targetId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Insumo canónico (conserva todo)"
+          }
+        },
+        "required": [
+          "sourceId",
+          "targetId"
         ]
       },
       "ContainerHolderDto": {

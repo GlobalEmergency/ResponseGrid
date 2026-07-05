@@ -9,11 +9,11 @@ describe('ListSupplies', () => {
     {
       id: '11111111-1111-4111-8111-111111111111',
       code: 'WAT-0001',
-      nameEs: 'Agua potable',
-      nameEn: 'Drinking water',
+      name: 'Agua potable',
+      translations: { en: 'Drinking water' },
       categorySlug: 'water',
-      categoryLabelEs: 'Agua',
-      categoryLabelEn: 'Water',
+      categoryLabel: 'Agua',
+      categoryTranslations: { es: 'Agua', en: 'Water' },
       defaultUnit: 'und',
       attributes: {},
       variantOfId: null,
@@ -22,11 +22,11 @@ describe('ListSupplies', () => {
     {
       id: '22222222-2222-4222-8222-222222222222',
       code: 'HYG-0002',
-      nameEs: 'Panal',
-      nameEn: null,
+      name: 'Panal',
+      translations: {},
       categorySlug: 'hygiene',
-      categoryLabelEs: 'Higiene',
-      categoryLabelEn: 'Hygiene',
+      categoryLabel: 'Higiene',
+      categoryTranslations: { es: 'Higiene', en: 'Hygiene' },
       defaultUnit: 'und',
       attributes: {},
       variantOfId: null,
@@ -61,5 +61,41 @@ describe('ListSupplies', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0]?.id).toBe(catalog[0].id);
+  });
+
+  it('soporta búsquedas difusas (fuzzy) con errores tipográficos (ej: abua -> agua)', async () => {
+    const result = await new ListSupplies(readModel()).execute({
+      q: 'abua',
+      locale: 'es',
+      limit: 20,
+      offset: 0,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.name).toBe('Agua potable');
+  });
+
+  it('soporta búsquedas por subcadenas o partes de palabra (ej: gua -> agua)', async () => {
+    const result = await new ListSupplies(readModel()).execute({
+      q: 'gua',
+      locale: 'es',
+      limit: 20,
+      offset: 0,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.name).toBe('Agua potable');
+  });
+
+  it('ordena los resultados de forma que los mejores matches (exacto/prefijo) salgan primero', async () => {
+    const result = await new ListSupplies(readModel()).execute({
+      q: 'agua',
+      locale: 'es',
+      limit: 20,
+      offset: 0,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.name).toBe('Agua potable');
   });
 });

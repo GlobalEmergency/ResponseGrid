@@ -85,6 +85,7 @@ describe('GetDonationIntakeTracking', () => {
         quantity: 5,
         unit: 'l',
         category: Category.Water,
+        supplyId: null,
         presentation: null,
       },
     ]);

@@ -3,6 +3,7 @@ import { LogisticsEmergencyStatusReader } from '../domain/ports/emergency-status
 import { ShipmentContainerPort } from '../domain/ports/shipment-container-port';
 import { Shipment } from '../domain/shipment';
 import { ShipmentId } from '../domain/shipment-id';
+import { formatShipmentCode } from '../domain/shipment-code';
 import { SupplyLine, SupplyLineProps } from '../../supplies/domain/supply-line';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
@@ -17,6 +18,8 @@ export interface CreateShipmentCommand {
   items: SupplyLineProps[];
   /** Trackable containers (#140) loaded onto the expedition. May be empty. */
   containerIds: string[];
+  /** Optional logistics hub this expedition transits (#150). Defaults to null. */
+  hubId?: string | null;
   manifest: string | null;
 }
 
@@ -36,13 +39,18 @@ export class CreateShipment {
       );
     }
 
+    const emergencyId = EmergencyId.fromString(cmd.emergencyId);
+    const code = formatShipmentCode(await this.repo.nextSequence(emergencyId));
+
     const shipment = Shipment.create({
       id: ShipmentId.create(),
-      emergencyId: EmergencyId.fromString(cmd.emergencyId),
+      code,
+      emergencyId,
       originResourceId: cmd.originResourceId,
       destinationResourceId: cmd.destinationResourceId,
       items: cmd.items.map((i) => SupplyLine.create(i)),
       containerIds: cmd.containerIds,
+      hubId: cmd.hubId ?? null,
       manifest: cmd.manifest,
     });
 

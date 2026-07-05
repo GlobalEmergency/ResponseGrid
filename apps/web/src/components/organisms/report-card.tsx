@@ -7,17 +7,16 @@ import type { ReviewReportResult } from '@/app/e/[slug]/reportar/actions';
 import {
   editReport,
   discardReport,
-} from '@/app/e/[slug]/coordinacion/actions';
+} from '@/app/emergencies/[slug]/manage/actions';
 import { Button } from '@/components/atoms/button';
 import {
   ValidationActions,
   type EditField,
 } from '@/components/organisms/validation-actions';
 import { LocalDate } from '@/components/atoms/local-date';
+import { fileSrc } from '@/lib/file-src';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
-
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/$/, '');
 
 /** Report timestamp format: "05 jun, 14:32" — preserved from the original. */
 const REPORT_DATE_OPTS: Intl.DateTimeFormatOptions = {
@@ -148,11 +147,7 @@ export function ReportCard({ report, slug }: ReportCardProps) {
       {report.photoUrls != null && report.photoUrls.length > 0 && (
         <ul className="flex flex-wrap gap-2" aria-label={tc.report_photos_label}>
           {report.photoUrls.filter((u) => u !== '').map((urlOrKey) => {
-            const src = urlOrKey.startsWith('http')
-              ? urlOrKey
-              : urlOrKey.startsWith('/')
-                ? `${API_BASE}${urlOrKey}`
-                : `${API_BASE}/files/${urlOrKey}`;
+            const src = fileSrc(urlOrKey);
             return (
               <li key={urlOrKey}>
                 <a

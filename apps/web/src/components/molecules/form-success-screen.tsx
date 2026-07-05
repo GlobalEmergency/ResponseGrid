@@ -2,12 +2,19 @@
 
 import Link from 'next/link';
 
+interface SuccessLink {
+  href: string;
+  label: string;
+}
+
 interface FormSuccessScreenProps {
   message: string;
   primaryHref: string;
   primaryLabel: string;
   secondaryHref: string;
   secondaryLabel: string;
+  /** Optional extra shortcuts rendered above the two default buttons. */
+  extraLinks?: readonly SuccessLink[];
 }
 
 export function FormSuccessScreen({
@@ -16,6 +23,7 @@ export function FormSuccessScreen({
   primaryLabel,
   secondaryHref,
   secondaryLabel,
+  extraLinks = [],
 }: FormSuccessScreenProps) {
   return (
     <section
@@ -27,6 +35,15 @@ export function FormSuccessScreen({
         {message}
       </p>
       <div className="flex flex-col gap-3">
+        {extraLinks.map(({ href, label }) => (
+          <Link
+            key={href}
+            href={href}
+            className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-ink bg-white border-2 border-navy rounded-lg hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors"
+          >
+            {label}
+          </Link>
+        ))}
         <Link
           href={primaryHref}
           className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-white bg-navy rounded-lg hover:bg-navy-700 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors"

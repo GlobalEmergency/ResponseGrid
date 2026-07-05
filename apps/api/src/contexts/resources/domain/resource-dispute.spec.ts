@@ -1,11 +1,7 @@
 import { Resource } from './resource';
 import { ResourceId } from './resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import {
-  ResourceType,
-  ResourceStage,
-  VerificationLevel,
-} from './resource-enums';
+import { ResourceType, VerificationLevel } from './resource-enums';
 import { Location } from '../../../shared/domain/location';
 import { ResourceNotDisputableError } from './resource-errors';
 
@@ -16,7 +12,6 @@ const make = (): Resource =>
     id: ResourceId.create(),
     emergencyId: EmergencyId.fromString(EM),
     type: ResourceType.CollectionPoint,
-    stage: ResourceStage.Origin,
     name: 'Acopio Centro',
     location: Location.create({
       address: 'Caracas',

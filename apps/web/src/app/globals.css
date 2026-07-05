@@ -16,6 +16,8 @@
   --color-navy-700: #13315c;
   --color-accent: #e8740e;
   --color-accent-600: #c85f08;
+  --color-accent-2: #1d9e75;
+  --color-accent-2-600: #0f6e56;
 
   /* Warm neutral surfaces & ink */
   --color-surface: #fbfaf8;
@@ -62,4 +64,10 @@
 
 body {
   font-family: var(--font-sans);
+}
+
+/* Keep Leaflet's panes/controls from painting over the sticky AppBar. */
+.leaflet-container {
+  isolation: isolate;
+  z-index: 0;
 }

@@ -77,7 +77,7 @@ export class Supply {
     const code = normalizeRequiredText(props.code, 'Supply code');
     if (!/^[A-Z]{3}-\d{4}$/.test(code)) {
       throw new SupplyValidationError(
-        'Supply code must match the XXX-NNNN format',
+        'Supply code must match the XXX-NNNN format (3-letter uppercase prefix and 4 digits)',
       );
     }
     const name = normalizeRequiredText(props.name, 'Supply name');
@@ -135,4 +135,85 @@ export class Supply {
       registrationNotes: this.registrationNotes,
     };
   }
+
+  /**
+   * Devuelve un nuevo `Supply` con los campos indicados sobreescritos,
+   * re-aplicando las invariantes de `create`. El agregado es inmutable: la
+   * gestión (edición admin, #222) produce instancias nuevas en vez de mutar.
+   * `id` y `code` no son editables (la identidad y el código asignado se
+   * conservan).
+   */
+  private withChanges(
+    changes: Partial<Omit<SupplyProps, 'id' | 'code'>>,
+  ): Supply {
+    return Supply.create({ ...this.toSnapshot(), ...changes });
+  }
+
+  rename(name: string): Supply {
+    return this.withChanges({ name });
+  }
+
+  recategorize(categorySlug: string): Supply {
+    return this.withChanges({ categorySlug });
+  }
+
+  setDefaultUnit(defaultUnit: string | null): Supply {
+    return this.withChanges({ defaultUnit });
+  }
+
+  setAttributes(attributes: Record<string, unknown>): Supply {
+    return this.withChanges({ attributes });
+  }
+
+  setRegistrationNotes(registrationNotes: string | null): Supply {
+    return this.withChanges({ registrationNotes });
+  }
+
+  setVariantOf(variantOfId: string | null): Supply {
+    return this.withChanges({ variantOfId });
+  }
+
+  archive(): Supply {
+    return this.withChanges({ status: 'archived' });
+  }
+
+  restore(): Supply {
+    return this.withChanges({ status: 'active' });
+  }
+
+  /**
+   * Actualiza el código de este insumo reemplazando el prefijo actual por uno nuevo,
+   * manteniendo el número secuencial intacto.
+   */
+  updateCodePrefix(newPrefix: string): Supply {
+    const parts = this.code.split('-');
+    const sequence = parts[1] ?? '0000';
+    const newCode = `${newPrefix}-${sequence}`;
+    if (newCode === this.code) {
+      return this;
+    }
+    return Supply.create({
+      ...this.toSnapshot(),
+      code: newCode,
+    });
+  }
+}
+
+/**
+ * Formatea un número de secuencia como código canónico `XXX-NNNN` (4 dígitos,
+ * la invariante que valida `Supply`). Puro: la secuencia la asigna el
+ * repositorio (infraestructura); esto sólo da formato.
+ */
+export function formatSupplyCode(prefix: string, sequence: number): string {
+  if (!/^[A-Z]{3}$/.test(prefix)) {
+    throw new SupplyValidationError(
+      'Supply code prefix must be a 3-letter uppercase string',
+    );
+  }
+  if (!Number.isInteger(sequence) || sequence < 1) {
+    throw new SupplyValidationError(
+      'Supply code sequence must be a positive integer',
+    );
+  }
+  return `${prefix}-${String(sequence).padStart(4, '0')}`;
 }

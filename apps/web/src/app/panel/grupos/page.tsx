@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { getToken, authHeaders } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { fetchMyGroups } from './actions';
 import { CreateGroupForm } from './create-group-form';
@@ -18,10 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function GruposPage() {
-  const token = await getToken();
-  if (!token) {
-    redirect('/login?next=/panel/grupos');
-  }
+  const token = await requireSession('/panel/grupos');
 
   const [{ data: me, response: meRes }, { data: roles }, myGroups] =
     await Promise.all([
@@ -31,7 +27,7 @@ export default async function GruposPage() {
     ]);
 
   if (meRes.status === 401 || !me) {
-    redirect('/login?next=/panel/grupos');
+    return redirectToLogin('/panel/grupos');
   }
 
   const roleMap = new Map((roles ?? []).map((r) => [r.id, r]));

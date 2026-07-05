@@ -4,8 +4,16 @@
 # Safe to re-run on every `docker compose up`.
 set -e
 
+# Connection + migrations dir default to the prod container layout, but are
+# overridable so the exact same script can be smoke-tested in CI against a
+# port-mapped Postgres (see the "Migrate smoke test" job). Prod sets none of
+# these, so the defaults below preserve the original behaviour.
+PGHOST="${PGHOST:-postgres}"
+PGPORT="${PGPORT:-5432}"
+MIGRATIONS_DIR="${MIGRATIONS_DIR:-/migrations}"
+
 export PGPASSWORD="$POSTGRES_PASSWORD"
-PSQL="psql -h postgres -U $POSTGRES_USER -d $POSTGRES_DB -v ON_ERROR_STOP=1"
+PSQL="psql -h $PGHOST -p $PGPORT -U $POSTGRES_USER -d $POSTGRES_DB -v ON_ERROR_STOP=1"
 
 # Wait for Postgres (compose healthcheck already gates us, this is a belt-and-braces retry).
 i=0
@@ -17,17 +25,25 @@ done
 
 $PSQL -c "CREATE TABLE IF NOT EXISTS _migrations (name text PRIMARY KEY, applied_at timestamptz DEFAULT now());"
 
-for f in /migrations/*.sql; do
+for f in "$MIGRATIONS_DIR"/*.sql; do
   [ -e "$f" ] || continue
   name=$(basename "$f")
-  applied=$($PSQL -tAc "SELECT 1 FROM _migrations WHERE name = '$name'")
+  # Pass the filename as a bound psql variable and quote it with :'mname' so a
+  # filename containing a quote can neither break the statement nor inject SQL
+  # into the _migrations table (defense-in-depth; filenames are repo-controlled).
+  # NOTE: psql only performs :'var' interpolation for SQL read from stdin/-f,
+  # NOT for -c strings, so the SQL is piped in (a -c form errors with
+  # "syntax error at or near \":\"").
+  applied=$(printf '%s' "SELECT 1 FROM _migrations WHERE name = :'mname';" \
+    | $PSQL -v mname="$name" -tA)
   if [ "$applied" = "1" ]; then
     echo "skip   $name"
     continue
   fi
   echo "apply  $name"
   $PSQL -f "$f"
-  $PSQL -c "INSERT INTO _migrations (name) VALUES ('$name');"
+  printf '%s' "INSERT INTO _migrations (name) VALUES (:'mname');" \
+    | $PSQL -v mname="$name"
 done
 
 echo "migrations up to date"

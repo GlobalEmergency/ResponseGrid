@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { HelpActionRow } from '@/components/molecules/help-action-row';
 import { getT } from '@/i18n/server';
 
@@ -49,12 +50,8 @@ export default async function DonarSelectorPage({ params }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <PageHeaderBand
-          backHref={`/e/${slug}`}
-          backLabel={t.common.back_to_emergency}
-          title={td.choose_title}
-          subtitle={td.choose_subtitle}
-        />
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <PageHeading title={td.choose_title} subtitle={td.choose_subtitle} />
         <div className="flex flex-col gap-3 px-4 pb-12 pt-6">
           <HelpActionRow
             href={`/e/${slug}/pre-registro`}

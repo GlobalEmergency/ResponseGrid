@@ -5,9 +5,9 @@ import {
   verifyAndPublish,
   editResource,
   discardResource,
-} from '@/app/e/[slug]/coordinacion/actions';
+} from '@/app/emergencies/[slug]/manage/actions';
 import type { components } from '@reliefhub/api-client';
-import type { ActionResult } from '@/app/e/[slug]/coordinacion/actions';
+import type { ActionResult } from '@/app/emergencies/[slug]/manage/actions';
 import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { VerificationBadge } from '@/components/atoms/verification-badge';
@@ -52,12 +52,6 @@ export function ResourceDetail({
     transport: tc.resource_type_transport,
     supplier: tc.resource_type_supplier,
     venue: tc.resource_type_venue,
-  };
-
-  const STAGE_LABELS: Record<ResourceView['stage'], string> = {
-    origin: tc.resource_stage_origin,
-    intermediate: tc.resource_stage_intermediate,
-    destination: tc.resource_stage_destination,
   };
 
   const PUBLIC_STATUS_LABELS: Record<ResourceView['publicStatus'], string> = {
@@ -153,10 +147,6 @@ export function ResourceDetail({
         <DetailField
           label={tc.detail_field_type}
           value={TYPE_LABELS[resource.type]}
-        />
-        <DetailField
-          label={tc.detail_field_stage}
-          value={STAGE_LABELS[resource.stage]}
         />
         <DetailField label={tc.detail_field_accepts} value={accepts} />
         <DetailField

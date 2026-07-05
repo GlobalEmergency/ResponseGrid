@@ -18,6 +18,7 @@ const CAPACITY = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
 const CARRIER_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const CONTAINER_A = '11111111-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const CONTAINER_B = '22222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+const HUB = '77777777-7777-4777-8777-777777777777';
 
 const CARRIER: CarrierPrincipal = {
   type: CarrierType.Volunteer,
@@ -39,16 +40,19 @@ function makeShipment(
     containerIds: string[];
     originResourceId: string;
     destinationResourceId: string;
+    hubId: string | null;
     manifest: string | null;
   }>,
 ): Shipment {
   return Shipment.create({
     id: ShipmentId.create(),
+    code: 'EXP-0001',
     emergencyId: EmergencyId.fromString(EM),
     originResourceId: overrides?.originResourceId ?? ORIGIN,
     destinationResourceId: overrides?.destinationResourceId ?? DEST,
     items: overrides?.items ?? [line('Agua', 5)],
     containerIds: overrides?.containerIds ?? [],
+    hubId: overrides?.hubId ?? null,
     manifest:
       overrides && 'manifest' in overrides
         ? overrides.manifest
@@ -63,7 +67,19 @@ describe('Shipment aggregate — creation', () => {
     expect(s.carrier).toBeNull();
     expect(s.assignedCapacityId).toBeNull();
     expect(s.containerIds).toEqual([]);
+    expect(s.hubId).toBeNull();
     expect(s.pullDomainEvents()).toHaveLength(0);
+  });
+
+  it('creates with a logistics hub it transits (#150)', () => {
+    const s = makeShipment({ hubId: HUB });
+    expect(s.hubId).toBe(HUB);
+  });
+
+  it('throws when the hub id is not a uuid', () => {
+    expect(() => makeShipment({ hubId: 'not-a-uuid' })).toThrow(
+      InvalidShipmentRouteError,
+    );
   });
 
   it('can be created with containers only (no loose lines)', () => {
@@ -258,6 +274,7 @@ describe('Shipment aggregate — snapshot round-trip', () => {
         line('varios'),
       ],
       containerIds: [CONTAINER_A, CONTAINER_B],
+      hubId: HUB,
       manifest: null,
     });
     const restored = Shipment.fromSnapshot(s.toSnapshot());
@@ -271,6 +288,7 @@ describe('Shipment aggregate — snapshot round-trip', () => {
     expect(restored.containerIds).toEqual([CONTAINER_A, CONTAINER_B]);
     expect(restored.assignedCapacityId).toBeNull();
     expect(restored.carrier).toBeNull();
+    expect(restored.hubId).toBe(HUB);
     expect(restored.manifest).toBeNull();
     expect(restored.status).toBe(ShipmentStatus.Planned);
   });

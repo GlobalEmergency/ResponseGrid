@@ -5,11 +5,7 @@ import { PublishResource } from './publish-resource';
 import { InMemoryResourceRepository } from '../infrastructure/in-memory-resource.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { ResourceId } from '../domain/resource-id';
-import {
-  ResourceType,
-  ResourceStage,
-  PublicStatus,
-} from '../domain/resource-enums';
+import { ResourceType, PublicStatus } from '../domain/resource-enums';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { ResourceMembershipReader } from '../domain/ports/membership-reader';
 import { ResourceNotFoundError } from './resource-not-found.error';
@@ -23,6 +19,7 @@ const EM = '11111111-1111-4111-8111-111111111111';
 const OWNER_ID = 'owner-user-0000-0000-000000000000';
 const COORD_ID = 'coord-user-0000-0000-000000000000';
 const THIRD_ID = 'third-user-0000-0000-000000000000';
+const MANAGER_ID = 'manager-user-0000-0000-000000000000';
 const baseLocation = {
   address: 'Calle Test 1, Madrid',
   latitude: 40.4168,
@@ -54,7 +51,6 @@ async function makePublishedResource(
   const { id } = await new RegisterResource(repo, bus, activeReader).execute({
     emergencyId: EM,
     type: ResourceType.CollectionPoint,
-    stage: ResourceStage.Origin,
     name: 'Punto Test',
     location: baseLocation,
     ownerUserId: OWNER_ID,
@@ -99,6 +95,28 @@ describe('UpdateResourcePublicStatus', () => {
     expect(found?.publicStatus).toBe(PublicStatus.Paused);
   });
 
+  it('point manager (entity-scoped grant, not owner/coordinator) can change status (#316)', async () => {
+    const repo = new InMemoryResourceRepository();
+    const bus = new FakeEventBus();
+    const id = await makePublishedResource(repo, bus);
+
+    await new UpdateResourcePublicStatus(repo, noMembership).execute({
+      resourceId: id,
+      targetStatus: PublicStatus.Saturated,
+      requesterUserId: MANAGER_ID,
+      grants: [
+        {
+          roleId: 'point_manager',
+          scope: { type: 'entity', entityType: 'resource', id },
+          expiresAt: null,
+        },
+      ],
+    });
+
+    const found = await repo.findById(ResourceId.fromString(id));
+    expect(found?.publicStatus).toBe(PublicStatus.Saturated);
+  });
+
   it('third-party user (not owner, not coordinator) → UnauthorizedStatusChangeError (→ 403)', async () => {
     const repo = new InMemoryResourceRepository();
     const bus = new FakeEventBus();
@@ -132,7 +150,6 @@ describe('UpdateResourcePublicStatus', () => {
     const { id } = await new RegisterResource(repo, bus, activeReader).execute({
       emergencyId: EM,
       type: ResourceType.Warehouse,
-      stage: ResourceStage.Origin,
       name: 'Hidden Warehouse',
       location: baseLocation,
       ownerUserId: OWNER_ID,

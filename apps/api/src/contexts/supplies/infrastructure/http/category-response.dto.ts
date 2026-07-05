@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import type { CategoryKind } from '../../domain/category-definition';
 
 /**
  * A category of the shared taxonomy (slug + localized labels + hierarchy).
@@ -6,16 +7,16 @@ import { ApiProperty } from '@nestjs/swagger';
  */
 export class CategoryDto {
   @ApiProperty({
+    example: 'medicines',
+    description: 'Canonical category slug (stable identifier)',
+  })
+  slug!: string;
+
+  @ApiProperty({
     example: 'Medicamentos',
-    description: 'Localized category label',
+    description: 'Etiqueta resuelta en el locale pedido (fallback a `es`)',
   })
   label!: string;
-
-  @ApiProperty({ example: 'Medicamentos' })
-  labelEs!: string;
-
-  @ApiProperty({ example: 'Medicines' })
-  labelEn!: string;
 
   @ApiProperty({
     example: 'medical',
@@ -30,4 +31,21 @@ export class CategoryDto {
 
   @ApiProperty({ example: 41, description: 'Display sort order' })
   sort!: number;
+
+  @ApiProperty({
+    example: 'MED',
+    nullable: true,
+    type: String,
+    description:
+      'Unique 3-letter prefix for supplies in this category, or null if inherited',
+  })
+  codePrefix!: string | null;
+
+  @ApiProperty({
+    enum: ['material', 'personnel'],
+    example: 'material',
+    description:
+      'Whether the category is aid material or personnel. Personnel (medical_personnel) is excluded from material pickers.',
+  })
+  kind!: CategoryKind;
 }

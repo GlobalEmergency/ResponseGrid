@@ -8,6 +8,7 @@ import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { LocalDate } from '@/components/atoms/local-date';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { fileSrc } from '@/lib/file-src';
 import { useLocale } from '@/i18n/locale-context';
 import { getMessages } from '@/i18n';
 import { formatDate } from '@/lib/format-date';
@@ -16,7 +17,7 @@ import {
   getValidityReports,
   resolveDispute,
   type DisputeResolution,
-} from '@/app/e/[slug]/coordinacion/actions';
+} from '@/app/emergencies/[slug]/manage/actions';
 
 type DisputedResource = components['schemas']['DisputedResourceDto'];
 type ValidityReport = components['schemas']['ValidityReportDto'];
@@ -210,7 +211,7 @@ function DisputedCard({
                     {report.photoUrls.map((url, i) => (
                       <a
                         key={url}
-                        href={url}
+                        href={fileSrc(url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-info underline"

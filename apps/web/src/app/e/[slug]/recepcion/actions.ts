@@ -2,8 +2,11 @@
 
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
-import { getToken, authHeaders, clearToken } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { getT } from '@/i18n/server';
+import { parseSupplyLines } from '@/lib/supply-lines';
+import { getCategories } from '@/adapters/get-categories';
+import { isMaterialCategory } from '@/domain/supplies/category';
 
 export type ReceptionActionState =
   | { status: 'idle' }
@@ -27,10 +30,9 @@ export async function submitReception(
   _prev: ReceptionActionState,
   formData: FormData,
 ): Promise<ReceptionActionState> {
-  const token = await getToken();
-  if (!token) redirect(`/login?next=/e/${slug}/recepcion`);
+  const token = await requireSession(`/e/${slug}/recepcion`);
 
-  const { t } = await getT();
+  const { t, locale } = await getT();
   const tr = t.recepcion;
 
   const intent = formData.get('intent');
@@ -44,6 +46,35 @@ export async function submitReception(
       ? rawNotes.trim()
       : null;
 
+  // Received lines edited at the desk (#129): only sent with `receive`. Reuse
+  // the shared parser with material-only category validation; an empty/absent
+  // list means "no edit" → keep the declared lines (items stays undefined).
+  let items: ReturnType<typeof parseSupplyLines> | undefined;
+  let adjustmentReason: string | null = null;
+  if (intent === 'receive') {
+    const validMaterialCategories = new Set(
+      (await getCategories(locale)).filter(isMaterialCategory).map((c) => c.slug),
+    );
+    items = parseSupplyLines(formData.get('items'), {
+      isValidCategory: (c) => validMaterialCategories.has(c),
+      allowEmpty: true,
+    });
+    if (items === null) {
+      return { status: 'error', message: tr.err_action_failed };
+    }
+    const rawReason = formData.get('adjustmentReason');
+    adjustmentReason =
+      typeof rawReason === 'string' && rawReason.trim() !== ''
+        ? rawReason.trim()
+        : null;
+  }
+
+  const rawEvidence = formData.get('evidenceFileKey');
+  const evidenceFileKey =
+    typeof rawEvidence === 'string' && rawEvidence.trim() !== ''
+      ? rawEvidence.trim()
+      : null;
+
   // Literal paths (not a computed union) keep the typed client happy.
   const params = { path: { intakeId } } as const;
   const result =
@@ -51,7 +82,13 @@ export async function submitReception(
       ? await api.POST('/donation-intakes/{intakeId}/receive', {
           params,
           headers: authHeaders(token),
-          body: { volunteerNotes },
+          body: {
+            volunteerNotes,
+            // Empty → keep the declared lines (undefined omits the field).
+            items: items && items.length > 0 ? items : undefined,
+            adjustmentReason,
+            evidenceFileKey,
+          },
         })
       : intent === 'reject'
         ? await api.POST('/donation-intakes/{intakeId}/reject', {
@@ -66,11 +103,14 @@ export async function submitReception(
           });
 
   if (result.response.status === 401) {
-    await clearToken();
-    redirect(`/login?next=/e/${slug}/recepcion`);
+    return redirectToLogin(`/e/${slug}/recepcion`);
   }
   if (result.response.status === 409) {
     return { status: 'error', message: tr.err_already_processed };
+  }
+  if (result.response.status === 400) {
+    // The only 400 on receive is the missing adjustment reason (#129).
+    return { status: 'error', message: tr.err_reason_required };
   }
   if (!result.response.ok) {
     return { status: 'error', message: tr.err_action_failed };

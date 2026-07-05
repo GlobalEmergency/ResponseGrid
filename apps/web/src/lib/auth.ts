@@ -1,6 +1,14 @@
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { loginHref, sessionClearHref } from './safe-next';
+import { SESSION_COOKIE } from './session-cookie';
 
-const COOKIE_NAME = 'rh_token';
+// Re-exported so server callers can pull the login-redirect contract and the
+// session gate from one place (`@/lib/auth`); defined in `safe-next` because it
+// is pure and must stay importable from client components too.
+export { loginHref };
+
+const COOKIE_NAME = SESSION_COOKIE;
 
 /**
  * Session lifetime in seconds. Defaults to 8 hours; override with SESSION_MAX_AGE_SECONDS
@@ -27,21 +35,51 @@ export async function setToken(token: string): Promise<void> {
     httpOnly: true,
     sameSite: 'lax',
     path: '/',
-    // Secure only when explicitly enabled (set COOKIE_SECURE=true behind HTTPS).
-    // Tying it to NODE_ENV breaks sessions when a production build is served over
-    // plain HTTP (local runs, reverse proxies that don't forward HTTPS).
-    secure: process.env.COOKIE_SECURE === 'true',
+    // Secure by default in production so the session JWT is never sent over plain
+    // HTTP (fail-safe). A production deployment that genuinely terminates HTTPS
+    // upstream and serves the app over plain HTTP can opt out with
+    // COOKIE_SECURE=false; outside production it stays off so local/proxy runs work.
+    secure:
+      process.env.NODE_ENV === 'production' &&
+      process.env.COOKIE_SECURE !== 'false',
     maxAge: SESSION_MAX_AGE_SECONDS,
   });
 }
 
 /**
- * Removes the auth token cookie (logout).
- * Must only be called from Server Actions.
+ * Removes the auth token cookie. Best-effort: Next.js only allows cookie
+ * mutation in Server Actions and Route Handlers, so when this runs during
+ * Server Component render (a fetch helper reacting to a 401 from an expired
+ * token) the deletion is skipped instead of crashing the render.
+ *
+ * Returns whether the cookie was actually deleted, so {@link redirectToLogin}
+ * — the only consumer, including logout — can route the real cleanup through
+ * `GET /api/session/clear` (the Route Handler that CAN delete it) when not.
  */
-export async function clearToken(): Promise<void> {
+async function clearToken(): Promise<boolean> {
   const jar = await cookies();
-  jar.delete(COOKIE_NAME);
+  try {
+    jar.delete(COOKIE_NAME);
+    return true;
+  } catch {
+    // Server Component render: cookies are read-only here.
+    return false;
+  }
+}
+
+/**
+ * Single owner of the "session is invalid → go to login" move, safe from both
+ * Server Actions and Server Component render. Deletes the session cookie when
+ * the runtime allows it and redirects to login preserving `next`; when it
+ * can't (render), it redirects through `GET /api/session/clear` so the stale
+ * cookie is deleted for real instead of lingering until its maxAge.
+ *
+ * Use this instead of hand-writing `await clearToken(); redirect(loginHref(…))`
+ * (issue #312 centralised that pattern).
+ */
+export async function redirectToLogin(next?: string | null): Promise<never> {
+  const cleared = await clearToken();
+  redirect(cleared ? loginHref(next) : sessionClearHref(next));
 }
 
 /**
@@ -49,4 +87,20 @@ export async function clearToken(): Promise<void> {
  */
 export function authHeaders(token: string): { Authorization: string } {
   return { Authorization: `Bearer ${token}` };
+}
+
+/**
+ * Coarse authentication gate for Server Components and Server Actions: returns
+ * the session token, or redirects to login — preserving `next` — when there is
+ * no session cookie.
+ *
+ * It only checks for the presence of the cookie; it does NOT validate the token
+ * against the API. Callers that additionally call `/auth/me` still handle a 401
+ * from that call — via {@link redirectToLogin}, so the stale cookie is also
+ * cleaned up.
+ */
+export async function requireSession(next?: string | null): Promise<string> {
+  const token = await getToken();
+  if (!token) redirect(loginHref(next));
+  return token;
 }

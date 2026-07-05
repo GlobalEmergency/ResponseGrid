@@ -8,12 +8,6 @@ export enum ResourceType {
   Venue = 'venue',
 }
 
-export enum ResourceStage {
-  Origin = 'origin',
-  Intermediate = 'intermediate',
-  Destination = 'destination',
-}
-
 export enum VerificationLevel {
   Unverified = 'unverified',
   Verified = 'verified',

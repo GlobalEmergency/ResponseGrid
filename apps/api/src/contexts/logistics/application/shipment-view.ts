@@ -11,6 +11,7 @@ export interface ShipmentItemView {
 
 export interface ShipmentView {
   id: string;
+  code: string;
   emergencyId: string;
   originResourceId: string;
   destinationResourceId: string;
@@ -19,6 +20,7 @@ export interface ShipmentView {
   assignedCapacityId: string | null;
   carrierType: string | null;
   carrierId: string | null;
+  hubId: string | null;
   manifest: string | null;
   status: string;
   createdAt: string;
@@ -39,6 +41,7 @@ export function toShipmentView(s: Shipment): ShipmentView {
   const snap = s.toSnapshot();
   return {
     id: snap.id,
+    code: snap.code,
     emergencyId: snap.emergencyId,
     originResourceId: snap.originResourceId,
     destinationResourceId: snap.destinationResourceId,
@@ -47,6 +50,7 @@ export function toShipmentView(s: Shipment): ShipmentView {
     assignedCapacityId: snap.assignedCapacityId,
     carrierType: snap.carrierType,
     carrierId: snap.carrierId,
+    hubId: snap.hubId,
     manifest: snap.manifest,
     status: snap.status,
     createdAt: snap.createdAt.toISOString(),

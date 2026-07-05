@@ -89,7 +89,9 @@ describe('GetPublicNeeds', () => {
 
     const result = await getPublicNeeds.execute({ emergencyId: EM });
     expect(result[0].description).toBe('Urgent water need');
-    expect(result[0].location.address).toBe('Plaza Bolívar, Caracas');
+    // Individual requester → Approximate sensitivity → the street line is
+    // coarsened to the locality only (privacy; the exact address must not leak).
+    expect(result[0].location.address).toBe('Caracas');
     expect(result[0].items).toHaveLength(2);
   });
 

@@ -6,7 +6,7 @@ import { InMemoryResourceRepository } from '../infrastructure/in-memory-resource
 import { InMemoryResourceValidityReportRepository } from '../infrastructure/in-memory-resource-validity-report.repository';
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { ResourceId } from '../domain/resource-id';
-import { ResourceType, ResourceStage } from '../domain/resource-enums';
+import { ResourceType } from '../domain/resource-enums';
 import { ValidityReason } from '../domain/resource-validity-report';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { OrganizationAccreditationReader } from '../domain/ports/organization-accreditation-reader';
@@ -44,7 +44,6 @@ describe('ReportResourceValidity', () => {
     ).execute({
       emergencyId: EM,
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name,
       description: null,
       location: { address: 'Caracas', latitude: 10.48, longitude: -66.9 },
@@ -61,8 +60,18 @@ describe('ReportResourceValidity', () => {
   const useCase = (
     threshold?: number,
     cooldownMs?: number,
+    emergencyThresholds?: {
+      getThreshold: (id: string) => Promise<number | null>;
+    },
   ): ReportResourceValidity =>
-    new ReportResourceValidity(resources, reports, bus, threshold, cooldownMs);
+    new ReportResourceValidity(
+      resources,
+      reports,
+      bus,
+      threshold,
+      cooldownMs,
+      emergencyThresholds,
+    );
 
   const cmd = (resourceId: string, reporterUserId: string) => ({
     resourceId,
@@ -168,7 +177,6 @@ describe('ReportResourceValidity', () => {
     ).execute({
       emergencyId: EM,
       type: ResourceType.CollectionPoint,
-      stage: ResourceStage.Origin,
       name: 'Oculto',
       description: null,
       location: { address: 'Caracas', latitude: 10.48, longitude: -66.9 },
@@ -195,5 +203,29 @@ describe('ReportResourceValidity', () => {
     expect(result.disputed).toBe(false);
     r = await resources.findById(ResourceId.fromString(id));
     expect(r!.disputed).toBe(false);
+  });
+
+  it('usa el umbral por emergencia cuando está configurado', async () => {
+    const id = await seedPublished();
+    // Umbral de 2 en vez del global de 3
+    const thresholdReader = {
+      getThreshold: () => Promise.resolve(2 as number | null),
+    };
+    const rep = useCase(3, undefined, thresholdReader);
+    await rep.execute(cmd(id, 'user-1'));
+    const res = await rep.execute(cmd(id, 'user-2'));
+    expect(res.disputed).toBe(true);
+  });
+
+  it('usa el umbral global cuando el umbral por emergencia es null', async () => {
+    const id = await seedPublished();
+    const thresholdReader = {
+      getThreshold: () => Promise.resolve(null as number | null),
+    };
+    const rep = useCase(3, undefined, thresholdReader);
+    await rep.execute(cmd(id, 'user-1'));
+    await rep.execute(cmd(id, 'user-2'));
+    const res = await rep.execute(cmd(id, 'user-3'));
+    expect(res.disputed).toBe(true);
   });
 });

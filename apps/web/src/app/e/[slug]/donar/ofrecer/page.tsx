@@ -1,15 +1,18 @@
 import type { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { getToken } from '@/lib/auth';
+import { requireSession } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { OrgSelector } from '@/components/molecules/org-selector';
 import { LocationPicker } from '@/components/organisms/location-picker';
 import { submitOffer } from './actions';
 import { DonarForm } from './donar-form';
-import { PageHeaderBand } from '@/components/molecules/page-header-band';
+import { AppBar } from '@/components/organisms/app-bar';
 import { Card } from '@/components/atoms/card';
+import { PageHeading } from '@/components/atoms/page-heading';
 import { getT } from '@/i18n/server';
+import { getCategories } from '@/adapters/get-categories';
+import { isMaterialCategory } from '@/domain/supplies/category';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -34,17 +37,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function DonarPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
-  const { t } = await getT();
+  const { t, locale } = await getT();
 
-  const token = await getToken();
-  if (!token) {
-    redirect(`/login?next=/e/${slug}/donar/ofrecer`);
-  }
+  await requireSession(`/e/${slug}/donar/ofrecer`);
 
   const emergency = await getEmergencyBySlug(slug);
   if (!emergency) {
     notFound();
   }
+
+  const categories = (await getCategories(locale)).filter(isMaterialCategory);
 
   const rawNeedId =
     typeof resolvedSearchParams.needId === 'string'
@@ -66,14 +68,13 @@ export default async function DonarPage({ params, searchParams }: Props) {
   const targetNeedId =
     targetNeedTitle !== undefined ? rawNeedId : undefined;
 
-  const boundAction = submitOffer.bind(null, emergency.id);
+  const boundAction = submitOffer.bind(null, slug, emergency.id);
 
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <PageHeaderBand
-          backHref={`/e/${slug}`}
-          backLabel={t.common.back_to_emergency}
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <PageHeading
           title={t.donar.page_title}
           subtitle={t.donar.page_subtitle.replace('{emergencyName}', emergency.name)}
         />
@@ -88,6 +89,7 @@ export default async function DonarPage({ params, searchParams }: Props) {
               orgSelector={<OrgSelector />}
               t={t.donar}
               backToEmergencyLabel={t.common.back_to_emergency}
+              categories={categories}
             />
           </Card>
         </div>

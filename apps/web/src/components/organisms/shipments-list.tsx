@@ -99,9 +99,14 @@ export function ShipmentsList({
                 aria-label={tc.ship_drawer_open.replace('{route}', route)}
               >
                 <div className="flex w-full items-start justify-between gap-3">
-                  <span className="text-base font-bold leading-tight text-ink break-words">
-                    {route}
-                  </span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="font-display text-sm font-bold tracking-widest text-navy break-all">
+                      {shipment.code}
+                    </span>
+                    <span className="text-base font-bold leading-tight text-ink break-words">
+                      {route}
+                    </span>
+                  </div>
                   <Badge variant={STATUS_BADGE[shipment.status]}>
                     {STATUS_LABELS[shipment.status]}
                   </Badge>

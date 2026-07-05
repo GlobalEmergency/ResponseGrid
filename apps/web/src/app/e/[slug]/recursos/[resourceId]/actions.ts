@@ -1,9 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { api } from "@/lib/api";
-import { authHeaders, clearToken, getToken } from "@/lib/auth";
+import { authHeaders, getToken, requireSession, redirectToLogin } from "@/lib/auth";
 
 export interface ResourceGrantView {
   id: string;
@@ -78,8 +77,7 @@ export async function grantResourceRoleAction(
   const resourceId = String(formData.get("resourceId") ?? "").trim();
   const principalInput = String(formData.get("principal") ?? "").trim();
   const roleId = String(formData.get("roleId") ?? "").trim();
-  const token = await getToken();
-  if (!token) redirect(resourcePath(slug, resourceId));
+  const token = await requireSession(resourcePath(slug, resourceId));
 
   const scopeType = String(formData.get("scopeType") ?? "").trim();
   const scopeEntityType = String(formData.get("scopeEntityType") ?? "").trim();
@@ -121,8 +119,7 @@ export async function grantResourceRoleAction(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(resourcePath(slug, resourceId));
+      return redirectToLogin(resourcePath(slug, resourceId));
     }
     if (response.status === 403) {
       return {
@@ -149,8 +146,7 @@ export async function revokeResourceGrantAction(
   slug: string,
   resourceId: string,
 ): Promise<ActionResult> {
-  const token = await getToken();
-  if (!token) redirect(resourcePath(slug, resourceId));
+  const token = await requireSession(resourcePath(slug, resourceId));
 
   const { error, response } = await api.DELETE("/grants/{id}", {
     params: { path: { id: grantId } },
@@ -159,8 +155,7 @@ export async function revokeResourceGrantAction(
 
   if (error !== undefined) {
     if (response.status === 401) {
-      await clearToken();
-      redirect(resourcePath(slug, resourceId));
+      return redirectToLogin(resourcePath(slug, resourceId));
     }
     if (response.status === 403) {
       return {

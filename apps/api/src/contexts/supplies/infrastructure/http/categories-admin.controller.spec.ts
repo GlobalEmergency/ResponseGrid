@@ -1,4 +1,3 @@
-import { BadRequestException } from '@nestjs/common';
 import { CategoriesAdminController } from './categories-admin.controller';
 import { CategoryDefinition } from '../../domain/category-definition';
 
@@ -10,6 +9,7 @@ describe('CategoriesAdminController', () => {
     parentSlug: 'food',
     vertical: 'general',
     sort: 140,
+    kind: 'material',
     archivedAt: null,
     translations: [
       { locale: 'es', label: 'Alimentos para bebé' },
@@ -69,15 +69,44 @@ describe('CategoriesAdminController', () => {
     expect(result.label).toBe('Nourriture pour bébé');
   });
 
-  it('rejects delete for core slugs', async () => {
+  // La protección de slugs núcleo ya NO vive en el controller (que solo
+  // delega): la aplica el caso de uso UpdateCategory (ver update-category.spec).
+  it('archiva vía DELETE delegando en el caso de uso (sin regla en el controller)', async () => {
+    const archived = { ...category, archivedAt: new Date().toISOString() };
+    const updateCategory = { execute: jest.fn().mockResolvedValue(archived) };
     const controller = new CategoriesAdminController(
       { execute: jest.fn() } as never,
       { execute: jest.fn() } as never,
-      { execute: jest.fn() } as never,
+      updateCategory as never,
     );
 
-    await expect(controller.delete('food')).rejects.toBeInstanceOf(
-      BadRequestException,
+    await controller.delete('baby_food');
+
+    expect(updateCategory.execute).toHaveBeenCalledWith('baby_food', {
+      archived: true,
+    });
+  });
+
+  it('restaura una categoría archivada vía PATCH con archived: false', async () => {
+    const restored: CategoryDefinition = { ...category, archivedAt: null };
+    const updateCategory = { execute: jest.fn().mockResolvedValue(restored) };
+    const controller = new CategoriesAdminController(
+      { execute: jest.fn() } as never,
+      { execute: jest.fn() } as never,
+      updateCategory as never,
     );
+
+    const result = await controller.update('baby_food', { archived: false });
+
+    expect(updateCategory.execute).toHaveBeenCalledWith('baby_food', {
+      labelEs: undefined,
+      labelEn: undefined,
+      parentSlug: undefined,
+      vertical: undefined,
+      sort: undefined,
+      archived: false,
+      translations: undefined,
+    });
+    expect(result.archivedAt).toBeNull();
   });
 });

@@ -1,9 +1,8 @@
 'use server';
 
-import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
-import { getToken, authHeaders, clearToken } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 
 type Skill = components['schemas']['RegisterVolunteerDto']['skills'][number];
@@ -42,14 +41,12 @@ function isVehicle(value: unknown): value is Vehicle {
 }
 
 export async function registerVolunteer(
+  slug: string,
   emergencyId: string,
   _prev: VolunteerActionState,
   formData: FormData,
 ): Promise<VolunteerActionState> {
-  const token = await getToken();
-  if (!token) {
-    redirect('/login');
-  }
+  const token = await requireSession(`/e/${slug}/voluntario`);
 
   const { t } = await getT();
 
@@ -106,8 +103,7 @@ export async function registerVolunteer(
   );
 
   if (response.status === 401) {
-    await clearToken();
-    redirect('/login');
+    return redirectToLogin(`/e/${slug}/voluntario`);
   }
 
   if (response.status === 409) {

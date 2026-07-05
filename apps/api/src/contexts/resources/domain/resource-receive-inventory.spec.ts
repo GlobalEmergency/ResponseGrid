@@ -3,7 +3,7 @@ import { SupplyLine } from '../../supplies/domain/supply-line';
 import { Category } from '../../supplies/domain/category';
 import { ResourceId } from './resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { ResourceType, ResourceStage } from './resource-enums';
+import { ResourceType } from './resource-enums';
 import { Location } from '../../../shared/domain/location';
 
 const make = (items: SupplyLine[] = []): Resource =>
@@ -11,7 +11,6 @@ const make = (items: SupplyLine[] = []): Resource =>
     id: ResourceId.create(),
     emergencyId: EmergencyId.fromString('11111111-1111-4111-8111-111111111111'),
     type: ResourceType.Warehouse,
-    stage: ResourceStage.Origin,
     name: 'Acopio Centro',
     location: Location.create({ address: 'X', latitude: 1, longitude: 2 }),
     ownerUserId: 'user-1',
@@ -63,6 +62,73 @@ describe('Resource.receiveInventory', () => {
     expect(r.items).toHaveLength(2);
     expect(r.items.find((i) => i.presentation === 'EV')?.quantity).toBe(8);
     expect(r.items.find((i) => i.presentation === 'ampolla')?.quantity).toBe(7);
+  });
+
+  it('keeps a new line expiresAt and supplyId (manual entry with freshness date)', () => {
+    const r = make();
+    r.receiveInventory([
+      SupplyLine.create({
+        name: 'Leche',
+        quantity: 10,
+        unit: 'l',
+        category: Category.Food,
+        supplyId: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
+        expiresAt: '2026-08-01',
+      }),
+    ]);
+    expect(r.items[0].toSnapshot()).toMatchObject({
+      supplyId: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
+      expiresAt: '2026-08-01',
+    });
+  });
+
+  it('a merge never erases the stored expiresAt and keeps the earliest date', () => {
+    const r = make([
+      SupplyLine.create({
+        name: 'Leche',
+        quantity: 10,
+        unit: 'l',
+        category: Category.Food,
+        expiresAt: '2026-07-15',
+      }),
+    ]);
+    // Incoming without a date: the owner-declared date must survive.
+    r.receiveInventory([line('Leche', 5, 'l', Category.Food)]);
+    expect(r.items[0].toSnapshot()).toMatchObject({
+      quantity: 15,
+      expiresAt: '2026-07-15',
+    });
+    // Incoming with an EARLIER date: merged stock is as fresh as its oldest batch.
+    r.receiveInventory([
+      SupplyLine.create({
+        name: 'Leche',
+        quantity: 2,
+        unit: 'l',
+        category: Category.Food,
+        expiresAt: '2026-07-01',
+      }),
+    ]);
+    expect(r.items[0].toSnapshot()).toMatchObject({
+      quantity: 17,
+      expiresAt: '2026-07-01',
+    });
+  });
+
+  it('a merge keeps the existing supplyId soft link', () => {
+    const r = make([
+      SupplyLine.create({
+        name: 'Agua',
+        quantity: 10,
+        unit: 'l',
+        category: Category.Water,
+        supplyId: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
+      }),
+    ]);
+    r.receiveInventory([line('Agua', 5, 'l')]);
+    expect(r.items[0].toSnapshot()).toMatchObject({
+      quantity: 15,
+      supplyId: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
+    });
   });
 
   it('is a no-op for an empty list', () => {

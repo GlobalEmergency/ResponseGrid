@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { clearToken, getToken } from "@/lib/auth";
+import { authHeaders, getToken } from "@/lib/auth";
 import { api } from "@/lib/api";
 import { getEmergencyBySlug } from "@/lib/emergencies";
 import { getMe, getRoles } from "@/lib/navigation-data";
@@ -9,10 +9,14 @@ import {
   resolveEmergencyAccess,
   type EmergencyAccess,
 } from "@/lib/emergency-permissions";
+import { AppBar } from "@/components/organisms/app-bar";
+import { PageHeading } from "@/components/atoms/page-heading";
 import { PublicResourceCard } from "@/components/organisms/public-resource-card";
 import { NeedCard } from "@/components/molecules/need-card";
 import { EmptyState } from "@/components/molecules/empty-state";
-import { categoryLabel, categoryColor } from "@/lib/categories";
+import { categoryColor } from "@/lib/categories";
+import { labelForCategory } from "@/domain/supplies/category";
+import { getCategoriesCached } from "@/adapters/get-categories";
 import { getT } from "@/i18n/server";
 import { ResourceGrantsPanel } from "./resource-grants-panel";
 import { fetchResourceGrants } from "./actions";
@@ -27,6 +31,7 @@ export default async function RecipientResourcePage({ params }: Props) {
   const { slug, resourceId } = await params;
   const emergency = await getEmergencyBySlug(slug);
   const { t, locale } = await getT();
+  const categories = await getCategoriesCached(locale);
 
   if (!emergency) {
     notFound();
@@ -34,13 +39,17 @@ export default async function RecipientResourcePage({ params }: Props) {
 
   const emergencyId = emergency.id;
   const isActive = emergency.status === "active";
-  const token = await getToken();
+  let token = await getToken();
   let access: EmergencyAccess | null = null;
 
   if (token !== null) {
     const [me, roles] = await Promise.all([getMe(), getRoles()]);
     if (me === null) {
-      await clearToken();
+      // Expired/invalid session on a public page: degrade to the anonymous
+      // view. The cookie can't be deleted from render (it goes away on the
+      // next login or via /api/session/clear from a protected page), so just
+      // stop forwarding the dead token to the fetches below.
+      token = null;
     } else {
       access = resolveEmergencyAccess(
         emergencyId,
@@ -53,6 +62,8 @@ export default async function RecipientResourcePage({ params }: Props) {
   const [{ data: resource }, { data: needs }] = await Promise.all([
     api.GET("/emergencies/{emergencyId}/public/resources/{resourceId}", {
       params: { path: { emergencyId, resourceId } },
+      // Forward auth so logged-in users see the contact (redacted for anon).
+      ...(token !== null && { headers: authHeaders(token) }),
     }),
     api.GET("/emergencies/{emergencyId}/public/needs", {
       params: { path: { emergencyId }, query: { resourceId } },
@@ -83,14 +94,9 @@ export default async function RecipientResourcePage({ params }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl bg-surface">
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <PageHeading title={resource.name} />
         <div className="flex flex-col gap-5 px-4 pb-12 pt-5 lg:gap-6 lg:px-8">
-          <Link
-            href={`/e/${slug}`}
-            className="w-fit text-sm font-semibold text-navy hover:underline"
-          >
-            ← {td.back}
-          </Link>
-
           <PublicResourceCard
             resource={resource}
             t={t.resource_card}
@@ -149,7 +155,7 @@ export default async function RecipientResourcePage({ params }: Props) {
                     role="listitem"
                     className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${categoryColor(slug)}`}
                   >
-                    {categoryLabel(slug, locale)}
+                    {labelForCategory(slug, categories)}
                   </span>
                 ))}
               </div>
@@ -177,11 +183,18 @@ export default async function RecipientResourcePage({ params }: Props) {
                       te={te}
                       slug={slug}
                       active={isActive}
-                      locale={locale}
                     />
                   </li>
                 ))}
               </ul>
+            )}
+            {isActive && (
+              <Link
+                href={`/e/${slug}/peticion?resourceId=${resourceId}`}
+                className="w-fit text-sm font-semibold text-navy hover:underline"
+              >
+                + {td.add_need_cta}
+              </Link>
             )}
           </section>
         </div>

@@ -18,7 +18,6 @@ import {
 import { Type, Transform } from 'class-transformer';
 import {
   ResourceType,
-  ResourceStage,
   PublicStatus,
   VerificationLevel,
 } from '../../domain/resource-enums';
@@ -53,14 +52,6 @@ export class RegisterResourceDto {
   @ApiProperty({ enum: ResourceType, example: ResourceType.CollectionPoint })
   @IsEnum(ResourceType)
   type!: ResourceType;
-
-  @ApiProperty({
-    enum: ResourceStage,
-    example: ResourceStage.Origin,
-    description: 'Stage of the resource in the emergency supply chain',
-  })
-  @IsEnum(ResourceStage)
-  stage!: ResourceStage;
 
   @ApiProperty({ example: 'Cruz Roja Madrid', minLength: 2 })
   @IsString()
@@ -138,8 +129,7 @@ export class RegisterResourceDto {
 
   @ApiPropertyOptional({
     example: true,
-    description:
-      'Mark this resource as a final recipient of aid (requires the destination stage)',
+    description: 'Mark this resource as a final recipient of aid',
   })
   @IsOptional()
   @IsBoolean()
@@ -198,6 +188,22 @@ export class RecordInventoryEntryDto {
   })
   @IsArray()
   @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => SupplyLineDto)
+  items!: SupplyLineDto[];
+}
+
+/**
+ * Body for the owner/coordinator declared-inventory edit (#263): the FULL set
+ * of lines. Replaces (not merges) the resource inventory; empty list clears it,
+ * so no @ArrayNotEmpty.
+ */
+export class UpdateInventoryDto {
+  @ApiProperty({
+    type: [SupplyLineDto],
+    description: 'Full declared inventory (replaces current; empty clears it)',
+  })
+  @IsArray()
   @ValidateNested({ each: true })
   @Type(() => SupplyLineDto)
   items!: SupplyLineDto[];

@@ -10,6 +10,7 @@ import {
   NotAuthorizedToRevokeError,
 } from '../domain/authorization/errors';
 import { ResourceEmergencyLookup } from '../domain/ports/resource-emergency-lookup';
+import { permissionsForRole } from '../domain/authorization/role-catalog';
 import { authorizationChainForScope } from './scope-chain';
 
 export interface RevokeGrantCommand {
@@ -61,6 +62,17 @@ export class RevokeGrant {
       chain,
     );
     if (!actorPermissions.has('role:revoke')) {
+      throw new NotAuthorizedToRevokeError(grant.scope.toPlain());
+    }
+
+    // Attenuation (mirror of GrantRole rule 2): you may only revoke a grant of a
+    // role you could also have granted here — i.e. every permission it confers
+    // is one you hold at this scope. Without this, a holder of `role:revoke`
+    // could strip a MORE-privileged peer's grant despite not dominating it.
+    const missing = permissionsForRole(grant.roleId).filter(
+      (p) => !actorPermissions.has(p),
+    );
+    if (missing.length > 0) {
       throw new NotAuthorizedToRevokeError(grant.scope.toPlain());
     }
 

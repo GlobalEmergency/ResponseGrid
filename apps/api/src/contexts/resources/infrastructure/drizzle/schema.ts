@@ -8,13 +8,13 @@ import {
   boolean,
 } from 'drizzle-orm/pg-core';
 import { supplyLineColumns } from '../../../supplies/infrastructure/drizzle/supply-line-columns';
+import { suppliesTable } from '../../../supplies/infrastructure/drizzle/schema';
 import { AuthorSnapshot } from '../../../../shared/domain/author';
 
 export const resourcesTable = pgTable('resources', {
   id: uuid('id').primaryKey(),
   emergencyId: uuid('emergency_id').notNull(),
   type: text('type').notNull(),
-  stage: text('stage').notNull(),
   name: text('name').notNull(),
   description: text('description'),
   address: text('address').notNull(),
@@ -80,5 +80,9 @@ export const resourceItemsTable = pgTable('resource_items', {
   resourceId: uuid('resource_id')
     .notNull()
     .references(() => resourcesTable.id, { onDelete: 'cascade' }),
-  ...supplyLineColumns(),
+  ...supplyLineColumns(
+    uuid('supply_id').references(() => suppliesTable.id, {
+      onDelete: 'set null',
+    }),
+  ),
 });

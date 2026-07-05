@@ -1,8 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { getToken, authHeaders, clearToken } from '@/lib/auth';
+import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
 import type { components } from '@reliefhub/api-client';
@@ -19,10 +18,7 @@ export async function fetchMyVolunteerProfile(
   emergencyId: string,
   slug: string,
 ): Promise<VolunteerProfile | null> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/mi-voluntariado`);
-  }
+  const token = await requireSession(`/e/${slug}/mi-voluntariado`);
 
   const { data, response } = await api.GET(
     '/emergencies/{emergencyId}/volunteers/me',
@@ -33,8 +29,7 @@ export async function fetchMyVolunteerProfile(
   );
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(`/login?next=/e/${slug}/mi-voluntariado`);
+    return redirectToLogin(`/e/${slug}/mi-voluntariado`);
   }
 
   if (response.status === 404 || data === undefined) {
@@ -48,10 +43,7 @@ export async function fetchMyTasks(
   emergencyId: string,
   slug: string,
 ): Promise<MyTask[]> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/mi-voluntariado`);
-  }
+  const token = await requireSession(`/e/${slug}/mi-voluntariado`);
 
   const { data, response } = await api.GET(
     '/emergencies/{emergencyId}/tasks/mine',
@@ -62,8 +54,7 @@ export async function fetchMyTasks(
   );
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(`/login?next=/e/${slug}/mi-voluntariado`);
+    return redirectToLogin(`/e/${slug}/mi-voluntariado`);
   }
 
   return data ?? [];
@@ -74,10 +65,7 @@ export async function checkInTask(
   volunteerId: string,
   slug: string,
 ): Promise<CheckActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/mi-voluntariado`);
-  }
+  const token = await requireSession(`/e/${slug}/mi-voluntariado`);
 
   const { response } = await api.POST('/tasks/{taskId}/check-in', {
     params: { path: { taskId } },
@@ -86,8 +74,7 @@ export async function checkInTask(
   });
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(`/login?next=/e/${slug}/mi-voluntariado`);
+    return redirectToLogin(`/e/${slug}/mi-voluntariado`);
   }
 
   if (response.status === 403) {
@@ -109,10 +96,7 @@ export async function checkOutTask(
   volunteerId: string,
   slug: string,
 ): Promise<CheckActionResult> {
-  const token = await getToken();
-  if (token === null) {
-    redirect(`/login?next=/e/${slug}/mi-voluntariado`);
-  }
+  const token = await requireSession(`/e/${slug}/mi-voluntariado`);
 
   const { response } = await api.POST('/tasks/{taskId}/check-out', {
     params: { path: { taskId } },
@@ -121,8 +105,7 @@ export async function checkOutTask(
   });
 
   if (response.status === 401) {
-    await clearToken();
-    redirect(`/login?next=/e/${slug}/mi-voluntariado`);
+    return redirectToLogin(`/e/${slug}/mi-voluntariado`);
   }
 
   if (response.status === 403) {

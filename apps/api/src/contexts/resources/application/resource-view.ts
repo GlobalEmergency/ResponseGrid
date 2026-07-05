@@ -1,7 +1,6 @@
 import { Resource } from '../domain/resource';
 import {
   ResourceType,
-  ResourceStage,
   VerificationLevel,
   PublicStatus,
 } from '../domain/resource-enums';
@@ -11,7 +10,6 @@ import { Category } from '../../supplies/domain/category';
 export interface ResourceView {
   id: string;
   type: ResourceType;
-  stage: ResourceStage;
   name: string;
   description: string | null;
   location: LocationProps;
@@ -21,6 +19,13 @@ export interface ResourceView {
   // enriched fields
   accepts: string[];
   contact: string | null;
+  /**
+   * Whether the resource has a contact on file, independent of whether
+   * `contact` is revealed to this caller. Lets the public UI show a
+   * "log in to see it" hint instead of "no contact" once `contact` is
+   * redacted for anonymous callers. See {@link redactContact}.
+   */
+  hasContact: boolean;
   schedule: string | null;
   manager: string | null;
   sourceName: string | null;
@@ -55,7 +60,6 @@ export function toResourceView(r: Resource): ResourceView {
   return {
     id: r.id.value,
     type: r.type,
-    stage: r.stage,
     name: r.name,
     description: r.description,
     location: r.location.toPlain(),
@@ -64,6 +68,7 @@ export function toResourceView(r: Resource): ResourceView {
     ownerOrganizationId: r.ownerOrganizationId,
     accepts: r.accepts,
     contact: r.contact,
+    hasContact: r.contact != null,
     schedule: r.schedule,
     manager: r.manager,
     sourceName: r.provenance?.sourceName ?? null,

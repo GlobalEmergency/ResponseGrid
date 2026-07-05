@@ -28,6 +28,8 @@ export interface CarrierPrincipal {
 
 export interface CreateShipmentProps {
   id: ShipmentId;
+  /** Legible/QR "Código Único" of the expedition (`EXP-0001`, #163). */
+  code: string;
   emergencyId: EmergencyId;
   originResourceId: string;
   destinationResourceId: string;
@@ -35,11 +37,19 @@ export interface CreateShipmentProps {
   items: SupplyLine[];
   /** Trackable containers (palet/caja/lote, #140) loaded onto this expedition. */
   containerIds: string[];
+  /**
+   * Optional logistics hub (#150) this expedition transits — an opaque
+   * cross-emergency scope id (no FK). A `hub_manager` grant scoped to it may
+   * operate the shipment without coordinating its emergency (§16.3). Defaults
+   * to null.
+   */
+  hubId?: string | null;
   manifest: string | null;
 }
 
 export interface ShipmentSnapshot {
   id: string;
+  code: string;
   emergencyId: string;
   originResourceId: string;
   destinationResourceId: string;
@@ -48,6 +58,7 @@ export interface ShipmentSnapshot {
   assignedCapacityId: string | null;
   carrierType: CarrierType | null;
   carrierId: string | null;
+  hubId: string | null;
   manifest: string | null;
   status: ShipmentStatus;
   createdAt: Date;
@@ -76,6 +87,7 @@ export class Shipment {
 
   private constructor(
     public readonly id: ShipmentId,
+    public readonly code: string,
     public readonly emergencyId: EmergencyId,
     public readonly originResourceId: string,
     public readonly destinationResourceId: string,
@@ -83,6 +95,7 @@ export class Shipment {
     public readonly containerIds: string[],
     private _assignedCapacityId: string | null,
     private _carrier: CarrierPrincipal | null,
+    public readonly hubId: string | null,
     public readonly manifest: string | null,
     private _status: ShipmentStatus,
     public readonly createdAt: Date,
@@ -105,9 +118,18 @@ export class Shipment {
     if (props.items.length === 0 && containerIds.length === 0) {
       throw new ShipmentMustHaveCargoError();
     }
+    const code = props.code.trim();
+    if (code.length === 0) {
+      throw new InvalidShipmentRouteError('Shipment code must not be empty');
+    }
+    const hubId = props.hubId ?? null;
+    if (hubId !== null) {
+      Shipment.assertUuid(hubId, 'hubId');
+    }
     const now = new Date();
     return new Shipment(
       props.id,
+      code,
       props.emergencyId,
       props.originResourceId,
       props.destinationResourceId,
@@ -115,6 +137,7 @@ export class Shipment {
       containerIds,
       null,
       null,
+      hubId,
       props.manifest,
       ShipmentStatus.Planned,
       now,
@@ -125,6 +148,7 @@ export class Shipment {
   static fromSnapshot(s: ShipmentSnapshot): Shipment {
     return new Shipment(
       ShipmentId.fromString(s.id),
+      s.code,
       EmergencyId.fromString(s.emergencyId),
       s.originResourceId,
       s.destinationResourceId,
@@ -134,6 +158,7 @@ export class Shipment {
       s.carrierType !== null && s.carrierId !== null
         ? { type: s.carrierType, id: s.carrierId }
         : null,
+      s.hubId,
       s.manifest,
       s.status,
       s.createdAt,
@@ -234,6 +259,7 @@ export class Shipment {
   toSnapshot(): ShipmentSnapshot {
     return {
       id: this.id.value,
+      code: this.code,
       emergencyId: this.emergencyId.value,
       originResourceId: this.originResourceId,
       destinationResourceId: this.destinationResourceId,
@@ -242,6 +268,7 @@ export class Shipment {
       assignedCapacityId: this._assignedCapacityId,
       carrierType: this._carrier?.type ?? null,
       carrierId: this._carrier?.id ?? null,
+      hubId: this.hubId,
       manifest: this.manifest,
       status: this._status,
       createdAt: this.createdAt,
