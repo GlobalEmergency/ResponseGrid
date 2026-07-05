@@ -16,6 +16,7 @@ import {
   ApiOkResponse,
   ApiNotFoundResponse,
 } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import { GetPublicResources } from '../../application/get-public-resources';
 import { GetResourceFacets } from '../../application/get-resource-facets';
 import { GetNearbyResources } from '../../application/get-nearby-resources';
@@ -42,6 +43,11 @@ type OptionalAuthedRequest = Request & { user?: AuthenticatedUser };
 
 @ApiTags('public')
 @Controller()
+// Public read-only API: must NOT inherit the specialized throttlers
+// (auth/intake/trusted-auth) that the global guard applies to every route —
+// only the `default` 200/min. Otherwise the tightest leaked bucket (intake,
+// 5/min) 429s legitimate integrations consuming the public API (#331).
+@SkipThrottle({ auth: true, intake: true, 'trusted-auth': true })
 // Optional auth: an anonymous caller gets `contact` redacted on non-official
 // resources (it's personal data); a caller with a valid Bearer token sees it.
 @UseGuards(OptionalJwtAuthGuard)

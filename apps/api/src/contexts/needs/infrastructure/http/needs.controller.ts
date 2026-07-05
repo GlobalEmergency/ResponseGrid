@@ -26,6 +26,7 @@ import {
   ApiForbiddenResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import { CreateNeed } from '../../application/create-need';
 import { ValidateNeed } from '../../application/validate-need';
 import { EditNeed, EditNeedCommand } from '../../application/edit-need';
@@ -79,6 +80,11 @@ interface AuthenticatedRequest extends Express.Request {
 
 @ApiTags('needs')
 @Controller()
+// Public read routes (public/needs*) must not inherit the specialized
+// throttlers (auth/intake/trusted-auth) the global guard applies to every
+// route — only `default` 200/min. Prevents 429 on the public API (#331). No
+// route here uses those buckets; they belong to auth/donation-intake/bot-login.
+@SkipThrottle({ auth: true, intake: true, 'trusted-auth': true })
 export class NeedsController {
   constructor(
     private readonly createNeed: CreateNeed,
