@@ -59,6 +59,7 @@ describe('ReportResourceValidity', () => {
 
   const useCase = (
     threshold?: number,
+    cooldownMs?: number,
     emergencyThresholds?: {
       getThreshold: (id: string) => Promise<number | null>;
     },
@@ -68,6 +69,7 @@ describe('ReportResourceValidity', () => {
       reports,
       bus,
       threshold,
+      cooldownMs,
       emergencyThresholds,
     );
 
@@ -185,13 +187,31 @@ describe('ReportResourceValidity', () => {
     );
   });
 
+  it('cooldown activo tras dismiss: el umbral se alcanza pero no marca disputed', async () => {
+    const id = await seedPublished();
+    const rep = useCase(2);
+    await rep.execute(cmd(id, 'user-1'));
+    await rep.execute(cmd(id, 'user-2'));
+    let r = await resources.findById(ResourceId.fromString(id));
+    expect(r!.disputed).toBe(true);
+
+    r!.clearDispute('dismiss');
+    await resources.save(r!);
+
+    const repWithCooldown = useCase(1, 86_400_000);
+    const result = await repWithCooldown.execute(cmd(id, 'user-3'));
+    expect(result.disputed).toBe(false);
+    r = await resources.findById(ResourceId.fromString(id));
+    expect(r!.disputed).toBe(false);
+  });
+
   it('usa el umbral por emergencia cuando está configurado', async () => {
     const id = await seedPublished();
     // Umbral de 2 en vez del global de 3
     const thresholdReader = {
       getThreshold: () => Promise.resolve(2 as number | null),
     };
-    const rep = useCase(3, thresholdReader);
+    const rep = useCase(3, undefined, thresholdReader);
     await rep.execute(cmd(id, 'user-1'));
     const res = await rep.execute(cmd(id, 'user-2'));
     expect(res.disputed).toBe(true);
@@ -202,7 +222,7 @@ describe('ReportResourceValidity', () => {
     const thresholdReader = {
       getThreshold: () => Promise.resolve(null as number | null),
     };
-    const rep = useCase(3, thresholdReader);
+    const rep = useCase(3, undefined, thresholdReader);
     await rep.execute(cmd(id, 'user-1'));
     await rep.execute(cmd(id, 'user-2'));
     const res = await rep.execute(cmd(id, 'user-3'));

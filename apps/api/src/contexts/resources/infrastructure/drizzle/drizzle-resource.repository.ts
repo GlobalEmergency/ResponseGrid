@@ -81,6 +81,7 @@ type RawRow = {
   recipient_type: string | null;
   disputed: boolean | null;
   disputed_at: unknown;
+  dispute_dismissed_at: unknown;
   author?: unknown;
 };
 
@@ -155,6 +156,7 @@ function rawRowToSnapshot(row: RawRow): ResourceSnapshot {
     recipientType: row.recipient_type ?? null,
     disputed: row.disputed ?? false,
     disputedAt: toDateOrNull(row.disputed_at),
+    disputeDismissedAt: toDateOrNull(row.dispute_dismissed_at),
     author: (row.author as AuthorSnapshot | null | undefined) ?? null,
     // Raw SQL paths (nearby) power the map, which does not render inventory —
     // items are intentionally not hydrated here to keep the payload lean.
@@ -202,6 +204,7 @@ function rowToSnapshot(row: Row, items: ItemsRow[] = []): ResourceSnapshot {
     recipientType: row.recipientType ?? null,
     disputed: row.disputed ?? false,
     disputedAt: row.disputedAt ?? null,
+    disputeDismissedAt: row.disputeDismissedAt ?? null,
     author: row.author ?? null,
     items: itemsToSnapshots(items),
   };
@@ -256,6 +259,7 @@ export class DrizzleResourceRepository implements ResourceRepository {
           recipientType: s.recipientType,
           disputed: s.disputed ?? false,
           disputedAt: s.disputedAt ?? null,
+          disputeDismissedAt: s.disputeDismissedAt ?? null,
           author: s.author ?? null,
         })
         .onConflictDoUpdate({
@@ -278,6 +282,7 @@ export class DrizzleResourceRepository implements ResourceRepository {
             recipientType: s.recipientType,
             disputed: s.disputed ?? false,
             disputedAt: s.disputedAt ?? null,
+            disputeDismissedAt: s.disputeDismissedAt ?? null,
           },
         });
 

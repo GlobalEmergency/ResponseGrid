@@ -67,6 +67,9 @@ importers:
       ioredis:
         specifier: 5.10.1
         version: 5.10.1
+      ipaddr.js:
+        specifier: ^1.9.1
+        version: 1.9.1
       multer:
         specifier: '>=2.2.0'
         version: 2.2.0

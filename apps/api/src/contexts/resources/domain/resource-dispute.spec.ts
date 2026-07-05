@@ -92,4 +92,67 @@ describe('Resource dispute', () => {
     expect(back.disputed).toBe(true);
     expect(back.disputedAt).toBeInstanceOf(Date);
   });
+
+  it('clearDispute("dismiss") sets disputeDismissedAt; other resolutions do not', () => {
+    const r = published();
+    r.flagDisputed();
+    r.pullDomainEvents();
+
+    r.clearDispute('dismiss');
+    expect(r.disputeDismissedAt).toBeInstanceOf(Date);
+
+    const r2 = published();
+    r2.flagDisputed();
+    r2.pullDomainEvents();
+    r2.clearDispute('confirm_closed');
+    expect(r2.disputeDismissedAt).toBeNull();
+  });
+
+  it('flagDisputed within cooldown window is a no-op (no event, stays undisputed)', () => {
+    const r = published();
+    r.flagDisputed();
+    r.pullDomainEvents();
+    r.clearDispute('dismiss');
+    r.pullDomainEvents();
+
+    r.flagDisputed(86_400_000);
+
+    expect(r.disputed).toBe(false);
+    expect(r.pullDomainEvents()).toEqual([]);
+  });
+
+  it('flagDisputed after cooldown expires works normally', () => {
+    const snap = published().toSnapshot();
+    snap.disputeDismissedAt = new Date(Date.now() - 90_000_000); // 25h ago
+    const r = Resource.fromSnapshot(snap);
+
+    r.flagDisputed(86_400_000);
+
+    expect(r.disputed).toBe(true);
+    expect(r.pullDomainEvents().map((e) => e.eventName)).toEqual([
+      'resource.disputed',
+    ]);
+  });
+
+  it('disputeDismissedAt survives a snapshot round-trip', () => {
+    const r = published();
+    r.flagDisputed();
+    r.clearDispute('dismiss');
+    const back = Resource.fromSnapshot(r.toSnapshot());
+    expect(back.disputeDismissedAt).toBeInstanceOf(Date);
+  });
+
+  it('a non-dismiss resolution clears a stale dismiss anchor from an earlier cycle', () => {
+    // Cycle 1: dismiss arms the cooldown anchor.
+    const r = published();
+    r.flagDisputed();
+    r.clearDispute('dismiss');
+    expect(r.disputeDismissedAt).toBeInstanceOf(Date);
+
+    // Cycle 2: re-disputed and this time confirmed closed (not dismissed) →
+    // the anchor must be cleared so it can never suppress a future dispute.
+    r.flagDisputed();
+    r.clearDispute('confirm_closed');
+    expect(r.disputeDismissedAt).toBeNull();
+  });
 });

@@ -11,6 +11,8 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
+import { ValidityReportThrottlerGuard } from './validity-report-throttler.guard';
 import {
   ApiTags,
   ApiOperation,
@@ -495,7 +497,13 @@ export class ResourcesController {
 
   @Post('resources/:resourceId/validity-reports')
   @HttpCode(201)
-  @UseGuards(JwtAuthGuard)
+  // Anti-overflood: ValidityReportThrottlerGuard (post-auth) aplica dos buckets
+  // de 20/hora —por IP y por usuario, así rotar de IP no evade el tope— y exime
+  // a los verificadores de confianza (permiso resource:verify vía el PDP). Se
+  // saltan los throttlers per-IP ajenos (auth/intake/trusted-auth); el `default`
+  // global (200/min por IP) sigue activo pre-auth como suelo anti-DoS para todos.
+  @UseGuards(JwtAuthGuard, ValidityReportThrottlerGuard)
+  @SkipThrottle({ auth: true, intake: true, 'trusted-auth': true })
   @ApiBearerAuth()
   @ApiOperation({
     summary:

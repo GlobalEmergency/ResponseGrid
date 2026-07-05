@@ -39,6 +39,7 @@ export class ReportResourceValidity {
     private readonly reports: ResourceValidityReportRepository,
     private readonly bus: EventBus,
     private readonly threshold: number = DEFAULT_DISPUTE_THRESHOLD,
+    private readonly cooldownMs: number = 0,
     private readonly emergencyThresholds?: EmergencyDisputeThresholdReader,
   ) {}
 
@@ -110,10 +111,10 @@ export class ReportResourceValidity {
         ResourceId.fromString(cmd.resourceId),
       );
       if (current && !current.disputed) {
-        current.flagDisputed();
+        current.flagDisputed(this.cooldownMs);
         await this.resources.save(current);
         await this.bus.publish(current.pullDomainEvents());
-        disputed = true;
+        disputed = current.disputed;
       } else if (current) {
         disputed = current.disputed;
       }
