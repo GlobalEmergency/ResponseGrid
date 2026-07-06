@@ -83,6 +83,7 @@ type RawRow = {
   disputed_at: unknown;
   dispute_dismissed_at: unknown;
   author?: unknown;
+  inventory_version?: unknown;
 };
 
 /**
@@ -161,6 +162,7 @@ function rawRowToSnapshot(row: RawRow): ResourceSnapshot {
     // Raw SQL paths (nearby) power the map, which does not render inventory —
     // items are intentionally not hydrated here to keep the payload lean.
     items: [],
+    inventoryVersion: Number(row.inventory_version ?? 0),
   };
 }
 
@@ -207,6 +209,7 @@ function rowToSnapshot(row: Row, items: ItemsRow[] = []): ResourceSnapshot {
     disputeDismissedAt: row.disputeDismissedAt ?? null,
     author: row.author ?? null,
     items: itemsToSnapshots(items),
+    inventoryVersion: row.inventoryVersion,
   };
 }
 
@@ -261,6 +264,7 @@ export class DrizzleResourceRepository implements ResourceRepository {
           disputedAt: s.disputedAt ?? null,
           disputeDismissedAt: s.disputeDismissedAt ?? null,
           author: s.author ?? null,
+          inventoryVersion: s.inventoryVersion ?? 0,
         })
         .onConflictDoUpdate({
           target: resourcesTable.id,
@@ -283,6 +287,7 @@ export class DrizzleResourceRepository implements ResourceRepository {
             disputed: s.disputed ?? false,
             disputedAt: s.disputedAt ?? null,
             disputeDismissedAt: s.disputeDismissedAt ?? null,
+            inventoryVersion: s.inventoryVersion ?? 0,
           },
         });
 
@@ -301,6 +306,51 @@ export class DrizzleResourceRepository implements ResourceRepository {
           })),
         );
       }
+    });
+  }
+
+  /**
+   * Optimistic-concurrency write for the declared inventory (#294). The
+   * check-and-set is a single conditional `UPDATE ... WHERE id = $1 AND
+   * inventory_version = $2`: Postgres row-locks the matched row for the
+   * duration of the statement, so two concurrent callers racing on the same
+   * `expectedVersion` cannot both succeed — the loser's WHERE simply matches
+   * zero rows once the winner commits. Only the `resources` row and its items
+   * are touched; unrelated resource fields are NOT overwritten here (unlike
+   * `save()`), since this path only ever runs after `resource.replaceInventory`.
+   */
+  async saveIfInventoryVersionMatches(
+    resource: Resource,
+    expectedVersion: number,
+  ): Promise<boolean> {
+    const s = resource.toSnapshot();
+    return this.db.transaction(async (tx) => {
+      const updated = await tx
+        .update(resourcesTable)
+        .set({ inventoryVersion: s.inventoryVersion ?? 0 })
+        .where(
+          and(
+            eq(resourcesTable.id, s.id),
+            eq(resourcesTable.inventoryVersion, expectedVersion),
+          ),
+        )
+        .returning({ id: resourcesTable.id });
+      if (updated.length === 0) return false;
+
+      await tx
+        .delete(resourceItemsTable)
+        .where(eq(resourceItemsTable.resourceId, s.id));
+
+      if (s.items.length > 0) {
+        await tx.insert(resourceItemsTable).values(
+          s.items.map((item) => ({
+            id: randomUUID(),
+            resourceId: s.id,
+            ...supplyLineToColumns(item),
+          })),
+        );
+      }
+      return true;
     });
   }
 

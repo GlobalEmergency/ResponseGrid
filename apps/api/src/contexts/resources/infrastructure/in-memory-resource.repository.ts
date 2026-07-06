@@ -46,6 +46,21 @@ export class InMemoryResourceRepository implements ResourceRepository {
     return Promise.resolve();
   }
 
+  /** In-memory mirror of the Drizzle conditional UPDATE (#294): a single
+   *  synchronous check-then-set, so it is race-free the same way a real
+   *  `UPDATE ... WHERE inventory_version = $expected` is. */
+  saveIfInventoryVersionMatches(
+    resource: Resource,
+    expectedVersion: number,
+  ): Promise<boolean> {
+    const current = this.store.get(resource.id.value);
+    if ((current?.inventoryVersion ?? 0) !== expectedVersion) {
+      return Promise.resolve(false);
+    }
+    this.store.set(resource.id.value, resource.toSnapshot());
+    return Promise.resolve(true);
+  }
+
   findById(id: ResourceId): Promise<Resource | null> {
     const snap = this.store.get(id.value);
     return Promise.resolve(snap ? Resource.fromSnapshot(snap) : null);

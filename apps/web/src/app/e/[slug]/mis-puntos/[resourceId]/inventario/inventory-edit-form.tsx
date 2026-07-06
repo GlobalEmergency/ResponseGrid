@@ -22,6 +22,13 @@ type BoundAction = (
 interface InventoryEditFormProps {
   action: BoundAction;
   initial: SupplyLineView[];
+  /**
+   * Optimistic-concurrency version read alongside `initial` (#294). Carried as
+   * a hidden field and sent back as `expectedVersion` on save — the API
+   * rejects the write with 409 if it no longer matches (someone merged
+   * inventory-entries or a donation into this point in the meantime).
+   */
+  expectedVersion: number;
   t: Messages['registrar'];
   ta: Messages['account'];
   locale: 'es' | 'en';
@@ -41,6 +48,7 @@ const toLine = (l: SupplyLineView): SupplyLine => ({
 export function InventoryEditForm({
   action,
   initial,
+  expectedVersion,
   t,
   ta,
   locale,
@@ -53,6 +61,7 @@ export function InventoryEditForm({
 
   return (
     <form action={formAction} className="flex flex-col gap-6" noValidate>
+      <input type="hidden" name="expectedVersion" value={expectedVersion} />
       {state.status === 'success' && (
         <p
           role="status"

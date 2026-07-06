@@ -9,6 +9,7 @@ import {
   ValidityReason,
   ValidityReportStatus,
 } from '../../domain/resource-validity-report';
+import { SupplyLineResponseDto } from '../../../supplies/infrastructure/http/supply-line.dto';
 
 export class RegisterResourceResponseDto {
   @ApiProperty({
@@ -45,6 +46,26 @@ export class MyManagedResourceDto {
     description: 'Slug of the owning emergency; null if its row is missing.',
   })
   emergencySlug!: string | null;
+}
+
+/**
+ * Response for `GET /resources/:id/inventory` (#294): the declared lines plus
+ * the optimistic-concurrency `version`, which the client must send back as
+ * `expectedVersion` on `PUT /resources/:id/inventory` — a mismatch there means
+ * the inventory changed (inventory-entries #9, donation events #129) since
+ * this read, and the write is rejected with 409 instead of overwriting it.
+ */
+export class InventoryViewDto {
+  @ApiProperty({ type: [SupplyLineResponseDto] })
+  items!: SupplyLineResponseDto[];
+
+  @ApiProperty({
+    example: 3,
+    description:
+      'Optimistic-concurrency version of the declared inventory. Pass back as ' +
+      '`expectedVersion` on PUT; a mismatch means it changed since this read (#294).',
+  })
+  version!: number;
 }
 
 export class LocationViewDto {

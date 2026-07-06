@@ -6,6 +6,7 @@ import {
   doublePrecision,
   jsonb,
   boolean,
+  integer,
 } from 'drizzle-orm/pg-core';
 import { supplyLineColumns } from '../../../supplies/infrastructure/drizzle/supply-line-columns';
 import { suppliesTable } from '../../../supplies/infrastructure/drizzle/schema';
@@ -46,6 +47,9 @@ export const resourcesTable = pgTable('resources', {
   disputeDismissedAt: timestamp('dispute_dismissed_at', { withTimezone: true }),
   /** Restricted self-reported author attribution (#235). Never public. */
   author: jsonb('author').$type<AuthorSnapshot>(),
+  // Optimistic-concurrency counter for the declared inventory
+  // (0055_resource_inventory_version, #294). See Resource.inventoryVersion.
+  inventoryVersion: integer('inventory_version').notNull().default(0),
 });
 
 // Reportes ciudadanos de validez de un punto (0031_resource_validity_reports):

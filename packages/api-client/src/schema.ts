@@ -409,9 +409,15 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Read a point declared inventory in full (owner or coordinator) */
+        /**
+         * Read a point declared inventory in full (owner or coordinator)
+         * @description Returns the declared lines plus the optimistic-concurrency `version` (#294) — send it back as `expectedVersion` on the PUT below.
+         */
         get: operations["ResourcesController_getMyInventoryAction"];
-        /** Replace a point declared inventory (owner or coordinator) — #263 */
+        /**
+         * Replace a point declared inventory (owner or coordinator) — #263
+         * @description Optimistic concurrency (#294): `expectedVersion` must match the current `version` (read from GET) or the request fails with 409 — someone else changed the inventory (inventory-entries, a donation) since it was loaded.
+         */
         put: operations["ResourcesController_updateMyInventoryAction"];
         post?: never;
         delete?: never;
@@ -3235,9 +3241,22 @@ export interface components {
              */
             expiresAt?: string | null;
         };
+        InventoryViewDto: {
+            items: components["schemas"]["SupplyLineResponseDto"][];
+            /**
+             * @description Optimistic-concurrency version of the declared inventory. Pass back as `expectedVersion` on PUT; a mismatch means it changed since this read (#294).
+             * @example 3
+             */
+            version: number;
+        };
         UpdateInventoryDto: {
             /** @description Full declared inventory (replaces current; empty clears it) */
             items: components["schemas"]["SupplyLineDto"][];
+            /**
+             * @description The inventory `version` read from GET /resources/:id/inventory. Rejected with 409 if it no longer matches the current version (#294).
+             * @example 3
+             */
+            expectedVersion: number;
         };
         VerifyResourceDto: Record<string, never>;
         EditResourceDto: {
@@ -6974,7 +6993,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SupplyLineResponseDto"][];
+                    "application/json": components["schemas"]["InventoryViewDto"];
                 };
             };
             /** @description Missing or invalid token */
@@ -7046,6 +7065,13 @@ export interface operations {
             };
             /** @description Resource not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description expectedVersion is stale — the inventory changed since it was loaded (#294) */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

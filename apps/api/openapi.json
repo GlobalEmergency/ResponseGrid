@@ -1124,6 +1124,7 @@
     },
     "/resources/{resourceId}/inventory": {
       "get": {
+        "description": "Returns the declared lines plus the optimistic-concurrency `version` (#294) — send it back as `expectedVersion` on the PUT below.",
         "operationId": "ResourcesController_getMyInventoryAction",
         "parameters": [
           {
@@ -1143,10 +1144,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SupplyLineResponseDto"
-                  }
+                  "$ref": "#/components/schemas/InventoryViewDto"
                 }
               }
             }
@@ -1172,6 +1170,7 @@
         ]
       },
       "put": {
+        "description": "Optimistic concurrency (#294): `expectedVersion` must match the current `version` (read from GET) or the request fails with 409 — someone else changed the inventory (inventory-entries, a donation) since it was loaded.",
         "operationId": "ResourcesController_updateMyInventoryAction",
         "parameters": [
           {
@@ -1210,6 +1209,9 @@
           },
           "404": {
             "description": "Resource not found"
+          },
+          "409": {
+            "description": "expectedVersion is stale — the inventory changed since it was loaded (#294)"
           }
         },
         "security": [
@@ -10212,6 +10214,26 @@
           "category"
         ]
       },
+      "InventoryViewDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyLineResponseDto"
+            }
+          },
+          "version": {
+            "type": "number",
+            "example": 3,
+            "description": "Optimistic-concurrency version of the declared inventory. Pass back as `expectedVersion` on PUT; a mismatch means it changed since this read (#294)."
+          }
+        },
+        "required": [
+          "items",
+          "version"
+        ]
+      },
       "UpdateInventoryDto": {
         "type": "object",
         "properties": {
@@ -10221,10 +10243,16 @@
             "items": {
               "$ref": "#/components/schemas/SupplyLineDto"
             }
+          },
+          "expectedVersion": {
+            "type": "number",
+            "example": 3,
+            "description": "The inventory `version` read from GET /resources/:id/inventory. Rejected with 409 if it no longer matches the current version (#294)."
           }
         },
         "required": [
-          "items"
+          "items",
+          "expectedVersion"
         ]
       },
       "VerifyResourceDto": {

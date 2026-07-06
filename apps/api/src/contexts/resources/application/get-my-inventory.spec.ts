@@ -59,13 +59,28 @@ describe('GetMyInventory', () => {
     const bus = new FakeEventBus();
     const id = await makeResource(repo, bus);
 
-    const lines = await new GetMyInventory(repo, noMembership).execute({
+    const { items } = await new GetMyInventory(repo, noMembership).execute({
       resourceId: id,
       requesterUserId: OWNER_ID,
     });
 
-    expect(lines).toHaveLength(1);
-    expect(lines[0]).toMatchObject({ name: 'Agua', quantity: 10, unit: 'l' });
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({ name: 'Agua', quantity: 10, unit: 'l' });
+  });
+
+  // #294: the caller must be able to send this back as `expectedVersion` on
+  // PUT /resources/:id/inventory for the optimistic-concurrency check.
+  it('reports the current inventoryVersion, starting at 0 for a freshly registered resource', async () => {
+    const repo = new InMemoryResourceRepository();
+    const bus = new FakeEventBus();
+    const id = await makeResource(repo, bus);
+
+    const { version } = await new GetMyInventory(repo, noMembership).execute({
+      resourceId: id,
+      requesterUserId: OWNER_ID,
+    });
+
+    expect(version).toBe(0);
   });
 
   it('coordinator (not owner) can read', async () => {
@@ -73,12 +88,15 @@ describe('GetMyInventory', () => {
     const bus = new FakeEventBus();
     const id = await makeResource(repo, bus);
 
-    const lines = await new GetMyInventory(repo, coordOnlyMembership).execute({
+    const { items } = await new GetMyInventory(
+      repo,
+      coordOnlyMembership,
+    ).execute({
       resourceId: id,
       requesterUserId: COORD_ID,
     });
 
-    expect(lines).toHaveLength(1);
+    expect(items).toHaveLength(1);
   });
 
   it('point manager (entity-scoped grant, not owner/coordinator) can read (#316)', async () => {
@@ -86,7 +104,7 @@ describe('GetMyInventory', () => {
     const bus = new FakeEventBus();
     const id = await makeResource(repo, bus);
 
-    const lines = await new GetMyInventory(repo, noMembership).execute({
+    const { items } = await new GetMyInventory(repo, noMembership).execute({
       resourceId: id,
       requesterUserId: MANAGER_ID,
       grants: [
@@ -98,7 +116,7 @@ describe('GetMyInventory', () => {
       ],
     });
 
-    expect(lines).toHaveLength(1);
+    expect(items).toHaveLength(1);
   });
 
   it('third party → UnauthorizedInventoryChangeError', async () => {

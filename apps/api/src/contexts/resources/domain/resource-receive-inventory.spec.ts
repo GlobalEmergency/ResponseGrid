@@ -138,6 +138,19 @@ describe('Resource.receiveInventory', () => {
     expect(r.items[0].quantity).toBe(10);
   });
 
+  // #294: a concurrent merge must advance inventoryVersion so a stale
+  // PUT /resources/:id/inventory overwrite (loaded before the merge) is
+  // detected instead of silently discarding it. A no-op merge (empty list)
+  // must NOT bump the version — nothing actually changed.
+  it('bumps inventoryVersion when it merges lines, but not on a no-op', () => {
+    const r = make([line('Agua', 10, 'l')]);
+    expect(r.inventoryVersion).toBe(0);
+    r.receiveInventory([]);
+    expect(r.inventoryVersion).toBe(0);
+    r.receiveInventory([line('Agua', 5, 'l')]);
+    expect(r.inventoryVersion).toBe(1);
+  });
+
   it('adds to an empty inventory', () => {
     const r = make();
     r.receiveInventory([line('Mantas', 20, 'unidades', Category.Shelter)]);

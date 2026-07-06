@@ -42,4 +42,15 @@ describe('Resource.replaceInventory', () => {
       quantity: 5,
     });
   });
+
+  // #294: PUT /resources/:id/inventory needs a counter to detect a concurrent
+  // merge (receiveInventory) that happened between the form load and the save.
+  it('bumps inventoryVersion on every replace', () => {
+    const r = make([line('Agua', 10)]);
+    expect(r.inventoryVersion).toBe(0);
+    r.replaceInventory([line('Arroz', 3)]);
+    expect(r.inventoryVersion).toBe(1);
+    r.replaceInventory([]);
+    expect(r.inventoryVersion).toBe(2);
+  });
 });

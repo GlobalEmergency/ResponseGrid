@@ -197,6 +197,12 @@ export class RecordInventoryEntryDto {
  * Body for the owner/coordinator declared-inventory edit (#263): the FULL set
  * of lines. Replaces (not merges) the resource inventory; empty list clears it,
  * so no @ArrayNotEmpty.
+ *
+ * `expectedVersion` is the optimistic-concurrency guard (#294): the caller
+ * must send back the `version` it read from `GET /resources/:id/inventory`.
+ * A stale value (someone merged inventory-entries or a donation into this
+ * point since) is rejected with 409 instead of silently overwriting the
+ * concurrent change.
  */
 export class UpdateInventoryDto {
   @ApiProperty({
@@ -207,6 +213,16 @@ export class UpdateInventoryDto {
   @ValidateNested({ each: true })
   @Type(() => SupplyLineDto)
   items!: SupplyLineDto[];
+
+  @ApiProperty({
+    example: 3,
+    description:
+      'The inventory `version` read from GET /resources/:id/inventory. ' +
+      'Rejected with 409 if it no longer matches the current version (#294).',
+  })
+  @IsInt()
+  @Min(0)
+  expectedVersion!: number;
 }
 
 export class UpdateResourcePublicStatusDto {

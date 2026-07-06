@@ -41,6 +41,23 @@ export interface ManagedResourceRow {
 
 export interface ResourceRepository {
   save(resource: Resource): Promise<void>;
+  /**
+   * Persist a resource whose declared inventory just changed, but ONLY if the
+   * resource's `inventoryVersion` in storage still equals `expectedVersion`
+   * (the optimistic-concurrency guard for `PUT /resources/:id/inventory`,
+   * #294). The caller has already advanced `resource.inventoryVersion` past
+   * `expectedVersion` (via `replaceInventory`); this must check-and-set the
+   * version atomically at the storage level — a plain read-then-write from the
+   * application layer would still race with a concurrent writer between the
+   * two steps. Returns `false` (nothing written) when the version no longer
+   * matches — a concurrent merge (receiveInventory) or another PUT already
+   * changed the inventory since the caller read it; `true` when the write
+   * committed.
+   */
+  saveIfInventoryVersionMatches(
+    resource: Resource,
+    expectedVersion: number,
+  ): Promise<boolean>;
   findById(id: ResourceId): Promise<Resource | null>;
   findPendingByEmergency(emergencyId: EmergencyId): Promise<Resource[]>;
   /**
