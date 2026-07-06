@@ -16,6 +16,7 @@ import { HelpActionRow } from '@/components/molecules/help-action-row';
 import { NeedsList } from '@/components/organisms/needs-list';
 import { EmergencyExplorer } from '@/components/organisms/emergency-explorer';
 import { EmergencyQuickLinks } from '@/components/molecules/emergency-quick-links';
+import { EmergencyBotBanner } from '@/components/molecules/emergency-bot-banner';
 import { JsonLd } from '@/components/atoms/json-ld';
 import type { MapPoint } from '@/components/organisms/emergency-map';
 import { getT } from '@/i18n/server';
@@ -527,6 +528,8 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
           <EmergencyQuickLinks slug={slug} te={te} />
         </div>
       </div>
+
+      {isActive && <EmergencyBotBanner />}
     </main>
   );
 }

@@ -44,6 +44,29 @@ export const en = {
       copyright: '© {year} Global Emergency · Open source (MIT)',
       built_by: 'Built by volunteers',
       aria_label: 'Footer',
+      bots_heading: 'Help via chat',
+      github: 'Source on GitHub',
+      github_aria: 'ResponseGrid repository on GitHub',
+    },
+
+    // Chat assistants (Telegram and WhatsApp bots) — promoted in the footer
+    // (always visible), on the home page and via a timed emergency banner.
+    bots: {
+      telegram: 'Telegram',
+      whatsapp: 'WhatsApp',
+      open_telegram: 'Open in Telegram',
+      open_whatsapp: 'Open in WhatsApp',
+      channels_aria: 'Chat help channels',
+      // Home section
+      home_overline: 'No apps, no sign-up',
+      home_heading: 'Donate and check in via WhatsApp or Telegram',
+      home_body:
+        'Our assistants guide you from the chat you already use: donate supplies, look up verified collection points and check what is needed right now. Instant, free and nothing to install.',
+      // Timed banner on the emergency page
+      banner_heading: 'Prefer to do it by chat?',
+      banner_body:
+        'Look up collection points and donate via WhatsApp or Telegram, instantly and with no sign-up.',
+      banner_dismiss: 'Close',
     },
 
     menu_aria: 'Menu',
@@ -228,6 +251,10 @@ export const en = {
       {
         q: 'How can I help beyond donating supplies?',
         a: 'You can offer a logistics point or warehouse, provide transport capacity, sign up as a volunteer or register a request from “How do you want to help?”.',
+      },
+      {
+        q: 'Can I donate or check in via WhatsApp or Telegram?',
+        a: 'Yes. ResponseGrid runs free chat assistants: on Telegram at https://t.me/donacionesvenezuela_bot and on WhatsApp at https://wa.me/15559386039. They guide you to donate supplies, look up verified collection points and see what is needed now, with nothing to install and no sign-up.',
       },
     ],
     status_active: 'Active emergency',

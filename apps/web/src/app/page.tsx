@@ -6,6 +6,7 @@ import { EmergencyDirectoryCard } from '@/components/organisms/emergency-directo
 import { HowItWorksStep } from '@/components/molecules/how-it-works-step';
 import { TrustLevelsCard } from '@/components/molecules/trust-levels-card';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { BotChannels } from '@/components/molecules/bot-channels';
 import { getT } from '@/i18n/server';
 
 // Emergency list must reflect live backend state on every request.
@@ -34,6 +35,7 @@ export default async function HomePage() {
   const closedEmergencies = all.filter((e) => e.status !== 'active');
 
   const th = t.home;
+  const tb = t.common.bots;
   const sectionHeading = 'font-display text-lg font-bold text-navy';
 
   return (
@@ -109,6 +111,19 @@ export default async function HomePage() {
                 ))}
               </div>
             )}
+          </section>
+
+          {/* ── Asistentes de chat (Telegram / WhatsApp) ────────────────── */}
+          <section
+            aria-labelledby="bots-heading"
+            className="rounded-card border border-navy/15 bg-navy px-5 py-6 text-white lg:px-7 lg:py-7"
+          >
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-accent">{tb.home_overline}</p>
+            <h2 id="bots-heading" className="mt-1.5 font-display text-lg font-extrabold leading-tight lg:text-xl">
+              {tb.home_heading}
+            </h2>
+            <p className="mt-2 max-w-xl text-[14px] leading-[1.55] text-white/80">{tb.home_body}</p>
+            <BotChannels t={tb} variant="buttons" className="mt-4 sm:max-w-md" />
           </section>
 
           {/* ── Cómo funciona ───────────────────────────────────────────── */}
