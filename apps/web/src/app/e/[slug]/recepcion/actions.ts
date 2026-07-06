@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { api } from '@/lib/api';
+import type { components } from '@reliefhub/api-client';
 import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { getT } from '@/i18n/server';
 import { parseSupplyLines } from '@/lib/supply-lines';
@@ -49,19 +50,20 @@ export async function submitReception(
   // Received lines edited at the desk (#129): only sent with `receive`. Reuse
   // the shared parser with material-only category validation; an empty/absent
   // list means "no edit" → keep the declared lines (items stays undefined).
-  let items: ReturnType<typeof parseSupplyLines> | undefined;
+  let items: components['schemas']['SupplyLineDto'][] | undefined;
   let adjustmentReason: string | null = null;
   if (intent === 'receive') {
     const validMaterialCategories = new Set(
       (await getCategories(locale)).filter(isMaterialCategory).map((c) => c.slug),
     );
-    items = parseSupplyLines(formData.get('items'), {
+    const parsedItems = parseSupplyLines(formData.get('items'), {
       isValidCategory: (c) => validMaterialCategories.has(c),
       allowEmpty: true,
     });
-    if (items === null) {
+    if ('invalidRow' in parsedItems) {
       return { status: 'error', message: tr.err_action_failed };
     }
+    items = parsedItems.items;
     const rawReason = formData.get('adjustmentReason');
     adjustmentReason =
       typeof rawReason === 'string' && rawReason.trim() !== ''

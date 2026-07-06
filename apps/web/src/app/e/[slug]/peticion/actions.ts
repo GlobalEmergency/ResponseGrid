@@ -84,16 +84,17 @@ export async function submitPeticion(
   // medical_personnel, which getCategories returns alongside material slugs).
   const validCategories = new Set((await getCategories(locale)).map((c) => c.slug));
 
-  const items = parseSupplyLines(rawItems, {
+  const parsedItems = parseSupplyLines(rawItems, {
     isValidCategory: (c) => validCategories.has(c),
     allowEmpty: false,
   });
-  if (items === null) {
+  if ('invalidRow' in parsedItems) {
     return {
       status: 'error',
       message: t.peticion.err_invalid_items,
     };
   }
+  const { items } = parsedItems;
 
   const description =
     typeof rawDescription === 'string' && rawDescription.trim() !== ''

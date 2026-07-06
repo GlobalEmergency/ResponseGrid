@@ -84,13 +84,14 @@ export async function registerResource(
     (await getCategories(locale)).filter(isMaterialCategory).map((c) => c.slug),
   );
 
-  const items = parseSupplyLines(formData.get('items'), {
+  const parsedItems = parseSupplyLines(formData.get('items'), {
     isValidCategory: (c) => validMaterialCategories.has(c),
     allowEmpty: true,
   });
-  if (items === null) {
+  if ('invalidRow' in parsedItems) {
     return { status: 'error', message: t.registrar.err_invalid_items };
   }
+  const { items } = parsedItems;
 
   const { data, error, response } = await api.POST(
     '/emergencies/{emergencyId}/resources',

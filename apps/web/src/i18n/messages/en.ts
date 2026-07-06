@@ -53,6 +53,24 @@ export const en = {
     intake_paused: 'Intake is paused for this emergency. Please try again later.',
   },
 
+  // Localized copy for raw 4xx domain-error messages (#296) — see es.ts.
+  backendErrors: {
+    resource_not_in_emergency: 'The linked resource no longer exists in this emergency.',
+    supply_name_required: 'Every material needs a name.',
+    supply_quantity_invalid: 'Quantity must be a whole number greater than zero.',
+    supply_expiry_invalid: 'The expiry date must use the YYYY-MM-DD format.',
+    target_need_not_found: 'The selected need no longer exists.',
+    target_need_wrong_emergency: 'The selected need does not belong to this emergency.',
+    offer_items_required: 'The offer must include at least one material.',
+    capacity_weight_or_volume_required: 'State the weight or the volume of the capacity.',
+    capacity_amount_invalid: 'Weight and volume must be greater than zero.',
+    coverage_area_required: 'The coverage area cannot be empty.',
+    capacity_window_invalid_date: 'The availability window date is not valid.',
+    capacity_window_order_invalid:
+      'The window start date cannot be after the end date.',
+    generic: 'Could not complete the request. Please try again.',
+  },
+
   appbar: {
     login: 'Log in',
     offer: 'Offer help',
@@ -715,6 +733,7 @@ export const en = {
     addItem: 'Add item',
     emptyList: 'No items yet.',
     legend: 'Items',
+    invalidRowHint: 'Check this row: it is incomplete or invalid.',
   },
 
   // ── Citizen delivery pre-registration (#130) ──────────────────────────────
@@ -1711,6 +1730,8 @@ export const en = {
     inventory_update_failed: 'Could not save the inventory.',
     inventory_invalid_items:
       'Check the material: some lines are incomplete or invalid. Fill in the missing fields or remove the empty rows.',
+    inventory_invalid_row:
+      'Row {n} is incomplete or invalid. Complete it or remove it to save.',
 
     type_collection_point: 'Collection point',
     type_delivery_point: 'Delivery point',
