@@ -4,6 +4,7 @@ import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { parseSupplyLines } from '@/lib/supply-lines';
+import { localizeBackendError } from '@/lib/backend-error-messages';
 import { getT } from '@/i18n/server';
 import { getCategories } from '@/adapters/get-categories';
 import { isMaterialCategory } from '@/domain/supplies/category';
@@ -121,14 +122,18 @@ export async function registerResource(
   }
 
   if (error !== undefined || data === undefined) {
-    const msg =
-      typeof error === 'object' &&
-      error !== null &&
-      'message' in error &&
-      typeof (error as { message: unknown }).message === 'string'
-        ? (error as { message: string }).message
-        : t.registrar.err_register_failed;
-    return { status: 'error', message: msg };
+    const rawMessage =
+      typeof error === 'object' && error !== null && 'message' in error
+        ? (error as { message: unknown }).message
+        : undefined;
+    return {
+      status: 'error',
+      message: localizeBackendError(
+        t.backendErrors,
+        rawMessage,
+        t.registrar.err_register_failed,
+      ),
+    };
   }
 
   return { status: 'success', id: data.id };
