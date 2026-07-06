@@ -1,6 +1,7 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { grantServiceAccountRoleAction } from './actions';
 import type { ApiKeyActionResult, RoleView } from './actions';
 import { Button } from '@/components/atoms/button';
@@ -25,9 +26,16 @@ export function GrantServiceAccountRoleForm({
   serviceAccountId: string;
   roles: RoleView[];
 }) {
+  const router = useRouter();
   const action = grantServiceAccountRoleAction.bind(null, serviceAccountId);
   const [state, formAction, pending] = useActionState(action, INITIAL_STATE);
   const [scopeType, setScopeType] = useState('organization');
+
+  // The grants list + effective permissions are server-rendered; force a refetch
+  // of the RSC once a grant lands so they reflect the new permission immediately.
+  useEffect(() => {
+    if (state.status === 'success') router.refresh();
+  }, [state, router]);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">

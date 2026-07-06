@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { revokeServiceAccountGrantAction } from './actions';
 import { Button } from '@/components/atoms/button';
 
@@ -11,6 +12,7 @@ export function RevokeServiceAccountGrantButton({
   grantId: string;
   serviceAccountId: string;
 }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -22,6 +24,7 @@ export function RevokeServiceAccountGrantButton({
         serviceAccountId,
       );
       if (result.status === 'error') setError(result.message);
+      else router.refresh();
     });
   }
 
