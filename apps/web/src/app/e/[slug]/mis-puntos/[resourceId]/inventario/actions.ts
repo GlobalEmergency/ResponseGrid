@@ -14,7 +14,7 @@ type SupplyLineView = components['schemas']['SupplyLineResponseDto'];
 export type InventoryState =
   | { status: 'idle' }
   | { status: 'success' }
-  | { status: 'error'; message: string };
+  | { status: 'error'; message: string; invalidRow?: number };
 
 /** Owner/coordinator read of the point's full declared lines (null → notFound). */
 export async function fetchMyInventory(
@@ -63,13 +63,25 @@ export async function saveMyInventory(
   );
 
   // allowEmpty: the owner can clear the inventory (empty list is a valid save).
-  const items = parseSupplyLines(formData.get('items'), {
+  const parsedItems = parseSupplyLines(formData.get('items'), {
     isValidCategory: (c) => validCategories.has(c),
     allowEmpty: true,
   });
-  if (items === null) {
-    return { status: 'error', message: t.account.inventory_invalid_items };
+  if ('invalidRow' in parsedItems) {
+    // invalidRow >= 0 means a specific row failed validation (#296): surface
+    // its 1-based position and let the caller highlight that row instead of
+    // making the owner hunt through a long inventory for the bad line.
+    const { invalidRow } = parsedItems;
+    return {
+      status: 'error',
+      message:
+        invalidRow >= 0
+          ? t.account.inventory_invalid_row.replace('{n}', String(invalidRow + 1))
+          : t.account.inventory_invalid_items,
+      ...(invalidRow >= 0 ? { invalidRow } : {}),
+    };
   }
+  const { items } = parsedItems;
 
   const { response } = await api.PUT('/resources/{resourceId}/inventory', {
     params: { path: { resourceId } },

@@ -4,6 +4,7 @@ import { api } from '@/lib/api';
 import type { components } from '@reliefhub/api-client';
 import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { parseSupplyLines } from '@/lib/supply-lines';
+import { localizeBackendError } from '@/lib/backend-error-messages';
 import { getT } from '@/i18n/server';
 import { getCategories } from '@/adapters/get-categories';
 import { isMaterialCategory } from '@/domain/supplies/category';
@@ -84,13 +85,14 @@ export async function registerResource(
     (await getCategories(locale)).filter(isMaterialCategory).map((c) => c.slug),
   );
 
-  const items = parseSupplyLines(formData.get('items'), {
+  const parsedItems = parseSupplyLines(formData.get('items'), {
     isValidCategory: (c) => validMaterialCategories.has(c),
     allowEmpty: true,
   });
-  if (items === null) {
+  if ('invalidRow' in parsedItems) {
     return { status: 'error', message: t.registrar.err_invalid_items };
   }
+  const { items } = parsedItems;
 
   const { data, error, response } = await api.POST(
     '/emergencies/{emergencyId}/resources',
@@ -120,14 +122,18 @@ export async function registerResource(
   }
 
   if (error !== undefined || data === undefined) {
-    const msg =
-      typeof error === 'object' &&
-      error !== null &&
-      'message' in error &&
-      typeof (error as { message: unknown }).message === 'string'
-        ? (error as { message: string }).message
-        : t.registrar.err_register_failed;
-    return { status: 'error', message: msg };
+    const rawMessage =
+      typeof error === 'object' && error !== null && 'message' in error
+        ? (error as { message: unknown }).message
+        : undefined;
+    return {
+      status: 'error',
+      message: localizeBackendError(
+        t.backendErrors,
+        rawMessage,
+        t.registrar.err_register_failed,
+      ),
+    };
   }
 
   return { status: 'success', id: data.id };

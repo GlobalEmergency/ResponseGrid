@@ -52,6 +52,29 @@ export const es = {
     intake_paused: 'El alta está en pausa en esta emergencia. Inténtalo más tarde.',
   },
 
+  // ── Backend error messages (#296) ───────────────────────────────────────
+  // Localized copy for raw 4xx domain-error messages the API returns as plain
+  // English text (no stable error-code contract — see the domain exception
+  // filters in apps/api). Matched by `src/lib/backend-error-messages.ts` and
+  // used as the fallback-safe replacement for `error.message` in server
+  // actions, instead of showing the backend's English text to the user.
+  backendErrors: {
+    resource_not_in_emergency: 'El punto vinculado ya no existe en esta emergencia.',
+    supply_name_required: 'Cada material necesita un nombre.',
+    supply_quantity_invalid: 'La cantidad debe ser un número entero mayor que cero.',
+    supply_expiry_invalid: 'La fecha de caducidad debe tener el formato AAAA-MM-DD.',
+    target_need_not_found: 'La necesidad seleccionada ya no existe.',
+    target_need_wrong_emergency: 'La necesidad seleccionada no pertenece a esta emergencia.',
+    offer_items_required: 'La oferta debe incluir al menos un material.',
+    capacity_weight_or_volume_required: 'Indica el peso o el volumen de la capacidad.',
+    capacity_amount_invalid: 'El peso y el volumen deben ser mayores que cero.',
+    coverage_area_required: 'El área de cobertura no puede estar vacía.',
+    capacity_window_invalid_date: 'La fecha de la ventana de disponibilidad no es válida.',
+    capacity_window_order_invalid:
+      'La fecha de inicio de la ventana no puede ser posterior a la de fin.',
+    generic: 'No se pudo completar la solicitud. Inténtalo de nuevo.',
+  },
+
   // ── AppBar ────────────────────────────────────────────────────────────────
   appbar: {
     login: 'Iniciar sesión',
@@ -742,6 +765,7 @@ export const es = {
     addItem: 'Añadir artículo',
     emptyList: 'Sin artículos todavía.',
     legend: 'Artículos',
+    invalidRowHint: 'Revisa esta fila: está incompleta o es inválida.',
   },
 
   // ── Pre-registro de entrega ciudadano (#130) ──────────────────────────────
@@ -1747,6 +1771,8 @@ export const es = {
     inventory_update_failed: 'No se pudo guardar el inventario.',
     inventory_invalid_items:
       'Revisa el material: hay líneas incompletas o inválidas. Completa los campos que falten o elimina las filas vacías.',
+    inventory_invalid_row:
+      'La fila {n} está incompleta o es inválida. Complétala o elimínala para poder guardar.',
 
     type_collection_point: 'Punto de recogida',
     type_delivery_point: 'Punto de entrega',

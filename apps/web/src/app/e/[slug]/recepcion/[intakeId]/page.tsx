@@ -115,6 +115,7 @@ export default async function IntakeDetailPage({ params }: Props) {
           variant="action"
           slug={slug}
           backHref={`/e/${slug}/recepcion`}
+          currentPath={`/e/${slug}/recepcion/${intakeId}`}
         />
         <PageHeading title={tr.detail_subtitle.replace('{code}', intake.intakeCode)} />
         <div className="flex flex-col gap-6 px-4 pb-12 pt-6">

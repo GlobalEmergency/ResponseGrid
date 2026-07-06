@@ -45,7 +45,12 @@ export default async function InventarioPage({ params }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <AppBar variant="action" slug={slug} backHref={`/e/${slug}/mis-puntos`} />
+        <AppBar
+          variant="action"
+          slug={slug}
+          backHref={`/e/${slug}/mis-puntos`}
+          currentPath={`/e/${slug}/mis-puntos/${resourceId}/inventario`}
+        />
         <PageHeading
           title={t.account.inventory_page_title}
           subtitle={t.account.inventory_page_subtitle}

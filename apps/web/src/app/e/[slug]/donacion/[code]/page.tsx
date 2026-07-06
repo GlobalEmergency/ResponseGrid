@@ -50,7 +50,7 @@ export default async function DonacionTrackingPage({ params }: Props) {
   const shell = (children: React.ReactNode) => (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-md">
-        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} currentPath={`/e/${slug}/donacion/${code}`} />
         <PageHeading title={td.page_title} subtitle={td.page_subtitle} />
         <div className="flex flex-col gap-6 px-4 pb-12 pt-6">{children}</div>
       </div>
