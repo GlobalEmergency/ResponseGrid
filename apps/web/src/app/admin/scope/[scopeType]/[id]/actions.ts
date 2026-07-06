@@ -34,6 +34,15 @@ export interface ServiceAccountView {
   createdAt: string;
 }
 
+export interface ServiceAccountGrantView {
+  id: string;
+  roleId: string;
+  scopeType: string;
+  scopeId: string | null;
+  grantedAt: string;
+  expiresAt: string | null;
+}
+
 export interface ApiKeyView {
   id: string;
   prefix: string;
@@ -271,6 +280,97 @@ export async function revokeApiKeyAction(keyId: string): Promise<ActionResult> {
       return { status: 'error', message: 'No tienes permiso para revocar esta clave.' };
     }
     return { status: 'error', message: 'No se pudo revocar la clave.' };
+  }
+  return { status: 'success' };
+}
+
+// Grants of a service account — the authority its keys inherit (any scope).
+export async function fetchServiceAccountGrants(
+  serviceAccountId: string,
+): Promise<ServiceAccountGrantView[]> {
+  const token = await getToken();
+  if (!token) return [];
+  const { data, error } = await api.GET(
+    '/service-accounts/{serviceAccountId}/grants',
+    {
+      params: { path: { serviceAccountId } },
+      headers: authHeaders(token),
+    },
+  );
+  if (error !== undefined) return [];
+  return (data ?? []) as ServiceAccountGrantView[];
+}
+
+export async function grantServiceAccountRoleAction(
+  serviceAccountId: string,
+  roleId: string,
+  scopeType: string,
+  scopeId: string,
+  expiresAtInput: string,
+): Promise<ActionResult> {
+  const token = await getToken();
+  if (!token) return { status: 'error', message: 'Sesión expirada.' };
+
+  if (!roleId || !scopeType) {
+    return { status: 'error', message: 'Rol y ámbito son obligatorios.' };
+  }
+  if (scopeType !== 'platform' && !scopeId.trim()) {
+    return {
+      status: 'error',
+      message: 'El ID de ámbito es obligatorio salvo para "Plataforma".',
+    };
+  }
+  const expiresAt = parseDateInput(expiresAtInput);
+
+  const { error, response } = await api.POST('/grants', {
+    body: {
+      principalId: serviceAccountId,
+      roleId,
+      scopeType: scopeType as
+        | 'platform'
+        | 'organization'
+        | 'emergency'
+        | 'group'
+        | 'entity',
+      ...(scopeType !== 'platform' ? { scopeId: scopeId.trim() } : {}),
+      ...(expiresAt ? { expiresAt } : {}),
+    },
+    headers: authHeaders(token),
+  });
+
+  if (error !== undefined) {
+    if (response.status === 403) {
+      return {
+        status: 'error',
+        message:
+          'No autorizado: no puedes conceder ese rol en ese ámbito (atenuación).',
+      };
+    }
+    if (response.status === 400) {
+      return { status: 'error', message: 'Datos inválidos. Revisa el ámbito.' };
+    }
+    return { status: 'error', message: 'No se pudo conceder el permiso.' };
+  }
+  return { status: 'success', message: 'Permiso concedido.' };
+}
+
+export async function revokeServiceAccountGrantAction(
+  grantId: string,
+): Promise<ActionResult> {
+  const token = await getToken();
+  if (!token) return { status: 'error', message: 'Sesión expirada.' };
+  const { error, response } = await api.DELETE('/grants/{id}', {
+    params: { path: { id: grantId } },
+    headers: authHeaders(token),
+  });
+  if (error !== undefined) {
+    if (response.status === 403) {
+      return {
+        status: 'error',
+        message: 'No tienes permiso para revocar este permiso.',
+      };
+    }
+    return { status: 'error', message: 'No se pudo revocar el permiso.' };
   }
   return { status: 'success' };
 }

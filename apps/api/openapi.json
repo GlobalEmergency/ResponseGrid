@@ -696,6 +696,51 @@
         ]
       }
     },
+    "/service-accounts/{serviceAccountId}/grants": {
+      "get": {
+        "operationId": "ApiKeysController_listServiceAccountGrants",
+        "parameters": [
+          {
+            "name": "serviceAccountId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ServiceAccountGrantDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "apikey:create required in scope"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the grants held by a service account — what its keys can do (scoped admin)",
+        "tags": [
+          "service-accounts"
+        ]
+      }
+    },
     "/api-keys/{keyId}": {
       "delete": {
         "operationId": "ApiKeysController_revoke",
@@ -9447,6 +9492,40 @@
           "lastUsedAt",
           "revokedAt",
           "createdAt"
+        ]
+      },
+      "ServiceAccountGrantDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roleId": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "scopeId": {
+            "type": "string",
+            "nullable": true
+          },
+          "grantedAt": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "roleId",
+          "scopeType",
+          "scopeId",
+          "grantedAt",
+          "expiresAt"
         ]
       },
       "CreateServiceAccountDto": {

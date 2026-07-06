@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { requireSession, getToken, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
+import { parseDateInput } from '@/lib/parse-date-input';
 
 export type ApiKeyActionResult =
   | { status: 'idle' }
@@ -30,6 +31,22 @@ export interface ApiKeyView {
   lastUsedAt: string | null;
   revokedAt: string | null;
   createdAt: string;
+}
+
+export interface RoleView {
+  id: string;
+  description: string;
+  defaultScopeType: string;
+  permissions: string[];
+}
+
+export interface ServiceAccountGrantView {
+  id: string;
+  roleId: string;
+  scopeType: string;
+  scopeId: string | null;
+  grantedAt: string;
+  expiresAt: string | null;
 }
 
 export async function fetchServiceAccounts(): Promise<ServiceAccountView[]> {
@@ -98,14 +115,17 @@ export async function createServiceAccountAction(
 
 export async function issueApiKeyAction(
   serviceAccountId: string,
+  expiresAtInput?: string,
 ): Promise<IssueKeyResult> {
   const token = await requireSession('/admin/api-keys');
+
+  const expiresAt = parseDateInput(expiresAtInput ?? '');
 
   const { data, error, response } = await api.POST(
     '/service-accounts/{serviceAccountId}/api-keys',
     {
       params: { path: { serviceAccountId } },
-      body: {},
+      body: expiresAt ? { expiresAt } : {},
       headers: authHeaders(token),
     },
   );
@@ -137,6 +157,116 @@ export async function revokeApiKeyAction(
       return { status: 'error', message: 'No autorizado para revocar la clave.' };
     }
     return { status: 'error', message: 'No se pudo revocar la clave.' };
+  }
+
+  revalidatePath(`/admin/api-keys/${serviceAccountId}`);
+  return { status: 'success' };
+}
+
+export async function fetchRoles(): Promise<RoleView[]> {
+  const token = await getToken();
+  if (!token) return [];
+  const { data, error } = await api.GET('/roles', {
+    headers: authHeaders(token),
+  });
+  if (error !== undefined) return [];
+  return (data ?? []) as RoleView[];
+}
+
+export async function fetchServiceAccountGrants(
+  serviceAccountId: string,
+): Promise<ServiceAccountGrantView[]> {
+  const token = await getToken();
+  if (!token) return [];
+  const { data, error } = await api.GET(
+    '/service-accounts/{serviceAccountId}/grants',
+    {
+      params: { path: { serviceAccountId } },
+      headers: authHeaders(token),
+    },
+  );
+  if (error !== undefined) return [];
+  return (data ?? []) as ServiceAccountGrantView[];
+}
+
+export async function grantServiceAccountRoleAction(
+  serviceAccountId: string,
+  _prev: ApiKeyActionResult,
+  formData: FormData,
+): Promise<ApiKeyActionResult> {
+  const token = await requireSession(`/admin/api-keys/${serviceAccountId}`);
+
+  const roleId = String(formData.get('roleId') ?? '').trim();
+  const scopeType = String(formData.get('scopeType') ?? '').trim();
+  const scopeId = String(formData.get('scopeId') ?? '').trim();
+  const expiresAt = parseDateInput(String(formData.get('expiresAt') ?? ''));
+
+  if (!roleId || !scopeType) {
+    return { status: 'error', message: 'Rol y ámbito son obligatorios.' };
+  }
+  if (scopeType !== 'platform' && !scopeId) {
+    return {
+      status: 'error',
+      message: 'El ID de ámbito es obligatorio salvo para "Plataforma".',
+    };
+  }
+
+  const { error, response } = await api.POST('/grants', {
+    body: {
+      principalId: serviceAccountId,
+      roleId,
+      scopeType: scopeType as
+        | 'platform'
+        | 'organization'
+        | 'emergency'
+        | 'group'
+        | 'entity',
+      ...(scopeType !== 'platform' ? { scopeId } : {}),
+      ...(expiresAt ? { expiresAt } : {}),
+    },
+    headers: authHeaders(token),
+  });
+
+  if (error !== undefined) {
+    if (response.status === 401) {
+      return redirectToLogin(`/admin/api-keys/${serviceAccountId}`);
+    }
+    if (response.status === 403) {
+      return {
+        status: 'error',
+        message:
+          'No autorizado: no puedes conceder ese rol en ese ámbito (o sería escalada de privilegios).',
+      };
+    }
+    if (response.status === 400) {
+      return { status: 'error', message: 'Datos inválidos. Revisa el ámbito.' };
+    }
+    return { status: 'error', message: 'No se pudo conceder el permiso.' };
+  }
+
+  revalidatePath(`/admin/api-keys/${serviceAccountId}`);
+  return { status: 'success', message: 'Permiso concedido.' };
+}
+
+export async function revokeServiceAccountGrantAction(
+  grantId: string,
+  serviceAccountId: string,
+): Promise<ApiKeyActionResult> {
+  const token = await requireSession(`/admin/api-keys/${serviceAccountId}`);
+
+  const { error, response } = await api.DELETE('/grants/{id}', {
+    params: { path: { id: grantId } },
+    headers: authHeaders(token),
+  });
+
+  if (error !== undefined) {
+    if (response.status === 403) {
+      return {
+        status: 'error',
+        message: 'No autorizado para revocar este permiso.',
+      };
+    }
+    return { status: 'error', message: 'No se pudo revocar el permiso.' };
   }
 
   revalidatePath(`/admin/api-keys/${serviceAccountId}`);
