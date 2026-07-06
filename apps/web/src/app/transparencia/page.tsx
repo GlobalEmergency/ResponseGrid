@@ -39,6 +39,7 @@ export default async function TransparencyPage() {
       lead={tr.lead}
       illustration={<ShieldIllustration className="w-full" />}
       cta={{ heading: tr.cta_heading, body: tr.cta_body, label: tr.cta_button, href: GITHUB, external: true }}
+      currentPath="/transparencia"
     >
       <ContentSection heading={tr.verify_heading}>{tr.verify_body}</ContentSection>
       <ContentSection heading={tr.data_heading}>{tr.data_body}</ContentSection>

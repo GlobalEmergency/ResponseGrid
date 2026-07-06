@@ -50,7 +50,7 @@ export default async function DonarSelectorPage({ params }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} currentPath={`/e/${slug}/donar`} />
         <PageHeading title={td.choose_title} subtitle={td.choose_subtitle} />
         <div className="flex flex-col gap-3 px-4 pb-12 pt-6">
           <HelpActionRow

@@ -63,7 +63,7 @@ export default async function VoluntarioPage({ params }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} currentPath={`/e/${slug}/voluntario`} />
         <PageHeading
           title={t.voluntario.page_title}
           subtitle={t.voluntario.page_subtitle.replace('{emergencyName}', emergency.name)}

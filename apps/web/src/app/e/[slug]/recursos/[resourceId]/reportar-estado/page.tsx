@@ -49,6 +49,7 @@ export default async function ReportarEstadoPage({ params }: Props) {
           variant="action"
           slug={slug}
           backHref={`/e/${slug}/recursos/${resourceId}`}
+          currentPath={`/e/${slug}/recursos/${resourceId}/reportar-estado`}
         />
         <PageHeading title={t.reportar_validez.page_title} subtitle={emergency.name} />
         <div className="flex flex-col gap-6 px-5 pb-12 pt-6 lg:px-8">
