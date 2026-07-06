@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { api } from '@/lib/api';
-import { getToken, authHeaders, loginHref as buildLoginHref } from '@/lib/auth';
+import { loginHref as buildLoginHref } from '@/lib/auth';
 import { getT } from '@/i18n/server';
+import { getMe, getNotificationUnread } from '@/lib/navigation-data';
 import { BrandLogo } from '@/components/molecules/brand-logo';
 import { LanguageSwitcher } from '@/components/molecules/language-switcher';
 import { AccountControl } from '@/components/molecules/account-control';
@@ -28,20 +28,14 @@ const STATUS_DOT: Record<'active' | 'paused' | 'closed', string> = {
 export async function AppBar({ variant, slug, emergency, backHref }: AppBarProps) {
   const { t } = await getT();
   const ta = t.appbar;
-  const token = await getToken();
 
-  let user: { name: string; email: string; isAdmin: boolean } | null = null;
-  let unreadCount = 0;
-  if (token != null) {
-    const [meRes, notifRes] = await Promise.all([
-      api.GET('/auth/me', { headers: authHeaders(token) }),
-      api.GET('/notifications/mine', { headers: authHeaders(token) }),
-    ]);
-    if (meRes.data != null) {
-      user = { name: meRes.data.name, email: meRes.data.email, isAdmin: meRes.data.isAdmin === true };
-    }
-    if (notifRes.data != null) unreadCount = notifRes.data.unreadCount;
-  }
+  // getMe()/getNotificationUnread() are wrapped in React `cache()` (see
+  // navigation-data.ts), so this dedupes with any other consumer that reads
+  // the same principal/notifications data within this request instead of
+  // re-hitting /auth/me and /notifications/mine per page (#277).
+  const [me, unreadCount] = await Promise.all([getMe(), getNotificationUnread()]);
+  const user =
+    me != null ? { name: me.name, email: me.email, isAdmin: me.isAdmin === true } : null;
 
   const currentPath = slug != null ? `/e/${slug}` : '/';
   const loginHref = buildLoginHref(currentPath);
