@@ -54,6 +54,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Type-aware lint resolves @globalemergency/warehouse-core types from its
+      # built dist, so build it first.
+      - name: Build — warehouse-core
+        run: pnpm --filter @globalemergency/warehouse-core build
+
       # api lint script has --fix; in CI we want read-only + fail on warnings
       - name: Lint — api
         run: pnpm --filter api exec eslint "{src,apps,libs,test}/**/*.ts" --max-warnings=0
@@ -99,6 +104,11 @@ jobs:
 
       - name: Build — api-client
         run: pnpm --filter @reliefhub/api-client build
+
+      # warehouse-core is a workspace dependency of api: build it (dist/cjs +
+      # dist/esm) before nest build resolves it via the exports map.
+      - name: Build — warehouse-core
+        run: pnpm --filter @globalemergency/warehouse-core build
 
       - name: Build — api (nest build / tsc)
         run: pnpm --filter api build
@@ -150,6 +160,11 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      # api consumes @globalemergency/warehouse-core via its built dist
+      # (ts-jest type resolution + node runtime), so build it first.
+      - name: Build — warehouse-core
+        run: pnpm --filter @globalemergency/warehouse-core build
 
       - name: Run tests — api
         env:
@@ -207,6 +222,11 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      # api consumes @globalemergency/warehouse-core via its built dist, so
+      # build it before the e2e suite runs.
+      - name: Build — warehouse-core
+        run: pnpm --filter @globalemergency/warehouse-core build
 
       - name: Run e2e tests — api
         env:

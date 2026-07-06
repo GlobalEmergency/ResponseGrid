@@ -1,6 +1,6 @@
 import { Resource } from './resource';
-import { SupplyLine } from '../../supplies/domain/supply-line';
-import { Category } from '../../supplies/domain/category';
+import { SupplyLine } from '@globalemergency/warehouse-core/kernel';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 import { ResourceId } from './resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { ResourceType } from './resource-enums';

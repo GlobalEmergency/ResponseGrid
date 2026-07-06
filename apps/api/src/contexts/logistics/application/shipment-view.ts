@@ -1,5 +1,5 @@
 import { Shipment } from '../domain/shipment';
-import { SupplyLineSnapshot } from '../../supplies/domain/supply-line';
+import { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
 
 export interface ShipmentItemView {
   name: string;

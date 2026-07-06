@@ -1,6 +1,6 @@
 import { ListCategories } from './list-categories';
-import { Category } from '../domain/category';
-import { CategoryDefinition } from '../domain/category-definition';
+import { Category } from '@globalemergency/warehouse-core/kernel';
+import { CategoryDefinition } from '@globalemergency/warehouse-core/kernel';
 import { CategoryRepository } from '../domain/ports/category.repository';
 
 const FOOD: CategoryDefinition = {

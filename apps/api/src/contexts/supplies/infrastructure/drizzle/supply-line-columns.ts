@@ -1,6 +1,6 @@
 import { integer, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { Category } from '../../domain/category';
-import { SupplyLineSnapshot } from '../../domain/supply-line';
+import { Category } from '@globalemergency/warehouse-core/kernel';
+import { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
 
 /**
  * The shared Drizzle columns of a supply line — the canonical material line of

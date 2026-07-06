@@ -7,7 +7,7 @@ import {
   IntakeResourceInfo,
 } from '../domain/ports/intake-resource-lookup';
 import { Category } from '../domain/offer-enums';
-import { SupplyLineProps } from '../../supplies/domain/supply-line';
+import { SupplyLineProps } from '@globalemergency/warehouse-core/kernel';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const RESOURCE = '33333333-3333-4333-8333-333333333331';

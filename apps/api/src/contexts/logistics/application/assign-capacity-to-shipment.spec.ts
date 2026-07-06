@@ -5,7 +5,7 @@ import { FakeShipmentContainerPort } from '../infrastructure/fake-shipment-conta
 import { LogisticsEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { ShipmentId } from '../domain/shipment-id';
 import { CarrierType, ShipmentStatus } from '../domain/shipment-enums';
-import { Category } from '../../supplies/domain/category';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 import { ShipmentNotFoundError } from './shipment-not-found.error';
 import { InvalidShipmentTransitionError } from '../domain/shipment-errors';
 

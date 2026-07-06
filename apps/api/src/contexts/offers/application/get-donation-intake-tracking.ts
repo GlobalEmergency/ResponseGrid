@@ -1,5 +1,5 @@
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { Category } from '../../supplies/domain/category';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 import { DonationIntakeRepository } from '../domain/ports/donation-intake.repository';
 import { IntakeResourceLookup } from '../domain/ports/intake-resource-lookup';
 import { DonationIntakeNotFoundError } from './donation-intake-not-found.error';

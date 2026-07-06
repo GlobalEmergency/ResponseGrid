@@ -1,9 +1,9 @@
 import { Shipment, CarrierPrincipal } from './shipment';
 import { ShipmentId } from './shipment-id';
-import { SupplyLine } from '../../supplies/domain/supply-line';
+import { SupplyLine } from '@globalemergency/warehouse-core/kernel';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { CarrierType, ShipmentStatus } from './shipment-enums';
-import { Category } from '../../supplies/domain/category';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 import {
   InvalidShipmentRouteError,
   InvalidShipmentTransitionError,

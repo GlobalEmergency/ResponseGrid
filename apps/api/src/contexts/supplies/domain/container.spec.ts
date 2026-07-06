@@ -11,8 +11,8 @@ import {
   ContainerSealedError,
   ContainerValidationError,
 } from './container-errors';
-import { SupplyLine } from './supply-line';
-import { Category } from './category';
+import { SupplyLine } from '@globalemergency/warehouse-core/kernel';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const RESOURCE = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';

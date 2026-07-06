@@ -6,11 +6,11 @@ import { ResourceId } from '../domain/resource-id';
 import { ResourceType } from '../domain/resource-enums';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { ResourceMembershipReader } from '../domain/ports/membership-reader';
-import { Category } from '../../supplies/domain/category';
-import { SupplyLineProps } from '../../supplies/domain/supply-line';
+import { Category } from '@globalemergency/warehouse-core/kernel';
+import { SupplyLineProps } from '@globalemergency/warehouse-core/kernel';
 import { ResourceNotFoundError } from './resource-not-found.error';
 import { UnauthorizedInventoryChangeError } from './unauthorized-inventory-change.error';
-import { SupplyLineValidationError } from '../../supplies/domain/supply-line';
+import { SupplyLineValidationError } from '@globalemergency/warehouse-core/kernel';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const OWNER_ID = 'owner-user-0000-0000-000000000000';

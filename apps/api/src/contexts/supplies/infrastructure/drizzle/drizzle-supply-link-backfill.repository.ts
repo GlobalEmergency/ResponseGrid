@@ -1,6 +1,6 @@
 import { and, inArray, isNull, sql, eq } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
-import { SupplyLineSnapshot } from '../../domain/supply-line';
+import { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
 import {
   SupplyLineSource,
   SupplyLinkBackfillRepository,

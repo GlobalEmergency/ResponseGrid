@@ -1,5 +1,5 @@
 import { CategoriesAdminController } from './categories-admin.controller';
-import { CategoryDefinition } from '../../domain/category-definition';
+import { CategoryDefinition } from '@globalemergency/warehouse-core/kernel';
 
 describe('CategoriesAdminController', () => {
   const category: CategoryDefinition = {

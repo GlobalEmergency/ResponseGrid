@@ -1,5 +1,5 @@
 import { CategoriesController } from './categories.controller';
-import { CategoryDefinition } from '../../domain/category-definition';
+import { CategoryDefinition } from '@globalemergency/warehouse-core/kernel';
 
 describe('CategoriesController', () => {
   const categories: CategoryDefinition[] = [

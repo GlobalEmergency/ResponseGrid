@@ -9,8 +9,8 @@ import {
   ContainerStatus,
   ContainerType,
 } from '../../domain/container-enums';
-import { SupplyLine } from '../../domain/supply-line';
-import { Category } from '../../domain/category';
+import { SupplyLine } from '@globalemergency/warehouse-core/kernel';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import type { Pool } from 'pg';
 

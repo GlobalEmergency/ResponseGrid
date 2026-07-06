@@ -6,7 +6,7 @@ import { OfferEmergencyStatusReader } from '../domain/ports/emergency-status-rea
 import { IntakeResourceLookup } from '../domain/ports/intake-resource-lookup';
 import { DonorAccountPort } from '../domain/ports/donor-account.port';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
-import { SupplyLineProps } from '../../supplies/domain/supply-line';
+import { SupplyLineProps } from '@globalemergency/warehouse-core/kernel';
 import {
   INTAKE_ACTIVE_STATUS,
   resolveIntakeTargetResource,

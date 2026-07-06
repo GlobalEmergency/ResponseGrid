@@ -1,5 +1,8 @@
-import { Category } from './category';
-import { SupplyLine, SupplyLineValidationError } from './supply-line';
+import { Category } from '@globalemergency/warehouse-core/kernel';
+import {
+  SupplyLine,
+  SupplyLineValidationError,
+} from '@globalemergency/warehouse-core/kernel';
 
 describe('SupplyLine', () => {
   it('creates a valid line and trims the name', () => {

@@ -6,7 +6,7 @@ import {
   ContainerStatus,
   ContainerType,
 } from '../domain/container-enums';
-import { Category } from '../domain/category';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const OTHER_EM = '22222222-2222-4222-8222-222222222222';

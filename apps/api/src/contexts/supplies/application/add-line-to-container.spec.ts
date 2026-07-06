@@ -6,7 +6,7 @@ import { Container } from '../domain/container';
 import { ContainerId } from '../domain/container-id';
 import { ContainerType } from '../domain/container-enums';
 import { ContainerSealedError } from '../domain/container-errors';
-import { Category } from '../domain/category';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { ContainerNotFoundError } from './container-not-found.error';
 

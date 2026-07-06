@@ -3,7 +3,7 @@ import {
   SupplyLine,
   SupplyLineProps,
   SupplyLineSnapshot,
-} from '../../supplies/domain/supply-line';
+} from '@globalemergency/warehouse-core/kernel';
 
 /** Persisted intake row: shared {@link SupplyLine} + id and display order. */
 export interface IntakeLineSnapshot extends SupplyLineSnapshot {

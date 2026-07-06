@@ -4,9 +4,9 @@ import {
   CategoryProtectedError,
   CategoryValidationError,
 } from './category-admin.errors';
-import { isCoreCategory } from '../domain/category';
+import { isCoreCategory } from '@globalemergency/warehouse-core/kernel';
 import { CategoryRepository } from '../domain/ports/category.repository';
-import { CategoryDefinition } from '../domain/category-definition';
+import { CategoryDefinition } from '@globalemergency/warehouse-core/kernel';
 
 export interface UpdateCategoryCommand {
   labelEs?: string | undefined;

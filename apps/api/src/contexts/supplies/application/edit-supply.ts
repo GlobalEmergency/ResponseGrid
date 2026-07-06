@@ -9,7 +9,7 @@ import {
   SupplyTranslationInput,
 } from '../domain/ports/supply.repository';
 import { CategoryRepository } from '../domain/ports/category.repository';
-import { getCategoryPrefix } from '../domain/category';
+import { getCategoryPrefix } from '@globalemergency/warehouse-core/kernel';
 
 export interface EditSupplyCommand {
   id: string;

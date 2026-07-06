@@ -8,7 +8,7 @@ import { NeedId } from '../domain/need-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Priority, Category, PersonnelSkill } from '../domain/need-enums';
 import { Location } from '../../../shared/domain/location';
-import { SupplyLine } from '../../supplies/domain/supply-line';
+import { SupplyLine } from '@globalemergency/warehouse-core/kernel';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 import { LocationSensitivity } from '../../../shared/domain/location-sensitivity';
 import { Author, AuthorProps } from '../../../shared/domain/author';

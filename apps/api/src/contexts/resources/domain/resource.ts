@@ -26,7 +26,7 @@ import { ResourceDisputeResolved } from './events/resource-dispute-resolved';
 import {
   SupplyLine,
   SupplyLineSnapshot,
-} from '../../supplies/domain/supply-line';
+} from '@globalemergency/warehouse-core/kernel';
 import { Author, AuthorSnapshot } from '../../../shared/domain/author';
 
 export type Provenance = {

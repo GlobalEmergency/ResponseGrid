@@ -12,7 +12,7 @@ import {
   ContainerSealedError,
   ContainerValidationError,
 } from '../../domain/container-errors';
-import { SupplyLineValidationError } from '../../domain/supply-line';
+import { SupplyLineValidationError } from '@globalemergency/warehouse-core/kernel';
 import { SupplyValidationError } from '../../domain/supply';
 import { SupplyAliasValidationError } from '../../domain/supply-alias';
 import {
