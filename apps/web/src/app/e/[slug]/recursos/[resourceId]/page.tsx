@@ -94,7 +94,7 @@ export default async function RecipientResourcePage({ params }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl bg-surface">
-        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} currentPath={`/e/${slug}/recursos/${resourceId}`} />
         <PageHeading title={resource.name} />
         <div className="flex flex-col gap-5 px-4 pb-12 pt-5 lg:gap-6 lg:px-8">
           <PublicResourceCard

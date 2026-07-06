@@ -73,7 +73,7 @@ export default async function DonarPage({ params, searchParams }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} currentPath={`/e/${slug}/donar/ofrecer`} />
         <PageHeading
           title={t.donar.page_title}
           subtitle={t.donar.page_subtitle.replace('{emergencyName}', emergency.name)}

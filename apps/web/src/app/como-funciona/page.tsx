@@ -44,6 +44,7 @@ export default async function HowItWorksPage() {
       lead={h.lead}
       illustration={<StepsIllustration className="w-full" />}
       cta={{ heading: h.cta_heading, body: h.cta_body, label: h.cta_button, href: '/#emergencias' }}
+      currentPath="/como-funciona"
     >
       <ol className="grid gap-4 sm:grid-cols-3">
         {steps.map((s) => (

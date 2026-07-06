@@ -17,12 +17,14 @@ interface ContentPageProps {
   illustration: ReactNode;
   children: ReactNode;
   cta: Cta;
+  /** Exact route this page is rendered at — see AppBarProps.currentPath (#278). */
+  currentPath?: string;
 }
 
-export async function ContentPage({ overline, h1, lead, illustration, children, cta }: ContentPageProps) {
+export async function ContentPage({ overline, h1, lead, illustration, children, cta, currentPath }: ContentPageProps) {
   return (
     <main className="flex-1 bg-surface">
-      <AppBar variant="content" />
+      <AppBar variant="content" currentPath={currentPath} />
 
       <div className="mx-auto w-full max-w-3xl bg-surface">
         <article className="px-5 pb-16 pt-8 lg:px-8 lg:pt-10">

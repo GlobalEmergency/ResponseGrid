@@ -64,7 +64,7 @@ export default async function PeticionPage({ params, searchParams }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} currentPath={`/e/${slug}/peticion`} />
         <PageHeading
           title={t.peticion.page_title}
           subtitle={t.peticion.page_subtitle.replace('{emergencyName}', emergency.name)}

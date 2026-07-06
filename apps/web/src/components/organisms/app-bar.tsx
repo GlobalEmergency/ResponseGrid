@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { getToken, authHeaders, loginHref as buildLoginHref } from '@/lib/auth';
+import { resolveAppBarCurrentPath } from '@/lib/app-bar-context';
 import { getT } from '@/i18n/server';
 import { BrandLogo } from '@/components/molecules/brand-logo';
 import { LanguageSwitcher } from '@/components/molecules/language-switcher';
@@ -17,6 +18,13 @@ interface AppBarProps {
   slug?: string;
   emergency?: { name: string; status: 'active' | 'paused' | 'closed' };
   backHref?: string;
+  /**
+   * Exact route the page is rendered at, used to build the login `next`
+   * param so "Iniciar sesión" returns here instead of collapsing to the
+   * emergency/site root (#278). Optional for backward compatibility; pages
+   * that don't pass it keep the previous (imprecise) fallback behavior.
+   */
+  currentPath?: string;
 }
 
 const STATUS_DOT: Record<'active' | 'paused' | 'closed', string> = {
@@ -25,7 +33,7 @@ const STATUS_DOT: Record<'active' | 'paused' | 'closed', string> = {
   closed: 'bg-white/50',
 };
 
-export async function AppBar({ variant, slug, emergency, backHref }: AppBarProps) {
+export async function AppBar({ variant, slug, emergency, backHref, currentPath }: AppBarProps) {
   const { t } = await getT();
   const ta = t.appbar;
   const token = await getToken();
@@ -43,8 +51,7 @@ export async function AppBar({ variant, slug, emergency, backHref }: AppBarProps
     if (notifRes.data != null) unreadCount = notifRes.data.unreadCount;
   }
 
-  const currentPath = slug != null ? `/e/${slug}` : '/';
-  const loginHref = buildLoginHref(currentPath);
+  const loginHref = buildLoginHref(resolveAppBarCurrentPath(slug, currentPath));
 
   const infoLinks: PublicLink[] = [
     { href: '/como-funciona', label: ta.how_it_works },
