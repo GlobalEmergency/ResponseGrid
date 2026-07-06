@@ -43,6 +43,29 @@ export const es = {
       copyright: '© {year} Global Emergency · Código abierto (MIT)',
       built_by: 'Hecho por voluntarios',
       aria_label: 'Pie de página',
+      bots_heading: 'Ayuda por chat',
+      github: 'Código en GitHub',
+      github_aria: 'Repositorio de ResponseGrid en GitHub',
+    },
+
+    // Asistentes de chat (bots de Telegram y WhatsApp) — promocionados en el
+    // footer (siempre visible), en la home y en un banner de la emergencia.
+    bots: {
+      telegram: 'Telegram',
+      whatsapp: 'WhatsApp',
+      open_telegram: 'Abrir en Telegram',
+      open_whatsapp: 'Abrir en WhatsApp',
+      channels_aria: 'Canales de ayuda por chat',
+      // Sección de la home
+      home_overline: 'Sin apps ni registros',
+      home_heading: 'Dona y consulta por WhatsApp o Telegram',
+      home_body:
+        'Nuestros asistentes te guían desde el chat que ya usas: dona material, consulta puntos de acopio verificados y comprueba qué se necesita ahora mismo. Al instante, gratis y sin instalar nada.',
+      // Banner temporizado de la página de emergencia
+      banner_heading: '¿Prefieres hacerlo por chat?',
+      banner_body:
+        'Consulta puntos de acopio y dona por WhatsApp o Telegram, al instante y sin registros.',
+      banner_dismiss: 'Cerrar',
     },
 
     menu_aria: 'Menú',
@@ -235,6 +258,10 @@ export const es = {
       {
         q: '¿Cómo puedo ayudar además de donar material?',
         a: 'Puedes ofrecer un punto logístico o almacén, poner tu capacidad de transporte, apuntarte como voluntario o registrar una petición desde «¿Cómo quieres colaborar?».',
+      },
+      {
+        q: '¿Puedo donar o consultar por WhatsApp o Telegram?',
+        a: 'Sí. ResponseGrid tiene asistentes de chat gratuitos: por Telegram en https://t.me/donacionesvenezuela_bot y por WhatsApp en https://wa.me/15559386039. Te guían para donar material, consultar puntos de acopio verificados y ver qué se necesita ahora, sin instalar nada ni registrarte.',
       },
     ],
     status_active: 'Emergencia activa',
