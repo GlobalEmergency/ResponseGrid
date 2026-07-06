@@ -285,11 +285,13 @@ export async function revokeApiKeyAction(keyId: string): Promise<ActionResult> {
 }
 
 // Grants of a service account — the authority its keys inherit (any scope).
+// Returns `null` when the load failed, so the UI can tell "couldn't load" apart
+// from "genuinely has no permissions".
 export async function fetchServiceAccountGrants(
   serviceAccountId: string,
-): Promise<ServiceAccountGrantView[]> {
+): Promise<ServiceAccountGrantView[] | null> {
   const token = await getToken();
-  if (!token) return [];
+  if (!token) return null;
   const { data, error } = await api.GET(
     '/service-accounts/{serviceAccountId}/grants',
     {
@@ -297,7 +299,7 @@ export async function fetchServiceAccountGrants(
       headers: authHeaders(token),
     },
   );
-  if (error !== undefined) return [];
+  if (error !== undefined) return null;
   return (data ?? []) as ServiceAccountGrantView[];
 }
 

@@ -116,6 +116,7 @@ function ServiceAccountKeys({
   const [open, setOpen] = useState(false);
   const [keys, setKeys] = useState<ApiKeyView[] | null>(null);
   const [grants, setGrants] = useState<ServiceAccountGrantView[] | null>(null);
+  const [grantsError, setGrantsError] = useState(false);
   const [secret, setSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -126,14 +127,17 @@ function ServiceAccountKeys({
     if (next && keys === null) refresh();
   }
 
+  function reloadGrants() {
+    return fetchServiceAccountGrants(saId).then((next) => {
+      setGrantsError(next === null);
+      setGrants(next ?? []);
+    });
+  }
+
   function refresh() {
     startTransition(async () => {
-      const [nextKeys, nextGrants] = await Promise.all([
-        fetchApiKeys(saId),
-        fetchServiceAccountGrants(saId),
-      ]);
+      const [nextKeys] = await Promise.all([fetchApiKeys(saId), reloadGrants()]);
       setKeys(nextKeys);
-      setGrants(nextGrants);
     });
   }
 
@@ -182,7 +186,7 @@ function ServiceAccountKeys({
         setRoleId('');
         setScopeId('');
         setGrantExpiresAt('');
-        setGrants(await fetchServiceAccountGrants(saId));
+        await reloadGrants();
         // The page's server-rendered "Roles concedidos" list also shows this
         // service account's grants — refresh it so the two lists don't disagree.
         router.refresh();
@@ -197,7 +201,7 @@ function ServiceAccountKeys({
     startTransition(async () => {
       const result = await revokeServiceAccountGrantAction(grantId);
       if (result.status === 'success') {
-        setGrants(await fetchServiceAccountGrants(saId));
+        await reloadGrants();
         router.refresh();
       } else if (result.status === 'error') {
         setError(result.message);
@@ -299,7 +303,11 @@ function ServiceAccountKeys({
               </span>
             </div>
 
-            {grants === null ? (
+            {grantsError ? (
+              <p className="text-sm text-red-700">
+                No se pudieron cargar los permisos.
+              </p>
+            ) : grants === null ? (
               <p className="text-sm text-muted">Cargando…</p>
             ) : grants.length === 0 ? (
               <p className="text-sm text-muted">Sin permisos concedidos.</p>

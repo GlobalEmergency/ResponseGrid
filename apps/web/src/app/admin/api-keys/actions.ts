@@ -173,11 +173,17 @@ export async function fetchRoles(): Promise<RoleView[]> {
   return (data ?? []) as RoleView[];
 }
 
+/**
+ * Returns the service account's grants, or `null` when the load itself failed
+ * (no session / 4xx / 5xx). Callers must distinguish `null` (couldn't load) from
+ * `[]` (genuinely no permissions) so a failed fetch isn't shown as "this key can
+ * do nothing".
+ */
 export async function fetchServiceAccountGrants(
   serviceAccountId: string,
-): Promise<ServiceAccountGrantView[]> {
+): Promise<ServiceAccountGrantView[] | null> {
   const token = await getToken();
-  if (!token) return [];
+  if (!token) return null;
   const { data, error } = await api.GET(
     '/service-accounts/{serviceAccountId}/grants',
     {
@@ -185,7 +191,7 @@ export async function fetchServiceAccountGrants(
       headers: authHeaders(token),
     },
   );
-  if (error !== undefined) return [];
+  if (error !== undefined) return null;
   return (data ?? []) as ServiceAccountGrantView[];
 }
 

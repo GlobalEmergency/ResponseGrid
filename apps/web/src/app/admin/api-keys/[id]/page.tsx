@@ -18,6 +18,7 @@ import { formatDate } from '@/lib/format-date';
 import { PageHeader } from '@/components/molecules/page-header';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { EffectivePermissions } from '@/components/molecules/effective-permissions';
+import { ErrorMessage } from '@/components/atoms/error-message';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,7 +44,7 @@ export default async function ServiceAccountDetailPage({ params }: Props) {
   if (meRes.status === 401 || !me) return redirectToLogin(`/admin/api-keys/${id}`);
   if (!me.isAdmin) redirect('/');
 
-  const [accounts, keys, roles, grants] = await Promise.all([
+  const [accounts, keys, roles, grantsResult] = await Promise.all([
     fetchServiceAccounts(),
     fetchApiKeys(id),
     fetchRoles(),
@@ -52,6 +53,8 @@ export default async function ServiceAccountDetailPage({ params }: Props) {
   const sa = accounts.find((a) => a.id === id);
   if (!sa) notFound();
 
+  const grantsFailed = grantsResult === null;
+  const grants = grantsResult ?? [];
   const effective = computeEffectivePermissions(grants, roles);
 
   return (
@@ -126,7 +129,9 @@ export default async function ServiceAccountDetailPage({ params }: Props) {
           </p>
         </div>
 
-        {grants.length === 0 ? (
+        {grantsFailed ? (
+          <ErrorMessage message="No se pudieron cargar los permisos de esta cuenta. Recarga la página para reintentarlo." />
+        ) : grants.length === 0 ? (
           <EmptyState title="Esta cuenta no tiene permisos concedidos. Sus claves solo pueden leer datos públicos." />
         ) : (
           <ul className="flex flex-col gap-2" role="list">
