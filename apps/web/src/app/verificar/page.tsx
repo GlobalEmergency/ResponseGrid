@@ -40,6 +40,7 @@ export default async function VerifyPage() {
       lead={v.lead}
       illustration={<VerifyIllustration className="w-full" />}
       cta={{ heading: v.cta_heading, body: v.cta_body, label: v.cta_button, href: '/#emergencias' }}
+      currentPath="/verificar"
     >
       <ContentSection heading={v.levels_heading}>
         <div className="mt-1 grid gap-3 sm:grid-cols-3">

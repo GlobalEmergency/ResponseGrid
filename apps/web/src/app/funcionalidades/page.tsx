@@ -42,6 +42,7 @@ export default async function FeaturesPage() {
         lead={f.lead}
         illustration={<CoordinationIllustration className="w-full" />}
         cta={{ heading: f.cta_heading, body: f.cta_body, label: f.cta_button, href: '/#emergencias' }}
+        currentPath="/funcionalidades"
       >
         {f.sections.map((s) => (
           <ContentSection key={s.heading} heading={s.heading}>

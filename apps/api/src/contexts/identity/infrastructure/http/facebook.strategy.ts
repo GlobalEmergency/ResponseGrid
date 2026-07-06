@@ -23,7 +23,18 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       clientID: clientID || PLACEHOLDER,
       clientSecret: clientSecret || PLACEHOLDER,
       callbackURL: `${process.env.OAUTH_CALLBACK_BASE ?? 'http://localhost:3000'}/auth/facebook/callback`,
+      // Request `public_profile` + `email`. `public_profile` is always granted
+      // and "supported", so it satisfies Facebook's "app needs at least one
+      // supported permission" check; `email` is what we actually consume (the
+      // Graph profile has no email without it, so validate() would throw).
+      scope: ['public_profile', 'email'],
       profileFields: ['id', 'emails', 'name', 'displayName'],
+      // Sign Graph API calls with appsecret_proof so a stolen user token cannot
+      // be replayed without the app secret (Facebook-recommended hardening).
+      enableProof: true,
+      // Pin a current Graph API version: passport-facebook defaults to v3.2
+      // (2018), long past Facebook's ~2-year support window, so /me is rejected.
+      graphAPIVersion: 'v21.0',
     };
 
     super(options);
@@ -53,17 +64,18 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
         .join(' ') ||
       email;
 
-    // SECURITY: passport-facebook does not expose a per-email verification
-    // flag, so we cannot assert the provider verified ownership of this email.
-    // We therefore treat Facebook emails as unverified: the identity can still
-    // create a brand-new account or reuse its own prior link, but it can never
-    // auto-unify into a pre-existing account by email match (takeover vector).
+    // Facebook's Graph API only returns an `email` the user has CONFIRMED on
+    // their Facebook account (unconfirmed emails are never returned), so a
+    // returned email is effectively provider-verified. We mark it verified to
+    // allow auto-linking to an existing social-only account by email match.
+    // Note: password-backed accounts are still protected — AuthenticateWithProvider
+    // raises AccountLinkRequiresAuthError for those regardless of this flag.
     return this.authenticateWithProvider.execute({
       provider: AuthProvider.Facebook,
       providerUserId: profile.id,
       email,
       name,
-      emailVerified: false,
+      emailVerified: true,
     });
   }
 }

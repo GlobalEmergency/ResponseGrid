@@ -342,7 +342,7 @@ for (const p of items) {
 
   return (
     <main className="flex-1 bg-surface">
-      <AppBar variant="content" />
+      <AppBar variant="content" currentPath="/docs" />
 
       <div className="mx-auto w-full max-w-md bg-surface lg:max-w-6xl">
         <div className="px-5 pb-16 pt-8 lg:px-8 lg:pt-10">

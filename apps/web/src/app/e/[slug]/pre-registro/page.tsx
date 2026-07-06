@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { LinkButton } from '@/components/atoms/link-button';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { api } from '@/lib/api';
 import { getMe } from '@/lib/navigation-data';
@@ -77,7 +78,7 @@ export default async function PreRegistroPage({ params, searchParams }: Props) {
     return (
       <main className="flex-1 bg-surface">
         <div className="mx-auto w-full max-w-3xl">
-          <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+          <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} currentPath={`/e/${slug}/pre-registro`} />
           <PageHeading title={tp.pick_title} subtitle={tp.pick_hint} />
           <div className="flex flex-col gap-5 px-4 pb-12 pt-6">
             <form method="get" role="search" className="flex gap-2">
@@ -160,6 +161,7 @@ export default async function PreRegistroPage({ params, searchParams }: Props) {
           variant="action"
           slug={slug}
           backHref={`/e/${slug}/pre-registro`}
+          currentPath={`/e/${slug}/pre-registro?resourceId=${resourceId}`}
         />
         <PageHeading
           title={tp.page_title}
@@ -197,12 +199,9 @@ export default async function PreRegistroPage({ params, searchParams }: Props) {
                   resource === undefined ? tp.no_point_body : tp.not_eligible_body
                 }
               />
-              <Link
-                href={`/e/${slug}/pre-registro`}
-                className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-white bg-navy rounded-lg hover:bg-navy-700 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors"
-              >
+              <LinkButton href={`/e/${slug}/pre-registro`} fullWidth>
                 {tp.no_point_cta}
-              </Link>
+              </LinkButton>
             </>
           )}
         </div>

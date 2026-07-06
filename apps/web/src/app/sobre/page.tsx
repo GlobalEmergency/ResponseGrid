@@ -39,6 +39,7 @@ export default async function AboutPage() {
       lead={a.lead}
       illustration={<CoordinationIllustration className="w-full" />}
       cta={{ heading: a.cta_heading, body: a.cta_body, label: a.cta_button, href: '/#emergencias' }}
+      currentPath="/sobre"
     >
       <div className="grid grid-cols-3 gap-3">
         {stats.map((s) => (

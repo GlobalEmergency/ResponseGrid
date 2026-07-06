@@ -23,7 +23,7 @@ export default async function OnboardingPage({ searchParams }: Props) {
 
   return (
     <main className="flex-1 bg-surface">
-      <AppBar variant="content" />
+      <AppBar variant="content" currentPath="/auth/onboarding" />
 
       <div className="mx-auto w-full max-w-3xl">
         <div className="flex flex-col gap-8 px-5 pb-12 pt-6 lg:px-8">

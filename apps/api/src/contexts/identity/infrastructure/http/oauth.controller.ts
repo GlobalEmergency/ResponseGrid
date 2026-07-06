@@ -1,4 +1,12 @@
-import { Controller, Get, Req, Res, UseGuards, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Req,
+  Res,
+  UseGuards,
+  UseFilters,
+  Logger,
+} from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import {
@@ -7,6 +15,7 @@ import {
   readCookie,
 } from './oauth-state.guard';
 import { OAUTH_NEXT_COOKIE, sanitizeNextPath } from './oauth-next';
+import { OAuthExceptionFilter } from './oauth-exception.filter';
 
 /**
  * OAuth 2.0 redirect-based endpoints for Google and Facebook login.
@@ -30,6 +39,7 @@ import { OAUTH_NEXT_COOKIE, sanitizeNextPath } from './oauth-next';
  */
 @ApiExcludeController()
 @Controller('auth')
+@UseFilters(OAuthExceptionFilter)
 export class OAuthController {
   private readonly logger = new Logger(OAuthController.name);
   private readonly frontendUrl =

@@ -48,7 +48,7 @@ export default async function RegistrarPage({ params }: Props) {
   return (
     <main className="flex-1 bg-surface">
       <div className="mx-auto w-full max-w-3xl">
-        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} />
+        <AppBar variant="action" slug={slug} backHref={`/e/${slug}`} currentPath={`/e/${slug}/registrar`} />
         <PageHeading
           title={t.registrar.page_title}
           subtitle={t.registrar.page_subtitle.replace('{emergencyName}', emergency.name)}
