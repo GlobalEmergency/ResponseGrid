@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { LinkButton } from '@/components/atoms/link-button';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { api } from '@/lib/api';
 import { getMe } from '@/lib/navigation-data';
@@ -197,12 +198,9 @@ export default async function PreRegistroPage({ params, searchParams }: Props) {
                   resource === undefined ? tp.no_point_body : tp.not_eligible_body
                 }
               />
-              <Link
-                href={`/e/${slug}/pre-registro`}
-                className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-white bg-navy rounded-lg hover:bg-navy-700 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors"
-              >
+              <LinkButton href={`/e/${slug}/pre-registro`} fullWidth>
                 {tp.no_point_cta}
-              </Link>
+              </LinkButton>
             </>
           )}
         </div>

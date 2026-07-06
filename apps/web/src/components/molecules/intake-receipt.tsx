@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { LinkButton } from '@/components/atoms/link-button';
 import { QRCodeSVG } from 'qrcode.react';
 
 /**
@@ -78,21 +78,18 @@ export function IntakeReceipt({
       </div>
 
       <div className="flex flex-col gap-3">
-        <Link
+        <LinkButton
           href={primaryHref}
-          className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-white bg-navy rounded-lg hover:bg-navy-700 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors"
+          fullWidth
           onClick={() => {
             window.location.href = primaryHref;
           }}
         >
           {primaryLabel}
-        </Link>
-        <Link
-          href={secondaryHref}
-          className="flex items-center justify-center w-full py-4 px-6 text-base font-semibold text-ink bg-white border-2 border-navy rounded-lg hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors"
-        >
+        </LinkButton>
+        <LinkButton href={secondaryHref} variant="secondary" fullWidth>
           {secondaryLabel}
-        </Link>
+        </LinkButton>
       </div>
     </section>
   );
