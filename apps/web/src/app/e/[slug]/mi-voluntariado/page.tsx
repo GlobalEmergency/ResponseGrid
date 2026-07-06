@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { requireSession } from '@/lib/auth';
 import { getEmergencyBySlug } from '@/lib/emergencies';
@@ -9,6 +8,7 @@ import { EmptyState } from '@/components/molecules/empty-state';
 import { Badge } from '@/components/atoms/badge';
 import { AppBar } from '@/components/organisms/app-bar';
 import { PageHeading } from '@/components/atoms/page-heading';
+import { LinkButton } from '@/components/atoms/link-button';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
@@ -94,12 +94,13 @@ export default async function MiVoluntariadoPage({ params }: Props) {
               <p className="text-sm text-muted">
                 {ta.not_registered_description}
               </p>
-              <Link
+              <LinkButton
                 href={`/e/${slug}/voluntario`}
-                className="inline-flex items-center justify-center self-center rounded-lg border-2 border-navy px-5 py-3 text-sm font-semibold text-white bg-navy hover:bg-navy-700 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors"
+                size="md"
+                className="self-center"
               >
                 {ta.register_cta}
-              </Link>
+              </LinkButton>
             </div>
           ) : (
             <article
@@ -159,12 +160,14 @@ export default async function MiVoluntariadoPage({ params }: Props) {
                 </span>
               </div>
 
-              <Link
+              <LinkButton
                 href={`/e/${slug}/voluntario`}
-                className="inline-flex items-center justify-center self-start rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink bg-white hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors"
+                variant="secondary"
+                size="sm"
+                className="self-start"
               >
                 {ta.edit_profile_cta}
-              </Link>
+              </LinkButton>
             </article>
           )}
         </section>
