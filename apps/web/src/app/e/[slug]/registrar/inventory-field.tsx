@@ -61,6 +61,13 @@ interface InventoryFieldProps {
    * not create.
    */
   allowAllCategories?: boolean;
+  /**
+   * Index of the row the last submit's server-side validation error points at
+   * (#296) — surfaced by `strict` surfaces via `parseSupplyLines`' `invalidRow`
+   * so the offending row is highlighted instead of making the user scan a long
+   * inventory for it.
+   */
+  invalidRowIndex?: number;
 }
 
 /**
@@ -78,6 +85,7 @@ export function InventoryField({
   initialLines,
   strict = false,
   allowAllCategories = false,
+  invalidRowIndex,
 }: InventoryFieldProps) {
   const materialCategories = categories.filter(isMaterialCategory);
   const selectableCategories = allowAllCategories ? categories : materialCategories;
@@ -128,6 +136,7 @@ export function InventoryField({
         defaultCategory={defaultCategory}
         showExpiry
         labels={labels}
+        invalidIndex={invalidRowIndex}
       />
 
       {/* Hidden input carries serialized items to the server action */}

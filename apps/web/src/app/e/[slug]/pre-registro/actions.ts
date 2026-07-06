@@ -70,13 +70,14 @@ export async function submitPreRegistration(
     (await getCategories(locale)).filter(isMaterialCategory).map((c) => c.slug),
   );
 
-  const items = parseSupplyLines(formData.get('items'), {
+  const parsedItems = parseSupplyLines(formData.get('items'), {
     isValidCategory: (c) => validMaterialCategories.has(c),
     allowEmpty: true,
   });
-  if (items === null) {
+  if ('invalidRow' in parsedItems) {
     return { status: 'error', message: tp.err_invalid_items };
   }
+  const { items } = parsedItems;
   if (items.length < 1) {
     return { status: 'error', message: tp.err_items_required };
   }
