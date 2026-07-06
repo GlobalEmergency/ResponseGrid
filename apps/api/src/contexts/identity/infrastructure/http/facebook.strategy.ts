@@ -23,7 +23,14 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       clientID: clientID || PLACEHOLDER,
       clientSecret: clientSecret || PLACEHOLDER,
       callbackURL: `${process.env.OAUTH_CALLBACK_BASE ?? 'http://localhost:3000'}/auth/facebook/callback`,
+      // Request the `email` permission — passport-facebook does NOT ask for it by
+      // default, so without this the Graph profile has no email and validate()
+      // throws. Mirrors GoogleStrategy's scope.
+      scope: ['email'],
       profileFields: ['id', 'emails', 'name', 'displayName'],
+      // Sign Graph API calls with appsecret_proof so a stolen user token cannot
+      // be replayed without the app secret (Facebook-recommended hardening).
+      enableProof: true,
     };
 
     super(options);
