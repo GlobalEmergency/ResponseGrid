@@ -70,6 +70,24 @@ describe('GrantRole (delegation with attenuation)', () => {
     expect(saved).toHaveLength(1);
     expect(saved[0].roleId).toBe('emergency_coordinator');
     expect(saved[0].grantedByPrincipalId).toBe(ACTOR);
+    expect(saved[0].principalType).toBe('user');
+  });
+
+  it('records the principal type when granting to a service account', async () => {
+    const actor = actorWith({
+      roleId: 'platform_admin',
+      scope: ScopeRef.platform(),
+    });
+    await useCase.execute({
+      actor,
+      targetPrincipalId: TARGET,
+      targetPrincipalType: 'service_account',
+      roleId: 'emergency_coordinator',
+      scope: ScopeRef.emergency('e1').toPlain(),
+    });
+
+    const saved = await repo.findByPrincipal(TARGET);
+    expect(saved[0].principalType).toBe('service_account');
   });
 
   it('uses the owning emergency when authorizing a resource entity scope', async () => {

@@ -325,6 +325,7 @@ export async function grantServiceAccountRoleAction(
   const { error, response } = await api.POST('/grants', {
     body: {
       principalId: serviceAccountId,
+      principalType: 'service_account',
       roleId,
       scopeType: scopeType as
         | 'platform'
@@ -339,6 +340,9 @@ export async function grantServiceAccountRoleAction(
   });
 
   if (error !== undefined) {
+    if (response.status === 401) {
+      return redirectToLogin('/admin');
+    }
     if (response.status === 403) {
       return {
         status: 'error',
@@ -364,6 +368,9 @@ export async function revokeServiceAccountGrantAction(
     headers: authHeaders(token),
   });
   if (error !== undefined) {
+    if (response.status === 401) {
+      return redirectToLogin('/admin');
+    }
     if (response.status === 403) {
       return {
         status: 'error',

@@ -17,12 +17,18 @@ import { computeEffectivePermissions } from '@/lib/effective-permissions';
 import { formatDate } from '@/lib/format-date';
 import { PageHeader } from '@/components/molecules/page-header';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { EffectivePermissions } from '@/components/molecules/effective-permissions';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Cuenta de servicio — Admin · ResponseGrid',
 };
+
+/** An expired grant confers nothing — surfaced so the list isn't misread. */
+function isExpired(iso: string): boolean {
+  return new Date(iso).getTime() <= Date.now();
+}
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -137,7 +143,7 @@ export default async function ServiceAccountDetailPage({ params }: Props) {
                     {scopeLabel(g.scopeType, g.scopeId)}
                     {g.expiresAt && (
                       <>
-                        {' · caduca '}
+                        {isExpired(g.expiresAt) ? ' · caducado ' : ' · caduca '}
                         <time dateTime={g.expiresAt} suppressHydrationWarning>
                           {formatDate(g.expiresAt, 'es')}
                         </time>
@@ -154,33 +160,7 @@ export default async function ServiceAccountDetailPage({ params }: Props) {
           </ul>
         )}
 
-        {effective.length > 0 && (
-          <div className="flex flex-col gap-2 rounded-lg border border-line bg-surface p-4">
-            <h3 className="text-sm font-bold text-ink">Permisos efectivos</h3>
-            <ul className="flex flex-col gap-3" role="list">
-              {effective.map((scope) => (
-                <li
-                  key={`${scope.scopeType}:${scope.scopeId ?? ''}`}
-                  className="flex flex-col gap-1"
-                >
-                  <span className="text-xs font-semibold text-muted">
-                    {scopeLabel(scope.scopeType, scope.scopeId)}
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {scope.permissions.map((p) => (
-                      <span
-                        key={p}
-                        className="inline-flex items-center rounded-full border border-line bg-white px-2 py-0.5 font-mono text-xs text-ink-soft"
-                      >
-                        {p}
-                      </span>
-                    ))}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <EffectivePermissions effective={effective} />
       </section>
 
       <hr className="border-line" />

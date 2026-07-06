@@ -214,6 +214,7 @@ export async function grantServiceAccountRoleAction(
   const { error, response } = await api.POST('/grants', {
     body: {
       principalId: serviceAccountId,
+      principalType: 'service_account',
       roleId,
       scopeType: scopeType as
         | 'platform'

@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { grantServiceAccountRoleAction } from './actions';
 import type { ApiKeyActionResult, RoleView } from './actions';
@@ -27,18 +27,23 @@ export function GrantServiceAccountRoleForm({
   roles: RoleView[];
 }) {
   const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
   const action = grantServiceAccountRoleAction.bind(null, serviceAccountId);
   const [state, formAction, pending] = useActionState(action, INITIAL_STATE);
   const [scopeType, setScopeType] = useState('organization');
 
   // The grants list + effective permissions are server-rendered; force a refetch
-  // of the RSC once a grant lands so they reflect the new permission immediately.
+  // of the RSC once a grant lands so they reflect the new permission immediately,
+  // and clear the fields so a second click can't resubmit the same grant.
   useEffect(() => {
-    if (state.status === 'success') router.refresh();
+    if (state.status === 'success') {
+      formRef.current?.reset();
+      router.refresh();
+    }
   }, [state, router]);
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
+    <form ref={formRef} action={formAction} className="flex flex-col gap-4">
       {state.status === 'error' && <ErrorMessage message={state.message} />}
       {state.status === 'success' && (
         <p

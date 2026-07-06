@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/atoms/button';
 import { Input } from '@/components/atoms/input';
 import { Select } from '@/components/atoms/select';
 import { Badge } from '@/components/atoms/badge';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { EffectivePermissions } from '@/components/molecules/effective-permissions';
 import { formatDate } from '@/lib/format-date';
 import { scopeLabel, scopeTypeLabel, GRANTABLE_SCOPE_TYPES } from '@/lib/permissions';
 import { computeEffectivePermissions } from '@/lib/effective-permissions';
@@ -110,6 +112,7 @@ function ServiceAccountKeys({
   name: string;
   roles: RoleView[];
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [keys, setKeys] = useState<ApiKeyView[] | null>(null);
   const [grants, setGrants] = useState<ServiceAccountGrantView[] | null>(null);
@@ -180,6 +183,9 @@ function ServiceAccountKeys({
         setScopeId('');
         setGrantExpiresAt('');
         setGrants(await fetchServiceAccountGrants(saId));
+        // The page's server-rendered "Roles concedidos" list also shows this
+        // service account's grants — refresh it so the two lists don't disagree.
+        router.refresh();
       } else if (result.status === 'error') {
         setError(result.message);
       }
@@ -192,6 +198,7 @@ function ServiceAccountKeys({
       const result = await revokeServiceAccountGrantAction(grantId);
       if (result.status === 'success') {
         setGrants(await fetchServiceAccountGrants(saId));
+        router.refresh();
       } else if (result.status === 'error') {
         setError(result.message);
       }
@@ -322,33 +329,7 @@ function ServiceAccountKeys({
               </ul>
             )}
 
-            {effective.length > 0 && (
-              <div className="flex flex-col gap-2 rounded-lg border border-line bg-surface p-3">
-                <span className="text-xs font-bold text-ink">
-                  Permisos efectivos
-                </span>
-                {effective.map((scope) => (
-                  <div
-                    key={`${scope.scopeType}:${scope.scopeId ?? ''}`}
-                    className="flex flex-col gap-1"
-                  >
-                    <span className="text-xs font-semibold text-muted">
-                      {scopeLabel(scope.scopeType, scope.scopeId)}
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {scope.permissions.map((p) => (
-                        <span
-                          key={p}
-                          className="inline-flex items-center rounded-full border border-line bg-white px-2 py-0.5 font-mono text-xs text-ink-soft"
-                        >
-                          {p}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <EffectivePermissions effective={effective} />
 
             <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
               <label className="flex flex-1 flex-col gap-1 text-xs font-semibold text-ink">

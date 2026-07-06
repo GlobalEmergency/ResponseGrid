@@ -2908,6 +2908,11 @@ export interface components {
              * @description Principal receiving the role
              */
             principalId: string;
+            /**
+             * @description Kind of principal receiving the role (defaults to user). Set to service_account when granting to a machine principal so it resolves and labels correctly.
+             * @enum {string}
+             */
+            principalType?: "user" | "service_account";
             /** @description Role id from the fixed catalog (e.g. emergency_coordinator) */
             roleId: string;
             /**
