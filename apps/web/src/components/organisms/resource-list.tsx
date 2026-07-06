@@ -15,13 +15,14 @@ import type { Locale } from '@/i18n';
 
 type NearbyResourceViewDto = components['schemas']['NearbyResourceViewDto'];
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
-if (!API_URL) {
-  console.error(
-    '[ResourceList] NEXT_PUBLIC_API_URL is not set — ' +
-      '"Load more" will fail. Set this env var in your deployment.',
-  );
-}
+/**
+ * Client-side resource reads go through the same-origin server proxy (#268),
+ * NOT directly to NEXT_PUBLIC_API_URL. The proxy attaches the httpOnly session
+ * cookie as a Bearer server-side, so a logged-in user sees the (non-official)
+ * `contact` in the list cards too — while an anonymous visitor still gets it
+ * redacted (#267). A relative base is resolved against the current origin.
+ */
+const PROXY_BASE = '/api/public-proxy';
 
 const LIMIT = 50;
 
@@ -102,7 +103,7 @@ export function ResourceList({
     setPage(1);
     setLoadMoreError(false);
     startTransition(async () => {
-      const client = createResponseGridClient(API_URL);
+      const client = createResponseGridClient(PROXY_BASE);
       const { data } = await client.GET(
         '/emergencies/{emergencyId}/public/resources',
         {
@@ -140,7 +141,7 @@ export function ResourceList({
     setLoadMoreError(false);
     startTransition(async () => {
       const nextPage = page + 1;
-      const client = createResponseGridClient(API_URL);
+      const client = createResponseGridClient(PROXY_BASE);
       const { data } = await client.GET(
         '/emergencies/{emergencyId}/public/resources',
         {
@@ -186,7 +187,7 @@ export function ResourceList({
     lat: number;
     lng: number;
   }) {
-    const client = createResponseGridClient(API_URL);
+    const client = createResponseGridClient(PROXY_BASE);
     const { data } = await client.GET(
       '/emergencies/{emergencyId}/public/resources/nearby',
       {

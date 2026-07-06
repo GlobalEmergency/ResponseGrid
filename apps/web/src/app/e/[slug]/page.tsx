@@ -2,7 +2,7 @@ import type { Metadata, ResolvingMetadata } from 'next';
 import { notFound } from 'next/navigation';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
-import { getToken } from '@/lib/auth';
+import { getToken, authHeaders } from '@/lib/auth';
 import { type ResourceViewDto } from '@/lib/group-by-country';
 import { AppBar } from '@/components/organisms/app-bar';
 import { ResourceList } from '@/components/organisms/resource-list';
@@ -98,6 +98,11 @@ export default async function EmergencyPage({ params, searchParams }: Props) {
         path: { emergencyId },
         query: { page: 1, limit: 50 },
       },
+      // Forward the session so a logged-in user sees the (non-official) contact
+      // in the list cards on first paint too, matching the client-side proxy
+      // refetch (#268). Anonymous callers (no token) still get it redacted, and
+      // an expired token fails open on the optional-auth endpoint → redacted.
+      ...(token !== null && { headers: authHeaders(token) }),
     }),
     api.GET('/emergencies/{emergencyId}/public/resources/facets', {
       params: { path: { emergencyId } },
