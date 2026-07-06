@@ -99,6 +99,12 @@ export interface ResourceSnapshot {
   disputeDismissedAt?: Date | null;
   /** Optional (legacy-safe) restricted author attribution (#235). */
   author?: AuthorSnapshot | null;
+  /**
+   * Optimistic-concurrency counter for the declared inventory (#294): bumped
+   * every time `replaceInventory`/`receiveInventory` change `items`. Optional
+   * (defaults to 0) so existing snapshot literals in tests don't need updating.
+   */
+  inventoryVersion?: number;
 }
 
 /**
@@ -137,6 +143,7 @@ export class Resource {
     private _disputedAt: Date | null,
     private _disputeDismissedAt: Date | null,
     public readonly author: Author | null,
+    private _inventoryVersion: number,
   ) {}
 
   static register(props: RegisterResourceProps): Resource {
@@ -166,6 +173,7 @@ export class Resource {
       null,
       null,
       props.author ?? null,
+      0,
     );
     r.events.push(
       new ResourceRegistered(r.id.value, {
@@ -204,6 +212,7 @@ export class Resource {
       s.disputedAt ?? null,
       s.disputeDismissedAt ?? null,
       s.author ? Author.fromSnapshot(s.author) : null,
+      s.inventoryVersion ?? 0,
     );
   }
 
@@ -237,6 +246,18 @@ export class Resource {
   /** Declared inventory the place holds for delivery (#28, #129). */
   get items(): SupplyLine[] {
     return this._items;
+  }
+  /**
+   * Optimistic-concurrency counter for the declared inventory (#294): bumped by
+   * every `replaceInventory`/`receiveInventory` call that actually changes
+   * `items`. `PUT /resources/:id/inventory` must send back the version it read
+   * (`expectedVersion`) — a mismatch means a concurrent writer (the incremental
+   * merge endpoint or the donation worker) already changed the inventory, and
+   * the full-snapshot overwrite must be rejected instead of silently
+   * discarding that change.
+   */
+  get inventoryVersion(): number {
+    return this._inventoryVersion;
   }
 
   verify(level: VerificationLevel, coordinatorId: string): void {
@@ -357,12 +378,14 @@ export class Resource {
       );
     }
     this._items = [...byKey.values()];
+    this._inventoryVersion++;
   }
 
   /** Owner/coordinator overwrites the declared inventory (#263). Replaces, not
    *  merges — unlike receiveInventory (donation/intake). Empty list clears it. */
   replaceInventory(lines: SupplyLine[]): void {
     this._items = [...lines];
+    this._inventoryVersion++;
   }
 
   /**
@@ -469,6 +492,7 @@ export class Resource {
       disputedAt: this._disputedAt,
       disputeDismissedAt: this._disputeDismissedAt,
       author: this.author ? this.author.toSnapshot() : null,
+      inventoryVersion: this._inventoryVersion,
     };
   }
 

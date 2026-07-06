@@ -54,7 +54,8 @@ export default async function InventarioPage({ params }: Props) {
           <Card className="p-5 lg:p-7">
             <InventoryEditForm
               action={boundAction}
-              initial={initial}
+              initial={initial.items}
+              expectedVersion={initial.version}
               t={t.registrar}
               ta={t.account}
               locale={locale}

@@ -1745,6 +1745,8 @@ export const es = {
     inventory_saved_success: 'Inventario actualizado.',
     inventory_update_forbidden: 'No tienes permiso para editar este inventario.',
     inventory_update_failed: 'No se pudo guardar el inventario.',
+    inventory_update_conflict:
+      'El inventario cambió mientras editabas (otra entrada o donación se registró en este punto). Recarga la página para ver los datos actuales y vuelve a guardar.',
     inventory_invalid_items:
       'Revisa el material: hay líneas incompletas o inválidas. Completa los campos que falten o elimina las filas vacías.',
 

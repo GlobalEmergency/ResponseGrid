@@ -31,3 +31,6 @@ apps/api/uploads/
 
 # Entorno local personal (scripts, seeds, docker extra) — no subir al repo
 .local/
+
+# Local git worktrees for parallel agent work — never commit
+.worktrees/

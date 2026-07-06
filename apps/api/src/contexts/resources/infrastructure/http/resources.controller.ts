@@ -62,7 +62,6 @@ import {
   ResolveResourceDisputeDto,
   UpdateInventoryDto,
 } from './dto';
-import { SupplyLineResponseDto } from '../../../supplies/infrastructure/http/supply-line.dto';
 import {
   toSupplyLineProps,
   toSupplyLineResponse,
@@ -74,6 +73,7 @@ import {
   MyManagedResourceDto,
   ReportResourceValidityResponseDto,
   ValidityReportDto,
+  InventoryViewDto,
 } from './response.dto';
 import {
   JwtAuthGuard,
@@ -217,26 +217,29 @@ export class ResourcesController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Read a point declared inventory in full (owner or coordinator)',
+    description:
+      'Returns the declared lines plus the optimistic-concurrency `version` ' +
+      '(#294) — send it back as `expectedVersion` on the PUT below.',
   })
   @ApiParam({
     name: 'resourceId',
     description: 'Resource UUID',
     format: 'uuid',
   })
-  @ApiOkResponse({ type: SupplyLineResponseDto, isArray: true })
+  @ApiOkResponse({ type: InventoryViewDto })
   @ApiNotFoundResponse({ description: 'Resource not found' })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
   @ApiForbiddenResponse({ description: 'Not owner nor coordinator' })
   async getMyInventoryAction(
     @Param('resourceId', ParseUUIDPipe) resourceId: string,
     @Req() req: Request & { user?: AuthenticatedUser },
-  ): Promise<SupplyLineResponseDto[]> {
-    const lines = await this.getMyInventory.execute({
+  ): Promise<InventoryViewDto> {
+    const { items, version } = await this.getMyInventory.execute({
       resourceId,
       requesterUserId: req.user!.id,
       grants: this.principalGrants(req.user!),
     });
-    return lines.map(toSupplyLineResponse);
+    return { items: items.map(toSupplyLineResponse), version };
   }
 
   @Put('resources/:resourceId/inventory')
@@ -245,6 +248,10 @@ export class ResourcesController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Replace a point declared inventory (owner or coordinator) — #263',
+    description:
+      'Optimistic concurrency (#294): `expectedVersion` must match the current ' +
+      '`version` (read from GET) or the request fails with 409 — someone else ' +
+      'changed the inventory (inventory-entries, a donation) since it was loaded.',
   })
   @ApiParam({
     name: 'resourceId',
@@ -256,6 +263,10 @@ export class ResourcesController {
   @ApiBadRequestResponse({ description: 'Invalid request body or UUID' })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
   @ApiForbiddenResponse({ description: 'Not owner nor coordinator' })
+  @ApiConflictResponse({
+    description:
+      'expectedVersion is stale — the inventory changed since it was loaded (#294)',
+  })
   async updateMyInventoryAction(
     @Param('resourceId', ParseUUIDPipe) resourceId: string,
     @Body() dto: UpdateInventoryDto,
@@ -265,6 +276,7 @@ export class ResourcesController {
       resourceId,
       requesterUserId: req.user!.id,
       lines: dto.items.map(toSupplyLineProps),
+      expectedVersion: dto.expectedVersion,
       grants: this.principalGrants(req.user!),
     });
   }

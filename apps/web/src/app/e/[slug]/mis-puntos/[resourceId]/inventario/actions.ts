@@ -9,18 +9,23 @@ import { parseSupplyLines } from '@/lib/supply-lines';
 import { getT } from '@/i18n/server';
 import { getCategories } from '@/adapters/get-categories';
 
-type SupplyLineView = components['schemas']['SupplyLineResponseDto'];
+type InventoryView = components['schemas']['InventoryViewDto'];
 
 export type InventoryState =
   | { status: 'idle' }
   | { status: 'success' }
   | { status: 'error'; message: string };
 
-/** Owner/coordinator read of the point's full declared lines (null → notFound). */
+/**
+ * Owner/coordinator read of the point's full declared lines (null →
+ * notFound). Includes the optimistic-concurrency `version` (#294): the form
+ * carries it back as `expectedVersion` on save, so a concurrent merge
+ * (inventory-entries, a donation) is detected instead of silently overwritten.
+ */
 export async function fetchMyInventory(
   resourceId: string,
   slug: string,
-): Promise<SupplyLineView[] | null> {
+): Promise<InventoryView | null> {
   const token = await requireSession(`/e/${slug}/mis-puntos/${resourceId}/inventario`);
 
   const { data, response } = await api.GET('/resources/{resourceId}/inventory', {
@@ -71,10 +76,17 @@ export async function saveMyInventory(
     return { status: 'error', message: t.account.inventory_invalid_items };
   }
 
+  // Optimistic-concurrency guard (#294): the hidden field carries the version
+  // read on page load. A missing/non-numeric value is treated as "definitely
+  // stale" (0 never matches a resource whose inventory has been touched more
+  // than once) so the API rejects it with 409 rather than the write silently
+  // going through with an undefined expectedVersion.
+  const expectedVersion = Number(formData.get('expectedVersion') ?? NaN);
+
   const { response } = await api.PUT('/resources/{resourceId}/inventory', {
     params: { path: { resourceId } },
     headers: authHeaders(token),
-    body: { items },
+    body: { items, expectedVersion: Number.isFinite(expectedVersion) ? expectedVersion : 0 },
   });
 
   if (response.status === 401) {
@@ -82,6 +94,14 @@ export async function saveMyInventory(
   }
   if (response.status === 403) {
     return { status: 'error', message: t.account.inventory_update_forbidden };
+  }
+  if (response.status === 409) {
+    // Someone else (an inventory entry, a donation) changed the inventory
+    // since this form was loaded — revalidate so a page reload shows the
+    // fresh state, and tell the owner to reload instead of silently
+    // overwriting the concurrent change (#294).
+    revalidatePath(`/e/${slug}/mis-puntos/${resourceId}/inventario`);
+    return { status: 'error', message: t.account.inventory_update_conflict };
   }
   if (!response.ok) {
     return { status: 'error', message: t.account.inventory_update_failed };

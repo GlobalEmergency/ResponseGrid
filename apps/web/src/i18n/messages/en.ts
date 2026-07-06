@@ -1709,6 +1709,8 @@ export const en = {
     inventory_saved_success: 'Inventory updated.',
     inventory_update_forbidden: 'You are not allowed to edit this inventory.',
     inventory_update_failed: 'Could not save the inventory.',
+    inventory_update_conflict:
+      'The inventory changed while you were editing (another entry or donation was recorded at this point). Reload the page to see the current data and save again.',
     inventory_invalid_items:
       'Check the material: some lines are incomplete or invalid. Fill in the missing fields or remove the empty rows.',
 

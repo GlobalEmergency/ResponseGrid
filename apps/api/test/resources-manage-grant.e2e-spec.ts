@@ -238,17 +238,27 @@ describe('Resource management by entity-scoped grant (e2e, #316)', () => {
       .set('Authorization', `Bearer ${managerToken}`)
       .expect(200);
 
-    const lines = res.body as Line[];
-    expect(lines).toHaveLength(1);
-    expect(lines[0]).toMatchObject({ name: 'Agua', quantity: 10 });
+    const body = res.body as { items: Line[]; version: number };
+    expect(body.items).toHaveLength(1);
+    expect(body.items[0]).toMatchObject({ name: 'Agua', quantity: 10 });
+    // Freshly registered point (#294): the optimistic-concurrency counter
+    // starts at 0 and the PUT below must send it back as expectedVersion.
+    expect(body.version).toBe(0);
   });
 
   it('the manager replaces the declared inventory of their point', async () => {
+    const before = await request(server)
+      .get(`/resources/${managedResourceId}/inventory`)
+      .set('Authorization', `Bearer ${managerToken}`)
+      .expect(200);
+    const { version } = before.body as { items: Line[]; version: number };
+
     await request(server)
       .put(`/resources/${managedResourceId}/inventory`)
       .set('Authorization', `Bearer ${managerToken}`)
       .send({
         items: [{ name: 'Arroz', quantity: 3, unit: 'kg', category: 'food' }],
+        expectedVersion: version,
       })
       .expect(204);
 
@@ -256,8 +266,18 @@ describe('Resource management by entity-scoped grant (e2e, #316)', () => {
       .get(`/resources/${managedResourceId}/inventory`)
       .set('Authorization', `Bearer ${managerToken}`)
       .expect(200);
-    const lines = res.body as Line[];
-    expect(lines.map((l) => l.name)).toEqual(['Arroz']);
+    const body = res.body as { items: Line[]; version: number };
+    expect(body.items.map((l) => l.name)).toEqual(['Arroz']);
+    // The replace advanced the version — reusing the old one must now 409 (#294).
+    expect(body.version).toBe(version + 1);
+    await request(server)
+      .put(`/resources/${managedResourceId}/inventory`)
+      .set('Authorization', `Bearer ${managerToken}`)
+      .send({
+        items: [{ name: 'Mantas', quantity: 1, unit: 'u', category: 'other' }],
+        expectedVersion: version,
+      })
+      .expect(409);
   });
 
   it('the manager changes the public status of their point', async () => {
@@ -294,6 +314,7 @@ describe('Resource management by entity-scoped grant (e2e, #316)', () => {
       .set('Authorization', `Bearer ${strangerToken}`)
       .send({
         items: [{ name: 'Nada', quantity: 1, unit: 'u', category: 'other' }],
+        expectedVersion: 0,
       })
       .expect(403);
   });

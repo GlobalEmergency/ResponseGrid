@@ -170,6 +170,112 @@ describe('DrizzleResourceRepository (integration)', () => {
     ]);
   });
 
+  // #294: PUT /resources/:id/inventory must be rejected — not silently applied
+  // — when the caller's version is stale. These prove the guard is enforced
+  // atomically by Postgres itself (a single conditional UPDATE), not just by
+  // the application-layer pre-check, which is what actually closes the race
+  // between two concurrent writers.
+  describe('saveIfInventoryVersionMatches (#294)', () => {
+    it('persists items and advances inventoryVersion when the expected version matches', async () => {
+      const id = ResourceId.create();
+      const r = Resource.register({
+        id,
+        emergencyId: EmergencyId.fromString(EM),
+        type: ResourceType.Warehouse,
+        name: 'Almacén versión',
+        location: baseLocation,
+        ownerUserId: OWNER_ID,
+        items: [
+          SupplyLine.create({
+            name: 'Agua',
+            quantity: 10,
+            unit: 'l',
+            category: Category.Water,
+          }),
+        ],
+      });
+      await repo.save(r);
+      expect(r.inventoryVersion).toBe(0);
+
+      const loaded = await repo.findById(id);
+      loaded!.replaceInventory([
+        SupplyLine.create({
+          name: 'Arroz',
+          quantity: 3,
+          unit: 'kg',
+          category: Category.Food,
+        }),
+      ]);
+      const applied = await repo.saveIfInventoryVersionMatches(loaded!, 0);
+      expect(applied).toBe(true);
+
+      const found = await repo.findById(id);
+      expect(found?.items.map((i) => i.name)).toEqual(['Arroz']);
+      expect(found?.inventoryVersion).toBe(1);
+    });
+
+    it('rejects the write and leaves storage untouched when the expected version is stale', async () => {
+      const id = ResourceId.create();
+      const r = Resource.register({
+        id,
+        emergencyId: EmergencyId.fromString(EM),
+        type: ResourceType.Warehouse,
+        name: 'Almacén versión conflicto',
+        location: baseLocation,
+        ownerUserId: OWNER_ID,
+        items: [
+          SupplyLine.create({
+            name: 'Agua',
+            quantity: 10,
+            unit: 'l',
+            category: Category.Water,
+          }),
+        ],
+      });
+      await repo.save(r);
+
+      // Simulates a concurrent merge (receiveInventory) landing first: it uses
+      // the plain save(), so it always succeeds and bumps the version.
+      const concurrent = await repo.findById(id);
+      concurrent!.receiveInventory([
+        SupplyLine.create({
+          name: 'Mantas',
+          quantity: 5,
+          unit: 'unidades',
+          category: Category.Shelter,
+        }),
+      ]);
+      await repo.save(concurrent!);
+
+      // The owner's form was loaded BEFORE the concurrent merge, so it still
+      // carries the stale version (0). Rebuild that exact in-process shape.
+      const current = await repo.findById(id);
+      const staleForm = Resource.fromSnapshot({
+        ...current!.toSnapshot(),
+        inventoryVersion: 0,
+      });
+      staleForm.replaceInventory([
+        SupplyLine.create({
+          name: 'Agua',
+          quantity: 10,
+          unit: 'l',
+          category: Category.Water,
+        }),
+      ]);
+
+      const applied = await repo.saveIfInventoryVersionMatches(staleForm, 0);
+      expect(applied).toBe(false);
+
+      // The concurrent merge must survive untouched — Mantas is still there.
+      const found = await repo.findById(id);
+      expect(found?.items.map((i) => i.name).sort()).toEqual([
+        'Agua',
+        'Mantas',
+      ]);
+      expect(found?.inventoryVersion).toBe(1);
+    });
+  });
+
   it('round-trips resource with description and ownerOrganizationId', async () => {
     const r = Resource.register({
       id: ResourceId.create(),
