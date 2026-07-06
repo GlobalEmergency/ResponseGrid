@@ -1,57 +1,44 @@
-"use client";
+'use client';
 
-import { useActionState, useState, useEffect } from "react";
-import { LinkButton } from "@/components/atoms/link-button";
-import type { components } from "@reliefhub/api-client";
-import type { VolunteerActionState } from "./actions";
-import { Button } from "@/components/atoms/button";
-import { Input } from "@/components/atoms/input";
-import { Select } from "@/components/atoms/select";
-import { ErrorMessage } from "@/components/atoms/error-message";
-import { FormField } from "@/components/molecules/form-field";
-import { DraftRestoredBanner } from "@/components/atoms/draft-restored-banner";
-import { useFormDraft } from "@/lib/use-form-draft";
-import type { Messages } from "@/i18n/messages/es";
+import { useActionState, useState, useEffect } from 'react';
+import { LinkButton } from '@/components/atoms/link-button';
+import type { components } from '@reliefhub/api-client';
+import type { VolunteerActionState } from './actions';
+import { Button } from '@/components/atoms/button';
+import { Input } from '@/components/atoms/input';
+import { Select } from '@/components/atoms/select';
+import { ErrorMessage } from '@/components/atoms/error-message';
+import { FormField } from '@/components/molecules/form-field';
+import { DraftRestoredBanner } from '@/components/atoms/draft-restored-banner';
+import { useFormDraft } from '@/lib/use-form-draft';
+import type { Messages } from '@/i18n/messages/es';
 
-type VolunteerViewDto = components["schemas"]["VolunteerViewDto"];
-type Skill = components["schemas"]["RegisterVolunteerDto"]["skills"][number];
+type VolunteerViewDto = components['schemas']['VolunteerViewDto'];
+type Skill = components['schemas']['RegisterVolunteerDto']['skills'][number];
 
-const INITIAL_STATE: VolunteerActionState = { status: "idle" };
+const INITIAL_STATE: VolunteerActionState = { status: 'idle' };
 
-type BoundAction = (
-  prev: VolunteerActionState,
-  formData: FormData,
-) => Promise<VolunteerActionState>;
+type BoundAction = (prev: VolunteerActionState, formData: FormData) => Promise<VolunteerActionState>;
 
 interface VoluntarioFormProps {
   action: BoundAction;
   slug: string;
   existingProfile: VolunteerViewDto | null;
-  t: Messages["voluntario"];
+  t: Messages['voluntario'];
   backToEmergencyLabel: string;
 }
 
-export function VoluntarioForm({
-  action,
-  slug,
-  existingProfile,
-  t,
-  backToEmergencyLabel,
-}: VoluntarioFormProps) {
-  const [state, formAction, pending] = useActionState<
-    VolunteerActionState,
-    FormData
-  >(action, INITIAL_STATE);
+export function VoluntarioForm({ action, slug, existingProfile, t, backToEmergencyLabel }: VoluntarioFormProps) {
+  const [state, formAction, pending] = useActionState<VolunteerActionState, FormData>(
+    action,
+    INITIAL_STATE,
+  );
 
-  const [name, setName] = useState(existingProfile?.name ?? "");
-  const [contact, setContact] = useState(existingProfile?.contact ?? "");
-  const [municipality, setMunicipality] = useState(
-    existingProfile?.municipality ?? "",
-  );
-  const [availability, setAvailability] = useState(
-    existingProfile?.availability ?? "",
-  );
-  const [vehicle, setVehicle] = useState(existingProfile?.vehicle ?? "");
+  const [name, setName] = useState(existingProfile?.name ?? '');
+  const [contact, setContact] = useState(existingProfile?.contact ?? '');
+  const [municipality, setMunicipality] = useState(existingProfile?.municipality ?? '');
+  const [availability, setAvailability] = useState(existingProfile?.availability ?? '');
+  const [vehicle, setVehicle] = useState(existingProfile?.vehicle ?? '');
   const [selectedSkills, setSelectedSkills] = useState<Set<Skill>>(
     new Set(existingProfile?.skills ?? []),
   );
@@ -75,7 +62,7 @@ export function VoluntarioForm({
   );
 
   useEffect(() => {
-    if (state.status === "success") clearDraft();
+    if (state.status === 'success') clearDraft();
   }, [state.status, clearDraft]);
 
   function toggleSkill(skill: Skill) {
@@ -91,29 +78,29 @@ export function VoluntarioForm({
   }
 
   const skillOptions: { value: Skill; label: string }[] = [
-    { value: "driving", label: t.skill_driving },
-    { value: "medical", label: t.skill_medical },
-    { value: "logistics", label: t.skill_logistics },
-    { value: "cooking", label: t.skill_cooking },
-    { value: "languages", label: t.skill_languages },
-    { value: "admin", label: t.skill_admin },
-    { value: "general", label: t.skill_general },
+    { value: 'driving', label: t.skill_driving },
+    { value: 'medical', label: t.skill_medical },
+    { value: 'logistics', label: t.skill_logistics },
+    { value: 'cooking', label: t.skill_cooking },
+    { value: 'languages', label: t.skill_languages },
+    { value: 'admin', label: t.skill_admin },
+    { value: 'general', label: t.skill_general },
   ];
 
   const availabilityOptions = [
-    { value: "immediate", label: t.availability_immediate },
-    { value: "this_week", label: t.availability_this_week },
-    { value: "flexible", label: t.availability_flexible },
+    { value: 'immediate', label: t.availability_immediate },
+    { value: 'this_week', label: t.availability_this_week },
+    { value: 'flexible', label: t.availability_flexible },
   ] as const;
 
   const vehicleOptions = [
-    { value: "none", label: t.vehicle_none },
-    { value: "car", label: t.vehicle_car },
-    { value: "van", label: t.vehicle_van },
-    { value: "truck", label: t.vehicle_truck },
+    { value: 'none', label: t.vehicle_none },
+    { value: 'car', label: t.vehicle_car },
+    { value: 'van', label: t.vehicle_van },
+    { value: 'truck', label: t.vehicle_truck },
   ] as const;
 
-  if (state.status === "success") {
+  if (state.status === 'success') {
     return (
       <section
         role="alert"
@@ -148,15 +135,13 @@ export function VoluntarioForm({
         </div>
       )}
 
-      {state.status === "error" && <ErrorMessage message={state.message} />}
+      {state.status === 'error' && (
+        <ErrorMessage message={state.message} />
+      )}
 
       <FormField
         htmlFor="name"
-        label={
-          <>
-            {t.name_label} <span aria-hidden="true">*</span>
-          </>
-        }
+        label={<>{t.name_label} <span aria-hidden="true">*</span></>}
       >
         <Input
           id="name"
@@ -172,11 +157,7 @@ export function VoluntarioForm({
 
       <FormField
         htmlFor="contact"
-        label={
-          <>
-            {t.contact_label} <span aria-hidden="true">*</span>
-          </>
-        }
+        label={<>{t.contact_label} <span aria-hidden="true">*</span></>}
       >
         <Input
           id="contact"
@@ -192,11 +173,7 @@ export function VoluntarioForm({
 
       <FormField
         htmlFor="municipality"
-        label={
-          <>
-            {t.municipality_label} <span aria-hidden="true">*</span>
-          </>
-        }
+        label={<>{t.municipality_label} <span aria-hidden="true">*</span></>}
       >
         <Input
           id="municipality"
@@ -221,11 +198,11 @@ export function VoluntarioForm({
               <label
                 key={value}
                 className={[
-                  "inline-flex cursor-pointer select-none items-center rounded-full border-2 px-3 py-1 text-sm font-semibold transition-colors",
+                  'inline-flex cursor-pointer select-none items-center rounded-full border-2 px-3 py-1 text-sm font-semibold transition-colors',
                   active
-                    ? "border-navy bg-navy text-white"
-                    : "border-line bg-white text-ink-soft hover:border-line-strong",
-                ].join(" ")}
+                    ? 'border-navy bg-navy text-white'
+                    : 'border-line bg-white text-ink-soft hover:border-line-strong',
+                ].join(' ')}
               >
                 <input
                   type="checkbox"
@@ -244,11 +221,7 @@ export function VoluntarioForm({
 
       <FormField
         htmlFor="availability"
-        label={
-          <>
-            {t.availability_label} <span aria-hidden="true">*</span>
-          </>
-        }
+        label={<>{t.availability_label} <span aria-hidden="true">*</span></>}
       >
         <Select
           id="availability"
@@ -270,11 +243,7 @@ export function VoluntarioForm({
 
       <FormField
         htmlFor="vehicle"
-        label={
-          <>
-            {t.vehicle_label} <span aria-hidden="true">*</span>
-          </>
-        }
+        label={<>{t.vehicle_label} <span aria-hidden="true">*</span></>}
       >
         <Select
           id="vehicle"
@@ -309,10 +278,8 @@ export function VoluntarioForm({
             htmlFor="consentAccepted"
             className="text-sm text-ink-soft leading-snug cursor-pointer"
           >
-            {t.consent_text}{" "}
-            <span aria-hidden="true" className="text-danger font-bold">
-              *
-            </span>
+            {t.consent_text}{' '}
+            <span aria-hidden="true" className="text-danger font-bold">*</span>
           </label>
         </div>
       </div>

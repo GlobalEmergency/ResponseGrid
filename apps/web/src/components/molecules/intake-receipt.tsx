@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { LinkButton } from "@/components/atoms/link-button";
-import { QRCodeSVG } from "qrcode.react";
+import { LinkButton } from '@/components/atoms/link-button';
+import { QRCodeSVG } from 'qrcode.react';
 
 /**
  * The donor's proof of a delivery pre-registration (#130): the short, human
@@ -48,8 +48,8 @@ export function IntakeReceipt({
   // Encode an absolute tracking URL so a phone camera opens the page; fall back
   // to the bare code. Rendered only client-side (after submit), so window exists.
   const qrValue =
-    trackUrl != null && trackUrl !== ""
-      ? `${typeof window !== "undefined" ? window.location.origin : ""}${trackUrl}`
+    trackUrl != null && trackUrl !== ''
+      ? `${typeof window !== 'undefined' ? window.location.origin : ''}${trackUrl}`
       : code;
 
   return (

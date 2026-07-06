@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { LinkButton } from "@/components/atoms/link-button";
+import { LinkButton } from '@/components/atoms/link-button';
 
 interface SuccessLink {
   href: string;
@@ -31,7 +31,9 @@ export function FormSuccessScreen({
       aria-live="polite"
       className="flex flex-col gap-6 rounded-lg border-2 border-navy bg-white p-6"
     >
-      <p className="text-lg font-semibold text-ink leading-snug">{message}</p>
+      <p className="text-lg font-semibold text-ink leading-snug">
+        {message}
+      </p>
       <div className="flex flex-col gap-3">
         {extraLinks.map(({ href, label }) => (
           <LinkButton key={href} href={href} variant="secondary" fullWidth>
@@ -41,6 +43,7 @@ export function FormSuccessScreen({
         <LinkButton
           href={primaryHref}
           fullWidth
+          // Hard navigation so the form page re-mounts and all controlled state resets.
           onClick={() => {
             window.location.href = primaryHref;
           }}
