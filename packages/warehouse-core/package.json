@@ -45,6 +45,16 @@
         "types": "./dist/cjs/containers/index.d.ts",
         "default": "./dist/cjs/containers/index.js"
       }
+    },
+    "./logistics": {
+      "import": {
+        "types": "./dist/esm/logistics/index.d.ts",
+        "default": "./dist/esm/logistics/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/logistics/index.d.ts",
+        "default": "./dist/cjs/logistics/index.js"
+      }
     }
   },
   "files": [

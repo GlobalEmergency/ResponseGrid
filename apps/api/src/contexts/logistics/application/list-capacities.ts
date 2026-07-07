@@ -1,12 +1,12 @@
 import {
   ListCapacitiesFilter,
   TransportCapacityRepository,
-} from '../domain/ports/transport-capacity.repository';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
+} from '@globalemergency/warehouse-core/logistics';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 import {
   TransportCapacityStatus,
   TransportMode,
-} from '../domain/transport-capacity-enums';
+} from '@globalemergency/warehouse-core/logistics';
 import { CapacityView, toCapacityView } from './capacity-view';
 
 export interface ListCapacitiesQuery {
@@ -27,8 +27,8 @@ export class ListCapacities {
     if (q.availableFrom !== undefined) filter.availableFrom = q.availableFrom;
     if (q.availableTo !== undefined) filter.availableTo = q.availableTo;
 
-    const capacities = await this.repo.findByEmergency(
-      EmergencyId.fromString(q.emergencyId),
+    const capacities = await this.repo.findByScope(
+      ScopeId.fromString(q.emergencyId),
       filter,
     );
     return capacities.map(toCapacityView);

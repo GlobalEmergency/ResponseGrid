@@ -1,7 +1,7 @@
-import { ShipmentRepository } from '../domain/ports/shipment.repository';
-import { ShipmentId } from '../domain/shipment-id';
-import { CarrierPrincipal } from '../domain/shipment';
-import { CarrierType } from '../domain/shipment-enums';
+import { ShipmentRepository } from '@globalemergency/warehouse-core/logistics';
+import { ShipmentId } from '@globalemergency/warehouse-core/logistics';
+import { CarrierPrincipal } from '@globalemergency/warehouse-core/logistics';
+import { CarrierType } from '@globalemergency/warehouse-core/logistics';
 import { ShipmentNotFoundError } from './shipment-not-found.error';
 
 export interface AssignCapacityToShipmentCommand {

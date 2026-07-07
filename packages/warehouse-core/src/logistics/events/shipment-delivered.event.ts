@@ -1,4 +1,4 @@
-import { DomainEvent } from './domain-event';
+import { DomainEvent } from '../../kernel/index.js';
 
 /**
  * Emitted when a shipment's delivery is confirmed (in_transit → delivered).
@@ -15,7 +15,7 @@ export class ShipmentDelivered implements DomainEvent {
   constructor(
     readonly aggregateId: string,
     readonly payload: {
-      emergencyId: string;
+      scopeId: string;
       originResourceId: string;
       destinationResourceId: string;
       assignedCapacityId: string | null;

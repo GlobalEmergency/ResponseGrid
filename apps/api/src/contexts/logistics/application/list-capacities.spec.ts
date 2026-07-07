@@ -1,16 +1,16 @@
 import { ListCapacities } from './list-capacities';
 import { InMemoryTransportCapacityRepository } from '../infrastructure/in-memory-transport-capacity.repository';
-import { TransportCapacity } from '../domain/transport-capacity';
-import { TransportCapacityId } from '../domain/transport-capacity-id';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
+import { TransportCapacity } from '@globalemergency/warehouse-core/logistics';
+import { TransportCapacityId } from '@globalemergency/warehouse-core/logistics';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 import {
   TransportCapacityStatus,
   TransportMode,
   TransportProviderType,
-} from '../domain/transport-capacity-enums';
-import { Capacity } from '../domain/capacity';
-import { Coverage } from '../domain/coverage';
-import { CapacityWindow } from '../domain/capacity-window';
+} from '@globalemergency/warehouse-core/logistics';
+import { Capacity } from '@globalemergency/warehouse-core/logistics';
+import { Coverage } from '@globalemergency/warehouse-core/logistics';
+import { CapacityWindow } from '@globalemergency/warehouse-core/logistics';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const OTHER_EM = '22222222-2222-4222-8222-222222222222';
@@ -24,7 +24,7 @@ function makeCapacity(opts: {
 }): TransportCapacity {
   const cap = TransportCapacity.publish({
     id: TransportCapacityId.create(),
-    emergencyId: EmergencyId.fromString(opts.emergencyId ?? EM),
+    scopeId: ScopeId.fromString(opts.emergencyId ?? EM),
     provider: { type: TransportProviderType.Organization, id: PROVIDER_ID },
     mode: opts.mode ?? TransportMode.Road,
     capacity: Capacity.create({ weightKg: 1000, volumeM3: null }),

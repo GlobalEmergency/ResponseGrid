@@ -1,4 +1,4 @@
-import { InvalidCapacityWindowError } from './transport-capacity-errors';
+import { InvalidCapacityWindowError } from './transport-capacity-errors.js';
 
 export interface CapacityWindowProps {
   /** Availability start (ISO-8601) or null for "no lower bound". */

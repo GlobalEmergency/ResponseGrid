@@ -1,5 +1,5 @@
-import { ShipmentRepository } from '../domain/ports/shipment.repository';
-import { ShipmentId } from '../domain/shipment-id';
+import { ShipmentRepository } from '@globalemergency/warehouse-core/logistics';
+import { ShipmentId } from '@globalemergency/warehouse-core/logistics';
 import { ShipmentNotFoundError } from './shipment-not-found.error';
 
 export class ShipmentActionUnauthorizedError extends Error {

@@ -1,5 +1,5 @@
 import { ShipmentEventBus } from '../domain/ports/shipment-event-bus';
-import { DomainEvent } from '../domain/events/domain-event';
+import { DomainEvent } from '@globalemergency/warehouse-core/kernel';
 
 export class FakeShipmentEventBus implements ShipmentEventBus {
   public published: DomainEvent[] = [];

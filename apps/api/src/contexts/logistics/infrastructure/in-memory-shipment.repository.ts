@@ -1,10 +1,13 @@
 import {
   ListShipmentsFilter,
   ShipmentRepository,
-} from '../domain/ports/shipment.repository';
-import { Shipment, ShipmentSnapshot } from '../domain/shipment';
-import { ShipmentId } from '../domain/shipment-id';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
+} from '@globalemergency/warehouse-core/logistics';
+import {
+  Shipment,
+  ShipmentSnapshot,
+} from '@globalemergency/warehouse-core/logistics';
+import { ShipmentId } from '@globalemergency/warehouse-core/logistics';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 
 export class InMemoryShipmentRepository implements ShipmentRepository {
   private store = new Map<string, ShipmentSnapshot>();
@@ -15,9 +18,9 @@ export class InMemoryShipmentRepository implements ShipmentRepository {
     return Promise.resolve();
   }
 
-  nextSequence(emergencyId: EmergencyId): Promise<number> {
-    const next = (this.sequences.get(emergencyId.value) ?? 0) + 1;
-    this.sequences.set(emergencyId.value, next);
+  nextSequence(scopeId: ScopeId): Promise<number> {
+    const next = (this.sequences.get(scopeId.value) ?? 0) + 1;
+    this.sequences.set(scopeId.value, next);
     return Promise.resolve(next);
   }
 
@@ -26,12 +29,12 @@ export class InMemoryShipmentRepository implements ShipmentRepository {
     return Promise.resolve(snap ? Shipment.fromSnapshot(snap) : null);
   }
 
-  findByEmergency(
-    emergencyId: EmergencyId,
+  findByScope(
+    scopeId: ScopeId,
     filter: ListShipmentsFilter,
   ): Promise<Shipment[]> {
     const result = [...this.store.values()]
-      .filter((s) => s.emergencyId === emergencyId.value)
+      .filter((s) => s.scopeId === scopeId.value)
       .filter((s) => filter.status === undefined || s.status === filter.status)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .map((s) => Shipment.fromSnapshot(s));
@@ -40,13 +43,11 @@ export class InMemoryShipmentRepository implements ShipmentRepository {
 
   findByCarrier(
     carrierId: string,
-    emergencyId: EmergencyId | null,
+    scopeId: ScopeId | null,
   ): Promise<Shipment[]> {
     const result = [...this.store.values()]
       .filter((s) => s.carrierId === carrierId)
-      .filter(
-        (s) => emergencyId === null || s.emergencyId === emergencyId.value,
-      )
+      .filter((s) => scopeId === null || s.scopeId === scopeId.value)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .map((s) => Shipment.fromSnapshot(s));
     return Promise.resolve(result);

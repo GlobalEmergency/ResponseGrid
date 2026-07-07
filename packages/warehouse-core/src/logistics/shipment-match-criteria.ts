@@ -1,5 +1,5 @@
-import { Shipment } from './shipment';
-import { TransportMode } from './transport-capacity-enums';
+import { Shipment } from './shipment.js';
+import { TransportMode } from './transport-capacity-enums.js';
 
 /**
  * The compatibility criteria a {@link TransportCapacity} must satisfy to be a
@@ -13,7 +13,7 @@ import { TransportMode } from './transport-capacity-enums';
  * is future-proof for when shipments start carrying that information.
  */
 export interface ShipmentMatchCriteria {
-  emergencyId: string;
+  scopeId: string;
   originResourceId: string;
   destinationResourceId: string;
   /** Required transport mode, or null to not filter on mode. */
@@ -48,7 +48,7 @@ export function deriveShipmentMatchCriteria(
 ): ShipmentMatchCriteria {
   const { weightKg, volumeM3 } = deriveLoad(shipment);
   return {
-    emergencyId: shipment.emergencyId.value,
+    scopeId: shipment.scopeId.value,
     originResourceId: shipment.originResourceId,
     destinationResourceId: shipment.destinationResourceId,
     // Shipment carries no required mode / window / constraints today → open.

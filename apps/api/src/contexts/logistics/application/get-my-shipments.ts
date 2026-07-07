@@ -1,5 +1,5 @@
-import { ShipmentRepository } from '../domain/ports/shipment.repository';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
+import { ShipmentRepository } from '@globalemergency/warehouse-core/logistics';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 import { ShipmentView, toShipmentView } from './shipment-view';
 
 export interface GetMyShipmentsQuery {
@@ -16,7 +16,7 @@ export class GetMyShipments {
   async execute(q: GetMyShipmentsQuery): Promise<ShipmentView[]> {
     const shipments = await this.repo.findByCarrier(
       q.carrierId,
-      q.emergencyId !== null ? EmergencyId.fromString(q.emergencyId) : null,
+      q.emergencyId !== null ? ScopeId.fromString(q.emergencyId) : null,
     );
     return shipments.map(toShipmentView);
   }

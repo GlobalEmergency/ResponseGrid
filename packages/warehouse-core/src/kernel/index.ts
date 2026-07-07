@@ -14,3 +14,5 @@ export type {
 export { SupplyLine, SupplyLineValidationError } from './supply-line.js';
 export type { SupplyLineProps, SupplyLineSnapshot } from './supply-line.js';
 export { ScopeId, ScopeIdValidationError } from './scope-id.js';
+export type { DomainEvent } from './domain-event.js';
+export { haversineMeters } from './geo-distance.js';

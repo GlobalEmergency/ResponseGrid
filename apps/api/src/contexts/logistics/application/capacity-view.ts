@@ -1,7 +1,7 @@
-import { TransportCapacity } from '../domain/transport-capacity';
-import { CapacityProps } from '../domain/capacity';
-import { CoverageProps } from '../domain/coverage';
-import { CapacityWindowProps } from '../domain/capacity-window';
+import { TransportCapacity } from '@globalemergency/warehouse-core/logistics';
+import { CapacityProps } from '@globalemergency/warehouse-core/logistics';
+import { CoverageProps } from '@globalemergency/warehouse-core/logistics';
+import { CapacityWindowProps } from '@globalemergency/warehouse-core/logistics';
 
 export interface CapacityView {
   id: string;
@@ -23,7 +23,7 @@ export function toCapacityView(c: TransportCapacity): CapacityView {
   const s = c.toSnapshot();
   return {
     id: s.id,
-    emergencyId: s.emergencyId,
+    emergencyId: s.scopeId,
     providerType: s.providerType,
     providerId: s.providerId,
     mode: s.mode,

@@ -1,7 +1,7 @@
-import { ShipmentRepository } from '../domain/ports/shipment.repository';
+import { ShipmentRepository } from '@globalemergency/warehouse-core/logistics';
 import { ShipmentEventBus } from '../domain/ports/shipment-event-bus';
 import { ShipmentContainerPort } from '../domain/ports/shipment-container-port';
-import { ShipmentId } from '../domain/shipment-id';
+import { ShipmentId } from '@globalemergency/warehouse-core/logistics';
 import { ShipmentNotFoundError } from './shipment-not-found.error';
 import { ShipmentActionUnauthorizedError } from './mark-shipment-in-transit';
 
@@ -38,7 +38,7 @@ export class ConfirmShipmentDelivery {
     // Delivered status so a move failure leaves the shipment in transit to retry.
     if (shipment.containerIds.length > 0) {
       await this.containerPort.moveContainersToResource({
-        emergencyId: shipment.emergencyId.value,
+        emergencyId: shipment.scopeId.value,
         containerIds: shipment.containerIds,
         resourceId: shipment.destinationResourceId,
       });

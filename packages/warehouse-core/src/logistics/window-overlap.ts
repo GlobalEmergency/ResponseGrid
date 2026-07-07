@@ -1,4 +1,4 @@
-import { CapacityWindowProps } from './capacity-window';
+import { CapacityWindowProps } from './capacity-window.js';
 
 /**
  * The half-open interval to test a capacity window against. Both bounds are

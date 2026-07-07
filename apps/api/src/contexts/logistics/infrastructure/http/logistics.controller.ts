@@ -31,7 +31,7 @@ import { ListCapacities } from '../../application/list-capacities';
 import { CapacityView } from '../../application/capacity-view';
 import { PublishCapacityDto, CoverageDto, ListCapacitiesQueryDto } from './dto';
 import { PublishCapacityResponseDto, CapacityViewDto } from './response.dto';
-import { CoverageProps } from '../../domain/coverage';
+import { CoverageProps } from '@globalemergency/warehouse-core/logistics';
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
 import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
 import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';

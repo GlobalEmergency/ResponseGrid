@@ -1,5 +1,5 @@
-import { TransportCapacityRepository } from '../domain/ports/transport-capacity.repository';
-import { TransportCapacityId } from '../domain/transport-capacity-id';
+import { TransportCapacityRepository } from '@globalemergency/warehouse-core/logistics';
+import { TransportCapacityId } from '@globalemergency/warehouse-core/logistics';
 import { CapacityNotFoundError } from './capacity-not-found.error';
 
 export class CapacityWithdrawUnauthorizedError extends Error {
