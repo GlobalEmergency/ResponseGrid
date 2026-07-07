@@ -2,6 +2,7 @@ import {
   pgTable,
   text,
   integer,
+  boolean,
   uuid,
   jsonb,
   doublePrecision,
@@ -11,7 +12,9 @@ import {
   primaryKey,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
+import { AttributeOption } from '@globalemergency/warehouse-core/catalog';
 
 export const categoriesTable = pgTable('categories', {
   slug: text('slug').primaryKey(),
@@ -78,6 +81,39 @@ export const suppliesTable = pgTable(
     index('supplies_category_slug_idx').on(t.categorySlug),
     index('supplies_variant_of_id_idx').on(t.variantOfId),
   ],
+);
+
+/**
+ * Metamodelo de atributos data-driven (#396): describe los campos tipados de
+ * cada familia (nodo de `categories`, con herencia). Los valores viven en el
+ * `attributes` jsonb de `supplies`, validados contra la unión de definiciones
+ * de la ascendencia de su categoría. `scopeId` null = global (Inc 1). El índice
+ * único parcial (categoría, key) WHERE scope_id IS NULL vive en la migración
+ * 0055.
+ */
+export const attributeDefinitionsTable = pgTable(
+  'attribute_definitions',
+  {
+    id: uuid('id').primaryKey(),
+    categorySlug: text('category_slug')
+      .notNull()
+      .references(() => categoriesTable.slug),
+    key: text('key').notNull(),
+    dataType: text('data_type').notNull(),
+    required: boolean('required').notNull().default(false),
+    options: jsonb('options').$type<AttributeOption[]>(),
+    unit: text('unit'),
+    sort: integer('sort').notNull().default(0),
+    scopeId: uuid('scope_id'),
+    archivedAt: timestamp('archived_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (t) => [index('attribute_definitions_category_slug_idx').on(t.categorySlug)],
 );
 
 export const supplyAliasesTable = pgTable(
