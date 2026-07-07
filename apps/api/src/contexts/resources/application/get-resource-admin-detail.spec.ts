@@ -5,8 +5,7 @@ import {
 } from '../domain/ports/resource.repository';
 import { ResourceValidityReportRepository } from '../domain/ports/resource-validity-report.repository';
 import { Resource } from '../domain/resource';
-import { SupplyLine } from '@globalemergency/warehouse-core/kernel';
-import { Category } from '@globalemergency/warehouse-core/kernel';
+import { SupplyLine, Category } from '@globalemergency/warehouse-core/kernel';
 import {
   ResourceValidityReport,
   ValidityReason,

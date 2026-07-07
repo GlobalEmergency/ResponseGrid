@@ -18,8 +18,10 @@ import {
   resourcesTable,
 } from '../../../resources/infrastructure/drizzle/schema';
 import { DrizzleSupplyLinkBackfillRepository } from './drizzle-supply-link-backfill.repository';
-import type { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
-import type { Category } from '@globalemergency/warehouse-core/kernel';
+import type {
+  SupplyLineSnapshot,
+  Category,
+} from '@globalemergency/warehouse-core/kernel';
 import type { Pool } from 'pg';
 
 const URL =

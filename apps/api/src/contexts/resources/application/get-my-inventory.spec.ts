@@ -5,8 +5,10 @@ import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { ResourceType } from '../domain/resource-enums';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { ResourceMembershipReader } from '../domain/ports/membership-reader';
-import { Category } from '@globalemergency/warehouse-core/kernel';
-import { SupplyLineProps } from '@globalemergency/warehouse-core/kernel';
+import {
+  Category,
+  SupplyLineProps,
+} from '@globalemergency/warehouse-core/kernel';
 import { ResourceNotFoundError } from './resource-not-found.error';
 import { UnauthorizedInventoryChangeError } from './unauthorized-inventory-change.error';
 

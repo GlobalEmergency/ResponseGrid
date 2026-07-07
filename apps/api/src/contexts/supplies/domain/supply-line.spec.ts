@@ -1,5 +1,5 @@
-import { Category } from '@globalemergency/warehouse-core/kernel';
 import {
+  Category,
   SupplyLine,
   SupplyLineValidationError,
 } from '@globalemergency/warehouse-core/kernel';

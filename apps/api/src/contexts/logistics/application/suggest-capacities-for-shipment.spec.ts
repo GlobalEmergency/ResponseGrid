@@ -6,8 +6,10 @@ import { InMemoryTransportCapacityRepository } from '../infrastructure/in-memory
 import { InMemoryResourceLocationLookup } from '../infrastructure/in-memory-resource-location-lookup';
 import { FakeShipmentContainerPort } from '../infrastructure/fake-shipment-container-port';
 import { LogisticsEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
-import { SupplyLineProps } from '@globalemergency/warehouse-core/kernel';
-import { Category } from '@globalemergency/warehouse-core/kernel';
+import {
+  SupplyLineProps,
+  Category,
+} from '@globalemergency/warehouse-core/kernel';
 import { TransportCapacity } from '../domain/transport-capacity';
 import { TransportCapacityId } from '../domain/transport-capacity-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';

@@ -1,7 +1,9 @@
 import { UpdateCategory } from './update-category';
 import { CategoryProtectedError } from './category-admin.errors';
-import { Category } from '@globalemergency/warehouse-core/kernel';
-import { CategoryDefinition } from '@globalemergency/warehouse-core/kernel';
+import {
+  Category,
+  CategoryDefinition,
+} from '@globalemergency/warehouse-core/kernel';
 import { CategoryRepository } from '../domain/ports/category.repository';
 
 const BASE: CategoryDefinition = {

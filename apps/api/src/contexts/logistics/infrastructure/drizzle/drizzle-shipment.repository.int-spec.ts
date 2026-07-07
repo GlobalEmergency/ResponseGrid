@@ -5,10 +5,9 @@ import { DrizzleShipmentAuthorizationLookup } from './drizzle-shipment-authoriza
 import { Shipment } from '../../domain/shipment';
 import { ShipmentId } from '../../domain/shipment-id';
 import { formatShipmentCode } from '../../domain/shipment-code';
-import { SupplyLine } from '@globalemergency/warehouse-core/kernel';
+import { SupplyLine, Category } from '@globalemergency/warehouse-core/kernel';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import { CarrierType, ShipmentStatus } from '../../domain/shipment-enums';
-import { Category } from '@globalemergency/warehouse-core/kernel';
 import type { Pool } from 'pg';
 
 const URL =
