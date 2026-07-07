@@ -42,6 +42,7 @@ export const es = {
       terms: 'Términos y condiciones',
       copyright: '© {year} Global Emergency · Código abierto (MIT)',
       built_by: 'Hecho por voluntarios',
+      legal_entity_prefix: 'Operado legalmente bajo',
       aria_label: 'Pie de página',
       bots_heading: 'Ayuda por chat',
       github: 'Código en GitHub',
