@@ -1,5 +1,5 @@
 import { DomainEvent } from './domain-event';
-import { SupplyLineSnapshot } from '../../../supplies/domain/supply-line';
+import { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
 
 export class DonationIntakeReceived implements DomainEvent {
   readonly eventName = 'donation_intake.received';

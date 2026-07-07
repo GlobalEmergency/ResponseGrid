@@ -1,6 +1,6 @@
 import { ResourceRepository } from '../domain/ports/resource.repository';
 import { ResourceMembershipReader } from '../domain/ports/membership-reader';
-import { SupplyLineSnapshot } from '../../supplies/domain/supply-line';
+import { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
 import { UnauthorizedInventoryChangeError } from './unauthorized-inventory-change.error';
 import { loadResourceForManagement } from './load-resource-for-management';
 import { PrincipalGrant } from './principal-grant';

@@ -30,7 +30,7 @@ import {
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
 import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
 import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
-import { CategoryDefinition } from '../../domain/category-definition';
+import { CategoryDefinition } from '@globalemergency/warehouse-core/kernel';
 import { CreateCategory } from '../../application/create-category';
 import { ListCategories } from '../../application/list-categories';
 import {

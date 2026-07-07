@@ -19,6 +19,9 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.1075.0
         version: 3.1075.0
+      '@globalemergency/warehouse-core':
+        specifier: workspace:*
+        version: link:../../packages/warehouse-core
       '@nestjs/common':
         specifier: ^11.0.1
         version: 11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -256,6 +259,12 @@ importers:
       openapi-typescript:
         specifier: ^7.8.0
         version: 7.13.0(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
+  packages/warehouse-core:
+    devDependencies:
       typescript:
         specifier: ^5.7.3
         version: 5.9.3

@@ -1,4 +1,4 @@
-import { Category } from './category';
+import { Category } from './category.js';
 
 /**
  * SupplyLine — the core "line of aid material" of the platform: a quantity of a

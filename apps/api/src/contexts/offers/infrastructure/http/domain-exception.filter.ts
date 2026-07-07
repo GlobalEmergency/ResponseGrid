@@ -30,7 +30,7 @@ import {
   DonationIntakeLineLimitError,
   DonationIntakeReceptionReasonRequiredError,
 } from '../../domain/donation-intake-errors';
-import { SupplyLineValidationError } from '../../../supplies/domain/supply-line';
+import { SupplyLineValidationError } from '@globalemergency/warehouse-core/kernel';
 import { InvalidAuthorError } from '../../../../shared/domain/author';
 
 type DomainError =

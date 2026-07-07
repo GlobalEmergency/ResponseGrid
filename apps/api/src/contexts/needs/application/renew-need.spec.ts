@@ -10,7 +10,7 @@ import { Need } from '../domain/need';
 import { NeedId } from '../domain/need-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Location } from '../../../shared/domain/location';
-import { SupplyLine } from '../../supplies/domain/supply-line';
+import { SupplyLine } from '@globalemergency/warehouse-core/kernel';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const USER_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';

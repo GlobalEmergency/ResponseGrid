@@ -3,7 +3,7 @@ import { contactMatchesIntake } from '../domain/donor-contact';
 import { DonationIntakeContactMismatchError } from '../domain/donation-intake-errors';
 import { DonationIntakeRepository } from '../domain/ports/donation-intake.repository';
 import { DonationIntakeNotFoundError } from './donation-intake-not-found.error';
-import { SupplyLineProps } from '../../supplies/domain/supply-line';
+import { SupplyLineProps } from '@globalemergency/warehouse-core/kernel';
 
 export interface UpdateDonationIntakeCommand {
   intakeId: string;

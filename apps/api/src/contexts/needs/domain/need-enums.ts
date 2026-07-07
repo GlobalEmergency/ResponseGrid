@@ -1,7 +1,7 @@
 export { Priority } from '../../../shared/domain/priority';
 // Re-export the shared Category taxonomy (owned by the supplies context) as the
 // needs enum barrel, mirroring how Priority is re-exported from the shared kernel.
-export { Category } from '../../supplies/domain/category';
+export { Category } from '@globalemergency/warehouse-core/kernel';
 
 /**
  * PersonnelSkill mirrors VolunteerSkill values WITHOUT importing from the

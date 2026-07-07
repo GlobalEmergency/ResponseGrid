@@ -9,7 +9,7 @@ import {
   Matches,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Category } from '../../domain/category';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 
 /**
  * SupplyLineDto — the single request shape for a line of aid material

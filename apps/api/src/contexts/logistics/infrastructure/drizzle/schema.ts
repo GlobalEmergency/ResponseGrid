@@ -8,7 +8,7 @@ import {
   jsonb,
 } from 'drizzle-orm/pg-core';
 import { CoverageProps } from '../../domain/coverage';
-import { SupplyLineSnapshot } from '../../../supplies/domain/supply-line';
+import { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
 
 export const transportCapacitiesTable = pgTable('transport_capacities', {
   id: uuid('id').primaryKey(),

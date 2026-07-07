@@ -2,7 +2,7 @@ import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
 import {
   CategoryDefinition,
   CategoryKind,
-} from '../../domain/category-definition';
+} from '@globalemergency/warehouse-core/kernel';
 import {
   CategoryListOptions,
   CategoryRepository,

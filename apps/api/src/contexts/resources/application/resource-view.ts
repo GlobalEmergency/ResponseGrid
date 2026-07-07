@@ -5,7 +5,7 @@ import {
   PublicStatus,
 } from '../domain/resource-enums';
 import { LocationProps } from '../../../shared/domain/location';
-import { Category } from '../../supplies/domain/category';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 
 export interface ResourceView {
   id: string;

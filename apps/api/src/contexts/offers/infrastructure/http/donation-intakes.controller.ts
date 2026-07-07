@@ -74,7 +74,7 @@ import { RequirePermission } from '../../../identity/infrastructure/http/require
 type OptionalAuthedRequest = Express.Request & { user?: AuthenticatedUser };
 type AuthedRequest = Express.Request & { user: AuthenticatedUser };
 
-import { SupplyLineProps } from '../../../supplies/domain/supply-line';
+import { SupplyLineProps } from '@globalemergency/warehouse-core/kernel';
 
 function mapItems(items: CreateDonationIntakeDto['items']): SupplyLineProps[] {
   return items.map((item) => ({

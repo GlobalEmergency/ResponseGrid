@@ -11,7 +11,7 @@ import {
   primaryKey,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
-import { SupplyLineSnapshot } from '../../domain/supply-line';
+import { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
 
 export const categoriesTable = pgTable('categories', {
   slug: text('slug').primaryKey(),

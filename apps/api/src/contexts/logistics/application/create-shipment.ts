@@ -4,7 +4,10 @@ import { ShipmentContainerPort } from '../domain/ports/shipment-container-port';
 import { Shipment } from '../domain/shipment';
 import { ShipmentId } from '../domain/shipment-id';
 import { formatShipmentCode } from '../domain/shipment-code';
-import { SupplyLine, SupplyLineProps } from '../../supplies/domain/supply-line';
+import {
+  SupplyLine,
+  SupplyLineProps,
+} from '@globalemergency/warehouse-core/kernel';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 
