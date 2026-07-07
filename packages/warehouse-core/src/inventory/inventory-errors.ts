@@ -33,3 +33,26 @@ export class WarehouseArchivedError extends Error {
     this.name = 'WarehouseArchivedError';
   }
 }
+
+/**
+ * Raised on invalid bin input (empty/oversized code, empty warehouse id). The
+ * HTTP layer of each host maps it to 422.
+ */
+export class BinValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'BinValidationError';
+  }
+}
+
+/**
+ * Raised when mutating an archived bin (blocking, reassigning its zone…). An
+ * archived bin is retired, read-only history; the HTTP layer maps this to 409
+ * Conflict.
+ */
+export class BinArchivedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'BinArchivedError';
+  }
+}
