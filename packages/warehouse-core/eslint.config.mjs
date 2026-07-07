@@ -7,7 +7,7 @@ import tseslint from 'typescript-eslint';
 // ajustada a la estructura de este paquete (todo src/ es dominio puro).
 export default tseslint.config(
   {
-    ignores: ['dist', 'eslint.config.mjs'],
+    ignores: ['dist', 'dist-test', 'eslint.config.mjs'],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
