@@ -75,6 +75,7 @@ pnpm --filter api test                  # runInBand; global-setup spins up relie
 # web (build the api-client first):
 pnpm --filter @reliefhub/api-client build && pnpm --filter web build
 pnpm --filter web lint
+pnpm --filter web test                  # node --test on .ts → needs Node ≥22.6 (native type-stripping); CI runs this step on Node 22
 ```
 
 If you change dependencies, regenerate the lockfile with `pnpm install` (pnpm 10.33.4) and commit `pnpm-lock.yaml` — lockfiles do **not** 3-way-merge cleanly, so regenerate after any merge that touched deps (else the Docker build fails on `--frozen-lockfile`).
