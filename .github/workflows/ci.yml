@@ -54,10 +54,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Type-aware lint resolves @globalemergency/warehouse-core types from its
+      # Type-aware lint resolves @globalemergency/warehouse-* types from its
       # built dist, so build it first.
-      - name: Build — warehouse-core
-        run: pnpm --filter @globalemergency/warehouse-core build
+      - name: Build — warehouse packages
+        run: pnpm --filter '@globalemergency/*' build
 
       # api lint script has --fix; in CI we want read-only + fail on warnings
       - name: Lint — api
@@ -105,10 +105,10 @@ jobs:
       - name: Build — api-client
         run: pnpm --filter @reliefhub/api-client build
 
-      # warehouse-core is a workspace dependency of api: build it (dist/cjs +
-      # dist/esm) before nest build resolves it via the exports map.
-      - name: Build — warehouse-core
-        run: pnpm --filter @globalemergency/warehouse-core build
+      # the warehouse-* packages are workspace dependencies of api: build them (dist/cjs +
+      # dist/esm) before nest build resolves them via the exports map.
+      - name: Build — warehouse packages
+        run: pnpm --filter '@globalemergency/*' build
 
       - name: Build — api (nest build / tsc)
         run: pnpm --filter api build
@@ -161,10 +161,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # api consumes @globalemergency/warehouse-core via its built dist
+      # api consumes @globalemergency/warehouse-* via its built dist
       # (ts-jest type resolution + node runtime), so build it first.
-      - name: Build — warehouse-core
-        run: pnpm --filter @globalemergency/warehouse-core build
+      - name: Build — warehouse packages
+        run: pnpm --filter '@globalemergency/*' build
 
       - name: Run tests — api
         env:
@@ -235,10 +235,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # api consumes @globalemergency/warehouse-core via its built dist, so
+      # api consumes @globalemergency/warehouse-* via its built dist, so
       # build it before the e2e suite runs.
-      - name: Build — warehouse-core
-        run: pnpm --filter @globalemergency/warehouse-core build
+      - name: Build — warehouse packages
+        run: pnpm --filter '@globalemergency/*' build
 
       - name: Run e2e tests — api
         env:

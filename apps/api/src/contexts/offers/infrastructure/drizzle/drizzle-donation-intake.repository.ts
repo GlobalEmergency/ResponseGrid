@@ -11,7 +11,7 @@ import { IntakeLineSnapshot } from '../../domain/intake-line';
 import {
   rowToSupplyLineSnapshot,
   supplyLineToColumns,
-} from '../../../supplies/infrastructure/drizzle/supply-line-columns';
+} from '@globalemergency/warehouse-postgres';
 import { DonationIntakeRepository } from '../../domain/ports/donation-intake.repository';
 import {
   donationIntakeLinesTable,

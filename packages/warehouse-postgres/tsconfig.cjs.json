@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "Node10",
+    "outDir": "dist/cjs",
+    "verbatimModuleSyntax": false,
+    "baseUrl": ".",
+    "paths": {
+      "@globalemergency/warehouse-core": [
+        "../warehouse-core/dist/esm/index.d.ts"
+      ],
+      "@globalemergency/warehouse-core/*": [
+        "../warehouse-core/dist/esm/*/index.d.ts"
+      ]
+    }
+  }
+}
