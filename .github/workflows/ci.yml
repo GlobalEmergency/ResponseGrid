@@ -30,10 +30,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Only apps/api has a .prettierrc; check its src + test dirs.
       # prettier lives in apps/api's deps, so run it from there (root has no prettier bin).
       - name: Prettier — api
         run: pnpm --filter api exec prettier --check "src/**/*.ts" "test/**/*.ts"
+
+      # The workspace @globalemergency/* packages carry their own .prettierrc
+      # (same config as api). Gate their TS here too, run via api's prettier bin
+      # with repo-relative globs.
+      - name: Prettier — warehouse packages
+        run: pnpm --filter api exec prettier --check "../../packages/warehouse-core/src/**/*.ts" "../../packages/warehouse-postgres/src/**/*.ts"
 
   # ── Lint ────────────────────────────────────────────────────────────────────
   lint:
@@ -58,6 +63,11 @@ jobs:
       # built dist, so build it first.
       - name: Build — warehouse packages
         run: pnpm --filter '@globalemergency/*' build
+
+      # TODO(#355 follow-up): eslint for @globalemergency/* packages. They ship no
+      # runnable eslint config locally (flat config can't resolve the shared
+      # plugins from the package root), so a lint step here would break rather
+      # than gate. Add it once the packages have a self-contained eslint setup.
 
       # api lint script has --fix; in CI we want read-only + fail on warnings
       - name: Lint — api
@@ -193,6 +203,18 @@ jobs:
       # required Test job so the new WMS core actually gates the merge.
       - name: Run tests — warehouse-core
         run: pnpm --filter '@globalemergency/warehouse-core' test
+
+      # warehouse-postgres ships integration tests for the WMS `wms.` schema
+      # persistence adapters (the 4 inventory ports + its own migration runner):
+      # unlike warehouse-core's pure unit tests these need a real Postgres, so
+      # they run in the Test job against the service DB. They create their own
+      # `wms` schema in the base `reliefhub` DB → isolated from the api suite's
+      # `reliefhub_test`. Kept in the required Test job so the WMS persistence
+      # layer actually gates the merge.
+      - name: Run tests — warehouse-postgres (integración)
+        env:
+          TEST_DATABASE_URL: postgres://reliefhub:reliefhub@localhost:5433/reliefhub
+        run: pnpm --filter '@globalemergency/warehouse-postgres' test:int
 
   # ── E2E tests ───────────────────────────────────────────────────────────────
   # The unit/int suite (`Test` job) does NOT cover the HTTP e2e specs under

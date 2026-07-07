@@ -9,11 +9,7 @@ import {
   ContainerSealedError,
   ContainerValidationError,
 } from './container-errors.js';
-import {
-  ScopeId,
-  SupplyLine,
-  SupplyLineSnapshot,
-} from '../kernel/index.js';
+import { ScopeId, SupplyLine, SupplyLineSnapshot } from '../kernel/index.js';
 
 /**
  * Where the container is held right now. Polymorphic reference (no FK), like a

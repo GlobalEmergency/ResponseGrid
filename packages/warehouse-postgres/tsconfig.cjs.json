@@ -10,6 +10,9 @@
       "@globalemergency/warehouse-core": [
         "../warehouse-core/dist/esm/index.d.ts"
       ],
+      "@globalemergency/warehouse-core/inventory": [
+        "../warehouse-core/dist/esm/inventory/index.d.ts"
+      ],
       "@globalemergency/warehouse-core/*": [
         "../warehouse-core/dist/esm/*/index.d.ts"
       ]
