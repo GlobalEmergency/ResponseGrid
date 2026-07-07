@@ -1,17 +1,17 @@
 import { createDb, Db } from '../../../../shared/db';
 import { transportCapacitiesTable } from './schema';
 import { DrizzleTransportCapacityRepository } from './drizzle-transport-capacity.repository';
-import { TransportCapacity } from '../../domain/transport-capacity';
-import { TransportCapacityId } from '../../domain/transport-capacity-id';
-import { EmergencyId } from '../../../../shared/domain/emergency-id';
+import { TransportCapacity } from '@globalemergency/warehouse-core/logistics';
+import { TransportCapacityId } from '@globalemergency/warehouse-core/logistics';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 import {
   TransportCapacityStatus,
   TransportMode,
   TransportProviderType,
-} from '../../domain/transport-capacity-enums';
-import { Capacity } from '../../domain/capacity';
-import { Coverage } from '../../domain/coverage';
-import { CapacityWindow } from '../../domain/capacity-window';
+} from '@globalemergency/warehouse-core/logistics';
+import { Capacity } from '@globalemergency/warehouse-core/logistics';
+import { Coverage } from '@globalemergency/warehouse-core/logistics';
+import { CapacityWindow } from '@globalemergency/warehouse-core/logistics';
 import type { Pool } from 'pg';
 
 const URL =
@@ -31,7 +31,7 @@ function makeCapacity(opts?: {
 }): TransportCapacity {
   return TransportCapacity.publish({
     id: TransportCapacityId.create(),
-    emergencyId: EmergencyId.fromString(EM),
+    scopeId: ScopeId.fromString(EM),
     provider: { type: TransportProviderType.Organization, id: PROVIDER_ID },
     mode: opts?.mode ?? TransportMode.Road,
     capacity:
@@ -121,33 +121,33 @@ describe('DrizzleTransportCapacityRepository (integration)', () => {
     expect(found!.status).toBe(TransportCapacityStatus.Withdrawn);
   });
 
-  it('findByEmergency filters by mode', async () => {
+  it('findByScope filters by mode', async () => {
     await repo.save(makeCapacity({ mode: TransportMode.Road }));
     await repo.save(
       makeCapacity({ mode: TransportMode.Air, coverage: Coverage.area('Hub') }),
     );
 
-    const result = await repo.findByEmergency(EmergencyId.fromString(EM), {
+    const result = await repo.findByScope(ScopeId.fromString(EM), {
       mode: TransportMode.Air,
     });
     expect(result).toHaveLength(1);
     expect(result[0].mode).toBe(TransportMode.Air);
   });
 
-  it('findByEmergency filters by status', async () => {
+  it('findByScope filters by status', async () => {
     await repo.save(makeCapacity());
     const withdrawn = makeCapacity({ coverage: Coverage.area('X') });
     withdrawn.withdraw();
     await repo.save(withdrawn);
 
-    const result = await repo.findByEmergency(EmergencyId.fromString(EM), {
+    const result = await repo.findByScope(ScopeId.fromString(EM), {
       status: TransportCapacityStatus.Available,
     });
     expect(result).toHaveLength(1);
     expect(result[0].status).toBe(TransportCapacityStatus.Available);
   });
 
-  it('findByEmergency filters by window overlap', async () => {
+  it('findByScope filters by window overlap', async () => {
     await repo.save(
       makeCapacity({
         window: CapacityWindow.create({
@@ -166,7 +166,7 @@ describe('DrizzleTransportCapacityRepository (integration)', () => {
       }),
     );
 
-    const result = await repo.findByEmergency(EmergencyId.fromString(EM), {
+    const result = await repo.findByScope(ScopeId.fromString(EM), {
       availableFrom: '2026-07-05T00:00:00Z',
       availableTo: '2026-07-10T00:00:00Z',
     });
@@ -174,10 +174,10 @@ describe('DrizzleTransportCapacityRepository (integration)', () => {
     expect(result[0].window.from).toBe('2026-07-01T00:00:00.000Z');
   });
 
-  it('findByEmergency includes open-ended windows in any range', async () => {
+  it('findByScope includes open-ended windows in any range', async () => {
     await repo.save(makeCapacity({ window: CapacityWindow.empty() }));
 
-    const result = await repo.findByEmergency(EmergencyId.fromString(EM), {
+    const result = await repo.findByScope(ScopeId.fromString(EM), {
       availableFrom: '2030-01-01T00:00:00Z',
       availableTo: '2030-12-31T00:00:00Z',
     });

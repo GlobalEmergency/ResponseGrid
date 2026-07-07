@@ -1,10 +1,10 @@
-import { TransportCapacity } from '../transport-capacity';
-import { TransportCapacityId } from '../transport-capacity-id';
-import { EmergencyId } from '../../../../shared/domain/emergency-id';
+import { TransportCapacity } from '../transport-capacity.js';
+import { TransportCapacityId } from '../transport-capacity-id.js';
+import { ScopeId } from '../../kernel/index.js';
 import {
   TransportCapacityStatus,
   TransportMode,
-} from '../transport-capacity-enums';
+} from '../transport-capacity-enums.js';
 
 export const TRANSPORT_CAPACITY_REPOSITORY = Symbol(
   'TransportCapacityRepository',
@@ -27,8 +27,8 @@ export interface ListCapacitiesFilter {
 export interface TransportCapacityRepository {
   save(capacity: TransportCapacity): Promise<void>;
   findById(id: TransportCapacityId): Promise<TransportCapacity | null>;
-  findByEmergency(
-    emergencyId: EmergencyId,
+  findByScope(
+    scopeId: ScopeId,
     filter: ListCapacitiesFilter,
   ): Promise<TransportCapacity[]>;
 }

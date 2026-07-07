@@ -1,4 +1,4 @@
-import { DomainEvent } from '../events/domain-event';
+import { DomainEvent } from '@globalemergency/warehouse-core/kernel';
 
 export const SHIPMENT_EVENT_BUS = Symbol('ShipmentEventBus');
 

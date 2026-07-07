@@ -1,17 +1,17 @@
-import { TransportCapacityId } from './transport-capacity-id';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
+import { TransportCapacityId } from './transport-capacity-id.js';
+import { ScopeId } from '../kernel/index.js';
 import {
   TransportCapacityStatus,
   TransportMode,
   TransportProviderType,
-} from './transport-capacity-enums';
-import { Capacity, CapacityProps } from './capacity';
-import { Coverage, CoverageProps } from './coverage';
-import { CapacityWindow, CapacityWindowProps } from './capacity-window';
+} from './transport-capacity-enums.js';
+import { Capacity, CapacityProps } from './capacity.js';
+import { Coverage, CoverageProps } from './coverage.js';
+import { CapacityWindow, CapacityWindowProps } from './capacity-window.js';
 import {
   CapacityAlreadyWithdrawnError,
   CapacityNotAvailableError,
-} from './transport-capacity-errors';
+} from './transport-capacity-errors.js';
 
 /**
  * Polymorphic reference to whoever offers the capacity. No FK to volunteers or
@@ -24,7 +24,7 @@ export interface TransportProvider {
 
 export interface PublishTransportCapacityProps {
   id: TransportCapacityId;
-  emergencyId: EmergencyId;
+  scopeId: ScopeId;
   provider: TransportProvider;
   mode: TransportMode;
   capacity: Capacity;
@@ -36,7 +36,7 @@ export interface PublishTransportCapacityProps {
 
 export interface TransportCapacitySnapshot {
   id: string;
-  emergencyId: string;
+  scopeId: string;
   providerType: TransportProviderType;
   providerId: string;
   mode: TransportMode;
@@ -58,7 +58,7 @@ export interface TransportCapacitySnapshot {
 export class TransportCapacity {
   private constructor(
     public readonly id: TransportCapacityId,
-    public readonly emergencyId: EmergencyId,
+    public readonly scopeId: ScopeId,
     public readonly provider: TransportProvider,
     public readonly mode: TransportMode,
     public readonly capacity: Capacity,
@@ -75,7 +75,7 @@ export class TransportCapacity {
     const now = new Date();
     return new TransportCapacity(
       props.id,
-      props.emergencyId,
+      props.scopeId,
       props.provider,
       props.mode,
       props.capacity,
@@ -92,7 +92,7 @@ export class TransportCapacity {
   static fromSnapshot(s: TransportCapacitySnapshot): TransportCapacity {
     return new TransportCapacity(
       TransportCapacityId.fromString(s.id),
-      EmergencyId.fromString(s.emergencyId),
+      ScopeId.fromString(s.scopeId),
       { type: s.providerType, id: s.providerId },
       s.mode,
       Capacity.create(s.capacity),
@@ -136,7 +136,7 @@ export class TransportCapacity {
   toSnapshot(): TransportCapacitySnapshot {
     return {
       id: this.id.value,
-      emergencyId: this.emergencyId.value,
+      scopeId: this.scopeId.value,
       providerType: this.provider.type,
       providerId: this.provider.id,
       mode: this.mode,

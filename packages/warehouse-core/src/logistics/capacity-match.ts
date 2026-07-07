@@ -1,8 +1,8 @@
-import { TransportCapacitySnapshot } from './transport-capacity';
-import { ShipmentMatchCriteria } from './shipment-match-criteria';
-import { CorridorCoverageProps } from './coverage';
-import { capacityWindowOverlaps } from './window-overlap';
-import { haversineMeters } from '../../../shared/domain/geo-distance';
+import { TransportCapacitySnapshot } from './transport-capacity.js';
+import { ShipmentMatchCriteria } from './shipment-match-criteria.js';
+import { CorridorCoverageProps } from './coverage.js';
+import { capacityWindowOverlaps } from './window-overlap.js';
+import { haversineMeters } from '../kernel/index.js';
 
 /**
  * Pure compatibility predicate for #107: does this available capacity satisfy

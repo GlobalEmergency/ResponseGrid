@@ -1,5 +1,5 @@
-import { formatShipmentCode } from './shipment-code';
-import { InvalidShipmentRouteError } from './shipment-errors';
+import { formatShipmentCode } from '@globalemergency/warehouse-core/logistics';
+import { InvalidShipmentRouteError } from '@globalemergency/warehouse-core/logistics';
 
 describe('formatShipmentCode', () => {
   it('formats the EXP prefix with a 4-digit zero-padded sequence', () => {

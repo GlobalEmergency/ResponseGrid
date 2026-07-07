@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { ShipmentEventBus } from '../domain/ports/shipment-event-bus';
-import { DomainEvent } from '../domain/events/domain-event';
+import { DomainEvent } from '@globalemergency/warehouse-core/kernel';
 
 /**
  * Forwards shipment domain events to the shared `domain-events` BullMQ queue

@@ -1,14 +1,23 @@
-import { Shipment, CarrierPrincipal } from './shipment';
-import { ShipmentId } from './shipment-id';
-import { SupplyLine, Category } from '@globalemergency/warehouse-core/kernel';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { CarrierType, ShipmentStatus } from './shipment-enums';
+import {
+  Shipment,
+  CarrierPrincipal,
+} from '@globalemergency/warehouse-core/logistics';
+import { ShipmentId } from '@globalemergency/warehouse-core/logistics';
+import {
+  SupplyLine,
+  Category,
+  ScopeId,
+} from '@globalemergency/warehouse-core/kernel';
+import {
+  CarrierType,
+  ShipmentStatus,
+} from '@globalemergency/warehouse-core/logistics';
 import {
   InvalidShipmentRouteError,
   InvalidShipmentTransitionError,
   ShipmentMustHaveCargoError,
-} from './shipment-errors';
-import { ShipmentDelivered } from './events/shipment-delivered.event';
+} from '@globalemergency/warehouse-core/logistics';
+import { ShipmentDelivered } from '@globalemergency/warehouse-core/logistics';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const ORIGIN = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
@@ -46,7 +55,7 @@ function makeShipment(
   return Shipment.create({
     id: ShipmentId.create(),
     code: 'EXP-0001',
-    emergencyId: EmergencyId.fromString(EM),
+    scopeId: ScopeId.fromString(EM),
     originResourceId: overrides?.originResourceId ?? ORIGIN,
     destinationResourceId: overrides?.destinationResourceId ?? DEST,
     items: overrides?.items ?? [line('Agua', 5)],
@@ -157,7 +166,7 @@ describe('Shipment aggregate — status machine (valid transitions)', () => {
     expect(evt.eventName).toBe('shipment.delivered');
     expect(evt.aggregateId).toBe(s.id.value);
     expect(evt.payload).toMatchObject({
-      emergencyId: EM,
+      scopeId: EM,
       originResourceId: ORIGIN,
       destinationResourceId: DEST,
       assignedCapacityId: CAPACITY,
@@ -278,7 +287,7 @@ describe('Shipment aggregate — snapshot round-trip', () => {
     });
     const restored = Shipment.fromSnapshot(s.toSnapshot());
     expect(restored.id.value).toBe(s.id.value);
-    expect(restored.emergencyId.value).toBe(EM);
+    expect(restored.scopeId.value).toBe(EM);
     expect(restored.originResourceId).toBe(ORIGIN);
     expect(restored.destinationResourceId).toBe(DEST);
     expect(restored.items).toHaveLength(2);

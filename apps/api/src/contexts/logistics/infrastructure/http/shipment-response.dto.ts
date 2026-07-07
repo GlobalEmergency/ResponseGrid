@@ -1,5 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { CarrierType, ShipmentStatus } from '../../domain/shipment-enums';
+import {
+  CarrierType,
+  ShipmentStatus,
+} from '@globalemergency/warehouse-core/logistics';
 import { SupplyLineResponseDto } from '../../../supplies/infrastructure/http/supply-line.dto';
 
 export class CreateShipmentResponseDto {

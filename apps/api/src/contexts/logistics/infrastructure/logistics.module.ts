@@ -19,11 +19,11 @@ import { SuggestCapacitiesForShipment } from '../application/suggest-capacities-
 import {
   TRANSPORT_CAPACITY_REPOSITORY,
   TransportCapacityRepository,
-} from '../domain/ports/transport-capacity.repository';
+} from '@globalemergency/warehouse-core/logistics';
 import {
   SHIPMENT_REPOSITORY,
   ShipmentRepository,
-} from '../domain/ports/shipment.repository';
+} from '@globalemergency/warehouse-core/logistics';
 import {
   SHIPMENT_EVENT_BUS,
   ShipmentEventBus,

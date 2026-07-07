@@ -1,16 +1,16 @@
-import { capacityMatchesShipment } from './capacity-match';
-import { ShipmentMatchCriteria } from './shipment-match-criteria';
-import { TransportCapacity } from './transport-capacity';
-import { TransportCapacityId } from './transport-capacity-id';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
+import { capacityMatchesShipment } from '@globalemergency/warehouse-core/logistics';
+import { ShipmentMatchCriteria } from '@globalemergency/warehouse-core/logistics';
+import { TransportCapacity } from '@globalemergency/warehouse-core/logistics';
+import { TransportCapacityId } from '@globalemergency/warehouse-core/logistics';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 import {
   TransportMode,
   TransportProviderType,
-} from './transport-capacity-enums';
-import { Capacity } from './capacity';
-import { Coverage } from './coverage';
-import { CapacityWindow } from './capacity-window';
-import { TransportCapacitySnapshot } from './transport-capacity';
+} from '@globalemergency/warehouse-core/logistics';
+import { Capacity } from '@globalemergency/warehouse-core/logistics';
+import { Coverage } from '@globalemergency/warehouse-core/logistics';
+import { CapacityWindow } from '@globalemergency/warehouse-core/logistics';
+import { TransportCapacitySnapshot } from '@globalemergency/warehouse-core/logistics';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const PROVIDER_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -25,7 +25,7 @@ function snapshot(opts: {
 }): TransportCapacitySnapshot {
   return TransportCapacity.publish({
     id: TransportCapacityId.create(),
-    emergencyId: EmergencyId.fromString(EM),
+    scopeId: ScopeId.fromString(EM),
     provider: { type: TransportProviderType.Organization, id: PROVIDER_ID },
     mode: opts.mode ?? TransportMode.Road,
     capacity: opts.capacity ?? Capacity.create({ weightKg: 1000, volumeM3: 8 }),
@@ -47,7 +47,7 @@ function criteria(
   overrides?: Partial<ShipmentMatchCriteria>,
 ): ShipmentMatchCriteria {
   return {
-    emergencyId: EM,
+    scopeId: EM,
     originResourceId: ORIGIN,
     destinationResourceId: DEST,
     requiredMode: null,

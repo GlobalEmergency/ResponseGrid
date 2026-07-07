@@ -1,4 +1,4 @@
-import { ShipmentStatus } from './shipment-enums';
+import { ShipmentStatus } from './shipment-enums.js';
 
 /**
  * A shipment must move *something*: at least one loose {@link SupplyLine} or at

@@ -1,17 +1,17 @@
-import { ShipmentId } from './shipment-id';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { CarrierType, ShipmentStatus } from './shipment-enums';
+import { ShipmentId } from './shipment-id.js';
+import { ScopeId } from '../kernel/index.js';
+import { CarrierType, ShipmentStatus } from './shipment-enums.js';
 import {
   SupplyLine,
   SupplyLineSnapshot,
-} from '@globalemergency/warehouse-core/kernel';
+} from '../kernel/index.js';
 import {
   InvalidShipmentRouteError,
   InvalidShipmentTransitionError,
   ShipmentMustHaveCargoError,
-} from './shipment-errors';
-import { DomainEvent } from './events/domain-event';
-import { ShipmentDelivered } from './events/shipment-delivered.event';
+} from './shipment-errors.js';
+import { DomainEvent } from '../kernel/index.js';
+import { ShipmentDelivered } from './events/shipment-delivered.event.js';
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
@@ -30,7 +30,7 @@ export interface CreateShipmentProps {
   id: ShipmentId;
   /** Legible/QR "Código Único" of the expedition (`EXP-0001`, #163). */
   code: string;
-  emergencyId: EmergencyId;
+  scopeId: ScopeId;
   originResourceId: string;
   destinationResourceId: string;
   /** Loose cargo lines (non-palletised material), as the canonical SupplyLine. */
@@ -50,7 +50,7 @@ export interface CreateShipmentProps {
 export interface ShipmentSnapshot {
   id: string;
   code: string;
-  emergencyId: string;
+  scopeId: string;
   originResourceId: string;
   destinationResourceId: string;
   items: SupplyLineSnapshot[];
@@ -88,7 +88,7 @@ export class Shipment {
   private constructor(
     public readonly id: ShipmentId,
     public readonly code: string,
-    public readonly emergencyId: EmergencyId,
+    public readonly scopeId: ScopeId,
     public readonly originResourceId: string,
     public readonly destinationResourceId: string,
     public readonly items: SupplyLine[],
@@ -130,7 +130,7 @@ export class Shipment {
     return new Shipment(
       props.id,
       code,
-      props.emergencyId,
+      props.scopeId,
       props.originResourceId,
       props.destinationResourceId,
       [...props.items],
@@ -149,7 +149,7 @@ export class Shipment {
     return new Shipment(
       ShipmentId.fromString(s.id),
       s.code,
-      EmergencyId.fromString(s.emergencyId),
+      ScopeId.fromString(s.scopeId),
       s.originResourceId,
       s.destinationResourceId,
       s.items.map((i) => SupplyLine.fromSnapshot(i)),
@@ -219,7 +219,7 @@ export class Shipment {
     this.touch();
     this.events.push(
       new ShipmentDelivered(this.id.value, {
-        emergencyId: this.emergencyId.value,
+        scopeId: this.scopeId.value,
         originResourceId: this.originResourceId,
         destinationResourceId: this.destinationResourceId,
         assignedCapacityId: this._assignedCapacityId,
@@ -260,7 +260,7 @@ export class Shipment {
     return {
       id: this.id.value,
       code: this.code,
-      emergencyId: this.emergencyId.value,
+      scopeId: this.scopeId.value,
       originResourceId: this.originResourceId,
       destinationResourceId: this.destinationResourceId,
       items: this.items.map((i) => i.toSnapshot()),

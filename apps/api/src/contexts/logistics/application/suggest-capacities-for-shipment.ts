@@ -1,16 +1,16 @@
-import { ShipmentRepository } from '../domain/ports/shipment.repository';
-import { TransportCapacityRepository } from '../domain/ports/transport-capacity.repository';
+import { ShipmentRepository } from '@globalemergency/warehouse-core/logistics';
+import { TransportCapacityRepository } from '@globalemergency/warehouse-core/logistics';
 import { ResourceLocationLookup } from '../domain/ports/resource-location-lookup';
-import { ShipmentId } from '../domain/shipment-id';
-import { TransportCapacityStatus } from '../domain/transport-capacity-enums';
-import { deriveShipmentMatchCriteria } from '../domain/shipment-match-criteria';
+import { ShipmentId } from '@globalemergency/warehouse-core/logistics';
+import { TransportCapacityStatus } from '@globalemergency/warehouse-core/logistics';
+import { deriveShipmentMatchCriteria } from '@globalemergency/warehouse-core/logistics';
 import {
   capacityMatchesShipment,
   rankCapacitiesForShipment,
   OriginLatLng,
-} from '../domain/capacity-match';
+} from '@globalemergency/warehouse-core/logistics';
 import { CapacityView, toCapacityView } from './capacity-view';
-import { TransportCapacity } from '../domain/transport-capacity';
+import { TransportCapacity } from '@globalemergency/warehouse-core/logistics';
 import { ShipmentNotFoundError } from './shipment-not-found.error';
 
 export interface SuggestCapacitiesForShipmentQuery {
@@ -46,10 +46,9 @@ export class SuggestCapacitiesForShipment {
 
     const criteria = deriveShipmentMatchCriteria(shipment);
 
-    const available = await this.capacityRepo.findByEmergency(
-      shipment.emergencyId,
-      { status: TransportCapacityStatus.Available },
-    );
+    const available = await this.capacityRepo.findByScope(shipment.scopeId, {
+      status: TransportCapacityStatus.Available,
+    });
 
     const compatible = available.filter((capacity: TransportCapacity) =>
       capacityMatchesShipment(capacity.toSnapshot(), criteria),

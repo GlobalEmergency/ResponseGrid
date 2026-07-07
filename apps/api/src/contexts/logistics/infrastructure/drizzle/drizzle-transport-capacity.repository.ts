@@ -4,25 +4,25 @@ import { transportCapacitiesTable } from './schema';
 import {
   ListCapacitiesFilter,
   TransportCapacityRepository,
-} from '../../domain/ports/transport-capacity.repository';
+} from '@globalemergency/warehouse-core/logistics';
 import {
   TransportCapacity,
   TransportCapacitySnapshot,
-} from '../../domain/transport-capacity';
-import { TransportCapacityId } from '../../domain/transport-capacity-id';
-import { EmergencyId } from '../../../../shared/domain/emergency-id';
+} from '@globalemergency/warehouse-core/logistics';
+import { TransportCapacityId } from '@globalemergency/warehouse-core/logistics';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 import {
   TransportCapacityStatus,
   TransportMode,
   TransportProviderType,
-} from '../../domain/transport-capacity-enums';
+} from '@globalemergency/warehouse-core/logistics';
 
 type CapacityRow = typeof transportCapacitiesTable.$inferSelect;
 
 function rowToSnapshot(row: CapacityRow): TransportCapacitySnapshot {
   return {
     id: row.id,
-    emergencyId: row.emergencyId,
+    scopeId: row.emergencyId,
     providerType: row.providerType as TransportProviderType,
     providerId: row.providerId,
     mode: row.mode as TransportMode,
@@ -52,7 +52,7 @@ export class DrizzleTransportCapacityRepository implements TransportCapacityRepo
       .insert(transportCapacitiesTable)
       .values({
         id: s.id,
-        emergencyId: s.emergencyId,
+        emergencyId: s.scopeId,
         providerType: s.providerType,
         providerId: s.providerId,
         mode: s.mode,
@@ -86,12 +86,12 @@ export class DrizzleTransportCapacityRepository implements TransportCapacityRepo
     return TransportCapacity.fromSnapshot(rowToSnapshot(rows[0]));
   }
 
-  async findByEmergency(
-    emergencyId: EmergencyId,
+  async findByScope(
+    scopeId: ScopeId,
     filter: ListCapacitiesFilter,
   ): Promise<TransportCapacity[]> {
     const conditions: SQL[] = [
-      eq(transportCapacitiesTable.emergencyId, emergencyId.value),
+      eq(transportCapacitiesTable.emergencyId, scopeId.value),
     ];
 
     if (filter.mode !== undefined) {

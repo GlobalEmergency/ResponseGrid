@@ -3,7 +3,7 @@ import {
   TransportCapacityStatus,
   TransportMode,
   TransportProviderType,
-} from '../../domain/transport-capacity-enums';
+} from '@globalemergency/warehouse-core/logistics';
 
 export class PublishCapacityResponseDto {
   @ApiProperty({

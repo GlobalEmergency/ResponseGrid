@@ -1,7 +1,7 @@
-import { Shipment } from '../shipment';
-import { ShipmentId } from '../shipment-id';
-import { EmergencyId } from '../../../../shared/domain/emergency-id';
-import { ShipmentStatus } from '../shipment-enums';
+import { Shipment } from '../shipment.js';
+import { ShipmentId } from '../shipment-id.js';
+import { ScopeId } from '../../kernel/index.js';
+import { ShipmentStatus } from '../shipment-enums.js';
 
 export const SHIPMENT_REPOSITORY = Symbol('ShipmentRepository');
 
@@ -18,10 +18,10 @@ export interface ShipmentRepository {
    * safe, and decoupled from the live row count so a deleted shipment never
    * frees its code.
    */
-  nextSequence(emergencyId: EmergencyId): Promise<number>;
+  nextSequence(scopeId: ScopeId): Promise<number>;
   findById(id: ShipmentId): Promise<Shipment | null>;
-  findByEmergency(
-    emergencyId: EmergencyId,
+  findByScope(
+    scopeId: ScopeId,
     filter: ListShipmentsFilter,
   ): Promise<Shipment[]>;
   /**
@@ -30,6 +30,6 @@ export interface ShipmentRepository {
    */
   findByCarrier(
     carrierId: string,
-    emergencyId: EmergencyId | null,
+    scopeId: ScopeId | null,
   ): Promise<Shipment[]>;
 }

@@ -1,4 +1,4 @@
-import { InvalidShipmentRouteError } from './shipment-errors';
+import { InvalidShipmentRouteError } from './shipment-errors.js';
 
 /**
  * Builds the expedition's trackable code from a per-emergency sequence number,

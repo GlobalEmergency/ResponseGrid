@@ -1,7 +1,7 @@
 import {
   CapacityMustHaveWeightOrVolumeError,
   InvalidCapacityAmountError,
-} from './transport-capacity-errors';
+} from './transport-capacity-errors.js';
 
 export interface CapacityProps {
   weightKg: number | null;
