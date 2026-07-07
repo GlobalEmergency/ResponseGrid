@@ -77,13 +77,11 @@ export class DrizzleSupplyLinkBackfillRepository implements SupplyLinkBackfillRe
           .from(table)
           .where(isNull(table.supplyId))
           .groupBy(table.name);
-        return rows.map(
-          (row): UnlinkedLineGroup => ({
-            source,
-            name: row.name,
-            lines: row.lines,
-          }),
-        );
+        return rows.map((row): UnlinkedLineGroup => ({
+          source,
+          name: row.name,
+          lines: row.lines,
+        }));
       }),
     );
 

@@ -41,15 +41,13 @@ export class DrizzleVolunteerMatcher implements VolunteerMatcherPort {
     return rows
       .filter((r) => r.skills.includes(skill))
       .slice(0, effectiveLimit)
-      .map(
-        (r): VolunteerMatchResult => ({
-          volunteerId: r.id,
-          userId: r.userId,
-          name: r.name,
-          skills: r.skills,
-          hasVehicle: r.vehicle !== 'none',
-          availability: r.availability,
-        }),
-      );
+      .map((r): VolunteerMatchResult => ({
+        volunteerId: r.id,
+        userId: r.userId,
+        name: r.name,
+        skills: r.skills,
+        hasVehicle: r.vehicle !== 'none',
+        availability: r.availability,
+      }));
   }
 }

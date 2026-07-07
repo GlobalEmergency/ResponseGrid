@@ -66,7 +66,9 @@ type Catalog = typeof PERMISSION_CATALOG;
 
 /** `${resource}:${verb}` union built from the catalog above. */
 export type Permission = {
-  [Resource in keyof Catalog]: `${Resource & string}:${Catalog[Resource][number]}`;
+  [
+    Resource in keyof Catalog
+  ]: `${Resource & string}:${Catalog[Resource][number]}`;
 }[keyof Catalog];
 
 function buildAllPermissions(): Permission[] {
