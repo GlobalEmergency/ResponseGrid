@@ -36,6 +36,9 @@ import { ListSupplies } from './application/list-supplies';
 import { GetSupply } from './application/get-supply';
 import { CreateSupply } from './application/create-supply';
 import { EditSupply } from './application/edit-supply';
+import { CreateAttributeDefinition } from './application/create-attribute-definition';
+import { ListAttributeDefinitions } from './application/list-attribute-definitions';
+import { ArchiveAttributeDefinition } from './application/archive-attribute-definition';
 import { ArchiveSupply } from './application/archive-supply';
 import { RestoreSupply } from './application/restore-supply';
 import { AddSupplyAlias } from './application/add-supply-alias';
@@ -54,6 +57,7 @@ import { GetContainer } from './application/get-container';
 import { ListContainers } from './application/list-containers';
 import { CategoriesController } from './infrastructure/http/categories.controller';
 import { CategoriesAdminController } from './infrastructure/http/categories-admin.controller';
+import { AttributeDefinitionsAdminController } from './infrastructure/http/attribute-definitions-admin.controller';
 import { SuppliesController } from './infrastructure/http/supplies.controller';
 import { SuppliesAdminController } from './infrastructure/http/supplies-admin.controller';
 import { ContainerController } from './infrastructure/http/containers.controller';
@@ -167,6 +171,29 @@ const editSupplyProvider = {
     categoryRepo: CategoryRepository,
     attributeRepo: AttributeDefinitionRepository,
   ) => new EditSupply(repo, categoryRepo, attributeRepo),
+};
+
+const createAttributeDefinitionProvider = {
+  provide: CreateAttributeDefinition,
+  inject: [ATTRIBUTE_DEFINITION_REPOSITORY, CATEGORY_REPOSITORY],
+  useFactory: (
+    repo: AttributeDefinitionRepository,
+    categoryRepo: CategoryRepository,
+  ) => new CreateAttributeDefinition(repo, categoryRepo),
+};
+
+const listAttributeDefinitionsProvider = {
+  provide: ListAttributeDefinitions,
+  inject: [ATTRIBUTE_DEFINITION_REPOSITORY],
+  useFactory: (repo: AttributeDefinitionRepository) =>
+    new ListAttributeDefinitions(repo),
+};
+
+const archiveAttributeDefinitionProvider = {
+  provide: ArchiveAttributeDefinition,
+  inject: [ATTRIBUTE_DEFINITION_REPOSITORY],
+  useFactory: (repo: AttributeDefinitionRepository) =>
+    new ArchiveAttributeDefinition(repo),
 };
 
 const archiveSupplyProvider = {
@@ -286,6 +313,7 @@ const listContainersProvider = {
   controllers: [
     CategoriesController,
     CategoriesAdminController,
+    AttributeDefinitionsAdminController,
     SuppliesController,
     SuppliesAdminController,
     ContainerController,
@@ -305,6 +333,9 @@ const listContainersProvider = {
     getSupplyProvider,
     createSupplyProvider,
     editSupplyProvider,
+    createAttributeDefinitionProvider,
+    listAttributeDefinitionsProvider,
+    archiveAttributeDefinitionProvider,
     archiveSupplyProvider,
     restoreSupplyProvider,
     addSupplyAliasProvider,

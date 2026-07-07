@@ -6301,6 +6301,147 @@
         ]
       }
     },
+    "/admin/attribute-definitions": {
+      "get": {
+        "operationId": "AttributeDefinitionsAdminController_list",
+        "parameters": [
+          {
+            "name": "categorySlug",
+            "required": false,
+            "in": "query",
+            "description": "Filter by the exact category slug",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AttributeDefinitionDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing catalogue:manage permission"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List global attribute definitions, optionally by category",
+        "tags": [
+          "attribute-definitions-admin"
+        ]
+      },
+      "post": {
+        "operationId": "AttributeDefinitionsAdminController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAttributeDefinitionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeDefinitionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid attribute definition payload"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing catalogue:manage permission"
+          },
+          "404": {
+            "description": "Category not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a global attribute definition for a family",
+        "tags": [
+          "attribute-definitions-admin"
+        ]
+      }
+    },
+    "/admin/attribute-definitions/{categorySlug}/{key}": {
+      "delete": {
+        "operationId": "AttributeDefinitionsAdminController_archive",
+        "parameters": [
+          {
+            "name": "categorySlug",
+            "required": true,
+            "in": "path",
+            "description": "Category slug of the family",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "description": "Attribute key",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Attribute definition archived"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing catalogue:manage permission"
+          },
+          "404": {
+            "description": "Attribute definition not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Archive (soft-delete) a global attribute definition",
+        "tags": [
+          "attribute-definitions-admin"
+        ]
+      }
+    },
     "/supplies": {
       "get": {
         "operationId": "SuppliesController_list",
@@ -14794,6 +14935,141 @@
             "description": "True to hide/archive the category, false to restore it"
           }
         }
+      },
+      "AttributeOptionDto": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "example": "tableta"
+          },
+          "label": {
+            "type": "string",
+            "example": "Tableta"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      },
+      "AttributeDefinitionDto": {
+        "type": "object",
+        "properties": {
+          "categorySlug": {
+            "type": "string",
+            "example": "medicines"
+          },
+          "key": {
+            "type": "string",
+            "example": "principio_activo"
+          },
+          "dataType": {
+            "type": "string",
+            "enum": [
+              "text",
+              "number",
+              "integer",
+              "boolean",
+              "enum",
+              "date",
+              "quantity"
+            ],
+            "example": "text"
+          },
+          "required": {
+            "type": "boolean",
+            "example": false
+          },
+          "options": {
+            "nullable": true,
+            "description": "Opciones del enum, o null",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttributeOptionDto"
+            }
+          },
+          "unit": {
+            "type": "string",
+            "example": null,
+            "nullable": true
+          },
+          "sort": {
+            "type": "number",
+            "example": 0
+          },
+          "archivedAt": {
+            "type": "object",
+            "example": null,
+            "nullable": true,
+            "description": "Marca de archivado (soft-delete)"
+          }
+        },
+        "required": [
+          "categorySlug",
+          "key",
+          "dataType",
+          "required",
+          "options",
+          "unit",
+          "sort",
+          "archivedAt"
+        ]
+      },
+      "CreateAttributeDefinitionDto": {
+        "type": "object",
+        "properties": {
+          "categorySlug": {
+            "type": "string",
+            "example": "medicines",
+            "description": "Slug de la categoría (familia) a la que se ancla"
+          },
+          "key": {
+            "type": "string",
+            "example": "principio_activo",
+            "description": "Clave del atributo (lowercase snake_case)"
+          },
+          "dataType": {
+            "type": "string",
+            "enum": [
+              "text",
+              "number",
+              "integer",
+              "boolean",
+              "enum",
+              "date",
+              "quantity"
+            ],
+            "example": "text"
+          },
+          "required": {
+            "type": "boolean",
+            "example": false,
+            "default": false
+          },
+          "options": {
+            "description": "Opciones (sólo para dataType=enum)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttributeOptionDto"
+            }
+          },
+          "unit": {
+            "type": "object",
+            "example": "mg",
+            "nullable": true,
+            "description": "Unidad (sólo para dataType=number|quantity)"
+          },
+          "sort": {
+            "type": "number",
+            "example": 0,
+            "default": 0
+          }
+        },
+        "required": [
+          "categorySlug",
+          "key",
+          "dataType"
+        ]
       },
       "SupplyDto": {
         "type": "object",

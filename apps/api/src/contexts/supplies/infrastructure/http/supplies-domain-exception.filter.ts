@@ -33,6 +33,7 @@ import {
   CategoryProtectedError,
   CategoryValidationError,
 } from '../../application/category-admin.errors';
+import { AttributeDefinitionNotFoundError } from '../../application/attribute-definition-admin.errors';
 
 type DomainError =
   | ContainerNotFoundError
@@ -52,6 +53,7 @@ type DomainError =
   | AttributeValidationError
   | AttributeKeyCollisionError
   | AttributeDefinitionValidationError
+  | AttributeDefinitionNotFoundError
   | CategoryAlreadyExistsError
   | CategoryAdminNotFoundError
   | CategoryParentNotFoundError
@@ -86,6 +88,7 @@ type DomainError =
   AttributeValidationError,
   AttributeKeyCollisionError,
   AttributeDefinitionValidationError,
+  AttributeDefinitionNotFoundError,
   CategoryAlreadyExistsError,
   CategoryAdminNotFoundError,
   CategoryParentNotFoundError,
@@ -108,7 +111,8 @@ export class SuppliesDomainExceptionFilter implements ExceptionFilter {
       exception instanceof VariantTargetNotFoundError ||
       exception instanceof CategoryNotFoundError ||
       exception instanceof CategoryAdminNotFoundError ||
-      exception instanceof CategoryParentNotFoundError
+      exception instanceof CategoryParentNotFoundError ||
+      exception instanceof AttributeDefinitionNotFoundError
     ) {
       return HttpStatus.NOT_FOUND;
     }
