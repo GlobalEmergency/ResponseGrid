@@ -32,6 +32,14 @@ export enum Category {
   OtherPets = 'other_pets',
 }
 
+/**
+ * The canonical seed of core category slugs — the values of the {@link Category}
+ * enum as plain strings. The taxonomy is *open* (a `CategoryRegistry` can carry
+ * finer, data-driven subcategories), but these are the ones guaranteed to exist
+ * and to have code-level meaning.
+ */
+export const CORE_CATEGORY_SLUGS: readonly string[] = Object.values(Category);
+
 export function isCoreCategory(slug: string): boolean {
   return Object.values(Category).includes(slug as Category);
 }
