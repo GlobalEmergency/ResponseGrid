@@ -7,8 +7,14 @@ import {
   SupplyRepository,
   SupplyTranslationInput,
   CategoryRepository,
+  AttributeDefinitionRepository,
+  resolveEffectiveSchema,
+  validateAttributes,
 } from '@globalemergency/warehouse-core/catalog';
-import { getCategoryPrefix } from '@globalemergency/warehouse-core/kernel';
+import {
+  getCategoryPrefix,
+  CategoryRegistry,
+} from '@globalemergency/warehouse-core/kernel';
 
 export interface CreateSupplyCommand {
   name: string;
@@ -31,6 +37,7 @@ export class CreateSupply {
   constructor(
     private readonly repo: SupplyRepository,
     private readonly categoryRepo: CategoryRepository,
+    private readonly attributeRepo: AttributeDefinitionRepository,
   ) {}
 
   async execute(
@@ -50,6 +57,15 @@ export class CreateSupply {
       throw new CategoryNotFoundError(cmd.categorySlug);
     }
 
+    // Valida el `attributes` jsonb contra el esquema efectivo de la familia (la
+    // unión de definiciones de la ascendencia de su categoría). Si la familia no
+    // tiene definiciones, el esquema es vacío y los atributos pasan tal cual.
+    const attributes = await this.validateAttributes(
+      cmd.categorySlug,
+      cmd.attributes ?? {},
+      categories,
+    );
+
     const prefix = getCategoryPrefix(cmd.categorySlug, categories);
     const seq = await this.repo.nextSequenceValue();
     const code = formatSupplyCode(prefix, seq);
@@ -60,12 +76,36 @@ export class CreateSupply {
       name: cmd.name,
       categorySlug: cmd.categorySlug,
       defaultUnit: cmd.defaultUnit ?? null,
-      attributes: cmd.attributes ?? {},
+      attributes,
       registrationNotes: cmd.registrationNotes ?? null,
       variantOfId,
     });
 
     await this.repo.save(supply, cmd.translations);
     return { id: supply.id, code: supply.code };
+  }
+
+  private async validateAttributes(
+    categorySlug: string,
+    attributes: Record<string, unknown>,
+    categories: readonly { slug: string; parentSlug: string | null }[],
+  ): Promise<Record<string, unknown>> {
+    const registry = CategoryRegistry.fromNodes(
+      categories.map((c) => ({
+        slug: c.slug,
+        parentSlug: c.parentSlug,
+        codePrefix: null,
+      })),
+    );
+    const ancestrySlugs = [
+      categorySlug,
+      ...registry.ancestorsOf(categorySlug).map((n) => n.slug),
+    ];
+    const defs = await this.attributeRepo.findByCategoryAncestry(
+      ancestrySlugs,
+      null,
+    );
+    const schema = resolveEffectiveSchema(categorySlug, defs, registry);
+    return validateAttributes(attributes, schema);
   }
 }

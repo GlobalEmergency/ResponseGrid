@@ -22,6 +22,9 @@ import {
   SupplyCodeConflictError,
   SupplyNotFoundError,
   VariantTargetNotFoundError,
+  AttributeValidationError,
+  AttributeKeyCollisionError,
+  AttributeDefinitionValidationError,
 } from '@globalemergency/warehouse-core/catalog';
 import {
   CategoryAlreadyExistsError,
@@ -46,6 +49,9 @@ type DomainError =
   | CategoryNotFoundError
   | MergeIntoSelfError
   | AliasConflictError
+  | AttributeValidationError
+  | AttributeKeyCollisionError
+  | AttributeDefinitionValidationError
   | CategoryAlreadyExistsError
   | CategoryAdminNotFoundError
   | CategoryParentNotFoundError
@@ -77,6 +83,9 @@ type DomainError =
   CategoryNotFoundError,
   MergeIntoSelfError,
   AliasConflictError,
+  AttributeValidationError,
+  AttributeKeyCollisionError,
+  AttributeDefinitionValidationError,
   CategoryAlreadyExistsError,
   CategoryAdminNotFoundError,
   CategoryParentNotFoundError,
@@ -116,10 +125,12 @@ export class SuppliesDomainExceptionFilter implements ExceptionFilter {
       exception instanceof SupplyLineValidationError ||
       exception instanceof SupplyValidationError ||
       exception instanceof SupplyAliasValidationError ||
-      exception instanceof MergeIntoSelfError
+      exception instanceof MergeIntoSelfError ||
+      exception instanceof AttributeValidationError
     ) {
       return HttpStatus.BAD_REQUEST;
     }
+    // AttributeKeyCollisionError / AttributeDefinitionValidationError → 422.
     return HttpStatus.UNPROCESSABLE_ENTITY;
   }
 }

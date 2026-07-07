@@ -3,9 +3,25 @@ import {
   Supply,
   VariantTargetNotFoundError,
   CategoryNotFoundError,
+  AttributeValidationError,
+  AttributeDefinition,
   SupplyRepository,
   CategoryRepository,
+  AttributeDefinitionRepository,
 } from '@globalemergency/warehouse-core/catalog';
+
+function makeAttributeRepo(
+  overrides: Partial<AttributeDefinitionRepository> = {},
+): AttributeDefinitionRepository {
+  return {
+    findByScope: jest.fn().mockResolvedValue([]),
+    findByCategoryAncestry: jest.fn().mockResolvedValue([]),
+    findOne: jest.fn().mockResolvedValue(null),
+    save: jest.fn().mockResolvedValue(undefined),
+    archive: jest.fn().mockResolvedValue(undefined),
+    ...overrides,
+  };
+}
 
 function makeRepo(overrides: Partial<SupplyRepository> = {}): SupplyRepository {
   return {
@@ -68,7 +84,11 @@ describe('CreateSupply', () => {
     const repo = makeRepo({ save, nextSequenceValue });
     const categoryRepo = makeCategoryRepo();
 
-    const result = await new CreateSupply(repo, categoryRepo).execute({
+    const result = await new CreateSupply(
+      repo,
+      categoryRepo,
+      makeAttributeRepo(),
+    ).execute({
       name: 'Agua potable',
       categorySlug: 'water',
     });
@@ -87,7 +107,7 @@ describe('CreateSupply', () => {
     const repo = makeRepo({ save });
     const categoryRepo = makeCategoryRepo();
 
-    await new CreateSupply(repo, categoryRepo).execute({
+    await new CreateSupply(repo, categoryRepo, makeAttributeRepo()).execute({
       name: 'Agua potable',
       categorySlug: 'water',
       translations: [{ locale: 'en', name: 'Drinking water' }],
@@ -104,7 +124,11 @@ describe('CreateSupply', () => {
     const repo = makeRepo({ save, nextSequenceValue });
     const categoryRepo = makeCategoryRepo();
 
-    const result = await new CreateSupply(repo, categoryRepo).execute({
+    const result = await new CreateSupply(
+      repo,
+      categoryRepo,
+      makeAttributeRepo(),
+    ).execute({
       name: 'Ibuprofeno',
       categorySlug: 'medicines',
     });
@@ -127,7 +151,7 @@ describe('CreateSupply', () => {
     const categoryRepo = makeCategoryRepo();
 
     await expect(
-      new CreateSupply(repo, categoryRepo).execute({
+      new CreateSupply(repo, categoryRepo, makeAttributeRepo()).execute({
         name: 'Agua 1.5L',
         categorySlug: 'water',
         variantOfId: '22222222-2222-4222-8222-222222222222',
@@ -152,7 +176,7 @@ describe('CreateSupply', () => {
     });
     const categoryRepo = makeCategoryRepo();
 
-    await new CreateSupply(repo, categoryRepo).execute({
+    await new CreateSupply(repo, categoryRepo, makeAttributeRepo()).execute({
       name: 'Agua 1.5L',
       categorySlug: 'water',
       variantOfId: parent.id,
@@ -179,10 +203,90 @@ describe('CreateSupply', () => {
     });
 
     await expect(
-      new CreateSupply(repo, categoryRepo).execute({
+      new CreateSupply(repo, categoryRepo, makeAttributeRepo()).execute({
         name: 'Agua potable',
         categorySlug: 'water',
       }),
     ).rejects.toBeInstanceOf(CategoryNotFoundError);
+  });
+
+  it('valida/coacciona los atributos contra el esquema efectivo (herencia por el árbol, #396)', async () => {
+    const save = jest.fn().mockResolvedValue(undefined);
+    const repo = makeRepo({ save });
+    const categoryRepo = makeCategoryRepo();
+    // medicines hereda de medical: la definición ancla en medical aplica.
+    const findByCategoryAncestry = jest.fn().mockResolvedValue([
+      AttributeDefinition.create({
+        categorySlug: 'medical',
+        key: 'principio_activo',
+        dataType: 'text',
+        required: true,
+      }),
+      AttributeDefinition.create({
+        categorySlug: 'medicines',
+        key: 'dosis_mg',
+        dataType: 'number',
+        unit: 'mg',
+      }),
+    ]);
+    const attributeRepo = makeAttributeRepo({ findByCategoryAncestry });
+
+    await new CreateSupply(repo, categoryRepo, attributeRepo).execute({
+      name: 'Amoxicilina',
+      categorySlug: 'medicines',
+      attributes: { principio_activo: 'Amoxicilina', dosis_mg: '500' },
+    });
+
+    // La ascendencia consultada incluye la propia categoría y su padre.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const ancestry = findByCategoryAncestry.mock.calls[0][0] as string[];
+    expect(new Set(ancestry)).toEqual(new Set(['medicines', 'medical']));
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const saved = save.mock.calls[0][0] as Supply;
+    expect(saved.attributes).toEqual({
+      principio_activo: 'Amoxicilina',
+      dosis_mg: 500, // coaccionado string -> number
+    });
+  });
+
+  it('rechaza atributos que no validan contra el esquema (#396)', async () => {
+    const save = jest.fn().mockResolvedValue(undefined);
+    const repo = makeRepo({ save });
+    const categoryRepo = makeCategoryRepo();
+    const attributeRepo = makeAttributeRepo({
+      findByCategoryAncestry: jest.fn().mockResolvedValue([
+        AttributeDefinition.create({
+          categorySlug: 'medical',
+          key: 'principio_activo',
+          dataType: 'text',
+          required: true,
+        }),
+      ]),
+    });
+
+    await expect(
+      new CreateSupply(repo, categoryRepo, attributeRepo).execute({
+        name: 'Algo sin principio activo',
+        categorySlug: 'medicines',
+        attributes: {},
+      }),
+    ).rejects.toBeInstanceOf(AttributeValidationError);
+    expect(save).not.toHaveBeenCalled();
+  });
+
+  it('pasa los atributos tal cual si la familia no tiene definiciones', async () => {
+    const save = jest.fn().mockResolvedValue(undefined);
+    const repo = makeRepo({ save });
+    const categoryRepo = makeCategoryRepo();
+
+    await new CreateSupply(repo, categoryRepo, makeAttributeRepo()).execute({
+      name: 'Agua',
+      categorySlug: 'water',
+      attributes: { cualquier_cosa: 'libre' },
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const saved = save.mock.calls[0][0] as Supply;
+    expect(saved.attributes).toEqual({ cualquier_cosa: 'libre' });
   });
 });

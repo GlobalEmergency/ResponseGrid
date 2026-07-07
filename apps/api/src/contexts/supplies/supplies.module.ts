@@ -10,6 +10,8 @@ import {
   SupplyCatalogReadModel,
   SUPPLY_LINK_BACKFILL_REPOSITORY,
   SupplyLinkBackfillRepository,
+  ATTRIBUTE_DEFINITION_REPOSITORY,
+  AttributeDefinitionRepository,
 } from '@globalemergency/warehouse-core/catalog';
 import {
   CONTAINER_REPOSITORY,
@@ -21,6 +23,7 @@ import {
 } from './domain/ports/container-authorization-lookup';
 import { DrizzleCategoryRepository } from './infrastructure/drizzle/drizzle-category.repository';
 import { DrizzleSupplyRepository } from './infrastructure/drizzle/drizzle-supply.repository';
+import { DrizzleAttributeDefinitionRepository } from './infrastructure/drizzle/drizzle-attribute-definition.repository';
 import { DrizzleSupplyCatalogReadModel } from './infrastructure/drizzle/drizzle-supply-catalog.read-model';
 import { CachingSupplyCatalogReadModel } from './infrastructure/caching-supply-catalog.read-model';
 import { DrizzleContainerRepository } from './infrastructure/drizzle/drizzle-container.repository';
@@ -66,6 +69,13 @@ const supplyRepositoryProvider = {
   provide: SUPPLY_REPOSITORY,
   inject: [DB],
   useFactory: (db: Db): SupplyRepository => new DrizzleSupplyRepository(db),
+};
+
+const attributeDefinitionRepositoryProvider = {
+  provide: ATTRIBUTE_DEFINITION_REPOSITORY,
+  inject: [DB],
+  useFactory: (db: Db): AttributeDefinitionRepository =>
+    new DrizzleAttributeDefinitionRepository(db),
 };
 
 // La instancia cacheada se provee bajo su clase concreta para poder inyectarla
@@ -133,16 +143,30 @@ const getSupplyProvider = {
 
 const createSupplyProvider = {
   provide: CreateSupply,
-  inject: [SUPPLY_REPOSITORY, CATEGORY_REPOSITORY],
-  useFactory: (repo: SupplyRepository, categoryRepo: CategoryRepository) =>
-    new CreateSupply(repo, categoryRepo),
+  inject: [
+    SUPPLY_REPOSITORY,
+    CATEGORY_REPOSITORY,
+    ATTRIBUTE_DEFINITION_REPOSITORY,
+  ],
+  useFactory: (
+    repo: SupplyRepository,
+    categoryRepo: CategoryRepository,
+    attributeRepo: AttributeDefinitionRepository,
+  ) => new CreateSupply(repo, categoryRepo, attributeRepo),
 };
 
 const editSupplyProvider = {
   provide: EditSupply,
-  inject: [SUPPLY_REPOSITORY, CATEGORY_REPOSITORY],
-  useFactory: (repo: SupplyRepository, categoryRepo: CategoryRepository) =>
-    new EditSupply(repo, categoryRepo),
+  inject: [
+    SUPPLY_REPOSITORY,
+    CATEGORY_REPOSITORY,
+    ATTRIBUTE_DEFINITION_REPOSITORY,
+  ],
+  useFactory: (
+    repo: SupplyRepository,
+    categoryRepo: CategoryRepository,
+    attributeRepo: AttributeDefinitionRepository,
+  ) => new EditSupply(repo, categoryRepo, attributeRepo),
 };
 
 const archiveSupplyProvider = {
@@ -269,6 +293,7 @@ const listContainersProvider = {
   providers: [
     categoryRepositoryProvider,
     supplyRepositoryProvider,
+    attributeDefinitionRepositoryProvider,
     cachingSupplyCatalogProvider,
     supplyCatalogReadModelProvider,
     containerRepositoryProvider,
