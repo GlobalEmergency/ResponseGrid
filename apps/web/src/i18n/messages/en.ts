@@ -44,8 +44,6 @@ export const en = {
       copyright: '© {year} Global Emergency · Open source (MIT)',
       built_by: 'Built by volunteers',
       legal_entity_prefix: 'Operated legally under',
-      legal_entity_suffix:
-        '(Tax ID {taxId}). A non-profit initiative, not a commercial product.',
       aria_label: 'Footer',
       bots_heading: 'Help via chat',
       github: 'Source on GitHub',

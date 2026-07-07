@@ -61,8 +61,7 @@ export function GlobalFooter({ tf, tb }: GlobalFooterProps) {
                 className="underline underline-offset-2 transition-colors hover:text-accent focus:outline-none focus:ring-2 focus:ring-white/60 rounded"
               >
                 {GLOBAL_EMERGENCY.legalEntity}
-              </a>{' '}
-              {tf.legal_entity_suffix.replace('{taxId}', GLOBAL_EMERGENCY.legalEntityTaxId)}
+              </a>
             </p>
           </div>
 

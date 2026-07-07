@@ -17,6 +17,5 @@ export const GLOBAL_EMERGENCY = {
   // display-name review can correlate the "ResponseGrid" brand with the legal
   // company name, as required by Meta's display-name guidelines.
   legalEntity: 'Ingenieros Web SL',
-  legalEntityTaxId: 'B86699436',
   legalEntitySite: 'https://ingenierosweb.co',
 } as const;
