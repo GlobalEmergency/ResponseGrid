@@ -1,12 +1,12 @@
 {
-  "name": "reliefhub",
+  "name": "responsegrid",
   "private": true,
   "packageManager": "pnpm@10.33.4",
   "scripts": {
     "dev:infra": "docker compose up -d",
     "api:dev": "pnpm --filter api start:dev",
     "api:test": "pnpm --filter api test",
-    "gen:api": "pnpm --filter api gen:openapi && pnpm --filter @reliefhub/api-client generate"
+    "gen:api": "pnpm --filter api gen:openapi && pnpm --filter @responsegrid/api-client generate"
   },
   "pnpm": {
     "overrides": {

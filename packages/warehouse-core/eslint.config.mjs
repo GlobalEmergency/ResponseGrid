@@ -29,7 +29,7 @@ export default tseslint.config(
                 'warehouse-core es dominio puro: no puede importar ORM/driver de BD.',
             },
             {
-              group: ['**/apps/*', '@reliefhub/*'],
+              group: ['**/apps/*', '@responsegrid/*'],
               message:
                 'Dependencia unidireccional: warehouse-core nunca importa de los hosts.',
             },

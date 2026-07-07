@@ -1,6 +1,6 @@
 import { cache } from 'react';
 import { api } from '@/lib/api';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 
 export type EmergencyViewDto = components['schemas']['EmergencyViewDto'];
 

@@ -4,7 +4,7 @@ import { redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { resolveManageAccess } from '@/lib/manage-access';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import { WorkQueue } from '@/components/organisms/work-queue';
 import { QueueToolbar } from '@/components/molecules/queue-toolbar';
 import { OffersQueue } from '@/components/organisms/coordination-queues';

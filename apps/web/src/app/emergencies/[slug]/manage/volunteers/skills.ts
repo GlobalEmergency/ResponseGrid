@@ -1,4 +1,4 @@
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 
 export type VolunteerSkill = components['schemas']['VolunteerViewDto']['skills'][number];
 

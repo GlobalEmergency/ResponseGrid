@@ -1,4 +1,4 @@
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 // Relative + .ts extension (not the `@/` alias) so the `node --test` runner,
 // which does not resolve tsconfig paths, can load this value import.
 import { buildSupplyLineDto } from '../domain/supplies/supply-line.ts';

@@ -1,7 +1,7 @@
 'use server';
 
 import { api } from '@/lib/api';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { localizeBackendError } from '@/lib/backend-error-messages';
 import { getT } from '@/i18n/server';

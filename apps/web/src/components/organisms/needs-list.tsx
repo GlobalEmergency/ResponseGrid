@@ -8,8 +8,8 @@
  */
 
 import { useState, useTransition, type ReactNode } from 'react';
-import { createResponseGridClient } from '@reliefhub/api-client';
-import type { components } from '@reliefhub/api-client';
+import { createResponseGridClient } from '@responsegrid/api-client';
+import type { components } from '@responsegrid/api-client';
 import { NeedCard } from '@/components/molecules/need-card';
 import { NearbyButton } from '@/components/molecules/nearby-button';
 import { DistanceBadge } from '@/components/atoms/distance-badge';

@@ -1,5 +1,5 @@
 import { fromSupplyDto, type CatalogueSupply } from '@/domain/supplies/catalogue-supply';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 
 type SupplyDto = components['schemas']['SupplyDto'];
 

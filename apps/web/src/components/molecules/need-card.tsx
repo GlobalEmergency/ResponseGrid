@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import { Card } from '@/components/atoms/card';
 import { PriorityBadge, type Priority } from '@/components/atoms/priority-badge';
 import { FreshnessIndicator } from '@/components/atoms/freshness-indicator';

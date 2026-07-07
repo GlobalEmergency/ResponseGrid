@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { getT } from '@/i18n/server';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 
 export type VolunteerProfile = components['schemas']['VolunteerViewDto'];
 export type MyTask = components['schemas']['MyTaskViewDto'];

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import { RelativeTime } from '@/components/atoms/relative-time';
 
 type EmergencyViewDto = components['schemas']['EmergencyViewDto'];

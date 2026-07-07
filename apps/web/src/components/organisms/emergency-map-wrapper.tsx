@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { MapPoint } from './emergency-map';
-import { createResponseGridClient } from '@reliefhub/api-client';
+import { createResponseGridClient } from '@responsegrid/api-client';
 import type { Map as LeafletMap, LatLngBounds } from 'leaflet';
 
 // Leaflet must only run in the browser — dynamic with ssr:false is only

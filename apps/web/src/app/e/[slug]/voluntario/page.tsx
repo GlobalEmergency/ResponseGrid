@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { requireSession, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import { registerVolunteer } from './actions';
 import { VoluntarioForm } from './voluntario-form';
 import { AppBar } from '@/components/organisms/app-bar';

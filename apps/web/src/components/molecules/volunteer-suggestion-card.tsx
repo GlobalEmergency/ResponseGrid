@@ -1,4 +1,4 @@
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import { SkillTag } from '@/components/atoms/skill-tag';
 import type { getMessages } from '@/i18n';
 

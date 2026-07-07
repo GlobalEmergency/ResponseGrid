@@ -1,4 +1,4 @@
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import type { CatalogueSupply } from '@/domain/supplies/catalogue-supply';
 import type { Category } from '@/domain/supplies/category';
 

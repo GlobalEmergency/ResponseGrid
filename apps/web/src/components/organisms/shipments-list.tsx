@@ -6,7 +6,7 @@
 // server action has already revalidated) to reflect the new status server-side.
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import { Badge } from '@/components/atoms/badge';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { ShipmentDetail } from '@/components/organisms/shipment-detail';

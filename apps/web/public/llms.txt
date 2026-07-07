@@ -2,7 +2,7 @@
 
 > Plataforma open source de coordinación de ayuda material y logística en emergencias, de Global Emergency. Se activa por catástrofe: conecta a ciudadanía, organizaciones y coordinación para que la ayuda llegue donde hace falta sin saturar la logística. Información oficial, verificada y en tiempo real. Los datos se aíslan por emergencia y se sirven en HTML renderizado en servidor (citable directamente).
 
-## Qué hace la plataforma (todo gratuito y de código abierto, licencia MIT)
+## Qué hace la plataforma (todo gratuito y de código abierto, licencia AGPL-3.0)
 
 - Puntos de acopio y logísticos verificados, cada uno con su inventario de material declarado.
 - Necesidades de material validadas por coordinación local, con frescura de 48 h.

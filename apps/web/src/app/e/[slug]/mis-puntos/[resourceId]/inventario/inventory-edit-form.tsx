@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import type { InventoryState } from './actions';
 import { InventoryField } from '../../../registrar/inventory-field';
 import { Button } from '@/components/atoms/button';

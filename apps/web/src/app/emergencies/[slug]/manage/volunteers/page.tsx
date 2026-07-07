@@ -12,7 +12,7 @@ import { TaskCard } from '@/components/organisms/task-card';
 import { CreateTaskForm } from '@/components/organisms/create-task-form';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { getT } from '@/i18n/server';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import { VALID_SKILLS, type VolunteerSkill } from './skills';
 
 export const dynamic = 'force-dynamic';

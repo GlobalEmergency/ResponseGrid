@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import { updateVolunteerStatus } from '@/app/emergencies/[slug]/manage/volunteers/actions';
 import type { ActionResult } from '@/app/emergencies/[slug]/manage/volunteers/actions';
 import { Badge } from '@/components/atoms/badge';

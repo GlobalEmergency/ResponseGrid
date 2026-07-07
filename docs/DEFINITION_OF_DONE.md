@@ -15,7 +15,7 @@ pnpm --filter api exec prettier --check "src/**/*.ts" "test/**/*.ts"
 pnpm --filter api test
 
 # Web (si tocas apps/web)
-pnpm --filter @reliefhub/api-client build
+pnpm --filter @responsegrid/api-client build
 pnpm --filter web build
 pnpm --filter web lint
 ```
