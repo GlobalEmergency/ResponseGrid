@@ -52,6 +52,18 @@ export function GlobalFooter({ tf, tb }: GlobalFooterProps) {
                 {tf.org}
               </a>
             </p>
+            <p className="mt-2 text-xs leading-relaxed text-white/55">
+              {tf.legal_entity_prefix}{' '}
+              <a
+                href={GLOBAL_EMERGENCY.legalEntitySite}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 transition-colors hover:text-accent focus:outline-none focus:ring-2 focus:ring-white/60 rounded"
+              >
+                {GLOBAL_EMERGENCY.legalEntity}
+              </a>{' '}
+              {tf.legal_entity_suffix.replace('{taxId}', GLOBAL_EMERGENCY.legalEntityTaxId)}
+            </p>
           </div>
 
           <nav aria-label={tf.nav_heading} className="flex flex-col gap-2.5">
