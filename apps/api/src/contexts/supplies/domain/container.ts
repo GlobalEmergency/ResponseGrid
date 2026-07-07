@@ -10,7 +10,10 @@ import {
   ContainerSealedError,
   ContainerValidationError,
 } from './container-errors';
-import { SupplyLine, SupplyLineSnapshot } from './supply-line';
+import {
+  SupplyLine,
+  SupplyLineSnapshot,
+} from '@globalemergency/warehouse-core/kernel';
 
 /**
  * Where the container is held right now. Polymorphic reference (no FK), like a

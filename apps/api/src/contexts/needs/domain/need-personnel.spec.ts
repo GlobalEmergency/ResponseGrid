@@ -4,7 +4,7 @@
 import { Need } from './need';
 import { NeedId } from './need-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { SupplyLine } from '../../supplies/domain/supply-line';
+import { SupplyLine } from '@globalemergency/warehouse-core/kernel';
 import { Category, Priority, PersonnelSkill } from './need-enums';
 import { Location } from '../../../shared/domain/location';
 

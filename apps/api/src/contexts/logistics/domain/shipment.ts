@@ -4,7 +4,7 @@ import { CarrierType, ShipmentStatus } from './shipment-enums';
 import {
   SupplyLine,
   SupplyLineSnapshot,
-} from '../../supplies/domain/supply-line';
+} from '@globalemergency/warehouse-core/kernel';
 import {
   InvalidShipmentRouteError,
   InvalidShipmentTransitionError,

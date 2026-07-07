@@ -2,7 +2,7 @@ import { InMemoryNeedRepository } from '../infrastructure/in-memory-need.reposit
 import { GetNeedsInBounds } from './get-needs-in-bounds';
 import { Need } from '../domain/need';
 import { NeedId } from '../domain/need-id';
-import { SupplyLine } from '../../supplies/domain/supply-line';
+import { SupplyLine } from '@globalemergency/warehouse-core/kernel';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { Priority, Category } from '../domain/need-enums';
 import { Location } from '../../../shared/domain/location';

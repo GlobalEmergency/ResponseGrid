@@ -5,7 +5,7 @@ import { SealContainer } from './seal-container';
 import { GetContainer } from './get-container';
 import { InMemoryContainerRepository } from '../infrastructure/in-memory-container.repository';
 import { ContainerStatus, ContainerType } from '../domain/container-enums';
-import { Category } from '../domain/category';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 import { ContainerNotFoundError } from './container-not-found.error';
 
 const EM = '11111111-1111-4111-8111-111111111111';

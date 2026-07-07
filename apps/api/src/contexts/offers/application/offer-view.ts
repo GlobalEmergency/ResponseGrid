@@ -1,6 +1,6 @@
 import { DonationOffer } from '../domain/donation-offer';
 import { LocationProps } from '../../../shared/domain/location';
-import { SupplyLineSnapshot } from '../../supplies/domain/supply-line';
+import { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
 import { AuthorSnapshot } from '../../../shared/domain/author';
 
 export interface OfferView {

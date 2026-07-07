@@ -1,5 +1,5 @@
 import { Container } from '../domain/container';
-import { SupplyLineSnapshot } from '../domain/supply-line';
+import { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
 
 export interface ContainerLineView {
   name: string;

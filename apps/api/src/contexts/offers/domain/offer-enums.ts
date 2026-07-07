@@ -1,5 +1,5 @@
 // Offers share the single Category taxonomy owned by the supplies context.
-import { Category } from '../../supplies/domain/category';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 
 export { Category };
 

@@ -161,7 +161,7 @@ export default async function PreRegistroPage({ params, searchParams }: Props) {
           variant="action"
           slug={slug}
           backHref={`/e/${slug}/pre-registro`}
-          currentPath={`/e/${slug}/pre-registro?resourceId=${resourceId}`}
+          currentPath={`/e/${slug}/pre-registro?resourceId=${encodeURIComponent(resourceId)}`}
         />
         <PageHeading
           title={tp.page_title}

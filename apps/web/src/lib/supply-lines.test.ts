@@ -11,35 +11,35 @@ const isCat = (c: string) => ['food', 'water', 'hygiene'].includes(c);
 const REQUIRED = { isValidCategory: isCat, allowEmpty: false };
 const OPTIONAL = { isValidCategory: isCat, allowEmpty: true };
 
-test('absent payload: [] when allowEmpty, null when required', () => {
-  assert.deepEqual(parseSupplyLines('', OPTIONAL), []);
-  assert.deepEqual(parseSupplyLines('   ', OPTIONAL), []);
-  assert.deepEqual(parseSupplyLines(null, OPTIONAL), []);
-  assert.equal(parseSupplyLines('', REQUIRED), null);
-  assert.equal(parseSupplyLines(null, REQUIRED), null);
+test('absent payload: {items:[]} when allowEmpty, generic invalidRow when required', () => {
+  assert.deepEqual(parseSupplyLines('', OPTIONAL), { items: [] });
+  assert.deepEqual(parseSupplyLines('   ', OPTIONAL), { items: [] });
+  assert.deepEqual(parseSupplyLines(null, OPTIONAL), { items: [] });
+  assert.deepEqual(parseSupplyLines('', REQUIRED), { invalidRow: -1 });
+  assert.deepEqual(parseSupplyLines(null, REQUIRED), { invalidRow: -1 });
 });
 
 test('empty array respects allowEmpty', () => {
-  assert.deepEqual(parseSupplyLines('[]', OPTIONAL), []);
-  assert.equal(parseSupplyLines('[]', REQUIRED), null);
+  assert.deepEqual(parseSupplyLines('[]', OPTIONAL), { items: [] });
+  assert.deepEqual(parseSupplyLines('[]', REQUIRED), { invalidRow: -1 });
 });
 
 test('parses a well-formed line and trims name/unit', () => {
   const raw = JSON.stringify([
     { name: '  Agua  ', quantity: 5, unit: ' cajas ', category: 'water' },
   ]);
-  assert.deepEqual(parseSupplyLines(raw, REQUIRED), [
-    { name: 'Agua', quantity: 5, unit: 'cajas', category: 'water' },
-  ]);
+  assert.deepEqual(parseSupplyLines(raw, REQUIRED), {
+    items: [{ name: 'Agua', quantity: 5, unit: 'cajas', category: 'water' }],
+  });
 });
 
 test('omits a blank unit instead of sending an empty string', () => {
   const raw = JSON.stringify([
     { name: 'Arroz', quantity: 2, unit: '   ', category: 'food' },
   ]);
-  assert.deepEqual(parseSupplyLines(raw, REQUIRED), [
-    { name: 'Arroz', quantity: 2, category: 'food' },
-  ]);
+  assert.deepEqual(parseSupplyLines(raw, REQUIRED), {
+    items: [{ name: 'Arroz', quantity: 2, category: 'food' }],
+  });
 });
 
 test('preserves a soft supply link when present', () => {
@@ -51,71 +51,102 @@ test('preserves a soft supply link when present', () => {
       supplyId: ' 1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8 ',
     },
   ]);
-  assert.deepEqual(parseSupplyLines(raw, REQUIRED), [
-    {
-      name: 'Agua',
-      quantity: 12,
-      category: 'water',
-      supplyId: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
-    },
-  ]);
+  assert.deepEqual(parseSupplyLines(raw, REQUIRED), {
+    items: [
+      {
+        name: 'Agua',
+        quantity: 12,
+        category: 'water',
+        supplyId: '1e4b5f3b-5c9c-4f77-8f50-3d2dbdc0c7d8',
+      },
+    ],
+  });
 });
 
 test('preserves a trimmed presentation, omits it when blank (#61)', () => {
   const withPres = JSON.stringify([
     { name: 'Clindamicina', quantity: 5, category: 'food', presentation: '  EV (intravenoso)  ' },
   ]);
-  assert.deepEqual(parseSupplyLines(withPres, REQUIRED), [
-    { name: 'Clindamicina', quantity: 5, category: 'food', presentation: 'EV (intravenoso)' },
-  ]);
+  assert.deepEqual(parseSupplyLines(withPres, REQUIRED), {
+    items: [{ name: 'Clindamicina', quantity: 5, category: 'food', presentation: 'EV (intravenoso)' }],
+  });
 
   const blankPres = JSON.stringify([
     { name: 'Agua', quantity: 1, category: 'water', presentation: '   ' },
   ]);
-  assert.deepEqual(parseSupplyLines(blankPres, REQUIRED), [
-    { name: 'Agua', quantity: 1, category: 'water' },
-  ]);
+  assert.deepEqual(parseSupplyLines(blankPres, REQUIRED), {
+    items: [{ name: 'Agua', quantity: 1, category: 'water' }],
+  });
 });
 
 test('rejects a non-string presentation', () => {
-  assert.equal(
+  assert.deepEqual(
     parseSupplyLines(
       JSON.stringify([{ name: 'X', quantity: 1, category: 'food', presentation: 5 }]),
       REQUIRED,
     ),
-    null,
+    { invalidRow: 0 },
   );
 });
 
-test('returns null on malformed JSON or a non-array root', () => {
-  assert.equal(parseSupplyLines('{not json', REQUIRED), null);
-  assert.equal(parseSupplyLines('{"a":1}', REQUIRED), null);
+test('returns a generic (row-less) failure on malformed JSON or a non-array root', () => {
+  assert.deepEqual(parseSupplyLines('{not json', REQUIRED), { invalidRow: -1 });
+  assert.deepEqual(parseSupplyLines('{"a":1}', REQUIRED), { invalidRow: -1 });
 });
 
 test('rejects blank name, bad quantity, or invalid category', () => {
-  assert.equal(
+  assert.deepEqual(
     parseSupplyLines(
       JSON.stringify([{ name: ' ', quantity: 1, category: 'food' }]),
       REQUIRED,
     ),
-    null,
+    { invalidRow: 0 },
   );
   for (const q of [0, -1, 1.5, '2']) {
-    assert.equal(
+    assert.deepEqual(
       parseSupplyLines(
         JSON.stringify([{ name: 'X', quantity: q, category: 'food' }]),
         REQUIRED,
       ),
-      null,
+      { invalidRow: 0 },
       `quantity=${String(q)} should be rejected`,
     );
   }
-  assert.equal(
+  assert.deepEqual(
     parseSupplyLines(
       JSON.stringify([{ name: 'X', quantity: 1, category: 'weapons' }]),
       REQUIRED,
     ),
-    null,
+    { invalidRow: 0 },
+  );
+});
+
+test('identifies the first invalid row when it is not the only one (start, middle, end)', () => {
+  const good = { name: 'Agua', quantity: 1, category: 'water' };
+  const bad = { name: '', quantity: 1, category: 'water' };
+
+  // Invalid row is first.
+  assert.deepEqual(
+    parseSupplyLines(JSON.stringify([bad, good, good]), REQUIRED),
+    { invalidRow: 0 },
+  );
+
+  // Invalid row is in the middle.
+  assert.deepEqual(
+    parseSupplyLines(JSON.stringify([good, bad, good]), REQUIRED),
+    { invalidRow: 1 },
+  );
+
+  // Invalid row is last.
+  assert.deepEqual(
+    parseSupplyLines(JSON.stringify([good, good, bad]), REQUIRED),
+    { invalidRow: 2 },
+  );
+
+  // Only the FIRST invalid row is reported when several are bad.
+  assert.deepEqual(
+    parseSupplyLines(JSON.stringify([good, bad, bad]), REQUIRED),
+    { invalidRow: 1 },
   );
 });
 

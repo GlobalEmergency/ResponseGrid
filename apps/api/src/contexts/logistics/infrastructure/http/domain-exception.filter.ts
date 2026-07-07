@@ -22,7 +22,7 @@ import {
   InvalidShipmentTransitionError,
   ShipmentMustHaveCargoError,
 } from '../../domain/shipment-errors';
-import { SupplyLineValidationError } from '../../../supplies/domain/supply-line';
+import { SupplyLineValidationError } from '@globalemergency/warehouse-core/kernel';
 import {
   ShipmentContainerNotFoundError,
   ShipmentContainerUnavailableError,

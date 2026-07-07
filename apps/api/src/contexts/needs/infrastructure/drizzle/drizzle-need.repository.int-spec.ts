@@ -8,7 +8,7 @@ import { NeedId } from '../../domain/need-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import { Category, Priority, NeedStatus } from '../../domain/need-enums';
 import { Location } from '../../../../shared/domain/location';
-import { SupplyLine } from '../../../supplies/domain/supply-line';
+import { SupplyLine } from '@globalemergency/warehouse-core/kernel';
 import type { Pool } from 'pg';
 
 const URL =

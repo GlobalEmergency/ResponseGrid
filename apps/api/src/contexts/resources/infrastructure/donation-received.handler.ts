@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { DomainEventEnvelope } from '../../../shared/events/fan-out';
 import { EventHandler } from '../../../shared/events/consumer-worker';
 import { ReceiveDonationIntoInventory } from '../application/receive-donation-into-inventory';
-import { SupplyLineSnapshot } from '../../supplies/domain/supply-line';
+import { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
 
 /**
  * Handler for `donation_intake.received` on the resources consumer queue: apply

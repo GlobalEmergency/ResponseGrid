@@ -248,6 +248,7 @@ export class GrantsController {
     return this.grantRole.execute({
       actor: { principalId: user.id, grants: user.grants },
       targetPrincipalId: dto.principalId,
+      ...(dto.principalType ? { targetPrincipalType: dto.principalType } : {}),
       roleId: dto.roleId,
       scope: buildScope(dto),
       expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : null,

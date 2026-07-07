@@ -1,6 +1,9 @@
 import { ResourceRepository } from '../domain/ports/resource.repository';
 import { ResourceId } from '../domain/resource-id';
-import { SupplyLine, SupplyLineProps } from '../../supplies/domain/supply-line';
+import {
+  SupplyLine,
+  SupplyLineProps,
+} from '@globalemergency/warehouse-core/kernel';
 import { ResourceNotFoundError } from './resource-not-found.error';
 
 export interface RecordInventoryEntryCommand {

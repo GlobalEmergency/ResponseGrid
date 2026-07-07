@@ -44,6 +44,29 @@ export const en = {
       copyright: '© {year} Global Emergency · Open source (MIT)',
       built_by: 'Built by volunteers',
       aria_label: 'Footer',
+      bots_heading: 'Help via chat',
+      github: 'Source on GitHub',
+      github_aria: 'ResponseGrid repository on GitHub',
+    },
+
+    // Chat assistants (Telegram and WhatsApp bots) — promoted in the footer
+    // (always visible), on the home page and via a timed emergency banner.
+    bots: {
+      telegram: 'Telegram',
+      whatsapp: 'WhatsApp',
+      open_telegram: 'Open in Telegram',
+      open_whatsapp: 'Open in WhatsApp',
+      channels_aria: 'Chat help channels',
+      // Home section
+      home_overline: 'No apps, no sign-up',
+      home_heading: 'Donate and check in via WhatsApp or Telegram',
+      home_body:
+        'Our assistants guide you from the chat you already use: donate supplies, look up verified collection points and check what is needed right now. Instant, free and nothing to install.',
+      // Timed banner on the emergency page
+      banner_heading: 'Prefer to do it by chat?',
+      banner_body:
+        'Look up collection points and donate via WhatsApp or Telegram, instantly and with no sign-up.',
+      banner_dismiss: 'Close',
     },
 
     menu_aria: 'Menu',
@@ -51,6 +74,24 @@ export const en = {
     // server-action messages
     default_address: 'No address',
     intake_paused: 'Intake is paused for this emergency. Please try again later.',
+  },
+
+  // Localized copy for raw 4xx domain-error messages (#296) — see es.ts.
+  backendErrors: {
+    resource_not_in_emergency: 'The linked resource no longer exists in this emergency.',
+    supply_name_required: 'Every material needs a name.',
+    supply_quantity_invalid: 'Quantity must be a whole number greater than zero.',
+    supply_expiry_invalid: 'The expiry date must use the YYYY-MM-DD format.',
+    target_need_not_found: 'The selected need no longer exists.',
+    target_need_wrong_emergency: 'The selected need does not belong to this emergency.',
+    offer_items_required: 'The offer must include at least one material.',
+    capacity_weight_or_volume_required: 'State the weight or the volume of the capacity.',
+    capacity_amount_invalid: 'Weight and volume must be greater than zero.',
+    coverage_area_required: 'The coverage area cannot be empty.',
+    capacity_window_invalid_date: 'The availability window date is not valid.',
+    capacity_window_order_invalid:
+      'The window start date cannot be after the end date.',
+    generic: 'Could not complete the request. Please try again.',
   },
 
   appbar: {
@@ -210,6 +251,10 @@ export const en = {
       {
         q: 'How can I help beyond donating supplies?',
         a: 'You can offer a logistics point or warehouse, provide transport capacity, sign up as a volunteer or register a request from “How do you want to help?”.',
+      },
+      {
+        q: 'Can I donate or check in via WhatsApp or Telegram?',
+        a: 'Yes. ResponseGrid runs free chat assistants: on Telegram at https://t.me/donacionesvenezuela_bot and on WhatsApp at https://wa.me/15559386039. They guide you to donate supplies, look up verified collection points and see what is needed now, with nothing to install and no sign-up.',
       },
     ],
     status_active: 'Active emergency',
@@ -715,6 +760,7 @@ export const en = {
     addItem: 'Add item',
     emptyList: 'No items yet.',
     legend: 'Items',
+    invalidRowHint: 'Check this row: it is incomplete or invalid.',
   },
 
   // ── Citizen delivery pre-registration (#130) ──────────────────────────────
@@ -1711,6 +1757,8 @@ export const en = {
     inventory_update_failed: 'Could not save the inventory.',
     inventory_invalid_items:
       'Check the material: some lines are incomplete or invalid. Fill in the missing fields or remove the empty rows.',
+    inventory_invalid_row:
+      'Row {n} is incomplete or invalid. Complete it or remove it to save.',
 
     type_collection_point: 'Collection point',
     type_delivery_point: 'Delivery point',

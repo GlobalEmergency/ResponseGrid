@@ -8,7 +8,7 @@ import {
   OfferCannotBeCancelledError,
   OfferItemsRequiredError,
 } from './offer-errors';
-import { SupplyLine } from '../../supplies/domain/supply-line';
+import { SupplyLine } from '@globalemergency/warehouse-core/kernel';
 import { Location } from '../../../shared/domain/location';
 
 const EM = '11111111-1111-4111-8111-111111111111';

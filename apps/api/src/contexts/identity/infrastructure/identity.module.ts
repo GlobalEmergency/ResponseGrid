@@ -25,6 +25,7 @@ import { RevokeApiKey } from '../application/revoke-api-key';
 import { FindUserByEmail } from '../application/find-user-by-email';
 import { ListGrantsAtScope } from '../application/list-grants-at-scope';
 import { ListApiKeys } from '../application/list-api-keys';
+import { ListServiceAccountGrants } from '../application/list-service-account-grants';
 import { ListServiceAccountsByOrg } from '../application/list-service-accounts-by-org';
 import { ListUsersAdmin } from '../application/list-users-admin';
 import { GetUserAdminDetail } from '../application/get-user-admin-detail';
@@ -332,6 +333,16 @@ const listServiceAccountsByOrgProvider = {
     new ListServiceAccountsByOrg(sas, access),
 };
 
+const listServiceAccountGrantsProvider = {
+  provide: ListServiceAccountGrants,
+  inject: [SERVICE_ACCOUNT_REPOSITORY, GRANT_REPOSITORY, ACCESS_CONTROL],
+  useFactory: (
+    sas: ServiceAccountRepository,
+    grants: GrantRepository,
+    access: AccessControl,
+  ) => new ListServiceAccountGrants(sas, grants, access),
+};
+
 const userIdentityRepositoryProvider = {
   provide: USER_IDENTITY_REPOSITORY,
   inject: [DB],
@@ -534,6 +545,7 @@ const updateProfileProvider = {
     issueApiKeyProvider,
     revokeApiKeyProvider,
     listApiKeysProvider,
+    listServiceAccountGrantsProvider,
     listServiceAccountsByOrgProvider,
     resourceEmergencyLookupProvider,
     needEmergencyLookupProvider,

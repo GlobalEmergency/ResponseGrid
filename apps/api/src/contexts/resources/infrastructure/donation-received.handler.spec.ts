@@ -6,7 +6,7 @@ import { ResourceId } from '../domain/resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { ResourceType } from '../domain/resource-enums';
 import { Location } from '../../../shared/domain/location';
-import { Category } from '../../supplies/domain/category';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 import { DomainEventEnvelope } from '../../../shared/events/fan-out';
 
 const EMG = '11111111-1111-4111-8111-111111111111';

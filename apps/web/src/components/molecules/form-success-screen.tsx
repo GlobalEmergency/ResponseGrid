@@ -5,6 +5,7 @@ import { LinkButton } from '@/components/atoms/link-button';
 interface SuccessLink {
   href: string;
   label: string;
+  variant?: 'primary' | 'secondary';
 }
 
 interface FormSuccessScreenProps {
@@ -25,6 +26,22 @@ export function FormSuccessScreen({
   secondaryLabel,
   extraLinks = [],
 }: FormSuccessScreenProps) {
+  // Single list of {href, label, variant} instead of three parallel renders
+  // (extraLinks / primary / secondary) — one map covers every link.
+  const links: ReadonlyArray<SuccessLink & { onClick?: () => void }> = [
+    ...extraLinks.map((link) => ({ ...link, variant: 'secondary' as const })),
+    {
+      href: primaryHref,
+      label: primaryLabel,
+      variant: 'primary' as const,
+      // Hard navigation so the form page re-mounts and all controlled state resets.
+      onClick: () => {
+        window.location.href = primaryHref;
+      },
+    },
+    { href: secondaryHref, label: secondaryLabel, variant: 'secondary' as const },
+  ];
+
   return (
     <section
       role="alert"
@@ -35,24 +52,11 @@ export function FormSuccessScreen({
         {message}
       </p>
       <div className="flex flex-col gap-3">
-        {extraLinks.map(({ href, label }) => (
-          <LinkButton key={href} href={href} variant="secondary" fullWidth>
+        {links.map(({ href, label, variant, onClick }) => (
+          <LinkButton key={href} href={href} variant={variant} fullWidth onClick={onClick}>
             {label}
           </LinkButton>
         ))}
-        <LinkButton
-          href={primaryHref}
-          fullWidth
-          // Hard navigation so the form page re-mounts and all controlled state resets.
-          onClick={() => {
-            window.location.href = primaryHref;
-          }}
-        >
-          {primaryLabel}
-        </LinkButton>
-        <LinkButton href={secondaryHref} variant="secondary" fullWidth>
-          {secondaryLabel}
-        </LinkButton>
       </div>
     </section>
   );

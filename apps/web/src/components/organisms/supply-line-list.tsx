@@ -16,11 +16,13 @@ interface SupplyLineListProps {
   defaultCategory: string;
   showExpiry?: boolean;
   labels?: Partial<Messages['supplyLine']>;
+  /** Index of the row a server-side validation error points at (#296). */
+  invalidIndex?: number;
 }
 
 export function SupplyLineList({
   value, onChange, categories, locale, idPrefix, required,
-  defaultCategory, showExpiry = false, labels,
+  defaultCategory, showExpiry = false, labels, invalidIndex,
 }: SupplyLineListProps) {
   const t = { ...getMessages(locale).supplyLine, ...labels };
 
@@ -56,6 +58,7 @@ export function SupplyLineList({
             onRemove={() => remove(index)}
             showExpiry={showExpiry}
             labels={labels}
+            invalid={index === invalidIndex}
           />
         ))
       )}

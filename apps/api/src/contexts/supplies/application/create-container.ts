@@ -3,7 +3,10 @@ import { Container, ContainerHolder } from '../domain/container';
 import { ContainerId } from '../domain/container-id';
 import { ContainerType } from '../domain/container-enums';
 import { formatContainerCode } from '../domain/container-code';
-import { SupplyLine, SupplyLineProps } from '../domain/supply-line';
+import {
+  SupplyLine,
+  SupplyLineProps,
+} from '@globalemergency/warehouse-core/kernel';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 
 export interface CreateContainerCommand {

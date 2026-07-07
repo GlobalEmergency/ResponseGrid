@@ -2,19 +2,34 @@ import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { api } from '@/lib/api';
-import { fetchServiceAccounts, fetchApiKeys } from '../actions';
+import {
+  fetchServiceAccounts,
+  fetchApiKeys,
+  fetchRoles,
+  fetchServiceAccountGrants,
+} from '../actions';
 import { IssueKeyButton } from '../issue-key-button';
 import { RevokeKeyButton } from '../revoke-key-button';
-import { shortId } from '@/lib/permissions';
+import { GrantServiceAccountRoleForm } from '../grant-sa-role-form';
+import { RevokeServiceAccountGrantButton } from '../revoke-sa-grant-button';
+import { shortId, scopeLabel } from '@/lib/permissions';
+import { computeEffectivePermissions } from '@/lib/effective-permissions';
 import { formatDate } from '@/lib/format-date';
 import { PageHeader } from '@/components/molecules/page-header';
 import { EmptyState } from '@/components/molecules/empty-state';
+import { EffectivePermissions } from '@/components/molecules/effective-permissions';
+import { ErrorMessage } from '@/components/atoms/error-message';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Cuenta de servicio — Admin · ResponseGrid',
 };
+
+/** An expired grant confers nothing — surfaced so the list isn't misread. */
+function isExpired(iso: string): boolean {
+  return new Date(iso).getTime() <= Date.now();
+}
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -29,12 +44,18 @@ export default async function ServiceAccountDetailPage({ params }: Props) {
   if (meRes.status === 401 || !me) return redirectToLogin(`/admin/api-keys/${id}`);
   if (!me.isAdmin) redirect('/');
 
-  const [accounts, keys] = await Promise.all([
+  const [accounts, keys, roles, grantsResult] = await Promise.all([
     fetchServiceAccounts(),
     fetchApiKeys(id),
+    fetchRoles(),
+    fetchServiceAccountGrants(id),
   ]);
   const sa = accounts.find((a) => a.id === id);
   if (!sa) notFound();
+
+  const grantsFailed = grantsResult === null;
+  const grants = grantsResult ?? [];
+  const effective = computeEffectivePermissions(grants, roles);
 
   return (
     <>
@@ -92,6 +113,70 @@ export default async function ServiceAccountDetailPage({ params }: Props) {
             ))}
           </ul>
         )}
+      </section>
+
+      <hr className="border-line" />
+
+      <section className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-xl font-bold text-ink">
+            Permisos ({grants.length})
+          </h2>
+          <p className="text-xs text-muted">
+            Una API key no tiene permisos propios: hereda los de esta cuenta de
+            servicio. Concede o revoca roles para cambiar qué pueden hacer sus
+            claves.
+          </p>
+        </div>
+
+        {grantsFailed ? (
+          <ErrorMessage message="No se pudieron cargar los permisos de esta cuenta. Recarga la página para reintentarlo." />
+        ) : grants.length === 0 ? (
+          <EmptyState title="Esta cuenta no tiene permisos concedidos. Sus claves solo pueden leer datos públicos." />
+        ) : (
+          <ul className="flex flex-col gap-2" role="list">
+            {grants.map((g) => (
+              <li
+                key={g.id}
+                className="flex items-center justify-between gap-3 rounded-lg border border-line bg-white p-3"
+              >
+                <div className="flex flex-col gap-0.5 min-w-0">
+                  <span className="text-sm font-semibold text-ink">
+                    {g.roleId}
+                  </span>
+                  <span className="text-xs text-muted">
+                    {scopeLabel(g.scopeType, g.scopeId)}
+                    {g.expiresAt && (
+                      <>
+                        {isExpired(g.expiresAt) ? ' · caducado ' : ' · caduca '}
+                        <time dateTime={g.expiresAt} suppressHydrationWarning>
+                          {formatDate(g.expiresAt, 'es')}
+                        </time>
+                      </>
+                    )}
+                  </span>
+                </div>
+                <RevokeServiceAccountGrantButton
+                  grantId={g.id}
+                  serviceAccountId={id}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <EffectivePermissions effective={effective} />
+      </section>
+
+      <hr className="border-line" />
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-lg font-bold text-ink">Conceder permiso</h2>
+        <p className="text-xs text-muted">
+          Solo puedes conceder roles que tú mismo tengas en ese ámbito (sin
+          escalada de privilegios).
+        </p>
+        <GrantServiceAccountRoleForm serviceAccountId={id} roles={roles} />
       </section>
 
       <hr className="border-line" />

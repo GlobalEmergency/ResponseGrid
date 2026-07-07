@@ -3,7 +3,7 @@ import { ResourceRepository } from '../domain/ports/resource.repository';
 import {
   SupplyLine,
   SupplyLineSnapshot,
-} from '../../supplies/domain/supply-line';
+} from '@globalemergency/warehouse-core/kernel';
 
 export interface ReceiveDonationIntoInventoryCommand {
   targetResourceId: string;

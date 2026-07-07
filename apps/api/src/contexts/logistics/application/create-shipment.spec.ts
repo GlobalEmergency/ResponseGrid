@@ -5,7 +5,7 @@ import { LogisticsEmergencyStatusReader } from '../domain/ports/emergency-status
 import { ShipmentId } from '../domain/shipment-id';
 import { ShipmentStatus } from '../domain/shipment-enums';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { Category } from '../../supplies/domain/category';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 import { ShipmentMustHaveCargoError } from '../domain/shipment-errors';
 
