@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 import { renewNeed } from '@/app/emergencies/[slug]/manage/actions';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import type { ActionResult } from '@/app/emergencies/[slug]/manage/actions';
 import { Button } from '@/components/atoms/button';
 import { ErrorMessage } from '@/components/atoms/error-message';

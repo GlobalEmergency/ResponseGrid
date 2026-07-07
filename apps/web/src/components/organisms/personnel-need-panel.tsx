@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import { SkillTag } from '@/components/atoms/skill-tag';
 import { ErrorMessage } from '@/components/atoms/error-message';
 import { VolunteerSuggestionCard } from '@/components/molecules/volunteer-suggestion-card';

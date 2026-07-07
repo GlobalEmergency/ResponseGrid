@@ -40,7 +40,7 @@ export const es = {
       legal_heading: 'Legal',
       privacy: 'Privacidad',
       terms: 'Términos y condiciones',
-      copyright: '© {year} Global Emergency · Código abierto (MIT)',
+      copyright: '© {year} Global Emergency · Código abierto (AGPL-3.0)',
       built_by: 'Hecho por voluntarios',
       aria_label: 'Pie de página',
       bots_heading: 'Ayuda por chat',
@@ -163,7 +163,7 @@ export const es = {
     features_cta: 'Ver todas las funcionalidades',
     features_heading: 'Todo el operativo en una sola plataforma',
     features_intro:
-      'ResponseGrid no es un mapa más: es la infraestructura completa para coordinar ayuda material en una catástrofe. Todo gratuito y de código abierto (licencia MIT), con los datos alojados en la UE (RGPD).',
+      'ResponseGrid no es un mapa más: es la infraestructura completa para coordinar ayuda material en una catástrofe. Todo gratuito y de código abierto (licencia AGPL-3.0), con los datos alojados en la UE (RGPD).',
     features: [
       {
         icon: '📍',
@@ -218,7 +218,7 @@ export const es = {
       {
         icon: '🔌',
         title: 'API pública y open source',
-        body: 'Datos abiertos de solo lectura, documentación para desarrolladores y todo el código auditable (MIT).',
+        body: 'Datos abiertos de solo lectura, documentación para desarrolladores y todo el código auditable (AGPL-3.0).',
       },
     ],
 
@@ -1238,7 +1238,7 @@ export const es = {
       },
       {
         heading: 'Confianza, datos abiertos y desarrolladores',
-        body: 'Todo recurso muestra su nivel de confianza: sin verificar, verificado por coordinación u organización acreditada. La plataforma es de código abierto (licencia MIT), aloja los datos en la UE (RGPD) y ofrece una API pública de solo lectura con documentación para desarrolladores.',
+        body: 'Todo recurso muestra su nivel de confianza: sin verificar, verificado por coordinación u organización acreditada. La plataforma es de código abierto (licencia AGPL-3.0), aloja los datos en la UE (RGPD) y ofrece una API pública de solo lectura con documentación para desarrolladores.',
       },
     ],
     cta_heading: '¿Quieres ayudar ahora?',
@@ -1256,7 +1256,7 @@ export const es = {
     lead:
       'ResponseGrid es una plataforma libre y sin ánimo de lucro de Global Emergency. Conecta a la ciudadanía, las organizaciones y la coordinación durante una catástrofe para que cada esfuerzo sea útil, verificado y sin saturar la logística.',
     stat_open: 'Código abierto',
-    stat_open_value: 'MIT',
+    stat_open_value: 'AGPL-3.0',
     stat_realtime: 'Información en tiempo real',
     stat_realtime_value: '24/7',
     stat_data: 'Datos alojados en la UE',
@@ -1269,7 +1269,7 @@ export const es = {
       'Publicamos solo puntos y campañas verificados por coordinación local, validamos las necesidades reales y casamos las ofertas de material con quien las pide. Toda la información es oficial y en tiempo real.',
     open_heading: 'Open source y de los voluntarios',
     open_body:
-      'El código es abierto (licencia MIT) y está hecho y mantenido por personas voluntarias. Cualquiera puede auditarlo, mejorarlo o desplegarlo para su territorio.',
+      'El código es abierto (licencia AGPL-3.0) y está hecho y mantenido por personas voluntarias. Cualquiera puede auditarlo, mejorarlo o desplegarlo para su territorio.',
     ge_heading: 'Parte de Global Emergency',
     ge_body:
       'ResponseGrid es uno de los proyectos de Global Emergency, una iniciativa que democratiza el acceso a tecnología profesional para Protección Civil y los servicios de emergencia.',
@@ -1311,7 +1311,7 @@ export const es = {
   transparency: {
     meta_title: 'Transparencia — ResponseGrid',
     meta_description:
-      'Transparencia en ResponseGrid: verificación antes de publicar, datos protegidos en la UE (RGPD), código abierto bajo licencia MIT y gobernanza abierta por voluntarios.',
+      'Transparencia en ResponseGrid: verificación antes de publicar, datos protegidos en la UE (RGPD), código abierto bajo licencia AGPL-3.0 y gobernanza abierta por voluntarios.',
     overline: 'Transparencia',
     h1: 'Transparencia y confianza, por diseño',
     lead:
@@ -1322,9 +1322,9 @@ export const es = {
     data_heading: 'Tus datos, protegidos',
     data_body:
       'Privacidad por diseño: pedimos los datos mínimos, las ubicaciones sensibles se publican con coordenadas aproximadas y los datos personales (como los datos de contacto de quienes ofrecen o solicitan ayuda) nunca se exponen. Datos alojados en la UE, conforme al RGPD.',
-    license_heading: 'Código abierto (MIT)',
+    license_heading: 'Código abierto (AGPL-3.0)',
     license_body:
-      'Todo el código es público y está bajo licencia MIT. Cualquiera puede auditarlo, contribuir o desplegarlo. Sin cajas negras: lo que ves es lo que hace.',
+      'Todo el código es público y está bajo licencia AGPL-3.0. Cualquiera puede auditarlo, contribuir o desplegarlo. Sin cajas negras: lo que ves es lo que hace.',
     governance_heading: 'Gobernanza abierta',
     governance_body:
       'ResponseGrid es un proyecto de Global Emergency, mantenido por voluntarios. Las decisiones y la hoja de ruta se debaten en abierto en el repositorio público.',
@@ -1567,7 +1567,7 @@ export const es = {
     links_openapi_b: 'El JSON de OpenAPI, para generar clientes o importar en tus herramientas.',
     links_client_t: 'Cliente TypeScript tipado',
     links_client_b:
-      'Paquete @reliefhub/api-client (openapi-fetch): tipos y autocompletado para consumir la API desde TypeScript.',
+      'Paquete @responsegrid/api-client (openapi-fetch): tipos y autocompletado para consumir la API desde TypeScript.',
 
     // Tablas
     th_field: 'Campo',

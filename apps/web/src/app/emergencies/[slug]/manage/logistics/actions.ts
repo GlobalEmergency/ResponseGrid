@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { api } from '@/lib/api';
 import { requireSession, authHeaders, redirectToLogin } from '@/lib/auth';
 import { getT } from '@/i18n/server';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 
 export type ActionResult =
   | { status: 'idle' }

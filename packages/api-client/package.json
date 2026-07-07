@@ -1,5 +1,5 @@
 {
-  "name": "@reliefhub/api-client",
+  "name": "@responsegrid/api-client",
   "version": "0.1.0",
   "type": "module",
   "main": "./dist/index.js",

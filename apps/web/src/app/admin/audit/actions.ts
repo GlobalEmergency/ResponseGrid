@@ -2,7 +2,7 @@
 
 import { getToken, authHeaders } from '@/lib/auth';
 import { api } from '@/lib/api';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 
 export type AuditEntryDto = components['schemas']['AuditEntryDto'];
 export type AuditListResponseDto = components['schemas']['AuditListResponseDto'];

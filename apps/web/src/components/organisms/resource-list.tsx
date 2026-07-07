@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useTransition, useEffect, useMemo, useRef } from 'react';
-import { createResponseGridClient } from '@reliefhub/api-client';
-import type { components } from '@reliefhub/api-client';
+import { createResponseGridClient } from '@responsegrid/api-client';
+import type { components } from '@responsegrid/api-client';
 import { groupByCountry, type ResourceViewDto } from '@/lib/group-by-country';
 import { PublicResourceCard } from '@/components/organisms/public-resource-card';
 import { ResourceFilterBar } from '@/components/molecules/resource-filter-bar';

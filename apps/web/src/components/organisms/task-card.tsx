@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useState } from 'react';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import {
   assignVolunteer,
   unassignVolunteer,

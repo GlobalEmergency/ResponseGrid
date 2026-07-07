@@ -194,7 +194,7 @@ importers:
 
   apps/web:
     dependencies:
-      '@reliefhub/api-client':
+      '@responsegrid/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
       leaflet:

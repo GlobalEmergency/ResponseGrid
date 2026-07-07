@@ -1,6 +1,6 @@
 'use client';
 
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import Link from 'next/link';
 import { VerificationBadge } from '@/components/atoms/verification-badge';
 import { StatusLight } from '@/components/atoms/status-light';

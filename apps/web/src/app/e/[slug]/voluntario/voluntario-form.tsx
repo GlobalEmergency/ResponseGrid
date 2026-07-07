@@ -2,7 +2,7 @@
 
 import { useActionState, useState, useEffect } from 'react';
 import { LinkButton } from '@/components/atoms/link-button';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import type { VolunteerActionState } from './actions';
 import { Button } from '@/components/atoms/button';
 import { Input } from '@/components/atoms/input';

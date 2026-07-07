@@ -1,4 +1,4 @@
-import { createResponseGridClient } from '@reliefhub/api-client';
+import { createResponseGridClient } from '@responsegrid/api-client';
 
 /**
  * Pre-configured API client — use ONLY in Server Components or Server Actions.

@@ -103,7 +103,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build — api-client
-        run: pnpm --filter @reliefhub/api-client build
+        run: pnpm --filter @responsegrid/api-client build
 
       # warehouse-core is a workspace dependency of api: build it (dist/cjs +
       # dist/esm) before nest build resolves it via the exports map.

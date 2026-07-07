@@ -2,7 +2,7 @@ import type { NextConfig } from 'next';
 import path from 'path';
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@reliefhub/api-client'],
+  transpilePackages: ['@responsegrid/api-client'],
   turbopack: {
     root: path.resolve(__dirname, '../..'),
   },

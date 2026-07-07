@@ -1,4 +1,4 @@
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import type { Messages } from '@/i18n/messages/es';
 import { Badge } from '@/components/atoms/badge';
 import { EmptyState } from '@/components/molecules/empty-state';

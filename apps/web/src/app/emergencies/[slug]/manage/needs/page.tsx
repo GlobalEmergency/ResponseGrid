@@ -13,7 +13,7 @@ import { SearchBox } from '@/components/molecules/search-box';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { getT } from '@/i18n/server';
 import { getCategoriesCached } from '@/adapters/get-categories';
-import type { paths } from '@reliefhub/api-client';
+import type { paths } from '@responsegrid/api-client';
 
 export const dynamic = 'force-dynamic';
 

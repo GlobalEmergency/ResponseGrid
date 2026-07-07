@@ -13,7 +13,7 @@
  * may act, which gates the drawer's action button(s).
  */
 import { useState, useCallback } from 'react';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import { Badge } from '@/components/atoms/badge';
 import { VerificationBadge } from '@/components/atoms/verification-badge';
 import { FreshnessIndicator } from '@/components/atoms/freshness-indicator';

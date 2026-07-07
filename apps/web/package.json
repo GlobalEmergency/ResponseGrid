@@ -10,7 +10,7 @@
     "test": "node --test \"src/**/*.test.ts\""
   },
   "dependencies": {
-    "@reliefhub/api-client": "workspace:*",
+    "@responsegrid/api-client": "workspace:*",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "next": "16.2.9",

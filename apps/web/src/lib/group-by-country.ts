@@ -11,7 +11,7 @@
  * for any record that happens to be stored that way.
  */
 
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 
 export type ResourceViewDto = components['schemas']['ResourceViewDto'];
 

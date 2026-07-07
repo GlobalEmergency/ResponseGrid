@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import { checkInTask, checkOutTask } from './actions';
 import type { CheckActionResult } from './actions';
 import { Button } from '@/components/atoms/button';

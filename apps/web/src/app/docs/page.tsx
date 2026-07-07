@@ -660,7 +660,7 @@ for (const p of items) {
                   <div className="rounded-card border border-line bg-surface-alt p-5">
                     <h3 className="font-display text-base font-bold text-navy">{d.links_client_t}</h3>
                     <p className="mt-1.5 text-[14px] leading-[1.55] text-ink-soft">{d.links_client_b}</p>
-                    <code className="mt-2 inline-block font-mono text-[12.5px] text-ink">@reliefhub/api-client</code>
+                    <code className="mt-2 inline-block font-mono text-[12.5px] text-ink">@responsegrid/api-client</code>
                   </div>
                 </div>
               </Section>

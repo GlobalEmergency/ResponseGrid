@@ -15,7 +15,7 @@ Multi-emergency **material aid coordination + logistics** platform (org: **Globa
 - **pnpm monorepo**, `packageManager: pnpm@10.33.4` (pinned — use corepack; do NOT let pnpm 11 regenerate the lockfile).
 - **`apps/api`** — NestJS 11, **hexagonal / DDD** (ports & adapters, CQRS-light, domain events via Redis/BullMQ), Drizzle ORM, Postgres 16, Redis 7. Swagger at `/docs`.
 - **`apps/web`** — Next 16 (App Router, React 19), **Atomic Design**, Tailwind 4, Leaflet + `leaflet.markercluster`. Consumes the typed client. (See `apps/web/AGENTS.md` for Next-16 specifics.)
-- **`packages/api-client`** — `@reliefhub/api-client`, openapi-fetch typed client. Regenerate with `pnpm gen:api`.
+- **`packages/api-client`** — `@responsegrid/api-client`, openapi-fetch typed client. Regenerate with `pnpm gen:api`.
 - TDD throughout. Dev infra via docker-compose.
 
 ## Architecture
@@ -73,7 +73,7 @@ pnpm --filter api exec eslint "{src,apps,libs,test}/**/*.ts" --max-warnings=0
 pnpm --filter api exec prettier --check "src/**/*.ts" "test/**/*.ts"
 pnpm --filter api test                  # runInBand; global-setup spins up reliefhub_test + applies migrations
 # web (build the api-client first):
-pnpm --filter @reliefhub/api-client build && pnpm --filter web build
+pnpm --filter @responsegrid/api-client build && pnpm --filter web build
 pnpm --filter web lint
 ```
 

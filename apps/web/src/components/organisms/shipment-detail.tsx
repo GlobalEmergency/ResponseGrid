@@ -10,7 +10,7 @@ import {
   cancelShipment,
   type ActionResult,
 } from '@/app/emergencies/[slug]/manage/logistics/actions';
-import type { components } from '@reliefhub/api-client';
+import type { components } from '@responsegrid/api-client';
 import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Select } from '@/components/atoms/select';

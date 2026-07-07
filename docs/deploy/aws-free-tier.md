@@ -85,7 +85,7 @@ Las **migraciones se aplican solas** (servicio `migrate`, idempotente). Caddy pi
 
 1. **Importa el repo** en Vercel.
 2. **Root Directory:** `apps/web`.
-3. **Build Command** (override): `pnpm --filter @reliefhub/api-client build && next build`.
+3. **Build Command** (override): `pnpm --filter @responsegrid/api-client build && next build`.
 4. **Environment Variables:**
    - `API_URL` = `https://api.tudominio.com`
    - `NEXT_PUBLIC_API_URL` = `https://api.tudominio.com`
