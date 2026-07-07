@@ -56,7 +56,7 @@ export class InMemoryOfferRepository implements OfferRepository {
         (s) =>
           s.emergencyId === emergencyId.value &&
           s.status === OfferStatus.Open &&
-          s.items.some((i) => (i.category as string) === category),
+          s.items.some((i) => i.category === category),
       )
       .map((s) => DonationOffer.fromSnapshot(s));
     return Promise.resolve(result);

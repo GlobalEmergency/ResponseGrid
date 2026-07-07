@@ -18,10 +18,7 @@ import {
   resourcesTable,
 } from '../../../resources/infrastructure/drizzle/schema';
 import { DrizzleSupplyLinkBackfillRepository } from './drizzle-supply-link-backfill.repository';
-import type {
-  SupplyLineSnapshot,
-  Category,
-} from '@globalemergency/warehouse-core/kernel';
+import type { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
 import type { Pool } from 'pg';
 
 const URL =
@@ -48,7 +45,7 @@ function containerLine(
     name,
     quantity: 1,
     unit: null,
-    category: 'water' as Category,
+    category: 'water',
     supplyId,
     presentation: null,
     expiresAt: null,

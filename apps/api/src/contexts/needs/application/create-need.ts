@@ -6,7 +6,7 @@ import { NeedResourceNotInEmergencyError } from '../domain/need-errors';
 import { Need } from '../domain/need';
 import { NeedId } from '../domain/need-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { Priority, Category, PersonnelSkill } from '../domain/need-enums';
+import { Priority, PersonnelSkill } from '../domain/need-enums';
 import { Location } from '../../../shared/domain/location';
 import { SupplyLine } from '@globalemergency/warehouse-core/kernel';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
@@ -19,7 +19,8 @@ export interface CreateNeedItemCommand {
   name: string;
   quantity: number;
   unit: string | null;
-  category: Category;
+  /** Slug de categoría (data-driven); el formato lo valida SupplyLine. */
+  category: string;
   supplyId?: string | null;
   /** Presentation / route of administration (#61). Optional. */
   presentation?: string | null;

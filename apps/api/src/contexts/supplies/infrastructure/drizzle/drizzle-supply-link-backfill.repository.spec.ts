@@ -11,7 +11,7 @@ function line(overrides: Partial<SupplyLineSnapshot>): SupplyLineSnapshot {
     presentation: null,
     expiresAt: null,
     ...overrides,
-  } as SupplyLineSnapshot;
+  };
 }
 
 describe('relinkContainerLines', () => {

@@ -1,11 +1,11 @@
 import { NeedRepository, NeedFilters } from '../domain/ports/need.repository';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { Category, Priority } from '../domain/need-enums';
+import { Priority } from '../domain/need-enums';
 import { NeedView, toPublicNeedView } from './need-view';
 
 export interface GetPublicNeedsQuery {
   emergencyId: string;
-  category?: Category;
+  category?: string;
   priority?: Priority;
   /** Filter to needs linked to a specific resource / final recipient (#60). */
   resourceId?: string;
