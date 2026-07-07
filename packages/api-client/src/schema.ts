@@ -3120,10 +3120,10 @@ export interface components {
              */
             unit?: string;
             /**
+             * @description Slug de categoría de material (data-driven, lowercase snake_case). Los slugs core son: food, water, hygiene, clothing, medical, shelter, tools, other, medicines, medical_equipment, medical_supplies, medical_personnel, food_fresh, food_non_perishable, hygiene_infantile, hygiene_personal, tools_extraction, other_pets. El conjunto es abierto: la taxonomía puede crecer vía datos (tabla `categories`).
              * @example water
-             * @enum {string}
              */
-            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
+            category: string;
             /**
              * @description Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe… Optional, free-form (#61).
              * @example ampolla
@@ -3250,10 +3250,10 @@ export interface components {
             /** @example liters */
             unit?: string | null;
             /**
+             * @description Slug de categoría de material (data-driven, lowercase snake_case).
              * @example water
-             * @enum {string}
              */
-            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
+            category: string;
             /**
              * @description Presentation / route of administration (ampolla, EV, inhalador…) — #61.
              * @example ampolla
@@ -4835,10 +4835,10 @@ export interface components {
             /** @example liters */
             unit?: string | null;
             /**
+             * @description Slug de categoría de material (data-driven, lowercase snake_case).
              * @example water
-             * @enum {string}
              */
-            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
+            category: string;
             /**
              * @description Presentation / route of administration (ampolla, EV, inhalador…) — #61.
              * @example ampolla
@@ -8514,8 +8514,8 @@ export interface operations {
     NeedsController_listPublic: {
         parameters: {
             query?: {
-                /** @description Filter by item category (needs with at least one item of this category) */
-                category?: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
+                /** @description Filter by item category slug (needs with at least one item of this category). Core slugs: food, water, hygiene, clothing, medical, shelter, tools, other, medicines, medical_equipment, medical_supplies, medical_personnel, food_fresh, food_non_perishable, hygiene_infantile, hygiene_personal, tools_extraction, other_pets. */
+                category?: string;
                 /** @description Filter by need priority */
                 priority?: "low" | "medium" | "high" | "urgent";
                 /** @description Filter to needs linked to this resource / final recipient */
@@ -8614,8 +8614,8 @@ export interface operations {
     NeedsController_listQueue: {
         parameters: {
             query?: {
-                /** @description Filter by item category (needs with at least one item of this category) */
-                category?: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
+                /** @description Filter by item category slug (needs with at least one item of this category). Core slugs: food, water, hygiene, clothing, medical, shelter, tools, other, medicines, medical_equipment, medical_supplies, medical_personnel, food_fresh, food_non_perishable, hygiene_infantile, hygiene_personal, tools_extraction, other_pets. */
+                category?: string;
                 /** @description Filter by need priority */
                 priority?: "low" | "medium" | "high" | "urgent";
             };
