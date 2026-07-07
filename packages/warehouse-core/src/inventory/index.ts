@@ -11,7 +11,8 @@
  * planifica el reparto de una demanda por caducidad (first-expired-first-out),
  * `reconcileCount` concilia un recuento físico con el sistema (ajuste) y
  * `reserveStock`/`releaseReservation` comprometen/liberan stock (available ↔
- * reserved) sin sacarlo del bin.
+ * reserved) sin sacarlo del bin, y los helpers de caducidad (`findExpired`/
+ * `expiringWithin`/`expiryStatusOf`/`nextToExpire`) dan visibilidad proactiva.
  *
  * Dominio puro: sin NestJS, sin ORM, sin infraestructura. Todo referencia el
  * catálogo (`supplyId`) y el backbone (bin → zona → almacén) por id.
@@ -82,6 +83,17 @@ export type {
 } from './cycle-count.js';
 export { reserveStock, releaseReservation } from './reservations.js';
 export type { ReservationInput } from './reservations.js';
+export {
+  expiryStatusOf,
+  findExpired,
+  expiringWithin,
+  nextToExpire,
+} from './expiry.js';
+export type {
+  ExpiryStatus,
+  ExpiryStatusOptions,
+  ExpiringWithinOptions,
+} from './expiry.js';
 export {
   WAREHOUSE_REPOSITORY,
   type WarehouseRepository,
