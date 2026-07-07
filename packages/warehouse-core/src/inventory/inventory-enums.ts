@@ -33,3 +33,31 @@ export enum ZoneKind {
   Shipping = 'shipping',
   Quarantine = 'quarantine',
 }
+
+/**
+ * Lifecycle of a {@link Bin} (ubicación física). `active` = usable for storage
+ * and picking; `blocked` = temporarily out of service (damaged shelf, spill,
+ * maintenance) — it keeps its stock but accepts no new put-aways and is skipped
+ * by allocation; `archived` = permanently retired. `blocked` is the reversible
+ * middle state a warehouse operator toggles day to day.
+ */
+export enum BinStatus {
+  Active = 'active',
+  Blocked = 'blocked',
+  Archived = 'archived',
+}
+
+/**
+ * Physical type of a {@link Bin} — finer than the {@link ZoneKind} of the area
+ * it sits in. `shelf` is a discrete racked location, `bulk` a floor/palletized
+ * spot, `staging` a marshalling square (recepción/expedición), `dock` a loading
+ * door, `quarantine` an isolation hold. Descriptive; put-away/pick rules read it
+ * but the aggregate does not constrain flows on it.
+ */
+export enum BinKind {
+  Shelf = 'shelf',
+  Bulk = 'bulk',
+  Staging = 'staging',
+  Dock = 'dock',
+  Quarantine = 'quarantine',
+}
