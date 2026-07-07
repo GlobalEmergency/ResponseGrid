@@ -18,7 +18,10 @@ test('create normaliza el slug de categoría (trim + lowercase)', () => {
 });
 
 test('create acepta los slugs core del enum', () => {
-  const line = SupplyLine.create({ ...base, category: Category.MedicalEquipment });
+  const line = SupplyLine.create({
+    ...base,
+    category: Category.MedicalEquipment,
+  });
   assert.equal(line.category, 'medical_equipment');
 });
 
