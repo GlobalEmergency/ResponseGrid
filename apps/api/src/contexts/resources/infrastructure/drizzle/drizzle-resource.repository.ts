@@ -13,7 +13,7 @@ import { AuthorSnapshot } from '../../../../shared/domain/author';
 import {
   rowToSupplyLineSnapshot,
   supplyLineToColumns,
-} from '../../../supplies/infrastructure/drizzle/supply-line-columns';
+} from '@globalemergency/warehouse-postgres';
 import { ResourceId } from '../../domain/resource-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import {

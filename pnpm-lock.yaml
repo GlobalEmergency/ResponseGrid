@@ -22,6 +22,9 @@ importers:
       '@globalemergency/warehouse-core':
         specifier: workspace:*
         version: link:../../packages/warehouse-core
+      '@globalemergency/warehouse-postgres':
+        specifier: workspace:*
+        version: link:../../packages/warehouse-postgres
       '@nestjs/common':
         specifier: ^11.0.1
         version: 11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -265,6 +268,19 @@ importers:
 
   packages/warehouse-core:
     devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
+  packages/warehouse-postgres:
+    dependencies:
+      '@globalemergency/warehouse-core':
+        specifier: workspace:*
+        version: link:../warehouse-core
+    devDependencies:
+      drizzle-orm:
+        specifier: ^0.45.2
+        version: 0.45.2(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)
       typescript:
         specifier: ^5.7.3
         version: 5.9.3

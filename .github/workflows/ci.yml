@@ -57,7 +57,7 @@ jobs:
       # Type-aware lint resolves @globalemergency/warehouse-core types from its
       # built dist, so build it first.
       - name: Build — warehouse-core
-        run: pnpm --filter @globalemergency/warehouse-core build
+        run: pnpm --filter '@globalemergency/*' build
 
       # api lint script has --fix; in CI we want read-only + fail on warnings
       - name: Lint — api
@@ -108,7 +108,7 @@ jobs:
       # warehouse-core is a workspace dependency of api: build it (dist/cjs +
       # dist/esm) before nest build resolves it via the exports map.
       - name: Build — warehouse-core
-        run: pnpm --filter @globalemergency/warehouse-core build
+        run: pnpm --filter '@globalemergency/*' build
 
       - name: Build — api (nest build / tsc)
         run: pnpm --filter api build
@@ -164,7 +164,7 @@ jobs:
       # api consumes @globalemergency/warehouse-core via its built dist
       # (ts-jest type resolution + node runtime), so build it first.
       - name: Build — warehouse-core
-        run: pnpm --filter @globalemergency/warehouse-core build
+        run: pnpm --filter '@globalemergency/*' build
 
       - name: Run tests — api
         env:
@@ -238,7 +238,7 @@ jobs:
       # api consumes @globalemergency/warehouse-core via its built dist, so
       # build it before the e2e suite runs.
       - name: Build — warehouse-core
-        run: pnpm --filter @globalemergency/warehouse-core build
+        run: pnpm --filter '@globalemergency/*' build
 
       - name: Run e2e tests — api
         env:
