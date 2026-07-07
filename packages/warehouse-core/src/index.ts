@@ -9,3 +9,4 @@ export * from './kernel/index.js';
 export * from './catalog/index.js';
 export * from './containers/index.js';
 export * from './logistics/index.js';
+export * from './inventory/index.js';
