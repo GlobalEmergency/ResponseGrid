@@ -1,13 +1,16 @@
-import { ContainerRepository } from '../domain/ports/container.repository';
-import { Container, ContainerHolder } from '../domain/container';
-import { ContainerId } from '../domain/container-id';
-import { ContainerType } from '../domain/container-enums';
-import { formatContainerCode } from '../domain/container-code';
+import {
+  ContainerRepository,
+  Container,
+  ContainerHolder,
+  ContainerId,
+  ContainerType,
+  formatContainerCode,
+} from '@globalemergency/warehouse-core/containers';
 import {
   SupplyLine,
   SupplyLineProps,
 } from '@globalemergency/warehouse-core/kernel';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 
 export interface CreateContainerCommand {
   emergencyId: string;
@@ -30,15 +33,15 @@ export class CreateContainer {
   async execute(
     cmd: CreateContainerCommand,
   ): Promise<{ id: string; code: string }> {
-    const emergencyId = EmergencyId.fromString(cmd.emergencyId);
-    const sequence = await this.repo.nextSequence(emergencyId, cmd.type);
+    const scopeId = ScopeId.fromString(cmd.emergencyId);
+    const sequence = await this.repo.nextSequence(scopeId, cmd.type);
     const code = formatContainerCode(cmd.type, sequence);
 
     const container = Container.create({
       id: ContainerId.create(),
       code,
       type: cmd.type,
-      emergencyId,
+      scopeId,
       lines: (cmd.lines ?? []).map((l) => SupplyLine.create(l)),
       grossWeightKg: cmd.grossWeightKg ?? null,
       grossVolumeM3: cmd.grossVolumeM3 ?? null,

@@ -1,12 +1,13 @@
 import { SuppliesShipmentContainerAdapter } from './supplies-shipment-container.adapter';
 import { InMemoryContainerRepository } from '../../supplies/infrastructure/in-memory-container.repository';
-import { Container, ContainerHolder } from '../../supplies/domain/container';
-import { ContainerId } from '../../supplies/domain/container-id';
 import {
+  Container,
+  ContainerHolder,
+  ContainerId,
   ContainerHolderType,
   ContainerType,
-} from '../../supplies/domain/container-enums';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
+} from '@globalemergency/warehouse-core/containers';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 import {
   ShipmentContainerNotFoundError,
   ShipmentContainerUnavailableError,
@@ -30,7 +31,7 @@ async function seedContainer(
       id,
       code: 'PAL-0001',
       type: ContainerType.Pallet,
-      emergencyId: EmergencyId.fromString(opts?.emergencyId ?? EM),
+      scopeId: ScopeId.fromString(opts?.emergencyId ?? EM),
       holder: opts?.holder ?? {
         type: ContainerHolderType.Resource,
         id: ORIGIN,

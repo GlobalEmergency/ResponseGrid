@@ -1,11 +1,12 @@
 import {
   ContainerRepository,
   ListContainersFilter,
-} from '../domain/ports/container.repository';
-import { Container, ContainerSnapshot } from '../domain/container';
-import { ContainerId } from '../domain/container-id';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { ContainerType } from '../domain/container-enums';
+  Container,
+  ContainerSnapshot,
+  ContainerId,
+  ContainerType,
+} from '@globalemergency/warehouse-core/containers';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 
 export class InMemoryContainerRepository implements ContainerRepository {
   private store = new Map<string, ContainerSnapshot>();
@@ -22,12 +23,12 @@ export class InMemoryContainerRepository implements ContainerRepository {
     return Promise.resolve(snap ? Container.fromSnapshot(snap) : null);
   }
 
-  findByEmergency(
-    emergencyId: EmergencyId,
+  findByScope(
+    scopeId: ScopeId,
     filter: ListContainersFilter,
   ): Promise<Container[]> {
     const result = [...this.store.values()]
-      .filter((s) => s.emergencyId === emergencyId.value)
+      .filter((s) => s.scopeId === scopeId.value)
       .filter((s) => filter.type === undefined || s.type === filter.type)
       .filter((s) => filter.status === undefined || s.status === filter.status)
       .filter(
@@ -51,8 +52,8 @@ export class InMemoryContainerRepository implements ContainerRepository {
     return Promise.resolve(result);
   }
 
-  nextSequence(emergencyId: EmergencyId, type: ContainerType): Promise<number> {
-    const key = `${emergencyId.value}:${type}`;
+  nextSequence(scopeId: ScopeId, type: ContainerType): Promise<number> {
+    const key = `${scopeId.value}:${type}`;
     const next = (this.sequences.get(key) ?? 0) + 1;
     this.sequences.set(key, next);
     return Promise.resolve(next);

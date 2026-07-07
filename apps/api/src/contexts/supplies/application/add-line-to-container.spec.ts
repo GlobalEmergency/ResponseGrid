@@ -2,12 +2,14 @@ import { AddLineToContainer } from './add-line-to-container';
 import { RemoveLineFromContainer } from './remove-line-from-container';
 import { SealContainer } from './seal-container';
 import { InMemoryContainerRepository } from '../infrastructure/in-memory-container.repository';
-import { Container } from '../domain/container';
-import { ContainerId } from '../domain/container-id';
-import { ContainerType } from '../domain/container-enums';
-import { ContainerSealedError } from '../domain/container-errors';
+import {
+  Container,
+  ContainerId,
+  ContainerType,
+  ContainerSealedError,
+} from '@globalemergency/warehouse-core/containers';
 import { Category } from '@globalemergency/warehouse-core/kernel';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 import { ContainerNotFoundError } from './container-not-found.error';
 
 const EM = '11111111-1111-4111-8111-111111111111';
@@ -18,7 +20,7 @@ function seed(repo: InMemoryContainerRepository): Container {
     id: ContainerId.create(),
     code: 'CAJ-0001',
     type: ContainerType.Box,
-    emergencyId: EmergencyId.fromString(EM),
+    scopeId: ScopeId.fromString(EM),
   });
   void repo.save(c);
   return c;

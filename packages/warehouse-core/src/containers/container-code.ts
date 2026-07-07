@@ -1,5 +1,5 @@
-import { ContainerType } from './container-enums';
-import { ContainerValidationError } from './container-errors';
+import { ContainerType } from './container-enums.js';
+import { ContainerValidationError } from './container-errors.js';
 
 /**
  * Human-readable prefix per container type. The full code (e.g. `PAL-0001`) is

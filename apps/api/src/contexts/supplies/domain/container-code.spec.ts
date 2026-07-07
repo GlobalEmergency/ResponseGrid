@@ -1,6 +1,8 @@
-import { formatContainerCode } from './container-code';
-import { ContainerType } from './container-enums';
-import { ContainerValidationError } from './container-errors';
+import {
+  formatContainerCode,
+  ContainerType,
+  ContainerValidationError,
+} from '@globalemergency/warehouse-core/containers';
 
 describe('formatContainerCode', () => {
   it('formats a per-type prefix with a 4-digit zero-padded sequence', () => {

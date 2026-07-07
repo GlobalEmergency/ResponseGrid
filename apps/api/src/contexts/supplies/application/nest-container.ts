@@ -1,10 +1,10 @@
-import { ContainerRepository } from '../domain/ports/container.repository';
-import { Container } from '../domain/container';
-import { ContainerId } from '../domain/container-id';
 import {
+  ContainerRepository,
+  Container,
+  ContainerId,
   ContainerCycleError,
-  ContainerEmergencyMismatchError,
-} from '../domain/container-errors';
+  ContainerScopeMismatchError,
+} from '@globalemergency/warehouse-core/containers';
 import { ContainerNotFoundError } from './container-not-found.error';
 
 export interface NestContainerCommand {
@@ -38,8 +38,8 @@ export class NestContainer {
     const parent = await this.repo.findById(parentId);
     if (!parent) throw new ContainerNotFoundError(cmd.parentContainerId);
 
-    if (!parent.emergencyId.equals(child.emergencyId)) {
-      throw new ContainerEmergencyMismatchError(
+    if (!parent.scopeId.equals(child.scopeId)) {
+      throw new ContainerScopeMismatchError(
         'A container and its parent must belong to the same emergency',
       );
     }

@@ -11,7 +11,7 @@ import { GetContainer } from '../../application/get-container';
 import { ListContainers } from '../../application/list-containers';
 import { MembershipRepository } from '../../../identity/domain/ports/membership.repository';
 import { Role } from '../../../identity/domain/role';
-import { ContainerType } from '../../domain/container-enums';
+import { ContainerType } from '@globalemergency/warehouse-core/containers';
 
 /**
  * Controller-level authorization tests (mirror of the shipment controller, #150):

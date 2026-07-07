@@ -4,15 +4,14 @@ import { containerCodeSequencesTable, containersTable } from './schema';
 import {
   ContainerRepository,
   ListContainersFilter,
-} from '../../domain/ports/container.repository';
-import { Container, ContainerSnapshot } from '../../domain/container';
-import { ContainerId } from '../../domain/container-id';
-import { EmergencyId } from '../../../../shared/domain/emergency-id';
-import {
+  Container,
+  ContainerSnapshot,
+  ContainerId,
   ContainerHolderType,
   ContainerStatus,
   ContainerType,
-} from '../../domain/container-enums';
+} from '@globalemergency/warehouse-core/containers';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 
 type ContainerRow = typeof containersTable.$inferSelect;
 
@@ -21,7 +20,7 @@ function rowToSnapshot(row: ContainerRow): ContainerSnapshot {
     id: row.id,
     code: row.code,
     type: row.type as ContainerType,
-    emergencyId: row.emergencyId,
+    scopeId: row.emergencyId,
     parentContainerId: row.parentContainerId ?? null,
     lines: row.lines ?? [],
     grossWeightKg: row.grossWeightKg ?? null,
@@ -43,7 +42,7 @@ export class DrizzleContainerRepository implements ContainerRepository {
       .insert(containersTable)
       .values({
         id: s.id,
-        emergencyId: s.emergencyId,
+        emergencyId: s.scopeId,
         code: s.code,
         type: s.type,
         parentContainerId: s.parentContainerId,
@@ -79,13 +78,11 @@ export class DrizzleContainerRepository implements ContainerRepository {
     return Container.fromSnapshot(rowToSnapshot(rows[0]));
   }
 
-  async findByEmergency(
-    emergencyId: EmergencyId,
+  async findByScope(
+    scopeId: ScopeId,
     filter: ListContainersFilter,
   ): Promise<Container[]> {
-    const conditions: SQL[] = [
-      eq(containersTable.emergencyId, emergencyId.value),
-    ];
+    const conditions: SQL[] = [eq(containersTable.emergencyId, scopeId.value)];
     if (filter.type !== undefined) {
       conditions.push(eq(containersTable.type, filter.type));
     }
@@ -127,13 +124,10 @@ export class DrizzleContainerRepository implements ContainerRepository {
    * creates never collide and a deleted container never frees its code (the
    * sequence is monotonic, decoupled from the live row count).
    */
-  async nextSequence(
-    emergencyId: EmergencyId,
-    type: ContainerType,
-  ): Promise<number> {
+  async nextSequence(scopeId: ScopeId, type: ContainerType): Promise<number> {
     const [row] = await this.db
       .insert(containerCodeSequencesTable)
-      .values({ emergencyId: emergencyId.value, type, lastValue: 1 })
+      .values({ emergencyId: scopeId.value, type, lastValue: 1 })
       .onConflictDoUpdate({
         target: [
           containerCodeSequencesTable.emergencyId,

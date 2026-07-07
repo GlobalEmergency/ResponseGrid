@@ -27,6 +27,8 @@ sus centros logísticos) y el futuro **WMS standalone** de Global Emergency.
 | --- | --- |
 | `@globalemergency/warehouse-core/kernel` | `SupplyLine` (value object de línea de material), `Category` (taxonomía canónica), `CategoryDefinition`. |
 | `@globalemergency/warehouse-core/catalog` | Catálogo `Supply` (insumos, master data), resolvers de texto→id (`SupplyResolver`, `CategoryResolver`), alias/normalización y ports de catálogo. |
+| `@globalemergency/warehouse-core/kernel` → `ScopeId` | Id opaco de tenencia/partición (owner del almacén / emergencia), consumido por `containers`. |
+| `@globalemergency/warehouse-core/containers` | Aggregate `Container` (palet/caja/lote) sobre `ScopeId`, id, enums, errores, formateo de código y port de repositorio. |
 
 ## Build
 

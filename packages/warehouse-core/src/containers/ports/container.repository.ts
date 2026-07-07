@@ -1,11 +1,11 @@
-import { Container } from '../container';
-import { ContainerId } from '../container-id';
-import { EmergencyId } from '../../../../shared/domain/emergency-id';
+import { Container } from '../container.js';
+import { ContainerId } from '../container-id.js';
+import { ScopeId } from '../../kernel/index.js';
 import {
   ContainerHolderType,
   ContainerStatus,
   ContainerType,
-} from '../container-enums';
+} from '../container-enums.js';
 
 export const CONTAINER_REPOSITORY = Symbol('ContainerRepository');
 
@@ -22,8 +22,8 @@ export interface ListContainersFilter {
 export interface ContainerRepository {
   save(container: Container): Promise<void>;
   findById(id: ContainerId): Promise<Container | null>;
-  findByEmergency(
-    emergencyId: EmergencyId,
+  findByScope(
+    scopeId: ScopeId,
     filter: ListContainersFilter,
   ): Promise<Container[]>;
   /** Direct children of a container (composition is by reference). */
@@ -32,5 +32,5 @@ export interface ContainerRepository {
    * Allocates the next code sequence for a (emergency, type) pair. The domain
    * formats it into a code (`PAL-0001`); the running count lives in the store.
    */
-  nextSequence(emergencyId: EmergencyId, type: ContainerType): Promise<number>;
+  nextSequence(scopeId: ScopeId, type: ContainerType): Promise<number>;
 }
