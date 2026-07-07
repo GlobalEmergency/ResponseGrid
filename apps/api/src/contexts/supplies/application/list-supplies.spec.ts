@@ -2,7 +2,7 @@ import { ListSupplies } from './list-supplies';
 import {
   PublicSupplyRecord,
   SupplyCatalogReadModel,
-} from '../domain/ports/supply-catalog.read-model';
+} from '@globalemergency/warehouse-core/catalog';
 
 describe('ListSupplies', () => {
   const catalog: PublicSupplyRecord[] = [

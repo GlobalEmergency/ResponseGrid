@@ -1,4 +1,4 @@
-import { CategoryResolver } from './category-resolver';
+import { CategoryResolver } from '@globalemergency/warehouse-core/catalog';
 
 describe('CategoryResolver', () => {
   const map = new Map<string, string>([

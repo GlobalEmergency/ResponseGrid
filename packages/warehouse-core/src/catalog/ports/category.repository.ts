@@ -1,4 +1,4 @@
-import { CategoryDefinition } from '@globalemergency/warehouse-core/kernel';
+import { CategoryDefinition } from '../../kernel/index.js';
 
 export const CATEGORY_REPOSITORY = Symbol('CATEGORY_REPOSITORY');
 

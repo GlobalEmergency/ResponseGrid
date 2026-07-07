@@ -1,4 +1,4 @@
-import { normalizeSupplyText } from './supply-normalize';
+import { normalizeSupplyText } from './supply-normalize.js';
 
 export interface SupplyAliasProps {
   alias: string;

@@ -1,11 +1,11 @@
-import { SupplyCatalogReadModel } from '../domain/ports/supply-catalog.read-model';
 import {
+  SupplyCatalogReadModel,
   SupplyLineSource,
   SupplyLinkBackfillRepository,
   SupplyLinkPatch,
-} from '../domain/ports/supply-link-backfill.repository';
-import { normalizeSupplyText } from '../domain/supply-normalize';
-import { supplyResolverFromCatalog } from '../domain/supply-resolver';
+  normalizeSupplyText,
+  supplyResolverFromCatalog,
+} from '@globalemergency/warehouse-core/catalog';
 
 /** Texto que no casa con el catálogo, agregado por forma normalizada. */
 export interface UnmatchedSupplyLineGroup {

@@ -4,15 +4,13 @@ import { Db } from '../../shared/db';
 import {
   CATEGORY_REPOSITORY,
   CategoryRepository,
-} from './domain/ports/category.repository';
-import {
   SUPPLY_REPOSITORY,
   SupplyRepository,
-} from './domain/ports/supply.repository';
-import {
   SUPPLY_CATALOG_READ_MODEL,
   SupplyCatalogReadModel,
-} from './domain/ports/supply-catalog.read-model';
+  SUPPLY_LINK_BACKFILL_REPOSITORY,
+  SupplyLinkBackfillRepository,
+} from '@globalemergency/warehouse-core/catalog';
 import {
   CONTAINER_REPOSITORY,
   ContainerRepository,
@@ -21,10 +19,6 @@ import {
   CONTAINER_AUTHORIZATION_LOOKUP,
   ContainerAuthorizationLookup,
 } from './domain/ports/container-authorization-lookup';
-import {
-  SUPPLY_LINK_BACKFILL_REPOSITORY,
-  SupplyLinkBackfillRepository,
-} from './domain/ports/supply-link-backfill.repository';
 import { DrizzleCategoryRepository } from './infrastructure/drizzle/drizzle-category.repository';
 import { DrizzleSupplyRepository } from './infrastructure/drizzle/drizzle-supply.repository';
 import { DrizzleSupplyCatalogReadModel } from './infrastructure/drizzle/drizzle-supply-catalog.read-model';

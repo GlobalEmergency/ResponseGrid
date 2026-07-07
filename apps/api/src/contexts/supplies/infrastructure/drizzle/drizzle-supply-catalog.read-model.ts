@@ -3,7 +3,7 @@ import { Db } from '../../../../shared/db';
 import {
   PublicSupplyRecord,
   SupplyCatalogReadModel,
-} from '../../domain/ports/supply-catalog.read-model';
+} from '@globalemergency/warehouse-core/catalog';
 import {
   categoryTranslationsTable,
   categoriesTable,

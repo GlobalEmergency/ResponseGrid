@@ -8,7 +8,7 @@ import {
   isCoreCategory,
   CategoryDefinition,
 } from '@globalemergency/warehouse-core/kernel';
-import { CategoryRepository } from '../domain/ports/category.repository';
+import { CategoryRepository } from '@globalemergency/warehouse-core/catalog';
 
 export interface UpdateCategoryCommand {
   labelEs?: string | undefined;

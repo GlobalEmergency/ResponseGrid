@@ -1,6 +1,8 @@
-import { SupplyAlias } from '../domain/supply-alias';
-import { SupplyNotFoundError } from '../domain/supply-errors';
-import { SupplyRepository } from '../domain/ports/supply.repository';
+import {
+  SupplyAlias,
+  SupplyNotFoundError,
+  SupplyRepository,
+} from '@globalemergency/warehouse-core/catalog';
 
 export interface AddSupplyAliasCommand {
   supplyId: string;

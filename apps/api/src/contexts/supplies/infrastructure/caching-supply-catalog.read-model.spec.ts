@@ -2,7 +2,7 @@ import { CachingSupplyCatalogReadModel } from './caching-supply-catalog.read-mod
 import {
   PublicSupplyRecord,
   SupplyCatalogReadModel,
-} from '../domain/ports/supply-catalog.read-model';
+} from '@globalemergency/warehouse-core/catalog';
 
 describe('CachingSupplyCatalogReadModel', () => {
   const record: PublicSupplyRecord = {

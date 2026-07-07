@@ -1,7 +1,7 @@
 import {
   PublicSupplyRecord,
   SupplyCatalogReadModel,
-} from '../domain/ports/supply-catalog.read-model';
+} from '@globalemergency/warehouse-core/catalog';
 
 /**
  * Decorator que cachea en memoria el catálogo activo (patrón Decorator: misma

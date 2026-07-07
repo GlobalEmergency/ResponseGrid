@@ -1,7 +1,7 @@
 import {
   PublicSupplyRecord,
   SupplyCatalogReadModel,
-} from '../domain/ports/supply-catalog.read-model';
+} from '@globalemergency/warehouse-core/catalog';
 
 export class GetSupply {
   constructor(private readonly catalog: SupplyCatalogReadModel) {}

@@ -25,7 +25,7 @@ import { Resource } from '../domain/resource';
 import { ResourceId } from '../domain/resource-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { VerificationLevel, PublicStatus } from '../domain/resource-enums';
-import { CategoryResolver } from '../../supplies/domain/category-resolver';
+import { CategoryResolver } from '@globalemergency/warehouse-core/catalog';
 import { ResourceMapper } from './acopiove-mapper';
 
 export type IngestInput = {
