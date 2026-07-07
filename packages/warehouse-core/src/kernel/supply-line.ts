@@ -1,4 +1,4 @@
-import { Category } from './category.js';
+import { CategorySlug } from './category-slug.js';
 
 /**
  * SupplyLine — the core "line of aid material" of the platform: a quantity of a
@@ -25,7 +25,13 @@ export interface SupplyLineProps {
   name: string;
   quantity: number;
   unit: string | null;
-  category: Category;
+  /**
+   * Slug de categoría (data-driven). Se valida el *formato* con
+   * {@link CategorySlug} en {@link SupplyLine.create}; la pertenencia a la
+   * taxonomía concreta (tabla `categories` / `CategoryRegistry`) es
+   * responsabilidad del host, no del value object.
+   */
+  category: string;
   supplyId?: string | null;
   presentation?: string | null;
   expiresAt?: string | null;
@@ -35,7 +41,8 @@ export interface SupplyLineSnapshot {
   name: string;
   quantity: number;
   unit: string | null;
-  category: Category;
+  /** Slug de categoría (data-driven) ya normalizado. */
+  category: string;
   /** Soft link to the canonical supply master data, or null when absent. */
   supplyId: string | null;
   /** Optional (legacy-safe) presentation / route of administration (#61). */
@@ -79,7 +86,7 @@ export class SupplyLine {
   readonly name: string;
   readonly quantity: number;
   readonly unit: string | null;
-  readonly category: Category;
+  readonly category: string;
   readonly supplyId: string | null;
   readonly presentation: string | null;
   readonly expiresAt: string | null;
@@ -103,11 +110,14 @@ export class SupplyLine {
         'SupplyLine quantity must be a positive integer',
       );
     }
+    // Valida el *formato* del slug (trim + lowercase + snake_case) y lo
+    // normaliza. La pertenencia a la taxonomía es cosa del host.
+    const category = CategorySlug.of(props.category).value;
     return new SupplyLine({
       name: props.name.trim(),
       quantity: props.quantity,
       unit: props.unit ?? null,
-      category: props.category,
+      category,
       supplyId: props.supplyId ?? null,
       presentation: props.presentation ?? null,
       expiresAt: props.expiresAt ?? null,
