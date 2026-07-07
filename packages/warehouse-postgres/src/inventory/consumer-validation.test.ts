@@ -31,6 +31,7 @@ import {
   DrizzleStockItemRepository,
   DrizzleStockMovementRepository,
   StaleStockItemError,
+  runInWmsTransaction,
 } from './index.js';
 import {
   newPool,
@@ -186,9 +187,13 @@ describe('Consumidor standalone: flujo WMS end-to-end (dominio + persistencia)',
     const fromItem = await items.findById(itemA.id);
     assert.ok(fromItem);
     applyStockMovement(transfer, { from: fromItem, to: itemB });
-    await items.save(fromItem); // A: 100 → 70 (v2 → v3)
-    await items.save(itemB); // B: 0 → 30 (v1 → v2)
-    await movements.append(transfer);
+    // Persistencia ATÓMICA del traslado: ambas patas + el asiento en una sola
+    // transacción (Unit of Work), como exige el dominio de StockMovement.
+    await runInWmsTransaction(db, async (uow) => {
+      await uow.items.save(fromItem); // A: 100 → 70 (v2 → v3)
+      await uow.items.save(itemB); // B: 0 → 30 (v1 → v2)
+      await uow.movements.append(transfer);
+    });
 
     assert.equal((await items.findById(itemA.id))?.quantity.amount, 70);
     assert.equal((await items.findById(itemB.id))?.quantity.amount, 30);
@@ -263,5 +268,69 @@ describe('Consumidor standalone: flujo WMS end-to-end (dominio + persistencia)',
     stale.decrease(Quantity.of(1, unit)); // sigue en v1
     await assert.rejects(() => items.save(stale), StaleStockItemError);
     assert.equal((await items.findById(itemBLate.id))?.quantity.amount, 45);
+  });
+
+  it('un fallo a mitad de runInWmsTransaction revierte todo (sin mutación parcial)', async () => {
+    const scopeId = ScopeId.create();
+    const supplyId = uuid();
+    const unit = 'unit';
+    const warehouseId = WarehouseId.create();
+
+    // Dos items del mismo producto en bins distintos: origen con stock, destino
+    // vacío. Se persisten fuera de la transacción (estado inicial conocido).
+    const from = StockItem.create({
+      id: StockItemId.create(),
+      scopeId,
+      warehouseId,
+      binId: BinId.create(),
+      supplyId,
+      lot: null,
+      quantity: Quantity.of(100, unit),
+      status: StockStatus.Available,
+    });
+    const to = StockItem.create({
+      id: StockItemId.create(),
+      scopeId,
+      warehouseId,
+      binId: BinId.create(),
+      supplyId,
+      lot: null,
+      quantity: Quantity.of(0, unit),
+      status: StockStatus.Available,
+    });
+    await items.save(from);
+    await items.save(to);
+
+    // Traslado en memoria: from 100 → 70, to 0 → 30.
+    const transfer = StockMovement.record({
+      id: StockMovementId.create(),
+      scopeId,
+      kind: MovementKind.Transfer,
+      quantity: Quantity.of(30, unit),
+      fromItemId: from.id,
+      toItemId: to.id,
+    });
+    applyStockMovement(transfer, { from, to });
+
+    const boom = new Error('fallo deliberado a mitad de la transacción');
+    await assert.rejects(
+      () =>
+        runInWmsTransaction(db, async (uow) => {
+          await uow.items.save(from); // se escribe la primera pata…
+          await uow.items.save(to); // …y la segunda…
+          throw boom; // …pero algo falla antes del COMMIT.
+        }),
+      (err) => err === boom,
+    );
+
+    // ROLLBACK: NINGUNA mutación quedó persistida — ambos items siguen en su
+    // estado inicial (v1, 100 y 0), y el asiento nunca se registró.
+    const reloadedFrom = await items.findById(from.id);
+    const reloadedTo = await items.findById(to.id);
+    assert.equal(reloadedFrom?.quantity.amount, 100);
+    assert.equal(reloadedFrom?.version, 1);
+    assert.equal(reloadedTo?.quantity.amount, 0);
+    assert.equal(reloadedTo?.version, 1);
+    assert.equal((await movements.findByScope(scopeId, {})).length, 0);
   });
 });

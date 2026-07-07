@@ -14,10 +14,24 @@ import type { Pool } from 'pg';
  * tabla `wms."_migrations"` (name text primary key). Re-ejecutar es seguro: los
  * ya aplicados se saltan. Los `.sql` usan `IF NOT EXISTS`, así que incluso una
  * aplicación parcial converge.
+ *
+ * Cerrojo entre procesos: dos runners concurrentes (dos instancias de la app
+ * arrancando a la vez, o procesos en paralelo) se serializan con un
+ * `pg_advisory_lock` de sesión sobre una clave constante ANTES de leer las
+ * migraciones aplicadas, de modo que el patrón check-then-apply no compita. El
+ * cerrojo se libera en un `finally`. Todo sigue siendo idempotente.
  */
 
 /** Nombre del paquete, usado para anclar la búsqueda del directorio. */
 const PACKAGE_SEGMENT = join('packages', 'warehouse-postgres');
+
+/**
+ * Clave constante del advisory lock de sesión. Un valor fijo dentro del rango de
+ * `bigint` de Postgres (derivado como hash constante de 'warehouse-postgres:wms')
+ * para que todos los runners del esquema `wms.` compitan por el MISMO cerrojo,
+ * sin colisionar con otros advisory locks del host.
+ */
+const WMS_MIGRATION_LOCK_KEY = 4310472051201983n;
 
 /**
  * Localiza el directorio `migrations/` del paquete sin depender del sistema de
@@ -83,6 +97,35 @@ async function migrationFiles(dir: string): Promise<string[]> {
 export async function migrateWms(
   pool: Pool,
   migrationsDir: string = resolveMigrationsDir(),
+): Promise<string[]> {
+  // Cerrojo de sesión sobre un cliente dedicado: serializa runners concurrentes
+  // en la BBDD antes del check-then-apply. Adquirir y liberar sobre el MISMO
+  // cliente (el advisory lock es por sesión), de ahí que no se use el pool.
+  const lockClient = await pool.connect();
+  try {
+    await lockClient.query('SELECT pg_advisory_lock($1)', [
+      WMS_MIGRATION_LOCK_KEY.toString(),
+    ]);
+    return await applyPendingMigrations(pool, migrationsDir);
+  } finally {
+    try {
+      await lockClient.query('SELECT pg_advisory_unlock($1)', [
+        WMS_MIGRATION_LOCK_KEY.toString(),
+      ]);
+    } finally {
+      lockClient.release();
+    }
+  }
+}
+
+/**
+ * Cuerpo idempotente de la migración, ya bajo el advisory lock: asegura la tabla
+ * de control, lee lo aplicado y aplica los ficheros pendientes en orden, cada
+ * uno en su propia transacción.
+ */
+async function applyPendingMigrations(
+  pool: Pool,
+  migrationsDir: string,
 ): Promise<string[]> {
   await ensureMigrationsTable(pool);
   const already = await appliedMigrations(pool);

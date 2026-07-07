@@ -100,6 +100,44 @@ describe('DrizzleWarehouseRepository (integración)', () => {
     assert.equal(onlyActive[0]?.code, 'A');
   });
 
+  it('findByScope lista varios almacenes agrupando sus zonas correctamente (sin N+1)', async () => {
+    const scopeId = ScopeId.create();
+    const a = newWarehouse(scopeId, 'A'); // 2 zonas: REC, ALM
+    const b = newWarehouse(scopeId, 'B');
+    // A B le añadimos una tercera zona para distinguir el agrupado por almacén.
+    b.addZone({
+      id: ZoneId.create(),
+      code: 'EXP',
+      name: 'Expedición',
+      kind: ZoneKind.Shipping,
+    });
+    await repo.save(a);
+    await repo.save(b);
+
+    const all = await repo.findByScope(scopeId, {});
+    assert.equal(all.length, 2);
+
+    const loadedA = all.find((w) => w.code === 'A');
+    const loadedB = all.find((w) => w.code === 'B');
+    assert.ok(loadedA && loadedB);
+
+    // Cada almacén recibe SÓLO sus zonas (agrupado por warehouse_id correcto).
+    assert.deepEqual(loadedA.zones.map((z) => z.code).sort(), ['ALM', 'REC']);
+    assert.deepEqual(loadedB.zones.map((z) => z.code).sort(), [
+      'ALM',
+      'EXP',
+      'REC',
+    ]);
+    // Reconstrucción fiel del agregado.
+    assert.deepEqual(loadedA.toSnapshot(), a.toSnapshot());
+    assert.deepEqual(loadedB.toSnapshot(), b.toSnapshot());
+  });
+
+  it('findByScope con cero almacenes devuelve lista vacía (no consulta zonas)', async () => {
+    const empty = await repo.findByScope(ScopeId.create(), {});
+    assert.deepEqual(empty, []);
+  });
+
   it('save reemplaza las zonas (upsert del agregado completo)', async () => {
     const scopeId = ScopeId.create();
     const warehouse = newWarehouse(scopeId);

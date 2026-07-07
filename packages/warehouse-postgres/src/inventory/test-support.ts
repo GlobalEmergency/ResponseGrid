@@ -24,6 +24,14 @@ export function newPool(): Pool {
 /**
  * Deja el esquema `wms` limpio y migrado, para que cada suite arranque desde un
  * estado repetible: `DROP SCHEMA wms CASCADE` + `migrateWms`.
+ *
+ * NOTA sobre `--test-concurrency=1` (script `test:int`): los ficheros de test
+ * comparten la MISMA BBDD y cada suite hace este `DROP SCHEMA wms CASCADE` en su
+ * `before`. Correr los ficheros en serie evita que el reset de una suite borre
+ * el esquema mientras otra está a mitad de sus tests. Es una preocupación
+ * distinta del advisory lock de {@link migrateWms} (que serializa runners de
+ * migración concurrentes DENTRO de la BBDD): NO quitar `--test-concurrency=1`
+ * pensando que el lock lo cubre — no protege del `DROP SCHEMA` entre ficheros.
  */
 export async function resetSchema(pool: Pool): Promise<void> {
   await pool.query('DROP SCHEMA IF EXISTS wms CASCADE');

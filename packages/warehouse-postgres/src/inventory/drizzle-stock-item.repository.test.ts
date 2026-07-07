@@ -12,7 +12,10 @@ import {
 } from '@globalemergency/warehouse-core/inventory';
 import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 import { DrizzleStockItemRepository } from './drizzle-stock-item.repository.js';
-import { StaleStockItemError } from './stock-persistence-errors.js';
+import {
+  StaleStockItemError,
+  DuplicateStockItemError,
+} from './stock-persistence-errors.js';
 import {
   newPool,
   resetSchema,
@@ -136,14 +139,32 @@ describe('DrizzleStockItemRepository (integración)', () => {
     assert.equal(loaded?.version, 2);
   });
 
-  it('el índice de grano rechaza un segundo item en el mismo grano (lote nulo)', async () => {
+  it('el índice de grano traduce el duplicado (lote nulo) a DuplicateStockItemError', async () => {
     const scopeId = ScopeId.create();
     const binId = BinId.create();
     const supplyId = uuid();
     await repo.save(newItem({ scopeId, binId, supplyId, lot: null }));
 
-    await assert.rejects(() =>
-      repo.save(newItem({ scopeId, binId, supplyId, lot: null })),
+    await assert.rejects(
+      () => repo.save(newItem({ scopeId, binId, supplyId, lot: null })),
+      DuplicateStockItemError,
+    );
+  });
+
+  it('el índice de grano traduce el duplicado CON lote a DuplicateStockItemError', async () => {
+    const scopeId = ScopeId.create();
+    const binId = BinId.create();
+    const supplyId = uuid();
+    await repo.save(
+      newItem({ scopeId, binId, supplyId, lot: { code: 'L-DUP' } }),
+    );
+
+    await assert.rejects(
+      () =>
+        repo.save(
+          newItem({ scopeId, binId, supplyId, lot: { code: 'L-DUP' } }),
+        ),
+      DuplicateStockItemError,
     );
   });
 

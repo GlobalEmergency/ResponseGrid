@@ -30,10 +30,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Only apps/api has a .prettierrc; check its src + test dirs.
       # prettier lives in apps/api's deps, so run it from there (root has no prettier bin).
       - name: Prettier — api
         run: pnpm --filter api exec prettier --check "src/**/*.ts" "test/**/*.ts"
+
+      # The workspace @globalemergency/* packages carry their own .prettierrc
+      # (same config as api). Gate warehouse-postgres' TS here too, run via api's
+      # prettier bin with a repo-relative glob.
+      # TODO(#355 follow-up): add packages/warehouse-core/src to this glob once
+      # its preexisting format drift (containers/container.ts, logistics/shipment.ts)
+      # is fixed forward — those files predate this gate and are out of scope here.
+      - name: Prettier — warehouse-postgres
+        run: pnpm --filter api exec prettier --check "../../packages/warehouse-postgres/src/**/*.ts"
 
   # ── Lint ────────────────────────────────────────────────────────────────────
   lint:
@@ -58,6 +66,11 @@ jobs:
       # built dist, so build it first.
       - name: Build — warehouse packages
         run: pnpm --filter '@globalemergency/*' build
+
+      # TODO(#355 follow-up): eslint for @globalemergency/* packages. They ship no
+      # runnable eslint config locally (flat config can't resolve the shared
+      # plugins from the package root), so a lint step here would break rather
+      # than gate. Add it once the packages have a self-contained eslint setup.
 
       # api lint script has --fix; in CI we want read-only + fail on warnings
       - name: Lint — api

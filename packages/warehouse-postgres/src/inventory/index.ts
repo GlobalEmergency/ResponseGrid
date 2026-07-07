@@ -30,5 +30,11 @@ export { DrizzleWarehouseRepository } from './drizzle-warehouse.repository.js';
 export { DrizzleBinRepository } from './drizzle-bin.repository.js';
 export { DrizzleStockItemRepository } from './drizzle-stock-item.repository.js';
 export { DrizzleStockMovementRepository } from './drizzle-stock-movement.repository.js';
-export { StaleStockItemError } from './stock-persistence-errors.js';
+export {
+  StaleStockItemError,
+  DuplicateStockItemError,
+  IdempotencyKeyConflictError,
+} from './stock-persistence-errors.js';
+export type { WmsDatabase } from './db.js';
+export { runInWmsTransaction, type WmsUnitOfWork } from './unit-of-work.js';
 export { migrateWms } from './migrate.js';

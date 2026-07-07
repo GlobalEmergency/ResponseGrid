@@ -1,5 +1,4 @@
 import { and, eq, type SQL } from 'drizzle-orm';
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import {
   Bin,
   BinId,
@@ -10,6 +9,7 @@ import type {
   ListBinsFilter,
 } from '@globalemergency/warehouse-core/inventory';
 import { ScopeId } from '@globalemergency/warehouse-core/kernel';
+import type { WmsDatabase } from './db.js';
 import { binsTable } from './schema.js';
 import { rowToBinSnapshot, binSnapshotToRow } from './mappers.js';
 
@@ -19,7 +19,7 @@ import { rowToBinSnapshot, binSnapshotToRow } from './mappers.js';
  * finders reconstruyen vía `Bin.fromSnapshot`.
  */
 export class DrizzleBinRepository implements BinRepository {
-  constructor(private readonly db: NodePgDatabase) {}
+  constructor(private readonly db: WmsDatabase) {}
 
   async save(bin: Bin): Promise<void> {
     const s = bin.toSnapshot();

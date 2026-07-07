@@ -1,5 +1,4 @@
-import { and, eq } from 'drizzle-orm';
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { and, eq, inArray } from 'drizzle-orm';
 import {
   Warehouse,
   WarehouseId,
@@ -10,6 +9,7 @@ import type {
 } from '@globalemergency/warehouse-core/inventory';
 // ScopeId es del kernel (tenencia genérica), no del módulo inventory.
 import { ScopeId } from '@globalemergency/warehouse-core/kernel';
+import type { WmsDatabase } from './db.js';
 import { warehousesTable, zonesTable } from './schema.js';
 import {
   rowsToWarehouseSnapshot,
@@ -29,7 +29,7 @@ import {
  * respeta el invariante de "estado completo del agregado".
  */
 export class DrizzleWarehouseRepository implements WarehouseRepository {
-  constructor(private readonly db: NodePgDatabase) {}
+  constructor(private readonly db: WmsDatabase) {}
 
   async save(warehouse: Warehouse): Promise<void> {
     const s = warehouse.toSnapshot();
@@ -97,10 +97,10 @@ export class DrizzleWarehouseRepository implements WarehouseRepository {
       .select()
       .from(warehousesTable)
       .where(and(...conditions));
-    return Promise.all(rows.map((row) => this.hydrate(row)));
+    return this.hydrateMany(rows);
   }
 
-  /** Carga las zonas del almacén y reconstruye el agregado. */
+  /** Carga las zonas del almacén y reconstruye el agregado (un solo almacén). */
   private async hydrate(
     row: typeof warehousesTable.$inferSelect,
   ): Promise<Warehouse> {
@@ -109,5 +109,36 @@ export class DrizzleWarehouseRepository implements WarehouseRepository {
       .from(zonesTable)
       .where(eq(zonesTable.warehouseId, row.id));
     return Warehouse.fromSnapshot(rowsToWarehouseSnapshot(row, zones));
+  }
+
+  /**
+   * Hidrata varios almacenes sin N+1: una única consulta de zonas
+   * `WHERE warehouse_id IN (<ids>)` y agrupación en memoria por almacén, en vez
+   * de una consulta de zonas por almacén.
+   */
+  private async hydrateMany(
+    rows: (typeof warehousesTable.$inferSelect)[],
+  ): Promise<Warehouse[]> {
+    if (rows.length === 0) return [];
+
+    const ids = rows.map((row) => row.id);
+    const zones = await this.db
+      .select()
+      .from(zonesTable)
+      .where(inArray(zonesTable.warehouseId, ids));
+
+    // Agrupa las zonas por su warehouseId para el ensamblado por almacén.
+    const zonesByWarehouse = new Map<string, (typeof zones)[number][]>();
+    for (const zone of zones) {
+      const bucket = zonesByWarehouse.get(zone.warehouseId);
+      if (bucket) bucket.push(zone);
+      else zonesByWarehouse.set(zone.warehouseId, [zone]);
+    }
+
+    return rows.map((row) =>
+      Warehouse.fromSnapshot(
+        rowsToWarehouseSnapshot(row, zonesByWarehouse.get(row.id) ?? []),
+      ),
+    );
   }
 }

@@ -1,5 +1,4 @@
 import { and, eq, isNull, type SQL } from 'drizzle-orm';
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import {
   StockItem,
   StockItemId,
@@ -12,9 +11,14 @@ import type {
   StockGrainKey,
 } from '@globalemergency/warehouse-core/inventory';
 import { ScopeId } from '@globalemergency/warehouse-core/kernel';
+import type { WmsDatabase } from './db.js';
 import { stockItemsTable } from './schema.js';
 import { rowToStockItemSnapshot, stockItemSnapshotToRow } from './mappers.js';
-import { StaleStockItemError } from './stock-persistence-errors.js';
+import {
+  StaleStockItemError,
+  DuplicateStockItemError,
+} from './stock-persistence-errors.js';
+import { isUniqueViolation } from './pg-errors.js';
 
 /**
  * Adaptador Drizzle/Postgres del puerto {@link StockItemRepository}.
@@ -28,13 +32,26 @@ import { StaleStockItemError } from './stock-persistence-errors.js';
  * nulo): la BBDD rechaza un segundo item en el mismo grano.
  */
 export class DrizzleStockItemRepository implements StockItemRepository {
-  constructor(private readonly db: NodePgDatabase) {}
+  constructor(private readonly db: WmsDatabase) {}
 
   async save(item: StockItem): Promise<void> {
     const s = item.toSnapshot();
     if (s.version === 1) {
-      // Alta: el índice de grano rechaza un duplicado con un error de la BBDD.
-      await this.db.insert(stockItemsTable).values(stockItemSnapshotToRow(s));
+      // Alta: el índice de grano rechaza un duplicado con un `23505` crudo de
+      // Postgres. Se traduce a un error tipado para que el host no vea un 500.
+      try {
+        await this.db.insert(stockItemsTable).values(stockItemSnapshotToRow(s));
+      } catch (err) {
+        if (isUniqueViolation(err)) {
+          throw new DuplicateStockItemError(
+            s.binId,
+            s.supplyId,
+            s.lotCode,
+            s.status,
+          );
+        }
+        throw err;
+      }
       return;
     }
 

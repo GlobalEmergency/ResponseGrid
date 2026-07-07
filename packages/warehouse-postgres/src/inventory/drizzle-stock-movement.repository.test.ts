@@ -11,6 +11,7 @@ import {
 } from '@globalemergency/warehouse-core/inventory';
 import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 import { DrizzleStockMovementRepository } from './drizzle-stock-movement.repository.js';
+import { IdempotencyKeyConflictError } from './stock-persistence-errors.js';
 import { newPool, resetSchema, truncateAll, makeDb } from './test-support.js';
 
 describe('DrizzleStockMovementRepository (integración)', () => {
@@ -78,6 +79,40 @@ describe('DrizzleStockMovementRepository (integración)', () => {
     const byKey = await repo.findByIdempotencyKey(scopeId, key);
     assert.ok(byKey);
     assert.equal(byKey.id.value, first.id.value);
+  });
+
+  it('misma clave + movimiento DISTINTO lanza IdempotencyKeyConflictError y deja una sola fila', async () => {
+    const scopeId = ScopeId.create();
+    const toItemId = StockItemId.create();
+    const key = 'albaran-99';
+
+    // Primer asiento con la clave.
+    const first = receipt({
+      scopeId,
+      toItemId,
+      amount: 8,
+      idempotencyKey: key,
+    });
+    await repo.append(first);
+
+    // Reutiliza la clave para un movimiento distinto (otra cantidad): conflicto.
+    const conflicting = receipt({
+      scopeId,
+      toItemId,
+      amount: 999,
+      idempotencyKey: key,
+    });
+    await assert.rejects(
+      () => repo.append(conflicting),
+      IdempotencyKeyConflictError,
+    );
+
+    // El asiento en conflicto NO se persistió: sigue habiendo una sola fila (la
+    // original).
+    const all = await repo.findByScope(scopeId, {});
+    assert.equal(all.length, 1);
+    assert.equal(all[0]?.id.value, first.id.value);
+    assert.equal(all[0]?.quantity.amount, 8);
   });
 
   it('la clave de idempotencia es única por scope, no global', async () => {
