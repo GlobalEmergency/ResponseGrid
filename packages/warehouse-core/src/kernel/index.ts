@@ -13,3 +13,4 @@ export type {
 } from './category-definition.js';
 export { SupplyLine, SupplyLineValidationError } from './supply-line.js';
 export type { SupplyLineProps, SupplyLineSnapshot } from './supply-line.js';
+export { ScopeId, ScopeIdValidationError } from './scope-id.js';
