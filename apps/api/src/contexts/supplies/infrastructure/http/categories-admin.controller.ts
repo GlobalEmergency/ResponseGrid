@@ -43,7 +43,7 @@ import {
   UpdateCategoryDto,
 } from './admin-category.dto';
 import { localizedCategoryText, resolveLocale } from './locale';
-import { CategoryWriteInput } from '../../domain/ports/category.repository';
+import { CategoryWriteInput } from '@globalemergency/warehouse-core/catalog';
 
 @ApiTags('categories-admin')
 @ApiBearerAuth()

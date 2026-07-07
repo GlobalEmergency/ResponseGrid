@@ -1,10 +1,10 @@
 import { MergeSupplies } from './merge-supplies';
-import { Supply } from '../domain/supply';
 import {
+  Supply,
   MergeIntoSelfError,
   SupplyNotFoundError,
-} from '../domain/supply-errors';
-import { SupplyRepository } from '../domain/ports/supply.repository';
+  SupplyRepository,
+} from '@globalemergency/warehouse-core/catalog';
 
 function supply(id: string, code: string): Supply {
   return Supply.create({

@@ -1,11 +1,11 @@
 import { EditSupply } from './edit-supply';
-import { Supply } from '../domain/supply';
 import {
+  Supply,
   SupplyNotFoundError,
   CategoryNotFoundError,
-} from '../domain/supply-errors';
-import { SupplyRepository } from '../domain/ports/supply.repository';
-import { CategoryRepository } from '../domain/ports/category.repository';
+  SupplyRepository,
+  CategoryRepository,
+} from '@globalemergency/warehouse-core/catalog';
 
 const ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 

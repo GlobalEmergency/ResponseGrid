@@ -4,10 +4,12 @@ import { AddSupplyAlias } from './add-supply-alias';
 import { RemoveSupplyAlias } from './remove-supply-alias';
 import { ListSuppliesAdmin } from './list-supplies-admin';
 import { GetSupplyAdmin } from './get-supply-admin';
-import { Supply } from '../domain/supply';
-import { SupplyAlias } from '../domain/supply-alias';
-import { SupplyNotFoundError } from '../domain/supply-errors';
-import { SupplyRepository } from '../domain/ports/supply.repository';
+import {
+  Supply,
+  SupplyAlias,
+  SupplyNotFoundError,
+  SupplyRepository,
+} from '@globalemergency/warehouse-core/catalog';
 
 const ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 

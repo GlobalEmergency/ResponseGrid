@@ -6,7 +6,7 @@ import {
   SupplyLinkBackfillRepository,
   SupplyLinkPatch,
   UnlinkedLineGroup,
-} from '../../domain/ports/supply-link-backfill.repository';
+} from '@globalemergency/warehouse-core/catalog';
 import { containersTable } from './schema';
 import { needItemsTable } from '../../../needs/infrastructure/drizzle/schema';
 import { offerItemsTable } from '../../../offers/infrastructure/drizzle/schema';

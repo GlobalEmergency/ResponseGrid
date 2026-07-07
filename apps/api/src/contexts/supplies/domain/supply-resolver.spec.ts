@@ -1,6 +1,8 @@
-import { Supply } from './supply';
-import { SupplyAlias } from './supply-alias';
-import { SupplyResolver } from './supply-resolver';
+import {
+  Supply,
+  SupplyAlias,
+  SupplyResolver,
+} from '@globalemergency/warehouse-core/catalog';
 
 describe('SupplyResolver', () => {
   const water = Supply.create({

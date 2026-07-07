@@ -7,7 +7,7 @@ import { CategoryDefinition } from '@globalemergency/warehouse-core/kernel';
 import {
   CategoryRepository,
   CategoryWriteInput,
-} from '../domain/ports/category.repository';
+} from '@globalemergency/warehouse-core/catalog';
 
 export type CreateCategoryCommand = CategoryWriteInput;
 

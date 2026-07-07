@@ -1,6 +1,8 @@
 import { BackfillSupplyLinks } from './backfill-supply-links';
-import { PublicSupplyRecord } from '../domain/ports/supply-catalog.read-model';
-import { UnlinkedLineGroup } from '../domain/ports/supply-link-backfill.repository';
+import {
+  PublicSupplyRecord,
+  UnlinkedLineGroup,
+} from '@globalemergency/warehouse-core/catalog';
 
 function makeRecord(
   overrides: Partial<PublicSupplyRecord> & { id: string; name: string },

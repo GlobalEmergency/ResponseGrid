@@ -1,4 +1,4 @@
-import { CategoryRepository } from '../domain/ports/category.repository';
+import { CategoryRepository } from '@globalemergency/warehouse-core/catalog';
 import { CategoryDefinition } from '@globalemergency/warehouse-core/kernel';
 
 /**

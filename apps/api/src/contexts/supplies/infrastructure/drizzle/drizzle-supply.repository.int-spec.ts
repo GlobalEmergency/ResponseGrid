@@ -1,9 +1,11 @@
 import { createDb, Db } from '../../../../shared/db';
 import { suppliesTable, supplyAliasesTable } from './schema';
 import { DrizzleSupplyRepository } from './drizzle-supply.repository';
-import { Supply } from '../../domain/supply';
-import { SupplyAlias } from '../../domain/supply-alias';
-import { AliasConflictError } from '../../domain/supply-errors';
+import {
+  Supply,
+  SupplyAlias,
+  AliasConflictError,
+} from '@globalemergency/warehouse-core/catalog';
 import type { Pool } from 'pg';
 
 const URL =

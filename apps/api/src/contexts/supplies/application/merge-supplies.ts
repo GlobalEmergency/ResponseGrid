@@ -1,8 +1,8 @@
 import {
   MergeIntoSelfError,
   SupplyNotFoundError,
-} from '../domain/supply-errors';
-import { SupplyRepository } from '../domain/ports/supply.repository';
+  SupplyRepository,
+} from '@globalemergency/warehouse-core/catalog';
 
 export interface MergeSuppliesCommand {
   /** Insumo duplicado que se absorbe y archiva. */

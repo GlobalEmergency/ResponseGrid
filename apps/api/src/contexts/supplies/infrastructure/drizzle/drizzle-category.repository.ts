@@ -8,7 +8,7 @@ import {
   CategoryRepository,
   CategoryTranslationInput,
   CategoryWriteInput,
-} from '../../domain/ports/category.repository';
+} from '@globalemergency/warehouse-core/catalog';
 import { Db } from '../../../../shared/db';
 import {
   categoriesTable,

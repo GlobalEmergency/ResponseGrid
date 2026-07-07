@@ -1,13 +1,14 @@
 import { and, asc, eq, ilike, ne, or, sql, type SQL } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
-import { Supply, SupplyStatus } from '../../domain/supply';
-import { SupplyAlias } from '../../domain/supply-alias';
-import { AliasConflictError } from '../../domain/supply-errors';
 import {
+  Supply,
+  SupplyStatus,
+  SupplyAlias,
+  AliasConflictError,
   SupplyListFilter,
   SupplyRepository,
   SupplyTranslationInput,
-} from '../../domain/ports/supply.repository';
+} from '@globalemergency/warehouse-core/catalog';
 import {
   suppliesTable,
   supplyAliasesTable,

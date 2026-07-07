@@ -1,11 +1,11 @@
 import { CreateSupply } from './create-supply';
-import { Supply } from '../domain/supply';
 import {
+  Supply,
   VariantTargetNotFoundError,
   CategoryNotFoundError,
-} from '../domain/supply-errors';
-import { SupplyRepository } from '../domain/ports/supply.repository';
-import { CategoryRepository } from '../domain/ports/category.repository';
+  SupplyRepository,
+  CategoryRepository,
+} from '@globalemergency/warehouse-core/catalog';
 
 function makeRepo(overrides: Partial<SupplyRepository> = {}): SupplyRepository {
   return {

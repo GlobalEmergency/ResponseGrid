@@ -13,16 +13,16 @@ import {
   ContainerValidationError,
 } from '../../domain/container-errors';
 import { SupplyLineValidationError } from '@globalemergency/warehouse-core/kernel';
-import { SupplyValidationError } from '../../domain/supply';
-import { SupplyAliasValidationError } from '../../domain/supply-alias';
 import {
+  SupplyValidationError,
+  SupplyAliasValidationError,
   AliasConflictError,
   CategoryNotFoundError,
   MergeIntoSelfError,
   SupplyCodeConflictError,
   SupplyNotFoundError,
   VariantTargetNotFoundError,
-} from '../../domain/supply-errors';
+} from '@globalemergency/warehouse-core/catalog';
 import {
   CategoryAlreadyExistsError,
   CategoryNotFoundError as CategoryAdminNotFoundError,

@@ -1,14 +1,13 @@
 import { randomUUID } from 'crypto';
-import { Supply, formatSupplyCode } from '../domain/supply';
 import {
+  Supply,
+  formatSupplyCode,
   VariantTargetNotFoundError,
   CategoryNotFoundError,
-} from '../domain/supply-errors';
-import {
   SupplyRepository,
   SupplyTranslationInput,
-} from '../domain/ports/supply.repository';
-import { CategoryRepository } from '../domain/ports/category.repository';
+  CategoryRepository,
+} from '@globalemergency/warehouse-core/catalog';
 import { getCategoryPrefix } from '@globalemergency/warehouse-core/kernel';
 
 export interface CreateSupplyCommand {

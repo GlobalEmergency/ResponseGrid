@@ -1,5 +1,5 @@
-import { Supply, SupplyStatus } from '../supply';
-import { SupplyAlias } from '../supply-alias';
+import { Supply, SupplyStatus } from '../supply.js';
+import { SupplyAlias } from '../supply-alias.js';
 
 export const SUPPLY_REPOSITORY = Symbol('SUPPLY_REPOSITORY');
 

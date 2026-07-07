@@ -1,7 +1,7 @@
-import { Supply } from './supply';
-import { SupplyAlias } from './supply-alias';
-import { allLocalizedVariants } from './localized-text';
-import { PublicSupplyRecord } from './ports/supply-catalog.read-model';
+import { Supply } from './supply.js';
+import { SupplyAlias } from './supply-alias.js';
+import { allLocalizedVariants } from './localized-text.js';
+import { PublicSupplyRecord } from './ports/supply-catalog.read-model.js';
 
 export class SupplyResolver {
   private readonly index = new Map<string, string | null>();

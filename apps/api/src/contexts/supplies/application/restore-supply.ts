@@ -1,5 +1,7 @@
-import { SupplyNotFoundError } from '../domain/supply-errors';
-import { SupplyRepository } from '../domain/ports/supply.repository';
+import {
+  SupplyNotFoundError,
+  SupplyRepository,
+} from '@globalemergency/warehouse-core/catalog';
 
 /**
  * Reactiva un insumo archivado (#222): vuelve a la cara pública del catálogo.

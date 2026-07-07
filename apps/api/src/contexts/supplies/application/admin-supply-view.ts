@@ -1,6 +1,8 @@
-import { Supply } from '../domain/supply';
-import { SupplyAlias } from '../domain/supply-alias';
-import { SupplyTranslationInput } from '../domain/ports/supply.repository';
+import {
+  Supply,
+  SupplyAlias,
+  SupplyTranslationInput,
+} from '@globalemergency/warehouse-core/catalog';
 
 /**
  * Proyección de gestión de un insumo: el agregado completo (incluye `status` y

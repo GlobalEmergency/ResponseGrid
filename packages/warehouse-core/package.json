@@ -25,6 +25,16 @@
         "types": "./dist/cjs/kernel/index.d.ts",
         "default": "./dist/cjs/kernel/index.js"
       }
+    },
+    "./catalog": {
+      "import": {
+        "types": "./dist/esm/catalog/index.d.ts",
+        "default": "./dist/esm/catalog/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/catalog/index.d.ts",
+        "default": "./dist/cjs/catalog/index.js"
+      }
     }
   },
   "files": [

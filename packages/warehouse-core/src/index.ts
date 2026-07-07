@@ -6,3 +6,4 @@
  * explícitas y aprovechar el tree-shaking.
  */
 export * from './kernel/index.js';
+export * from './catalog/index.js';
