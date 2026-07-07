@@ -7,7 +7,8 @@
  * El stock existente se modela con `StockItem` (una fila por producto × lote ×
  * bin × estado, con cantidad decimal + UoM y `version` para concurrencia
  * optimista) y su libro mayor `StockMovement` (asiento inmutable de doble pata:
- * `applyStockMovement` decrementa un item e incrementa otro).
+ * `applyStockMovement` decrementa un item e incrementa otro). `allocateFefo`
+ * planifica el reparto de una demanda por caducidad (first-expired-first-out).
  *
  * Dominio puro: sin NestJS, sin ORM, sin infraestructura. Todo referencia el
  * catálogo (`supplyId`) y el backbone (bin → zona → almacén) por id.
@@ -63,6 +64,13 @@ export type {
   StockMovementSnapshot,
   MovementLegs,
 } from './stock-movement.js';
+export { allocateFefo } from './fefo-allocation.js';
+export type {
+  FefoDemand,
+  FefoOptions,
+  AllocationLine,
+  AllocationPlan,
+} from './fefo-allocation.js';
 export {
   WAREHOUSE_REPOSITORY,
   type WarehouseRepository,
