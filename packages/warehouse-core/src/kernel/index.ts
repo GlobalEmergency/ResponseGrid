@@ -5,12 +5,24 @@
  *
  * No depende de infraestructura, NestJS ni ORM: es dominio puro.
  */
-export { Category, isCoreCategory, getCategoryPrefix } from './category.js';
+export {
+  Category,
+  CORE_CATEGORY_SLUGS,
+  isCoreCategory,
+  getCategoryPrefix,
+} from './category.js';
 export type {
   CategoryDefinition,
   CategoryTranslation,
   CategoryKind,
 } from './category-definition.js';
+export { CategorySlug } from './category-slug.js';
+export {
+  CategoryValidationError,
+  UnknownCategoryError,
+} from './category-errors.js';
+export { CategoryRegistry } from './category-registry.js';
+export type { CategoryNode } from './category-registry.js';
 export { SupplyLine, SupplyLineValidationError } from './supply-line.js';
 export type { SupplyLineProps, SupplyLineSnapshot } from './supply-line.js';
 export { ScopeId, ScopeIdValidationError } from './scope-id.js';
