@@ -6,7 +6,8 @@
  *
  * El stock existente se modela con `StockItem` (una fila por producto × lote ×
  * bin × estado, con cantidad decimal + UoM y `version` para concurrencia
- * optimista). El kardex `StockMovement` llega en el incremento siguiente.
+ * optimista) y su libro mayor `StockMovement` (asiento inmutable de doble pata:
+ * `applyStockMovement` decrementa un item e incrementa otro).
  *
  * Dominio puro: sin NestJS, sin ORM, sin infraestructura. Todo referencia el
  * catálogo (`supplyId`) y el backbone (bin → zona → almacén) por id.
@@ -15,6 +16,7 @@ export { WarehouseId } from './warehouse-id.js';
 export { ZoneId } from './zone-id.js';
 export { BinId } from './bin-id.js';
 export { StockItemId } from './stock-item-id.js';
+export { StockMovementId } from './stock-movement-id.js';
 export {
   WarehouseStatus,
   ZoneStatus,
@@ -23,6 +25,7 @@ export {
   BinKind,
 } from './inventory-enums.js';
 export { StockStatus } from './stock-enums.js';
+export { MovementKind } from './movement-enums.js';
 export {
   WarehouseValidationError,
   DuplicateZoneCodeError,
@@ -34,6 +37,7 @@ export {
   StockValidationError,
   QuantityUnitMismatchError,
   InsufficientStockError,
+  StockMovementValidationError,
 } from './stock-errors.js';
 export { Quantity } from './quantity.js';
 export { Lot } from './lot.js';
@@ -53,6 +57,12 @@ export type {
   CreateStockItemProps,
   StockItemSnapshot,
 } from './stock-item.js';
+export { StockMovement, applyStockMovement } from './stock-movement.js';
+export type {
+  RecordStockMovementProps,
+  StockMovementSnapshot,
+  MovementLegs,
+} from './stock-movement.js';
 export {
   WAREHOUSE_REPOSITORY,
   type WarehouseRepository,
@@ -69,3 +79,8 @@ export {
   type ListStockFilter,
   type StockGrainKey,
 } from './ports/stock-item.repository.js';
+export {
+  STOCK_MOVEMENT_REPOSITORY,
+  type StockMovementRepository,
+  type ListMovementsFilter,
+} from './ports/stock-movement.repository.js';

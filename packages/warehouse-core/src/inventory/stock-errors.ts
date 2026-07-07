@@ -31,3 +31,16 @@ export class InsufficientStockError extends Error {
     this.name = 'InsufficientStockError';
   }
 }
+
+/**
+ * Raised on an invalid stock movement (asiento): zero quantity, legs that don't
+ * match its kind (a receipt with a source, a transfer to the same item…), or a
+ * StockItem passed to `applyStockMovement` that doesn't match the movement's
+ * leg id or scope. The HTTP layer maps it to 422 (bad request) or 409.
+ */
+export class StockMovementValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'StockMovementValidationError';
+  }
+}
