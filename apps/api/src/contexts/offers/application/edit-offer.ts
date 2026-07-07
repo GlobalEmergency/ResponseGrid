@@ -1,7 +1,6 @@
 import { OfferRepository } from '../domain/ports/offer.repository';
 import { OfferId } from '../domain/offer-id';
 import { EditOfferProps } from '../domain/donation-offer';
-import { Category } from '../domain/offer-enums';
 import {
   SupplyLine,
   SupplyLineSnapshot,
@@ -16,7 +15,8 @@ export interface EditOfferItemCommand {
   name: string;
   quantity: number;
   unit: string | null;
-  category: Category;
+  /** Slug de categoría (data-driven); el formato lo valida SupplyLine. */
+  category: string;
   supplyId?: string | null;
   presentation: string | null;
 }

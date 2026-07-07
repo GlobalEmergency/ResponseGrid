@@ -42,7 +42,11 @@ import { RenewNeed, GetExpiredNeeds } from '../../application/renew-need';
 import { SuggestVolunteersForNeed } from '../../application/suggest-volunteers-for-need';
 import { CreateTaskFromNeed } from '../../application/create-task-from-need';
 import { NeedView } from '../../application/need-view';
-import { Category, Priority } from '../../domain/need-enums';
+import { Priority } from '../../domain/need-enums';
+import {
+  CORE_CATEGORY_SLUGS,
+  isCoreCategory,
+} from '@globalemergency/warehouse-core/kernel';
 import {
   CreateNeedDto,
   AssignNeedManagerDto,
@@ -171,10 +175,12 @@ export class NeedsController {
   })
   @ApiQuery({
     name: 'category',
-    enum: Category,
+    type: String,
+    example: 'water',
     required: false,
     description:
-      'Filter by item category (needs with at least one item of this category)',
+      'Filter by item category slug (needs with at least one item of this category). ' +
+      `Core slugs: ${CORE_CATEGORY_SLUGS.join(', ')}.`,
   })
   @ApiQuery({
     name: 'priority',
@@ -210,9 +216,8 @@ export class NeedsController {
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
   ): Promise<NeedView[]> {
-    const validCategory = Object.values(Category).includes(category as Category)
-      ? (category as Category)
-      : undefined;
+    const validCategory =
+      category !== undefined && isCoreCategory(category) ? category : undefined;
     const validPriority = Object.values(Priority).includes(priority as Priority)
       ? (priority as Priority)
       : undefined;
@@ -306,10 +311,12 @@ export class NeedsController {
   })
   @ApiQuery({
     name: 'category',
-    enum: Category,
+    type: String,
+    example: 'water',
     required: false,
     description:
-      'Filter by item category (needs with at least one item of this category)',
+      'Filter by item category slug (needs with at least one item of this category). ' +
+      `Core slugs: ${CORE_CATEGORY_SLUGS.join(', ')}.`,
   })
   @ApiQuery({
     name: 'priority',
@@ -327,9 +334,8 @@ export class NeedsController {
     @Query('category') category?: string,
     @Query('priority') priority?: string,
   ): Promise<NeedView[]> {
-    const validCategory = Object.values(Category).includes(category as Category)
-      ? (category as Category)
-      : undefined;
+    const validCategory =
+      category !== undefined && isCoreCategory(category) ? category : undefined;
     const validPriority = Object.values(Priority).includes(priority as Priority)
       ? (priority as Priority)
       : undefined;
