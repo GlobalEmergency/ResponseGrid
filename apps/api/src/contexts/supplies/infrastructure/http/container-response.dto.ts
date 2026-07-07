@@ -3,7 +3,7 @@ import {
   ContainerHolderType,
   ContainerStatus,
   ContainerType,
-} from '../../domain/container-enums';
+} from '@globalemergency/warehouse-core/containers';
 import { SupplyLineResponseDto } from './supply-line.dto';
 
 export class CreateContainerResponseDto {

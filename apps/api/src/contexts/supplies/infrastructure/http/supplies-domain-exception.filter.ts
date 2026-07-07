@@ -8,10 +8,10 @@ import { Response } from 'express';
 import { ContainerNotFoundError } from '../../application/container-not-found.error';
 import {
   ContainerCycleError,
-  ContainerEmergencyMismatchError,
+  ContainerScopeMismatchError,
   ContainerSealedError,
   ContainerValidationError,
-} from '../../domain/container-errors';
+} from '@globalemergency/warehouse-core/containers';
 import { SupplyLineValidationError } from '@globalemergency/warehouse-core/kernel';
 import {
   SupplyValidationError,
@@ -35,7 +35,7 @@ type DomainError =
   | ContainerNotFoundError
   | ContainerSealedError
   | ContainerCycleError
-  | ContainerEmergencyMismatchError
+  | ContainerScopeMismatchError
   | ContainerValidationError
   | SupplyLineValidationError
   | SupplyValidationError
@@ -66,7 +66,7 @@ type DomainError =
   ContainerNotFoundError,
   ContainerSealedError,
   ContainerCycleError,
-  ContainerEmergencyMismatchError,
+  ContainerScopeMismatchError,
   ContainerValidationError,
   SupplyLineValidationError,
   SupplyValidationError,

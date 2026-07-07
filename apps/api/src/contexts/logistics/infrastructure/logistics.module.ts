@@ -59,7 +59,7 @@ import { SuppliesModule } from '../../supplies/supplies.module';
 import {
   CONTAINER_REPOSITORY,
   ContainerRepository,
-} from '../../supplies/domain/ports/container.repository';
+} from '@globalemergency/warehouse-core/containers';
 import {
   SHIPMENT_CONTAINER_PORT,
   ShipmentContainerPort,

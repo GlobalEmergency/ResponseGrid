@@ -1,7 +1,9 @@
-import { ContainerRepository } from '../../supplies/domain/ports/container.repository';
-import { Container } from '../../supplies/domain/container';
-import { ContainerId } from '../../supplies/domain/container-id';
-import { ContainerHolderType } from '../../supplies/domain/container-enums';
+import {
+  ContainerRepository,
+  Container,
+  ContainerId,
+  ContainerHolderType,
+} from '@globalemergency/warehouse-core/containers';
 import {
   LoadContainersOntoShipmentCommand,
   MoveContainersToResourceCommand,
@@ -68,7 +70,7 @@ export class SuppliesShipmentContainerAdapter implements ShipmentContainerPort {
     const container = await this.containers.findById(
       ContainerId.fromString(id),
     );
-    if (container === null || container.emergencyId.value !== emergencyId) {
+    if (container === null || container.scopeId.value !== emergencyId) {
       throw new ShipmentContainerNotFoundError(id);
     }
     return container;

@@ -14,7 +14,7 @@ import {
 import {
   CONTAINER_REPOSITORY,
   ContainerRepository,
-} from './domain/ports/container.repository';
+} from '@globalemergency/warehouse-core/containers';
 import {
   CONTAINER_AUTHORIZATION_LOOKUP,
   ContainerAuthorizationLookup,

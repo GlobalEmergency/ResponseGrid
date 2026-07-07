@@ -1,9 +1,12 @@
 import { MoveContainer } from './move-container';
 import { InMemoryContainerRepository } from '../infrastructure/in-memory-container.repository';
-import { Container } from '../domain/container';
-import { ContainerId } from '../domain/container-id';
-import { ContainerHolderType, ContainerType } from '../domain/container-enums';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
+import {
+  Container,
+  ContainerId,
+  ContainerHolderType,
+  ContainerType,
+} from '@globalemergency/warehouse-core/containers';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 import { ContainerNotFoundError } from './container-not-found.error';
 
 const EM = '11111111-1111-4111-8111-111111111111';
@@ -16,7 +19,7 @@ function seed(repo: InMemoryContainerRepository): Container {
     id: ContainerId.create(),
     code: 'PAL-0001',
     type: ContainerType.Pallet,
-    emergencyId: EmergencyId.fromString(EM),
+    scopeId: ScopeId.fromString(EM),
     holder: { type: ContainerHolderType.Resource, id: RESOURCE },
   });
   void repo.save(c);

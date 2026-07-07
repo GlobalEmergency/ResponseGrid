@@ -36,9 +36,9 @@ export class ContainerCycleError extends Error {
  * Raised when nesting a container under a parent that belongs to a different
  * emergency. A container and its parent must share the same `emergencyId`.
  */
-export class ContainerEmergencyMismatchError extends Error {
+export class ContainerScopeMismatchError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'ContainerEmergencyMismatchError';
+    this.name = 'ContainerScopeMismatchError';
   }
 }

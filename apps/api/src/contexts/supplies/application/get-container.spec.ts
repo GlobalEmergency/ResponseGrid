@@ -4,7 +4,10 @@ import { NestContainer } from './nest-container';
 import { SealContainer } from './seal-container';
 import { GetContainer } from './get-container';
 import { InMemoryContainerRepository } from '../infrastructure/in-memory-container.repository';
-import { ContainerStatus, ContainerType } from '../domain/container-enums';
+import {
+  ContainerStatus,
+  ContainerType,
+} from '@globalemergency/warehouse-core/containers';
 import { Category } from '@globalemergency/warehouse-core/kernel';
 import { ContainerNotFoundError } from './container-not-found.error';
 

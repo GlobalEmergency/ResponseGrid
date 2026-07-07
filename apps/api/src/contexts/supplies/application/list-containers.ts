@@ -1,14 +1,12 @@
 import {
   ContainerRepository,
   ListContainersFilter,
-} from '../domain/ports/container.repository';
-import {
   ContainerHolderType,
   ContainerStatus,
   ContainerType,
-} from '../domain/container-enums';
+} from '@globalemergency/warehouse-core/containers';
 import { ContainerView, toContainerView } from './container-view';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 
 export interface ListContainersCommand {
   emergencyId: string;
@@ -34,8 +32,8 @@ export class ListContainers {
         : {}),
     };
 
-    const containers = await this.repo.findByEmergency(
-      EmergencyId.fromString(cmd.emergencyId),
+    const containers = await this.repo.findByScope(
+      ScopeId.fromString(cmd.emergencyId),
       filter,
     );
     return containers.map(toContainerView);

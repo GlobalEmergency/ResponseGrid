@@ -1,6 +1,8 @@
-import { ContainerRepository } from '../domain/ports/container.repository';
-import { ContainerHolder } from '../domain/container';
-import { ContainerId } from '../domain/container-id';
+import {
+  ContainerRepository,
+  ContainerHolder,
+  ContainerId,
+} from '@globalemergency/warehouse-core/containers';
 import { ContainerNotFoundError } from './container-not-found.error';
 
 export interface MoveContainerCommand {

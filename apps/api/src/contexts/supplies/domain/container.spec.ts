@@ -1,16 +1,14 @@
-import { Container } from './container';
-import { ContainerId } from './container-id';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
 import {
+  Container,
+  ContainerId,
   ContainerHolderType,
   ContainerStatus,
   ContainerType,
-} from './container-enums';
-import {
   ContainerCycleError,
   ContainerSealedError,
   ContainerValidationError,
-} from './container-errors';
+} from '@globalemergency/warehouse-core/containers';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 import { SupplyLine, Category } from '@globalemergency/warehouse-core/kernel';
 
 const EM = '11111111-1111-4111-8111-111111111111';
@@ -33,7 +31,7 @@ function makeContainer(
     id: ContainerId.create(),
     code: 'PAL-0001',
     type: ContainerType.Pallet,
-    emergencyId: EmergencyId.fromString(EM),
+    scopeId: ScopeId.fromString(EM),
     ...overrides,
   });
 }

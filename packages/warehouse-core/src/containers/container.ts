@@ -1,19 +1,19 @@
-import { ContainerId } from './container-id';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
+import { ContainerId } from './container-id.js';
 import {
   ContainerHolderType,
   ContainerStatus,
   ContainerType,
-} from './container-enums';
+} from './container-enums.js';
 import {
   ContainerCycleError,
   ContainerSealedError,
   ContainerValidationError,
-} from './container-errors';
+} from './container-errors.js';
 import {
+  ScopeId,
   SupplyLine,
   SupplyLineSnapshot,
-} from '@globalemergency/warehouse-core/kernel';
+} from '../kernel/index.js';
 
 /**
  * Where the container is held right now. Polymorphic reference (no FK), like a
@@ -29,7 +29,7 @@ export interface CreateContainerProps {
   id: ContainerId;
   code: string;
   type: ContainerType;
-  emergencyId: EmergencyId;
+  scopeId: ScopeId;
   lines?: SupplyLine[];
   grossWeightKg?: number | null;
   grossVolumeM3?: number | null;
@@ -40,7 +40,7 @@ export interface ContainerSnapshot {
   id: string;
   code: string;
   type: ContainerType;
-  emergencyId: string;
+  scopeId: string;
   parentContainerId: string | null;
   lines: SupplyLineSnapshot[];
   grossWeightKg: number | null;
@@ -71,7 +71,7 @@ export class Container {
     public readonly id: ContainerId,
     public readonly code: string,
     public readonly type: ContainerType,
-    public readonly emergencyId: EmergencyId,
+    public readonly scopeId: ScopeId,
     private _parentContainerId: ContainerId | null,
     private _lines: SupplyLine[],
     public readonly grossWeightKg: number | null,
@@ -96,7 +96,7 @@ export class Container {
       props.id,
       code,
       props.type,
-      props.emergencyId,
+      props.scopeId,
       null,
       [...(props.lines ?? [])],
       props.grossWeightKg ?? null,
@@ -113,7 +113,7 @@ export class Container {
       ContainerId.fromString(s.id),
       s.code,
       s.type,
-      EmergencyId.fromString(s.emergencyId),
+      ScopeId.fromString(s.scopeId),
       s.parentContainerId ? ContainerId.fromString(s.parentContainerId) : null,
       s.lines.map((l) => SupplyLine.fromSnapshot(l)),
       s.grossWeightKg,
@@ -235,7 +235,7 @@ export class Container {
       id: this.id.value,
       code: this.code,
       type: this.type,
-      emergencyId: this.emergencyId.value,
+      scopeId: this.scopeId.value,
       parentContainerId: this._parentContainerId?.value ?? null,
       lines: this._lines.map((l) => l.toSnapshot()),
       grossWeightKg: this.grossWeightKg,

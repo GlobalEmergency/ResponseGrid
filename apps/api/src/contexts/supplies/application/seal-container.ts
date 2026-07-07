@@ -1,5 +1,7 @@
-import { ContainerRepository } from '../domain/ports/container.repository';
-import { ContainerId } from '../domain/container-id';
+import {
+  ContainerRepository,
+  ContainerId,
+} from '@globalemergency/warehouse-core/containers';
 import { ContainerNotFoundError } from './container-not-found.error';
 
 export interface SealContainerCommand {
