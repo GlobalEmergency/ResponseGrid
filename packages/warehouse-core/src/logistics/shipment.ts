@@ -1,10 +1,7 @@
 import { ShipmentId } from './shipment-id.js';
 import { ScopeId } from '../kernel/index.js';
 import { CarrierType, ShipmentStatus } from './shipment-enums.js';
-import {
-  SupplyLine,
-  SupplyLineSnapshot,
-} from '../kernel/index.js';
+import { SupplyLine, SupplyLineSnapshot } from '../kernel/index.js';
 import {
   InvalidShipmentRouteError,
   InvalidShipmentTransitionError,

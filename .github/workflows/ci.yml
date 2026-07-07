@@ -35,13 +35,10 @@ jobs:
         run: pnpm --filter api exec prettier --check "src/**/*.ts" "test/**/*.ts"
 
       # The workspace @globalemergency/* packages carry their own .prettierrc
-      # (same config as api). Gate warehouse-postgres' TS here too, run via api's
-      # prettier bin with a repo-relative glob.
-      # TODO(#355 follow-up): add packages/warehouse-core/src to this glob once
-      # its preexisting format drift (containers/container.ts, logistics/shipment.ts)
-      # is fixed forward — those files predate this gate and are out of scope here.
-      - name: Prettier — warehouse-postgres
-        run: pnpm --filter api exec prettier --check "../../packages/warehouse-postgres/src/**/*.ts"
+      # (same config as api). Gate their TS here too, run via api's prettier bin
+      # with repo-relative globs.
+      - name: Prettier — warehouse packages
+        run: pnpm --filter api exec prettier --check "../../packages/warehouse-core/src/**/*.ts" "../../packages/warehouse-postgres/src/**/*.ts"
 
   # ── Lint ────────────────────────────────────────────────────────────────────
   lint:
