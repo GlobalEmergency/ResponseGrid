@@ -8,7 +8,8 @@
  * bin × estado, con cantidad decimal + UoM y `version` para concurrencia
  * optimista) y su libro mayor `StockMovement` (asiento inmutable de doble pata:
  * `applyStockMovement` decrementa un item e incrementa otro). `allocateFefo`
- * planifica el reparto de una demanda por caducidad (first-expired-first-out).
+ * planifica el reparto de una demanda por caducidad (first-expired-first-out) y
+ * `reconcileCount` concilia un recuento físico con el sistema (ajuste).
  *
  * Dominio puro: sin NestJS, sin ORM, sin infraestructura. Todo referencia el
  * catálogo (`supplyId`) y el backbone (bin → zona → almacén) por id.
@@ -71,6 +72,12 @@ export type {
   AllocationLine,
   AllocationPlan,
 } from './fefo-allocation.js';
+export { reconcileCount } from './cycle-count.js';
+export type {
+  CountDirection,
+  CycleCountInput,
+  CycleCountResult,
+} from './cycle-count.js';
 export {
   WAREHOUSE_REPOSITORY,
   type WarehouseRepository,
