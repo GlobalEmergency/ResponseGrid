@@ -26,6 +26,12 @@ export interface CreateSupplyCommand {
   variantOfId?: string | null;
   /** Traducciones de nombre por idioma (#320). El nombre base (`name`) es `es`. */
   translations?: readonly SupplyTranslationInput[];
+  /**
+   * Tenencia (#397): `undefined`/`null` = insumo global (por defecto; HTTP hoy
+   * opera en global). Un `scopeId` de tenant crea el insumo en su scope y valida
+   * sus atributos contra el esquema efectivo global ∪ tenant.
+   */
+  scopeId?: string | null;
 }
 
 /**
@@ -57,13 +63,17 @@ export class CreateSupply {
       throw new CategoryNotFoundError(cmd.categorySlug);
     }
 
+    const scopeId = cmd.scopeId ?? null;
+
     // Valida el `attributes` jsonb contra el esquema efectivo de la familia (la
-    // unión de definiciones de la ascendencia de su categoría). Si la familia no
-    // tiene definiciones, el esquema es vacío y los atributos pasan tal cual.
+    // unión de definiciones de la ascendencia de su categoría). Con scope de
+    // tenant, el esquema efectivo es global ∪ tenant. Si la familia no tiene
+    // definiciones, el esquema es vacío y los atributos pasan tal cual.
     const attributes = await this.validateAttributes(
       cmd.categorySlug,
       cmd.attributes ?? {},
       categories,
+      scopeId,
     );
 
     const prefix = getCategoryPrefix(cmd.categorySlug, categories);
@@ -79,6 +89,7 @@ export class CreateSupply {
       attributes,
       registrationNotes: cmd.registrationNotes ?? null,
       variantOfId,
+      scopeId,
     });
 
     await this.repo.save(supply, cmd.translations);
@@ -89,6 +100,7 @@ export class CreateSupply {
     categorySlug: string,
     attributes: Record<string, unknown>,
     categories: readonly { slug: string; parentSlug: string | null }[],
+    scopeId: string | null,
   ): Promise<Record<string, unknown>> {
     const registry = CategoryRegistry.fromNodes(
       categories.map((c) => ({
@@ -101,11 +113,18 @@ export class CreateSupply {
       categorySlug,
       ...registry.ancestorsOf(categorySlug).map((n) => n.slug),
     ];
+    // Con scope de tenant el repo devuelve global ∪ tenant; sin scope, sólo
+    // global. `resolveEffectiveSchema` fusiona ese conjunto por scope.
     const defs = await this.attributeRepo.findByCategoryAncestry(
       ancestrySlugs,
-      null,
+      scopeId,
     );
-    const schema = resolveEffectiveSchema(categorySlug, defs, registry);
+    const schema = resolveEffectiveSchema(
+      categorySlug,
+      defs,
+      registry,
+      scopeId,
+    );
     return validateAttributes(attributes, schema);
   }
 }

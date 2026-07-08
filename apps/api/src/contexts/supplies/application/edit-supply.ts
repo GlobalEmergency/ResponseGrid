@@ -81,10 +81,14 @@ export class EditSupply {
     // cambian los atributos o la categoría (una recategorización puede invalidar
     // atributos válidos en la familia anterior). Persiste la versión validada.
     if (cmd.attributes !== undefined || cmd.categorySlug !== undefined) {
+      // Tenencia (#397): valida contra el esquema efectivo del scope del propio
+      // insumo (global ∪ tenant si es de tenant). El scope es identidad: no se
+      // edita, se conserva del agregado cargado.
       const attributes = await this.validateAttributes(
         next.categorySlug,
         next.attributes,
         categories,
+        next.scopeId,
       );
       next = next.setAttributes(attributes);
     }
@@ -99,6 +103,7 @@ export class EditSupply {
     categorySlug: string,
     attributes: Record<string, unknown>,
     categories: readonly { slug: string; parentSlug: string | null }[],
+    scopeId: string | null,
   ): Promise<Record<string, unknown>> {
     const registry = CategoryRegistry.fromNodes(
       categories.map((c) => ({
@@ -113,9 +118,14 @@ export class EditSupply {
     ];
     const defs = await this.attributeRepo.findByCategoryAncestry(
       ancestrySlugs,
-      null,
+      scopeId,
     );
-    const schema = resolveEffectiveSchema(categorySlug, defs, registry);
+    const schema = resolveEffectiveSchema(
+      categorySlug,
+      defs,
+      registry,
+      scopeId,
+    );
     return validateAttributes(attributes, schema);
   }
 }
