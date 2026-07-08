@@ -17,8 +17,13 @@ import { AttributeKeyCollisionError } from './supply-errors.js';
  * - Sólo entran definiciones activas (no archivadas).
  * - La extensión es **aditiva, sin precedencia**: dos definiciones con la misma
  *   `key` en la cadena de ascendencia son una colisión → {@link AttributeKeyCollisionError}.
- * - Inc 1: sólo definiciones globales (`scopeId === null`). La fusión con las de
- *   tenant es Inc 2; este parámetro queda abierto para entonces.
+ * - **Tenencia (Inc 2):** sin `scopeId` (o `null`) sólo entran las definiciones
+ *   globales (`def.scopeId === null`) — el comportamiento global es idéntico al
+ *   de Inc 1. Con un `scopeId` de tenant se fusiona **global ∪ tenant**: entran
+ *   las globales (`scopeId === null`) y las del tenant dado (`scopeId ===
+ *   scopeId`), nunca las de otros tenants. La colisión de `key` se comprueba
+ *   sobre el conjunto fusionado, así que una key global que un tenant repite es
+ *   colisión (la extensión es aditiva, no sobrescribe la base global).
  *
  * Orden de salida: de la raíz hacia la hoja (ancestros primero), y dentro de
  * cada nivel por `sort` y luego `key` — estable y predecible para formularios.
@@ -27,6 +32,7 @@ export function resolveEffectiveSchema(
   categorySlug: string,
   allDefs: readonly AttributeDefinition[],
   registry: CategoryRegistry,
+  scopeId: string | null = null,
 ): AttributeDefinition[] {
   // Cadena de ascendencia: la propia categoría (hoja) + ancestros hacia la raíz.
   const chain = [
@@ -42,7 +48,7 @@ export function resolveEffectiveSchema(
 
   const applicable = allDefs.filter(
     (def) =>
-      def.scopeId === null &&
+      (def.scopeId === null || def.scopeId === scopeId) &&
       !def.isArchived &&
       chainDepth.has(def.categorySlug),
   );
