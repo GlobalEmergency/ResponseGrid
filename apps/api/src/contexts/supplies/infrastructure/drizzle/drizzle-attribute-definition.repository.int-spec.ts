@@ -125,4 +125,117 @@ describe('DrizzleAttributeDefinitionRepository (integration)', () => {
     expect(found).not.toBeNull();
     expect(found!.isArchived).toBe(true);
   });
+
+  // === Tenencia (#397) ===
+
+  const TENANT_A = '11111111-1111-4111-8111-111111111111';
+  const TENANT_B = '22222222-2222-4222-8222-222222222222';
+
+  it('findOne apunta a la fila exacta del scope (global XOR tenant)', async () => {
+    await repo.save(
+      AttributeDefinition.create({
+        categorySlug: 'medical',
+        key: 'dosis',
+        dataType: 'text',
+      }),
+    );
+    await repo.save(
+      AttributeDefinition.create({
+        categorySlug: 'medical',
+        key: 'dosis_local',
+        dataType: 'text',
+        scopeId: TENANT_A,
+      }),
+    );
+
+    expect(await repo.findOne('medical', 'dosis', null)).not.toBeNull();
+    expect(await repo.findOne('medical', 'dosis', TENANT_A)).toBeNull();
+    expect(
+      await repo.findOne('medical', 'dosis_local', TENANT_A),
+    ).not.toBeNull();
+    expect(await repo.findOne('medical', 'dosis_local', null)).toBeNull();
+  });
+
+  it('findByScope(tenant) devuelve global ∪ tenant, excluye otros tenants', async () => {
+    await repo.save(
+      AttributeDefinition.create({
+        categorySlug: 'medical',
+        key: 'global_key',
+        dataType: 'text',
+      }),
+    );
+    await repo.save(
+      AttributeDefinition.create({
+        categorySlug: 'medical',
+        key: 'para_a',
+        dataType: 'text',
+        scopeId: TENANT_A,
+      }),
+    );
+    await repo.save(
+      AttributeDefinition.create({
+        categorySlug: 'medical',
+        key: 'para_b',
+        dataType: 'text',
+        scopeId: TENANT_B,
+      }),
+    );
+
+    expect((await repo.findByScope(null)).map((d) => d.key)).toEqual([
+      'global_key',
+    ]);
+    expect((await repo.findByScope(TENANT_A)).map((d) => d.key).sort()).toEqual(
+      ['global_key', 'para_a'],
+    );
+  });
+
+  it('findByCategoryAncestry(tenant) fusiona global ∪ tenant de la ascendencia', async () => {
+    await repo.save(
+      AttributeDefinition.create({
+        categorySlug: 'medical',
+        key: 'global_key',
+        dataType: 'text',
+      }),
+    );
+    await repo.save(
+      AttributeDefinition.create({
+        categorySlug: 'medical',
+        key: 'tenant_key',
+        dataType: 'text',
+        scopeId: TENANT_A,
+      }),
+    );
+
+    const global = await repo.findByCategoryAncestry(['medical'], null);
+    expect(global.map((d) => d.key)).toEqual(['global_key']);
+
+    const merged = await repo.findByCategoryAncestry(['medical'], TENANT_A);
+    expect(merged.map((d) => d.key).sort()).toEqual([
+      'global_key',
+      'tenant_key',
+    ]);
+  });
+
+  it('un tenant puede reutilizar una key que ya existe en global (sin chocar)', async () => {
+    await repo.save(
+      AttributeDefinition.create({
+        categorySlug: 'medical',
+        key: 'dosis',
+        dataType: 'text',
+      }),
+    );
+    // Misma (categoría, key) pero scope de tenant → fila aparte, no upsert.
+    await repo.save(
+      AttributeDefinition.create({
+        categorySlug: 'medical',
+        key: 'dosis',
+        dataType: 'text',
+        scopeId: TENANT_A,
+      }),
+    );
+
+    expect(await repo.findOne('medical', 'dosis', null)).not.toBeNull();
+    expect(await repo.findOne('medical', 'dosis', TENANT_A)).not.toBeNull();
+    expect(await repo.findByScope(TENANT_A)).toHaveLength(2);
+  });
 });
