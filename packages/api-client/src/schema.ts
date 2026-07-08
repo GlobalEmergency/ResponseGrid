@@ -1971,6 +1971,41 @@ export interface paths {
         patch: operations["CategoriesAdminController_update"];
         trace?: never;
     };
+    "/admin/attribute-definitions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List global attribute definitions, optionally by category */
+        get: operations["AttributeDefinitionsAdminController_list"];
+        put?: never;
+        /** Create a global attribute definition for a family */
+        post: operations["AttributeDefinitionsAdminController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/attribute-definitions/{categorySlug}/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Archive (soft-delete) a global attribute definition */
+        delete: operations["AttributeDefinitionsAdminController_archive"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/supplies": {
         parameters: {
             query?: never;
@@ -5345,6 +5380,70 @@ export interface components {
              * @example false
              */
             archived?: boolean;
+        };
+        AttributeOptionDto: {
+            /** @example tableta */
+            value: string;
+            /** @example Tableta */
+            label?: string;
+        };
+        AttributeDefinitionDto: {
+            /** @example medicines */
+            categorySlug: string;
+            /** @example principio_activo */
+            key: string;
+            /**
+             * @example text
+             * @enum {string}
+             */
+            dataType: "text" | "number" | "integer" | "boolean" | "enum" | "date" | "quantity";
+            /** @example false */
+            required: boolean;
+            /** @description Opciones del enum, o null */
+            options: components["schemas"]["AttributeOptionDto"][] | null;
+            /** @example null */
+            unit: string | null;
+            /** @example 0 */
+            sort: number;
+            /**
+             * @description Marca de archivado (soft-delete)
+             * @example null
+             */
+            archivedAt: Record<string, never> | null;
+        };
+        CreateAttributeDefinitionDto: {
+            /**
+             * @description Slug de la categoría (familia) a la que se ancla
+             * @example medicines
+             */
+            categorySlug: string;
+            /**
+             * @description Clave del atributo (lowercase snake_case)
+             * @example principio_activo
+             */
+            key: string;
+            /**
+             * @example text
+             * @enum {string}
+             */
+            dataType: "text" | "number" | "integer" | "boolean" | "enum" | "date" | "quantity";
+            /**
+             * @default false
+             * @example false
+             */
+            required: boolean;
+            /** @description Opciones (sólo para dataType=enum) */
+            options?: components["schemas"]["AttributeOptionDto"][];
+            /**
+             * @description Unidad (sólo para dataType=number|quantity)
+             * @example mg
+             */
+            unit?: Record<string, never> | null;
+            /**
+             * @default 0
+             * @example 0
+             */
+            sort: number;
         };
         SupplyDto: {
             /**
@@ -11336,6 +11435,137 @@ export interface operations {
             };
             /** @description Category slug already exists */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AttributeDefinitionsAdminController_list: {
+        parameters: {
+            query?: {
+                /** @description Filter by the exact category slug */
+                categorySlug?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttributeDefinitionDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing catalogue:manage permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AttributeDefinitionsAdminController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAttributeDefinitionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttributeDefinitionDto"];
+                };
+            };
+            /** @description Invalid attribute definition payload */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing catalogue:manage permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Category not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AttributeDefinitionsAdminController_archive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Category slug of the family */
+                categorySlug: string;
+                /** @description Attribute key */
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Attribute definition archived */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing catalogue:manage permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Attribute definition not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

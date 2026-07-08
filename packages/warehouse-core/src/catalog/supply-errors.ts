@@ -46,3 +46,39 @@ export class CategoryNotFoundError extends Error {
     this.name = 'CategoryNotFoundError';
   }
 }
+
+/**
+ * Colisión de `key` de atributo a lo largo de la ascendencia de categoría al
+ * resolver el esquema efectivo (#396): dos {@link AttributeDefinition} en el
+ * árbol (p.ej. una en la categoría y otra en un ancestro) comparten `key`. La
+ * extensión es aditiva, sin precedencia, así que se rechaza. El filtro HTTP la
+ * mapea a 422.
+ */
+export class AttributeKeyCollisionError extends Error {
+  constructor(key: string) {
+    super(
+      `Attribute key "${key}" is defined more than once in the category ancestry`,
+    );
+    this.name = 'AttributeKeyCollisionError';
+  }
+}
+
+/**
+ * Los atributos de un `Supply` no validan contra el esquema efectivo de su
+ * familia (#396): requerido ausente, tipo/enum inválido, unidad inconsistente,
+ * o clave desconocida. Lista las claves ofensoras. El filtro HTTP la mapea a 400.
+ */
+export class AttributeValidationError extends Error {
+  readonly keys: string[];
+
+  constructor(keys: string[], detail?: string) {
+    const list = keys.join(', ');
+    super(
+      detail
+        ? `Invalid supply attributes (${list}): ${detail}`
+        : `Invalid supply attributes: ${list}`,
+    );
+    this.name = 'AttributeValidationError';
+    this.keys = keys;
+  }
+}

@@ -3,11 +3,27 @@ import {
   Supply,
   SupplyNotFoundError,
   CategoryNotFoundError,
+  AttributeValidationError,
+  AttributeDefinition,
   SupplyRepository,
   CategoryRepository,
+  AttributeDefinitionRepository,
 } from '@globalemergency/warehouse-core/catalog';
 
 const ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+
+function makeAttributeRepo(
+  overrides: Partial<AttributeDefinitionRepository> = {},
+): AttributeDefinitionRepository {
+  return {
+    findByScope: jest.fn().mockResolvedValue([]),
+    findByCategoryAncestry: jest.fn().mockResolvedValue([]),
+    findOne: jest.fn().mockResolvedValue(null),
+    save: jest.fn().mockResolvedValue(undefined),
+    archive: jest.fn().mockResolvedValue(undefined),
+    ...overrides,
+  };
+}
 
 function existing(): Supply {
   return Supply.create({
@@ -59,7 +75,7 @@ describe('EditSupply', () => {
     const save = jest.fn().mockResolvedValue(undefined);
     const repo = makeRepo(existing(), save);
     const categoryRepo = makeCategoryRepo();
-    await new EditSupply(repo, categoryRepo).execute({
+    await new EditSupply(repo, categoryRepo, makeAttributeRepo()).execute({
       id: ID,
       name: 'Agua mineral',
     });
@@ -84,7 +100,7 @@ describe('EditSupply', () => {
     );
     const categoryRepo = makeCategoryRepo();
 
-    await new EditSupply(repo, categoryRepo).execute({
+    await new EditSupply(repo, categoryRepo, makeAttributeRepo()).execute({
       id: ID,
       name: 'Agua con gas',
     });
@@ -128,7 +144,7 @@ describe('EditSupply', () => {
       ]),
     });
 
-    await new EditSupply(repo, categoryRepo).execute({
+    await new EditSupply(repo, categoryRepo, makeAttributeRepo()).execute({
       id: ID,
       categorySlug: 'food',
     });
@@ -143,7 +159,7 @@ describe('EditSupply', () => {
     const save = jest.fn().mockResolvedValue(undefined);
     const repo = makeRepo(existing(), save);
     const categoryRepo = makeCategoryRepo();
-    await new EditSupply(repo, categoryRepo).execute({
+    await new EditSupply(repo, categoryRepo, makeAttributeRepo()).execute({
       id: ID,
       translations: [{ locale: 'en', name: 'Mineral water' }],
     });
@@ -156,7 +172,7 @@ describe('EditSupply', () => {
     const save = jest.fn().mockResolvedValue(undefined);
     const repo = makeRepo(existing(), save);
     const categoryRepo = makeCategoryRepo();
-    await new EditSupply(repo, categoryRepo).execute({
+    await new EditSupply(repo, categoryRepo, makeAttributeRepo()).execute({
       id: ID,
       name: 'Agua x',
     });
@@ -170,7 +186,10 @@ describe('EditSupply', () => {
     const repo = makeRepo(null, save);
     const categoryRepo = makeCategoryRepo();
     await expect(
-      new EditSupply(repo, categoryRepo).execute({ id: ID, name: 'X' }),
+      new EditSupply(repo, categoryRepo, makeAttributeRepo()).execute({
+        id: ID,
+        name: 'X',
+      }),
     ).rejects.toBeInstanceOf(SupplyNotFoundError);
     expect(save).not.toHaveBeenCalled();
   });
@@ -192,11 +211,59 @@ describe('EditSupply', () => {
       ]),
     });
     await expect(
-      new EditSupply(repo, categoryRepo).execute({
+      new EditSupply(repo, categoryRepo, makeAttributeRepo()).execute({
         id: ID,
         categorySlug: 'food',
       }),
     ).rejects.toBeInstanceOf(CategoryNotFoundError);
+    expect(save).not.toHaveBeenCalled();
+  });
+
+  it('valida y persiste los atributos contra el esquema de la familia (#396)', async () => {
+    const save = jest.fn().mockResolvedValue(undefined);
+    const repo = makeRepo(existing(), save);
+    const categoryRepo = makeCategoryRepo();
+    const attributeRepo = makeAttributeRepo({
+      findByCategoryAncestry: jest.fn().mockResolvedValue([
+        AttributeDefinition.create({
+          categorySlug: 'water',
+          key: 'volumen_l',
+          dataType: 'number',
+        }),
+      ]),
+    });
+
+    await new EditSupply(repo, categoryRepo, attributeRepo).execute({
+      id: ID,
+      attributes: { volumen_l: '1.5' },
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const saved = save.mock.calls[0][0] as Supply;
+    expect(saved.attributes).toEqual({ volumen_l: 1.5 }); // coaccionado
+  });
+
+  it('rechaza atributos inválidos contra el esquema (#396)', async () => {
+    const save = jest.fn().mockResolvedValue(undefined);
+    const repo = makeRepo(existing(), save);
+    const categoryRepo = makeCategoryRepo();
+    const attributeRepo = makeAttributeRepo({
+      findByCategoryAncestry: jest.fn().mockResolvedValue([
+        AttributeDefinition.create({
+          categorySlug: 'water',
+          key: 'volumen_l',
+          dataType: 'number',
+          required: true,
+        }),
+      ]),
+    });
+
+    await expect(
+      new EditSupply(repo, categoryRepo, attributeRepo).execute({
+        id: ID,
+        attributes: { volumen_l: 'no-es-numero' },
+      }),
+    ).rejects.toBeInstanceOf(AttributeValidationError);
     expect(save).not.toHaveBeenCalled();
   });
 });

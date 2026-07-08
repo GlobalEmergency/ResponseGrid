@@ -22,6 +22,9 @@ import {
   SupplyCodeConflictError,
   SupplyNotFoundError,
   VariantTargetNotFoundError,
+  AttributeValidationError,
+  AttributeKeyCollisionError,
+  AttributeDefinitionValidationError,
 } from '@globalemergency/warehouse-core/catalog';
 import {
   CategoryAlreadyExistsError,
@@ -30,6 +33,7 @@ import {
   CategoryProtectedError,
   CategoryValidationError,
 } from '../../application/category-admin.errors';
+import { AttributeDefinitionNotFoundError } from '../../application/attribute-definition-admin.errors';
 
 type DomainError =
   | ContainerNotFoundError
@@ -46,6 +50,10 @@ type DomainError =
   | CategoryNotFoundError
   | MergeIntoSelfError
   | AliasConflictError
+  | AttributeValidationError
+  | AttributeKeyCollisionError
+  | AttributeDefinitionValidationError
+  | AttributeDefinitionNotFoundError
   | CategoryAlreadyExistsError
   | CategoryAdminNotFoundError
   | CategoryParentNotFoundError
@@ -77,6 +85,10 @@ type DomainError =
   CategoryNotFoundError,
   MergeIntoSelfError,
   AliasConflictError,
+  AttributeValidationError,
+  AttributeKeyCollisionError,
+  AttributeDefinitionValidationError,
+  AttributeDefinitionNotFoundError,
   CategoryAlreadyExistsError,
   CategoryAdminNotFoundError,
   CategoryParentNotFoundError,
@@ -99,7 +111,8 @@ export class SuppliesDomainExceptionFilter implements ExceptionFilter {
       exception instanceof VariantTargetNotFoundError ||
       exception instanceof CategoryNotFoundError ||
       exception instanceof CategoryAdminNotFoundError ||
-      exception instanceof CategoryParentNotFoundError
+      exception instanceof CategoryParentNotFoundError ||
+      exception instanceof AttributeDefinitionNotFoundError
     ) {
       return HttpStatus.NOT_FOUND;
     }
@@ -116,10 +129,12 @@ export class SuppliesDomainExceptionFilter implements ExceptionFilter {
       exception instanceof SupplyLineValidationError ||
       exception instanceof SupplyValidationError ||
       exception instanceof SupplyAliasValidationError ||
-      exception instanceof MergeIntoSelfError
+      exception instanceof MergeIntoSelfError ||
+      exception instanceof AttributeValidationError
     ) {
       return HttpStatus.BAD_REQUEST;
     }
+    // AttributeKeyCollisionError / AttributeDefinitionValidationError → 422.
     return HttpStatus.UNPROCESSABLE_ENTITY;
   }
 }

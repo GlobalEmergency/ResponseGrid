@@ -10,6 +10,8 @@ import {
   SupplyCatalogReadModel,
   SUPPLY_LINK_BACKFILL_REPOSITORY,
   SupplyLinkBackfillRepository,
+  ATTRIBUTE_DEFINITION_REPOSITORY,
+  AttributeDefinitionRepository,
 } from '@globalemergency/warehouse-core/catalog';
 import {
   CONTAINER_REPOSITORY,
@@ -21,6 +23,7 @@ import {
 } from './domain/ports/container-authorization-lookup';
 import { DrizzleCategoryRepository } from './infrastructure/drizzle/drizzle-category.repository';
 import { DrizzleSupplyRepository } from './infrastructure/drizzle/drizzle-supply.repository';
+import { DrizzleAttributeDefinitionRepository } from './infrastructure/drizzle/drizzle-attribute-definition.repository';
 import { DrizzleSupplyCatalogReadModel } from './infrastructure/drizzle/drizzle-supply-catalog.read-model';
 import { CachingSupplyCatalogReadModel } from './infrastructure/caching-supply-catalog.read-model';
 import { DrizzleContainerRepository } from './infrastructure/drizzle/drizzle-container.repository';
@@ -33,6 +36,9 @@ import { ListSupplies } from './application/list-supplies';
 import { GetSupply } from './application/get-supply';
 import { CreateSupply } from './application/create-supply';
 import { EditSupply } from './application/edit-supply';
+import { CreateAttributeDefinition } from './application/create-attribute-definition';
+import { ListAttributeDefinitions } from './application/list-attribute-definitions';
+import { ArchiveAttributeDefinition } from './application/archive-attribute-definition';
 import { ArchiveSupply } from './application/archive-supply';
 import { RestoreSupply } from './application/restore-supply';
 import { AddSupplyAlias } from './application/add-supply-alias';
@@ -51,6 +57,7 @@ import { GetContainer } from './application/get-container';
 import { ListContainers } from './application/list-containers';
 import { CategoriesController } from './infrastructure/http/categories.controller';
 import { CategoriesAdminController } from './infrastructure/http/categories-admin.controller';
+import { AttributeDefinitionsAdminController } from './infrastructure/http/attribute-definitions-admin.controller';
 import { SuppliesController } from './infrastructure/http/supplies.controller';
 import { SuppliesAdminController } from './infrastructure/http/supplies-admin.controller';
 import { ContainerController } from './infrastructure/http/containers.controller';
@@ -66,6 +73,13 @@ const supplyRepositoryProvider = {
   provide: SUPPLY_REPOSITORY,
   inject: [DB],
   useFactory: (db: Db): SupplyRepository => new DrizzleSupplyRepository(db),
+};
+
+const attributeDefinitionRepositoryProvider = {
+  provide: ATTRIBUTE_DEFINITION_REPOSITORY,
+  inject: [DB],
+  useFactory: (db: Db): AttributeDefinitionRepository =>
+    new DrizzleAttributeDefinitionRepository(db),
 };
 
 // La instancia cacheada se provee bajo su clase concreta para poder inyectarla
@@ -133,16 +147,53 @@ const getSupplyProvider = {
 
 const createSupplyProvider = {
   provide: CreateSupply,
-  inject: [SUPPLY_REPOSITORY, CATEGORY_REPOSITORY],
-  useFactory: (repo: SupplyRepository, categoryRepo: CategoryRepository) =>
-    new CreateSupply(repo, categoryRepo),
+  inject: [
+    SUPPLY_REPOSITORY,
+    CATEGORY_REPOSITORY,
+    ATTRIBUTE_DEFINITION_REPOSITORY,
+  ],
+  useFactory: (
+    repo: SupplyRepository,
+    categoryRepo: CategoryRepository,
+    attributeRepo: AttributeDefinitionRepository,
+  ) => new CreateSupply(repo, categoryRepo, attributeRepo),
 };
 
 const editSupplyProvider = {
   provide: EditSupply,
-  inject: [SUPPLY_REPOSITORY, CATEGORY_REPOSITORY],
-  useFactory: (repo: SupplyRepository, categoryRepo: CategoryRepository) =>
-    new EditSupply(repo, categoryRepo),
+  inject: [
+    SUPPLY_REPOSITORY,
+    CATEGORY_REPOSITORY,
+    ATTRIBUTE_DEFINITION_REPOSITORY,
+  ],
+  useFactory: (
+    repo: SupplyRepository,
+    categoryRepo: CategoryRepository,
+    attributeRepo: AttributeDefinitionRepository,
+  ) => new EditSupply(repo, categoryRepo, attributeRepo),
+};
+
+const createAttributeDefinitionProvider = {
+  provide: CreateAttributeDefinition,
+  inject: [ATTRIBUTE_DEFINITION_REPOSITORY, CATEGORY_REPOSITORY],
+  useFactory: (
+    repo: AttributeDefinitionRepository,
+    categoryRepo: CategoryRepository,
+  ) => new CreateAttributeDefinition(repo, categoryRepo),
+};
+
+const listAttributeDefinitionsProvider = {
+  provide: ListAttributeDefinitions,
+  inject: [ATTRIBUTE_DEFINITION_REPOSITORY],
+  useFactory: (repo: AttributeDefinitionRepository) =>
+    new ListAttributeDefinitions(repo),
+};
+
+const archiveAttributeDefinitionProvider = {
+  provide: ArchiveAttributeDefinition,
+  inject: [ATTRIBUTE_DEFINITION_REPOSITORY],
+  useFactory: (repo: AttributeDefinitionRepository) =>
+    new ArchiveAttributeDefinition(repo),
 };
 
 const archiveSupplyProvider = {
@@ -262,6 +313,7 @@ const listContainersProvider = {
   controllers: [
     CategoriesController,
     CategoriesAdminController,
+    AttributeDefinitionsAdminController,
     SuppliesController,
     SuppliesAdminController,
     ContainerController,
@@ -269,6 +321,7 @@ const listContainersProvider = {
   providers: [
     categoryRepositoryProvider,
     supplyRepositoryProvider,
+    attributeDefinitionRepositoryProvider,
     cachingSupplyCatalogProvider,
     supplyCatalogReadModelProvider,
     containerRepositoryProvider,
@@ -280,6 +333,9 @@ const listContainersProvider = {
     getSupplyProvider,
     createSupplyProvider,
     editSupplyProvider,
+    createAttributeDefinitionProvider,
+    listAttributeDefinitionsProvider,
+    archiveAttributeDefinitionProvider,
     archiveSupplyProvider,
     restoreSupplyProvider,
     addSupplyAliasProvider,
