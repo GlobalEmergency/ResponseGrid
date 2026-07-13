@@ -21,7 +21,7 @@
     "gen:openapi": "ts-node --transpile-only scripts/generate-openapi.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1075.0",
+    "@aws-sdk/client-s3": "^3.1079.0",
     "@globalemergency/warehouse-core": "workspace:*",
     "@globalemergency/warehouse-postgres": "workspace:*",
     "@nestjs/common": "^11.0.1",
@@ -29,7 +29,7 @@
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
-    "@nestjs/swagger": "^11.4.4",
+    "@nestjs/swagger": "^11.4.5",
     "@nestjs/throttler": "^6.5.0",
     "bcryptjs": "^3.0.3",
     "bullmq": "^5.79.2",
@@ -59,7 +59,7 @@
     "@types/bcryptjs": "^3.0.0",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
-    "@types/multer": "^2.1.0",
+    "@types/multer": "^2.2.0",
     "@types/node": "^24.0.0",
     "@types/passport": "^1.0.17",
     "@types/passport-facebook": "^3.0.4",
@@ -73,7 +73,7 @@
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^17.0.0",
     "jest": "^30.0.0",
-    "prettier": "^3.9.1",
+    "prettier": "^3.9.4",
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
@@ -81,7 +81,7 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.20.0"
+    "typescript-eslint": "^8.62.1"
   },
   "jest": {
     "moduleFileExtensions": [
