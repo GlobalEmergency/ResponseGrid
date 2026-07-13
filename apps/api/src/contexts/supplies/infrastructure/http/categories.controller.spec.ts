@@ -11,12 +11,14 @@ describe('CategoriesController', () => {
       vertical: 'general',
       sort: 1,
       kind: 'material',
+      codePrefix: null,
       archivedAt: null,
       translations: [
         { locale: 'es', label: 'Alimentos' },
         { locale: 'en', label: 'Food' },
         { locale: 'fr', label: 'Nourriture' },
       ],
+      externalCodes: {},
     },
   ];
 

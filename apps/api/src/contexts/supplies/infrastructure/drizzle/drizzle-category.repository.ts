@@ -77,6 +77,7 @@ export class DrizzleCategoryRepository implements CategoryRepository {
       translations: (translationsBySlug.get(row.slug) ?? []).sort((a, b) =>
         a.locale.localeCompare(b.locale),
       ),
+      externalCodes: (row.externalCodes ?? {}) as Record<string, string>,
     }));
   }
 
@@ -119,6 +120,7 @@ export class DrizzleCategoryRepository implements CategoryRepository {
       kind: row.kind as CategoryKind,
       archivedAt: row.archivedAt ?? null,
       translations,
+      externalCodes: (row.externalCodes ?? {}) as Record<string, string>,
     };
   }
 
@@ -134,6 +136,7 @@ export class DrizzleCategoryRepository implements CategoryRepository {
         vertical: input.vertical,
         sort: input.sort,
         archivedAt: input.archivedAt ?? null,
+        externalCodes: input.externalCodes ?? {},
       });
 
       const translations = this.buildTranslationRows(
@@ -171,6 +174,7 @@ export class DrizzleCategoryRepository implements CategoryRepository {
           vertical: input.vertical,
           sort: input.sort,
           archivedAt: input.archivedAt ?? null,
+          externalCodes: input.externalCodes ?? {},
         })
         .where(eq(categoriesTable.slug, slug));
 

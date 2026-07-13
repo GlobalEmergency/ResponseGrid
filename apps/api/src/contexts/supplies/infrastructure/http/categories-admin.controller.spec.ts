@@ -10,12 +10,14 @@ describe('CategoriesAdminController', () => {
     vertical: 'general',
     sort: 140,
     kind: 'material',
+    codePrefix: null,
     archivedAt: null,
     translations: [
       { locale: 'es', label: 'Alimentos para bebé' },
       { locale: 'en', label: 'Baby food' },
       { locale: 'fr', label: 'Nourriture pour bébé' },
     ],
+    externalCodes: {},
   };
 
   it('lists and localizes categories for admin', async () => {
