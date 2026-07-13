@@ -103,6 +103,8 @@ test('Supply round-trip por snapshot conserva nature', () => {
     scopeId: null,
     nature: 'reusable' as const,
     externalCodes: {},
+    unitWeightKg: null,
+    unitVolumeM3: null,
   };
   assert.deepEqual(Supply.fromSnapshot(snap).toSnapshot(), snap);
 });

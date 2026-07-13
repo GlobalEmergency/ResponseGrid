@@ -80,6 +80,8 @@ export function supplyResolverFromCatalog(
       scopeId: null,
       nature: null,
       externalCodes: {},
+      unitWeightKg: null,
+      unitVolumeM3: null,
     });
 
   const supplies = records.flatMap((record) =>
