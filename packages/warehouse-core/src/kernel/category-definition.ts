@@ -8,6 +8,8 @@
  * solo campos publicables. NO debe crecer con datos de gestión interna (notas,
  * flag de desactivación, etc.); esos quedan para la API interna.
  */
+import { ExternalCodes } from './external-codes.js';
+
 export interface CategoryTranslation {
   locale: string;
   label: string;
@@ -26,4 +28,9 @@ export interface CategoryDefinition {
   kind: CategoryKind;
   archivedAt: Date | null;
   translations: readonly CategoryTranslation[];
+  /**
+   * Códigos externos estándar para interop (#398): mapa abierto
+   * namespace→código (`{ unspsc: '…', hxl: '#item+code' }`). Por defecto `{}`.
+   */
+  externalCodes: ExternalCodes;
 }

@@ -1,3 +1,8 @@
+import {
+  ExternalCodes,
+  normalizeExternalCodes,
+} from '../kernel/external-codes.js';
+
 export type SupplyStatus = 'active' | 'archived';
 
 /**
@@ -38,6 +43,11 @@ export interface SupplyProps {
   scopeId?: string | null;
   /** Naturaleza logística (#269): null = sin clasificar (por defecto). */
   nature?: SupplyNature | null;
+  /**
+   * Códigos externos estándar para interop (#398): mapa abierto
+   * namespace→código (`{ unspsc: '51101500', … }`). Por defecto `{}`.
+   */
+  externalCodes?: Record<string, string> | null;
 }
 
 export interface SupplySnapshot {
@@ -52,6 +62,7 @@ export interface SupplySnapshot {
   registrationNotes: string | null;
   scopeId: string | null;
   nature: SupplyNature | null;
+  externalCodes: ExternalCodes;
 }
 
 export class SupplyValidationError extends Error {
@@ -91,6 +102,7 @@ export class Supply {
   readonly registrationNotes: string | null;
   readonly scopeId: string | null;
   readonly nature: SupplyNature | null;
+  readonly externalCodes: ExternalCodes;
 
   private constructor(props: SupplyProps) {
     this.id = props.id;
@@ -104,6 +116,7 @@ export class Supply {
     this.registrationNotes = props.registrationNotes ?? null;
     this.scopeId = props.scopeId ?? null;
     this.nature = props.nature ?? null;
+    this.externalCodes = { ...(props.externalCodes ?? {}) };
   }
 
   static create(props: SupplyProps): Supply {
@@ -135,6 +148,7 @@ export class Supply {
         `Supply nature must be one of: ${SUPPLY_NATURES.join(', ')}`,
       );
     }
+    const externalCodes = normalizeExternalCodes(props.externalCodes);
 
     return new Supply({
       id,
@@ -148,6 +162,7 @@ export class Supply {
       registrationNotes,
       scopeId,
       nature,
+      externalCodes,
     });
   }
 
@@ -164,6 +179,7 @@ export class Supply {
       registrationNotes: s.registrationNotes,
       scopeId: s.scopeId,
       nature: s.nature,
+      externalCodes: s.externalCodes,
     });
   }
 
@@ -180,6 +196,7 @@ export class Supply {
       registrationNotes: this.registrationNotes,
       scopeId: this.scopeId,
       nature: this.nature,
+      externalCodes: { ...this.externalCodes },
     };
   }
 
@@ -226,6 +243,15 @@ export class Supply {
    */
   reclassify(nature: SupplyNature | null): Supply {
     return this.withChanges({ nature });
+  }
+
+  /**
+   * Reemplaza el mapa de códigos externos de interop (#398). El mapa se
+   * normaliza y valida en `create` (vía `withChanges`); un mapa vacío los
+   * limpia. Inmutable: produce una instancia nueva.
+   */
+  setExternalCodes(externalCodes: Record<string, string>): Supply {
+    return this.withChanges({ externalCodes });
   }
 
   archive(): Supply {
