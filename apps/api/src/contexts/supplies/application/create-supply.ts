@@ -8,13 +8,9 @@ import {
   SupplyTranslationInput,
   CategoryRepository,
   AttributeDefinitionRepository,
-  resolveEffectiveSchema,
-  validateAttributes,
 } from '@globalemergency/warehouse-core/catalog';
-import {
-  getCategoryPrefix,
-  CategoryRegistry,
-} from '@globalemergency/warehouse-core/kernel';
+import { getCategoryPrefix } from '@globalemergency/warehouse-core/kernel';
+import { validateSupplyAttributes } from './validate-supply-attributes';
 
 export interface CreateSupplyCommand {
   name: string;
@@ -69,7 +65,8 @@ export class CreateSupply {
     // unión de definiciones de la ascendencia de su categoría). Con scope de
     // tenant, el esquema efectivo es global ∪ tenant. Si la familia no tiene
     // definiciones, el esquema es vacío y los atributos pasan tal cual.
-    const attributes = await this.validateAttributes(
+    const attributes = await validateSupplyAttributes(
+      this.attributeRepo,
       cmd.categorySlug,
       cmd.attributes ?? {},
       categories,
@@ -94,37 +91,5 @@ export class CreateSupply {
 
     await this.repo.save(supply, cmd.translations);
     return { id: supply.id, code: supply.code };
-  }
-
-  private async validateAttributes(
-    categorySlug: string,
-    attributes: Record<string, unknown>,
-    categories: readonly { slug: string; parentSlug: string | null }[],
-    scopeId: string | null,
-  ): Promise<Record<string, unknown>> {
-    const registry = CategoryRegistry.fromNodes(
-      categories.map((c) => ({
-        slug: c.slug,
-        parentSlug: c.parentSlug,
-        codePrefix: null,
-      })),
-    );
-    const ancestrySlugs = [
-      categorySlug,
-      ...registry.ancestorsOf(categorySlug).map((n) => n.slug),
-    ];
-    // Con scope de tenant el repo devuelve global ∪ tenant; sin scope, sólo
-    // global. `resolveEffectiveSchema` fusiona ese conjunto por scope.
-    const defs = await this.attributeRepo.findByCategoryAncestry(
-      ancestrySlugs,
-      scopeId,
-    );
-    const schema = resolveEffectiveSchema(
-      categorySlug,
-      defs,
-      registry,
-      scopeId,
-    );
-    return validateAttributes(attributes, schema);
   }
 }
