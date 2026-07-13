@@ -56,6 +56,7 @@ test('Supply round-trip por snapshot conserva scopeId', () => {
     status: 'active' as const,
     registrationNotes: null,
     scopeId: 'tenant-1',
+    nature: null,
   };
   assert.deepEqual(Supply.fromSnapshot(snap).toSnapshot(), snap);
 });

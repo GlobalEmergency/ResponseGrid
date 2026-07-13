@@ -78,6 +78,7 @@ export function supplyResolverFromCatalog(
       status: 'active',
       registrationNotes: null,
       scopeId: null,
+      nature: null,
     });
 
   const supplies = records.flatMap((record) =>
