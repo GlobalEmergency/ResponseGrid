@@ -23,6 +23,7 @@ export { BinId } from './bin-id.js';
 export { StockItemId } from './stock-item-id.js';
 export { StockMovementId } from './stock-movement-id.js';
 export {
+  WarehouseKind,
   WarehouseStatus,
   ZoneStatus,
   ZoneKind,
