@@ -115,3 +115,119 @@ test('nature=human se excluye del peso/volumen y se reporta como personal', () =
   assert.equal(r.personnel.length, 1);
   assert.equal(r.personnel[0]!.quantity, 4);
 });
+
+test('container con bruto declarado: cuenta el declarado y sus líneas NO suman', () => {
+  const r = computeLoad(
+    [],
+    [
+      {
+        id: 'PAL-1',
+        parentId: null,
+        grossWeightKg: 120,
+        grossVolumeM3: 0.5,
+        lines: [{ supplyId: 'water', quantity: 999, unit: 'und', ref: 'L' }],
+      },
+    ],
+    lookup,
+  );
+  assert.equal(r.weightKg, 120);
+  assert.equal(r.volumeM3, 0.5);
+  assert.equal(r.complete, true);
+});
+
+test('container sin declarar deriva de sus líneas (vía catálogo)', () => {
+  const r = computeLoad(
+    [],
+    [
+      {
+        id: 'BOX-1',
+        parentId: null,
+        grossWeightKg: null,
+        grossVolumeM3: null,
+        lines: [{ supplyId: 'water', quantity: 12, unit: null, ref: 'L' }],
+      },
+    ],
+    lookup,
+  );
+  assert.equal(r.weightKg, 18); // 12 × 1.5
+  assert.equal(r.complete, true);
+});
+
+test('declarado parcial: el peso declarado corta SU dimensión; el volumen se deriva', () => {
+  const r = computeLoad(
+    [],
+    [
+      {
+        id: 'PAL-1',
+        parentId: null,
+        grossWeightKg: 200, // pesado en báscula (incluye tara)
+        grossVolumeM3: null,
+        lines: [{ supplyId: 'water', quantity: 100, unit: null, ref: 'L' }],
+      },
+    ],
+    lookup,
+  );
+  assert.equal(r.weightKg, 200); // NO 150: el declarado gana en peso
+  assert.equal(r.volumeM3, 0.16); // 100 × 0.0016 derivado
+  assert.equal(r.complete, true);
+});
+
+test('árbol anidado: el declarado del ancestro gana y corta a los descendientes', () => {
+  const r = computeLoad(
+    [],
+    [
+      {
+        id: 'PAL-1',
+        parentId: null,
+        grossWeightKg: 300,
+        grossVolumeM3: 1.2,
+        lines: [],
+      },
+      {
+        id: 'BOX-1',
+        parentId: 'PAL-1',
+        grossWeightKg: 50, // se ignora: el palet ya declaró
+        grossVolumeM3: null,
+        lines: [{ supplyId: 'water', quantity: 10, unit: null, ref: 'L' }],
+      },
+    ],
+    lookup,
+  );
+  assert.equal(r.weightKg, 300);
+  assert.equal(r.volumeM3, 1.2);
+});
+
+test('padre desconocido en el conjunto ⇒ el hijo cuenta como raíz (no se pierde)', () => {
+  const r = computeLoad(
+    [],
+    [
+      {
+        id: 'BOX-9',
+        parentId: 'PAL-QUE-NO-VINO',
+        grossWeightKg: 10,
+        grossVolumeM3: null,
+        lines: [],
+      },
+    ],
+    lookup,
+  );
+  assert.equal(r.weightKg, 10);
+});
+
+test('línea no calculable dentro de un container sin declarar → unknown', () => {
+  const r = computeLoad(
+    [],
+    [
+      {
+        id: 'BOX-1',
+        parentId: null,
+        grossWeightKg: null,
+        grossVolumeM3: null,
+        lines: [{ supplyId: null, quantity: 5, unit: null, ref: 'BOX-1/L1' }],
+      },
+    ],
+    lookup,
+  );
+  assert.equal(r.complete, false);
+  assert.equal(r.unknowns[0]!.reason, 'unknown_supply');
+});
