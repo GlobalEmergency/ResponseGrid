@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull, or, type SQL } from 'drizzle-orm';
 import {
   AttributeDefinition,
   AttributeDataType,
@@ -11,10 +11,18 @@ import { attributeDefinitionsTable } from './schema';
 type AttributeDefinitionRow = typeof attributeDefinitionsTable.$inferSelect;
 
 /**
- * Persistencia Drizzle del metamodelo `AttributeDefinition` (#396). Usa el query
- * builder tipado (no SQL crudo) para que timestamptz/jsonb lleguen ya tipados.
- * `scope_id` null = global (Inc 1); las firmas aceptan un `scopeId` para que la
- * tenencia (Inc 2) reutilice el repo sin cambiarlas.
+ * Persistencia Drizzle del metamodelo `AttributeDefinition` (#396, tenencia #397).
+ * Usa el query builder tipado (no SQL crudo) para que timestamptz/jsonb lleguen
+ * ya tipados.
+ *
+ * Tenencia (#397): dos semánticas de scope conviven —
+ * - **Visibilidad** (`findByScope`, `findByCategoryAncestry`): sin scope (null)
+ *   devuelve sólo las globales; con un `scopeId` de tenant devuelve **global ∪
+ *   tenant** (nunca las de otros tenants). El dominio `resolveEffectiveSchema`
+ *   fusiona ese superconjunto.
+ * - **Identidad exacta** (`findOne`, `save`, `archive`): apuntan a la fila del
+ *   scope dado exactamente (global XOR tenant), para que el upsert/archive
+ *   globales nunca toquen una fila de tenant y viceversa.
  */
 export class DrizzleAttributeDefinitionRepository implements AttributeDefinitionRepository {
   constructor(private readonly db: Db) {}
@@ -23,7 +31,7 @@ export class DrizzleAttributeDefinitionRepository implements AttributeDefinition
     const rows = await this.db
       .select()
       .from(attributeDefinitionsTable)
-      .where(this.scopeFilter(scopeId))
+      .where(this.visibilityFilter(scopeId))
       .orderBy(
         asc(attributeDefinitionsTable.categorySlug),
         asc(attributeDefinitionsTable.sort),
@@ -45,7 +53,7 @@ export class DrizzleAttributeDefinitionRepository implements AttributeDefinition
       .where(
         and(
           inArray(attributeDefinitionsTable.categorySlug, [...ancestorSlugs]),
-          this.scopeFilter(scopeId),
+          this.visibilityFilter(scopeId),
         ),
       )
       .orderBy(
@@ -135,10 +143,24 @@ export class DrizzleAttributeDefinitionRepository implements AttributeDefinition
       );
   }
 
-  private scopeFilter(scopeId: string | null) {
+  /** Identidad exacta: la fila del scope dado (global XOR ese tenant). */
+  private scopeFilter(scopeId: string | null): SQL | undefined {
     return scopeId === null
       ? isNull(attributeDefinitionsTable.scopeId)
       : eq(attributeDefinitionsTable.scopeId, scopeId);
+  }
+
+  /**
+   * Visibilidad: sin scope, sólo globales; con tenant, global ∪ tenant (el
+   * superconjunto que fusiona `resolveEffectiveSchema`).
+   */
+  private visibilityFilter(scopeId: string | null): SQL | undefined {
+    return scopeId === null
+      ? isNull(attributeDefinitionsTable.scopeId)
+      : or(
+          isNull(attributeDefinitionsTable.scopeId),
+          eq(attributeDefinitionsTable.scopeId, scopeId),
+        );
   }
 
   private toDefinition(row: AttributeDefinitionRow): AttributeDefinition {

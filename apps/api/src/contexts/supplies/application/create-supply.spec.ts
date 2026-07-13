@@ -4,6 +4,7 @@ import {
   VariantTargetNotFoundError,
   CategoryNotFoundError,
   AttributeValidationError,
+  AttributeKeyCollisionError,
   AttributeDefinition,
   SupplyRepository,
   CategoryRepository,
@@ -288,5 +289,100 @@ describe('CreateSupply', () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const saved = save.mock.calls[0][0] as Supply;
     expect(saved.attributes).toEqual({ cualquier_cosa: 'libre' });
+  });
+
+  // === Tenencia (#397) ===
+
+  const TENANT = '11111111-1111-4111-8111-111111111111';
+
+  it('sin scopeId el insumo es global (null) y consulta sólo definiciones globales', async () => {
+    const save = jest.fn().mockResolvedValue(undefined);
+    const findByCategoryAncestry = jest.fn().mockResolvedValue([]);
+    const repo = makeRepo({ save });
+    const attributeRepo = makeAttributeRepo({ findByCategoryAncestry });
+
+    await new CreateSupply(repo, makeCategoryRepo(), attributeRepo).execute({
+      name: 'Agua',
+      categorySlug: 'water',
+    });
+
+    // El repo se consulta con scope null (sólo globales).
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const scopeArg = findByCategoryAncestry.mock.calls[0][1] as string | null;
+    expect(scopeArg).toBeNull();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const saved = save.mock.calls[0][0] as Supply;
+    expect(saved.scopeId).toBeNull();
+  });
+
+  it('con scopeId el insumo es de tenant y valida contra global ∪ tenant', async () => {
+    const save = jest.fn().mockResolvedValue(undefined);
+    // El repo (con scope de tenant) devuelve global ∪ tenant; el use-case pasa
+    // ese conjunto y el mismo scope a resolveEffectiveSchema.
+    const findByCategoryAncestry = jest.fn().mockResolvedValue([
+      AttributeDefinition.create({
+        categorySlug: 'medical',
+        key: 'principio_activo',
+        dataType: 'text',
+        required: true,
+      }),
+      AttributeDefinition.create({
+        categorySlug: 'medicines',
+        key: 'nota_local',
+        dataType: 'text',
+        scopeId: TENANT,
+      }),
+    ]);
+    const repo = makeRepo({ save });
+    const attributeRepo = makeAttributeRepo({ findByCategoryAncestry });
+
+    await new CreateSupply(repo, makeCategoryRepo(), attributeRepo).execute({
+      name: 'Amoxicilina local',
+      categorySlug: 'medicines',
+      attributes: { principio_activo: 'Amoxicilina', nota_local: 'lote X' },
+      scopeId: TENANT,
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const scopeArg = findByCategoryAncestry.mock.calls[0][1] as string | null;
+    expect(scopeArg).toBe(TENANT);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const saved = save.mock.calls[0][0] as Supply;
+    expect(saved.scopeId).toBe(TENANT);
+    // Valida contra el atributo de tenant además del global.
+    expect(saved.attributes).toEqual({
+      principio_activo: 'Amoxicilina',
+      nota_local: 'lote X',
+    });
+  });
+
+  it('rechaza una colisión de key global↔tenant en el esquema efectivo del tenant', async () => {
+    const save = jest.fn().mockResolvedValue(undefined);
+    const findByCategoryAncestry = jest.fn().mockResolvedValue([
+      AttributeDefinition.create({
+        categorySlug: 'medical',
+        key: 'dosis',
+        dataType: 'text',
+      }),
+      // Un tenant que intenta redefinir una key global de su ascendencia.
+      AttributeDefinition.create({
+        categorySlug: 'medicines',
+        key: 'dosis',
+        dataType: 'text',
+        scopeId: TENANT,
+      }),
+    ]);
+    const repo = makeRepo({ save });
+    const attributeRepo = makeAttributeRepo({ findByCategoryAncestry });
+
+    await expect(
+      new CreateSupply(repo, makeCategoryRepo(), attributeRepo).execute({
+        name: 'Colisión',
+        categorySlug: 'medicines',
+        attributes: { dosis: 'x' },
+        scopeId: TENANT,
+      }),
+    ).rejects.toThrow(AttributeKeyCollisionError);
+    expect(save).not.toHaveBeenCalled();
   });
 });

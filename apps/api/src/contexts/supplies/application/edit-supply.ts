@@ -7,13 +7,9 @@ import {
   SupplyTranslationInput,
   CategoryRepository,
   AttributeDefinitionRepository,
-  resolveEffectiveSchema,
-  validateAttributes,
 } from '@globalemergency/warehouse-core/catalog';
-import {
-  getCategoryPrefix,
-  CategoryRegistry,
-} from '@globalemergency/warehouse-core/kernel';
+import { getCategoryPrefix } from '@globalemergency/warehouse-core/kernel';
+import { validateSupplyAttributes } from './validate-supply-attributes';
 
 export interface EditSupplyCommand {
   id: string;
@@ -81,10 +77,15 @@ export class EditSupply {
     // cambian los atributos o la categoría (una recategorización puede invalidar
     // atributos válidos en la familia anterior). Persiste la versión validada.
     if (cmd.attributes !== undefined || cmd.categorySlug !== undefined) {
-      const attributes = await this.validateAttributes(
+      // Tenencia (#397): valida contra el esquema efectivo del scope del propio
+      // insumo (global ∪ tenant si es de tenant). El scope es identidad: no se
+      // edita, se conserva del agregado cargado.
+      const attributes = await validateSupplyAttributes(
+        this.attributeRepo,
         next.categorySlug,
         next.attributes,
         categories,
+        next.scopeId,
       );
       next = next.setAttributes(attributes);
     }
@@ -93,29 +94,5 @@ export class EditSupply {
     next = next.updateCodePrefix(prefix);
 
     await this.repo.save(next, cmd.translations);
-  }
-
-  private async validateAttributes(
-    categorySlug: string,
-    attributes: Record<string, unknown>,
-    categories: readonly { slug: string; parentSlug: string | null }[],
-  ): Promise<Record<string, unknown>> {
-    const registry = CategoryRegistry.fromNodes(
-      categories.map((c) => ({
-        slug: c.slug,
-        parentSlug: c.parentSlug,
-        codePrefix: null,
-      })),
-    );
-    const ancestrySlugs = [
-      categorySlug,
-      ...registry.ancestorsOf(categorySlug).map((n) => n.slug),
-    ];
-    const defs = await this.attributeRepo.findByCategoryAncestry(
-      ancestrySlugs,
-      null,
-    );
-    const schema = resolveEffectiveSchema(categorySlug, defs, registry);
-    return validateAttributes(attributes, schema);
   }
 }

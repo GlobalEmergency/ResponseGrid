@@ -63,7 +63,7 @@ test('ordena de la raíz hacia la hoja, luego por sort y key', () => {
   );
 });
 
-test('ignora definiciones archivadas y de otro scope (Inc 1: sólo globales)', () => {
+test('ignora definiciones archivadas y de otro scope (sin scope: sólo globales)', () => {
   const defs = [
     def('medicines', 'archivada', {
       archivedAt: new Date('2026-01-01T00:00:00Z'),
@@ -76,6 +76,68 @@ test('ignora definiciones archivadas y de otro scope (Inc 1: sólo globales)', (
     schema.map((d) => d.key),
     ['viva'],
   );
+});
+
+test('con scope de tenant: fusiona global ∪ tenant (extensión aditiva)', () => {
+  const defs = [
+    def('medicines', 'global_key'),
+    def('medicines', 'tenant_key', { scopeId: 'tenant-1' }),
+  ];
+  const schema = resolveEffectiveSchema(
+    'medicines',
+    defs,
+    registry,
+    'tenant-1',
+  );
+  assert.deepEqual(schema.map((d) => d.key).sort(), [
+    'global_key',
+    'tenant_key',
+  ]);
+});
+
+test('con scope de tenant: el tenant añade una key nueva a una familia con globales', () => {
+  const defs = [
+    def('medical', 'expiry_tracked', { dataType: 'boolean' }),
+    def('medicines', 'principio_activo'),
+    def('medicines', 'nota_local', { scopeId: 'tenant-1' }),
+  ];
+  const schema = resolveEffectiveSchema(
+    'antibioticos',
+    defs,
+    registry,
+    'tenant-1',
+  );
+  assert.deepEqual(schema.map((d) => d.key).sort(), [
+    'expiry_tracked',
+    'nota_local',
+    'principio_activo',
+  ]);
+});
+
+test('con scope de tenant: colisión de key global↔tenant se rechaza', () => {
+  const defs = [
+    def('medicines', 'dosis'),
+    def('medicines', 'dosis', { scopeId: 'tenant-1' }),
+  ];
+  assert.throws(
+    () => resolveEffectiveSchema('medicines', defs, registry, 'tenant-1'),
+    AttributeKeyCollisionError,
+  );
+});
+
+test('con scope de tenant: excluye las definiciones de otros tenants', () => {
+  const defs = [
+    def('medicines', 'global_key'),
+    def('medicines', 'para_t1', { scopeId: 'tenant-1' }),
+    def('medicines', 'para_t2', { scopeId: 'tenant-2' }),
+  ];
+  const schema = resolveEffectiveSchema(
+    'medicines',
+    defs,
+    registry,
+    'tenant-1',
+  );
+  assert.deepEqual(schema.map((d) => d.key).sort(), ['global_key', 'para_t1']);
 });
 
 test('rechaza una colisión de key entre la categoría y un ancestro', () => {

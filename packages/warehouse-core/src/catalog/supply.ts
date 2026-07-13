@@ -10,6 +10,8 @@ export interface SupplyProps {
   variantOfId?: string | null;
   status?: SupplyStatus;
   registrationNotes?: string | null;
+  /** Tenencia (#397): null = insumo global · set = insumo de un tenant. */
+  scopeId?: string | null;
 }
 
 export interface SupplySnapshot {
@@ -22,6 +24,7 @@ export interface SupplySnapshot {
   variantOfId: string | null;
   status: SupplyStatus;
   registrationNotes: string | null;
+  scopeId: string | null;
 }
 
 export class SupplyValidationError extends Error {
@@ -59,6 +62,7 @@ export class Supply {
   readonly variantOfId: string | null;
   readonly status: SupplyStatus;
   readonly registrationNotes: string | null;
+  readonly scopeId: string | null;
 
   private constructor(props: SupplyProps) {
     this.id = props.id;
@@ -70,6 +74,7 @@ export class Supply {
     this.variantOfId = props.variantOfId ?? null;
     this.status = props.status ?? 'active';
     this.registrationNotes = props.registrationNotes ?? null;
+    this.scopeId = props.scopeId ?? null;
   }
 
   static create(props: SupplyProps): Supply {
@@ -88,6 +93,7 @@ export class Supply {
     const defaultUnit = normalizeOptionalText(props.defaultUnit);
     const variantOfId = normalizeOptionalText(props.variantOfId);
     const registrationNotes = normalizeOptionalText(props.registrationNotes);
+    const scopeId = normalizeOptionalText(props.scopeId);
     const status = props.status ?? 'active';
     if (status !== 'active' && status !== 'archived') {
       throw new SupplyValidationError(
@@ -105,6 +111,7 @@ export class Supply {
       variantOfId,
       status,
       registrationNotes,
+      scopeId,
     });
   }
 
@@ -119,6 +126,7 @@ export class Supply {
       variantOfId: s.variantOfId,
       status: s.status,
       registrationNotes: s.registrationNotes,
+      scopeId: s.scopeId,
     });
   }
 
@@ -133,6 +141,7 @@ export class Supply {
       variantOfId: this.variantOfId,
       status: this.status,
       registrationNotes: this.registrationNotes,
+      scopeId: this.scopeId,
     };
   }
 

@@ -108,11 +108,13 @@ describe('ListSuppliesAdmin / GetSupplyAdmin', () => {
   it('list adjunta los alias y expone campos internos', async () => {
     const repo = makeRepo({
       list: jest.fn().mockResolvedValue([supply('archived')]),
-      listAliases: jest
-        .fn()
-        .mockResolvedValue([
-          SupplyAlias.fromSnapshot({ alias: 'aguita', supplyId: ID }),
-        ]),
+      listAliases: jest.fn().mockResolvedValue([
+        SupplyAlias.fromSnapshot({
+          alias: 'aguita',
+          supplyId: ID,
+          scopeId: null,
+        }),
+      ]),
     });
     const views = await new ListSuppliesAdmin(repo).execute({});
     expect(views).toHaveLength(1);

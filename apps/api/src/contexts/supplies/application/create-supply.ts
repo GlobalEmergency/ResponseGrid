@@ -8,13 +8,9 @@ import {
   SupplyTranslationInput,
   CategoryRepository,
   AttributeDefinitionRepository,
-  resolveEffectiveSchema,
-  validateAttributes,
 } from '@globalemergency/warehouse-core/catalog';
-import {
-  getCategoryPrefix,
-  CategoryRegistry,
-} from '@globalemergency/warehouse-core/kernel';
+import { getCategoryPrefix } from '@globalemergency/warehouse-core/kernel';
+import { validateSupplyAttributes } from './validate-supply-attributes';
 
 export interface CreateSupplyCommand {
   name: string;
@@ -26,6 +22,12 @@ export interface CreateSupplyCommand {
   variantOfId?: string | null;
   /** Traducciones de nombre por idioma (#320). El nombre base (`name`) es `es`. */
   translations?: readonly SupplyTranslationInput[];
+  /**
+   * Tenencia (#397): `undefined`/`null` = insumo global (por defecto; HTTP hoy
+   * opera en global). Un `scopeId` de tenant crea el insumo en su scope y valida
+   * sus atributos contra el esquema efectivo global ∪ tenant.
+   */
+  scopeId?: string | null;
 }
 
 /**
@@ -57,13 +59,18 @@ export class CreateSupply {
       throw new CategoryNotFoundError(cmd.categorySlug);
     }
 
+    const scopeId = cmd.scopeId ?? null;
+
     // Valida el `attributes` jsonb contra el esquema efectivo de la familia (la
-    // unión de definiciones de la ascendencia de su categoría). Si la familia no
-    // tiene definiciones, el esquema es vacío y los atributos pasan tal cual.
-    const attributes = await this.validateAttributes(
+    // unión de definiciones de la ascendencia de su categoría). Con scope de
+    // tenant, el esquema efectivo es global ∪ tenant. Si la familia no tiene
+    // definiciones, el esquema es vacío y los atributos pasan tal cual.
+    const attributes = await validateSupplyAttributes(
+      this.attributeRepo,
       cmd.categorySlug,
       cmd.attributes ?? {},
       categories,
+      scopeId,
     );
 
     const prefix = getCategoryPrefix(cmd.categorySlug, categories);
@@ -79,33 +86,10 @@ export class CreateSupply {
       attributes,
       registrationNotes: cmd.registrationNotes ?? null,
       variantOfId,
+      scopeId,
     });
 
     await this.repo.save(supply, cmd.translations);
     return { id: supply.id, code: supply.code };
-  }
-
-  private async validateAttributes(
-    categorySlug: string,
-    attributes: Record<string, unknown>,
-    categories: readonly { slug: string; parentSlug: string | null }[],
-  ): Promise<Record<string, unknown>> {
-    const registry = CategoryRegistry.fromNodes(
-      categories.map((c) => ({
-        slug: c.slug,
-        parentSlug: c.parentSlug,
-        codePrefix: null,
-      })),
-    );
-    const ancestrySlugs = [
-      categorySlug,
-      ...registry.ancestorsOf(categorySlug).map((n) => n.slug),
-    ];
-    const defs = await this.attributeRepo.findByCategoryAncestry(
-      ancestrySlugs,
-      null,
-    );
-    const schema = resolveEffectiveSchema(categorySlug, defs, registry);
-    return validateAttributes(attributes, schema);
   }
 }

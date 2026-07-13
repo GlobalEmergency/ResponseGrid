@@ -9,6 +9,12 @@ export interface SupplyListFilter {
   status?: SupplyStatus;
   /** Búsqueda libre por código o nombre (normalizada en infraestructura). */
   q?: string;
+  /**
+   * Tenencia (#397): visibilidad por scope. `undefined`/`null` = sólo globales
+   * (comportamiento por defecto de los hosts HTTP, que hoy operan en global). Un
+   * `scopeId` de tenant devuelve **global ∪ tenant** (nunca otros tenants).
+   */
+  scopeId?: string | null;
 }
 
 /**
@@ -36,7 +42,11 @@ export interface SupplyTranslationInput {
  */
 export interface SupplyRepository {
   findById(id: string): Promise<Supply | null>;
-  findByCode(code: string): Promise<Supply | null>;
+  /**
+   * Busca por código. Tenencia (#397): `scopeId` `undefined`/`null` = sólo
+   * globales; un tenant busca en global ∪ tenant. Por defecto global.
+   */
+  findByCode(code: string, scopeId?: string | null): Promise<Supply | null>;
   /**
    * Persiste el agregado. Si `translations` se indica, REEMPLAZA por completo el
    * conjunto de traducciones del insumo en `supply_translations` (quitar una
@@ -54,8 +64,17 @@ export interface SupplyRepository {
   /** Traducciones de nombre del insumo (i18n admin, #320), ordenadas por locale. */
   listTranslations(supplyId: string): Promise<SupplyTranslationInput[]>;
   listAliases(supplyId: string): Promise<SupplyAlias[]>;
+  /**
+   * Añade un alias. Tenencia (#397): el `scopeId` del propio `SupplyAlias`
+   * decide el candado de unicidad (global vs tenant). Idempotente si ya apunta
+   * al mismo insumo dentro de ese scope; conflicto si apunta a otro.
+   */
   addAlias(alias: SupplyAlias): Promise<void>;
-  removeAlias(aliasNorm: string): Promise<void>;
+  /**
+   * Elimina un alias por su forma normalizada dentro del scope dado
+   * (`undefined`/`null` = global). No cruza scopes.
+   */
+  removeAlias(aliasNorm: string, scopeId?: string | null): Promise<void>;
   /**
    * Fusiona `sourceId` en `targetId`: mueve los alias de A a B, repunta las
    * variantes hijas de A a B y archiva A. No borra A (preserva referencias
