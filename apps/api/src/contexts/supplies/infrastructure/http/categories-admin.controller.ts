@@ -167,6 +167,7 @@ export class CategoriesAdminController {
         locale: translation.locale,
         label: translation.label,
       })),
+      externalCodes: category.externalCodes,
     };
   }
 
@@ -180,6 +181,7 @@ export class CategoriesAdminController {
       sort: dto.sort,
       archivedAt: null,
       translations: dto.translations ?? [],
+      externalCodes: dto.externalCodes ?? {},
     };
   }
 
@@ -192,6 +194,7 @@ export class CategoriesAdminController {
       sort: dto.sort,
       archived: dto.archived,
       translations: dto.translations,
+      externalCodes: dto.externalCodes,
     };
   }
 }

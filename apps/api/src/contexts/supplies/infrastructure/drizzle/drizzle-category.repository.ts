@@ -77,7 +77,7 @@ export class DrizzleCategoryRepository implements CategoryRepository {
       translations: (translationsBySlug.get(row.slug) ?? []).sort((a, b) =>
         a.locale.localeCompare(b.locale),
       ),
-      externalCodes: (row.externalCodes ?? {}) as Record<string, string>,
+      externalCodes: row.externalCodes ?? {},
     }));
   }
 
@@ -120,7 +120,7 @@ export class DrizzleCategoryRepository implements CategoryRepository {
       kind: row.kind as CategoryKind,
       archivedAt: row.archivedAt ?? null,
       translations,
-      externalCodes: (row.externalCodes ?? {}) as Record<string, string>,
+      externalCodes: row.externalCodes ?? {},
     };
   }
 

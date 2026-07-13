@@ -78,6 +78,16 @@ export class CreateSupplyDto {
   nature?: SupplyNature;
 
   @ApiPropertyOptional({
+    type: 'object',
+    additionalProperties: { type: 'string' },
+    description:
+      'Códigos externos estándar para interop (#398): mapa namespace→código, p.ej. { "unspsc": "51101500", "hxl": "#item+code" }.',
+  })
+  @IsOptional()
+  @IsObject()
+  externalCodes?: Record<string, string>;
+
+  @ApiPropertyOptional({
     format: 'uuid',
     description: 'Si es variante, id del insumo padre (debe existir)',
   })
@@ -137,6 +147,16 @@ export class EditSupplyDto {
   @IsOptional()
   @IsIn(SUPPLY_NATURES)
   nature?: SupplyNature | null;
+
+  @ApiPropertyOptional({
+    type: 'object',
+    additionalProperties: { type: 'string' },
+    description:
+      'Códigos externos de interop (#398). Si se indica, reemplaza el mapa completo; `{}` los limpia.',
+  })
+  @IsOptional()
+  @IsObject()
+  externalCodes?: Record<string, string>;
 
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()

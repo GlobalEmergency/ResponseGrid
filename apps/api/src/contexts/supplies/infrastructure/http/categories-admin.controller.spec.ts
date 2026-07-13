@@ -67,6 +67,7 @@ describe('CategoriesAdminController', () => {
       sort: 140,
       archivedAt: null,
       translations: [{ locale: 'fr', label: 'Nourriture pour bébé' }],
+      externalCodes: {},
     });
     expect(result.label).toBe('Nourriture pour bébé');
   });
@@ -108,6 +109,7 @@ describe('CategoriesAdminController', () => {
       sort: undefined,
       archived: false,
       translations: undefined,
+      externalCodes: undefined,
     });
     expect(result.archivedAt).toBeNull();
   });

@@ -326,7 +326,7 @@ export class DrizzleSupplyRepository implements SupplyRepository {
       registrationNotes: row.registrationNotes ?? null,
       scopeId: row.scopeId ?? null,
       nature: (row.nature ?? null) as SupplyNature | null,
-      externalCodes: (row.externalCodes ?? {}) as Record<string, string>,
+      externalCodes: row.externalCodes ?? {},
     });
   }
 

@@ -5339,6 +5339,15 @@ export interface components {
              */
             archivedAt: Record<string, never> | null;
             translations: components["schemas"]["CategoryTranslationDto"][];
+            /**
+             * @description Códigos externos estándar para interop (#398): mapa namespace→código. `{}` si no tiene.
+             * @example {
+             *       "unspsc": "51101500"
+             *     }
+             */
+            externalCodes: {
+                [key: string]: string;
+            };
         };
         CreateCategoryDto: {
             /** @example baby_food */
@@ -5358,6 +5367,10 @@ export interface components {
             sort: number;
             /** @description Additional locale labels to persist in category_translations */
             translations?: components["schemas"]["CategoryTranslationDto"][];
+            /** @description Códigos externos estándar para interop (#398): mapa namespace→código. */
+            externalCodes?: {
+                [key: string]: string;
+            };
         };
         UpdateCategoryDto: {
             /** @example Alimentos para bebé */
@@ -5375,6 +5388,10 @@ export interface components {
             sort?: number;
             /** @description Replace the category_translation rows with this set */
             translations?: components["schemas"]["CategoryTranslationDto"][];
+            /** @description Códigos externos de interop (#398). Si se indica, reemplaza el mapa; omitir lo conserva. */
+            externalCodes?: {
+                [key: string]: string;
+            };
             /**
              * @description True to hide/archive the category, false to restore it
              * @example false
@@ -5516,6 +5533,10 @@ export interface components {
              * @enum {string}
              */
             nature?: "fungible" | "reusable" | "human";
+            /** @description Códigos externos estándar para interop (#398): mapa namespace→código, p.ej. { "unspsc": "51101500", "hxl": "#item+code" }. */
+            externalCodes?: {
+                [key: string]: string;
+            };
             /**
              * Format: uuid
              * @description Si es variante, id del insumo padre (debe existir)
@@ -5561,6 +5582,16 @@ export interface components {
              * @enum {string|null}
              */
             nature?: "fungible" | "reusable" | "human" | null;
+            /**
+             * @description Códigos externos estándar para interop (#398): mapa namespace→código. `{}` si no tiene.
+             * @example {
+             *       "unspsc": "51101500",
+             *       "hxl": "#item+code"
+             *     }
+             */
+            externalCodes: {
+                [key: string]: string;
+            };
             /**
              * @example [
              *       "agua embotellada",
@@ -5637,6 +5668,10 @@ export interface components {
              * @enum {string|null}
              */
             nature?: "fungible" | "reusable" | "human" | null;
+            /** @description Códigos externos de interop (#398). Si se indica, reemplaza el mapa completo; `{}` los limpia. */
+            externalCodes?: {
+                [key: string]: string;
+            };
             /** Format: uuid */
             variantOfId?: Record<string, never>;
             /** @description Reemplaza el conjunto de traducciones del insumo; omitir para no tocarlas. */
