@@ -132,7 +132,7 @@ export class Supply {
     const nature = props.nature ?? null;
     if (nature !== null && !isSupplyNature(nature)) {
       throw new SupplyValidationError(
-        'Supply nature must be fungible, reusable or human',
+        `Supply nature must be one of: ${SUPPLY_NATURES.join(', ')}`,
       );
     }
 
