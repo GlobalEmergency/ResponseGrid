@@ -58,6 +58,9 @@ describe('CategoriesController', () => {
       vertical: 'general',
       sort: 1,
       kind: 'material',
+      codePrefix: null,
     });
+    // externalCodes NO se expone en la proyección pública (solo admin).
+    expect(result[0]).not.toHaveProperty('externalCodes');
   });
 });
