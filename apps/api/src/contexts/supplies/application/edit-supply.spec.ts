@@ -326,4 +326,50 @@ describe('EditSupply', () => {
     const saved = save.mock.calls[0][0] as Supply;
     expect(saved.nature).toBe('reusable');
   });
+
+  it('externalCodes (#398): omitir no los toca', async () => {
+    const save = jest.fn().mockResolvedValue(undefined);
+    const repo = makeRepo(
+      Supply.create({
+        id: ID,
+        code: 'WAT-0001',
+        name: 'Agua',
+        categorySlug: 'water',
+        externalCodes: { unspsc: '51101500' },
+      }),
+      save,
+    );
+    await new EditSupply(repo, makeCategoryRepo(), makeAttributeRepo()).execute(
+      {
+        id: ID,
+        name: 'Agua mineral',
+      },
+    );
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const saved = save.mock.calls[0][0] as Supply;
+    expect(saved.externalCodes).toEqual({ unspsc: '51101500' }); // conservados
+  });
+
+  it('externalCodes (#398): proveer reemplaza el mapa completo', async () => {
+    const save = jest.fn().mockResolvedValue(undefined);
+    const repo = makeRepo(
+      Supply.create({
+        id: ID,
+        code: 'WAT-0001',
+        name: 'Agua',
+        categorySlug: 'water',
+        externalCodes: { unspsc: '51101500' },
+      }),
+      save,
+    );
+    await new EditSupply(repo, makeCategoryRepo(), makeAttributeRepo()).execute(
+      {
+        id: ID,
+        externalCodes: { who_eml: 'ABC' },
+      },
+    );
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const saved = save.mock.calls[0][0] as Supply;
+    expect(saved.externalCodes).toEqual({ who_eml: 'ABC' }); // reemplazado, no fusionado
+  });
 });
