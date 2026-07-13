@@ -14,8 +14,10 @@ const BASE: CategoryDefinition = {
   vertical: 'general',
   sort: 140,
   kind: 'material',
+  codePrefix: null,
   archivedAt: null,
   translations: [],
+  externalCodes: {},
 };
 
 function makeRepo(

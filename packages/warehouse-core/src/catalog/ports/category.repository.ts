@@ -20,6 +20,8 @@ export interface CategoryWriteInput {
   sort: number;
   archivedAt?: Date | null;
   translations?: readonly CategoryTranslationInput[];
+  /** Códigos externos estándar para interop (#398). Por defecto `{}`. */
+  externalCodes?: Record<string, string> | null;
 }
 
 export interface CategoryRepository {

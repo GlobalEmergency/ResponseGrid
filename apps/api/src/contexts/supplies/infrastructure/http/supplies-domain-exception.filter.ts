@@ -12,7 +12,10 @@ import {
   ContainerSealedError,
   ContainerValidationError,
 } from '@globalemergency/warehouse-core/containers';
-import { SupplyLineValidationError } from '@globalemergency/warehouse-core/kernel';
+import {
+  SupplyLineValidationError,
+  ExternalCodesValidationError,
+} from '@globalemergency/warehouse-core/kernel';
 import {
   SupplyValidationError,
   SupplyAliasValidationError,
@@ -42,6 +45,7 @@ type DomainError =
   | ContainerScopeMismatchError
   | ContainerValidationError
   | SupplyLineValidationError
+  | ExternalCodesValidationError
   | SupplyValidationError
   | SupplyAliasValidationError
   | SupplyNotFoundError
@@ -77,6 +81,7 @@ type DomainError =
   ContainerScopeMismatchError,
   ContainerValidationError,
   SupplyLineValidationError,
+  ExternalCodesValidationError,
   SupplyValidationError,
   SupplyAliasValidationError,
   SupplyNotFoundError,
@@ -127,6 +132,7 @@ export class SuppliesDomainExceptionFilter implements ExceptionFilter {
     }
     if (
       exception instanceof SupplyLineValidationError ||
+      exception instanceof ExternalCodesValidationError ||
       exception instanceof SupplyValidationError ||
       exception instanceof SupplyAliasValidationError ||
       exception instanceof MergeIntoSelfError ||

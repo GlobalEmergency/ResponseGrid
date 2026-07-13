@@ -26,5 +26,11 @@ export type { CategoryNode } from './category-registry.js';
 export { SupplyLine, SupplyLineValidationError } from './supply-line.js';
 export type { SupplyLineProps, SupplyLineSnapshot } from './supply-line.js';
 export { ScopeId, ScopeIdValidationError } from './scope-id.js';
+export {
+  ExternalCodesValidationError,
+  isExternalCodeNamespace,
+  normalizeExternalCodes,
+} from './external-codes.js';
+export type { ExternalCodes } from './external-codes.js';
 export type { DomainEvent } from './domain-event.js';
 export { haversineMeters } from './geo-distance.js';

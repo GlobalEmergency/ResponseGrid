@@ -21,6 +21,11 @@ export interface EditSupplyCommand {
   registrationNotes?: string | null;
   /** Naturaleza logística (#269). Si se indica, reclasifica; `null` la limpia. */
   nature?: SupplyNature | null;
+  /**
+   * Códigos externos de interop (#398). Si se indica, REEMPLAZA el mapa
+   * completo (mapa vacío los limpia); si se omite, no se tocan.
+   */
+  externalCodes?: Record<string, string>;
   variantOfId?: string | null;
   /**
    * Traducciones de nombre por idioma (#320). Si se indica, REEMPLAZA el set
@@ -69,6 +74,9 @@ export class EditSupply {
       next = next.setRegistrationNotes(cmd.registrationNotes);
     }
     if (cmd.nature !== undefined) next = next.reclassify(cmd.nature);
+    if (cmd.externalCodes !== undefined) {
+      next = next.setExternalCodes(cmd.externalCodes);
+    }
     if (cmd.variantOfId !== undefined) {
       if (cmd.variantOfId) {
         const parent = await this.repo.findById(cmd.variantOfId);

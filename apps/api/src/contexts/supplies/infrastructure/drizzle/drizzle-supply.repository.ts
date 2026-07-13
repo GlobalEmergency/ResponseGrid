@@ -81,6 +81,7 @@ export class DrizzleSupplyRepository implements SupplyRepository {
       variantOfId: s.variantOfId,
       scopeId: s.scopeId,
       nature: s.nature,
+      externalCodes: s.externalCodes,
       createdAt: now,
       updatedAt: now,
     };
@@ -95,6 +96,7 @@ export class DrizzleSupplyRepository implements SupplyRepository {
         attributes: s.attributes,
         variantOfId: s.variantOfId,
         nature: s.nature,
+        externalCodes: s.externalCodes,
         updatedAt: now,
       },
     };
@@ -324,6 +326,7 @@ export class DrizzleSupplyRepository implements SupplyRepository {
       registrationNotes: row.registrationNotes ?? null,
       scopeId: row.scopeId ?? null,
       nature: (row.nature ?? null) as SupplyNature | null,
+      externalCodes: row.externalCodes ?? {},
     });
   }
 

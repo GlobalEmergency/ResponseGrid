@@ -21,6 +21,7 @@ export interface AdminSupplyView {
   status: Supply['status'];
   registrationNotes: string | null;
   nature: Supply['nature'];
+  externalCodes: Supply['externalCodes'];
   aliases: string[];
   translations: SupplyTranslationInput[];
 }

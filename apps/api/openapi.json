@@ -14838,6 +14838,16 @@
             "items": {
               "$ref": "#/components/schemas/CategoryTranslationDto"
             }
+          },
+          "externalCodes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Códigos externos estándar para interop (#398): mapa namespace→código. `{}` si no tiene.",
+            "example": {
+              "unspsc": "51101500"
+            }
           }
         },
         "required": [
@@ -14849,7 +14859,8 @@
           "vertical",
           "sort",
           "archivedAt",
-          "translations"
+          "translations",
+          "externalCodes"
         ]
       },
       "CreateCategoryDto": {
@@ -14887,6 +14898,13 @@
             "items": {
               "$ref": "#/components/schemas/CategoryTranslationDto"
             }
+          },
+          "externalCodes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Códigos externos estándar para interop (#398): mapa namespace→código."
           }
         },
         "required": [
@@ -14928,6 +14946,13 @@
             "items": {
               "$ref": "#/components/schemas/CategoryTranslationDto"
             }
+          },
+          "externalCodes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Códigos externos de interop (#398). Si se indica, reemplaza el mapa; omitir lo conserva."
           },
           "archived": {
             "type": "boolean",
@@ -15189,6 +15214,13 @@
             ],
             "description": "Naturaleza logística (#269): fungible | reusable | human. Omitir = sin clasificar."
           },
+          "externalCodes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Códigos externos estándar para interop (#398): mapa namespace→código, p.ej. { \"unspsc\": \"51101500\", \"hxl\": \"#item+code\" }."
+          },
           "variantOfId": {
             "type": "object",
             "format": "uuid",
@@ -15282,6 +15314,17 @@
             "example": "fungible",
             "description": "Naturaleza logística (#269): fungible | reusable | human. Null = sin clasificar."
           },
+          "externalCodes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Códigos externos estándar para interop (#398): mapa namespace→código. `{}` si no tiene.",
+            "example": {
+              "unspsc": "51101500",
+              "hxl": "#item+code"
+            }
+          },
           "aliases": {
             "example": [
               "agua embotellada",
@@ -15313,6 +15356,7 @@
           "categorySlug",
           "attributes",
           "status",
+          "externalCodes",
           "aliases",
           "translations"
         ]
@@ -15447,6 +15491,13 @@
             ],
             "nullable": true,
             "description": "Naturaleza logística (#269). `null` la limpia (sin clasificar); omitir no la toca."
+          },
+          "externalCodes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Códigos externos de interop (#398). Si se indica, reemplaza el mapa completo; `{}` los limpia."
           },
           "variantOfId": {
             "type": "object",

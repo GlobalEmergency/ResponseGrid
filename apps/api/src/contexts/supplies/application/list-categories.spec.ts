@@ -19,6 +19,7 @@ const FOOD: CategoryDefinition = {
     { locale: 'es', label: 'Alimentos' },
     { locale: 'en', label: 'Food' },
   ],
+  externalCodes: {},
 };
 
 function makeRepo(listCategoriesFn: jest.Mock): CategoryRepository {

@@ -10,12 +10,14 @@ describe('CategoriesAdminController', () => {
     vertical: 'general',
     sort: 140,
     kind: 'material',
+    codePrefix: null,
     archivedAt: null,
     translations: [
       { locale: 'es', label: 'Alimentos para bebé' },
       { locale: 'en', label: 'Baby food' },
       { locale: 'fr', label: 'Nourriture pour bébé' },
     ],
+    externalCodes: {},
   };
 
   it('lists and localizes categories for admin', async () => {
@@ -65,6 +67,7 @@ describe('CategoriesAdminController', () => {
       sort: 140,
       archivedAt: null,
       translations: [{ locale: 'fr', label: 'Nourriture pour bébé' }],
+      externalCodes: {},
     });
     expect(result.label).toBe('Nourriture pour bébé');
   });
@@ -106,6 +109,7 @@ describe('CategoriesAdminController', () => {
       sort: undefined,
       archived: false,
       translations: undefined,
+      externalCodes: undefined,
     });
     expect(result.archivedAt).toBeNull();
   });

@@ -29,6 +29,14 @@ export const categoriesTable = pgTable('categories', {
   codePrefix: text('code_prefix'),
   kind: text('kind').notNull().default('material'),
   archivedAt: timestamp('archived_at', { withTimezone: true }),
+  /**
+   * Códigos externos estándar para interop (#398): mapa abierto namespace→código
+   * (migración 0058). Por defecto '{}'.
+   */
+  externalCodes: jsonb('external_codes')
+    .$type<Record<string, string>>()
+    .notNull()
+    .default({}),
 });
 
 export const categoryAliasesTable = pgTable('category_aliases', {
@@ -80,6 +88,15 @@ export const suppliesTable = pgTable(
      * human. CHECK en la migración 0057 (enum extensible, no boolean).
      */
     nature: text('nature'),
+    /**
+     * Códigos externos estándar para interop (#398): mapa abierto
+     * namespace→código (migración 0058). GIN `supplies_external_codes_gin` para
+     * la búsqueda inversa. Por defecto '{}'.
+     */
+    externalCodes: jsonb('external_codes')
+      .$type<Record<string, string>>()
+      .notNull()
+      .default({}),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
   },
@@ -95,6 +112,8 @@ export const suppliesTable = pgTable(
     index('supplies_category_slug_idx').on(t.categorySlug),
     index('supplies_variant_of_id_idx').on(t.variantOfId),
     index('supplies_scope_id_idx').on(t.scopeId),
+    // Búsqueda inversa por código externo (#398, migración 0058): `@>` / `?`.
+    index('supplies_external_codes_gin').using('gin', t.externalCodes),
   ],
 );
 

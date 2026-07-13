@@ -102,6 +102,7 @@ test('Supply round-trip por snapshot conserva nature', () => {
     registrationNotes: null,
     scopeId: null,
     nature: 'reusable' as const,
+    externalCodes: {},
   };
   assert.deepEqual(Supply.fromSnapshot(snap).toSnapshot(), snap);
 });

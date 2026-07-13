@@ -47,6 +47,15 @@ export class AdminSupplyDto {
   })
   nature!: SupplyNature | null;
 
+  @ApiProperty({
+    type: 'object',
+    additionalProperties: { type: 'string' },
+    description:
+      'Códigos externos estándar para interop (#398): mapa namespace→código. `{}` si no tiene.',
+    example: { unspsc: '51101500', hxl: '#item+code' },
+  })
+  externalCodes!: Record<string, string>;
+
   @ApiProperty({ type: [String], example: ['agua embotellada', 'botellon'] })
   aliases!: string[];
 

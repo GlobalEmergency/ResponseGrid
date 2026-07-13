@@ -11,12 +11,14 @@ describe('CategoriesController', () => {
       vertical: 'general',
       sort: 1,
       kind: 'material',
+      codePrefix: null,
       archivedAt: null,
       translations: [
         { locale: 'es', label: 'Alimentos' },
         { locale: 'en', label: 'Food' },
         { locale: 'fr', label: 'Nourriture' },
       ],
+      externalCodes: {},
     },
   ];
 
@@ -56,6 +58,9 @@ describe('CategoriesController', () => {
       vertical: 'general',
       sort: 1,
       kind: 'material',
+      codePrefix: null,
     });
+    // externalCodes NO se expone en la proyección pública (solo admin).
+    expect(result[0]).not.toHaveProperty('externalCodes');
   });
 });

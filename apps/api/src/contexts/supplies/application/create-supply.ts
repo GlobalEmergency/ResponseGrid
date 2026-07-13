@@ -21,6 +21,11 @@ export interface CreateSupplyCommand {
   registrationNotes?: string | null;
   /** Naturaleza logística (#269): fungible | reusable | human. Null = sin clasificar. */
   nature?: SupplyNature | null;
+  /**
+   * Códigos externos estándar para interop (#398): mapa abierto namespace→código.
+   * Se valida/normaliza en el agregado. Omitir = sin códigos (`{}`).
+   */
+  externalCodes?: Record<string, string> | null;
   /** Si se indica, el insumo es una variante de otro existente (#222). */
   variantOfId?: string | null;
   /** Traducciones de nombre por idioma (#320). El nombre base (`name`) es `es`. */
@@ -89,6 +94,7 @@ export class CreateSupply {
       attributes,
       registrationNotes: cmd.registrationNotes ?? null,
       nature: cmd.nature ?? null,
+      externalCodes: cmd.externalCodes ?? {},
       variantOfId,
       scopeId,
     });
