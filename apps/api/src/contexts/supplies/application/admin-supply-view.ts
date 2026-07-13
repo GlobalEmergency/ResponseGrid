@@ -20,6 +20,7 @@ export interface AdminSupplyView {
   variantOfId: string | null;
   status: Supply['status'];
   registrationNotes: string | null;
+  nature: Supply['nature'];
   aliases: string[];
   translations: SupplyTranslationInput[];
 }

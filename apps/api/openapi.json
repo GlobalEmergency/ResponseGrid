@@ -15180,6 +15180,15 @@
             "type": "object",
             "description": "Notas internas de gestión"
           },
+          "nature": {
+            "type": "string",
+            "enum": [
+              "fungible",
+              "reusable",
+              "human"
+            ],
+            "description": "Naturaleza logística (#269): fungible | reusable | human. Omitir = sin clasificar."
+          },
           "variantOfId": {
             "type": "object",
             "format": "uuid",
@@ -15261,6 +15270,17 @@
           "registrationNotes": {
             "type": "string",
             "nullable": true
+          },
+          "nature": {
+            "type": "string",
+            "enum": [
+              "fungible",
+              "reusable",
+              "human"
+            ],
+            "nullable": true,
+            "example": "fungible",
+            "description": "Naturaleza logística (#269): fungible | reusable | human. Null = sin clasificar."
           },
           "aliases": {
             "example": [
@@ -15417,6 +15437,16 @@
           },
           "registrationNotes": {
             "type": "object"
+          },
+          "nature": {
+            "type": "string",
+            "enum": [
+              "fungible",
+              "reusable",
+              "human"
+            ],
+            "nullable": true,
+            "description": "Naturaleza logística (#269). `null` la limpia (sin clasificar); omitir no la toca."
           },
           "variantOfId": {
             "type": "object",

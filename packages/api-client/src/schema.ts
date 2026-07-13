@@ -5512,6 +5512,11 @@ export interface components {
             /** @description Notas internas de gestión */
             registrationNotes?: Record<string, never>;
             /**
+             * @description Naturaleza logística (#269): fungible | reusable | human. Omitir = sin clasificar.
+             * @enum {string}
+             */
+            nature?: "fungible" | "reusable" | "human";
+            /**
              * Format: uuid
              * @description Si es variante, id del insumo padre (debe existir)
              */
@@ -5550,6 +5555,12 @@ export interface components {
              */
             status: "active" | "archived";
             registrationNotes?: string | null;
+            /**
+             * @description Naturaleza logística (#269): fungible | reusable | human. Null = sin clasificar.
+             * @example fungible
+             * @enum {string|null}
+             */
+            nature?: "fungible" | "reusable" | "human" | null;
             /**
              * @example [
              *       "agua embotellada",
@@ -5621,6 +5632,11 @@ export interface components {
                 [key: string]: unknown;
             };
             registrationNotes?: Record<string, never>;
+            /**
+             * @description Naturaleza logística (#269). `null` la limpia (sin clasificar); omitir no la toca.
+             * @enum {string|null}
+             */
+            nature?: "fungible" | "reusable" | "human" | null;
             /** Format: uuid */
             variantOfId?: Record<string, never>;
             /** @description Reemplaza el conjunto de traducciones del insumo; omitir para no tocarlas. */
