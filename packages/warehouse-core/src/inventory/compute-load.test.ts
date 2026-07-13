@@ -231,3 +231,23 @@ test('línea no calculable dentro de un container sin declarar → unknown', () 
   assert.equal(r.complete, false);
   assert.equal(r.unknowns[0]!.reason, 'unknown_supply');
 });
+
+test('personal dentro de un container con bruto declarado: se reporta igual (no es carga)', () => {
+  const r = computeLoad(
+    [],
+    [
+      {
+        id: 'PAL-1',
+        parentId: null,
+        grossWeightKg: 120, // ambas dimensiones cubiertas por el bruto
+        grossVolumeM3: 0.5,
+        lines: [{ supplyId: 'medic', quantity: 2, unit: 'und', ref: 'P1' }],
+      },
+    ],
+    lookup,
+  );
+  assert.equal(r.weightKg, 120); // el personal no altera el peso
+  assert.equal(r.complete, true);
+  assert.equal(r.personnel.length, 1); // pero sí aparece en el manifiesto
+  assert.equal(r.personnel[0]!.quantity, 2);
+});

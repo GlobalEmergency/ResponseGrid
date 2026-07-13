@@ -18,6 +18,14 @@
  * - **Honestidad:** todo lo no calculable va a `unknowns` con su dimensión y
  *   motivo; `weightComplete`/`volumeComplete` marcan si el total de cada
  *   dimensión es exacto o un límite inferior ("al menos X").
+ *
+ * Precondiciones (garantizadas por el llamador, que mapea desde agregados WMS
+ * ya validados; esta función NO las re-valida):
+ * - `quantity` finita y ≥ 0 (viene del VO `Quantity` de un `StockItem`). Un
+ *   valor no finito/negativo envenenaría el total sin marcarse como desconocido.
+ * - Los containers forman un **bosque acíclico** (lo garantiza el agregado
+ *   `Container` vía `ContainerCycleError`). Un ciclo dejaría esos containers
+ *   fuera del cómputo (nunca serían raíz), no un bucle infinito.
  */
 
 /** Lo que el catálogo sabe de un insumo a efectos de carga (port de lookup). */
@@ -51,7 +59,7 @@ export interface ContainerLoadNode {
   parentId: string | null;
   grossWeightKg: number | null;
   grossVolumeM3: number | null;
-  lines: LoadLine[];
+  lines: readonly LoadLine[];
 }
 
 export type LoadDimension = 'weight' | 'volume';
@@ -166,10 +174,12 @@ function addContainer(
     volume: covered.volume || node.grossVolumeM3 !== null,
   };
 
-  if (!next.weight || !next.volume) {
-    for (const line of node.lines) {
-      addLine(line, next, acc, unknowns, personnel, lookup);
-    }
+  // Siempre se recorren líneas e hijos, aunque ambas dimensiones estén
+  // cubiertas por el bruto declarado: el peso/volumen no suma (lo corta
+  // `addLine`/la propagación de `next`), pero el PERSONAL de un subárbol
+  // declarado debe reportarse igual (no es carga).
+  for (const line of node.lines) {
+    addLine(line, next, acc, unknowns, personnel, lookup);
   }
   for (const child of byParent.get(node.id) ?? []) {
     addContainer(child, byParent, next, acc, unknowns, personnel, lookup);
@@ -184,30 +194,29 @@ function addLine(
   personnel: LoadLine[],
   lookup: SupplyLoadLookup,
 ): void {
+  const info = line.supplyId !== null ? lookup(line.supplyId) : null;
+
+  // El personal (nature=human) NUNCA es carga: se reporta siempre, aun cuando
+  // un container ancestro ya tenga el bruto declarado (no depende de las
+  // dimensiones abiertas, a diferencia del peso/volumen de abajo).
+  if (info !== null && info.nature === 'human') {
+    personnel.push(line);
+    return;
+  }
+
   const open: LoadDimension[] = [];
   if (!covered.weight) open.push('weight');
   if (!covered.volume) open.push('volume');
+  // Dimensiones cubiertas por un bruto declarado más arriba: la línea no aporta
+  // (ni cuenta como desconocida — el declarado ya la incluye).
   if (open.length === 0) return;
 
-  if (line.supplyId === null) {
+  if (line.supplyId === null || info === null) {
     unknowns.push({
       ref: line.ref,
       dimensions: open,
       reason: 'unknown_supply',
     });
-    return;
-  }
-  const info = lookup(line.supplyId);
-  if (info === null) {
-    unknowns.push({
-      ref: line.ref,
-      dimensions: open,
-      reason: 'unknown_supply',
-    });
-    return;
-  }
-  if (info.nature === 'human') {
-    personnel.push(line);
     return;
   }
   const lineUnit = normalizeUnit(line.unit);
