@@ -35,6 +35,20 @@ export class WarehouseArchivedError extends Error {
 }
 
 /**
+ * Raised when archiving a warehouse that still holds stock (StockItems on
+ * board). Archiving it would orphan that inventory, so the host must relocate or
+ * unload it first. The HTTP layer maps this to 409 Conflict.
+ */
+export class WarehouseNotEmptyError extends Error {
+  constructor(stockItemCount: number) {
+    super(
+      `Warehouse still holds ${stockItemCount} stock item(s) and cannot be archived`,
+    );
+    this.name = 'WarehouseNotEmptyError';
+  }
+}
+
+/**
  * Raised on invalid bin input (empty/oversized code, empty warehouse id). The
  * HTTP layer of each host maps it to 422.
  */

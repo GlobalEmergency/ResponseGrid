@@ -36,9 +36,11 @@ export {
   WarehouseValidationError,
   DuplicateZoneCodeError,
   WarehouseArchivedError,
+  WarehouseNotEmptyError,
   BinValidationError,
   BinArchivedError,
 } from './inventory-errors.js';
+export { assertWarehouseCanBeArchived } from './warehouse-archival.js';
 export {
   StockValidationError,
   QuantityUnitMismatchError,
