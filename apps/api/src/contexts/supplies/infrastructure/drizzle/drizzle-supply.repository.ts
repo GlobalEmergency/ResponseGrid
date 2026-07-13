@@ -327,6 +327,11 @@ export class DrizzleSupplyRepository implements SupplyRepository {
       scopeId: row.scopeId ?? null,
       nature: (row.nature ?? null) as SupplyNature | null,
       externalCodes: row.externalCodes ?? {},
+      // Inc 1 vehículos: el host aún no persiste las medidas unitarias (la
+      // adopción por ResponseGrid es una pista aparte del spec); se mapean a
+      // null hasta entonces — frontera 1:1, sin cambio de columna ni de API.
+      unitWeightKg: null,
+      unitVolumeM3: null,
     });
   }
 

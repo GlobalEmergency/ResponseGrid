@@ -99,6 +99,8 @@ test('Supply round-trip por snapshot conserva externalCodes', () => {
     scopeId: null,
     nature: null,
     externalCodes: { unspsc: '51101500', hxl: '#item+code' },
+    unitWeightKg: null,
+    unitVolumeM3: null,
   };
   assert.deepEqual(Supply.fromSnapshot(snap).toSnapshot(), snap);
 });

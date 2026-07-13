@@ -94,6 +94,16 @@ export type {
   ExpiryStatusOptions,
   ExpiringWithinOptions,
 } from './expiry.js';
+export { computeLoad } from './compute-load.js';
+export type {
+  SupplyLoadInfo,
+  SupplyLoadLookup,
+  LoadLine,
+  ContainerLoadNode,
+  LoadDimension,
+  LoadUnknown,
+  LoadTotals,
+} from './compute-load.js';
 export {
   WAREHOUSE_REPOSITORY,
   type WarehouseRepository,

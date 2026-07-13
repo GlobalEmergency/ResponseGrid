@@ -48,6 +48,13 @@ export interface SupplyProps {
    * namespace→código (`{ unspsc: '51101500', … }`). Por defecto `{}`.
    */
   externalCodes?: Record<string, string> | null;
+  /**
+   * Peso unitario en kg, respecto al `defaultUnit` del insumo (vehículos,
+   * Inc 1). Null = desconocido; la carga que lo use queda marcada incompleta.
+   */
+  unitWeightKg?: number | null;
+  /** Volumen unitario en m³, misma base `defaultUnit`. Null = desconocido. */
+  unitVolumeM3?: number | null;
 }
 
 export interface SupplySnapshot {
@@ -63,6 +70,8 @@ export interface SupplySnapshot {
   scopeId: string | null;
   nature: SupplyNature | null;
   externalCodes: ExternalCodes;
+  unitWeightKg: number | null;
+  unitVolumeM3: number | null;
 }
 
 export class SupplyValidationError extends Error {
@@ -90,6 +99,18 @@ function normalizeOptionalText(
   return normalized.length === 0 ? null : normalized;
 }
 
+/** Medida unitaria (kg o m³): null = desconocida; si viene, debe ser > 0 y finita. */
+function normalizeUnitMeasure(
+  value: number | null | undefined,
+  field: string,
+): number | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+    throw new SupplyValidationError(`${field} must be a positive number`);
+  }
+  return value;
+}
+
 export class Supply {
   readonly id: string;
   readonly code: string;
@@ -103,6 +124,8 @@ export class Supply {
   readonly scopeId: string | null;
   readonly nature: SupplyNature | null;
   readonly externalCodes: ExternalCodes;
+  readonly unitWeightKg: number | null;
+  readonly unitVolumeM3: number | null;
 
   private constructor(props: SupplyProps) {
     this.id = props.id;
@@ -117,6 +140,8 @@ export class Supply {
     this.scopeId = props.scopeId ?? null;
     this.nature = props.nature ?? null;
     this.externalCodes = { ...(props.externalCodes ?? {}) };
+    this.unitWeightKg = props.unitWeightKg ?? null;
+    this.unitVolumeM3 = props.unitVolumeM3 ?? null;
   }
 
   static create(props: SupplyProps): Supply {
@@ -149,6 +174,14 @@ export class Supply {
       );
     }
     const externalCodes = normalizeExternalCodes(props.externalCodes);
+    const unitWeightKg = normalizeUnitMeasure(
+      props.unitWeightKg,
+      'Supply unitWeightKg',
+    );
+    const unitVolumeM3 = normalizeUnitMeasure(
+      props.unitVolumeM3,
+      'Supply unitVolumeM3',
+    );
 
     return new Supply({
       id,
@@ -163,6 +196,8 @@ export class Supply {
       scopeId,
       nature,
       externalCodes,
+      unitWeightKg,
+      unitVolumeM3,
     });
   }
 
@@ -180,6 +215,8 @@ export class Supply {
       scopeId: s.scopeId,
       nature: s.nature,
       externalCodes: s.externalCodes,
+      unitWeightKg: s.unitWeightKg,
+      unitVolumeM3: s.unitVolumeM3,
     });
   }
 
@@ -197,6 +234,8 @@ export class Supply {
       scopeId: this.scopeId,
       nature: this.nature,
       externalCodes: { ...this.externalCodes },
+      unitWeightKg: this.unitWeightKg,
+      unitVolumeM3: this.unitVolumeM3,
     };
   }
 
@@ -252,6 +291,17 @@ export class Supply {
    */
   setExternalCodes(externalCodes: Record<string, string>): Supply {
     return this.withChanges({ externalCodes });
+  }
+
+  /**
+   * Fija/limpia las medidas unitarias del insumo (base `defaultUnit`), para el
+   * cálculo de carga (vehículos, Inc 1). Inmutable: instancia nueva.
+   */
+  setUnitMeasures(
+    unitWeightKg: number | null,
+    unitVolumeM3: number | null,
+  ): Supply {
+    return this.withChanges({ unitWeightKg, unitVolumeM3 });
   }
 
   archive(): Supply {
