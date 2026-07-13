@@ -6,6 +6,7 @@ import type {
   StockMovementSnapshot,
 } from '@globalemergency/warehouse-core/inventory';
 import {
+  WarehouseKind,
   WarehouseStatus,
   ZoneStatus,
   ZoneKind,
@@ -14,6 +15,7 @@ import {
   StockStatus,
   MovementKind,
 } from '@globalemergency/warehouse-core/inventory';
+import type { CapacityProps } from '@globalemergency/warehouse-core/kernel';
 import type {
   warehousesTable,
   zonesTable,
@@ -39,6 +41,27 @@ function numericToNumber(value: string): number {
     throw new Error(`Valor numeric no finito en la BBDD: "${value}"`);
   }
   return n;
+}
+
+/** `numeric` nullable → number | null (misma cautela que {@link numericToNumber}). */
+function nullableNumericToNumber(value: string | null): number | null {
+  return value === null ? null : numericToNumber(value);
+}
+
+/**
+ * Reconstruye la carga útil máxima del vehículo a partir de las dos columnas
+ * `max_weight_kg` / `max_volume_m3`: `null` si ambas son nulas (almacén fijo o
+ * vehículo sin capacidad declarada); en otro caso, las props del VO Capacity.
+ */
+function rowToMaxCapacity(
+  maxWeightKg: string | null,
+  maxVolumeM3: string | null,
+): CapacityProps | null {
+  if (maxWeightKg === null && maxVolumeM3 === null) return null;
+  return {
+    weightKg: nullableNumericToNumber(maxWeightKg),
+    volumeM3: nullableNumericToNumber(maxVolumeM3),
+  };
 }
 
 // --- Warehouse + Zone ------------------------------------------------------
@@ -72,6 +95,8 @@ export function rowsToWarehouseSnapshot(
     lat: row.lat ?? null,
     lng: row.lng ?? null,
     status: row.status as WarehouseStatus,
+    kind: row.kind as WarehouseKind,
+    maxCapacity: rowToMaxCapacity(row.maxWeightKg, row.maxVolumeM3),
     zones: zones.map(rowToZoneSnapshot),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -91,6 +116,16 @@ export function warehouseSnapshotToRow(
     lat: s.lat,
     lng: s.lng,
     status: s.status,
+    kind: s.kind,
+    // `numeric` acepta string; se serializa igual que quantityAmount. null → null.
+    maxWeightKg:
+      s.maxCapacity?.weightKg != null
+        ? s.maxCapacity.weightKg.toString()
+        : null,
+    maxVolumeM3:
+      s.maxCapacity?.volumeM3 != null
+        ? s.maxCapacity.volumeM3.toString()
+        : null,
     createdAt: s.createdAt,
     updatedAt: s.updatedAt,
   };

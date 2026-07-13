@@ -5,6 +5,7 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import {
   Warehouse,
   WarehouseId,
+  WarehouseKind,
   ZoneId,
   ZoneKind,
   WarehouseStatus,
@@ -167,5 +168,73 @@ describe('DrizzleWarehouseRepository (integración)', () => {
   it('findById devuelve null cuando no existe', async () => {
     const missing = await repo.findById(WarehouseId.create());
     assert.equal(missing, null);
+  });
+
+  it('un almacén fijo por defecto conserva kind=fixed y maxCapacity null', async () => {
+    const scopeId = ScopeId.create();
+    const warehouse = newWarehouse(scopeId, 'FIX-1');
+    await repo.save(warehouse);
+
+    const loaded = await repo.findById(warehouse.id);
+    assert.ok(loaded);
+    assert.equal(loaded.kind, WarehouseKind.Fixed);
+    assert.equal(loaded.maxCapacity, null);
+    assert.deepEqual(loaded.toSnapshot(), warehouse.toSnapshot());
+  });
+
+  it('un vehículo conserva kind=vehicle y su maxCapacity parcial (solo peso)', async () => {
+    const scopeId = ScopeId.create();
+    const vehicle = Warehouse.create({
+      id: WarehouseId.create(),
+      scopeId,
+      code: 'VEH-1',
+      name: 'Camión 1',
+      kind: WarehouseKind.Vehicle,
+      maxCapacity: { weightKg: 3500, volumeM3: null },
+    });
+    await repo.save(vehicle);
+
+    const loaded = await repo.findById(vehicle.id);
+    assert.ok(loaded);
+    assert.equal(loaded.kind, WarehouseKind.Vehicle);
+    assert.deepEqual(loaded.maxCapacity, { weightKg: 3500, volumeM3: null });
+    assert.deepEqual(loaded.toSnapshot(), vehicle.toSnapshot());
+  });
+
+  it('un vehículo con capacidad completa (peso + volumen) round-trip', async () => {
+    const scopeId = ScopeId.create();
+    const vehicle = Warehouse.create({
+      id: WarehouseId.create(),
+      scopeId,
+      code: 'VEH-2',
+      name: 'Furgón 2',
+      kind: WarehouseKind.Vehicle,
+      maxCapacity: { weightKg: 1200.5, volumeM3: 8.75 },
+    });
+    await repo.save(vehicle);
+
+    const loaded = await repo.findById(vehicle.id);
+    assert.ok(loaded);
+    assert.deepEqual(loaded.maxCapacity, { weightKg: 1200.5, volumeM3: 8.75 });
+  });
+
+  it('actualiza la maxCapacity de un vehículo (upsert)', async () => {
+    const scopeId = ScopeId.create();
+    const vehicle = Warehouse.create({
+      id: WarehouseId.create(),
+      scopeId,
+      code: 'VEH-3',
+      name: 'Camión 3',
+      kind: WarehouseKind.Vehicle,
+      maxCapacity: null,
+    });
+    await repo.save(vehicle);
+
+    vehicle.setMaxCapacity({ weightKg: 5000, volumeM3: 20 });
+    await repo.save(vehicle);
+
+    const loaded = await repo.findById(vehicle.id);
+    assert.ok(loaded);
+    assert.deepEqual(loaded.maxCapacity, { weightKg: 5000, volumeM3: 20 });
   });
 });

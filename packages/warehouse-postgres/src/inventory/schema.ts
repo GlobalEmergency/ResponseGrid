@@ -27,6 +27,11 @@ export const warehousesTable = wms.table('warehouses', {
   lat: doublePrecision('lat'),
   lng: doublePrecision('lng'),
   status: text('status').notNull(),
+  // Naturaleza física (`fixed` | `vehicle`) y carga útil máxima del vehículo.
+  // `numeric` llega como string: el mapper lo convierte a number con cuidado.
+  kind: text('kind').notNull(),
+  maxWeightKg: numeric('max_weight_kg', { precision: 18, scale: 6 }),
+  maxVolumeM3: numeric('max_volume_m3', { precision: 18, scale: 6 }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
 });
