@@ -75,6 +75,11 @@ export const suppliesTable = pgTable(
     ),
     /** Tenencia (#397): null = fila global · set = extensión de un tenant. */
     scopeId: uuid('scope_id'),
+    /**
+     * Naturaleza logística (#269): null = sin clasificar · fungible | reusable |
+     * human. CHECK en la migración 0057 (enum extensible, no boolean).
+     */
+    nature: text('nature'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
   },

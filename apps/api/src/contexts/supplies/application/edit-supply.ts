@@ -1,5 +1,6 @@
 import {
   Supply,
+  SupplyNature,
   SupplyNotFoundError,
   VariantTargetNotFoundError,
   CategoryNotFoundError,
@@ -18,6 +19,8 @@ export interface EditSupplyCommand {
   defaultUnit?: string | null;
   attributes?: Record<string, unknown>;
   registrationNotes?: string | null;
+  /** Naturaleza logística (#269). Si se indica, reclasifica; `null` la limpia. */
+  nature?: SupplyNature | null;
   variantOfId?: string | null;
   /**
    * Traducciones de nombre por idioma (#320). Si se indica, REEMPLAZA el set
@@ -65,6 +68,7 @@ export class EditSupply {
     if (cmd.registrationNotes !== undefined) {
       next = next.setRegistrationNotes(cmd.registrationNotes);
     }
+    if (cmd.nature !== undefined) next = next.reclassify(cmd.nature);
     if (cmd.variantOfId !== undefined) {
       if (cmd.variantOfId) {
         const parent = await this.repo.findById(cmd.variantOfId);

@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import {
   Supply,
+  SupplyNature,
   formatSupplyCode,
   VariantTargetNotFoundError,
   CategoryNotFoundError,
@@ -18,6 +19,8 @@ export interface CreateSupplyCommand {
   defaultUnit?: string | null;
   attributes?: Record<string, unknown> | null;
   registrationNotes?: string | null;
+  /** Naturaleza logística (#269): fungible | reusable | human. Null = sin clasificar. */
+  nature?: SupplyNature | null;
   /** Si se indica, el insumo es una variante de otro existente (#222). */
   variantOfId?: string | null;
   /** Traducciones de nombre por idioma (#320). El nombre base (`name`) es `es`. */
@@ -85,6 +88,7 @@ export class CreateSupply {
       defaultUnit: cmd.defaultUnit ?? null,
       attributes,
       registrationNotes: cmd.registrationNotes ?? null,
+      nature: cmd.nature ?? null,
       variantOfId,
       scopeId,
     });

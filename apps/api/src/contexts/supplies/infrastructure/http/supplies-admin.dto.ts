@@ -1,4 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  SUPPLY_NATURES,
+  type SupplyNature,
+} from '@globalemergency/warehouse-core/catalog';
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -65,6 +69,15 @@ export class CreateSupplyDto {
   registrationNotes?: string | null;
 
   @ApiPropertyOptional({
+    enum: SUPPLY_NATURES,
+    description:
+      'Naturaleza logística (#269): fungible | reusable | human. Omitir = sin clasificar.',
+  })
+  @IsOptional()
+  @IsIn(SUPPLY_NATURES)
+  nature?: SupplyNature;
+
+  @ApiPropertyOptional({
     format: 'uuid',
     description: 'Si es variante, id del insumo padre (debe existir)',
   })
@@ -114,6 +127,16 @@ export class EditSupplyDto {
   @IsOptional()
   @IsString()
   registrationNotes?: string | null;
+
+  @ApiPropertyOptional({
+    enum: SUPPLY_NATURES,
+    nullable: true,
+    description:
+      'Naturaleza logística (#269). `null` la limpia (sin clasificar); omitir no la toca.',
+  })
+  @IsOptional()
+  @IsIn(SUPPLY_NATURES)
+  nature?: SupplyNature | null;
 
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()

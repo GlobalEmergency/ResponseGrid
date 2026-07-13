@@ -266,4 +266,64 @@ describe('EditSupply', () => {
     ).rejects.toBeInstanceOf(AttributeValidationError);
     expect(save).not.toHaveBeenCalled();
   });
+
+  it('naturaleza (#269): omitir no la toca', async () => {
+    const save = jest.fn().mockResolvedValue(undefined);
+    const repo = makeRepo(
+      Supply.create({
+        id: ID,
+        code: 'WAT-0001',
+        name: 'Agua',
+        categorySlug: 'water',
+        nature: 'fungible',
+      }),
+      save,
+    );
+    await new EditSupply(repo, makeCategoryRepo(), makeAttributeRepo()).execute(
+      {
+        id: ID,
+        name: 'Agua mineral',
+      },
+    );
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const saved = save.mock.calls[0][0] as Supply;
+    expect(saved.nature).toBe('fungible'); // conservada
+  });
+
+  it('naturaleza (#269): null la limpia', async () => {
+    const save = jest.fn().mockResolvedValue(undefined);
+    const repo = makeRepo(
+      Supply.create({
+        id: ID,
+        code: 'WAT-0001',
+        name: 'Agua',
+        categorySlug: 'water',
+        nature: 'fungible',
+      }),
+      save,
+    );
+    await new EditSupply(repo, makeCategoryRepo(), makeAttributeRepo()).execute(
+      {
+        id: ID,
+        nature: null,
+      },
+    );
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const saved = save.mock.calls[0][0] as Supply;
+    expect(saved.nature).toBeNull();
+  });
+
+  it('naturaleza (#269): reclasifica con un valor válido', async () => {
+    const save = jest.fn().mockResolvedValue(undefined);
+    const repo = makeRepo(existing(), save); // arranca sin naturaleza (null)
+    await new EditSupply(repo, makeCategoryRepo(), makeAttributeRepo()).execute(
+      {
+        id: ID,
+        nature: 'reusable',
+      },
+    );
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const saved = save.mock.calls[0][0] as Supply;
+    expect(saved.nature).toBe('reusable');
+  });
 });

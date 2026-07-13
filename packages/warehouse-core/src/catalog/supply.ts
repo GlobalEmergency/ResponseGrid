@@ -1,5 +1,29 @@
 export type SupplyStatus = 'active' | 'archived';
 
+/**
+ * Clasificación fina de un insumo por su naturaleza logística (#269). Vive en el
+ * INSUMO, no en la categoría (una categoría puede mezclar naturalezas). Enum
+ * extensible (no boolean) para poder crecer sin una migración destructiva:
+ * - `fungible`: se consume (gasas, agua).
+ * - `reusable`: no se consume, se presta/devuelve (maquinaria, equipos).
+ * - `human`: se asigna, no es carga (personal).
+ *
+ * `null` = sin clasificar (los insumos previos no se rellenan).
+ */
+export type SupplyNature = 'fungible' | 'reusable' | 'human';
+
+export const SUPPLY_NATURES: readonly SupplyNature[] = [
+  'fungible',
+  'reusable',
+  'human',
+] as const;
+
+export function isSupplyNature(x: unknown): x is SupplyNature {
+  return (
+    typeof x === 'string' && (SUPPLY_NATURES as readonly string[]).includes(x)
+  );
+}
+
 export interface SupplyProps {
   id: string;
   code: string;
@@ -12,6 +36,8 @@ export interface SupplyProps {
   registrationNotes?: string | null;
   /** Tenencia (#397): null = insumo global · set = insumo de un tenant. */
   scopeId?: string | null;
+  /** Naturaleza logística (#269): null = sin clasificar (por defecto). */
+  nature?: SupplyNature | null;
 }
 
 export interface SupplySnapshot {
@@ -25,6 +51,7 @@ export interface SupplySnapshot {
   status: SupplyStatus;
   registrationNotes: string | null;
   scopeId: string | null;
+  nature: SupplyNature | null;
 }
 
 export class SupplyValidationError extends Error {
@@ -63,6 +90,7 @@ export class Supply {
   readonly status: SupplyStatus;
   readonly registrationNotes: string | null;
   readonly scopeId: string | null;
+  readonly nature: SupplyNature | null;
 
   private constructor(props: SupplyProps) {
     this.id = props.id;
@@ -75,6 +103,7 @@ export class Supply {
     this.status = props.status ?? 'active';
     this.registrationNotes = props.registrationNotes ?? null;
     this.scopeId = props.scopeId ?? null;
+    this.nature = props.nature ?? null;
   }
 
   static create(props: SupplyProps): Supply {
@@ -100,6 +129,12 @@ export class Supply {
         'Supply status must be active or archived',
       );
     }
+    const nature = props.nature ?? null;
+    if (nature !== null && !isSupplyNature(nature)) {
+      throw new SupplyValidationError(
+        `Supply nature must be one of: ${SUPPLY_NATURES.join(', ')}`,
+      );
+    }
 
     return new Supply({
       id,
@@ -112,6 +147,7 @@ export class Supply {
       status,
       registrationNotes,
       scopeId,
+      nature,
     });
   }
 
@@ -127,6 +163,7 @@ export class Supply {
       status: s.status,
       registrationNotes: s.registrationNotes,
       scopeId: s.scopeId,
+      nature: s.nature,
     });
   }
 
@@ -142,6 +179,7 @@ export class Supply {
       status: this.status,
       registrationNotes: this.registrationNotes,
       scopeId: this.scopeId,
+      nature: this.nature,
     };
   }
 
@@ -180,6 +218,14 @@ export class Supply {
 
   setVariantOf(variantOfId: string | null): Supply {
     return this.withChanges({ variantOfId });
+  }
+
+  /**
+   * Reclasifica el insumo por su naturaleza logística (#269). `null` lo deja sin
+   * clasificar. Inmutable: produce una instancia nueva vía `withChanges`.
+   */
+  reclassify(nature: SupplyNature | null): Supply {
+    return this.withChanges({ nature });
   }
 
   archive(): Supply {
