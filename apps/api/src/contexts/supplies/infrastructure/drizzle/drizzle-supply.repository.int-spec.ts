@@ -65,6 +65,23 @@ describe('DrizzleSupplyRepository (integration)', () => {
     expect(found!.categorySlug).toBe('food');
   });
 
+  it('persiste y actualiza la naturaleza logística (#269), por defecto null', async () => {
+    await repo.save(makeSupply({ id: A, code: 'INS-9001', name: 'Agua' }));
+    expect((await repo.findById(A))!.nature).toBeNull();
+
+    // Clasifica y relee.
+    await repo.save((await repo.findById(A))!.reclassify('fungible'));
+    expect((await repo.findById(A))!.nature).toBe('fungible');
+
+    // Reclasifica a otra naturaleza (upsert set).
+    await repo.save((await repo.findById(A))!.reclassify('reusable'));
+    expect((await repo.findById(A))!.nature).toBe('reusable');
+
+    // Limpia (vuelve a sin clasificar).
+    await repo.save((await repo.findById(A))!.reclassify(null));
+    expect((await repo.findById(A))!.nature).toBeNull();
+  });
+
   it('save persiste y reemplaza las traducciones, normalizando locale/nombre (#320)', async () => {
     await repo.save(makeSupply({ id: A, code: 'INS-9001', name: 'Agua' }), [
       { locale: 'en', name: 'Water' },

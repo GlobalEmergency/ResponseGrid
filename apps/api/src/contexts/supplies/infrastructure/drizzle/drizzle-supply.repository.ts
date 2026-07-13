@@ -13,6 +13,7 @@ import { Db } from '../../../../shared/db';
 import {
   Supply,
   SupplyStatus,
+  SupplyNature,
   SupplyAlias,
   AliasConflictError,
   SupplyListFilter,
@@ -79,6 +80,7 @@ export class DrizzleSupplyRepository implements SupplyRepository {
       attributes: s.attributes,
       variantOfId: s.variantOfId,
       scopeId: s.scopeId,
+      nature: s.nature,
       createdAt: now,
       updatedAt: now,
     };
@@ -92,6 +94,7 @@ export class DrizzleSupplyRepository implements SupplyRepository {
         defaultUnit: s.defaultUnit,
         attributes: s.attributes,
         variantOfId: s.variantOfId,
+        nature: s.nature,
         updatedAt: now,
       },
     };
@@ -320,6 +323,7 @@ export class DrizzleSupplyRepository implements SupplyRepository {
       status: row.status as SupplyStatus,
       registrationNotes: row.registrationNotes ?? null,
       scopeId: row.scopeId ?? null,
+      nature: (row.nature ?? null) as SupplyNature | null,
     });
   }
 
