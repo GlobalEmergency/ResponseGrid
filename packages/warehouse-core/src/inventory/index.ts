@@ -107,6 +107,8 @@ export type {
   LoadUnknown,
   LoadTotals,
 } from './compute-load.js';
+export { vehicleLoadStatus } from './vehicle-load-status.js';
+export type { VehicleLoadStatus } from './vehicle-load-status.js';
 export {
   WAREHOUSE_REPOSITORY,
   type WarehouseRepository,
