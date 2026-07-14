@@ -13,6 +13,8 @@ export {
   binsTable,
   stockItemsTable,
   stockMovementsTable,
+  containersTable,
+  containerCodeSequencesTable,
 } from './schema.js';
 export {
   rowToZoneSnapshot,
@@ -30,6 +32,7 @@ export { DrizzleWarehouseRepository } from './drizzle-warehouse.repository.js';
 export { DrizzleBinRepository } from './drizzle-bin.repository.js';
 export { DrizzleStockItemRepository } from './drizzle-stock-item.repository.js';
 export { DrizzleStockMovementRepository } from './drizzle-stock-movement.repository.js';
+export { DrizzleContainerRepository } from './drizzle-container.repository.js';
 export {
   StaleStockItemError,
   DuplicateStockItemError,
