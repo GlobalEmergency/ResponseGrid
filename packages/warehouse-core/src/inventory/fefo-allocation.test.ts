@@ -185,3 +185,29 @@ test('exact match allocates fully with no shortfall', () => {
   assert.equal(plan.shortfall.amount, 0);
   assert.equal(plan.lines.length, 2);
 });
+
+test('excludeWarehouseIds: el stock de un vehículo no se asigna', () => {
+  const fixedItem = item({
+    amount: 10,
+    warehouseId: WH_A,
+    expiresAt: '2026-03-01T00:00:00Z',
+  });
+  const vehicleItem = item({
+    amount: 10,
+    warehouseId: WH_B,
+    expiresAt: '2026-02-01T00:00:00Z',
+  });
+
+  const plan = allocateFefo(demand(15), [fixedItem, vehicleItem], {
+    excludeWarehouseIds: [WarehouseId.fromString(WH_B)],
+  });
+
+  // Sólo el almacén fijo (10) es elegible → 10 asignados, 5 de shortfall.
+  assert.equal(plan.allocated.amount, 10);
+  assert.equal(plan.shortfall.amount, 5);
+  assert.ok(
+    plan.lines.every((l) =>
+      l.item.warehouseId.equals(WarehouseId.fromString(WH_A)),
+    ),
+  );
+});

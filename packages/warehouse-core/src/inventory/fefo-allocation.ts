@@ -19,6 +19,12 @@ export interface FefoOptions {
    * on expiry grounds — the caller decides.
    */
   asOf?: Date;
+  /**
+   * Almacenes cuyo stock se EXCLUYE de la asignación (p.ej. vehículos: lo que va
+   * en un camión preparado no está "disponible"). Vacío/ausente = no excluye
+   * nada. El llamador pasa los ids de los almacenes `kind=vehicle`.
+   */
+  excludeWarehouseIds?: readonly WarehouseId[];
 }
 
 /** One draw of the plan: take `quantity` from `item`. */
@@ -50,8 +56,10 @@ export interface AllocationPlan {
  * id so the plan is stable.
  *
  * Candidates are filtered to the demand's scope, `supplyId` and unit (and
- * warehouse if given), skipping empty items and — when `asOf` is set — expired
- * lots.
+ * warehouse if given), skipping empty items, — when `asOf` is set — expired
+ * lots, and — when `excludeWarehouseIds` is set — stock sitting in any of
+ * those warehouses (e.g. vehicles: material already loaded on a truck isn't
+ * "available" to allocate again).
  */
 export function allocateFefo(
   demand: FefoDemand,
@@ -102,6 +110,9 @@ function isEligible(
   }
   if (options.asOf !== undefined && item.isExpiredAt(options.asOf))
     return false;
+  if (options.excludeWarehouseIds?.some((id) => item.warehouseId.equals(id))) {
+    return false;
+  }
   return true;
 }
 
