@@ -9,6 +9,7 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import {
   Warehouse,
   WarehouseId,
+  WarehouseKind,
   ZoneId,
   ZoneKind,
   Bin,
@@ -23,6 +24,11 @@ import {
   Quantity,
   StockStatus,
   MovementKind,
+  vehicleLoadStatus,
+  buildVehicleManifest,
+  type LoadLine,
+  type SupplyLoadInfo,
+  type SupplyLoadLookup,
 } from '@globalemergency/warehouse-core/inventory';
 import {
   Container,
@@ -425,5 +431,205 @@ describe('Consumidor standalone: flujo WMS end-to-end (dominio + persistencia)',
     );
     assert.equal(await containers.findById(orphanPallet.id), null);
     assert.equal(await items.findById(orphanStock.id), null);
+  });
+
+  it('un host carga un vehículo, lee su manifiesto y lo descarga (Inc 5 vehículos)', async () => {
+    const scopeId = ScopeId.create();
+    const supplyId = uuid();
+    const unit = 'und';
+    const actorId = 'op-1';
+
+    // Catálogo en memoria: el consumidor NO depende de dónde viva (supplies vive
+    // en otro contexto/paquete); sólo necesita este port síncrono.
+    const catalog = new Map<string, SupplyLoadInfo>([
+      [
+        supplyId,
+        {
+          unitWeightKg: 1.5,
+          unitVolumeM3: 0.0016,
+          defaultUnit: unit,
+          nature: 'fungible',
+        },
+      ],
+    ]);
+    const lookup: SupplyLoadLookup = (id) => catalog.get(id) ?? null;
+
+    // --- 1. Layout: almacén fijo (con bin) + vehículo (con bin), capacidad
+    // parcial (sólo peso) para poder forzar overWeight de forma determinista. ---
+    const fixedZoneId = ZoneId.create();
+    const fixedWarehouse = Warehouse.create({
+      id: WarehouseId.create(),
+      scopeId,
+      code: 'ALM-FIJO',
+      name: 'Almacén Fijo',
+      zones: [
+        {
+          id: fixedZoneId,
+          code: 'ALM',
+          name: 'Almacenaje',
+          kind: ZoneKind.Storage,
+        },
+      ],
+    });
+    await warehouses.save(fixedWarehouse);
+    const fixedBin = Bin.create({
+      id: BinId.create(),
+      scopeId,
+      warehouseId: fixedWarehouse.id,
+      zoneId: fixedZoneId,
+      code: 'F-01',
+      kind: BinKind.Shelf,
+    });
+    await bins.save(fixedBin);
+
+    const vehicleZoneId = ZoneId.create();
+    const vehicleWarehouse = Warehouse.create({
+      id: WarehouseId.create(),
+      scopeId,
+      code: 'CAMION-01',
+      name: 'Camión 01',
+      kind: WarehouseKind.Vehicle,
+      maxCapacity: { weightKg: 20, volumeM3: null },
+      zones: [
+        {
+          id: vehicleZoneId,
+          code: 'CARGA',
+          name: 'Caja de carga',
+          kind: ZoneKind.Storage,
+        },
+      ],
+    });
+    await warehouses.save(vehicleWarehouse);
+    const vehicleBin = Bin.create({
+      id: BinId.create(),
+      scopeId,
+      warehouseId: vehicleWarehouse.id,
+      zoneId: vehicleZoneId,
+      code: 'V-01',
+      kind: BinKind.Shelf,
+    });
+    await bins.save(vehicleBin);
+
+    // --- 2. Recepción: 15 und en el bin fijo (15 × 1.5 kg = 22.5 kg > 20 kg). ---
+    const fixedItem = StockItem.create({
+      id: StockItemId.create(),
+      scopeId,
+      warehouseId: fixedWarehouse.id,
+      binId: fixedBin.id,
+      supplyId,
+      lot: null,
+      quantity: Quantity.of(0, unit),
+      status: StockStatus.Available,
+    });
+    await items.save(fixedItem);
+    const receipt = StockMovement.record({
+      id: StockMovementId.create(),
+      scopeId,
+      kind: MovementKind.Receipt,
+      quantity: Quantity.of(15, unit),
+      toItemId: fixedItem.id,
+      actorId,
+    });
+    applyStockMovement(receipt, { to: fixedItem });
+    await items.save(fixedItem);
+    await movements.append(receipt);
+
+    // --- 3. Carga: traslado atómico fijo → vehículo (item nuevo en su bin). ---
+    const vehicleItem = StockItem.create({
+      id: StockItemId.create(),
+      scopeId,
+      warehouseId: vehicleWarehouse.id,
+      binId: vehicleBin.id,
+      supplyId,
+      lot: null,
+      quantity: Quantity.of(0, unit),
+      status: StockStatus.Available,
+    });
+    await items.save(vehicleItem);
+
+    const load = StockMovement.record({
+      id: StockMovementId.create(),
+      scopeId,
+      kind: MovementKind.Transfer,
+      quantity: Quantity.of(15, unit),
+      fromItemId: fixedItem.id,
+      toItemId: vehicleItem.id,
+      idempotencyKey: 'carga-1',
+      actorId,
+    });
+    const fixedBeforeLoad = await items.findById(fixedItem.id);
+    assert.ok(fixedBeforeLoad);
+    applyStockMovement(load, { from: fixedBeforeLoad, to: vehicleItem });
+    await runInWmsTransaction(db, async (uow) => {
+      await uow.items.save(fixedBeforeLoad);
+      await uow.items.save(vehicleItem);
+      await uow.movements.append(load);
+    });
+
+    assert.equal((await items.findById(fixedItem.id))?.quantity.amount, 0);
+    assert.equal((await items.findById(vehicleItem.id))?.quantity.amount, 15);
+
+    // --- 4. Estado + manifiesto del vehículo, leídos sólo de su stock. --------
+    const aboard = await items.findByWarehouse(vehicleWarehouse.id, {});
+    const looseLines: LoadLine[] = aboard.map((item) => ({
+      supplyId: item.supplyId,
+      quantity: item.quantity.amount,
+      unit: item.quantity.unit,
+      ref: item.id.value,
+    }));
+
+    const manifest = buildVehicleManifest(
+      looseLines,
+      [],
+      lookup,
+      vehicleWarehouse.maxCapacity,
+    );
+    assert.deepEqual(manifest.cargo, [{ supplyId, quantity: 15, unit }]);
+    assert.equal(manifest.personnel.length, 0);
+    assert.equal(manifest.totals.weightKg, 22.5); // 15 × 1.5 kg
+    assert.equal(manifest.status.overWeight, true); // 22.5 kg > 20 kg de capacidad
+    assert.equal(manifest.status.weightUtilizationPct, 112.5);
+
+    const status = vehicleLoadStatus(
+      vehicleWarehouse.maxCapacity,
+      manifest.totals,
+    );
+    assert.equal(status.overWeight, true);
+    assert.equal(status.overVolume, false); // sin límite de volumen declarado
+
+    // --- 5. Descarga: traslado inverso vehículo → fijo; el vehículo queda vacío. ---
+    const unload = StockMovement.record({
+      id: StockMovementId.create(),
+      scopeId,
+      kind: MovementKind.Transfer,
+      quantity: Quantity.of(15, unit),
+      fromItemId: vehicleItem.id,
+      toItemId: fixedItem.id,
+      idempotencyKey: 'descarga-1',
+      actorId,
+    });
+    const vehicleBeforeUnload = await items.findById(vehicleItem.id);
+    const fixedBeforeUnload = await items.findById(fixedItem.id);
+    assert.ok(vehicleBeforeUnload && fixedBeforeUnload);
+    applyStockMovement(unload, {
+      from: vehicleBeforeUnload,
+      to: fixedBeforeUnload,
+    });
+    await runInWmsTransaction(db, async (uow) => {
+      await uow.items.save(vehicleBeforeUnload);
+      await uow.items.save(fixedBeforeUnload);
+      await uow.movements.append(unload);
+    });
+
+    assert.equal((await items.findById(vehicleItem.id))?.quantity.amount, 0);
+    assert.equal((await items.findById(fixedItem.id))?.quantity.amount, 15);
+    const vehicleAfterUnload = await items.findByWarehouse(
+      vehicleWarehouse.id,
+      {},
+    );
+    assert.equal(
+      vehicleAfterUnload.reduce((sum, i) => sum + i.quantity.amount, 0),
+      0,
+    );
   });
 });
