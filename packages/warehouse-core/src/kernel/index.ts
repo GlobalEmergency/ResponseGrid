@@ -34,3 +34,9 @@ export {
 export type { ExternalCodes } from './external-codes.js';
 export type { DomainEvent } from './domain-event.js';
 export { haversineMeters } from './geo-distance.js';
+export {
+  Capacity,
+  CapacityMustHaveWeightOrVolumeError,
+  InvalidCapacityAmountError,
+} from './capacity.js';
+export type { CapacityProps } from './capacity.js';

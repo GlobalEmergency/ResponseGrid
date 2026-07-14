@@ -46,6 +46,15 @@ export class DrizzleWarehouseRepository implements WarehouseRepository {
             lat: s.lat,
             lng: s.lng,
             status: s.status,
+            kind: s.kind,
+            maxWeightKg:
+              s.maxCapacity?.weightKg != null
+                ? s.maxCapacity.weightKg.toString()
+                : null,
+            maxVolumeM3:
+              s.maxCapacity?.volumeM3 != null
+                ? s.maxCapacity.volumeM3.toString()
+                : null,
             updatedAt: s.updatedAt,
           },
         });

@@ -3,7 +3,12 @@ import assert from 'node:assert/strict';
 import { Warehouse, Zone } from './warehouse.js';
 import { WarehouseId } from './warehouse-id.js';
 import { ZoneId } from './zone-id.js';
-import { WarehouseStatus, ZoneKind, ZoneStatus } from './inventory-enums.js';
+import {
+  WarehouseKind,
+  WarehouseStatus,
+  ZoneKind,
+  ZoneStatus,
+} from './inventory-enums.js';
 import {
   DuplicateZoneCodeError,
   WarehouseArchivedError,
@@ -203,4 +208,109 @@ test('round-trips through a snapshot', () => {
   assert.deepEqual(restored.toSnapshot(), snap);
   assert.ok(restored instanceof Warehouse);
   assert.ok(restored.zones[0] instanceof Zone);
+});
+
+// --- kind + maxCapacity (vehículo como almacén móvil) ----------------------
+
+test('defaults kind to fixed with null maxCapacity', () => {
+  const w = make();
+  assert.equal(w.kind, WarehouseKind.Fixed);
+  assert.equal(w.maxCapacity, null);
+});
+
+test('creates a vehicle warehouse with partial (weight-only) capacity', () => {
+  const w = Warehouse.create({
+    id: WarehouseId.create(),
+    scopeId: ScopeId.fromString(SCOPE),
+    code: 'VEH-1',
+    name: 'Camión 1',
+    kind: WarehouseKind.Vehicle,
+    maxCapacity: { weightKg: 3500, volumeM3: null },
+  });
+  assert.equal(w.kind, WarehouseKind.Vehicle);
+  assert.deepEqual(w.maxCapacity, { weightKg: 3500, volumeM3: null });
+});
+
+test('allows a vehicle with an as-yet-undeclared (null) maxCapacity', () => {
+  const w = Warehouse.create({
+    id: WarehouseId.create(),
+    scopeId: ScopeId.fromString(SCOPE),
+    code: 'VEH-2',
+    name: 'Camión 2',
+    kind: WarehouseKind.Vehicle,
+    maxCapacity: null,
+  });
+  assert.equal(w.kind, WarehouseKind.Vehicle);
+  assert.equal(w.maxCapacity, null);
+});
+
+test('rejects a fixed warehouse that declares a maxCapacity', () => {
+  assert.throws(
+    () =>
+      Warehouse.create({
+        id: WarehouseId.create(),
+        scopeId: ScopeId.fromString(SCOPE),
+        code: 'ALM-X',
+        name: 'Almacén X',
+        kind: WarehouseKind.Fixed,
+        maxCapacity: { weightKg: 1000, volumeM3: null },
+      }),
+    WarehouseValidationError,
+  );
+});
+
+test('rejects a maxCapacity with no dimension at all (VO invariant)', () => {
+  assert.throws(
+    () =>
+      Warehouse.create({
+        id: WarehouseId.create(),
+        scopeId: ScopeId.fromString(SCOPE),
+        code: 'VEH-3',
+        name: 'Camión 3',
+        kind: WarehouseKind.Vehicle,
+        maxCapacity: { weightKg: null, volumeM3: null },
+      }),
+    Error,
+  );
+});
+
+test('setMaxCapacity sets and clears the capacity of a vehicle', () => {
+  const w = Warehouse.create({
+    id: WarehouseId.create(),
+    scopeId: ScopeId.fromString(SCOPE),
+    code: 'VEH-4',
+    name: 'Camión 4',
+    kind: WarehouseKind.Vehicle,
+    maxCapacity: null,
+  });
+  w.setMaxCapacity({ weightKg: 2000, volumeM3: 12 });
+  assert.deepEqual(w.maxCapacity, { weightKg: 2000, volumeM3: 12 });
+  w.setMaxCapacity(null);
+  assert.equal(w.maxCapacity, null);
+});
+
+test('setMaxCapacity rejects a non-null capacity on a fixed warehouse', () => {
+  const w = make(); // fixed
+  assert.throws(
+    () => w.setMaxCapacity({ weightKg: 1000, volumeM3: null }),
+    WarehouseValidationError,
+  );
+});
+
+test('round-trips a vehicle warehouse with capacity through a snapshot', () => {
+  const w = Warehouse.create({
+    id: WarehouseId.create(),
+    scopeId: ScopeId.fromString(SCOPE),
+    code: 'VEH-5',
+    name: 'Camión 5',
+    kind: WarehouseKind.Vehicle,
+    maxCapacity: { weightKg: 3500, volumeM3: null },
+  });
+  const snap = w.toSnapshot();
+  assert.equal(snap.kind, WarehouseKind.Vehicle);
+  assert.deepEqual(snap.maxCapacity, { weightKg: 3500, volumeM3: null });
+  const restored = Warehouse.fromSnapshot(snap);
+  assert.deepEqual(restored.toSnapshot(), snap);
+  assert.equal(restored.kind, WarehouseKind.Vehicle);
+  assert.deepEqual(restored.maxCapacity, { weightKg: 3500, volumeM3: null });
 });

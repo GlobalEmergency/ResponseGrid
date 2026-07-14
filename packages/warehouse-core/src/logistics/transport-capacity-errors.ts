@@ -1,16 +1,10 @@
-export class CapacityMustHaveWeightOrVolumeError extends Error {
-  constructor() {
-    super('Transport capacity must declare at least weightKg or volumeM3');
-    this.name = 'CapacityMustHaveWeightOrVolumeError';
-  }
-}
-
-export class InvalidCapacityAmountError extends Error {
-  constructor(field: string, value: number) {
-    super(`Capacity ${field} must be greater than 0, got ${value}`);
-    this.name = 'InvalidCapacityAmountError';
-  }
-}
+// Estos dos errores se movieron al `kernel` junto con el VO `Capacity`. Se
+// re-exportan desde aquí para no romper a sus consumidores (misma clase, así que
+// `instanceof` sigue funcionando).
+export {
+  CapacityMustHaveWeightOrVolumeError,
+  InvalidCapacityAmountError,
+} from '../kernel/capacity.js';
 
 export class InvalidCoverageError extends Error {
   constructor(message: string) {

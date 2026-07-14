@@ -1,12 +1,18 @@
 import { WarehouseId } from './warehouse-id.js';
 import { ZoneId } from './zone-id.js';
-import { WarehouseStatus, ZoneKind, ZoneStatus } from './inventory-enums.js';
+import {
+  WarehouseKind,
+  WarehouseStatus,
+  ZoneKind,
+  ZoneStatus,
+} from './inventory-enums.js';
 import {
   DuplicateZoneCodeError,
   WarehouseArchivedError,
   WarehouseValidationError,
 } from './inventory-errors.js';
-import { ScopeId } from '../kernel/index.js';
+import { Capacity, ScopeId } from '../kernel/index.js';
+import type { CapacityProps } from '../kernel/index.js';
 
 /** Optional geographic point of the warehouse building (WGS84). */
 export interface WarehouseGeo {
@@ -29,6 +35,13 @@ export interface CreateWarehouseProps {
   address?: string | null;
   geo?: WarehouseGeo | null;
   zones?: AddZoneProps[];
+  /** Naturaleza física del almacén. Por defecto `fixed`. */
+  kind?: WarehouseKind;
+  /**
+   * Carga útil máxima (payload). Sólo válida en vehículos; un almacén fijo la
+   * deja `null`. Puede ser parcial (sólo peso o sólo volumen).
+   */
+  maxCapacity?: CapacityProps | null;
 }
 
 export interface ZoneSnapshot {
@@ -48,6 +61,8 @@ export interface WarehouseSnapshot {
   lat: number | null;
   lng: number | null;
   status: WarehouseStatus;
+  kind: WarehouseKind;
+  maxCapacity: CapacityProps | null;
   zones: ZoneSnapshot[];
   createdAt: Date;
   updatedAt: Date;
@@ -147,6 +162,8 @@ export class Warehouse {
     private _address: string | null,
     private _geo: WarehouseGeo,
     private _status: WarehouseStatus,
+    private readonly _kind: WarehouseKind,
+    private _maxCapacity: Capacity | null,
     private _zones: Zone[],
     public readonly createdAt: Date,
     private _updatedAt: Date,
@@ -157,6 +174,8 @@ export class Warehouse {
     const name = normalizeName(props.name, 'Warehouse name');
     const address = normalizeAddress(props.address ?? null);
     const geo = normalizeGeo(props.geo ?? null);
+    const kind = props.kind ?? WarehouseKind.Fixed;
+    const maxCapacity = buildMaxCapacity(kind, props.maxCapacity ?? null);
 
     const zones = (props.zones ?? []).map((z) => Zone.create(z));
     assertUniqueZoneCodes(zones);
@@ -170,6 +189,8 @@ export class Warehouse {
       address,
       geo,
       WarehouseStatus.Active,
+      kind,
+      maxCapacity,
       zones,
       now,
       now,
@@ -185,6 +206,8 @@ export class Warehouse {
       s.address,
       { lat: s.lat, lng: s.lng },
       s.status,
+      s.kind,
+      s.maxCapacity ? Capacity.create(s.maxCapacity) : null,
       s.zones.map((z) => Zone.fromSnapshot(z)),
       s.createdAt,
       s.updatedAt,
@@ -205,6 +228,13 @@ export class Warehouse {
   }
   get status(): WarehouseStatus {
     return this._status;
+  }
+  get kind(): WarehouseKind {
+    return this._kind;
+  }
+  /** Carga útil máxima como props planas, o `null` (sólo la declaran vehículos). */
+  get maxCapacity(): CapacityProps | null {
+    return this._maxCapacity?.toPlain() ?? null;
   }
   get isArchived(): boolean {
     return this._status === WarehouseStatus.Archived;
@@ -228,6 +258,17 @@ export class Warehouse {
     this.assertActive();
     this._address = normalizeAddress(address);
     this._geo = normalizeGeo(geo);
+    this.touch();
+  }
+
+  /**
+   * Declara o borra (`null`) la carga útil máxima del vehículo. Sólo válida en
+   * almacenes `vehicle`; un almacén fijo la rechaza. La capacidad puede ser
+   * parcial (sólo peso o sólo volumen), como exige el VO {@link Capacity}.
+   */
+  setMaxCapacity(props: CapacityProps | null): void {
+    this.assertActive();
+    this._maxCapacity = buildMaxCapacity(this._kind, props);
     this.touch();
   }
 
@@ -273,6 +314,8 @@ export class Warehouse {
       lat: this._geo.lat,
       lng: this._geo.lng,
       status: this._status,
+      kind: this._kind,
+      maxCapacity: this._maxCapacity?.toPlain() ?? null,
       zones: this._zones.map((z) => z.toSnapshot()),
       createdAt: this.createdAt,
       updatedAt: this._updatedAt,
@@ -352,6 +395,25 @@ function normalizeGeo(geo: WarehouseGeo | null): WarehouseGeo {
     );
   }
   return { lat, lng };
+}
+
+/**
+ * Construye (y valida) la carga útil máxima según la naturaleza del almacén:
+ * sólo un vehículo puede declararla; un almacén fijo con capacidad es un error.
+ * Un vehículo sin capacidad declarada (`null`) es válido. Delega la invariante de
+ * "al menos una dimensión positiva" al VO {@link Capacity}.
+ */
+function buildMaxCapacity(
+  kind: WarehouseKind,
+  props: CapacityProps | null,
+): Capacity | null {
+  if (props === null) return null;
+  if (kind !== WarehouseKind.Vehicle) {
+    throw new WarehouseValidationError(
+      'Only a vehicle warehouse can declare a maxCapacity',
+    );
+  }
+  return Capacity.create(props);
 }
 
 function assertUniqueZoneCodes(zones: Zone[]): void {

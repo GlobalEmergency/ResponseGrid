@@ -10,6 +10,17 @@ export enum WarehouseStatus {
 }
 
 /**
+ * Naturaleza física de un {@link Warehouse}. `fixed` = almacén de obra (edificio,
+ * depósito); `vehicle` = almacén móvil (camión/furgón) que se carga, descarga e
+ * inspecciona a lo largo del tiempo y tiene una carga útil máxima (`maxCapacity`).
+ * Sólo los vehículos declaran capacidad. Por defecto `fixed`.
+ */
+export enum WarehouseKind {
+  Fixed = 'fixed',
+  Vehicle = 'vehicle',
+}
+
+/**
  * Lifecycle of a {@link Zone}. Mirrors the warehouse: `active` or `archived`.
  * Archiving a zone (e.g. a bay taken out of service) keeps its id valid for
  * historical references while removing it from the operational layout.
