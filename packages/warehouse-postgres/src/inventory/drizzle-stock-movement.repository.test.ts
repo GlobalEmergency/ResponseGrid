@@ -39,6 +39,7 @@ describe('DrizzleStockMovementRepository (integración)', () => {
     toItemId: StockItemId;
     amount?: number;
     idempotencyKey?: string | null;
+    actorId?: string | null;
   }): StockMovement {
     return StockMovement.record({
       id: StockMovementId.create(),
@@ -48,6 +49,7 @@ describe('DrizzleStockMovementRepository (integración)', () => {
       toItemId: opts.toItemId,
       reason: 'Entrada de donación',
       idempotencyKey: opts.idempotencyKey ?? null,
+      actorId: opts.actorId ?? null,
     });
   }
 
@@ -59,6 +61,20 @@ describe('DrizzleStockMovementRepository (integración)', () => {
     const loaded = await repo.findById(movement.id);
     assert.ok(loaded);
     assert.deepEqual(loaded.toSnapshot(), movement.toSnapshot());
+  });
+
+  it('actorId (cadena de custodia) hace round-trip', async () => {
+    const scopeId = ScopeId.create();
+    const movement = receipt({
+      scopeId,
+      toItemId: StockItemId.create(),
+      actorId: 'coordinador-7',
+    });
+    await repo.append(movement);
+
+    const loaded = await repo.findById(movement.id);
+    assert.ok(loaded);
+    assert.equal(loaded.actorId, 'coordinador-7');
   });
 
   it('idempotencia: la misma clave insertada dos veces deja una sola fila', async () => {

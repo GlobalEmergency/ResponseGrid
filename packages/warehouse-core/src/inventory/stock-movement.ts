@@ -23,6 +23,12 @@ export interface RecordStockMovementProps {
    * movement by key before applying, guarding against double entradas.
    */
   idempotencyKey?: string | null;
+  /**
+   * Quién ejecutó el movimiento (cadena de custodia). Id opaco: el paquete no
+   * resuelve identidad ni permisos — eso lo hace el host (#355). Null = sin
+   * autor conocido (movimientos históricos o del sistema).
+   */
+  actorId?: string | null;
   occurredAt?: Date;
 }
 
@@ -36,6 +42,7 @@ export interface StockMovementSnapshot {
   toItemId: string | null;
   reason: string | null;
   idempotencyKey: string | null;
+  actorId: string | null;
   occurredAt: Date;
 }
 
@@ -73,6 +80,7 @@ export class StockMovement {
     public readonly toItemId: StockItemId | null,
     public readonly reason: string | null,
     public readonly idempotencyKey: string | null,
+    public readonly actorId: string | null,
     public readonly occurredAt: Date,
   ) {}
 
@@ -95,6 +103,7 @@ export class StockMovement {
       to,
       normalizeText(props.reason),
       normalizeText(props.idempotencyKey),
+      normalizeText(props.actorId),
       props.occurredAt ?? new Date(),
     );
   }
@@ -109,6 +118,7 @@ export class StockMovement {
       s.toItemId !== null ? StockItemId.fromString(s.toItemId) : null,
       s.reason,
       s.idempotencyKey,
+      s.actorId,
       s.occurredAt,
     );
   }
@@ -134,6 +144,7 @@ export class StockMovement {
       toItemId: this.toItemId?.value ?? null,
       reason: this.reason,
       idempotencyKey: this.idempotencyKey,
+      actorId: this.actorId,
       occurredAt: this.occurredAt,
     };
   }

@@ -234,6 +234,7 @@ export function rowToStockMovementSnapshot(
     toItemId: row.toItemId ?? null,
     reason: row.reason ?? null,
     idempotencyKey: row.idempotencyKey ?? null,
+    actorId: row.actorId ?? null,
     occurredAt: row.occurredAt,
   };
 }
@@ -251,6 +252,7 @@ export function stockMovementSnapshotToRow(
     toItemId: s.toItemId,
     reason: s.reason,
     idempotencyKey: s.idempotencyKey,
+    actorId: s.actorId,
     occurredAt: s.occurredAt,
   };
 }
