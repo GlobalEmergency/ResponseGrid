@@ -24,12 +24,20 @@ import {
   StockStatus,
   MovementKind,
 } from '@globalemergency/warehouse-core/inventory';
-import { ScopeId } from '@globalemergency/warehouse-core/kernel';
+import {
+  Container,
+  ContainerId,
+  ContainerHolderType,
+  ContainerStatus,
+  ContainerType,
+} from '@globalemergency/warehouse-core/containers';
+import { ScopeId, SupplyLine } from '@globalemergency/warehouse-core/kernel';
 import {
   DrizzleWarehouseRepository,
   DrizzleBinRepository,
   DrizzleStockItemRepository,
   DrizzleStockMovementRepository,
+  DrizzleContainerRepository,
   StaleStockItemError,
   runInWmsTransaction,
 } from './index.js';
@@ -54,6 +62,7 @@ describe('Consumidor standalone: flujo WMS end-to-end (dominio + persistencia)',
   let bins: DrizzleBinRepository;
   let items: DrizzleStockItemRepository;
   let movements: DrizzleStockMovementRepository;
+  let containers: DrizzleContainerRepository;
 
   before(async () => {
     pool = newPool();
@@ -63,6 +72,7 @@ describe('Consumidor standalone: flujo WMS end-to-end (dominio + persistencia)',
     bins = new DrizzleBinRepository(db);
     items = new DrizzleStockItemRepository(db);
     movements = new DrizzleStockMovementRepository(db);
+    containers = new DrizzleContainerRepository(db);
   });
 
   after(async () => {
@@ -332,5 +342,88 @@ describe('Consumidor standalone: flujo WMS end-to-end (dominio + persistencia)',
     assert.equal(reloadedTo?.quantity.amount, 0);
     assert.equal(reloadedTo?.version, 1);
     assert.equal((await movements.findByScope(scopeId, {})).length, 0);
+  });
+
+  it('empaqueta un palet y su stock en la MISMA transacción (atomicidad palet+stock)', async () => {
+    const scopeId = ScopeId.create();
+    const supplyId = uuid();
+    const unit = 'unit';
+    const warehouseId = WarehouseId.create();
+    const binId = BinId.create();
+
+    // El código del palet lo asigna el allocator atómico del propio repo.
+    const seq = await containers.nextSequence(scopeId, ContainerType.Pallet);
+    assert.equal(seq, 1);
+    const pallet = Container.create({
+      id: ContainerId.create(),
+      code: `PAL-${String(seq).padStart(4, '0')}`,
+      type: ContainerType.Pallet,
+      scopeId,
+      lines: [
+        SupplyLine.create({
+          name: 'Agua 1.5L',
+          quantity: 24,
+          unit: 'botella',
+          category: 'water',
+        }),
+      ],
+      grossWeightKg: 36,
+    });
+
+    const stock = StockItem.create({
+      id: StockItemId.create(),
+      scopeId,
+      warehouseId,
+      binId,
+      supplyId,
+      lot: null,
+      quantity: Quantity.of(24, unit),
+      status: StockStatus.Available,
+    });
+
+    // Palet + stock que lo constituye se confirman juntos: un fallo revertiría
+    // ambos (misma transacción de la Unit of Work).
+    await runInWmsTransaction(db, async (uow) => {
+      await uow.containers.save(pallet);
+      await uow.items.save(stock);
+    });
+
+    const loadedPallet = await containers.findById(pallet.id);
+    assert.ok(loadedPallet);
+    assert.equal(loadedPallet.code, 'PAL-0001');
+    assert.equal(loadedPallet.status, ContainerStatus.Open);
+    assert.equal(loadedPallet.lines.length, 1);
+    assert.equal((await items.findById(stock.id))?.quantity.amount, 24);
+
+    // Un fallo a mitad revierte el palet Y el stock (nada queda persistido).
+    const boom = new Error('fallo deliberado empaquetando');
+    const orphanPallet = Container.create({
+      id: ContainerId.create(),
+      code: 'PAL-0002',
+      type: ContainerType.Pallet,
+      scopeId,
+      holder: { type: ContainerHolderType.Shipment, id: uuid() },
+    });
+    const orphanStock = StockItem.create({
+      id: StockItemId.create(),
+      scopeId,
+      warehouseId,
+      binId: BinId.create(),
+      supplyId,
+      lot: null,
+      quantity: Quantity.of(5, unit),
+      status: StockStatus.Available,
+    });
+    await assert.rejects(
+      () =>
+        runInWmsTransaction(db, async (uow) => {
+          await uow.containers.save(orphanPallet);
+          await uow.items.save(orphanStock);
+          throw boom;
+        }),
+      (err) => err === boom,
+    );
+    assert.equal(await containers.findById(orphanPallet.id), null);
+    assert.equal(await items.findById(orphanStock.id), null);
   });
 });

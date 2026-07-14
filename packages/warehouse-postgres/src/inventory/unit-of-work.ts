@@ -3,18 +3,20 @@ import { DrizzleWarehouseRepository } from './drizzle-warehouse.repository.js';
 import { DrizzleBinRepository } from './drizzle-bin.repository.js';
 import { DrizzleStockItemRepository } from './drizzle-stock-item.repository.js';
 import { DrizzleStockMovementRepository } from './drizzle-stock-movement.repository.js';
+import { DrizzleContainerRepository } from './drizzle-container.repository.js';
 
 /**
- * Los 4 repositorios del módulo inventory, ligados a una misma transacción.
+ * Los repositorios del módulo inventory, ligados a una misma transacción.
  * Es lo que recibe el callback de {@link runInWmsTransaction}: úsalos para
  * componer varias escrituras (p. ej. las dos patas de un traslado + el asiento
- * del libro mayor) de forma atómica.
+ * del libro mayor, o un palet y el stock que lo empaqueta) de forma atómica.
  */
 export interface WmsUnitOfWork {
   warehouses: DrizzleWarehouseRepository;
   bins: DrizzleBinRepository;
   items: DrizzleStockItemRepository;
   movements: DrizzleStockMovementRepository;
+  containers: DrizzleContainerRepository;
 }
 
 /**
@@ -50,6 +52,7 @@ export async function runInWmsTransaction<T>(
       bins: new DrizzleBinRepository(tx),
       items: new DrizzleStockItemRepository(tx),
       movements: new DrizzleStockMovementRepository(tx),
+      containers: new DrizzleContainerRepository(tx),
     };
     return work(uow);
   });
