@@ -114,7 +114,12 @@ export class DrizzleContainerRepository implements ContainerRepository {
     const rows = await this.db
       .select()
       .from(containersTable)
-      .where(and(eq(containersTable.scopeId, scopeId.value), ...containerFilters(filter)))
+      .where(
+        and(
+          eq(containersTable.scopeId, scopeId.value),
+          ...containerFilters(filter),
+        ),
+      )
       .orderBy(desc(containersTable.createdAt));
     return rows.map((row) =>
       Container.fromSnapshot(rowToContainerSnapshot(row)),

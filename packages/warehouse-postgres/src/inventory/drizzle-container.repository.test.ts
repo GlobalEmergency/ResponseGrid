@@ -63,7 +63,10 @@ describe('DrizzleContainerRepository (persistencia del agregado Container)', () 
       ],
       grossWeightKg: 42.5,
       grossVolumeM3: 1.2,
-      holder: { type: ContainerHolderType.Resource, id: ScopeId.create().value },
+      holder: {
+        type: ContainerHolderType.Resource,
+        id: ScopeId.create().value,
+      },
     });
     await repo.save(container);
 
