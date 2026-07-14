@@ -110,6 +110,7 @@ export const stockMovementsTable = wms.table('stock_movements', {
   toItemId: uuid('to_item_id'),
   reason: text('reason'),
   idempotencyKey: text('idempotency_key'),
+  actorId: text('actor_id'),
   occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull(),
 });
 
