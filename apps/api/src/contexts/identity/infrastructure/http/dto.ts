@@ -238,6 +238,38 @@ export class TrustedAuthResponseDto {
   user!: TrustedAuthUserDto;
 }
 
+export class SetPasswordDto {
+  @ApiProperty({
+    description: 'Token de un solo uso recibido en el email de set-password',
+  })
+  @IsString()
+  @IsNotEmpty()
+  token!: string;
+
+  @ApiProperty({ example: 'mi-nueva-contrasena', minLength: 8 })
+  @IsString()
+  @MinLength(8)
+  password!: string;
+}
+
+export class SetPasswordResponseDto {
+  @ApiProperty({
+    description: 'JWT access token (auto-login tras establecer la contraseña)',
+  })
+  accessToken!: string;
+}
+
+export class RequestPasswordSetupDto {
+  @ApiProperty({
+    example: 'donor@example.com',
+    description:
+      'Email del perfil sin contraseña al que reenviar el enlace de ' +
+      'set-password. La respuesta es 202 siempre, exista o no la cuenta.',
+  })
+  @IsEmail()
+  email!: string;
+}
+
 export class UpdateProfileDto {
   @ApiProperty({
     example: '+58 412 555 0101',

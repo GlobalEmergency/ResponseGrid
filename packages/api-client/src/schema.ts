@@ -38,6 +38,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/set-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Establecer la contraseña de un perfil sin contraseña con un token de un solo uso (auto-login: devuelve un JWT) */
+        post: operations["AuthController_setPasswordRoute"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/set-password/request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reenviar el email de «crea tu contraseña» a un perfil sin contraseña. Responde 202 siempre (no revela si el email existe). */
+        post: operations["AuthController_requestPasswordSetupRoute"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/onboarding": {
         parameters: {
             query?: never;
@@ -2819,6 +2853,23 @@ export interface components {
         RegisterResponseDto: {
             /** @description JWT access token (auto-login after registration) */
             accessToken: string;
+        };
+        SetPasswordDto: {
+            /** @description Token de un solo uso recibido en el email de set-password */
+            token: string;
+            /** @example mi-nueva-contrasena */
+            password: string;
+        };
+        SetPasswordResponseDto: {
+            /** @description JWT access token (auto-login tras establecer la contraseña) */
+            accessToken: string;
+        };
+        RequestPasswordSetupDto: {
+            /**
+             * @description Email del perfil sin contraseña al que reenviar el enlace de set-password. La respuesta es 202 siempre, exista o no la cuenta.
+             * @example donor@example.com
+             */
+            email: string;
         };
         OnboardingDto: {
             /**
@@ -6205,6 +6256,73 @@ export interface operations {
             };
             /** @description Email already registered */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limit exceeded — try again later */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_setPasswordRoute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetPasswordDto"];
+            };
+        };
+        responses: {
+            /** @description Contraseña establecida */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetPasswordResponseDto"];
+                };
+            };
+            /** @description Token inválido, caducado o ya usado */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limit exceeded — try again later */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_requestPasswordSetupRoute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestPasswordSetupDto"];
+            };
+        };
+        responses: {
+            /** @description Solicitud aceptada (se envía el email si procede) */
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -34,6 +34,12 @@ export class InMemoryUserRepository implements UserRepository {
     return Promise.resolve(snap ? User.fromSnapshot(snap) : null);
   }
 
+  setPassword(id: UserId, passwordHash: string): Promise<void> {
+    const snap = this.store.get(id.value);
+    if (snap) this.store.set(id.value, { ...snap, passwordHash });
+    return Promise.resolve();
+  }
+
   /** Records when the user last logged in (issue #176). */
   recordLogin(id: UserId): Promise<void> {
     this.lastLoginById.set(id.value, new Date());
