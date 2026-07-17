@@ -5,8 +5,7 @@ import { NeedLookup } from '../domain/ports/need-lookup';
 import { DonationOffer } from '../domain/donation-offer';
 import { OfferId } from '../domain/offer-id';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { Category } from '../domain/offer-enums';
-import { SupplyLine } from '../../supplies/domain/supply-line';
+import { SupplyLine } from '@globalemergency/warehouse-core/kernel';
 import { Location } from '../../../shared/domain/location';
 import { Author, AuthorProps } from '../../../shared/domain/author';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
@@ -39,7 +38,8 @@ export interface SubmitOfferItemCommand {
   name: string;
   quantity: number;
   unit: string | null;
-  category: Category;
+  /** Slug de categoría (data-driven); el formato lo valida SupplyLine. */
+  category: string;
   supplyId?: string | null;
   presentation: string | null;
 }

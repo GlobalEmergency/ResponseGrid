@@ -118,8 +118,7 @@ describe('Authorization coverage — every mutating endpoint is guarded', () => 
         const key = `${metatype.name}#${methodName}`;
         const guards = [...guardNamesOf(handler), ...classGuards];
         const path = Reflect.getMetadata(PATH_METADATA, handler as object) as
-          | string
-          | undefined;
+          string | undefined;
         const label = `${METHOD_LABEL[httpMethod]} ${path ?? ''} (${key})`;
 
         const hasAuth = guards.some((g) => AUTHENTICATING_GUARDS.has(g));
@@ -131,11 +130,9 @@ describe('Authorization coverage — every mutating endpoint is guarded', () => 
         // controller class (class-level applies to every route).
         const requiredPermission =
           (Reflect.getMetadata(REQUIRED_PERMISSION, handler as object) as
-            | string
-            | undefined) ??
+            string | undefined) ??
           (Reflect.getMetadata(REQUIRED_PERMISSION, metatype) as
-            | string
-            | undefined);
+            string | undefined);
         if (
           guards.includes('PermissionGuard') &&
           requiredPermission === undefined

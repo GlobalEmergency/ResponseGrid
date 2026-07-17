@@ -2,6 +2,7 @@ import {
   pgTable,
   text,
   integer,
+  boolean,
   uuid,
   jsonb,
   doublePrecision,
@@ -11,7 +12,9 @@ import {
   primaryKey,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
-import { SupplyLineSnapshot } from '../../domain/supply-line';
+import { sql } from 'drizzle-orm';
+import { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
+import { AttributeOption } from '@globalemergency/warehouse-core/catalog';
 
 export const categoriesTable = pgTable('categories', {
   slug: text('slug').primaryKey(),
@@ -26,6 +29,14 @@ export const categoriesTable = pgTable('categories', {
   codePrefix: text('code_prefix'),
   kind: text('kind').notNull().default('material'),
   archivedAt: timestamp('archived_at', { withTimezone: true }),
+  /**
+   * Códigos externos estándar para interop (#398): mapa abierto namespace→código
+   * (migración 0058). Por defecto '{}'.
+   */
+  externalCodes: jsonb('external_codes')
+    .$type<Record<string, string>>()
+    .notNull()
+    .default({}),
 });
 
 export const categoryAliasesTable = pgTable('category_aliases', {
@@ -70,25 +81,108 @@ export const suppliesTable = pgTable(
       (): AnyPgColumn => suppliesTable.id,
       { onDelete: 'set null' },
     ),
+    /** Tenencia (#397): null = fila global · set = extensión de un tenant. */
+    scopeId: uuid('scope_id'),
+    /**
+     * Naturaleza logística (#269): null = sin clasificar · fungible | reusable |
+     * human. CHECK en la migración 0057 (enum extensible, no boolean).
+     */
+    nature: text('nature'),
+    /**
+     * Códigos externos estándar para interop (#398): mapa abierto
+     * namespace→código (migración 0058). GIN `supplies_external_codes_gin` para
+     * la búsqueda inversa. Por defecto '{}'.
+     */
+    externalCodes: jsonb('external_codes')
+      .$type<Record<string, string>>()
+      .notNull()
+      .default({}),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
   },
   (t) => [
-    uniqueIndex('supplies_code_uniq').on(t.code),
+    // Unicidad de `code` por scope (#397, migración 0056): par de índices
+    // parciales — global (scope_id IS NULL) + por tenant (code, scope_id).
+    uniqueIndex('supplies_code_global_uniq')
+      .on(t.code)
+      .where(sql`${t.scopeId} IS NULL`),
+    uniqueIndex('supplies_code_scope_uniq')
+      .on(t.code, t.scopeId)
+      .where(sql`${t.scopeId} IS NOT NULL`),
     index('supplies_category_slug_idx').on(t.categorySlug),
     index('supplies_variant_of_id_idx').on(t.variantOfId),
+    index('supplies_scope_id_idx').on(t.scopeId),
+    // Búsqueda inversa por código externo (#398, migración 0058): `@>` / `?`.
+    index('supplies_external_codes_gin').using('gin', t.externalCodes),
+  ],
+);
+
+/**
+ * Metamodelo de atributos data-driven (#396): describe los campos tipados de
+ * cada familia (nodo de `categories`, con herencia). Los valores viven en el
+ * `attributes` jsonb de `supplies`, validados contra la unión de definiciones
+ * de la ascendencia de su categoría. `scopeId` null = global (Inc 1). El índice
+ * único parcial (categoría, key) WHERE scope_id IS NULL vive en la migración
+ * 0055.
+ */
+export const attributeDefinitionsTable = pgTable(
+  'attribute_definitions',
+  {
+    id: uuid('id').primaryKey(),
+    categorySlug: text('category_slug')
+      .notNull()
+      .references(() => categoriesTable.slug),
+    key: text('key').notNull(),
+    dataType: text('data_type').notNull(),
+    required: boolean('required').notNull().default(false),
+    options: jsonb('options').$type<AttributeOption[]>(),
+    unit: text('unit'),
+    sort: integer('sort').notNull().default(0),
+    scopeId: uuid('scope_id'),
+    archivedAt: timestamp('archived_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (t) => [
+    index('attribute_definitions_category_slug_idx').on(t.categorySlug),
+    // Unicidad por scope: global (categoría,key) WHERE scope_id IS NULL en 0055;
+    // por tenant (categoría,key,scope_id) WHERE scope_id IS NOT NULL en 0056 (#397).
+    uniqueIndex('attribute_definitions_global_category_key_uniq')
+      .on(t.categorySlug, t.key)
+      .where(sql`${t.scopeId} IS NULL`),
+    uniqueIndex('attribute_definitions_scope_category_key_uniq')
+      .on(t.categorySlug, t.key, t.scopeId)
+      .where(sql`${t.scopeId} IS NOT NULL`),
   ],
 );
 
 export const supplyAliasesTable = pgTable(
   'supply_aliases',
   {
-    aliasNorm: text('alias_norm').primaryKey(),
+    aliasNorm: text('alias_norm').notNull(),
     supplyId: uuid('supply_id')
       .notNull()
       .references(() => suppliesTable.id, { onDelete: 'cascade' }),
+    /** Tenencia (#397): null = alias global · set = alias de un tenant. */
+    scopeId: uuid('scope_id'),
   },
-  (t) => [index('supply_aliases_supply_id_idx').on(t.supplyId)],
+  (t) => [
+    index('supply_aliases_supply_id_idx').on(t.supplyId),
+    // Unicidad del alias normalizado por scope (#397, migración 0056): par de
+    // índices parciales — global (alias_norm) + por tenant (alias_norm, scope_id).
+    // Reemplaza la PRIMARY KEY global sobre alias_norm de 0037.
+    uniqueIndex('supply_aliases_alias_global_uniq')
+      .on(t.aliasNorm)
+      .where(sql`${t.scopeId} IS NULL`),
+    uniqueIndex('supply_aliases_alias_scope_uniq')
+      .on(t.aliasNorm, t.scopeId)
+      .where(sql`${t.scopeId} IS NOT NULL`),
+    index('supply_aliases_scope_id_idx').on(t.scopeId),
+  ],
 );
 
 export const supplyTranslationsTable = pgTable(

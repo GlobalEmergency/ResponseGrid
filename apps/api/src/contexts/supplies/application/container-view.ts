@@ -1,5 +1,5 @@
-import { Container } from '../domain/container';
-import { SupplyLineSnapshot } from '../domain/supply-line';
+import { Container } from '@globalemergency/warehouse-core/containers';
+import { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
 
 export interface ContainerLineView {
   name: string;
@@ -52,7 +52,7 @@ export function toContainerView(c: Container): ContainerView {
     id: snap.id,
     code: snap.code,
     type: snap.type,
-    emergencyId: snap.emergencyId,
+    emergencyId: snap.scopeId,
     parentContainerId: snap.parentContainerId,
     lines: snap.lines.map(toLineView),
     grossWeightKg: snap.grossWeightKg,

@@ -4,17 +4,17 @@ import {
 } from './withdraw-capacity';
 import { CapacityNotFoundError } from './capacity-not-found.error';
 import { InMemoryTransportCapacityRepository } from '../infrastructure/in-memory-transport-capacity.repository';
-import { TransportCapacity } from '../domain/transport-capacity';
-import { TransportCapacityId } from '../domain/transport-capacity-id';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
+import { TransportCapacity } from '@globalemergency/warehouse-core/logistics';
+import { TransportCapacityId } from '@globalemergency/warehouse-core/logistics';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 import {
   TransportCapacityStatus,
   TransportMode,
   TransportProviderType,
-} from '../domain/transport-capacity-enums';
-import { Capacity } from '../domain/capacity';
-import { Coverage } from '../domain/coverage';
-import { CapacityWindow } from '../domain/capacity-window';
+} from '@globalemergency/warehouse-core/logistics';
+import { Capacity } from '@globalemergency/warehouse-core/logistics';
+import { Coverage } from '@globalemergency/warehouse-core/logistics';
+import { CapacityWindow } from '@globalemergency/warehouse-core/logistics';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const OWNER = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -23,7 +23,7 @@ const OTHER = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 function makeCapacity(): TransportCapacity {
   return TransportCapacity.publish({
     id: TransportCapacityId.create(),
-    emergencyId: EmergencyId.fromString(EM),
+    scopeId: ScopeId.fromString(EM),
     provider: { type: TransportProviderType.Volunteer, id: OWNER },
     mode: TransportMode.Road,
     capacity: Capacity.create({ weightKg: 1000, volumeM3: null }),

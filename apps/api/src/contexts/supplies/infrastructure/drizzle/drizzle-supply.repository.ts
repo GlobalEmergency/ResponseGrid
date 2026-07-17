@@ -1,13 +1,25 @@
-import { and, asc, eq, ilike, ne, or, sql, type SQL } from 'drizzle-orm';
-import { Db } from '../../../../shared/db';
-import { Supply, SupplyStatus } from '../../domain/supply';
-import { SupplyAlias } from '../../domain/supply-alias';
-import { AliasConflictError } from '../../domain/supply-errors';
 import {
+  and,
+  asc,
+  eq,
+  ilike,
+  isNull,
+  ne,
+  or,
+  sql,
+  type SQL,
+} from 'drizzle-orm';
+import { Db } from '../../../../shared/db';
+import {
+  Supply,
+  SupplyStatus,
+  SupplyNature,
+  SupplyAlias,
+  AliasConflictError,
   SupplyListFilter,
   SupplyRepository,
   SupplyTranslationInput,
-} from '../../domain/ports/supply.repository';
+} from '@globalemergency/warehouse-core/catalog';
 import {
   suppliesTable,
   supplyAliasesTable,
@@ -33,14 +45,20 @@ export class DrizzleSupplyRepository implements SupplyRepository {
     return row ? this.toSupply(row) : null;
   }
 
-  async findByCode(code: string): Promise<Supply | null> {
+  async findByCode(
+    code: string,
+    scopeId: string | null = null,
+  ): Promise<Supply | null> {
     // Búsqueda por código normalizada a mayúsculas (los códigos canónicos son
-    // 'INS-NNNN', lo que permite usar el índice único).
+    // 'INS-NNNN', lo que permite usar el índice único). Tenencia (#397): global
+    // por defecto; con tenant busca en global ∪ tenant.
     const normalized = code.trim().toUpperCase();
     const [row] = await this.db
       .select()
       .from(suppliesTable)
-      .where(eq(suppliesTable.code, normalized))
+      .where(
+        and(eq(suppliesTable.code, normalized), this.supplyVisibility(scopeId)),
+      )
       .limit(1);
     return row ? this.toSupply(row) : null;
   }
@@ -61,6 +79,9 @@ export class DrizzleSupplyRepository implements SupplyRepository {
       defaultUnit: s.defaultUnit,
       attributes: s.attributes,
       variantOfId: s.variantOfId,
+      scopeId: s.scopeId,
+      nature: s.nature,
+      externalCodes: s.externalCodes,
       createdAt: now,
       updatedAt: now,
     };
@@ -74,6 +95,8 @@ export class DrizzleSupplyRepository implements SupplyRepository {
         defaultUnit: s.defaultUnit,
         attributes: s.attributes,
         variantOfId: s.variantOfId,
+        nature: s.nature,
+        externalCodes: s.externalCodes,
         updatedAt: now,
       },
     };
@@ -153,6 +176,11 @@ export class DrizzleSupplyRepository implements SupplyRepository {
 
   async list(filter: SupplyListFilter): Promise<Supply[]> {
     const conditions: SQL[] = [];
+    // Tenencia (#397): visibilidad por scope. Sin scope, sólo globales.
+    const visibility = this.supplyVisibility(filter.scopeId);
+    if (visibility) {
+      conditions.push(visibility);
+    }
     if (filter.status) {
       conditions.push(eq(suppliesTable.status, filter.status));
     }
@@ -184,16 +212,30 @@ export class DrizzleSupplyRepository implements SupplyRepository {
       .where(eq(supplyAliasesTable.supplyId, supplyId))
       .orderBy(asc(supplyAliasesTable.aliasNorm));
     return rows.map((r) =>
-      SupplyAlias.fromSnapshot({ alias: r.aliasNorm, supplyId: r.supplyId }),
+      SupplyAlias.fromSnapshot({
+        alias: r.aliasNorm,
+        supplyId: r.supplyId,
+        scopeId: r.scopeId ?? null,
+      }),
     );
   }
 
   async addAlias(alias: SupplyAlias): Promise<void> {
     const aliasNorm = SupplyAlias.normalize(alias.alias);
+    const scopeId = alias.scopeId;
+    // La unicidad del alias es por scope (#397): el candado global no ve los de
+    // tenant y viceversa. Se comprueba el conflicto dentro del mismo scope.
     const [existing] = await this.db
       .select()
       .from(supplyAliasesTable)
-      .where(eq(supplyAliasesTable.aliasNorm, aliasNorm))
+      .where(
+        and(
+          eq(supplyAliasesTable.aliasNorm, aliasNorm),
+          scopeId === null
+            ? isNull(supplyAliasesTable.scopeId)
+            : eq(supplyAliasesTable.scopeId, scopeId),
+        ),
+      )
       .limit(1);
     if (existing) {
       // Idempotente si ya apunta al mismo insumo; conflicto si apunta a otro.
@@ -202,14 +244,22 @@ export class DrizzleSupplyRepository implements SupplyRepository {
     }
     await this.db
       .insert(supplyAliasesTable)
-      .values({ aliasNorm, supplyId: alias.supplyId });
+      .values({ aliasNorm, supplyId: alias.supplyId, scopeId });
   }
 
-  async removeAlias(aliasNorm: string): Promise<void> {
+  async removeAlias(
+    aliasNorm: string,
+    scopeId: string | null = null,
+  ): Promise<void> {
     await this.db
       .delete(supplyAliasesTable)
       .where(
-        eq(supplyAliasesTable.aliasNorm, SupplyAlias.normalize(aliasNorm)),
+        and(
+          eq(supplyAliasesTable.aliasNorm, SupplyAlias.normalize(aliasNorm)),
+          scopeId === null
+            ? isNull(supplyAliasesTable.scopeId)
+            : eq(supplyAliasesTable.scopeId, scopeId),
+        ),
       );
   }
 
@@ -274,6 +324,36 @@ export class DrizzleSupplyRepository implements SupplyRepository {
       variantOfId: row.variantOfId ?? null,
       status: row.status as SupplyStatus,
       registrationNotes: row.registrationNotes ?? null,
+      scopeId: row.scopeId ?? null,
+      nature: (row.nature ?? null) as SupplyNature | null,
+      externalCodes: row.externalCodes ?? {},
+      // Inc 1 vehículos: el host aún no persiste las medidas unitarias (la
+      // adopción por ResponseGrid es una pista aparte del spec); se mapean a
+      // null hasta entonces — frontera 1:1, sin cambio de columna ni de API.
+      unitWeightKg: null,
+      unitVolumeM3: null,
     });
+  }
+
+  /**
+   * Visibilidad por scope (#397): sin scope, sólo globales (`scope_id IS NULL`);
+   * con un tenant, global ∪ tenant (nunca otros tenants). El default global
+   * preserva el comportamiento actual (los hosts HTTP operan en global).
+   */
+  private supplyVisibility(
+    scopeId: string | null | undefined,
+  ): SQL | undefined {
+    return scopeId === null || scopeId === undefined
+      ? isNull(suppliesTable.scopeId)
+      : or(isNull(suppliesTable.scopeId), eq(suppliesTable.scopeId, scopeId));
+  }
+
+  private aliasVisibility(scopeId: string | null | undefined): SQL | undefined {
+    return scopeId === null || scopeId === undefined
+      ? isNull(supplyAliasesTable.scopeId)
+      : or(
+          isNull(supplyAliasesTable.scopeId),
+          eq(supplyAliasesTable.scopeId, scopeId),
+        );
   }
 }

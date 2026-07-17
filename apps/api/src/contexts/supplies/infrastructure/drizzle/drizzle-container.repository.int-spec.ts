@@ -2,16 +2,15 @@ import { createDb, Db } from '../../../../shared/db';
 import { containerCodeSequencesTable, containersTable } from './schema';
 import { DrizzleContainerRepository } from './drizzle-container.repository';
 import { DrizzleContainerAuthorizationLookup } from './drizzle-container-authorization-lookup';
-import { Container } from '../../domain/container';
-import { ContainerId } from '../../domain/container-id';
 import {
+  Container,
+  ContainerId,
   ContainerHolderType,
   ContainerStatus,
   ContainerType,
-} from '../../domain/container-enums';
-import { SupplyLine } from '../../domain/supply-line';
-import { Category } from '../../domain/category';
-import { EmergencyId } from '../../../../shared/domain/emergency-id';
+} from '@globalemergency/warehouse-core/containers';
+import { SupplyLine, Category } from '@globalemergency/warehouse-core/kernel';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 import type { Pool } from 'pg';
 
 const URL =
@@ -34,7 +33,7 @@ function makeContainer(opts?: {
     id: ContainerId.create(),
     code: opts?.code ?? 'PAL-0001',
     type: opts?.type ?? ContainerType.Pallet,
-    emergencyId: EmergencyId.fromString(opts?.emergencyId ?? EM),
+    scopeId: ScopeId.fromString(opts?.emergencyId ?? EM),
     lines: opts?.lines ?? [],
     grossWeightKg: opts?.grossWeightKg ?? null,
     holder: opts?.holder ?? null,
@@ -120,7 +119,7 @@ describe('DrizzleContainerRepository (integration)', () => {
   });
 
   it('nextSequence allocates a monotonic per-(emergency, type) sequence, never reused', async () => {
-    const em = EmergencyId.fromString(EM);
+    const em = ScopeId.fromString(EM);
     // increments on every call, independent of how many rows exist
     expect(await repo.nextSequence(em, ContainerType.Pallet)).toBe(1);
     expect(await repo.nextSequence(em, ContainerType.Pallet)).toBe(2);
@@ -128,7 +127,7 @@ describe('DrizzleContainerRepository (integration)', () => {
     expect(await repo.nextSequence(em, ContainerType.Box)).toBe(1);
     expect(
       await repo.nextSequence(
-        EmergencyId.fromString(OTHER_EM),
+        ScopeId.fromString(OTHER_EM),
         ContainerType.Pallet,
       ),
     ).toBe(1);
@@ -139,7 +138,7 @@ describe('DrizzleContainerRepository (integration)', () => {
     expect(await repo.nextSequence(em, ContainerType.Pallet)).toBe(3);
   });
 
-  it('findByEmergency filters by type/status/holder/top-level, newest first', async () => {
+  it('findByScope filters by type/status/holder/top-level, newest first', async () => {
     const pallet = makeContainer({
       code: 'PAL-0001',
       holder: { type: ContainerHolderType.Shipment, id: SHIPMENT },
@@ -150,18 +149,16 @@ describe('DrizzleContainerRepository (integration)', () => {
     box.seal();
     await repo.save(box);
 
-    const em = EmergencyId.fromString(EM);
-    expect(await repo.findByEmergency(em, {})).toHaveLength(2);
+    const em = ScopeId.fromString(EM);
+    expect(await repo.findByScope(em, {})).toHaveLength(2);
     expect(
-      await repo.findByEmergency(em, { type: ContainerType.Box }),
+      await repo.findByScope(em, { type: ContainerType.Box }),
     ).toHaveLength(1);
     expect(
-      await repo.findByEmergency(em, { status: ContainerStatus.Sealed }),
+      await repo.findByScope(em, { status: ContainerStatus.Sealed }),
     ).toHaveLength(1);
-    expect(await repo.findByEmergency(em, { topLevelOnly: true })).toHaveLength(
-      1,
-    );
-    const inShipment = await repo.findByEmergency(em, {
+    expect(await repo.findByScope(em, { topLevelOnly: true })).toHaveLength(1);
+    const inShipment = await repo.findByScope(em, {
       holderType: ContainerHolderType.Shipment,
       holderId: SHIPMENT,
     });

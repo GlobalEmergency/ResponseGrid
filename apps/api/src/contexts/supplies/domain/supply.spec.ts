@@ -1,4 +1,8 @@
-import { Supply, SupplyValidationError, formatSupplyCode } from './supply';
+import {
+  Supply,
+  SupplyValidationError,
+  formatSupplyCode,
+} from '@globalemergency/warehouse-core/catalog';
 
 describe('Supply', () => {
   it('crea un supply valido y recorta los textos', () => {

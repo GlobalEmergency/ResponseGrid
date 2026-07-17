@@ -3,7 +3,7 @@ import { InMemoryResourceRepository } from '../infrastructure/in-memory-resource
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
 import { ResourceType, VerificationLevel } from '../domain/resource-enums';
-import { Category } from '../../supplies/domain/category';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 

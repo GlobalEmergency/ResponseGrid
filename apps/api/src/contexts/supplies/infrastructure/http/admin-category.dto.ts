@@ -3,6 +3,7 @@ import {
   IsArray,
   IsBoolean,
   IsInt,
+  IsObject,
   IsOptional,
   IsString,
   Matches,
@@ -64,6 +65,16 @@ export class CreateCategoryDto {
   @ValidateNested({ each: true })
   @Type(() => CategoryTranslationDto)
   translations?: CategoryTranslationDto[];
+
+  @ApiPropertyOptional({
+    type: 'object',
+    additionalProperties: { type: 'string' },
+    description:
+      'Códigos externos estándar para interop (#398): mapa namespace→código.',
+  })
+  @IsOptional()
+  @IsObject()
+  externalCodes?: Record<string, string>;
 }
 
 export class UpdateCategoryDto {
@@ -105,6 +116,16 @@ export class UpdateCategoryDto {
   @ValidateNested({ each: true })
   @Type(() => CategoryTranslationDto)
   translations?: CategoryTranslationDto[];
+
+  @ApiPropertyOptional({
+    type: 'object',
+    additionalProperties: { type: 'string' },
+    description:
+      'Códigos externos de interop (#398). Si se indica, reemplaza el mapa; omitir lo conserva.',
+  })
+  @IsOptional()
+  @IsObject()
+  externalCodes?: Record<string, string>;
 
   @ApiPropertyOptional({
     example: false,
@@ -154,4 +175,13 @@ export class CategoryAdminDto {
 
   @ApiProperty({ type: [CategoryTranslationDto] })
   translations!: CategoryTranslationDto[];
+
+  @ApiProperty({
+    type: 'object',
+    additionalProperties: { type: 'string' },
+    description:
+      'Códigos externos estándar para interop (#398): mapa namespace→código. `{}` si no tiene.',
+    example: { unspsc: '51101500' },
+  })
+  externalCodes!: Record<string, string>;
 }

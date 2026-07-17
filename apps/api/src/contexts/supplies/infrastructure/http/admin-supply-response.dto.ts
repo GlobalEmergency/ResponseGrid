@@ -1,4 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  SUPPLY_NATURES,
+  type SupplyNature,
+} from '@globalemergency/warehouse-core/catalog';
 import { SupplyTranslationDto } from './supplies-admin.dto';
 
 /**
@@ -33,6 +37,24 @@ export class AdminSupplyDto {
 
   @ApiPropertyOptional({ nullable: true, type: String })
   registrationNotes!: string | null;
+
+  @ApiPropertyOptional({
+    enum: SUPPLY_NATURES,
+    nullable: true,
+    example: 'fungible',
+    description:
+      'Naturaleza logística (#269): fungible | reusable | human. Null = sin clasificar.',
+  })
+  nature!: SupplyNature | null;
+
+  @ApiProperty({
+    type: 'object',
+    additionalProperties: { type: 'string' },
+    description:
+      'Códigos externos estándar para interop (#398): mapa namespace→código. `{}` si no tiene.',
+    example: { unspsc: '51101500', hxl: '#item+code' },
+  })
+  externalCodes!: Record<string, string>;
 
   @ApiProperty({ type: [String], example: ['agua embotellada', 'botellon'] })
   aliases!: string[];

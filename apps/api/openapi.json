@@ -696,6 +696,51 @@
         ]
       }
     },
+    "/service-accounts/{serviceAccountId}/grants": {
+      "get": {
+        "operationId": "ApiKeysController_listServiceAccountGrants",
+        "parameters": [
+          {
+            "name": "serviceAccountId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ServiceAccountGrantDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "apikey:create required in scope"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the grants held by a service account — what its keys can do (scoped admin)",
+        "tags": [
+          "service-accounts"
+        ]
+      }
+    },
     "/api-keys/{keyId}": {
       "delete": {
         "operationId": "ApiKeysController_revoke",
@@ -2966,28 +3011,9 @@
             "name": "category",
             "required": false,
             "in": "query",
-            "description": "Filter by item category (needs with at least one item of this category)",
+            "description": "Filter by item category slug (needs with at least one item of this category). Core slugs: food, water, hygiene, clothing, medical, shelter, tools, other, medicines, medical_equipment, medical_supplies, medical_personnel, food_fresh, food_non_perishable, hygiene_infantile, hygiene_personal, tools_extraction, other_pets.",
             "schema": {
-              "enum": [
-                "food",
-                "water",
-                "hygiene",
-                "clothing",
-                "medical",
-                "shelter",
-                "tools",
-                "other",
-                "medicines",
-                "medical_equipment",
-                "medical_supplies",
-                "medical_personnel",
-                "food_fresh",
-                "food_non_perishable",
-                "hygiene_infantile",
-                "hygiene_personal",
-                "tools_extraction",
-                "other_pets"
-              ],
+              "example": "water",
               "type": "string"
             }
           },
@@ -3230,28 +3256,9 @@
             "name": "category",
             "required": false,
             "in": "query",
-            "description": "Filter by item category (needs with at least one item of this category)",
+            "description": "Filter by item category slug (needs with at least one item of this category). Core slugs: food, water, hygiene, clothing, medical, shelter, tools, other, medicines, medical_equipment, medical_supplies, medical_personnel, food_fresh, food_non_perishable, hygiene_infantile, hygiene_personal, tools_extraction, other_pets.",
             "schema": {
-              "enum": [
-                "food",
-                "water",
-                "hygiene",
-                "clothing",
-                "medical",
-                "shelter",
-                "tools",
-                "other",
-                "medicines",
-                "medical_equipment",
-                "medical_supplies",
-                "medical_personnel",
-                "food_fresh",
-                "food_non_perishable",
-                "hygiene_infantile",
-                "hygiene_personal",
-                "tools_extraction",
-                "other_pets"
-              ],
+              "example": "water",
               "type": "string"
             }
           },
@@ -6294,6 +6301,147 @@
         ]
       }
     },
+    "/admin/attribute-definitions": {
+      "get": {
+        "operationId": "AttributeDefinitionsAdminController_list",
+        "parameters": [
+          {
+            "name": "categorySlug",
+            "required": false,
+            "in": "query",
+            "description": "Filter by the exact category slug",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AttributeDefinitionDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing catalogue:manage permission"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List global attribute definitions, optionally by category",
+        "tags": [
+          "attribute-definitions-admin"
+        ]
+      },
+      "post": {
+        "operationId": "AttributeDefinitionsAdminController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAttributeDefinitionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeDefinitionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid attribute definition payload"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing catalogue:manage permission"
+          },
+          "404": {
+            "description": "Category not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a global attribute definition for a family",
+        "tags": [
+          "attribute-definitions-admin"
+        ]
+      }
+    },
+    "/admin/attribute-definitions/{categorySlug}/{key}": {
+      "delete": {
+        "operationId": "AttributeDefinitionsAdminController_archive",
+        "parameters": [
+          {
+            "name": "categorySlug",
+            "required": true,
+            "in": "path",
+            "description": "Category slug of the family",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "description": "Attribute key",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Attribute definition archived"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Missing catalogue:manage permission"
+          },
+          "404": {
+            "description": "Attribute definition not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Archive (soft-delete) a global attribute definition",
+        "tags": [
+          "attribute-definitions-admin"
+        ]
+      }
+    },
     "/supplies": {
       "get": {
         "operationId": "SuppliesController_list",
@@ -9332,6 +9480,14 @@
             "format": "uuid",
             "description": "Principal receiving the role"
           },
+          "principalType": {
+            "type": "string",
+            "enum": [
+              "user",
+              "service_account"
+            ],
+            "description": "Kind of principal receiving the role (defaults to user). Set to service_account when granting to a machine principal so it resolves and labels correctly."
+          },
           "roleId": {
             "type": "string",
             "description": "Role id from the fixed catalog (e.g. emergency_coordinator)"
@@ -9447,6 +9603,40 @@
           "lastUsedAt",
           "revokedAt",
           "createdAt"
+        ]
+      },
+      "ServiceAccountGrantDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roleId": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "scopeId": {
+            "type": "string",
+            "nullable": true
+          },
+          "grantedAt": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "roleId",
+          "scopeType",
+          "scopeId",
+          "grantedAt",
+          "expiresAt"
         ]
       },
       "CreateServiceAccountDto": {
@@ -9932,27 +10122,8 @@
           },
           "category": {
             "type": "string",
-            "enum": [
-              "food",
-              "water",
-              "hygiene",
-              "clothing",
-              "medical",
-              "shelter",
-              "tools",
-              "other",
-              "medicines",
-              "medical_equipment",
-              "medical_supplies",
-              "medical_personnel",
-              "food_fresh",
-              "food_non_perishable",
-              "hygiene_infantile",
-              "hygiene_personal",
-              "tools_extraction",
-              "other_pets"
-            ],
-            "example": "water"
+            "example": "water",
+            "description": "Slug de categoría de material (data-driven, lowercase snake_case). Los slugs core son: food, water, hygiene, clothing, medical, shelter, tools, other, medicines, medical_equipment, medical_supplies, medical_personnel, food_fresh, food_non_perishable, hygiene_infantile, hygiene_personal, tools_extraction, other_pets. El conjunto es abierto: la taxonomía puede crecer vía datos (tabla `categories`)."
           },
           "presentation": {
             "type": "string",
@@ -10169,27 +10340,8 @@
           },
           "category": {
             "type": "string",
-            "enum": [
-              "food",
-              "water",
-              "hygiene",
-              "clothing",
-              "medical",
-              "shelter",
-              "tools",
-              "other",
-              "medicines",
-              "medical_equipment",
-              "medical_supplies",
-              "medical_personnel",
-              "food_fresh",
-              "food_non_perishable",
-              "hygiene_infantile",
-              "hygiene_personal",
-              "tools_extraction",
-              "other_pets"
-            ],
-            "example": "water"
+            "example": "water",
+            "description": "Slug de categoría de material (data-driven, lowercase snake_case)."
           },
           "presentation": {
             "type": "string",
@@ -13694,27 +13846,8 @@
           },
           "category": {
             "type": "string",
-            "enum": [
-              "food",
-              "water",
-              "hygiene",
-              "clothing",
-              "medical",
-              "shelter",
-              "tools",
-              "other",
-              "medicines",
-              "medical_equipment",
-              "medical_supplies",
-              "medical_personnel",
-              "food_fresh",
-              "food_non_perishable",
-              "hygiene_infantile",
-              "hygiene_personal",
-              "tools_extraction",
-              "other_pets"
-            ],
-            "example": "water"
+            "example": "water",
+            "description": "Slug de categoría de material (data-driven, lowercase snake_case)."
           },
           "presentation": {
             "type": "string",
@@ -14705,6 +14838,16 @@
             "items": {
               "$ref": "#/components/schemas/CategoryTranslationDto"
             }
+          },
+          "externalCodes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Códigos externos estándar para interop (#398): mapa namespace→código. `{}` si no tiene.",
+            "example": {
+              "unspsc": "51101500"
+            }
           }
         },
         "required": [
@@ -14716,7 +14859,8 @@
           "vertical",
           "sort",
           "archivedAt",
-          "translations"
+          "translations",
+          "externalCodes"
         ]
       },
       "CreateCategoryDto": {
@@ -14754,6 +14898,13 @@
             "items": {
               "$ref": "#/components/schemas/CategoryTranslationDto"
             }
+          },
+          "externalCodes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Códigos externos estándar para interop (#398): mapa namespace→código."
           }
         },
         "required": [
@@ -14796,12 +14947,154 @@
               "$ref": "#/components/schemas/CategoryTranslationDto"
             }
           },
+          "externalCodes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Códigos externos de interop (#398). Si se indica, reemplaza el mapa; omitir lo conserva."
+          },
           "archived": {
             "type": "boolean",
             "example": false,
             "description": "True to hide/archive the category, false to restore it"
           }
         }
+      },
+      "AttributeOptionDto": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "example": "tableta"
+          },
+          "label": {
+            "type": "string",
+            "example": "Tableta"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      },
+      "AttributeDefinitionDto": {
+        "type": "object",
+        "properties": {
+          "categorySlug": {
+            "type": "string",
+            "example": "medicines"
+          },
+          "key": {
+            "type": "string",
+            "example": "principio_activo"
+          },
+          "dataType": {
+            "type": "string",
+            "enum": [
+              "text",
+              "number",
+              "integer",
+              "boolean",
+              "enum",
+              "date",
+              "quantity"
+            ],
+            "example": "text"
+          },
+          "required": {
+            "type": "boolean",
+            "example": false
+          },
+          "options": {
+            "nullable": true,
+            "description": "Opciones del enum, o null",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttributeOptionDto"
+            }
+          },
+          "unit": {
+            "type": "string",
+            "example": null,
+            "nullable": true
+          },
+          "sort": {
+            "type": "number",
+            "example": 0
+          },
+          "archivedAt": {
+            "type": "object",
+            "example": null,
+            "nullable": true,
+            "description": "Marca de archivado (soft-delete)"
+          }
+        },
+        "required": [
+          "categorySlug",
+          "key",
+          "dataType",
+          "required",
+          "options",
+          "unit",
+          "sort",
+          "archivedAt"
+        ]
+      },
+      "CreateAttributeDefinitionDto": {
+        "type": "object",
+        "properties": {
+          "categorySlug": {
+            "type": "string",
+            "example": "medicines",
+            "description": "Slug de la categoría (familia) a la que se ancla"
+          },
+          "key": {
+            "type": "string",
+            "example": "principio_activo",
+            "description": "Clave del atributo (lowercase snake_case)"
+          },
+          "dataType": {
+            "type": "string",
+            "enum": [
+              "text",
+              "number",
+              "integer",
+              "boolean",
+              "enum",
+              "date",
+              "quantity"
+            ],
+            "example": "text"
+          },
+          "required": {
+            "type": "boolean",
+            "example": false,
+            "default": false
+          },
+          "options": {
+            "description": "Opciones (sólo para dataType=enum)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttributeOptionDto"
+            }
+          },
+          "unit": {
+            "type": "object",
+            "example": "mg",
+            "nullable": true,
+            "description": "Unidad (sólo para dataType=number|quantity)"
+          },
+          "sort": {
+            "type": "number",
+            "example": 0,
+            "default": 0
+          }
+        },
+        "required": [
+          "categorySlug",
+          "key",
+          "dataType"
+        ]
       },
       "SupplyDto": {
         "type": "object",
@@ -14912,6 +15205,22 @@
             "type": "object",
             "description": "Notas internas de gestión"
           },
+          "nature": {
+            "type": "string",
+            "enum": [
+              "fungible",
+              "reusable",
+              "human"
+            ],
+            "description": "Naturaleza logística (#269): fungible | reusable | human. Omitir = sin clasificar."
+          },
+          "externalCodes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Códigos externos estándar para interop (#398): mapa namespace→código, p.ej. { \"unspsc\": \"51101500\", \"hxl\": \"#item+code\" }."
+          },
           "variantOfId": {
             "type": "object",
             "format": "uuid",
@@ -14994,6 +15303,28 @@
             "type": "string",
             "nullable": true
           },
+          "nature": {
+            "type": "string",
+            "enum": [
+              "fungible",
+              "reusable",
+              "human"
+            ],
+            "nullable": true,
+            "example": "fungible",
+            "description": "Naturaleza logística (#269): fungible | reusable | human. Null = sin clasificar."
+          },
+          "externalCodes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Códigos externos estándar para interop (#398): mapa namespace→código. `{}` si no tiene.",
+            "example": {
+              "unspsc": "51101500",
+              "hxl": "#item+code"
+            }
+          },
           "aliases": {
             "example": [
               "agua embotellada",
@@ -15025,6 +15356,7 @@
           "categorySlug",
           "attributes",
           "status",
+          "externalCodes",
           "aliases",
           "translations"
         ]
@@ -15149,6 +15481,23 @@
           },
           "registrationNotes": {
             "type": "object"
+          },
+          "nature": {
+            "type": "string",
+            "enum": [
+              "fungible",
+              "reusable",
+              "human"
+            ],
+            "nullable": true,
+            "description": "Naturaleza logística (#269). `null` la limpia (sin clasificar); omitir no la toca."
+          },
+          "externalCodes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Códigos externos de interop (#398). Si se indica, reemplaza el mapa completo; `{}` los limpia."
           },
           "variantOfId": {
             "type": "object",

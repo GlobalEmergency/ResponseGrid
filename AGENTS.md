@@ -16,6 +16,7 @@ Multi-emergency **material aid coordination + logistics** platform (org: **Globa
 - **`apps/api`** — NestJS 11, **hexagonal / DDD** (ports & adapters, CQRS-light, domain events via Redis/BullMQ), Drizzle ORM, Postgres 16, Redis 7. Swagger at `/docs`.
 - **`apps/web`** — Next 16 (App Router, React 19), **Atomic Design**, Tailwind 4, Leaflet + `leaflet.markercluster`. Consumes the typed client. (See `apps/web/AGENTS.md` for Next-16 specifics.)
 - **`packages/api-client`** — `@reliefhub/api-client`, openapi-fetch typed client. Regenerate with `pnpm gen:api`.
+- **`packages/warehouse-*`** — `@globalemergency/warehouse-core` (reusable, framework-free WMS domain: `kernel`/`catalog`/`inventory`/`containers`/`logistics` over an opaque `ScopeId`) + `@globalemergency/warehouse-postgres` (Drizzle persistence). Consumed by `apps/api` via `workspace:*`; **pure domain** — ESLint forbids `@nestjs/*`/`drizzle-orm`/`pg`/`apps/*` imports. Own tests run via `node --test` on compiled JS (`pnpm --filter '@globalemergency/warehouse-core' test`). **The extraction-to-OSS-product roadmap is [EPIC #355](https://github.com/GlobalEmergency/ResponseGrid/issues/355)** — read it before touching these packages.
 - TDD throughout. Dev infra via docker-compose.
 
 ## Architecture
@@ -75,6 +76,7 @@ pnpm --filter api test                  # runInBand; global-setup spins up relie
 # web (build the api-client first):
 pnpm --filter @reliefhub/api-client build && pnpm --filter web build
 pnpm --filter web lint
+pnpm --filter web test                  # node --test on .ts → needs Node ≥22.6 (native type-stripping); CI runs this step on Node 22
 ```
 
 If you change dependencies, regenerate the lockfile with `pnpm install` (pnpm 10.33.4) and commit `pnpm-lock.yaml` — lockfiles do **not** 3-way-merge cleanly, so regenerate after any merge that touched deps (else the Docker build fails on `--frozen-lockfile`).

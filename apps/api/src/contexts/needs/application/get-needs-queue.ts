@@ -1,11 +1,11 @@
 import { NeedRepository, NeedFilters } from '../domain/ports/need.repository';
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { Category, Priority } from '../domain/need-enums';
+import { Priority } from '../domain/need-enums';
 import { NeedView, toNeedView } from './need-view';
 
 export interface GetNeedsQueueQuery {
   emergencyId: string;
-  category?: Category;
+  category?: string;
   priority?: Priority;
 }
 

@@ -10,7 +10,7 @@ export interface NeedLocationView {
   latitude: number;
   longitude: number;
 }
-import { SupplyLineSnapshot } from '../../supplies/domain/supply-line';
+import { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
 import { LocationSensitivity } from '../../../shared/domain/location-sensitivity';
 import { approximateLocation } from '../../../shared/domain/approximate-location';
 import { coarsenAddress } from '../../../shared/domain/coarsen-address';

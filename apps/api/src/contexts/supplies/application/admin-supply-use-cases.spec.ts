@@ -4,10 +4,12 @@ import { AddSupplyAlias } from './add-supply-alias';
 import { RemoveSupplyAlias } from './remove-supply-alias';
 import { ListSuppliesAdmin } from './list-supplies-admin';
 import { GetSupplyAdmin } from './get-supply-admin';
-import { Supply } from '../domain/supply';
-import { SupplyAlias } from '../domain/supply-alias';
-import { SupplyNotFoundError } from '../domain/supply-errors';
-import { SupplyRepository } from '../domain/ports/supply.repository';
+import {
+  Supply,
+  SupplyAlias,
+  SupplyNotFoundError,
+  SupplyRepository,
+} from '@globalemergency/warehouse-core/catalog';
 
 const ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 
@@ -106,11 +108,13 @@ describe('ListSuppliesAdmin / GetSupplyAdmin', () => {
   it('list adjunta los alias y expone campos internos', async () => {
     const repo = makeRepo({
       list: jest.fn().mockResolvedValue([supply('archived')]),
-      listAliases: jest
-        .fn()
-        .mockResolvedValue([
-          SupplyAlias.fromSnapshot({ alias: 'aguita', supplyId: ID }),
-        ]),
+      listAliases: jest.fn().mockResolvedValue([
+        SupplyAlias.fromSnapshot({
+          alias: 'aguita',
+          supplyId: ID,
+          scopeId: null,
+        }),
+      ]),
     });
     const views = await new ListSuppliesAdmin(repo).execute({});
     expect(views).toHaveLength(1);

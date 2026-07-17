@@ -4,9 +4,12 @@ import {
   CategoryProtectedError,
   CategoryValidationError,
 } from './category-admin.errors';
-import { isCoreCategory } from '../domain/category';
-import { CategoryRepository } from '../domain/ports/category.repository';
-import { CategoryDefinition } from '../domain/category-definition';
+import {
+  isCoreCategory,
+  CategoryDefinition,
+  normalizeExternalCodes,
+} from '@globalemergency/warehouse-core/kernel';
+import { CategoryRepository } from '@globalemergency/warehouse-core/catalog';
 
 export interface UpdateCategoryCommand {
   labelEs?: string | undefined;
@@ -16,6 +19,11 @@ export interface UpdateCategoryCommand {
   sort?: number | undefined;
   archived?: boolean | undefined;
   translations?: CategoryDefinition['translations'] | undefined;
+  /**
+   * Códigos externos de interop (#398). Si se indica, REEMPLAZA el mapa; si se
+   * omite, se conserva el actual de la categoría.
+   */
+  externalCodes?: Record<string, string> | null | undefined;
 }
 
 export class UpdateCategory {
@@ -71,6 +79,10 @@ export class UpdateCategory {
             ? new Date()
             : null,
       translations: cmd.translations ?? current.translations,
+      externalCodes:
+        cmd.externalCodes !== undefined
+          ? normalizeExternalCodes(cmd.externalCodes)
+          : current.externalCodes,
     });
   }
 }

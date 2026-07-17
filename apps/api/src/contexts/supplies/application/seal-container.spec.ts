@@ -1,10 +1,13 @@
 import { SealContainer } from './seal-container';
 import { InMemoryContainerRepository } from '../infrastructure/in-memory-container.repository';
-import { Container } from '../domain/container';
-import { ContainerId } from '../domain/container-id';
-import { ContainerStatus, ContainerType } from '../domain/container-enums';
-import { ContainerSealedError } from '../domain/container-errors';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
+import {
+  Container,
+  ContainerId,
+  ContainerStatus,
+  ContainerType,
+  ContainerSealedError,
+} from '@globalemergency/warehouse-core/containers';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 import { ContainerNotFoundError } from './container-not-found.error';
 
 const EM = '11111111-1111-4111-8111-111111111111';
@@ -15,7 +18,7 @@ function seed(repo: InMemoryContainerRepository): Container {
     id: ContainerId.create(),
     code: 'PAL-0001',
     type: ContainerType.Pallet,
-    emergencyId: EmergencyId.fromString(EM),
+    scopeId: ScopeId.fromString(EM),
   });
   void repo.save(c);
   return c;

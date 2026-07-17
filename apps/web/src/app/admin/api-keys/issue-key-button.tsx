@@ -3,6 +3,8 @@
 import { useState, useTransition } from 'react';
 import { issueApiKeyAction } from './actions';
 import { Button } from '@/components/atoms/button';
+import { Input } from '@/components/atoms/input';
+import { FormField } from '@/components/molecules/form-field';
 import { ErrorMessage } from '@/components/atoms/error-message';
 
 export function IssueKeyButton({
@@ -13,14 +15,17 @@ export function IssueKeyButton({
   const [pending, startTransition] = useTransition();
   const [secret, setSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState('');
 
   function handleIssue() {
     setError(null);
     setSecret(null);
     startTransition(async () => {
-      const result = await issueApiKeyAction(serviceAccountId);
-      if (result.status === 'success') setSecret(result.apiKey);
-      else if (result.status === 'error') setError(result.message);
+      const result = await issueApiKeyAction(serviceAccountId, expiresAt);
+      if (result.status === 'success') {
+        setSecret(result.apiKey);
+        setExpiresAt('');
+      } else if (result.status === 'error') setError(result.message);
     });
   }
 
@@ -45,14 +50,26 @@ export function IssueKeyButton({
           </button>
         </div>
       ) : (
-        <Button
-          type="button"
-          onClick={handleIssue}
-          disabled={pending}
-          size="md"
-        >
-          {pending ? 'Emitiendo…' : 'Emitir nueva clave'}
-        </Button>
+        <div className="flex flex-col gap-3 sm:max-w-xs">
+          <FormField htmlFor="key-expiresAt" label="Caduca (opcional)">
+            <Input
+              id="key-expiresAt"
+              name="expiresAt"
+              type="date"
+              value={expiresAt}
+              onChange={(e) => setExpiresAt(e.target.value)}
+              autoComplete="off"
+            />
+          </FormField>
+          <Button
+            type="button"
+            onClick={handleIssue}
+            disabled={pending}
+            size="md"
+          >
+            {pending ? 'Emitiendo…' : 'Emitir nueva clave'}
+          </Button>
+        </div>
       )}
     </div>
   );

@@ -1,7 +1,7 @@
 import {
   SupplyListFilter,
   SupplyRepository,
-} from '../domain/ports/supply.repository';
+} from '@globalemergency/warehouse-core/catalog';
 import { AdminSupplyView, toAdminSupplyView } from './admin-supply-view';
 
 /**

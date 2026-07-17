@@ -3,11 +3,14 @@ import {
   CategoryParentNotFoundError,
   CategoryValidationError,
 } from './category-admin.errors';
-import { CategoryDefinition } from '../domain/category-definition';
+import {
+  CategoryDefinition,
+  normalizeExternalCodes,
+} from '@globalemergency/warehouse-core/kernel';
 import {
   CategoryRepository,
   CategoryWriteInput,
-} from '../domain/ports/category.repository';
+} from '@globalemergency/warehouse-core/catalog';
 
 export type CreateCategoryCommand = CategoryWriteInput;
 
@@ -45,6 +48,7 @@ export class CreateCategory {
       parentSlug: cmd.parentSlug,
       archivedAt: cmd.archivedAt ?? null,
       translations: cmd.translations ?? [],
+      externalCodes: normalizeExternalCodes(cmd.externalCodes),
     });
   }
 }

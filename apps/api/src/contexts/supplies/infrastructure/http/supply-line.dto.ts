@@ -1,5 +1,4 @@
 import {
-  IsEnum,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -9,7 +8,7 @@ import {
   Matches,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Category } from '../../domain/category';
+import { CategorySlugProperty } from './category-slug.validator';
 
 /**
  * SupplyLineDto — the single request shape for a line of aid material
@@ -47,9 +46,8 @@ export class SupplyLineDto {
   @IsString()
   unit?: string;
 
-  @ApiProperty({ enum: Category, example: Category.Water })
-  @IsEnum(Category)
-  category!: Category;
+  @CategorySlugProperty()
+  category!: string;
 
   @ApiPropertyOptional({
     example: 'ampolla',
@@ -92,8 +90,13 @@ export class SupplyLineResponseDto {
   @ApiPropertyOptional({ example: 'liters', nullable: true, type: String })
   unit!: string | null;
 
-  @ApiProperty({ enum: Category, example: Category.Water })
-  category!: Category;
+  @ApiProperty({
+    type: String,
+    example: 'water',
+    description:
+      'Slug de categoría de material (data-driven, lowercase snake_case).',
+  })
+  category!: string;
 
   @ApiPropertyOptional({
     example: 'ampolla',

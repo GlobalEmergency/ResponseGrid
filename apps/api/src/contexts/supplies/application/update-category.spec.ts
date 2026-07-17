@@ -1,8 +1,10 @@
 import { UpdateCategory } from './update-category';
 import { CategoryProtectedError } from './category-admin.errors';
-import { Category } from '../domain/category';
-import { CategoryDefinition } from '../domain/category-definition';
-import { CategoryRepository } from '../domain/ports/category.repository';
+import {
+  Category,
+  CategoryDefinition,
+} from '@globalemergency/warehouse-core/kernel';
+import { CategoryRepository } from '@globalemergency/warehouse-core/catalog';
 
 const BASE: CategoryDefinition = {
   slug: 'baby_food',
@@ -12,8 +14,10 @@ const BASE: CategoryDefinition = {
   vertical: 'general',
   sort: 140,
   kind: 'material',
+  codePrefix: null,
   archivedAt: null,
   translations: [],
+  externalCodes: {},
 };
 
 function makeRepo(

@@ -1,5 +1,5 @@
 import { relinkContainerLines } from './drizzle-supply-link-backfill.repository';
-import { SupplyLineSnapshot } from '../../domain/supply-line';
+import { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
 
 function line(overrides: Partial<SupplyLineSnapshot>): SupplyLineSnapshot {
   return {
@@ -11,7 +11,7 @@ function line(overrides: Partial<SupplyLineSnapshot>): SupplyLineSnapshot {
     presentation: null,
     expiresAt: null,
     ...overrides,
-  } as SupplyLineSnapshot;
+  };
 }
 
 describe('relinkContainerLines', () => {

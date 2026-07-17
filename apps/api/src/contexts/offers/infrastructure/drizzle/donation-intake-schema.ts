@@ -1,5 +1,5 @@
 import { pgTable, uuid, text, timestamp, integer } from 'drizzle-orm/pg-core';
-import { supplyLineColumns } from '../../../supplies/infrastructure/drizzle/supply-line-columns';
+import { supplyLineColumns } from '@globalemergency/warehouse-postgres';
 import { suppliesTable } from '../../../supplies/infrastructure/drizzle/schema';
 
 export const donationIntakesTable = pgTable('donation_intakes', {

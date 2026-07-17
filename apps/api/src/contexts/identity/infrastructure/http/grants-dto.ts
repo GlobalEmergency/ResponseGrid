@@ -17,10 +17,23 @@ export const SCOPE_TYPES = [
 
 export type ScopeTypeDto = (typeof SCOPE_TYPES)[number];
 
+export const PRINCIPAL_TYPES = ['user', 'service_account'] as const;
+
+export type PrincipalTypeDto = (typeof PRINCIPAL_TYPES)[number];
+
 export class GrantRoleDto {
   @ApiProperty({ format: 'uuid', description: 'Principal receiving the role' })
   @IsUUID()
   principalId!: string;
+
+  @ApiPropertyOptional({
+    enum: PRINCIPAL_TYPES,
+    description:
+      'Kind of principal receiving the role (defaults to user). Set to service_account when granting to a machine principal so it resolves and labels correctly.',
+  })
+  @IsOptional()
+  @IsIn(PRINCIPAL_TYPES)
+  principalType?: PrincipalTypeDto;
 
   @ApiProperty({
     description: 'Role id from the fixed catalog (e.g. emergency_coordinator)',

@@ -70,6 +70,7 @@ export function InventoryEditForm({
         initialLines={initial.map(toLine)}
         strict
         allowAllCategories
+        invalidRowIndex={state.status === 'error' ? state.invalidRow : undefined}
       />
 
       <Button type="submit" disabled={pending} fullWidth>

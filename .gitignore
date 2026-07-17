@@ -14,6 +14,7 @@
 node_modules/
 dist/
 packages/*/dist/
+packages/*/dist-test/
 .next/
 
 # Generated artifacts

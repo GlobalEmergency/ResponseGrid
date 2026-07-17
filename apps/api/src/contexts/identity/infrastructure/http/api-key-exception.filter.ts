@@ -12,9 +12,7 @@ import {
 } from '../../domain/api-key-errors';
 
 type ApiKeyError =
-  | ApiKeyAccessDeniedError
-  | ApiKeyNotFoundError
-  | ServiceAccountNotFoundError;
+  ApiKeyAccessDeniedError | ApiKeyNotFoundError | ServiceAccountNotFoundError;
 
 @Catch(
   ApiKeyAccessDeniedError,

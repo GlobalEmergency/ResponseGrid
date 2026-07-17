@@ -8,21 +8,27 @@ import { Response } from 'express';
 import { ContainerNotFoundError } from '../../application/container-not-found.error';
 import {
   ContainerCycleError,
-  ContainerEmergencyMismatchError,
+  ContainerScopeMismatchError,
   ContainerSealedError,
   ContainerValidationError,
-} from '../../domain/container-errors';
-import { SupplyLineValidationError } from '../../domain/supply-line';
-import { SupplyValidationError } from '../../domain/supply';
-import { SupplyAliasValidationError } from '../../domain/supply-alias';
+} from '@globalemergency/warehouse-core/containers';
 import {
+  SupplyLineValidationError,
+  ExternalCodesValidationError,
+} from '@globalemergency/warehouse-core/kernel';
+import {
+  SupplyValidationError,
+  SupplyAliasValidationError,
   AliasConflictError,
   CategoryNotFoundError,
   MergeIntoSelfError,
   SupplyCodeConflictError,
   SupplyNotFoundError,
   VariantTargetNotFoundError,
-} from '../../domain/supply-errors';
+  AttributeValidationError,
+  AttributeKeyCollisionError,
+  AttributeDefinitionValidationError,
+} from '@globalemergency/warehouse-core/catalog';
 import {
   CategoryAlreadyExistsError,
   CategoryNotFoundError as CategoryAdminNotFoundError,
@@ -30,14 +36,16 @@ import {
   CategoryProtectedError,
   CategoryValidationError,
 } from '../../application/category-admin.errors';
+import { AttributeDefinitionNotFoundError } from '../../application/attribute-definition-admin.errors';
 
 type DomainError =
   | ContainerNotFoundError
   | ContainerSealedError
   | ContainerCycleError
-  | ContainerEmergencyMismatchError
+  | ContainerScopeMismatchError
   | ContainerValidationError
   | SupplyLineValidationError
+  | ExternalCodesValidationError
   | SupplyValidationError
   | SupplyAliasValidationError
   | SupplyNotFoundError
@@ -46,6 +54,10 @@ type DomainError =
   | CategoryNotFoundError
   | MergeIntoSelfError
   | AliasConflictError
+  | AttributeValidationError
+  | AttributeKeyCollisionError
+  | AttributeDefinitionValidationError
+  | AttributeDefinitionNotFoundError
   | CategoryAlreadyExistsError
   | CategoryAdminNotFoundError
   | CategoryParentNotFoundError
@@ -66,9 +78,10 @@ type DomainError =
   ContainerNotFoundError,
   ContainerSealedError,
   ContainerCycleError,
-  ContainerEmergencyMismatchError,
+  ContainerScopeMismatchError,
   ContainerValidationError,
   SupplyLineValidationError,
+  ExternalCodesValidationError,
   SupplyValidationError,
   SupplyAliasValidationError,
   SupplyNotFoundError,
@@ -77,6 +90,10 @@ type DomainError =
   CategoryNotFoundError,
   MergeIntoSelfError,
   AliasConflictError,
+  AttributeValidationError,
+  AttributeKeyCollisionError,
+  AttributeDefinitionValidationError,
+  AttributeDefinitionNotFoundError,
   CategoryAlreadyExistsError,
   CategoryAdminNotFoundError,
   CategoryParentNotFoundError,
@@ -99,7 +116,8 @@ export class SuppliesDomainExceptionFilter implements ExceptionFilter {
       exception instanceof VariantTargetNotFoundError ||
       exception instanceof CategoryNotFoundError ||
       exception instanceof CategoryAdminNotFoundError ||
-      exception instanceof CategoryParentNotFoundError
+      exception instanceof CategoryParentNotFoundError ||
+      exception instanceof AttributeDefinitionNotFoundError
     ) {
       return HttpStatus.NOT_FOUND;
     }
@@ -114,12 +132,15 @@ export class SuppliesDomainExceptionFilter implements ExceptionFilter {
     }
     if (
       exception instanceof SupplyLineValidationError ||
+      exception instanceof ExternalCodesValidationError ||
       exception instanceof SupplyValidationError ||
       exception instanceof SupplyAliasValidationError ||
-      exception instanceof MergeIntoSelfError
+      exception instanceof MergeIntoSelfError ||
+      exception instanceof AttributeValidationError
     ) {
       return HttpStatus.BAD_REQUEST;
     }
+    // AttributeKeyCollisionError / AttributeDefinitionValidationError → 422.
     return HttpStatus.UNPROCESSABLE_ENTITY;
   }
 }

@@ -1,15 +1,17 @@
 import { randomUUID } from 'crypto';
-import { Supply, formatSupplyCode } from '../domain/supply';
 import {
+  Supply,
+  SupplyNature,
+  formatSupplyCode,
   VariantTargetNotFoundError,
   CategoryNotFoundError,
-} from '../domain/supply-errors';
-import {
   SupplyRepository,
   SupplyTranslationInput,
-} from '../domain/ports/supply.repository';
-import { CategoryRepository } from '../domain/ports/category.repository';
-import { getCategoryPrefix } from '../domain/category';
+  CategoryRepository,
+  AttributeDefinitionRepository,
+} from '@globalemergency/warehouse-core/catalog';
+import { getCategoryPrefix } from '@globalemergency/warehouse-core/kernel';
+import { validateSupplyAttributes } from './validate-supply-attributes';
 
 export interface CreateSupplyCommand {
   name: string;
@@ -17,10 +19,23 @@ export interface CreateSupplyCommand {
   defaultUnit?: string | null;
   attributes?: Record<string, unknown> | null;
   registrationNotes?: string | null;
+  /** Naturaleza logística (#269): fungible | reusable | human. Null = sin clasificar. */
+  nature?: SupplyNature | null;
+  /**
+   * Códigos externos estándar para interop (#398): mapa abierto namespace→código.
+   * Se valida/normaliza en el agregado. Omitir = sin códigos (`{}`).
+   */
+  externalCodes?: Record<string, string> | null;
   /** Si se indica, el insumo es una variante de otro existente (#222). */
   variantOfId?: string | null;
   /** Traducciones de nombre por idioma (#320). El nombre base (`name`) es `es`. */
   translations?: readonly SupplyTranslationInput[];
+  /**
+   * Tenencia (#397): `undefined`/`null` = insumo global (por defecto; HTTP hoy
+   * opera en global). Un `scopeId` de tenant crea el insumo en su scope y valida
+   * sus atributos contra el esquema efectivo global ∪ tenant.
+   */
+  scopeId?: string | null;
 }
 
 /**
@@ -32,6 +47,7 @@ export class CreateSupply {
   constructor(
     private readonly repo: SupplyRepository,
     private readonly categoryRepo: CategoryRepository,
+    private readonly attributeRepo: AttributeDefinitionRepository,
   ) {}
 
   async execute(
@@ -51,6 +67,20 @@ export class CreateSupply {
       throw new CategoryNotFoundError(cmd.categorySlug);
     }
 
+    const scopeId = cmd.scopeId ?? null;
+
+    // Valida el `attributes` jsonb contra el esquema efectivo de la familia (la
+    // unión de definiciones de la ascendencia de su categoría). Con scope de
+    // tenant, el esquema efectivo es global ∪ tenant. Si la familia no tiene
+    // definiciones, el esquema es vacío y los atributos pasan tal cual.
+    const attributes = await validateSupplyAttributes(
+      this.attributeRepo,
+      cmd.categorySlug,
+      cmd.attributes ?? {},
+      categories,
+      scopeId,
+    );
+
     const prefix = getCategoryPrefix(cmd.categorySlug, categories);
     const seq = await this.repo.nextSequenceValue();
     const code = formatSupplyCode(prefix, seq);
@@ -61,9 +91,12 @@ export class CreateSupply {
       name: cmd.name,
       categorySlug: cmd.categorySlug,
       defaultUnit: cmd.defaultUnit ?? null,
-      attributes: cmd.attributes ?? {},
+      attributes,
       registrationNotes: cmd.registrationNotes ?? null,
+      nature: cmd.nature ?? null,
+      externalCodes: cmd.externalCodes ?? {},
       variantOfId,
+      scopeId,
     });
 
     await this.repo.save(supply, cmd.translations);

@@ -1,4 +1,4 @@
-import { SupplyRepository } from '../domain/ports/supply.repository';
+import { SupplyRepository } from '@globalemergency/warehouse-core/catalog';
 
 export interface RemoveSupplyAliasCommand {
   aliasNorm: string;

@@ -10,8 +10,11 @@ WORKDIR /repo
 
 # Copy the whole workspace (a root .dockerignore keeps it lean) and install.
 COPY . .
+# `--filter=api...` builds api AND its workspace dependencies (warehouse-core)
+# in topological order, so the package's dist exists before nest build resolves
+# it and before `pnpm deploy` bundles it into the self-contained /prod output.
 RUN pnpm install --frozen-lockfile --filter=api... \
- && pnpm --filter=api build \
+ && pnpm --filter=api... build \
  && pnpm --filter=api deploy --prod --legacy /prod
 
 # ── Runner ───────────────────────────────────────────────────────────────────

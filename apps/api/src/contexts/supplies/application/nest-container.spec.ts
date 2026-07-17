@@ -1,13 +1,13 @@
 import { NestContainer } from './nest-container';
 import { InMemoryContainerRepository } from '../infrastructure/in-memory-container.repository';
-import { Container } from '../domain/container';
-import { ContainerId } from '../domain/container-id';
-import { ContainerType } from '../domain/container-enums';
 import {
+  Container,
+  ContainerId,
+  ContainerType,
   ContainerCycleError,
-  ContainerEmergencyMismatchError,
-} from '../domain/container-errors';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
+  ContainerScopeMismatchError,
+} from '@globalemergency/warehouse-core/containers';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
 import { ContainerNotFoundError } from './container-not-found.error';
 
 const EM = '11111111-1111-4111-8111-111111111111';
@@ -23,7 +23,7 @@ function make(
     id: ContainerId.create(),
     code: `${type}-x`,
     type,
-    emergencyId: EmergencyId.fromString(emergencyId),
+    scopeId: ScopeId.fromString(emergencyId),
   });
   void repo.save(c);
   return c;
@@ -99,7 +99,7 @@ describe('NestContainer', () => {
         containerId: box.id.value,
         parentContainerId: pallet.id.value,
       }),
-    ).rejects.toThrow(ContainerEmergencyMismatchError);
+    ).rejects.toThrow(ContainerScopeMismatchError);
   });
 
   it('404s an unknown child or parent', async () => {

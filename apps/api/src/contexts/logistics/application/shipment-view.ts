@@ -1,5 +1,5 @@
-import { Shipment } from '../domain/shipment';
-import { SupplyLineSnapshot } from '../../supplies/domain/supply-line';
+import { Shipment } from '@globalemergency/warehouse-core/logistics';
+import { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
 
 export interface ShipmentItemView {
   name: string;
@@ -42,7 +42,7 @@ export function toShipmentView(s: Shipment): ShipmentView {
   return {
     id: snap.id,
     code: snap.code,
-    emergencyId: snap.emergencyId,
+    emergencyId: snap.scopeId,
     originResourceId: snap.originResourceId,
     destinationResourceId: snap.destinationResourceId,
     items: snap.items.map(toItemView),

@@ -28,6 +28,7 @@ import { CreateServiceAccount } from '../../application/create-service-account';
 import { IssueApiKey } from '../../application/issue-api-key';
 import { RevokeApiKey } from '../../application/revoke-api-key';
 import { ListApiKeys } from '../../application/list-api-keys';
+import { ListServiceAccountGrants } from '../../application/list-service-account-grants';
 import { ListServiceAccountsByOrg } from '../../application/list-service-accounts-by-org';
 import { SERVICE_ACCOUNT_REPOSITORY } from '../../domain/ports/service-account.repository';
 import type { ServiceAccountRepository } from '../../domain/ports/service-account.repository';
@@ -78,6 +79,26 @@ class ApiKeyListItemDto {
   createdAt!: string;
 }
 
+class ServiceAccountGrantDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty()
+  roleId!: string;
+
+  @ApiProperty()
+  scopeType!: string;
+
+  @ApiProperty({ type: String, nullable: true })
+  scopeId!: string | null;
+
+  @ApiProperty()
+  grantedAt!: string;
+
+  @ApiProperty({ type: String, nullable: true })
+  expiresAt!: string | null;
+}
+
 class ServiceAccountResponseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
@@ -112,6 +133,7 @@ export class ApiKeysController {
     private readonly issueApiKey: IssueApiKey,
     private readonly revokeApiKey: RevokeApiKey,
     private readonly listApiKeysUseCase: ListApiKeys,
+    private readonly listServiceAccountGrantsUseCase: ListServiceAccountGrants,
     private readonly listServiceAccountsByOrg: ListServiceAccountsByOrg,
     @Inject(SERVICE_ACCOUNT_REPOSITORY)
     private readonly serviceAccounts: ServiceAccountRepository,
@@ -187,6 +209,33 @@ export class ApiKeysController {
       lastUsedAt: s.lastUsedAt,
       revokedAt: s.revokedAt,
       createdAt: s.createdAt,
+    }));
+  }
+
+  @Get('service-accounts/:serviceAccountId/grants')
+  @ApiOperation({
+    summary:
+      'List the grants held by a service account — what its keys can do (scoped admin)',
+  })
+  @ApiOkResponse({ type: [ServiceAccountGrantDto] })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({ description: 'apikey:create required in scope' })
+  async listServiceAccountGrants(
+    @Param('serviceAccountId', ParseUUIDPipe) serviceAccountId: string,
+    @Req() req: Request & { user?: AuthenticatedUser },
+  ): Promise<ServiceAccountGrantDto[]> {
+    const user = req.user!;
+    const grants = await this.listServiceAccountGrantsUseCase.execute({
+      actor: { principalId: user.id, grants: user.grants },
+      serviceAccountId,
+    });
+    return grants.map((g) => ({
+      id: g.id,
+      roleId: g.roleId,
+      scopeType: g.scope.type,
+      scopeId: 'id' in g.scope ? g.scope.id : null,
+      grantedAt: g.grantedAt,
+      expiresAt: g.expiresAt,
     }));
   }
 

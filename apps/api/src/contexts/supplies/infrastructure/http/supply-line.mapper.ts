@@ -1,4 +1,7 @@
-import { SupplyLineProps, SupplyLineSnapshot } from '../../domain/supply-line';
+import {
+  SupplyLineProps,
+  SupplyLineSnapshot,
+} from '@globalemergency/warehouse-core/kernel';
 import { SupplyLineDto, SupplyLineResponseDto } from './supply-line.dto';
 
 /**

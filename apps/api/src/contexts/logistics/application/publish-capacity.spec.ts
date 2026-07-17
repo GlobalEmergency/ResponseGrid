@@ -5,10 +5,10 @@ import {
   TransportCapacityStatus,
   TransportMode,
   TransportProviderType,
-} from '../domain/transport-capacity-enums';
-import { TransportCapacityId } from '../domain/transport-capacity-id';
+} from '@globalemergency/warehouse-core/logistics';
+import { TransportCapacityId } from '@globalemergency/warehouse-core/logistics';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
-import { CapacityMustHaveWeightOrVolumeError } from '../domain/transport-capacity-errors';
+import { CapacityMustHaveWeightOrVolumeError } from '@globalemergency/warehouse-core/logistics';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const PROVIDER_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';

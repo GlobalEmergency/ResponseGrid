@@ -1,5 +1,5 @@
-import { CategoryRepository } from '../domain/ports/category.repository';
-import { CategoryDefinition } from '../domain/category-definition';
+import { CategoryRepository } from '@globalemergency/warehouse-core/catalog';
+import { CategoryDefinition } from '@globalemergency/warehouse-core/kernel';
 
 /**
  * Lists the canonical category taxonomy (slug + labels + hierarchy + order).

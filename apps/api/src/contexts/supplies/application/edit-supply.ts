@@ -1,15 +1,16 @@
-import { Supply } from '../domain/supply';
 import {
+  Supply,
+  SupplyNature,
   SupplyNotFoundError,
   VariantTargetNotFoundError,
   CategoryNotFoundError,
-} from '../domain/supply-errors';
-import {
   SupplyRepository,
   SupplyTranslationInput,
-} from '../domain/ports/supply.repository';
-import { CategoryRepository } from '../domain/ports/category.repository';
-import { getCategoryPrefix } from '../domain/category';
+  CategoryRepository,
+  AttributeDefinitionRepository,
+} from '@globalemergency/warehouse-core/catalog';
+import { getCategoryPrefix } from '@globalemergency/warehouse-core/kernel';
+import { validateSupplyAttributes } from './validate-supply-attributes';
 
 export interface EditSupplyCommand {
   id: string;
@@ -18,6 +19,13 @@ export interface EditSupplyCommand {
   defaultUnit?: string | null;
   attributes?: Record<string, unknown>;
   registrationNotes?: string | null;
+  /** Naturaleza logística (#269). Si se indica, reclasifica; `null` la limpia. */
+  nature?: SupplyNature | null;
+  /**
+   * Códigos externos de interop (#398). Si se indica, REEMPLAZA el mapa
+   * completo (mapa vacío los limpia); si se omite, no se tocan.
+   */
+  externalCodes?: Record<string, string>;
   variantOfId?: string | null;
   /**
    * Traducciones de nombre por idioma (#320). Si se indica, REEMPLAZA el set
@@ -36,6 +44,7 @@ export class EditSupply {
   constructor(
     private readonly repo: SupplyRepository,
     private readonly categoryRepo: CategoryRepository,
+    private readonly attributeRepo: AttributeDefinitionRepository,
   ) {}
 
   async execute(cmd: EditSupplyCommand): Promise<void> {
@@ -64,12 +73,33 @@ export class EditSupply {
     if (cmd.registrationNotes !== undefined) {
       next = next.setRegistrationNotes(cmd.registrationNotes);
     }
+    if (cmd.nature !== undefined) next = next.reclassify(cmd.nature);
+    if (cmd.externalCodes !== undefined) {
+      next = next.setExternalCodes(cmd.externalCodes);
+    }
     if (cmd.variantOfId !== undefined) {
       if (cmd.variantOfId) {
         const parent = await this.repo.findById(cmd.variantOfId);
         if (!parent) throw new VariantTargetNotFoundError(cmd.variantOfId);
       }
       next = next.setVariantOf(cmd.variantOfId);
+    }
+
+    // Re-valida los atributos contra el esquema efectivo de la familia cuando
+    // cambian los atributos o la categoría (una recategorización puede invalidar
+    // atributos válidos en la familia anterior). Persiste la versión validada.
+    if (cmd.attributes !== undefined || cmd.categorySlug !== undefined) {
+      // Tenencia (#397): valida contra el esquema efectivo del scope del propio
+      // insumo (global ∪ tenant si es de tenant). El scope es identidad: no se
+      // edita, se conserva del agregado cargado.
+      const attributes = await validateSupplyAttributes(
+        this.attributeRepo,
+        next.categorySlug,
+        next.attributes,
+        categories,
+        next.scopeId,
+      );
+      next = next.setAttributes(attributes);
     }
 
     const prefix = getCategoryPrefix(next.categorySlug, categories);

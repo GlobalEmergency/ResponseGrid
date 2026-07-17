@@ -9,7 +9,7 @@ import {
   DonationIntakeReceptionReasonRequiredError,
 } from './donation-intake-errors';
 import { InvalidDonationIntakeContactError } from './donation-intake-errors';
-import { SupplyLineValidationError } from '../../supplies/domain/supply-line';
+import { SupplyLineValidationError } from '@globalemergency/warehouse-core/kernel';
 import { DonationIntakeReceived } from './events/donation-intake-received.event';
 
 const EM = '11111111-1111-4111-8111-111111111111';

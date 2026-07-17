@@ -1,10 +1,11 @@
-import { normalizeSupplyText } from '../domain/supply-normalize';
-import { supplyResolverFromCatalog } from '../domain/supply-resolver';
-import { allLocalizedVariants, localize } from '../domain/localized-text';
 import {
+  normalizeSupplyText,
+  supplyResolverFromCatalog,
+  allLocalizedVariants,
+  localize,
   PublicSupplyRecord,
   SupplyCatalogReadModel,
-} from '../domain/ports/supply-catalog.read-model';
+} from '@globalemergency/warehouse-core/catalog';
 
 export interface SupplyCatalogQuery {
   q?: string | undefined;

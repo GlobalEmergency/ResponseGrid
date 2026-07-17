@@ -1,7 +1,9 @@
 import { ListCategories } from './list-categories';
-import { Category } from '../domain/category';
-import { CategoryDefinition } from '../domain/category-definition';
-import { CategoryRepository } from '../domain/ports/category.repository';
+import {
+  Category,
+  CategoryDefinition,
+} from '@globalemergency/warehouse-core/kernel';
+import { CategoryRepository } from '@globalemergency/warehouse-core/catalog';
 
 const FOOD: CategoryDefinition = {
   slug: Category.Food,
@@ -17,6 +19,7 @@ const FOOD: CategoryDefinition = {
     { locale: 'es', label: 'Alimentos' },
     { locale: 'en', label: 'Food' },
   ],
+  externalCodes: {},
 };
 
 function makeRepo(listCategoriesFn: jest.Mock): CategoryRepository {

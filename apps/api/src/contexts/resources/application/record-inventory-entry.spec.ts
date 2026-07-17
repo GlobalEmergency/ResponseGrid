@@ -4,7 +4,7 @@ import { InMemoryResourceRepository } from '../infrastructure/in-memory-resource
 import { FakeEventBus } from '../infrastructure/fake-event-bus';
 import { ResourceId } from '../domain/resource-id';
 import { ResourceType } from '../domain/resource-enums';
-import { Category } from '../../supplies/domain/category';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 import { ResourceNotFoundError } from './resource-not-found.error';
 import { ResourceEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 

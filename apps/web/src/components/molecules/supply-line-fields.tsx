@@ -45,11 +45,18 @@ interface SupplyLineFieldsProps {
   labels?: Partial<Messages['supplyLine']>;
   showExpiry?: boolean;
   hideHeader?: boolean;
+  /**
+   * Marks this row as the one a server-side validation error points at (#296,
+   * e.g. `parseSupplyLines`' `invalidRow`) so the user can find it in a long
+   * list instead of getting only a generic "something in here is wrong".
+   */
+  invalid?: boolean;
 }
 
 export function SupplyLineFields({
   idPrefix, rowId, index, required, removable, categories, locale,
   value, onChange, onRemove, labels, showExpiry = false, hideHeader = false,
+  invalid = false,
 }: SupplyLineFieldsProps) {
   const t = { ...getMessages(locale).supplyLine, ...labels };
   const n = String(index + 1);
@@ -71,7 +78,10 @@ export function SupplyLineFields({
     'w-full rounded-lg border-2 border-navy bg-white px-4 py-3 text-base text-ink focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2';
 
   return (
-    <div className="rounded-lg border-2 border-line p-4">
+    <div
+      className={`rounded-lg border-2 p-4 ${invalid ? 'border-danger' : 'border-line'}`}
+      aria-invalid={invalid || undefined}
+    >
       <div className="flex flex-col gap-3">
         {!hideHeader && (
           <div className="flex items-center justify-between">
@@ -89,6 +99,12 @@ export function SupplyLineFields({
               </button>
             )}
           </div>
+        )}
+
+        {invalid && (
+          <p role="alert" className="text-sm font-medium text-danger">
+            {t.invalidRowHint}
+          </p>
         )}
 
         <div className="flex flex-col gap-1.5">

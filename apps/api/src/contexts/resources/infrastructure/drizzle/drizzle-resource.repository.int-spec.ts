@@ -5,8 +5,7 @@ import { suppliesTable } from '../../../supplies/infrastructure/drizzle/schema';
 import { emergenciesTable } from '../../../emergencies/infrastructure/drizzle/schema';
 import { DrizzleResourceRepository } from './drizzle-resource.repository';
 import { Resource } from '../../domain/resource';
-import { SupplyLine } from '../../../supplies/domain/supply-line';
-import { Category } from '../../../supplies/domain/category';
+import { SupplyLine, Category } from '@globalemergency/warehouse-core/kernel';
 import { ResourceId } from '../../domain/resource-id';
 import { EmergencyId } from '../../../../shared/domain/emergency-id';
 import {

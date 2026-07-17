@@ -1,12 +1,12 @@
 import { and, inArray, isNull, sql, eq } from 'drizzle-orm';
 import { Db } from '../../../../shared/db';
-import { SupplyLineSnapshot } from '../../domain/supply-line';
+import { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
 import {
   SupplyLineSource,
   SupplyLinkBackfillRepository,
   SupplyLinkPatch,
   UnlinkedLineGroup,
-} from '../../domain/ports/supply-link-backfill.repository';
+} from '@globalemergency/warehouse-core/catalog';
 import { containersTable } from './schema';
 import { needItemsTable } from '../../../needs/infrastructure/drizzle/schema';
 import { offerItemsTable } from '../../../offers/infrastructure/drizzle/schema';
@@ -77,13 +77,11 @@ export class DrizzleSupplyLinkBackfillRepository implements SupplyLinkBackfillRe
           .from(table)
           .where(isNull(table.supplyId))
           .groupBy(table.name);
-        return rows.map(
-          (row): UnlinkedLineGroup => ({
-            source,
-            name: row.name,
-            lines: row.lines,
-          }),
-        );
+        return rows.map((row): UnlinkedLineGroup => ({
+          source,
+          name: row.name,
+          lines: row.lines,
+        }));
       }),
     );
 

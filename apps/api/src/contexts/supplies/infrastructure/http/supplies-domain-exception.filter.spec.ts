@@ -8,9 +8,7 @@ import {
 
 function statusFor(
   exception:
-    | CategoryNotFoundError
-    | CategoryProtectedError
-    | CategoryValidationError,
+    CategoryNotFoundError | CategoryProtectedError | CategoryValidationError,
 ): number {
   const filter = new SuppliesDomainExceptionFilter();
   let statusCode = 0;

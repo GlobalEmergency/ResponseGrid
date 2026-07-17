@@ -7,7 +7,7 @@ import {
   ContainerHolderType,
   ContainerStatus,
   ContainerType,
-} from '../domain/container-enums';
+} from '@globalemergency/warehouse-core/containers';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const SHIPMENT = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';

@@ -1,6 +1,8 @@
-import { ContainerRepository } from '../domain/ports/container.repository';
-import { Container } from '../domain/container';
-import { ContainerId } from '../domain/container-id';
+import {
+  ContainerRepository,
+  Container,
+  ContainerId,
+} from '@globalemergency/warehouse-core/containers';
 import {
   addOptionalAmounts,
   ContainerTreeView,

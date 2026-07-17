@@ -1,4 +1,4 @@
-import { CategoryDefinition } from '../../domain/category-definition';
+import { CategoryDefinition } from '@globalemergency/warehouse-core/kernel';
 
 export type CategoryLocale = string;
 

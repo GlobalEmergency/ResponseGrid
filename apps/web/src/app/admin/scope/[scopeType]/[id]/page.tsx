@@ -150,6 +150,7 @@ export default async function ScopeAdminPage({ params }: PageProps) {
             <ServiceAccountsManager
               orgId={scopeId}
               initialAccounts={serviceAccounts}
+              roles={roles}
             />
           </section>
         </>

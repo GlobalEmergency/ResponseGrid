@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import { createDb, Db } from '../../../../shared/db';
 import { DrizzleCategoryRepository } from './drizzle-category.repository';
 import type { Pool } from 'pg';
@@ -34,5 +35,48 @@ describe('DrizzleCategoryRepository — kind (integration)', () => {
       includeArchived: true,
     });
     expect(personnel?.kind).toBe('personnel');
+  });
+
+  it('round-trip de externalCodes (#398): crea con códigos, edita y por defecto {}', async () => {
+    const slug = 'interop_test_398';
+    try {
+      const created = await repo.createCategory({
+        slug,
+        labelEs: 'Interop',
+        labelEn: 'Interop',
+        parentSlug: null,
+        vertical: 'general',
+        sort: 999,
+        externalCodes: { unspsc: '51101500' },
+      });
+      expect(created.externalCodes).toEqual({ unspsc: '51101500' });
+      expect((await repo.findBySlug(slug))!.externalCodes).toEqual({
+        unspsc: '51101500',
+      });
+
+      const updated = await repo.updateCategory(slug, {
+        slug,
+        labelEs: 'Interop',
+        labelEn: 'Interop',
+        parentSlug: null,
+        vertical: 'general',
+        sort: 999,
+        externalCodes: { hxl: '#item+code' },
+      });
+      expect(updated.externalCodes).toEqual({ hxl: '#item+code' });
+
+      // Sin externalCodes en el input → el repo cae al mapa vacío por defecto.
+      const cleared = await repo.updateCategory(slug, {
+        slug,
+        labelEs: 'Interop',
+        labelEn: 'Interop',
+        parentSlug: null,
+        vertical: 'general',
+        sort: 999,
+      });
+      expect(cleared.externalCodes).toEqual({});
+    } finally {
+      await db.execute(sql`DELETE FROM categories WHERE slug = ${slug}`);
+    }
   });
 });

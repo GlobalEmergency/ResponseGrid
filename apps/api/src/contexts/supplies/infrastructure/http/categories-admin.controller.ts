@@ -30,7 +30,7 @@ import {
 import { JwtAuthGuard } from '../../../identity/infrastructure/http/jwt-auth.guard';
 import { PermissionGuard } from '../../../identity/infrastructure/http/permission.guard';
 import { RequirePermission } from '../../../identity/infrastructure/http/require-permission.decorator';
-import { CategoryDefinition } from '../../domain/category-definition';
+import { CategoryDefinition } from '@globalemergency/warehouse-core/kernel';
 import { CreateCategory } from '../../application/create-category';
 import { ListCategories } from '../../application/list-categories';
 import {
@@ -43,7 +43,7 @@ import {
   UpdateCategoryDto,
 } from './admin-category.dto';
 import { localizedCategoryText, resolveLocale } from './locale';
-import { CategoryWriteInput } from '../../domain/ports/category.repository';
+import { CategoryWriteInput } from '@globalemergency/warehouse-core/catalog';
 
 @ApiTags('categories-admin')
 @ApiBearerAuth()
@@ -167,6 +167,7 @@ export class CategoriesAdminController {
         locale: translation.locale,
         label: translation.label,
       })),
+      externalCodes: category.externalCodes,
     };
   }
 
@@ -180,6 +181,7 @@ export class CategoriesAdminController {
       sort: dto.sort,
       archivedAt: null,
       translations: dto.translations ?? [],
+      externalCodes: dto.externalCodes ?? {},
     };
   }
 
@@ -192,6 +194,7 @@ export class CategoriesAdminController {
       sort: dto.sort,
       archived: dto.archived,
       translations: dto.translations,
+      externalCodes: dto.externalCodes,
     };
   }
 }

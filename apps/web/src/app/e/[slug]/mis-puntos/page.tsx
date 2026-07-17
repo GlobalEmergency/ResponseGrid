@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { requireSession } from '@/lib/auth';
 import { getEmergencyBySlug } from '@/lib/emergencies';
@@ -8,6 +7,7 @@ import { StatusForm } from './status-form';
 import { EmptyState } from '@/components/molecules/empty-state';
 import { AppBar } from '@/components/organisms/app-bar';
 import { PageHeading } from '@/components/atoms/page-heading';
+import { LinkButton } from '@/components/atoms/link-button';
 import { getT } from '@/i18n/server';
 
 export const dynamic = 'force-dynamic';
@@ -92,24 +92,27 @@ export default async function MisPuntosPage({ params }: Props) {
                     />
 
                     <div className="flex flex-wrap gap-3">
-                      <Link
+                      <LinkButton
                         href={`/e/${slug}/mis-puntos/${resource.id}/inventario`}
-                        className="inline-flex items-center justify-center rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink bg-white hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors w-fit"
+                        variant="secondary"
+                        size="sm"
                       >
                         {ta.manage_inventory_cta}
-                      </Link>
-                      <Link
+                      </LinkButton>
+                      <LinkButton
                         href={`/e/${slug}/peticion?resourceId=${resource.id}`}
-                        className="inline-flex items-center justify-center rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink bg-white hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors w-fit"
+                        variant="secondary"
+                        size="sm"
                       >
                         {ta.declare_needs_cta}
-                      </Link>
-                      <Link
+                      </LinkButton>
+                      <LinkButton
                         href={`/e/${slug}/reportar?resourceId=${resource.id}`}
-                        className="inline-flex items-center justify-center rounded-lg border-2 border-navy px-4 py-2 text-sm font-semibold text-ink bg-white hover:bg-surface focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 transition-colors w-fit"
+                        variant="secondary"
+                        size="sm"
                       >
                         {ta.report_incident_cta}
-                      </Link>
+                      </LinkButton>
                     </div>
                   </article>
                 </li>

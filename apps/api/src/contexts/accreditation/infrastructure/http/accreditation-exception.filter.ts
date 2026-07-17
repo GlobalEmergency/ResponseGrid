@@ -9,8 +9,7 @@ import { AccreditationNotFoundError } from '../../application/revoke-accreditati
 import { AccreditationAlreadyExistsError } from '../../application/grant-accreditation';
 
 type AccreditationError =
-  | AccreditationNotFoundError
-  | AccreditationAlreadyExistsError;
+  AccreditationNotFoundError | AccreditationAlreadyExistsError;
 
 @Catch(AccreditationNotFoundError, AccreditationAlreadyExistsError)
 export class AccreditationExceptionFilter implements ExceptionFilter {

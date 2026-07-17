@@ -1,5 +1,7 @@
-import { SupplyNotFoundError } from '../domain/supply-errors';
-import { SupplyRepository } from '../domain/ports/supply.repository';
+import {
+  SupplyNotFoundError,
+  SupplyRepository,
+} from '@globalemergency/warehouse-core/catalog';
 import { AdminSupplyView, toAdminSupplyView } from './admin-supply-view';
 
 /**

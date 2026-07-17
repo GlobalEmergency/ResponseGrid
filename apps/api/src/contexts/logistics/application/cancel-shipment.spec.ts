@@ -5,11 +5,14 @@ import { CreateShipment } from './create-shipment';
 import { InMemoryShipmentRepository } from '../infrastructure/in-memory-shipment.repository';
 import { FakeShipmentContainerPort } from '../infrastructure/fake-shipment-container-port';
 import { LogisticsEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
-import { ShipmentId } from '../domain/shipment-id';
-import { CarrierType, ShipmentStatus } from '../domain/shipment-enums';
-import { Category } from '../../supplies/domain/category';
+import { ShipmentId } from '@globalemergency/warehouse-core/logistics';
+import {
+  CarrierType,
+  ShipmentStatus,
+} from '@globalemergency/warehouse-core/logistics';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 import { ShipmentNotFoundError } from './shipment-not-found.error';
-import { InvalidShipmentTransitionError } from '../domain/shipment-errors';
+import { InvalidShipmentTransitionError } from '@globalemergency/warehouse-core/logistics';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const ORIGIN = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';

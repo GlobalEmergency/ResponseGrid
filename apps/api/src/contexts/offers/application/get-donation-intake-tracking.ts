@@ -1,5 +1,4 @@
 import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { Category } from '../../supplies/domain/category';
 import { DonationIntakeRepository } from '../domain/ports/donation-intake.repository';
 import { IntakeResourceLookup } from '../domain/ports/intake-resource-lookup';
 import { DonationIntakeNotFoundError } from './donation-intake-not-found.error';
@@ -8,7 +7,8 @@ export interface DonationIntakeTrackingLine {
   name: string;
   quantity: number;
   unit: string | null;
-  category: Category;
+  /** Slug de categoría (data-driven). */
+  category: string;
   supplyId: string | null;
   presentation: string | null;
 }

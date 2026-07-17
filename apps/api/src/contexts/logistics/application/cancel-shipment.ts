@@ -1,6 +1,6 @@
-import { ShipmentRepository } from '../domain/ports/shipment.repository';
+import { ShipmentRepository } from '@globalemergency/warehouse-core/logistics';
 import { ShipmentContainerPort } from '../domain/ports/shipment-container-port';
-import { ShipmentId } from '../domain/shipment-id';
+import { ShipmentId } from '@globalemergency/warehouse-core/logistics';
 import { ShipmentNotFoundError } from './shipment-not-found.error';
 
 export interface CancelShipmentCommand {
@@ -29,7 +29,7 @@ export class CancelShipment {
 
     if (shipment.containerIds.length > 0) {
       await this.containerPort.moveContainersToResource({
-        emergencyId: shipment.emergencyId.value,
+        emergencyId: shipment.scopeId.value,
         containerIds: shipment.containerIds,
         resourceId: shipment.originResourceId,
       });

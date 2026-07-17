@@ -1,7 +1,7 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ShipmentController } from './shipment.controller';
 import { CreateShipmentDto, AssignCapacityToShipmentDto } from './shipment-dto';
-import { Category } from '../../../supplies/domain/category';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 import { CreateShipment } from '../../application/create-shipment';
 import { AssignCapacityToShipment } from '../../application/assign-capacity-to-shipment';
 import { MarkShipmentInTransit } from '../../application/mark-shipment-in-transit';

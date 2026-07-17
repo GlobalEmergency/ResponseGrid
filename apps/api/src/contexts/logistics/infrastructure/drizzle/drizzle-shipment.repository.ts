@@ -4,11 +4,17 @@ import { shipmentCodeSequencesTable, shipmentsTable } from './schema';
 import {
   ListShipmentsFilter,
   ShipmentRepository,
-} from '../../domain/ports/shipment.repository';
-import { Shipment, ShipmentSnapshot } from '../../domain/shipment';
-import { ShipmentId } from '../../domain/shipment-id';
-import { EmergencyId } from '../../../../shared/domain/emergency-id';
-import { CarrierType, ShipmentStatus } from '../../domain/shipment-enums';
+} from '@globalemergency/warehouse-core/logistics';
+import {
+  Shipment,
+  ShipmentSnapshot,
+} from '@globalemergency/warehouse-core/logistics';
+import { ShipmentId } from '@globalemergency/warehouse-core/logistics';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
+import {
+  CarrierType,
+  ShipmentStatus,
+} from '@globalemergency/warehouse-core/logistics';
 
 type ShipmentRow = typeof shipmentsTable.$inferSelect;
 
@@ -16,7 +22,7 @@ function rowToSnapshot(row: ShipmentRow): ShipmentSnapshot {
   return {
     id: row.id,
     code: row.code,
-    emergencyId: row.emergencyId,
+    scopeId: row.emergencyId,
     originResourceId: row.originResourceId,
     destinationResourceId: row.destinationResourceId,
     items: row.items ?? [],
@@ -42,7 +48,7 @@ export class DrizzleShipmentRepository implements ShipmentRepository {
       .values({
         id: s.id,
         code: s.code,
-        emergencyId: s.emergencyId,
+        emergencyId: s.scopeId,
         originResourceId: s.originResourceId,
         destinationResourceId: s.destinationResourceId,
         items: s.items,
@@ -68,10 +74,10 @@ export class DrizzleShipmentRepository implements ShipmentRepository {
       });
   }
 
-  async nextSequence(emergencyId: EmergencyId): Promise<number> {
+  async nextSequence(scopeId: ScopeId): Promise<number> {
     const [row] = await this.db
       .insert(shipmentCodeSequencesTable)
-      .values({ emergencyId: emergencyId.value, lastValue: 1 })
+      .values({ emergencyId: scopeId.value, lastValue: 1 })
       .onConflictDoUpdate({
         target: shipmentCodeSequencesTable.emergencyId,
         set: { lastValue: sql`${shipmentCodeSequencesTable.lastValue} + 1` },
@@ -93,13 +99,11 @@ export class DrizzleShipmentRepository implements ShipmentRepository {
     return Shipment.fromSnapshot(rowToSnapshot(rows[0]));
   }
 
-  async findByEmergency(
-    emergencyId: EmergencyId,
+  async findByScope(
+    scopeId: ScopeId,
     filter: ListShipmentsFilter,
   ): Promise<Shipment[]> {
-    const conditions: SQL[] = [
-      eq(shipmentsTable.emergencyId, emergencyId.value),
-    ];
+    const conditions: SQL[] = [eq(shipmentsTable.emergencyId, scopeId.value)];
     if (filter.status !== undefined) {
       conditions.push(eq(shipmentsTable.status, filter.status));
     }
@@ -115,11 +119,11 @@ export class DrizzleShipmentRepository implements ShipmentRepository {
 
   async findByCarrier(
     carrierId: string,
-    emergencyId: EmergencyId | null,
+    scopeId: ScopeId | null,
   ): Promise<Shipment[]> {
     const conditions: SQL[] = [eq(shipmentsTable.carrierId, carrierId)];
-    if (emergencyId !== null) {
-      conditions.push(eq(shipmentsTable.emergencyId, emergencyId.value));
+    if (scopeId !== null) {
+      conditions.push(eq(shipmentsTable.emergencyId, scopeId.value));
     }
 
     const rows = await this.db

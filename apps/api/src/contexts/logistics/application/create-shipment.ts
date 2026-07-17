@@ -1,11 +1,14 @@
-import { ShipmentRepository } from '../domain/ports/shipment.repository';
+import { ShipmentRepository } from '@globalemergency/warehouse-core/logistics';
 import { LogisticsEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
 import { ShipmentContainerPort } from '../domain/ports/shipment-container-port';
-import { Shipment } from '../domain/shipment';
-import { ShipmentId } from '../domain/shipment-id';
-import { formatShipmentCode } from '../domain/shipment-code';
-import { SupplyLine, SupplyLineProps } from '../../supplies/domain/supply-line';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
+import { Shipment } from '@globalemergency/warehouse-core/logistics';
+import { ShipmentId } from '@globalemergency/warehouse-core/logistics';
+import { formatShipmentCode } from '@globalemergency/warehouse-core/logistics';
+import {
+  ScopeId,
+  SupplyLine,
+  SupplyLineProps,
+} from '@globalemergency/warehouse-core/kernel';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
 
 const ACTIVE_STATUS = 'active';
@@ -39,13 +42,13 @@ export class CreateShipment {
       );
     }
 
-    const emergencyId = EmergencyId.fromString(cmd.emergencyId);
-    const code = formatShipmentCode(await this.repo.nextSequence(emergencyId));
+    const scopeId = ScopeId.fromString(cmd.emergencyId);
+    const code = formatShipmentCode(await this.repo.nextSequence(scopeId));
 
     const shipment = Shipment.create({
       id: ShipmentId.create(),
       code,
-      emergencyId,
+      scopeId,
       originResourceId: cmd.originResourceId,
       destinationResourceId: cmd.destinationResourceId,
       items: cmd.items.map((i) => SupplyLine.create(i)),

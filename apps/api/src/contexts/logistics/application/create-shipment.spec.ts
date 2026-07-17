@@ -2,12 +2,11 @@ import { CreateShipment } from './create-shipment';
 import { InMemoryShipmentRepository } from '../infrastructure/in-memory-shipment.repository';
 import { FakeShipmentContainerPort } from '../infrastructure/fake-shipment-container-port';
 import { LogisticsEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
-import { ShipmentId } from '../domain/shipment-id';
-import { ShipmentStatus } from '../domain/shipment-enums';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { Category } from '../../supplies/domain/category';
+import { ShipmentId } from '@globalemergency/warehouse-core/logistics';
+import { ShipmentStatus } from '@globalemergency/warehouse-core/logistics';
+import { Category, ScopeId } from '@globalemergency/warehouse-core/kernel';
 import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emergency-not-accepting-intake.error';
-import { ShipmentMustHaveCargoError } from '../domain/shipment-errors';
+import { ShipmentMustHaveCargoError } from '@globalemergency/warehouse-core/logistics';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const ORIGIN = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
@@ -144,7 +143,7 @@ describe('CreateShipment', () => {
       useCase.execute({ ...baseCmd(), containerIds: [CONTAINER_A] }),
     ).rejects.toThrow('container unavailable');
 
-    const all = await repo.findByEmergency(EmergencyId.fromString(EM), {});
+    const all = await repo.findByScope(ScopeId.fromString(EM), {});
     expect(all).toHaveLength(0);
   });
 });

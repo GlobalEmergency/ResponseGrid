@@ -1,9 +1,12 @@
+import { sql } from 'drizzle-orm';
 import { createDb, Db } from '../../../../shared/db';
 import { suppliesTable, supplyAliasesTable } from './schema';
 import { DrizzleSupplyRepository } from './drizzle-supply.repository';
-import { Supply } from '../../domain/supply';
-import { SupplyAlias } from '../../domain/supply-alias';
-import { AliasConflictError } from '../../domain/supply-errors';
+import {
+  Supply,
+  SupplyAlias,
+  AliasConflictError,
+} from '@globalemergency/warehouse-core/catalog';
 import type { Pool } from 'pg';
 
 const URL =
@@ -61,6 +64,61 @@ describe('DrizzleSupplyRepository (integration)', () => {
     found = await repo.findById(A);
     expect(found!.name).toBe('Agua mineral');
     expect(found!.categorySlug).toBe('food');
+  });
+
+  it('persiste y actualiza la naturaleza logística (#269), por defecto null', async () => {
+    await repo.save(makeSupply({ id: A, code: 'INS-9001', name: 'Agua' }));
+    expect((await repo.findById(A))!.nature).toBeNull();
+
+    // Clasifica y relee.
+    await repo.save((await repo.findById(A))!.reclassify('fungible'));
+    expect((await repo.findById(A))!.nature).toBe('fungible');
+
+    // Reclasifica a otra naturaleza (upsert set).
+    await repo.save((await repo.findById(A))!.reclassify('reusable'));
+    expect((await repo.findById(A))!.nature).toBe('reusable');
+
+    // Limpia (vuelve a sin clasificar).
+    await repo.save((await repo.findById(A))!.reclassify(null));
+    expect((await repo.findById(A))!.nature).toBeNull();
+  });
+
+  it('persiste, actualiza y limpia los códigos externos de interop (#398), por defecto {}', async () => {
+    await repo.save(makeSupply({ id: A, code: 'INS-9001', name: 'Agua' }));
+    expect((await repo.findById(A))!.externalCodes).toEqual({});
+
+    // Asigna códigos y relee (jsonb round-trip).
+    await repo.save(
+      (await repo.findById(A))!.setExternalCodes({
+        unspsc: '51101500',
+        hxl: '#item+code',
+      }),
+    );
+    expect((await repo.findById(A))!.externalCodes).toEqual({
+      unspsc: '51101500',
+      hxl: '#item+code',
+    });
+
+    // Reemplaza el mapa (upsert set).
+    await repo.save(
+      (await repo.findById(A))!.setExternalCodes({ who_eml: 'core-121' }),
+    );
+    expect((await repo.findById(A))!.externalCodes).toEqual({
+      who_eml: 'core-121',
+    });
+
+    // Búsqueda inversa por código externo (usa el índice GIN, operador @>).
+    const [hit] = await db
+      .select()
+      .from(suppliesTable)
+      .where(
+        sql`${suppliesTable.externalCodes} @> ${'{"who_eml":"core-121"}'}`,
+      );
+    expect(hit?.id).toBe(A);
+
+    // Limpia (vuelve al mapa vacío).
+    await repo.save((await repo.findById(A))!.setExternalCodes({}));
+    expect((await repo.findById(A))!.externalCodes).toEqual({});
   });
 
   it('save persiste y reemplaza las traducciones, normalizando locale/nombre (#320)', async () => {

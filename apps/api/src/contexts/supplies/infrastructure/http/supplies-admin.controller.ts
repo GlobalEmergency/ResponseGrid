@@ -97,6 +97,8 @@ export class SuppliesAdminController {
       defaultUnit: dto.defaultUnit ?? null,
       attributes: dto.attributes ?? null,
       registrationNotes: dto.registrationNotes ?? null,
+      nature: dto.nature ?? null,
+      externalCodes: dto.externalCodes ?? {},
       variantOfId: dto.variantOfId ?? null,
       ...(dto.translations !== undefined
         ? { translations: dto.translations }

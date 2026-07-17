@@ -28,7 +28,7 @@ import { Priority, NeedStatus, PersonnelSkill } from '../../domain/need-enums';
 import {
   rowToSupplyLineSnapshot,
   supplyLineToColumns,
-} from '../../../supplies/infrastructure/drizzle/supply-line-columns';
+} from '@globalemergency/warehouse-postgres';
 import { LocationSensitivity } from '../../../../shared/domain/location-sensitivity';
 
 type NeedsRow = typeof needsTable.$inferSelect;

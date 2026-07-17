@@ -14,7 +14,7 @@ import {
 } from '../../domain/need-errors';
 import { EmergencyNotAcceptingIntakeError } from '../../../emergencies/domain/emergency-not-accepting-intake.error';
 import { InvalidAuthorError } from '../../../../shared/domain/author';
-import { SupplyLineValidationError } from '../../../supplies/domain/supply-line';
+import { SupplyLineValidationError } from '@globalemergency/warehouse-core/kernel';
 
 type DomainError =
   | NeedNotFoundError

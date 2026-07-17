@@ -4,8 +4,8 @@ import { CreateShipment } from './create-shipment';
 import { InMemoryShipmentRepository } from '../infrastructure/in-memory-shipment.repository';
 import { FakeShipmentContainerPort } from '../infrastructure/fake-shipment-container-port';
 import { LogisticsEmergencyStatusReader } from '../domain/ports/emergency-status-reader';
-import { CarrierType } from '../domain/shipment-enums';
-import { Category } from '../../supplies/domain/category';
+import { CarrierType } from '@globalemergency/warehouse-core/logistics';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const OTHER_EM = '22222222-2222-4222-8222-222222222222';

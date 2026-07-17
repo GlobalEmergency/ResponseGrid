@@ -19,7 +19,7 @@
 import { createDb } from '../src/shared/db';
 import { DrizzleResourceRepository } from '../src/contexts/resources/infrastructure/drizzle/drizzle-resource.repository';
 import { DrizzleCategoryRepository } from '../src/contexts/supplies/infrastructure/drizzle/drizzle-category.repository';
-import { CategoryResolver } from '../src/contexts/supplies/domain/category-resolver';
+import { CategoryResolver } from '@globalemergency/warehouse-core/catalog';
 import { IngestExternalResources } from '../src/contexts/resources/application/ingest-external-resources';
 import { acopioveMapper } from '../src/contexts/resources/application/acopiove-mapper';
 

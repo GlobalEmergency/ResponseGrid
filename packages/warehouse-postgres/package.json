@@ -1,0 +1,54 @@
+{
+  "name": "@globalemergency/warehouse-postgres",
+  "version": "0.0.0",
+  "description": "Adaptador de persistencia Postgres/Drizzle para @globalemergency/warehouse-core: columnas y mappers compartidos de la línea de material, y el esquema `wms.` del módulo inventory (almacenes/zonas/bins/stock + libro mayor) con su runner de migraciones. Consumido por ResponseGrid y por el WMS standalone.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./inventory": {
+      "import": {
+        "types": "./dist/esm/inventory/index.d.ts",
+        "default": "./dist/esm/inventory/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/inventory/index.d.ts",
+        "default": "./dist/cjs/inventory/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "migrations"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.cjs.json && tsc -p tsconfig.esm.json && node -e \"require('fs').writeFileSync('dist/cjs/package.json', JSON.stringify({ type: 'commonjs' }))\"",
+    "typecheck": "tsc -p tsconfig.esm.json --noEmit",
+    "pretest:int": "node -e \"require('fs').rmSync('dist-test', { recursive: true, force: true })\"",
+    "test:int": "tsc -p tsconfig.test.json && node --test --test-concurrency=1 \"dist-test/**/*.test.js\"",
+    "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\""
+  },
+  "peerDependencies": {
+    "drizzle-orm": "^0.45.2"
+  },
+  "dependencies": {
+    "@globalemergency/warehouse-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.11.10",
+    "drizzle-orm": "^0.45.2",
+    "pg": "^8.13.1",
+    "typescript": "^5.7.3"
+  }
+}

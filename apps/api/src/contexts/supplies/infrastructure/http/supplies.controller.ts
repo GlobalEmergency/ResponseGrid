@@ -15,8 +15,10 @@ import {
 } from '@nestjs/swagger';
 import { GetSupply } from '../../application/get-supply';
 import { ListSupplies } from '../../application/list-supplies';
-import { PublicSupplyRecord } from '../../domain/ports/supply-catalog.read-model';
-import { localize } from '../../domain/localized-text';
+import {
+  PublicSupplyRecord,
+  localize,
+} from '@globalemergency/warehouse-core/catalog';
 import { resolveLocale } from './locale';
 import { SuppliesQueryDto } from './supplies-query.dto';
 import { SupplyDto } from './supply-response.dto';

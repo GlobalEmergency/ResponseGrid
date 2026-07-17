@@ -14,7 +14,7 @@ import { Location, LocationProps } from '../../../shared/domain/location';
 import {
   SupplyLine,
   SupplyLineSnapshot,
-} from '../../supplies/domain/supply-line';
+} from '@globalemergency/warehouse-core/kernel';
 import { LocationSensitivity } from '../../../shared/domain/location-sensitivity';
 import { Author, AuthorSnapshot } from '../../../shared/domain/author';
 

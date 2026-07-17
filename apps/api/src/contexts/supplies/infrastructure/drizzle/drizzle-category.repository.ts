@@ -2,13 +2,13 @@ import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
 import {
   CategoryDefinition,
   CategoryKind,
-} from '../../domain/category-definition';
+} from '@globalemergency/warehouse-core/kernel';
 import {
   CategoryListOptions,
   CategoryRepository,
   CategoryTranslationInput,
   CategoryWriteInput,
-} from '../../domain/ports/category.repository';
+} from '@globalemergency/warehouse-core/catalog';
 import { Db } from '../../../../shared/db';
 import {
   categoriesTable,
@@ -77,6 +77,7 @@ export class DrizzleCategoryRepository implements CategoryRepository {
       translations: (translationsBySlug.get(row.slug) ?? []).sort((a, b) =>
         a.locale.localeCompare(b.locale),
       ),
+      externalCodes: row.externalCodes ?? {},
     }));
   }
 
@@ -119,6 +120,7 @@ export class DrizzleCategoryRepository implements CategoryRepository {
       kind: row.kind as CategoryKind,
       archivedAt: row.archivedAt ?? null,
       translations,
+      externalCodes: row.externalCodes ?? {},
     };
   }
 
@@ -134,6 +136,7 @@ export class DrizzleCategoryRepository implements CategoryRepository {
         vertical: input.vertical,
         sort: input.sort,
         archivedAt: input.archivedAt ?? null,
+        externalCodes: input.externalCodes ?? {},
       });
 
       const translations = this.buildTranslationRows(
@@ -171,6 +174,7 @@ export class DrizzleCategoryRepository implements CategoryRepository {
           vertical: input.vertical,
           sort: input.sort,
           archivedAt: input.archivedAt ?? null,
+          externalCodes: input.externalCodes ?? {},
         })
         .where(eq(categoriesTable.slug, slug));
 

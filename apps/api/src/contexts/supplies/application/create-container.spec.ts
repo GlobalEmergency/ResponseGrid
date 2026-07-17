@@ -1,12 +1,12 @@
 import { CreateContainer } from './create-container';
 import { InMemoryContainerRepository } from '../infrastructure/in-memory-container.repository';
-import { ContainerId } from '../domain/container-id';
 import {
+  ContainerId,
   ContainerHolderType,
   ContainerStatus,
   ContainerType,
-} from '../domain/container-enums';
-import { Category } from '../domain/category';
+} from '@globalemergency/warehouse-core/containers';
+import { Category } from '@globalemergency/warehouse-core/kernel';
 
 const EM = '11111111-1111-4111-8111-111111111111';
 const OTHER_EM = '22222222-2222-4222-8222-222222222222';

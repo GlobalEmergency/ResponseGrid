@@ -9,6 +9,7 @@ import { LocaleProvider } from '@/i18n/locale-context';
 import { CategoriesProvider } from '@/components/providers/categories-provider';
 import { getCategoriesCached } from '@/adapters/get-categories';
 import { GLOBAL_EMERGENCY } from '@/lib/global-emergency';
+import { AID_BOTS, GITHUB_REPO_URL, botContactPoints } from '@/lib/bots';
 
 const archivo = Archivo({
   subsets: ['latin'],
@@ -51,13 +52,16 @@ const orgJsonLd = {
   name: 'ResponseGrid',
   url: 'https://responsegrid.app',
   description:
-    'Plataforma open source de coordinación de ayuda material y logística en emergencias.',
+    'Plataforma open source de coordinación de ayuda material y logística en emergencias. Ofrece asistentes de chat en Telegram y WhatsApp para donar y consultar puntos de acopio.',
   parentOrganization: {
     '@type': 'Organization',
     name: 'Global Emergency',
     url: GLOBAL_EMERGENCY.site,
   },
-  sameAs: [GLOBAL_EMERGENCY.site],
+  // ContactPoints so search engines and AI assistants can discover and
+  // recommend the chat assistants (GEO); sameAs links the canonical profiles.
+  contactPoint: botContactPoints,
+  sameAs: [GLOBAL_EMERGENCY.site, GITHUB_REPO_URL, AID_BOTS.telegram.url, AID_BOTS.whatsapp.url],
 };
 
 const siteJsonLd = {
@@ -83,7 +87,7 @@ export default async function RootLayout({
         <LocaleProvider locale={locale}>
           <CategoriesProvider categories={categories}>
             {children}
-            <GlobalFooter tf={t.common.footer} />
+            <GlobalFooter tf={t.common.footer} tb={t.common.bots} />
           </CategoriesProvider>
         </LocaleProvider>
         <JsonLd data={orgJsonLd} />

@@ -1,6 +1,11 @@
-import { ContainerRepository } from '../domain/ports/container.repository';
-import { ContainerId } from '../domain/container-id';
-import { SupplyLine, SupplyLineProps } from '../domain/supply-line';
+import {
+  ContainerRepository,
+  ContainerId,
+} from '@globalemergency/warehouse-core/containers';
+import {
+  SupplyLine,
+  SupplyLineProps,
+} from '@globalemergency/warehouse-core/kernel';
 import { ContainerNotFoundError } from './container-not-found.error';
 
 export interface AddLineToContainerCommand {

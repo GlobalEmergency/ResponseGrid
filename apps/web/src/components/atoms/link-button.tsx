@@ -2,9 +2,11 @@ import Link from 'next/link';
 import type { ComponentProps } from 'react';
 
 type Variant = 'primary' | 'secondary';
+type Size = 'sm' | 'md' | 'lg';
 
 interface LinkButtonProps extends ComponentProps<typeof Link> {
   variant?: Variant;
+  size?: Size;
   fullWidth?: boolean;
 }
 
@@ -16,10 +18,15 @@ const VARIANTS: Record<Variant, string> = {
   secondary: 'text-ink bg-white border-2 border-navy hover:bg-surface',
 };
 
-const SIZE_CLASSES = 'px-6 py-4 text-base';
+const SIZES: Record<Size, string> = {
+  sm: 'px-4 py-2 text-sm',
+  md: 'px-5 py-3 text-sm',
+  lg: 'px-6 py-4 text-base',
+};
 
 export function LinkButton({
   variant = 'primary',
+  size = 'lg',
   fullWidth = false,
   className = '',
   children,
@@ -31,7 +38,7 @@ export function LinkButton({
       className={[
         BASE,
         VARIANTS[variant],
-        SIZE_CLASSES,
+        SIZES[size],
         fullWidth ? 'w-full' : '',
         className,
       ]

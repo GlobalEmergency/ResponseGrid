@@ -1,5 +1,5 @@
 import { SuppliesController } from './supplies.controller';
-import { PublicSupplyRecord } from '../../domain/ports/supply-catalog.read-model';
+import { PublicSupplyRecord } from '@globalemergency/warehouse-core/catalog';
 
 describe('SuppliesController', () => {
   const record: PublicSupplyRecord = {

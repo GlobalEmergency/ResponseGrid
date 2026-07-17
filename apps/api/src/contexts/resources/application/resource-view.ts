@@ -5,7 +5,6 @@ import {
   PublicStatus,
 } from '../domain/resource-enums';
 import { LocationProps } from '../../../shared/domain/location';
-import { Category } from '../../supplies/domain/category';
 
 export interface ResourceView {
   id: string;
@@ -53,7 +52,8 @@ export interface ResourceView {
  * endpoint returns this; list/map views use the lighter ResourceView.
  */
 export interface ResourceDetailView extends ResourceView {
-  inventoryCategories: Category[];
+  /** Distinct category slugs present in the place's declared inventory. */
+  inventoryCategories: string[];
 }
 
 export function toResourceView(r: Resource): ResourceView {

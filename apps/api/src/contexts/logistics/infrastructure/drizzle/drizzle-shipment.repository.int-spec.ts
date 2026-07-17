@@ -2,13 +2,15 @@ import { createDb, Db } from '../../../../shared/db';
 import { shipmentCodeSequencesTable, shipmentsTable } from './schema';
 import { DrizzleShipmentRepository } from './drizzle-shipment.repository';
 import { DrizzleShipmentAuthorizationLookup } from './drizzle-shipment-authorization-lookup';
-import { Shipment } from '../../domain/shipment';
-import { ShipmentId } from '../../domain/shipment-id';
-import { formatShipmentCode } from '../../domain/shipment-code';
-import { SupplyLine } from '../../../supplies/domain/supply-line';
-import { EmergencyId } from '../../../../shared/domain/emergency-id';
-import { CarrierType, ShipmentStatus } from '../../domain/shipment-enums';
-import { Category } from '../../../supplies/domain/category';
+import { Shipment } from '@globalemergency/warehouse-core/logistics';
+import { ShipmentId } from '@globalemergency/warehouse-core/logistics';
+import { formatShipmentCode } from '@globalemergency/warehouse-core/logistics';
+import { SupplyLine, Category } from '@globalemergency/warehouse-core/kernel';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
+import {
+  CarrierType,
+  ShipmentStatus,
+} from '@globalemergency/warehouse-core/logistics';
 import type { Pool } from 'pg';
 
 const URL =
@@ -39,7 +41,7 @@ function makeShipment(opts?: {
   return Shipment.create({
     id: ShipmentId.create(),
     code: formatShipmentCode(++codeSeq),
-    emergencyId: EmergencyId.fromString(opts?.emergencyId ?? EM),
+    scopeId: ScopeId.fromString(opts?.emergencyId ?? EM),
     originResourceId: ORIGIN,
     destinationResourceId: DEST,
     items: opts?.items ?? [
@@ -78,12 +80,12 @@ describe('DrizzleShipmentRepository (integration)', () => {
   });
 
   it('nextSequence allocates a monotonic per-emergency sequence, never reused', async () => {
-    const em = EmergencyId.fromString(EM);
+    const em = ScopeId.fromString(EM);
     // increments on every call, independent of how many rows exist
     expect(await repo.nextSequence(em)).toBe(1);
     expect(await repo.nextSequence(em)).toBe(2);
     // a different emergency keeps its own sequence
-    expect(await repo.nextSequence(EmergencyId.fromString(OTHER_EM))).toBe(1);
+    expect(await repo.nextSequence(ScopeId.fromString(OTHER_EM))).toBe(1);
     // deleting shipments does NOT free a code for reuse — the sequence is
     // monotonic, decoupled from the live row count.
     await repo.save(makeShipment());
@@ -157,7 +159,7 @@ describe('DrizzleShipmentRepository (integration)', () => {
     });
   });
 
-  it('findByEmergency filters by status, newest first', async () => {
+  it('findByScope filters by status, newest first', async () => {
     const planned = makeShipment();
     await repo.save(planned);
     const assigned = makeShipment();
@@ -167,14 +169,13 @@ describe('DrizzleShipmentRepository (integration)', () => {
     });
     await repo.save(assigned);
 
-    const onlyAssigned = await repo.findByEmergency(
-      EmergencyId.fromString(EM),
-      { status: ShipmentStatus.Assigned },
-    );
+    const onlyAssigned = await repo.findByScope(ScopeId.fromString(EM), {
+      status: ShipmentStatus.Assigned,
+    });
     expect(onlyAssigned).toHaveLength(1);
     expect(onlyAssigned[0].id.value).toBe(assigned.id.value);
 
-    const all = await repo.findByEmergency(EmergencyId.fromString(EM), {});
+    const all = await repo.findByScope(ScopeId.fromString(EM), {});
     expect(all).toHaveLength(2);
   });
 
@@ -189,12 +190,9 @@ describe('DrizzleShipmentRepository (integration)', () => {
     const all = await repo.findByCarrier(CARRIER_ID, null);
     expect(all).toHaveLength(2);
 
-    const scoped = await repo.findByCarrier(
-      CARRIER_ID,
-      EmergencyId.fromString(EM),
-    );
+    const scoped = await repo.findByCarrier(CARRIER_ID, ScopeId.fromString(EM));
     expect(scoped).toHaveLength(1);
-    expect(scoped[0].emergencyId.value).toBe(EM);
+    expect(scoped[0].scopeId.value).toBe(EM);
   });
 
   it('authorization lookup resolves emergency + carrier (and null for unknown)', async () => {

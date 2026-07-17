@@ -5,8 +5,7 @@
  * - Emergency scope: the organization is accredited for a specific emergency.
  */
 export type AccreditationScopeProps =
-  | { kind: 'global' }
-  | { kind: 'emergency'; emergencyId: string };
+  { kind: 'global' } | { kind: 'emergency'; emergencyId: string };
 
 export class AccreditationScope {
   private constructor(private readonly props: AccreditationScopeProps) {}

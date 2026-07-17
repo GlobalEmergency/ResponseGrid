@@ -1,9 +1,9 @@
 import {
   ListShipmentsFilter,
   ShipmentRepository,
-} from '../domain/ports/shipment.repository';
-import { EmergencyId } from '../../../shared/domain/emergency-id';
-import { ShipmentStatus } from '../domain/shipment-enums';
+} from '@globalemergency/warehouse-core/logistics';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
+import { ShipmentStatus } from '@globalemergency/warehouse-core/logistics';
 import { ShipmentView, toShipmentView } from './shipment-view';
 
 export interface ListShipmentsQuery {
@@ -18,8 +18,8 @@ export class ListShipments {
     const filter: ListShipmentsFilter = {};
     if (q.status !== undefined) filter.status = q.status;
 
-    const shipments = await this.repo.findByEmergency(
-      EmergencyId.fromString(q.emergencyId),
+    const shipments = await this.repo.findByScope(
+      ScopeId.fromString(q.emergencyId),
       filter,
     );
     return shipments.map(toShipmentView);

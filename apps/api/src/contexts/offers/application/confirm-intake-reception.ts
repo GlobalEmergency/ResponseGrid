@@ -1,7 +1,7 @@
 import { DonationIntakeId } from '../domain/donation-intake-id';
 import { DonationIntakeRepository } from '../domain/ports/donation-intake.repository';
 import { EventBus } from '../domain/ports/event-bus';
-import { SupplyLineProps } from '../../supplies/domain/supply-line';
+import { SupplyLineProps } from '@globalemergency/warehouse-core/kernel';
 import { DonationIntakeNotFoundError } from './donation-intake-not-found.error';
 
 export interface ConfirmIntakeReceptionCommand {

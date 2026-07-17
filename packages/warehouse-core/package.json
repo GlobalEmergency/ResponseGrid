@@ -1,0 +1,84 @@
+{
+  "name": "@globalemergency/warehouse-core",
+  "version": "0.0.0",
+  "description": "Núcleo reutilizable de gestión de almacén (dominio puro). Consumido por ResponseGrid y, en el futuro, por el WMS standalone. Sin NestJS, sin Drizzle, sin infraestructura.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./kernel": {
+      "import": {
+        "types": "./dist/esm/kernel/index.d.ts",
+        "default": "./dist/esm/kernel/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/kernel/index.d.ts",
+        "default": "./dist/cjs/kernel/index.js"
+      }
+    },
+    "./catalog": {
+      "import": {
+        "types": "./dist/esm/catalog/index.d.ts",
+        "default": "./dist/esm/catalog/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/catalog/index.d.ts",
+        "default": "./dist/cjs/catalog/index.js"
+      }
+    },
+    "./containers": {
+      "import": {
+        "types": "./dist/esm/containers/index.d.ts",
+        "default": "./dist/esm/containers/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/containers/index.d.ts",
+        "default": "./dist/cjs/containers/index.js"
+      }
+    },
+    "./logistics": {
+      "import": {
+        "types": "./dist/esm/logistics/index.d.ts",
+        "default": "./dist/esm/logistics/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/logistics/index.d.ts",
+        "default": "./dist/cjs/logistics/index.js"
+      }
+    },
+    "./inventory": {
+      "import": {
+        "types": "./dist/esm/inventory/index.d.ts",
+        "default": "./dist/esm/inventory/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/inventory/index.d.ts",
+        "default": "./dist/cjs/inventory/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.cjs.json && tsc -p tsconfig.esm.json && node -e \"require('fs').writeFileSync('dist/cjs/package.json', JSON.stringify({ type: 'commonjs' }))\"",
+    "typecheck": "tsc -p tsconfig.esm.json --noEmit",
+    "test": "tsc -p tsconfig.test.json && node --test \"dist-test/**/*.test.js\"",
+    "pretest": "node -e \"require('fs').rmSync('dist-test', { recursive: true, force: true })\"",
+    "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\""
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.7.3"
+  }
+}

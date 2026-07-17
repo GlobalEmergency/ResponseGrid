@@ -6,7 +6,7 @@ import {
   doublePrecision,
   jsonb,
 } from 'drizzle-orm/pg-core';
-import { supplyLineColumns } from '../../../supplies/infrastructure/drizzle/supply-line-columns';
+import { supplyLineColumns } from '@globalemergency/warehouse-postgres';
 import { suppliesTable } from '../../../supplies/infrastructure/drizzle/schema';
 import { AuthorSnapshot } from '../../../../shared/domain/author';
 

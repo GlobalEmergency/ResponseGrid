@@ -14,15 +14,15 @@ import {
   InvalidCapacityAmountError,
   InvalidCapacityWindowError,
   InvalidCoverageError,
-} from '../../domain/transport-capacity-errors';
+} from '@globalemergency/warehouse-core/logistics';
 import { ShipmentNotFoundError } from '../../application/shipment-not-found.error';
 import { ShipmentActionUnauthorizedError } from '../../application/mark-shipment-in-transit';
 import {
   InvalidShipmentRouteError,
   InvalidShipmentTransitionError,
   ShipmentMustHaveCargoError,
-} from '../../domain/shipment-errors';
-import { SupplyLineValidationError } from '../../../supplies/domain/supply-line';
+} from '@globalemergency/warehouse-core/logistics';
+import { SupplyLineValidationError } from '@globalemergency/warehouse-core/kernel';
 import {
   ShipmentContainerNotFoundError,
   ShipmentContainerUnavailableError,

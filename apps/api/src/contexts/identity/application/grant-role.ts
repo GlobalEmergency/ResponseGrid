@@ -4,7 +4,7 @@ import {
   AccessControl,
   AuthorizationContext,
 } from '../domain/authorization/access-control';
-import { Grant } from '../domain/authorization/grant';
+import { Grant, PrincipalType } from '../domain/authorization/grant';
 import { ScopeRef, ScopeRefProps } from '../domain/authorization/scope-ref';
 import {
   permissionsForRole,
@@ -23,6 +23,8 @@ export interface GrantRoleCommand {
   /** Who is granting — their effective grants for this request. */
   actor: AuthorizationContext;
   targetPrincipalId: string;
+  /** Kind of principal receiving the role — defaults to 'user' when omitted. */
+  targetPrincipalType?: PrincipalType;
   roleId: string;
   scope: ScopeRefProps;
   expiresAt?: Date | null;
@@ -84,6 +86,7 @@ export class GrantRole {
     const grant = Grant.create({
       id: randomUUID(),
       principalId: cmd.targetPrincipalId,
+      principalType: cmd.targetPrincipalType ?? 'user',
       roleId: cmd.roleId,
       scope: ScopeRef.fromProps(cmd.scope),
       grantedByPrincipalId: cmd.actor.principalId,

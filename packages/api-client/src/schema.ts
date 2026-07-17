@@ -212,6 +212,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/service-accounts/{serviceAccountId}/grants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the grants held by a service account — what its keys can do (scoped admin) */
+        get: operations["ApiKeysController_listServiceAccountGrants"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api-keys/{keyId}": {
         parameters: {
             query?: never;
@@ -1954,6 +1971,41 @@ export interface paths {
         patch: operations["CategoriesAdminController_update"];
         trace?: never;
     };
+    "/admin/attribute-definitions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List global attribute definitions, optionally by category */
+        get: operations["AttributeDefinitionsAdminController_list"];
+        put?: never;
+        /** Create a global attribute definition for a family */
+        post: operations["AttributeDefinitionsAdminController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/attribute-definitions/{categorySlug}/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Archive (soft-delete) a global attribute definition */
+        delete: operations["AttributeDefinitionsAdminController_archive"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/supplies": {
         parameters: {
             query?: never;
@@ -2891,6 +2943,11 @@ export interface components {
              * @description Principal receiving the role
              */
             principalId: string;
+            /**
+             * @description Kind of principal receiving the role (defaults to user). Set to service_account when granting to a machine principal so it resolves and labels correctly.
+             * @enum {string}
+             */
+            principalType?: "user" | "service_account";
             /** @description Role id from the fixed catalog (e.g. emergency_coordinator) */
             roleId: string;
             /**
@@ -2929,6 +2986,15 @@ export interface components {
             lastUsedAt: string | null;
             revokedAt: string | null;
             createdAt: string;
+        };
+        ServiceAccountGrantDto: {
+            /** Format: uuid */
+            id: string;
+            roleId: string;
+            scopeType: string;
+            scopeId: string | null;
+            grantedAt: string;
+            expiresAt: string | null;
         };
         CreateServiceAccountDto: {
             /** @description Human-readable name for the service account */
@@ -3089,10 +3155,10 @@ export interface components {
              */
             unit?: string;
             /**
+             * @description Slug de categoría de material (data-driven, lowercase snake_case). Los slugs core son: food, water, hygiene, clothing, medical, shelter, tools, other, medicines, medical_equipment, medical_supplies, medical_personnel, food_fresh, food_non_perishable, hygiene_infantile, hygiene_personal, tools_extraction, other_pets. El conjunto es abierto: la taxonomía puede crecer vía datos (tabla `categories`).
              * @example water
-             * @enum {string}
              */
-            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
+            category: string;
             /**
              * @description Presentation / route of administration: ampolla, EV (intravenoso), inhalador, pastilla, jarabe… Optional, free-form (#61).
              * @example ampolla
@@ -3219,10 +3285,10 @@ export interface components {
             /** @example liters */
             unit?: string | null;
             /**
+             * @description Slug de categoría de material (data-driven, lowercase snake_case).
              * @example water
-             * @enum {string}
              */
-            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
+            category: string;
             /**
              * @description Presentation / route of administration (ampolla, EV, inhalador…) — #61.
              * @example ampolla
@@ -4804,10 +4870,10 @@ export interface components {
             /** @example liters */
             unit?: string | null;
             /**
+             * @description Slug de categoría de material (data-driven, lowercase snake_case).
              * @example water
-             * @enum {string}
              */
-            category: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
+            category: string;
             /**
              * @description Presentation / route of administration (ampolla, EV, inhalador…) — #61.
              * @example ampolla
@@ -5273,6 +5339,15 @@ export interface components {
              */
             archivedAt: Record<string, never> | null;
             translations: components["schemas"]["CategoryTranslationDto"][];
+            /**
+             * @description Códigos externos estándar para interop (#398): mapa namespace→código. `{}` si no tiene.
+             * @example {
+             *       "unspsc": "51101500"
+             *     }
+             */
+            externalCodes: {
+                [key: string]: string;
+            };
         };
         CreateCategoryDto: {
             /** @example baby_food */
@@ -5292,6 +5367,10 @@ export interface components {
             sort: number;
             /** @description Additional locale labels to persist in category_translations */
             translations?: components["schemas"]["CategoryTranslationDto"][];
+            /** @description Códigos externos estándar para interop (#398): mapa namespace→código. */
+            externalCodes?: {
+                [key: string]: string;
+            };
         };
         UpdateCategoryDto: {
             /** @example Alimentos para bebé */
@@ -5309,11 +5388,79 @@ export interface components {
             sort?: number;
             /** @description Replace the category_translation rows with this set */
             translations?: components["schemas"]["CategoryTranslationDto"][];
+            /** @description Códigos externos de interop (#398). Si se indica, reemplaza el mapa; omitir lo conserva. */
+            externalCodes?: {
+                [key: string]: string;
+            };
             /**
              * @description True to hide/archive the category, false to restore it
              * @example false
              */
             archived?: boolean;
+        };
+        AttributeOptionDto: {
+            /** @example tableta */
+            value: string;
+            /** @example Tableta */
+            label?: string;
+        };
+        AttributeDefinitionDto: {
+            /** @example medicines */
+            categorySlug: string;
+            /** @example principio_activo */
+            key: string;
+            /**
+             * @example text
+             * @enum {string}
+             */
+            dataType: "text" | "number" | "integer" | "boolean" | "enum" | "date" | "quantity";
+            /** @example false */
+            required: boolean;
+            /** @description Opciones del enum, o null */
+            options: components["schemas"]["AttributeOptionDto"][] | null;
+            /** @example null */
+            unit: string | null;
+            /** @example 0 */
+            sort: number;
+            /**
+             * @description Marca de archivado (soft-delete)
+             * @example null
+             */
+            archivedAt: Record<string, never> | null;
+        };
+        CreateAttributeDefinitionDto: {
+            /**
+             * @description Slug de la categoría (familia) a la que se ancla
+             * @example medicines
+             */
+            categorySlug: string;
+            /**
+             * @description Clave del atributo (lowercase snake_case)
+             * @example principio_activo
+             */
+            key: string;
+            /**
+             * @example text
+             * @enum {string}
+             */
+            dataType: "text" | "number" | "integer" | "boolean" | "enum" | "date" | "quantity";
+            /**
+             * @default false
+             * @example false
+             */
+            required: boolean;
+            /** @description Opciones (sólo para dataType=enum) */
+            options?: components["schemas"]["AttributeOptionDto"][];
+            /**
+             * @description Unidad (sólo para dataType=number|quantity)
+             * @example mg
+             */
+            unit?: Record<string, never> | null;
+            /**
+             * @default 0
+             * @example 0
+             */
+            sort: number;
         };
         SupplyDto: {
             /**
@@ -5382,6 +5529,15 @@ export interface components {
             /** @description Notas internas de gestión */
             registrationNotes?: Record<string, never>;
             /**
+             * @description Naturaleza logística (#269): fungible | reusable | human. Omitir = sin clasificar.
+             * @enum {string}
+             */
+            nature?: "fungible" | "reusable" | "human";
+            /** @description Códigos externos estándar para interop (#398): mapa namespace→código, p.ej. { "unspsc": "51101500", "hxl": "#item+code" }. */
+            externalCodes?: {
+                [key: string]: string;
+            };
+            /**
              * Format: uuid
              * @description Si es variante, id del insumo padre (debe existir)
              */
@@ -5420,6 +5576,22 @@ export interface components {
              */
             status: "active" | "archived";
             registrationNotes?: string | null;
+            /**
+             * @description Naturaleza logística (#269): fungible | reusable | human. Null = sin clasificar.
+             * @example fungible
+             * @enum {string|null}
+             */
+            nature?: "fungible" | "reusable" | "human" | null;
+            /**
+             * @description Códigos externos estándar para interop (#398): mapa namespace→código. `{}` si no tiene.
+             * @example {
+             *       "unspsc": "51101500",
+             *       "hxl": "#item+code"
+             *     }
+             */
+            externalCodes: {
+                [key: string]: string;
+            };
             /**
              * @example [
              *       "agua embotellada",
@@ -5491,6 +5663,15 @@ export interface components {
                 [key: string]: unknown;
             };
             registrationNotes?: Record<string, never>;
+            /**
+             * @description Naturaleza logística (#269). `null` la limpia (sin clasificar); omitir no la toca.
+             * @enum {string|null}
+             */
+            nature?: "fungible" | "reusable" | "human" | null;
+            /** @description Códigos externos de interop (#398). Si se indica, reemplaza el mapa completo; `{}` los limpia. */
+            externalCodes?: {
+                [key: string]: string;
+            };
             /** Format: uuid */
             variantOfId?: Record<string, never>;
             /** @description Reemplaza el conjunto de traducciones del insumo; omitir para no tocarlas. */
@@ -6562,6 +6743,41 @@ export interface operations {
                 content?: never;
             };
             /** @description apikey:create required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ApiKeysController_listServiceAccountGrants: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                serviceAccountId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceAccountGrantDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description apikey:create required in scope */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -8448,8 +8664,8 @@ export interface operations {
     NeedsController_listPublic: {
         parameters: {
             query?: {
-                /** @description Filter by item category (needs with at least one item of this category) */
-                category?: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
+                /** @description Filter by item category slug (needs with at least one item of this category). Core slugs: food, water, hygiene, clothing, medical, shelter, tools, other, medicines, medical_equipment, medical_supplies, medical_personnel, food_fresh, food_non_perishable, hygiene_infantile, hygiene_personal, tools_extraction, other_pets. */
+                category?: string;
                 /** @description Filter by need priority */
                 priority?: "low" | "medium" | "high" | "urgent";
                 /** @description Filter to needs linked to this resource / final recipient */
@@ -8548,8 +8764,8 @@ export interface operations {
     NeedsController_listQueue: {
         parameters: {
             query?: {
-                /** @description Filter by item category (needs with at least one item of this category) */
-                category?: "food" | "water" | "hygiene" | "clothing" | "medical" | "shelter" | "tools" | "other" | "medicines" | "medical_equipment" | "medical_supplies" | "medical_personnel" | "food_fresh" | "food_non_perishable" | "hygiene_infantile" | "hygiene_personal" | "tools_extraction" | "other_pets";
+                /** @description Filter by item category slug (needs with at least one item of this category). Core slugs: food, water, hygiene, clothing, medical, shelter, tools, other, medicines, medical_equipment, medical_supplies, medical_personnel, food_fresh, food_non_perishable, hygiene_infantile, hygiene_personal, tools_extraction, other_pets. */
+                category?: string;
                 /** @description Filter by need priority */
                 priority?: "low" | "medium" | "high" | "urgent";
             };
@@ -11270,6 +11486,137 @@ export interface operations {
             };
             /** @description Category slug already exists */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AttributeDefinitionsAdminController_list: {
+        parameters: {
+            query?: {
+                /** @description Filter by the exact category slug */
+                categorySlug?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttributeDefinitionDto"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing catalogue:manage permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AttributeDefinitionsAdminController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAttributeDefinitionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttributeDefinitionDto"];
+                };
+            };
+            /** @description Invalid attribute definition payload */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing catalogue:manage permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Category not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AttributeDefinitionsAdminController_archive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Category slug of the family */
+                categorySlug: string;
+                /** @description Attribute key */
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Attribute definition archived */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing catalogue:manage permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Attribute definition not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

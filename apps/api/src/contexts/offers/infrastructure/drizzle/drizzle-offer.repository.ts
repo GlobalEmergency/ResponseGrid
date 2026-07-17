@@ -13,7 +13,7 @@ import { OfferStatus } from '../../domain/offer-enums';
 import {
   rowToSupplyLineSnapshot,
   supplyLineToColumns,
-} from '../../../supplies/infrastructure/drizzle/supply-line-columns';
+} from '@globalemergency/warehouse-postgres';
 
 type OfferRow = typeof offersTable.$inferSelect;
 type OfferItemRow = typeof offerItemsTable.$inferSelect;
