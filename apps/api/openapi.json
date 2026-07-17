@@ -2932,6 +2932,59 @@
         ]
       }
     },
+    "/emergencies/{emergencyId}/auto-hide-on-dispute": {
+      "put": {
+        "operationId": "EmergenciesController_setEmergencyAutoHideOnDispute",
+        "parameters": [
+          {
+            "name": "emergencyId",
+            "required": true,
+            "in": "path",
+            "description": "Emergency UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetAutoHideOnDisputeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Política actualizada"
+          },
+          "400": {
+            "description": "Invalid body"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "emergency:configure permission required"
+          },
+          "404": {
+            "description": "Emergency not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Activar o desactivar la política de auto-ocultado por disputa (#171)",
+        "tags": [
+          "emergencies"
+        ]
+      }
+    },
     "/emergencies/{emergencyId}/needs": {
       "post": {
         "description": "Open to any authenticated user (a citizen submits; a coordinator validates later). A trusted integration may also create on behalf of a third party with its service-account API key when it holds `need:create` and includes the `author` block (#235).",
@@ -12026,6 +12079,11 @@
             "example": 5,
             "nullable": true,
             "description": "Umbral de disputa configurado para esta emergencia, o null cuando usa el global. Solo se expone en la vista autenticada."
+          },
+          "autoHideOnDispute": {
+            "type": "boolean",
+            "example": false,
+            "description": "Política opt-in (#171): si está activa, un punto disputado que alcanza el umbral se cierra automáticamente (misma transición que \"confirmar cierre\"); si no, el comportamiento actual (visible con badge, confirma un coordinador). Off por defecto. Solo se expone en la vista autenticada."
           }
         },
         "required": [
@@ -12038,7 +12096,8 @@
           "dontBringList",
           "updatedAt",
           "roleIds",
-          "resourceDisputeThreshold"
+          "resourceDisputeThreshold",
+          "autoHideOnDispute"
         ]
       },
       "CreateEmergencyFromTemplateDto": {
@@ -12098,6 +12157,19 @@
         },
         "required": [
           "threshold"
+        ]
+      },
+      "SetAutoHideOnDisputeDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "example": true,
+            "description": "Activa (true) o desactiva (false) la política de auto-ocultado (#171)."
+          }
+        },
+        "required": [
+          "enabled"
         ]
       },
       "NeedLocationDto": {

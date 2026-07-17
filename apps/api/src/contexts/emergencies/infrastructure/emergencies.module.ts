@@ -11,6 +11,7 @@ import { ResumeEmergency } from '../application/resume-emergency';
 import { PublishAnnouncement } from '../application/publish-announcement';
 import { CreateEmergencyFromTemplate } from '../application/create-emergency-from-template';
 import { SetEmergencyDisputeThreshold } from '../application/set-emergency-dispute-threshold';
+import { SetEmergencyAutoHideOnDispute } from '../application/set-emergency-auto-hide-on-dispute';
 import {
   EMERGENCY_REPOSITORY,
   EmergencyRepository,
@@ -88,6 +89,13 @@ const setDisputeThresholdProvider = {
     new SetEmergencyDisputeThreshold(repo),
 };
 
+const setAutoHideOnDisputeProvider = {
+  provide: SetEmergencyAutoHideOnDispute,
+  inject: [EMERGENCY_REPOSITORY],
+  useFactory: (repo: EmergencyRepository) =>
+    new SetEmergencyAutoHideOnDispute(repo),
+};
+
 @Module({
   imports: [DatabaseModule, IdentityModule, TemplatesModule],
   controllers: [EmergenciesController],
@@ -102,6 +110,7 @@ const setDisputeThresholdProvider = {
     publishAnnouncementProvider,
     createFromTemplateProvider,
     setDisputeThresholdProvider,
+    setAutoHideOnDisputeProvider,
   ],
 })
 export class EmergenciesModule {}
