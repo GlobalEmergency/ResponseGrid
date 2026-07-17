@@ -5,6 +5,7 @@ import {
   CategoryProtectedError,
   CategoryValidationError,
 } from '../../application/category-admin.errors';
+import { SupplyLineValidationError } from '@globalemergency/warehouse-core/kernel';
 
 function statusFor(
   exception:
@@ -28,6 +29,25 @@ function statusFor(
   return statusCode;
 }
 
+function bodyFor(exception: Error): unknown {
+  const filter = new SuppliesDomainExceptionFilter();
+  let body: unknown;
+  const res = {
+    status() {
+      return this;
+    },
+    json(payload: unknown) {
+      body = payload;
+      return this;
+    },
+  };
+  const host = {
+    switchToHttp: () => ({ getResponse: () => res }),
+  } as unknown as ArgumentsHost;
+  filter.catch(exception, host);
+  return body;
+}
+
 describe('SuppliesDomainExceptionFilter — categorías admin', () => {
   it('mapea el CategoryNotFoundError de application a 404 (regresión: antes 500)', () => {
     expect(statusFor(new CategoryNotFoundError('missing'))).toBe(
@@ -45,5 +65,20 @@ describe('SuppliesDomainExceptionFilter — categorías admin', () => {
     expect(statusFor(new CategoryValidationError('bad'))).toBe(
       HttpStatus.UNPROCESSABLE_ENTITY,
     );
+  });
+
+  it('incluye el code estable de SupplyLineValidationError en el body (#348)', () => {
+    const body = bodyFor(
+      new SupplyLineValidationError(
+        'SupplyLine name must not be empty',
+        'supply_name_required',
+      ),
+    );
+    expect(body).toMatchObject({ code: 'supply_name_required' });
+  });
+
+  it('omite code cuando la excepción no expone uno', () => {
+    const body = bodyFor(new CategoryNotFoundError('missing'));
+    expect(body).not.toHaveProperty('code');
   });
 });

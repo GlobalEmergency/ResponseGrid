@@ -17,6 +17,9 @@ export interface CapacityProps {
 
 /** Se lanza cuando una capacidad no declara ni peso ni volumen. */
 export class CapacityMustHaveWeightOrVolumeError extends Error {
+  /** Stable identifier for web localization (#348); see `SupplyLineErrorCode`. */
+  readonly code = 'capacity_weight_or_volume_required' as const;
+
   constructor() {
     super('Transport capacity must declare at least weightKg or volumeM3');
     this.name = 'CapacityMustHaveWeightOrVolumeError';
@@ -25,6 +28,9 @@ export class CapacityMustHaveWeightOrVolumeError extends Error {
 
 /** Se lanza cuando una dimensión de capacidad presente no es positiva. */
 export class InvalidCapacityAmountError extends Error {
+  /** Stable identifier for web localization (#348); see `SupplyLineErrorCode`. */
+  readonly code = 'capacity_amount_invalid' as const;
+
   constructor(field: string, value: number) {
     super(`Capacity ${field} must be greater than 0, got ${value}`);
     this.name = 'InvalidCapacityAmountError';

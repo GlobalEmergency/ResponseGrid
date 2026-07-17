@@ -13,6 +13,9 @@ import { EmergencyNotAcceptingIntakeError } from '../../emergencies/domain/emerg
 const ACTIVE_STATUS = 'active';
 
 export class TargetNeedNotFoundError extends Error {
+  /** Stable identifier for web localization (#348). */
+  readonly code = 'target_need_not_found' as const;
+
   constructor(needId: string) {
     super(`Target need not found: ${needId}`);
     this.name = 'TargetNeedNotFoundError';
@@ -20,6 +23,9 @@ export class TargetNeedNotFoundError extends Error {
 }
 
 export class TargetNeedWrongEmergencyError extends Error {
+  /** Stable identifier for web localization (#348). */
+  readonly code = 'target_need_wrong_emergency' as const;
+
   constructor(needId: string, emergencyId: string) {
     super(
       `Target need '${needId}' does not belong to emergency '${emergencyId}'`,
