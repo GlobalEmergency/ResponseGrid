@@ -45,7 +45,7 @@
     "@globalemergency/warehouse-core": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^24.0.0",
+    "@types/node": "^26.1.1",
     "@types/pg": "^8.11.10",
     "drizzle-orm": "^0.45.2",
     "pg": "^8.13.1",
