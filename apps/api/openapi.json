@@ -7396,7 +7396,8 @@
               "type": "string",
               "enum": [
                 "resource",
-                "shipment"
+                "shipment",
+                "vehicle"
               ]
             }
           },
@@ -15551,7 +15552,8 @@
             "type": "string",
             "enum": [
               "resource",
-              "shipment"
+              "shipment",
+              "vehicle"
             ],
             "example": "resource"
           },
@@ -15707,7 +15709,8 @@
             "type": "string",
             "enum": [
               "resource",
-              "shipment"
+              "shipment",
+              "vehicle"
             ],
             "nullable": true,
             "example": "resource"
@@ -15814,7 +15817,8 @@
             "type": "string",
             "enum": [
               "resource",
-              "shipment"
+              "shipment",
+              "vehicle"
             ],
             "nullable": true,
             "example": "resource"

@@ -5701,7 +5701,7 @@ export interface components {
              * @example resource
              * @enum {string}
              */
-            type: "resource" | "shipment";
+            type: "resource" | "shipment" | "vehicle";
             /**
              * Format: uuid
              * @description Resource node or shipment id (polymorphic, no FK)
@@ -5777,7 +5777,7 @@ export interface components {
              * @example resource
              * @enum {string|null}
              */
-            holderType?: "resource" | "shipment" | null;
+            holderType?: "resource" | "shipment" | "vehicle" | null;
             /** Format: uuid */
             holderId?: string | null;
             /**
@@ -5825,7 +5825,7 @@ export interface components {
              * @example resource
              * @enum {string|null}
              */
-            holderType?: "resource" | "shipment" | null;
+            holderType?: "resource" | "shipment" | "vehicle" | null;
             /** Format: uuid */
             holderId?: string | null;
             /**
@@ -12362,7 +12362,7 @@ export interface operations {
             query?: {
                 type?: "pallet" | "box" | "lote";
                 status?: "open" | "sealed";
-                holderType?: "resource" | "shipment";
+                holderType?: "resource" | "shipment" | "vehicle";
                 holderId?: string;
                 /** @description Only top-level containers (the roots of the trees) */
                 topLevelOnly?: boolean;
