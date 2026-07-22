@@ -28,6 +28,7 @@ import {
   ShipmentContainerUnavailableError,
 } from '../../application/shipment-cargo-errors';
 import { EmergencyNotAcceptingIntakeError } from '../../../emergencies/domain/emergency-not-accepting-intake.error';
+import { domainErrorResponseBody } from '../../../../shared/http/domain-error-response';
 
 type DomainError =
   | CapacityNotFoundError
@@ -73,7 +74,7 @@ export class LogisticsDomainExceptionFilter implements ExceptionFilter {
     const statusCode = this.statusFor(exception);
     response
       .status(statusCode)
-      .json({ statusCode, message: exception.message });
+      .json(domainErrorResponseBody(statusCode, exception));
   }
 
   private statusFor(exception: DomainError): HttpStatus {

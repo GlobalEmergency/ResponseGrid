@@ -29,6 +29,9 @@ export class OfferNotEditableError extends Error {
 
 /** Raised when an offer would be left without any supply line. */
 export class OfferItemsRequiredError extends Error {
+  /** Stable identifier for web localization (#348). */
+  readonly code = 'offer_items_required' as const;
+
   constructor() {
     super('An offer must have at least one supply line');
     this.name = 'OfferItemsRequiredError';

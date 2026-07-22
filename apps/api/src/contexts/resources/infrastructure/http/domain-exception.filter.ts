@@ -24,6 +24,7 @@ import {
 import { EmergencyNotAcceptingIntakeError } from '../../../emergencies/domain/emergency-not-accepting-intake.error';
 import { InvalidAuthorError } from '../../../../shared/domain/author';
 import { SupplyLineValidationError } from '@globalemergency/warehouse-core/kernel';
+import { domainErrorResponseBody } from '../../../../shared/http/domain-error-response';
 
 type DomainError =
   | ResourceNotFoundError
@@ -93,6 +94,6 @@ export class DomainExceptionFilter implements ExceptionFilter {
     const statusCode = match ? match[1] : HttpStatus.BAD_REQUEST;
     response
       .status(statusCode)
-      .json({ statusCode, message: exception.message });
+      .json(domainErrorResponseBody(statusCode, exception));
   }
 }
