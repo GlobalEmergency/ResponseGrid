@@ -25,10 +25,14 @@ export enum ContainerStatus {
 /**
  * Where a container physically is *right now*. `resource` = parked at a
  * collection point / warehouse (becomes that place's inventory); `shipment` =
- * loaded onto an expedition. Polymorphic by design (no FK), mirroring how a
- * shipment models its carrier. Null when it is held by neither.
+ * loaded onto an expedition; `vehicle` = a bordo de un vehículo en ruta
+ * (`Warehouse` kind=vehicle) — distinto de `resource`, que es un punto fijo.
+ * Polymorphic by design (no FK), mirroring how a shipment models its carrier.
+ * Null when it is held by neither.
  */
 export enum ContainerHolderType {
   Resource = 'resource',
   Shipment = 'shipment',
+  /** Cargado en un vehículo (almacén móvil, `Warehouse` kind=vehicle). */
+  Vehicle = 'vehicle',
 }
