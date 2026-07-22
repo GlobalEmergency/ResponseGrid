@@ -4,6 +4,7 @@ import { DrizzleBinRepository } from './drizzle-bin.repository.js';
 import { DrizzleStockItemRepository } from './drizzle-stock-item.repository.js';
 import { DrizzleStockMovementRepository } from './drizzle-stock-movement.repository.js';
 import { DrizzleContainerRepository } from './drizzle-container.repository.js';
+import { DrizzleLoadTemplateRepository } from './drizzle-load-template.repository.js';
 
 /**
  * Los repositorios del módulo inventory, ligados a una misma transacción.
@@ -17,6 +18,7 @@ export interface WmsUnitOfWork {
   items: DrizzleStockItemRepository;
   movements: DrizzleStockMovementRepository;
   containers: DrizzleContainerRepository;
+  loadTemplates: DrizzleLoadTemplateRepository;
 }
 
 /**
@@ -53,6 +55,7 @@ export async function runInWmsTransaction<T>(
       items: new DrizzleStockItemRepository(tx),
       movements: new DrizzleStockMovementRepository(tx),
       containers: new DrizzleContainerRepository(tx),
+      loadTemplates: new DrizzleLoadTemplateRepository(tx),
     };
     return work(uow);
   });

@@ -145,3 +145,8 @@ export {
   type StockMovementRepository,
   type ListMovementsFilter,
 } from './ports/stock-movement.repository.js';
+export {
+  LOAD_TEMPLATE_REPOSITORY,
+  type LoadTemplateRepository,
+  type ListLoadTemplatesFilter,
+} from './ports/load-template.repository.js';

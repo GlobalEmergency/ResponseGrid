@@ -41,9 +41,10 @@ export async function resetSchema(pool: Pool): Promise<void> {
 /** Vacía las tablas de datos entre tests (mantiene el esquema/migraciones). */
 export async function truncateAll(db: NodePgDatabase): Promise<void> {
   // CASCADE + RESTART IDENTITY: borra almacenes y, por la FK con cascada, zonas.
-  // Incluye los containers y su allocator de código (self-FK → CASCADE).
+  // Incluye los containers y su allocator de código (self-FK → CASCADE), y los
+  // kits de misión con sus líneas (FK con cascada).
   await db.execute(
-    sql`TRUNCATE TABLE wms.stock_movements, wms.stock_items, wms.bins, wms.zones, wms.warehouses, wms.containers, wms.container_code_sequences RESTART IDENTITY CASCADE`,
+    sql`TRUNCATE TABLE wms.stock_movements, wms.stock_items, wms.bins, wms.zones, wms.warehouses, wms.containers, wms.container_code_sequences, wms.load_templates, wms.load_template_lines RESTART IDENTITY CASCADE`,
   );
 }
 
