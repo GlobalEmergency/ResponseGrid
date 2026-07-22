@@ -30,6 +30,7 @@ import { ReceiveDonationIntoInventory } from '../application/receive-donation-in
 import { ConsumerWorker } from '../../../shared/events/consumer-worker';
 import { DrizzleProcessedEventStore } from '../../../shared/events/drizzle-processed-event-store';
 import { receiveDonationHandler } from './donation-received.handler';
+import { resourceDisputedHandler } from './resource-disputed.handler';
 import {
   RESOURCE_REPOSITORY,
   ResourceRepository,
@@ -42,10 +43,18 @@ import { EVENT_BUS, EventBus } from '../domain/ports/event-bus';
 import { DrizzleResourceRepository } from './drizzle/drizzle-resource.repository';
 import { DrizzleEmergencyStatusReader } from '../../../shared/drizzle-emergency-status-reader';
 import { DrizzleEmergencyDisputeThresholdReader } from '../../../shared/drizzle-emergency-dispute-threshold-reader';
+import { DrizzleEmergencyAutoHideOnDisputeReader } from '../../../shared/drizzle-emergency-auto-hide-on-dispute-reader';
+import { DrizzleAuditTrail } from '../../../shared/drizzle-audit-trail';
 import {
   EMERGENCY_DISPUTE_THRESHOLD_READER,
   EmergencyDisputeThresholdReader,
 } from '../domain/ports/emergency-dispute-threshold-reader';
+import {
+  EMERGENCY_AUTO_HIDE_ON_DISPUTE_READER,
+  EmergencyAutoHideOnDisputeReader,
+} from '../domain/ports/emergency-auto-hide-on-dispute-reader';
+import { AUDIT_TRAIL, AuditTrail } from '../domain/ports/audit-trail';
+import { AutoHideDisputedResource } from '../application/auto-hide-disputed-resource';
 import { DrizzleOrganizationAccreditationReader } from '../../../shared/drizzle-organization-accreditation-reader';
 import { BullMqEventBus } from './bullmq-event-bus';
 import { IdentityModule } from '../../identity/infrastructure/identity.module';
@@ -121,6 +130,20 @@ const emergencyDisputeThresholdReaderProvider = {
   inject: [DB],
   useFactory: (db: Db): EmergencyDisputeThresholdReader =>
     new DrizzleEmergencyDisputeThresholdReader(db),
+};
+
+// Per-emergency opt-in auto-hide-on-dispute policy (#171).
+const emergencyAutoHideOnDisputeReaderProvider = {
+  provide: EMERGENCY_AUTO_HIDE_ON_DISPUTE_READER,
+  inject: [DB],
+  useFactory: (db: Db): EmergencyAutoHideOnDisputeReader =>
+    new DrizzleEmergencyAutoHideOnDisputeReader(db),
+};
+
+const auditTrailProvider = {
+  provide: AUDIT_TRAIL,
+  inject: [DB],
+  useFactory: (db: Db): AuditTrail => new DrizzleAuditTrail(db),
 };
 
 const busProvider = {
@@ -320,6 +343,23 @@ const resolveResourceDisputeProvider = {
   ) => new ResolveResourceDispute(repo, validityRepo, bus),
 };
 
+// Auto-hide-on-dispute (#171): reuses ResolveResourceDispute's confirm_closed
+// path so the automatic transition is identical to a human coordinator's,
+// gated by the per-emergency opt-in policy and traced as a "system" action.
+const autoHideDisputedResourceProvider = {
+  provide: AutoHideDisputedResource,
+  inject: [
+    EMERGENCY_AUTO_HIDE_ON_DISPUTE_READER,
+    ResolveResourceDispute,
+    AUDIT_TRAIL,
+  ],
+  useFactory: (
+    policy: EmergencyAutoHideOnDisputeReader,
+    resolve: ResolveResourceDispute,
+    audit: AuditTrail,
+  ) => new AutoHideDisputedResource(policy, resolve, audit),
+};
+
 const getDisputedResourcesProvider = {
   provide: GetDisputedResources,
   inject: [RESOURCE_REPOSITORY, RESOURCE_VALIDITY_REPORT_REPOSITORY],
@@ -368,16 +408,23 @@ const processedEventStoreProvider = {
 };
 
 // Resources consumer of the domain-event fan-out: applies received donation
-// lines to the target point's inventory, at most once per intake.
+// lines to the target point's inventory, at most once per intake, and — #171
+// — auto-hides a disputed resource when its emergency opted into that policy.
 const donationEventsWorkerProvider = {
   provide: ConsumerWorker,
-  inject: [DrizzleProcessedEventStore, ReceiveDonationIntoInventory],
+  inject: [
+    DrizzleProcessedEventStore,
+    ReceiveDonationIntoInventory,
+    AutoHideDisputedResource,
+  ],
   useFactory: (
     store: DrizzleProcessedEventStore,
     receive: ReceiveDonationIntoInventory,
+    autoHide: AutoHideDisputedResource,
   ) =>
     new ConsumerWorker('resources', store, {
       'donation_intake.received': receiveDonationHandler(receive),
+      'resource.disputed': resourceDisputedHandler(autoHide),
     }),
 };
 
@@ -407,6 +454,8 @@ const recordInventoryEntryProvider = {
     resourceRepositoryProvider,
     emergencyStatusReaderProvider,
     emergencyDisputeThresholdReaderProvider,
+    emergencyAutoHideOnDisputeReaderProvider,
+    auditTrailProvider,
     organizationAccreditationReaderProvider,
     membershipReaderProvider,
     busProvider,
@@ -431,6 +480,7 @@ const recordInventoryEntryProvider = {
     validityReportRepositoryProvider,
     reportResourceValidityProvider,
     resolveResourceDisputeProvider,
+    autoHideDisputedResourceProvider,
     getDisputedResourcesProvider,
     getResourceValidityReportsProvider,
     listResourcesAdminProvider,

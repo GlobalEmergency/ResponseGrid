@@ -2443,6 +2443,15 @@ export const en = {
     controls_announcement_placeholder: 'Write the official announcement for citizens here…',
     controls_announcement_publish: 'Publish announcement',
     controls_announcement_publishing: 'Publishing…',
+    controls_auto_hide_heading: 'Point disputes',
+    controls_auto_hide_label: 'Auto-hide on reaching the dispute threshold',
+    controls_auto_hide_description:
+      'When on, a disputed point closes automatically once it reaches the threshold (same action as "Confirm closed"). When off (default), the point stays visible with a warning until a coordinator confirms or dismisses it.',
+    controls_auto_hide_save: 'Save',
+    controls_auto_hide_saving: 'Saving…',
+    controls_auto_hide_saved: 'Policy updated.',
+    err_auto_hide_failed: 'Could not update the auto-hide policy.',
+    err_no_permission_configure: 'You do not have permission to configure this emergency.',
 
     task_form_label: 'Create new task',
     task_form_heading: 'New task',

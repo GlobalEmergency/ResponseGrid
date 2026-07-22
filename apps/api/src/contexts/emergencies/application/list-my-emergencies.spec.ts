@@ -28,6 +28,7 @@ describe('ListMyEmergencies', () => {
       announcement: null,
       dontBringList: [],
       resourceDisputeThreshold: 7,
+      autoHideOnDispute: true,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -42,6 +43,7 @@ describe('ListMyEmergencies', () => {
       announcement: null,
       dontBringList: [],
       resourceDisputeThreshold: null,
+      autoHideOnDispute: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -61,6 +63,7 @@ describe('ListMyEmergencies', () => {
     expect(views[0].slug).toBe('terremoto-venezuela-2026');
     expect(views[0].roleIds).toEqual(['emergency_verifier']);
     expect(views[0].resourceDisputeThreshold).toBe(7);
+    expect(views[0].autoHideOnDispute).toBe(true);
   });
 
   it('exposes a null dispute threshold when the emergency uses the global default', async () => {
@@ -70,6 +73,15 @@ describe('ListMyEmergencies', () => {
     const views = await useCase.execute([grant(PAUSED_ID)]);
 
     expect(views[0].resourceDisputeThreshold).toBeNull();
+  });
+
+  it('exposes the auto-hide-on-dispute policy (#171), off by default', async () => {
+    const repo = await seed();
+    const useCase = new ListMyEmergencies(repo);
+
+    const views = await useCase.execute([grant(PAUSED_ID)]);
+
+    expect(views[0].autoHideOnDispute).toBe(false);
   });
 
   it('includes PAUSED emergencies (unlike listActive)', async () => {

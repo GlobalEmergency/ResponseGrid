@@ -2488,6 +2488,15 @@ export const es = {
     controls_announcement_placeholder: 'Escribe aquí el comunicado oficial para los ciudadanos…',
     controls_announcement_publish: 'Publicar comunicado',
     controls_announcement_publishing: 'Publicando…',
+    controls_auto_hide_heading: 'Disputas de puntos',
+    controls_auto_hide_label: 'Auto-ocultar al alcanzar el umbral de disputa',
+    controls_auto_hide_description:
+      'Si está activa, un punto disputado se cierra automáticamente al llegar al umbral (misma acción que "Confirmar cierre"). Si está desactivada (por defecto), el punto sigue visible con un aviso hasta que un coordinador lo confirme o lo descarte.',
+    controls_auto_hide_save: 'Guardar',
+    controls_auto_hide_saving: 'Guardando…',
+    controls_auto_hide_saved: 'Política actualizada.',
+    err_auto_hide_failed: 'No se pudo actualizar la política de auto-ocultado.',
+    err_no_permission_configure: 'No tienes permiso para configurar esta emergencia.',
 
     task_form_label: 'Crear nueva tarea',
     task_form_heading: 'Nueva tarea',

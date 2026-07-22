@@ -936,6 +936,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/emergencies/{emergencyId}/auto-hide-on-dispute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Activar o desactivar la política de auto-ocultado por disputa (#171) */
+        put: operations["EmergenciesController_setEmergencyAutoHideOnDispute"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/emergencies/{emergencyId}/needs": {
         parameters: {
             query?: never;
@@ -4113,6 +4130,11 @@ export interface components {
              * @example 5
              */
             resourceDisputeThreshold: number | null;
+            /**
+             * @description Política opt-in (#171): si está activa, un punto disputado que alcanza el umbral se cierra automáticamente (misma transición que "confirmar cierre"); si no, el comportamiento actual (visible con badge, confirma un coordinador). Off por defecto. Solo se expone en la vista autenticada.
+             * @example false
+             */
+            autoHideOnDispute: boolean;
         };
         CreateEmergencyFromTemplateDto: {
             /** @example aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa */
@@ -4137,6 +4159,13 @@ export interface components {
              * @example 5
              */
             threshold: number | null;
+        };
+        SetAutoHideOnDisputeDto: {
+            /**
+             * @description Activa (true) o desactiva (false) la política de auto-ocultado (#171).
+             * @example true
+             */
+            enabled: boolean;
         };
         NeedLocationDto: {
             /** @example 123 Main Street, Caracas, Venezuela */
@@ -8577,6 +8606,59 @@ export interface operations {
         };
         responses: {
             /** @description Umbral actualizado */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description emergency:configure permission required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Emergency not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EmergenciesController_setEmergencyAutoHideOnDispute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Emergency UUID */
+                emergencyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetAutoHideOnDisputeDto"];
+            };
+        };
+        responses: {
+            /** @description Política actualizada */
             204: {
                 headers: {
                     [name: string]: unknown;
