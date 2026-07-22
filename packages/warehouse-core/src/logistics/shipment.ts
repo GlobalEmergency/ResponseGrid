@@ -6,6 +6,7 @@ import {
   InvalidShipmentRouteError,
   InvalidShipmentTransitionError,
   ShipmentMustHaveCargoError,
+  VehicleShipmentCargoError,
 } from './shipment-errors.js';
 import { DomainEvent } from '../kernel/index.js';
 import { ShipmentDelivered } from './events/shipment-delivered.event.js';
@@ -42,6 +43,12 @@ export interface CreateShipmentProps {
    */
   hubId?: string | null;
   manifest: string | null;
+  /**
+   * Si está presente, la carga del viaje ES el inventario del vehículo
+   * (`Warehouse` kind=vehicle) — `items`/`containerIds` deben ir vacíos (los
+   * dos modos son excluyentes, ver {@link VehicleShipmentCargoError}).
+   */
+  vehicleId?: string | null;
 }
 
 export interface ShipmentSnapshot {
@@ -60,6 +67,11 @@ export interface ShipmentSnapshot {
   status: ShipmentStatus;
   createdAt: Date;
   updatedAt: Date;
+  /**
+   * Opcional — no-breaking para hosts que aún no persisten la columna
+   * `vehicle_id` (frontera 1:1, follow-up de persistencia en ResponseGrid).
+   */
+  vehicleId?: string | null;
 }
 
 /**
@@ -94,6 +106,7 @@ export class Shipment {
     private _carrier: CarrierPrincipal | null,
     public readonly hubId: string | null,
     public readonly manifest: string | null,
+    public readonly vehicleId: string | null,
     private _status: ShipmentStatus,
     public readonly createdAt: Date,
     private _updatedAt: Date,
@@ -112,7 +125,16 @@ export class Shipment {
     // containers carries nothing.
     const containerIds = [...new Set(props.containerIds)];
     containerIds.forEach((id) => Shipment.assertUuid(id, 'containerId'));
-    if (props.items.length === 0 && containerIds.length === 0) {
+    // Modos excluyentes: en modo vehículo la carga ES el inventario del
+    // vehículo, así que la carga suelta debe ir vacía; sin vehículo, se exige
+    // el comportamiento actual (al menos una línea o container).
+    const vehicleId = props.vehicleId ?? null;
+    if (vehicleId !== null) {
+      Shipment.assertUuid(vehicleId, 'vehicleId');
+      if (props.items.length > 0 || containerIds.length > 0) {
+        throw new VehicleShipmentCargoError();
+      }
+    } else if (props.items.length === 0 && containerIds.length === 0) {
       throw new ShipmentMustHaveCargoError();
     }
     const code = props.code.trim();
@@ -136,6 +158,7 @@ export class Shipment {
       null,
       hubId,
       props.manifest,
+      vehicleId,
       ShipmentStatus.Planned,
       now,
       now,
@@ -157,6 +180,7 @@ export class Shipment {
         : null,
       s.hubId,
       s.manifest,
+      s.vehicleId ?? null,
       s.status,
       s.createdAt,
       s.updatedAt,
@@ -267,6 +291,7 @@ export class Shipment {
       carrierId: this._carrier?.id ?? null,
       hubId: this.hubId,
       manifest: this.manifest,
+      vehicleId: this.vehicleId,
       status: this._status,
       createdAt: this.createdAt,
       updatedAt: this._updatedAt,

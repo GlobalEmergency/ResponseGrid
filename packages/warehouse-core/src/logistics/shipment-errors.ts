@@ -20,6 +20,20 @@ export class InvalidShipmentRouteError extends Error {
 }
 
 /**
+ * Raised when a shipment references a vehicle (`vehicleId`) but ALSO carries
+ * loose cargo. In vehicle mode the cargo IS the vehicle's current inventory, so
+ * `items` and `containerIds` must be empty — the two modes are exclusive.
+ */
+export class VehicleShipmentCargoError extends Error {
+  constructor() {
+    super(
+      'A vehicle shipment carries the vehicle inventory; loose items and containers must be empty',
+    );
+    this.name = 'VehicleShipmentCargoError';
+  }
+}
+
+/**
  * Raised when a status transition is not allowed from the current status
  * (e.g. delivering a shipment that is not in transit). Carries both ends so the
  * HTTP layer can render a precise 409.
