@@ -83,6 +83,72 @@
         ]
       }
     },
+    "/auth/set-password": {
+      "post": {
+        "operationId": "AuthController_setPasswordRoute",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contraseña establecida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetPasswordResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Token inválido, caducado o ya usado"
+          },
+          "429": {
+            "description": "Rate limit exceeded — try again later"
+          }
+        },
+        "summary": "Establecer la contraseña de un perfil sin contraseña con un token de un solo uso (auto-login: devuelve un JWT)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/set-password/request": {
+      "post": {
+        "operationId": "AuthController_requestPasswordSetupRoute",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestPasswordSetupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Solicitud aceptada (se envía el email si procede)"
+          },
+          "429": {
+            "description": "Rate limit exceeded — try again later"
+          }
+        },
+        "summary": "Reenviar el email de «crea tu contraseña» a un perfil sin contraseña. Responde 202 siempre (no revela si el email existe).",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/auth/onboarding": {
       "post": {
         "operationId": "AuthController_onboardingRoute",
@@ -9188,6 +9254,49 @@
         },
         "required": [
           "accessToken"
+        ]
+      },
+      "SetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Token de un solo uso recibido en el email de set-password"
+          },
+          "password": {
+            "type": "string",
+            "example": "mi-nueva-contrasena",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "token",
+          "password"
+        ]
+      },
+      "SetPasswordResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "JWT access token (auto-login tras establecer la contraseña)"
+          }
+        },
+        "required": [
+          "accessToken"
+        ]
+      },
+      "RequestPasswordSetupDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "donor@example.com",
+            "description": "Email del perfil sin contraseña al que reenviar el enlace de set-password. La respuesta es 202 siempre, exista o no la cuenta."
+          }
+        },
+        "required": [
+          "email"
         ]
       },
       "OnboardingDto": {

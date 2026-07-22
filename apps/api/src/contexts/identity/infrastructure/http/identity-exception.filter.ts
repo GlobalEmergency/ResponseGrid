@@ -11,6 +11,7 @@ import { AccountLinkRequiresAuthError } from '../../domain/account-link-requires
 import { ConsentRequiredError } from '../../domain/consent-required.error';
 import { PhoneRequiredError } from '../../domain/phone-required.error';
 import { UserNotFoundByPhoneError } from '../../domain/user-not-found-by-phone.error';
+import { InvalidPasswordSetupTokenError } from '../../domain/invalid-password-setup-token.error';
 
 type IdentityError =
   | InvalidCredentialsError
@@ -18,7 +19,8 @@ type IdentityError =
   | AccountLinkRequiresAuthError
   | ConsentRequiredError
   | PhoneRequiredError
-  | UserNotFoundByPhoneError;
+  | UserNotFoundByPhoneError
+  | InvalidPasswordSetupTokenError;
 
 @Catch(
   InvalidCredentialsError,
@@ -27,6 +29,7 @@ type IdentityError =
   ConsentRequiredError,
   PhoneRequiredError,
   UserNotFoundByPhoneError,
+  InvalidPasswordSetupTokenError,
 )
 export class IdentityExceptionFilter implements ExceptionFilter {
   catch(exception: IdentityError, host: ArgumentsHost): void {
@@ -46,6 +49,10 @@ export class IdentityExceptionFilter implements ExceptionFilter {
     } else if (exception instanceof UserNotFoundByPhoneError) {
       // 404: no account for that phone → the bot falls back to register-by-phone.
       status = HttpStatus.NOT_FOUND;
+    } else if (exception instanceof InvalidPasswordSetupTokenError) {
+      // 400: the set-password token is missing/expired/used. One shape for all
+      // three so the endpoint is not an oracle for probing tokens.
+      status = HttpStatus.BAD_REQUEST;
     } else {
       status = HttpStatus.UNAUTHORIZED;
     }
