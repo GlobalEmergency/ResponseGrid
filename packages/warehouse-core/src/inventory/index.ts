@@ -70,6 +70,8 @@ export type {
   CreateLoadTemplateProps,
   LoadTemplateSnapshot,
 } from './load-template.js';
+export { gapAnalysis } from './gap-analysis.js';
+export type { OnboardLine, GapLine, GapReport } from './gap-analysis.js';
 export { StockItem } from './stock-item.js';
 export type {
   LotInput,
