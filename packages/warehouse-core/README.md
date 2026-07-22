@@ -1,40 +1,73 @@
 # @globalemergency/warehouse-core
 
-Núcleo reutilizable de **gestión de almacén** (dominio puro). Es el paquete
-compartido entre **ResponseGrid** (que lo embebe como funcionalidad interna de
-sus centros logísticos) y el futuro **WMS standalone** de Global Emergency.
+Núcleo de dominio **puro** de un sistema de gestión de almacén (WMS). Es el
+**motor reutilizable de [OpenDepot](https://github.com/GlobalEmergency/opendepot)**
+— el WMS open-source pensado para Protección Civil y ayuda humanitaria, válido
+para cualquier sector. Lo consumen la app OpenDepot y
+[ResponseGrid](https://responsegrid.app).
 
-> Estado: **precursor in-monorepo**. Vive dentro de este monorepo y se consume
-> vía `workspace:*`; se extraerá a su propio repo OSS más adelante. Ver épica
-> [#355](https://github.com/GlobalEmergency/ResponseGrid/issues/355).
+Sin NestJS, sin Drizzle/`pg`, sin red ni disco: solo agregados, value objects y
+servicios de dominio. La persistencia y el HTTP los pone cada host — ver
+[`@globalemergency/warehouse-postgres`](https://www.npmjs.com/package/@globalemergency/warehouse-postgres).
+
+## Instalación
+
+```bash
+pnpm add @globalemergency/warehouse-core
+```
 
 ## Principios
 
-- **Dominio puro.** Sin NestJS, sin Drizzle/`pg`, sin infraestructura. La
-  persistencia y el HTTP los pone cada host.
-- **Agnóstico de tenencia.** El núcleo no sabe qué es una emergencia ni una
-  Protección Civil: opera contra ids opacos (`ownerId`/`actorId` en módulos
-  posteriores).
-- **Dependencia unidireccional.** Este paquete **nunca** importa de `apps/*`.
-  Los hosts importan de aquí, no al revés.
-- **Módulos internos** vía *subpath exports* (`/kernel`, y en el futuro
-  `/catalog`, `/inventory`, `/containers`, `/logistics`). Se dividen en paquetes
-  independientes solo ante una necesidad real.
+- **Dominio puro.** Nunca importa infraestructura ni `apps/*`; los hosts importan
+  de aquí, no al revés.
+- **Agnóstico de tenencia.** Opera contra un `ScopeId` **opaco**: el host traduce
+  su identidad de tenant (organización, emergencia, centro…) a un `ScopeId` en la
+  frontera. El paquete no conoce auth ni permisos.
+- **Módulos internos** vía _subpath exports_; se dividirían en paquetes propios
+  solo ante una necesidad real (OCP/DIP).
 
 ## Módulos
 
-| Import | Contenido |
-| --- | --- |
-| `@globalemergency/warehouse-core/kernel` | `SupplyLine` (value object de línea de material), `Category` (taxonomía canónica), `CategoryDefinition`. |
-| `@globalemergency/warehouse-core/catalog` | Catálogo `Supply` (insumos, master data), resolvers de texto→id (`SupplyResolver`, `CategoryResolver`), alias/normalización y ports de catálogo. |
-| `@globalemergency/warehouse-core/kernel` → `ScopeId` | Id opaco de tenencia/partición (owner del almacén / emergencia), consumido por `containers`. |
-| `@globalemergency/warehouse-core/containers` | Aggregate `Container` (palet/caja/lote) sobre `ScopeId`, id, enums, errores, formateo de código y port de repositorio. |
+| Import           | Qué contiene                                                                                                                                                                        |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.../kernel`     | `ScopeId`, `SupplyLine`, `Category`/`CategorySlug`/`CategoryRegistry`, `Capacity`, `DomainEvent`                                                                                    |
+| `.../catalog`    | `Supply` (maestro de insumos), resolvers texto→id, alias/normalización y puertos                                                                                                    |
+| `.../inventory`  | `Warehouse`/`Zone`/`Bin`, `StockItem`, `StockMovement` (kardex + `actorId`), FEFO, reservas, recuentos, caducidad, `LoadTemplate` + `gapAnalysis`, capacidad/manifiesto de vehículo |
+| `.../containers` | `Container` (palet/caja/lote) y su holder polimórfico                                                                                                                               |
+| `.../logistics`  | `TransportCapacity`, `Shipment` (con `vehicleId`, modos excluyentes), matching                                                                                                      |
+
+## Uso mínimo
+
+```ts
+import {
+  Warehouse,
+  WarehouseId,
+} from '@globalemergency/warehouse-core/inventory';
+import { ScopeId } from '@globalemergency/warehouse-core/kernel';
+
+const scopeId = ScopeId.create(); // el host mapea su tenant a un ScopeId opaco
+
+const warehouse = Warehouse.create({
+  id: WarehouseId.create(),
+  scopeId,
+  code: 'ALM-CENTRAL',
+  name: 'Almacén Central',
+  zones: [],
+});
+
+// Los agregados son inmutables y exponen snapshots para persistir:
+const snapshot = warehouse.toSnapshot();
+```
 
 ## Build
 
-Doble build para poder ser consumido tanto por CommonJS (la API NestJS de
-ResponseGrid) como por ESM (web / WMS standalone):
-
 ```bash
-pnpm --filter @globalemergency/warehouse-core build   # emite dist/cjs y dist/esm
+pnpm --filter @globalemergency/warehouse-core build   # dual CJS + ESM
+pnpm --filter @globalemergency/warehouse-core test    # node --test sobre JS compilado
 ```
+
+## Licencia
+
+**AGPL-3.0-only.** Las obras derivadas —incluidos los despliegues en red/SaaS
+modificados— deben permanecer open source bajo la misma licencia. Ver
+[`LICENSE`](./LICENSE).

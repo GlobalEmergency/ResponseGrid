@@ -1,8 +1,31 @@
 {
   "name": "@globalemergency/warehouse-postgres",
   "version": "0.0.0",
-  "description": "Adaptador de persistencia Postgres/Drizzle para @globalemergency/warehouse-core: columnas y mappers compartidos de la línea de material, y el esquema `wms.` del módulo inventory (almacenes/zonas/bins/stock + libro mayor) con su runner de migraciones. Consumido por ResponseGrid y por el WMS standalone.",
-  "license": "UNLICENSED",
+  "description": "Adaptador de persistencia Postgres/Drizzle para @globalemergency/warehouse-core: columnas y mappers de la línea de material, y el esquema `wms.` del módulo inventory (almacenes/zonas/bins/stock + libro mayor) con su runner de migraciones. Motor de persistencia del WMS OpenDepot.",
+  "license": "AGPL-3.0-only",
+  "author": "Global Emergency",
+  "homepage": "https://github.com/GlobalEmergency/opendepot#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GlobalEmergency/opendepot.git",
+    "directory": "packages/warehouse-postgres"
+  },
+  "bugs": {
+    "url": "https://github.com/GlobalEmergency/opendepot/issues"
+  },
+  "keywords": [
+    "wms",
+    "warehouse",
+    "inventory",
+    "drizzle",
+    "postgres",
+    "opendepot",
+    "humanitarian",
+    "emergency"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "sideEffects": false,
   "exports": {

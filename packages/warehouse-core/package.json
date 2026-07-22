@@ -1,8 +1,31 @@
 {
   "name": "@globalemergency/warehouse-core",
   "version": "0.0.0",
-  "description": "Núcleo reutilizable de gestión de almacén (dominio puro). Consumido por ResponseGrid y, en el futuro, por el WMS standalone. Sin NestJS, sin Drizzle, sin infraestructura.",
-  "license": "UNLICENSED",
+  "description": "Núcleo reutilizable de gestión de almacén (dominio puro). Motor del WMS OpenDepot; consumido por ResponseGrid y por cualquier host. Sin NestJS, sin Drizzle, sin infraestructura.",
+  "license": "AGPL-3.0-only",
+  "author": "Global Emergency",
+  "homepage": "https://github.com/GlobalEmergency/opendepot#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GlobalEmergency/opendepot.git",
+    "directory": "packages/warehouse-core"
+  },
+  "bugs": {
+    "url": "https://github.com/GlobalEmergency/opendepot/issues"
+  },
+  "keywords": [
+    "wms",
+    "warehouse",
+    "inventory",
+    "logistics",
+    "ddd",
+    "opendepot",
+    "humanitarian",
+    "emergency"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "sideEffects": false,
   "exports": {
