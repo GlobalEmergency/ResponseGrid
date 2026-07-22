@@ -131,4 +131,19 @@ describe('DrizzleLoadTemplateRepository (integración)', () => {
     assert.equal(loaded.lines.length, 1);
     assert.equal(loaded.lines[0]?.supplyId, newSupplyId);
   });
+
+  it('re-save del mismo id actualiza la raíz (status), no inserta otra fila', async () => {
+    const scopeId = ScopeId.create();
+    const template = newTemplate(scopeId, 'ARCHIVO');
+    await repo.save(template);
+    // Re-guarda el MISMO kit archivado: ejercita el `set` del upsert de la raíz.
+    await repo.save(template.archive());
+
+    const loaded = await repo.findById(template.id);
+    assert.ok(loaded);
+    assert.equal(loaded.status, LoadTemplateStatus.Archived);
+    // Sigue siendo una sola fila (upsert, no insert): el scope ve un único kit.
+    const all = await repo.findByScope(scopeId, {});
+    assert.equal(all.length, 1);
+  });
 });
