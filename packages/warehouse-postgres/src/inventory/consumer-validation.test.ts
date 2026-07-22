@@ -26,6 +26,9 @@ import {
   MovementKind,
   vehicleLoadStatus,
   buildVehicleManifest,
+  LoadTemplate,
+  LoadTemplateId,
+  gapAnalysis,
   type LoadLine,
   type SupplyLoadInfo,
   type SupplyLoadLookup,
@@ -44,6 +47,7 @@ import {
   DrizzleStockItemRepository,
   DrizzleStockMovementRepository,
   DrizzleContainerRepository,
+  DrizzleLoadTemplateRepository,
   StaleStockItemError,
   runInWmsTransaction,
 } from './index.js';
@@ -69,6 +73,7 @@ describe('Consumidor standalone: flujo WMS end-to-end (dominio + persistencia)',
   let items: DrizzleStockItemRepository;
   let movements: DrizzleStockMovementRepository;
   let containers: DrizzleContainerRepository;
+  let loadTemplates: DrizzleLoadTemplateRepository;
 
   before(async () => {
     pool = newPool();
@@ -79,6 +84,7 @@ describe('Consumidor standalone: flujo WMS end-to-end (dominio + persistencia)',
     items = new DrizzleStockItemRepository(db);
     movements = new DrizzleStockMovementRepository(db);
     containers = new DrizzleContainerRepository(db);
+    loadTemplates = new DrizzleLoadTemplateRepository(db);
   });
 
   after(async () => {
@@ -631,5 +637,132 @@ describe('Consumidor standalone: flujo WMS end-to-end (dominio + persistencia)',
       vehicleAfterUnload.reduce((sum, i) => sum + i.quantity.amount, 0),
       0,
     );
+  });
+
+  it('un host corre gapAnalysis del vehículo contra un kit persistido (Inc 6 vehículos)', async () => {
+    const scopeId = ScopeId.create();
+    const aguaId = uuid();
+    const mantasId = uuid();
+    const unit = 'und';
+
+    // --- 1. Persiste el kit PSA (agua permanente + mantas de misión) y recárgalo
+    // por código, como haría el host al preparar la salida. ---------------------
+    const template = LoadTemplate.create({
+      id: LoadTemplateId.create(),
+      scopeId,
+      code: 'PSA',
+      name: 'Kit PSA',
+      lines: [
+        { supplyId: aguaId, quantity: 10, unit, permanent: true },
+        { supplyId: mantasId, quantity: 5, unit, permanent: false },
+      ],
+    });
+    await runInWmsTransaction(db, async (uow) => {
+      await uow.loadTemplates.save(template);
+    });
+    const persistedTemplate = await loadTemplates.findByCode(scopeId, 'PSA');
+    assert.ok(persistedTemplate);
+
+    // --- 2. Vehículo con carga PARCIAL: 6 agua (de 10, permanent) + 5 mantas
+    // (completo). Sin maxCapacity declarada: un vehículo sin capacidad es válido
+    // y no afecta al gap analysis. --------------------------------------------
+    const vehicleZoneId = ZoneId.create();
+    const vehicleWarehouse = Warehouse.create({
+      id: WarehouseId.create(),
+      scopeId,
+      code: 'CAMION-PSA',
+      name: 'Camión PSA',
+      kind: WarehouseKind.Vehicle,
+      zones: [
+        {
+          id: vehicleZoneId,
+          code: 'CARGA',
+          name: 'Caja de carga',
+          kind: ZoneKind.Storage,
+        },
+      ],
+    });
+    await warehouses.save(vehicleWarehouse);
+    const vehicleBin = Bin.create({
+      id: BinId.create(),
+      scopeId,
+      warehouseId: vehicleWarehouse.id,
+      zoneId: vehicleZoneId,
+      code: 'V-PSA',
+      kind: BinKind.Shelf,
+    });
+    await bins.save(vehicleBin);
+
+    const aguaItem = StockItem.create({
+      id: StockItemId.create(),
+      scopeId,
+      warehouseId: vehicleWarehouse.id,
+      binId: vehicleBin.id,
+      supplyId: aguaId,
+      lot: null,
+      quantity: Quantity.of(6, unit),
+      status: StockStatus.Available,
+    });
+    const mantasItem = StockItem.create({
+      id: StockItemId.create(),
+      scopeId,
+      warehouseId: vehicleWarehouse.id,
+      binId: vehicleBin.id,
+      supplyId: mantasId,
+      lot: null,
+      quantity: Quantity.of(5, unit),
+      status: StockStatus.Available,
+    });
+    await items.save(aguaItem);
+    await items.save(mantasItem);
+
+    // --- 3. Manifiesto leído sólo del stock del vehículo (catálogo mínimo: el
+    // gap analysis no necesita peso/volumen, sólo buildVehicleManifest). --------
+    const catalog = new Map<string, SupplyLoadInfo>([
+      [
+        aguaId,
+        {
+          unitWeightKg: 1,
+          unitVolumeM3: 0.001,
+          defaultUnit: unit,
+          nature: 'fungible',
+        },
+      ],
+      [
+        mantasId,
+        {
+          unitWeightKg: 0.5,
+          unitVolumeM3: 0.002,
+          defaultUnit: unit,
+          nature: 'fungible',
+        },
+      ],
+    ]);
+    const lookup: SupplyLoadLookup = (id) => catalog.get(id) ?? null;
+
+    const aboard = await items.findByWarehouse(vehicleWarehouse.id, {});
+    const looseLines: LoadLine[] = aboard.map((item) => ({
+      supplyId: item.supplyId,
+      quantity: item.quantity.amount,
+      unit: item.quantity.unit,
+      ref: item.id.value,
+    }));
+    const manifest = buildVehicleManifest(
+      looseLines,
+      [],
+      lookup,
+      vehicleWarehouse.maxCapacity,
+    );
+
+    // --- 4. Checklist operativo contra el kit recargado: falta parte del agua
+    // (permanent), las mantas están completas. --------------------------------
+    const report = gapAnalysis(manifest.cargo, persistedTemplate);
+    const aguaGap = report.missing.find((m) => m.supplyId === aguaId);
+    assert.equal(aguaGap?.quantity, 4); // 10 requeridos − 6 a bordo
+    assert.equal(aguaGap?.permanent, true);
+    assert.equal(report.extra.length, 0); // nada a bordo fuera del kit
+    assert.ok(report.matched.some((m) => m.supplyId === mantasId));
+    assert.equal(report.permanentOk, false); // agua es permanent y está incompleta
+    assert.equal(report.completenessPct, 73.3); // (6+5)/(10+5) · 100
   });
 });
