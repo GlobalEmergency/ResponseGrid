@@ -4,6 +4,7 @@ import type {
   BinSnapshot,
   StockItemSnapshot,
   StockMovementSnapshot,
+  LoadTemplateSnapshot,
 } from '@globalemergency/warehouse-core/inventory';
 import {
   WarehouseKind,
@@ -14,6 +15,7 @@ import {
   BinKind,
   StockStatus,
   MovementKind,
+  LoadTemplateStatus,
 } from '@globalemergency/warehouse-core/inventory';
 import type { CapacityProps } from '@globalemergency/warehouse-core/kernel';
 import type {
@@ -22,6 +24,8 @@ import type {
   binsTable,
   stockItemsTable,
   stockMovementsTable,
+  loadTemplatesTable,
+  loadTemplateLinesTable,
 } from './schema.js';
 
 type WarehouseRow = typeof warehousesTable.$inferSelect;
@@ -29,6 +33,8 @@ type ZoneRow = typeof zonesTable.$inferSelect;
 type BinRow = typeof binsTable.$inferSelect;
 type StockItemRow = typeof stockItemsTable.$inferSelect;
 type StockMovementRow = typeof stockMovementsTable.$inferSelect;
+type LoadTemplateRow = typeof loadTemplatesTable.$inferSelect;
+type LoadTemplateLineRow = typeof loadTemplateLinesTable.$inferSelect;
 
 /**
  * `numeric` de Postgres llega a la app como string (gotcha del repo). Se
@@ -254,5 +260,67 @@ export function stockMovementSnapshotToRow(
     idempotencyKey: s.idempotencyKey,
     actorId: s.actorId,
     occurredAt: s.occurredAt,
+  };
+}
+
+// --- LoadTemplate + línea ----------------------------------------------------
+
+/**
+ * Ensambla el {@link LoadTemplateSnapshot} a partir de la fila raíz del kit y
+ * sus filas de línea (ya cargadas). El agregado se reconstruye luego con
+ * `LoadTemplate.fromSnapshot`.
+ */
+export function rowsToLoadTemplateSnapshot(
+  row: LoadTemplateRow,
+  lines: LoadTemplateLineRow[],
+): LoadTemplateSnapshot {
+  return {
+    id: row.id,
+    scopeId: row.scopeId,
+    code: row.code,
+    name: row.name,
+    status: row.status as LoadTemplateStatus,
+    lines: lines.map((l) => ({
+      supplyId: l.supplyId,
+      quantity: numericToNumber(l.quantity),
+      unit: l.unit,
+      permanent: l.permanent,
+      notes: l.notes ?? null,
+    })),
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+/** {@link LoadTemplateSnapshot} → columnas de la fila raíz (sin las líneas). */
+export function loadTemplateSnapshotToRow(
+  s: LoadTemplateSnapshot,
+): typeof loadTemplatesTable.$inferInsert {
+  return {
+    id: s.id,
+    scopeId: s.scopeId,
+    code: s.code,
+    name: s.name,
+    status: s.status,
+    createdAt: s.createdAt,
+    updatedAt: s.updatedAt,
+  };
+}
+
+/** Una línea del kit + su templateId/scopeId → columnas de la fila de línea. */
+export function loadTemplateLineToRow(
+  templateId: string,
+  scopeId: string,
+  l: LoadTemplateSnapshot['lines'][number],
+): typeof loadTemplateLinesTable.$inferInsert {
+  return {
+    templateId,
+    scopeId,
+    supplyId: l.supplyId,
+    // `numeric` acepta string; se serializa igual que quantityAmount.
+    quantity: l.quantity.toString(),
+    unit: l.unit,
+    permanent: l.permanent,
+    notes: l.notes,
   };
 }

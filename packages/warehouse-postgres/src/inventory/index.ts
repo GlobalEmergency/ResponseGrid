@@ -15,6 +15,8 @@ export {
   stockMovementsTable,
   containersTable,
   containerCodeSequencesTable,
+  loadTemplatesTable,
+  loadTemplateLinesTable,
 } from './schema.js';
 export {
   rowToZoneSnapshot,
@@ -27,12 +29,16 @@ export {
   stockItemSnapshotToRow,
   rowToStockMovementSnapshot,
   stockMovementSnapshotToRow,
+  rowsToLoadTemplateSnapshot,
+  loadTemplateSnapshotToRow,
+  loadTemplateLineToRow,
 } from './mappers.js';
 export { DrizzleWarehouseRepository } from './drizzle-warehouse.repository.js';
 export { DrizzleBinRepository } from './drizzle-bin.repository.js';
 export { DrizzleStockItemRepository } from './drizzle-stock-item.repository.js';
 export { DrizzleStockMovementRepository } from './drizzle-stock-movement.repository.js';
 export { DrizzleContainerRepository } from './drizzle-container.repository.js';
+export { DrizzleLoadTemplateRepository } from './drizzle-load-template.repository.js';
 export {
   StaleStockItemError,
   DuplicateStockItemError,

@@ -7,6 +7,7 @@ import {
   integer,
   numeric,
   jsonb,
+  boolean,
   primaryKey,
 } from 'drizzle-orm/pg-core';
 import type { SupplyLineSnapshot } from '@globalemergency/warehouse-core/kernel';
@@ -155,4 +156,34 @@ export const containerCodeSequencesTable = wms.table(
     lastValue: integer('last_value').notNull(),
   },
   (t) => [primaryKey({ columns: [t.scopeId, t.type] })],
+);
+
+/** Kit de misión (agregado raíz). `code` único por scope. */
+export const loadTemplatesTable = wms.table('load_templates', {
+  id: uuid('id').primaryKey(),
+  scopeId: uuid('scope_id').notNull(),
+  code: text('code').notNull(),
+  name: text('name').notNull(),
+  status: text('status').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+});
+
+/**
+ * Línea del kit (entidad hija). FK a `load_templates` con borrado en cascada.
+ * `quantity` es numeric(18,6) → Drizzle lo devuelve string; el mapper lo pasa a
+ * number con cuidado. PK compuesta (template_id, supply_id): una línea por insumo.
+ */
+export const loadTemplateLinesTable = wms.table(
+  'load_template_lines',
+  {
+    templateId: uuid('template_id').notNull(),
+    scopeId: uuid('scope_id').notNull(),
+    supplyId: uuid('supply_id').notNull(),
+    quantity: numeric('quantity', { precision: 18, scale: 6 }).notNull(),
+    unit: text('unit').notNull(),
+    permanent: boolean('permanent').notNull(),
+    notes: text('notes'),
+  },
+  (t) => [primaryKey({ columns: [t.templateId, t.supplyId] })],
 );

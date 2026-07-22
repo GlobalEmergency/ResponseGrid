@@ -70,3 +70,26 @@ export class BinArchivedError extends Error {
     this.name = 'BinArchivedError';
   }
 }
+
+/**
+ * Raised on invalid `LoadTemplate` input (empty code/name, non-positive
+ * quantity, empty unit). The HTTP layer of each host maps it to 422.
+ */
+export class LoadTemplateValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'LoadTemplateValidationError';
+  }
+}
+
+/**
+ * Raised when a `LoadTemplate` would have two lines for the same supply.
+ * Kit lines are unique per supplyId; the HTTP layer maps this to 409
+ * Conflict.
+ */
+export class DuplicateTemplateLineError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'DuplicateTemplateLineError';
+  }
+}
