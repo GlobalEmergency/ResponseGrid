@@ -4,14 +4,14 @@
   "description": "Adaptador de persistencia Postgres/Drizzle para @globalemergency/warehouse-core: columnas y mappers de la línea de material, y el esquema `wms.` del módulo inventory (almacenes/zonas/bins/stock + libro mayor) con su runner de migraciones. Motor de persistencia del WMS OpenDepot.",
   "license": "AGPL-3.0-only",
   "author": "Global Emergency",
-  "homepage": "https://github.com/GlobalEmergency/opendepot#readme",
+  "homepage": "https://github.com/vgpastor/OpenDepot#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GlobalEmergency/opendepot.git",
+    "url": "git+https://github.com/vgpastor/OpenDepot.git",
     "directory": "packages/warehouse-postgres"
   },
   "bugs": {
-    "url": "https://github.com/GlobalEmergency/opendepot/issues"
+    "url": "https://github.com/vgpastor/OpenDepot/issues"
   },
   "keywords": [
     "wms",

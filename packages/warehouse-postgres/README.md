@@ -3,7 +3,7 @@
 Adaptador de **persistencia Postgres/Drizzle** para
 [`@globalemergency/warehouse-core`](https://www.npmjs.com/package/@globalemergency/warehouse-core).
 Es la capa "con pilas" (schema, repos y migraciones del WMS) — el **motor de
-persistencia de [OpenDepot](https://github.com/GlobalEmergency/opendepot)**, para
+persistencia de [OpenDepot](https://github.com/vgpastor/OpenDepot)**, para
 que cualquier host comparta la persistencia **una sola vez** en vez de
 reimplementarla.
 

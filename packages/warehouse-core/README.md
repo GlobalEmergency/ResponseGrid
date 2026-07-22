@@ -1,7 +1,7 @@
 # @globalemergency/warehouse-core
 
 Núcleo de dominio **puro** de un sistema de gestión de almacén (WMS). Es el
-**motor reutilizable de [OpenDepot](https://github.com/GlobalEmergency/opendepot)**
+**motor reutilizable de [OpenDepot](https://github.com/vgpastor/OpenDepot)**
 — el WMS open-source pensado para Protección Civil y ayuda humanitaria, válido
 para cualquier sector. Lo consumen la app OpenDepot y
 [ResponseGrid](https://responsegrid.app).

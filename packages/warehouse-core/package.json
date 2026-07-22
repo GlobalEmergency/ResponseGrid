@@ -4,14 +4,14 @@
   "description": "Núcleo reutilizable de gestión de almacén (dominio puro). Motor del WMS OpenDepot; consumido por ResponseGrid y por cualquier host. Sin NestJS, sin Drizzle, sin infraestructura.",
   "license": "AGPL-3.0-only",
   "author": "Global Emergency",
-  "homepage": "https://github.com/GlobalEmergency/opendepot#readme",
+  "homepage": "https://github.com/vgpastor/OpenDepot#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GlobalEmergency/opendepot.git",
+    "url": "git+https://github.com/vgpastor/OpenDepot.git",
     "directory": "packages/warehouse-core"
   },
   "bugs": {
-    "url": "https://github.com/GlobalEmergency/opendepot/issues"
+    "url": "https://github.com/vgpastor/OpenDepot/issues"
   },
   "keywords": [
     "wms",
