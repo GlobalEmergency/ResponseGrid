@@ -72,3 +72,14 @@ export enum BinKind {
   Dock = 'dock',
   Quarantine = 'quarantine',
 }
+
+/**
+ * Lifecycle of a {@link LoadTemplate} (dotación tipo / kit de misión).
+ * `active` mientras se usa para cargar vehículos o comparar contra el
+ * manifiesto; `archived` una vez retirado — conserva su histórico pero deja
+ * de ofrecerse en los pickers operativos.
+ */
+export enum LoadTemplateStatus {
+  Active = 'active',
+  Archived = 'archived',
+}

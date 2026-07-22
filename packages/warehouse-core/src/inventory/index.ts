@@ -22,6 +22,7 @@ export { ZoneId } from './zone-id.js';
 export { BinId } from './bin-id.js';
 export { StockItemId } from './stock-item-id.js';
 export { StockMovementId } from './stock-movement-id.js';
+export { LoadTemplateId } from './load-template-id.js';
 export {
   WarehouseKind,
   WarehouseStatus,
@@ -29,6 +30,7 @@ export {
   ZoneKind,
   BinStatus,
   BinKind,
+  LoadTemplateStatus,
 } from './inventory-enums.js';
 export { StockStatus } from './stock-enums.js';
 export { MovementKind } from './movement-enums.js';
@@ -39,6 +41,8 @@ export {
   WarehouseNotEmptyError,
   BinValidationError,
   BinArchivedError,
+  LoadTemplateValidationError,
+  DuplicateTemplateLineError,
 } from './inventory-errors.js';
 export { assertWarehouseCanBeArchived } from './warehouse-archival.js';
 export {
@@ -59,6 +63,13 @@ export type {
 } from './warehouse.js';
 export { Bin } from './bin.js';
 export type { CreateBinProps, BinSnapshot } from './bin.js';
+export { LoadTemplate } from './load-template.js';
+export type {
+  LoadTemplateLineProps,
+  LoadTemplateLineSnapshot,
+  CreateLoadTemplateProps,
+  LoadTemplateSnapshot,
+} from './load-template.js';
 export { StockItem } from './stock-item.js';
 export type {
   LotInput,
