@@ -6569,6 +6569,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Supply not found (or archived)"
           }
         },
         "summary": "Get a supply by id",
@@ -6602,8 +6605,17 @@
               }
             }
           },
+          "400": {
+            "description": "Payload inválido (código de insumo, atributos sin casar el esquema efectivo de la categoría, etc.)"
+          },
+          "401": {
+            "description": "Token ausente o inválido"
+          },
           "403": {
             "description": "Falta el permiso catalogue:manage"
+          },
+          "404": {
+            "description": "categorySlug o variantOfId no existen"
           }
         },
         "security": [
@@ -6664,6 +6676,9 @@
               }
             }
           },
+          "401": {
+            "description": "Token ausente o inválido"
+          },
           "403": {
             "description": "Falta el permiso catalogue:manage"
           }
@@ -6694,6 +6709,9 @@
               }
             }
           },
+          "401": {
+            "description": "Token ausente o inválido"
+          },
           "403": {
             "description": "Falta el permiso catalogue:manage"
           }
@@ -6721,6 +6739,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Token ausente o inválido"
           },
           "403": {
             "description": "Falta el permiso catalogue:manage"
@@ -6761,8 +6782,14 @@
               }
             }
           },
+          "401": {
+            "description": "Token ausente o inválido"
+          },
           "403": {
             "description": "Falta el permiso catalogue:manage"
+          },
+          "404": {
+            "description": "Insumo no encontrado"
           }
         },
         "security": [
@@ -6801,8 +6828,17 @@
           "204": {
             "description": ""
           },
+          "400": {
+            "description": "Payload inválido o atributos que no casan el esquema"
+          },
+          "401": {
+            "description": "Token ausente o inválido"
+          },
           "403": {
             "description": "Falta el permiso catalogue:manage"
+          },
+          "404": {
+            "description": "Insumo, categorySlug o variantOfId no encontrados"
           }
         },
         "security": [
@@ -6833,8 +6869,14 @@
           "204": {
             "description": ""
           },
+          "401": {
+            "description": "Token ausente o inválido"
+          },
           "403": {
             "description": "Falta el permiso catalogue:manage"
+          },
+          "404": {
+            "description": "Insumo no encontrado"
           }
         },
         "security": [
@@ -6865,8 +6907,14 @@
           "204": {
             "description": ""
           },
+          "401": {
+            "description": "Token ausente o inválido"
+          },
           "403": {
             "description": "Falta el permiso catalogue:manage"
+          },
+          "404": {
+            "description": "Insumo no encontrado"
           }
         },
         "security": [
@@ -6907,8 +6955,17 @@
           "204": {
             "description": ""
           },
+          "401": {
+            "description": "Token ausente o inválido"
+          },
           "403": {
             "description": "Falta el permiso catalogue:manage"
+          },
+          "404": {
+            "description": "Insumo no encontrado"
+          },
+          "409": {
+            "description": "El alias ya apunta a otro insumo del mismo scope"
           }
         },
         "security": [
@@ -6947,6 +7004,9 @@
           "204": {
             "description": ""
           },
+          "401": {
+            "description": "Token ausente o inválido"
+          },
           "403": {
             "description": "Falta el permiso catalogue:manage"
           }
@@ -6980,8 +7040,17 @@
           "204": {
             "description": ""
           },
+          "400": {
+            "description": "sourceId y targetId son el mismo insumo"
+          },
+          "401": {
+            "description": "Token ausente o inválido"
+          },
           "403": {
             "description": "Falta el permiso catalogue:manage"
+          },
+          "404": {
+            "description": "sourceId o targetId no encontrados"
           }
         },
         "security": [

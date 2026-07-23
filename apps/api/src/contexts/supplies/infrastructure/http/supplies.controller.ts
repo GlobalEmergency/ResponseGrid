@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiHeader,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
@@ -91,6 +92,7 @@ export class SuppliesController {
     description: 'Preferred locale',
   })
   @ApiOkResponse({ description: 'Supply detail', type: SupplyDto })
+  @ApiNotFoundResponse({ description: 'Supply not found (or archived)' })
   async get(
     @Param('id') id: string,
     @Query('locale') localeParam: string | undefined,
