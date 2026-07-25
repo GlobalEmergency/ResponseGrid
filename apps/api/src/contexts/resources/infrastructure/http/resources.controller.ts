@@ -353,6 +353,7 @@ export class ResourcesController {
     if (dto.description !== undefined) cmd.description = dto.description;
     if (dto.contact !== undefined) cmd.contact = dto.contact;
     if (dto.schedule !== undefined) cmd.schedule = dto.schedule;
+    if (dto.location !== undefined) cmd.location = dto.location;
 
     const result = await this.editResource.execute(cmd);
     setAuditContext(req, {

@@ -10413,6 +10413,14 @@
             "type": "string",
             "description": "Nuevo horario. Cadena vacía lo borra. Omitir para no cambiarlo.",
             "nullable": true
+          },
+          "location": {
+            "description": "Nueva ubicación (dirección + coordenadas) para corregir la geolocalización. Omitir para no cambiarla.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocationDto"
+              }
+            ]
           }
         },
         "required": [

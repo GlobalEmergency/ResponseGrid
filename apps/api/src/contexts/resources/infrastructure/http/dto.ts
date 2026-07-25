@@ -555,6 +555,16 @@ export class EditResourceDto {
   @IsOptional()
   @IsString()
   schedule?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Nueva ubicación (dirección + coordenadas) para corregir la geolocalización. Omitir para no cambiarla.',
+    type: LocationDto,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => LocationDto)
+  location?: LocationDto;
 }
 
 export class ReportResourceValidityDto {
