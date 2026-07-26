@@ -27,6 +27,9 @@ export class NeedTitleRequiredError extends Error {
  * error: the referenced resource is not part of this emergency.
  */
 export class NeedResourceNotInEmergencyError extends Error {
+  /** Stable identifier for web localization (#348). */
+  readonly code = 'resource_not_in_emergency' as const;
+
   constructor(resourceId: string) {
     super(`Resource ${resourceId} does not exist in this emergency`);
     this.name = 'NeedResourceNotInEmergencyError';

@@ -32,6 +32,7 @@ import {
 } from '../../domain/donation-intake-errors';
 import { SupplyLineValidationError } from '@globalemergency/warehouse-core/kernel';
 import { InvalidAuthorError } from '../../../../shared/domain/author';
+import { domainErrorResponseBody } from '../../../../shared/http/domain-error-response';
 
 type DomainError =
   | OfferNotFoundError
@@ -120,6 +121,6 @@ export class OffersDomainExceptionFilter implements ExceptionFilter {
                                     : HttpStatus.CONFLICT;
     response
       .status(statusCode)
-      .json({ statusCode, message: exception.message });
+      .json(domainErrorResponseBody(statusCode, exception));
   }
 }

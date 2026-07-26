@@ -15,6 +15,7 @@ import {
 import { EmergencyNotAcceptingIntakeError } from '../../../emergencies/domain/emergency-not-accepting-intake.error';
 import { InvalidAuthorError } from '../../../../shared/domain/author';
 import { SupplyLineValidationError } from '@globalemergency/warehouse-core/kernel';
+import { domainErrorResponseBody } from '../../../../shared/http/domain-error-response';
 
 type DomainError =
   | NeedNotFoundError
@@ -52,6 +53,6 @@ export class NeedsDomainExceptionFilter implements ExceptionFilter {
           : HttpStatus.CONFLICT;
     response
       .status(statusCode)
-      .json({ statusCode, message: exception.message });
+      .json(domainErrorResponseBody(statusCode, exception));
   }
 }

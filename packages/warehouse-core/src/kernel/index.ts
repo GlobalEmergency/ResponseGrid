@@ -24,7 +24,11 @@ export {
 export { CategoryRegistry } from './category-registry.js';
 export type { CategoryNode } from './category-registry.js';
 export { SupplyLine, SupplyLineValidationError } from './supply-line.js';
-export type { SupplyLineProps, SupplyLineSnapshot } from './supply-line.js';
+export type {
+  SupplyLineProps,
+  SupplyLineSnapshot,
+  SupplyLineErrorCode,
+} from './supply-line.js';
 export { ScopeId, ScopeIdValidationError } from './scope-id.js';
 export {
   ExternalCodesValidationError,
