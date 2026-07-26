@@ -702,3 +702,41 @@ export async function publishAnnouncement(
   revalidatePath(`/e/${slug}`);
   return { status: 'success' };
 }
+
+/**
+ * Turns the opt-in auto-hide-on-dispute policy (#171) on or off for an
+ * emergency. When on, a disputed point that reaches the threshold is closed
+ * automatically (same transition a coordinator's "Confirmar cierre" performs)
+ * instead of just staying visible with a badge.
+ */
+export async function setAutoHideOnDispute(
+  emergencyId: string,
+  slug: string,
+  enabled: boolean,
+): Promise<ActionResult> {
+  const token = await requireSession(`/emergencies/${slug}/manage`);
+
+  const { t } = await getT();
+
+  const { error, response } = await api.PUT(
+    '/emergencies/{emergencyId}/auto-hide-on-dispute',
+    {
+      params: { path: { emergencyId } },
+      body: { enabled },
+      headers: authHeaders(token),
+    },
+  );
+
+  if (error !== undefined) {
+    if (response.status === 401) {
+      return redirectToLogin(`/emergencies/${slug}/manage`);
+    }
+    if (response.status === 403) {
+      return { status: 'error', message: t.coord.err_no_permission_configure };
+    }
+    return { status: 'error', message: t.coord.err_auto_hide_failed };
+  }
+
+  revalidatePath(`/emergencies/${slug}/manage`);
+  return { status: 'success' };
+}

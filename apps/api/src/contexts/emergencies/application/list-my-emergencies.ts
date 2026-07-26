@@ -11,6 +11,8 @@ export interface MyEmergencyView extends EmergencyView {
   roleIds: string[];
   /** Per-emergency dispute threshold, or null when it uses the global default. */
   resourceDisputeThreshold: number | null;
+  /** Opt-in policy (#171): auto-resolve a disputed resource on threshold, default off. */
+  autoHideOnDispute: boolean;
 }
 
 /**
@@ -66,6 +68,7 @@ export class ListMyEmergencies {
       ...toEmergencyView(e),
       roleIds: roleIdsByEmergency.get(e.id.value) ?? [],
       resourceDisputeThreshold: e.resourceDisputeThreshold,
+      autoHideOnDispute: e.autoHideOnDispute,
     }));
   }
 }

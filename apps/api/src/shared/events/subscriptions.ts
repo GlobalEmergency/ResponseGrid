@@ -18,7 +18,10 @@ export interface EventSubscription {
 }
 
 export const EVENT_SUBSCRIPTIONS: readonly EventSubscription[] = [
-  { consumer: 'resources', events: ['donation_intake.received'] },
+  {
+    consumer: 'resources',
+    events: ['donation_intake.received', 'resource.disputed'],
+  },
   { consumer: 'notifications', events: ['donation_intake.received'] },
 ];
 

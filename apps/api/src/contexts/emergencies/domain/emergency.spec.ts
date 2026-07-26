@@ -164,11 +164,13 @@ describe('Emergency', () => {
     const e = makeEmergency();
     e.pause();
     e.publishAnnouncement('Round-trip test');
+    e.setAutoHideOnDispute(true);
     const snap = e.toSnapshot();
 
     expect(snap.status).toBe(EmergencyStatus.Paused);
     expect(snap.announcement).toBe('Round-trip test');
     expect(snap.updatedAt).toBeInstanceOf(Date);
+    expect(snap.autoHideOnDispute).toBe(true);
 
     const restored = Emergency.fromSnapshot(snap);
     expect(restored.id.equals(e.id)).toBe(true);
@@ -178,5 +180,27 @@ describe('Emergency', () => {
     expect(restored.updatedAt.toISOString()).toBe(e.updatedAt.toISOString());
     expect(restored.country).toBe('TR');
     expect(restored.createdAt.toISOString()).toBe(e.createdAt.toISOString());
+    expect(restored.autoHideOnDispute).toBe(true);
+  });
+
+  describe('setAutoHideOnDispute()', () => {
+    it('creates with the policy off by default (#171)', () => {
+      expect(makeEmergency().autoHideOnDispute).toBe(false);
+    });
+
+    it('turns the policy on and updates updatedAt', () => {
+      const e = makeEmergency();
+      const before = new Date();
+      e.setAutoHideOnDispute(true);
+      expect(e.autoHideOnDispute).toBe(true);
+      expect(e.updatedAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
+    });
+
+    it('turns the policy back off', () => {
+      const e = makeEmergency();
+      e.setAutoHideOnDispute(true);
+      e.setAutoHideOnDispute(false);
+      expect(e.autoHideOnDispute).toBe(false);
+    });
   });
 });

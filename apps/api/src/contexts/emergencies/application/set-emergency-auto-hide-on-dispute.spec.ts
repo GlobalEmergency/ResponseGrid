@@ -1,8 +1,7 @@
-import { SetEmergencyDisputeThreshold } from './set-emergency-dispute-threshold';
+import { SetEmergencyAutoHideOnDispute } from './set-emergency-auto-hide-on-dispute';
 import { EmergencyNotFoundError } from './emergency-not-found.error';
 import { Emergency } from '../domain/emergency';
 import { EmergencyStatus } from '../domain/emergency-status';
-import { InvalidDisputeThresholdError } from '../domain/invalid-dispute-threshold.error';
 import { EmergencyRepository } from '../domain/ports/emergency.repository';
 
 const SNAP = {
@@ -39,55 +38,42 @@ function makeRepo(emergency: Emergency | null): {
   return { repo, saveMock, saved: () => saved };
 }
 
-describe('SetEmergencyDisputeThreshold', () => {
-  it('persiste el umbral cuando se pasa un valor positivo', async () => {
+describe('SetEmergencyAutoHideOnDispute', () => {
+  it('turns the policy on (#171)', async () => {
     const emergency = Emergency.fromSnapshot(SNAP);
     const { repo, saveMock, saved } = makeRepo(emergency);
 
-    await new SetEmergencyDisputeThreshold(repo).execute({
+    await new SetEmergencyAutoHideOnDispute(repo).execute({
       emergencyId: SNAP.id,
-      threshold: 5,
+      enabled: true,
     });
 
     expect(saveMock).toHaveBeenCalledTimes(1);
-    expect(saved()!.resourceDisputeThreshold).toBe(5);
+    expect(saved()!.autoHideOnDispute).toBe(true);
   });
 
-  it('limpia el umbral cuando se pasa null (vuelve al global)', async () => {
+  it('turns the policy back off', async () => {
     const emergency = Emergency.fromSnapshot({
       ...SNAP,
-      resourceDisputeThreshold: 5,
+      autoHideOnDispute: true,
     });
     const { repo, saved } = makeRepo(emergency);
 
-    await new SetEmergencyDisputeThreshold(repo).execute({
+    await new SetEmergencyAutoHideOnDispute(repo).execute({
       emergencyId: SNAP.id,
-      threshold: null,
+      enabled: false,
     });
 
-    expect(saved()!.resourceDisputeThreshold).toBeNull();
-  });
-
-  it('propaga el error de dominio y no persiste con un umbral inválido', async () => {
-    const emergency = Emergency.fromSnapshot(SNAP);
-    const { repo, saveMock } = makeRepo(emergency);
-
-    await expect(
-      new SetEmergencyDisputeThreshold(repo).execute({
-        emergencyId: SNAP.id,
-        threshold: 0,
-      }),
-    ).rejects.toBeInstanceOf(InvalidDisputeThresholdError);
-    expect(saveMock).not.toHaveBeenCalled();
+    expect(saved()!.autoHideOnDispute).toBe(false);
   });
 
   it('lanza EmergencyNotFoundError si la emergencia no existe', async () => {
     const { repo, saveMock } = makeRepo(null);
 
     await expect(
-      new SetEmergencyDisputeThreshold(repo).execute({
+      new SetEmergencyAutoHideOnDispute(repo).execute({
         emergencyId: SNAP.id,
-        threshold: 5,
+        enabled: true,
       }),
     ).rejects.toBeInstanceOf(EmergencyNotFoundError);
     expect(saveMock).not.toHaveBeenCalled();

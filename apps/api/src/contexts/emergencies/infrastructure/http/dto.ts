@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -103,6 +104,16 @@ export class MyEmergencyViewDto extends EmergencyViewDto {
       'el global. Solo se expone en la vista autenticada.',
   })
   resourceDisputeThreshold!: number | null;
+
+  @ApiProperty({
+    example: false,
+    description:
+      'Política opt-in (#171): si está activa, un punto disputado que alcanza ' +
+      'el umbral se cierra automáticamente (misma transición que "confirmar ' +
+      'cierre"); si no, el comportamiento actual (visible con badge, confirma ' +
+      'un coordinador). Off por defecto. Solo se expone en la vista autenticada.',
+  })
+  autoHideOnDispute!: boolean;
 }
 
 export class PublishAnnouncementDto {
@@ -163,4 +174,14 @@ export class SetDisputeThresholdDto {
   @IsPositive()
   @Max(MAX_RESOURCE_DISPUTE_THRESHOLD)
   threshold!: number | null;
+}
+
+export class SetAutoHideOnDisputeDto {
+  @ApiProperty({
+    example: true,
+    description:
+      'Activa (true) o desactiva (false) la política de auto-ocultado (#171).',
+  })
+  @IsBoolean()
+  enabled!: boolean;
 }
