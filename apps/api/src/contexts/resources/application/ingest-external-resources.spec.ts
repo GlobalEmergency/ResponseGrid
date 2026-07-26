@@ -241,6 +241,10 @@ describe('IngestExternalResources', () => {
         accepts: [],
         country: null,
         city: null,
+        capacity: null,
+        occupancy: null,
+        sourceOrganisation: null,
+        sourceUrl: null,
         provenance: {
           sourceName: SOURCE_NAME,
           externalId: EXT_ID_1,
@@ -304,6 +308,10 @@ describe('IngestExternalResources', () => {
         accepts: [],
         country: null,
         city: null,
+        capacity: null,
+        occupancy: null,
+        sourceOrganisation: null,
+        sourceUrl: null,
         provenance: {
           sourceName: SOURCE_NAME,
           externalId: EXT_ID_1,

@@ -14,6 +14,10 @@ export interface EditResourceCommand {
   description?: string | null;
   contact?: string | null;
   schedule?: string | null;
+  capacity?: number | null;
+  occupancy?: number | null;
+  sourceOrganisation?: string | null;
+  sourceUrl?: string | null;
   location?: LocationProps;
 }
 
@@ -36,6 +40,10 @@ export class EditResource {
       description: resource.description,
       contact: resource.contact,
       schedule: resource.schedule,
+      capacity: resource.capacity,
+      occupancy: resource.occupancy,
+      sourceOrganisation: resource.sourceOrganisation,
+      sourceUrl: resource.sourceUrl,
       address: resource.location.toPlain().address,
       latitude: resource.location.toPlain().latitude,
       longitude: resource.location.toPlain().longitude,
@@ -46,6 +54,11 @@ export class EditResource {
     if (cmd.description !== undefined) edit.description = cmd.description;
     if (cmd.contact !== undefined) edit.contact = cmd.contact;
     if (cmd.schedule !== undefined) edit.schedule = cmd.schedule;
+    if (cmd.capacity !== undefined) edit.capacity = cmd.capacity;
+    if (cmd.occupancy !== undefined) edit.occupancy = cmd.occupancy;
+    if (cmd.sourceOrganisation !== undefined)
+      edit.sourceOrganisation = cmd.sourceOrganisation;
+    if (cmd.sourceUrl !== undefined) edit.sourceUrl = cmd.sourceUrl;
     if (cmd.location !== undefined)
       edit.location = Location.create(cmd.location);
     resource.edit(edit);
@@ -55,6 +68,10 @@ export class EditResource {
       description: resource.description,
       contact: resource.contact,
       schedule: resource.schedule,
+      capacity: resource.capacity,
+      occupancy: resource.occupancy,
+      sourceOrganisation: resource.sourceOrganisation,
+      sourceUrl: resource.sourceUrl,
       address: resource.location.toPlain().address,
       latitude: resource.location.toPlain().latitude,
       longitude: resource.location.toPlain().longitude,

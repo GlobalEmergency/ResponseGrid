@@ -315,6 +315,34 @@ describe('Resource', () => {
       expect(restored.provenance?.externalUpdatedAt).toEqual(externalUpdatedAt);
       expect(restored.provenance?.raw).toEqual({ x: 42 });
     });
+
+    it('carries capacity/occupancy/source fields and defaults them to null', () => {
+      expect(make().capacity).toBeNull();
+      expect(make().occupancy).toBeNull();
+      expect(make().sourceOrganisation).toBeNull();
+      expect(make().sourceUrl).toBeNull();
+
+      const r = Resource.register({
+        id: ResourceId.create(),
+        emergencyId: EmergencyId.fromString(
+          '11111111-1111-4111-8111-111111111111',
+        ),
+        type: ResourceType.Venue,
+        name: 'Refugio con aforo',
+        location: makeLocation(),
+        ownerUserId: 'user-capacity',
+        capacity: 200,
+        occupancy: 120,
+        sourceOrganisation: 'Protección Civil',
+        sourceUrl: 'https://example.org/refugios/123',
+      });
+
+      const restored = Resource.fromSnapshot(r.toSnapshot());
+      expect(restored.capacity).toBe(200);
+      expect(restored.occupancy).toBe(120);
+      expect(restored.sourceOrganisation).toBe('Protección Civil');
+      expect(restored.sourceUrl).toBe('https://example.org/refugios/123');
+    });
   });
 
   describe('destinatario final (#60)', () => {

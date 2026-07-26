@@ -87,6 +87,11 @@ export class IngestExternalResources {
           // Preserved (local-owned recipient role — #60):
           isFinalRecipient: existingSnap.isFinalRecipient,
           recipientType: existingSnap.recipientType,
+          // Preserved (local-owned enrichment — not mapped from the source):
+          capacity: existingSnap.capacity,
+          occupancy: existingSnap.occupancy,
+          sourceOrganisation: existingSnap.sourceOrganisation,
+          sourceUrl: existingSnap.sourceUrl,
           // Preserved (local-owned inventory — operators may have declared stock):
           items: existingSnap.items,
           // Preserved (citizen-validity dispute state — ficha 15): a re-ingest of
@@ -141,6 +146,10 @@ export class IngestExternalResources {
           createdAt: new Date(),
           isFinalRecipient: false,
           recipientType: null,
+          capacity: null,
+          occupancy: null,
+          sourceOrganisation: null,
+          sourceUrl: null,
           items: [],
           contact: mapped.contact,
           schedule: mapped.schedule,

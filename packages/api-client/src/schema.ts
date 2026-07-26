@@ -3247,6 +3247,26 @@ export interface components {
              */
             city?: string;
             /**
+             * @description Total capacity of the place (e.g. shelter beds)
+             * @example 200
+             */
+            capacity?: number;
+            /**
+             * @description Current occupancy of the place
+             * @example 120
+             */
+            occupancy?: number;
+            /**
+             * @description Organisation that is the source of this record
+             * @example Protección Civil
+             */
+            sourceOrganisation?: string;
+            /**
+             * @description URL of the source record
+             * @example https://example.org/refugios/123
+             */
+            sourceUrl?: string;
+            /**
              * @description Mark this resource as a final recipient of aid
              * @example true
              */
@@ -3320,6 +3340,20 @@ export interface components {
             contact?: string | null;
             /** @description Nuevo horario. Cadena vacía lo borra. Omitir para no cambiarlo. */
             schedule?: string | null;
+            /**
+             * @description Nueva capacidad total. Omitir para no cambiarla.
+             * @example 200
+             */
+            capacity?: number;
+            /**
+             * @description Nueva ocupación actual. Omitir para no cambiarla.
+             * @example 120
+             */
+            occupancy?: number;
+            /** @description Nueva organización de origen. Cadena vacía la borra. Omitir para no cambiarla. */
+            sourceOrganisation?: string | null;
+            /** @description Nueva URL de origen. Cadena vacía la borra. Omitir para no cambiarla. */
+            sourceUrl?: string | null;
             /** @description Nueva ubicación (dirección + coordenadas) para corregir la geolocalización. Omitir para no cambiarla. */
             location?: components["schemas"]["LocationDto"];
         };
@@ -3430,6 +3464,26 @@ export interface components {
             country: string | null;
             /** @example Caracas */
             city: string | null;
+            /**
+             * @description Total capacity of the place (e.g. shelter beds)
+             * @example 200
+             */
+            capacity: number | null;
+            /**
+             * @description Current occupancy of the place
+             * @example 120
+             */
+            occupancy: number | null;
+            /**
+             * @description Organisation that is the source of this record
+             * @example Protección Civil
+             */
+            sourceOrganisation: string | null;
+            /**
+             * @description URL of the source record
+             * @example https://example.org/refugios/123
+             */
+            sourceUrl: string | null;
             /**
              * @description Whether this resource is a final recipient of aid
              * @example false
@@ -3609,6 +3663,26 @@ export interface components {
             /** @example Caracas */
             city: string | null;
             /**
+             * @description Total capacity of the place (e.g. shelter beds)
+             * @example 200
+             */
+            capacity: number | null;
+            /**
+             * @description Current occupancy of the place
+             * @example 120
+             */
+            occupancy: number | null;
+            /**
+             * @description Organisation that is the source of this record
+             * @example Protección Civil
+             */
+            sourceOrganisation: string | null;
+            /**
+             * @description URL of the source record
+             * @example https://example.org/refugios/123
+             */
+            sourceUrl: string | null;
+            /**
              * @description Whether this resource is a final recipient of aid
              * @example false
              */
@@ -3723,6 +3797,26 @@ export interface components {
             /** @example Caracas */
             city: string | null;
             /**
+             * @description Total capacity of the place (e.g. shelter beds)
+             * @example 200
+             */
+            capacity: number | null;
+            /**
+             * @description Current occupancy of the place
+             * @example 120
+             */
+            occupancy: number | null;
+            /**
+             * @description Organisation that is the source of this record
+             * @example Protección Civil
+             */
+            sourceOrganisation: string | null;
+            /**
+             * @description URL of the source record
+             * @example https://example.org/refugios/123
+             */
+            sourceUrl: string | null;
+            /**
              * @description Whether this resource is a final recipient of aid
              * @example false
              */
@@ -3827,6 +3921,26 @@ export interface components {
             country: string | null;
             /** @example Caracas */
             city: string | null;
+            /**
+             * @description Total capacity of the place (e.g. shelter beds)
+             * @example 200
+             */
+            capacity: number | null;
+            /**
+             * @description Current occupancy of the place
+             * @example 120
+             */
+            occupancy: number | null;
+            /**
+             * @description Organisation that is the source of this record
+             * @example Protección Civil
+             */
+            sourceOrganisation: string | null;
+            /**
+             * @description URL of the source record
+             * @example https://example.org/refugios/123
+             */
+            sourceUrl: string | null;
             /**
              * @description Whether this resource is a final recipient of aid
              * @example false
@@ -3933,6 +4047,26 @@ export interface components {
             country: string | null;
             /** @example Caracas */
             city: string | null;
+            /**
+             * @description Total capacity of the place (e.g. shelter beds)
+             * @example 200
+             */
+            capacity: number | null;
+            /**
+             * @description Current occupancy of the place
+             * @example 120
+             */
+            occupancy: number | null;
+            /**
+             * @description Organisation that is the source of this record
+             * @example Protección Civil
+             */
+            sourceOrganisation: string | null;
+            /**
+             * @description URL of the source record
+             * @example https://example.org/refugios/123
+             */
+            sourceUrl: string | null;
             /**
              * @description Whether this resource is a final recipient of aid
              * @example false

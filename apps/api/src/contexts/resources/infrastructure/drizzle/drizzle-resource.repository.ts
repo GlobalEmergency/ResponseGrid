@@ -76,6 +76,10 @@ type RawRow = {
   external_updated_at: unknown;
   country: string | null;
   city: string | null;
+  capacity: unknown;
+  occupancy: unknown;
+  source_organisation: string | null;
+  source_url: string | null;
   raw: unknown;
   is_final_recipient: boolean | null;
   recipient_type: string | null;
@@ -151,6 +155,10 @@ function rawRowToSnapshot(row: RawRow): ResourceSnapshot {
     accepts: toStringArray(row.accepts),
     country: row.country ?? null,
     city: row.city ?? null,
+    capacity: row.capacity == null ? null : Number(row.capacity),
+    occupancy: row.occupancy == null ? null : Number(row.occupancy),
+    sourceOrganisation: row.source_organisation ?? null,
+    sourceUrl: row.source_url ?? null,
     provenance,
     isFinalRecipient: row.is_final_recipient ?? false,
     recipientType: row.recipient_type ?? null,
@@ -199,6 +207,10 @@ function rowToSnapshot(row: Row, items: ItemsRow[] = []): ResourceSnapshot {
     accepts: row.accepts ?? [],
     country: row.country ?? null,
     city: row.city ?? null,
+    capacity: row.capacity ?? null,
+    occupancy: row.occupancy ?? null,
+    sourceOrganisation: row.sourceOrganisation ?? null,
+    sourceUrl: row.sourceUrl ?? null,
     provenance: rowToProvenance(row),
     isFinalRecipient: row.isFinalRecipient ?? false,
     recipientType: row.recipientType ?? null,
@@ -251,6 +263,10 @@ export class DrizzleResourceRepository implements ResourceRepository {
           accepts: s.accepts,
           country: s.country,
           city: s.city,
+          capacity: s.capacity,
+          occupancy: s.occupancy,
+          sourceOrganisation: s.sourceOrganisation,
+          sourceUrl: s.sourceUrl,
           sourceName: s.provenance?.sourceName ?? null,
           externalId: s.provenance?.externalId ?? null,
           externalUpdatedAt: s.provenance?.externalUpdatedAt ?? null,
@@ -278,6 +294,10 @@ export class DrizzleResourceRepository implements ResourceRepository {
             accepts: s.accepts,
             country: s.country,
             city: s.city,
+            capacity: s.capacity,
+            occupancy: s.occupancy,
+            sourceOrganisation: s.sourceOrganisation,
+            sourceUrl: s.sourceUrl,
             sourceName: s.provenance?.sourceName ?? null,
             externalId: s.provenance?.externalId ?? null,
             externalUpdatedAt: s.provenance?.externalUpdatedAt ?? null,
