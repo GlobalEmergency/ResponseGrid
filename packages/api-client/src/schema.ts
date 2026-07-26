@@ -3320,6 +3320,8 @@ export interface components {
             contact?: string | null;
             /** @description Nuevo horario. Cadena vacía lo borra. Omitir para no cambiarlo. */
             schedule?: string | null;
+            /** @description Nueva ubicación (dirección + coordenadas) para corregir la geolocalización. Omitir para no cambiarla. */
+            location?: components["schemas"]["LocationDto"];
         };
         DiscardResourceDto: {
             /**

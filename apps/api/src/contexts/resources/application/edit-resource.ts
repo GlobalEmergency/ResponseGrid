@@ -2,6 +2,7 @@ import { ResourceRepository } from '../domain/ports/resource.repository';
 import { ResourceId } from '../domain/resource-id';
 import { EditResourceProps } from '../domain/resource';
 import { ResourceNotFoundError } from './resource-not-found.error';
+import { Location, LocationProps } from '../../../shared/domain/location';
 import {
   MutationAuditResult,
   diffFields,
@@ -13,6 +14,7 @@ export interface EditResourceCommand {
   description?: string | null;
   contact?: string | null;
   schedule?: string | null;
+  location?: LocationProps;
 }
 
 /**
@@ -34,6 +36,9 @@ export class EditResource {
       description: resource.description,
       contact: resource.contact,
       schedule: resource.schedule,
+      address: resource.location.toPlain().address,
+      latitude: resource.location.toPlain().latitude,
+      longitude: resource.location.toPlain().longitude,
     };
 
     const edit: EditResourceProps = {};
@@ -41,6 +46,8 @@ export class EditResource {
     if (cmd.description !== undefined) edit.description = cmd.description;
     if (cmd.contact !== undefined) edit.contact = cmd.contact;
     if (cmd.schedule !== undefined) edit.schedule = cmd.schedule;
+    if (cmd.location !== undefined)
+      edit.location = Location.create(cmd.location);
     resource.edit(edit);
 
     const after = {
@@ -48,6 +55,9 @@ export class EditResource {
       description: resource.description,
       contact: resource.contact,
       schedule: resource.schedule,
+      address: resource.location.toPlain().address,
+      latitude: resource.location.toPlain().latitude,
+      longitude: resource.location.toPlain().longitude,
     };
 
     await this.repo.save(resource);

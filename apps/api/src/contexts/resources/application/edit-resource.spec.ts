@@ -80,6 +80,30 @@ describe('EditResource', () => {
     ]);
   });
 
+  it('corrects the location in place and reports the coordinate diff', async () => {
+    const id = await seed();
+
+    const result = await editResource.execute({
+      resourceId: id,
+      location: { address: 'Av. Bolívar 5', latitude: 10.5, longitude: -66.92 },
+    });
+
+    const resource = await repo.findById(ResourceId.fromString(id));
+    expect(resource!.location.toPlain()).toEqual({
+      address: 'Av. Bolívar 5',
+      latitude: 10.5,
+      longitude: -66.92,
+    });
+    expect(result.changes).toEqual(
+      expect.arrayContaining([
+        { field: 'address', before: 'Caracas', after: 'Av. Bolívar 5' },
+        { field: 'latitude', before: 10.48, after: 10.5 },
+        { field: 'longitude', before: -66.9, after: -66.92 },
+      ]),
+    );
+    expect(result.changes).toHaveLength(3);
+  });
+
   it('throws ResourceNotFoundError for an unknown id', async () => {
     await expect(
       editResource.execute({ resourceId: OWNER, name: 'x' }),

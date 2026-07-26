@@ -68,6 +68,8 @@ export interface EditResourceProps {
   description?: string | null;
   contact?: string | null;
   schedule?: string | null;
+  /** Correct the point's geolocation (address + coordinates) in place (#—). */
+  location?: Location;
 }
 
 // Snapshot used by repositories to rehydrate without going through register().
@@ -117,7 +119,7 @@ export class Resource {
     public readonly type: ResourceType,
     private _name: string,
     private _description: string | null,
-    public readonly location: Location,
+    private _location: Location,
     public readonly ownerUserId: string,
     public readonly ownerOrganizationId: string | null,
     private _verificationLevel: VerificationLevel,
@@ -212,6 +214,9 @@ export class Resource {
   }
   get description(): string | null {
     return this._description;
+  }
+  get location(): Location {
+    return this._location;
   }
   get contact(): string | null {
     return this._contact;
@@ -315,6 +320,9 @@ export class Resource {
     if (props.schedule !== undefined) {
       this._schedule =
         props.schedule === null ? null : props.schedule.trim() || null;
+    }
+    if (props.location !== undefined) {
+      this._location = props.location;
     }
   }
 
