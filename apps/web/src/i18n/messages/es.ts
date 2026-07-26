@@ -591,6 +591,8 @@ export const es = {
     paused: 'En pausa',
     closed: 'Cerrado',
     hidden: 'Oculto',
+    preparing: 'En preparación',
+    assisted: 'Asistido',
     aria_prefix: 'Estado operativo:',
   },
 

@@ -41,7 +41,14 @@ const ICONS: Record<MarkerColor, L.Icon> = {
 };
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-export type ResourcePublicStatus = 'active' | 'saturated' | 'paused' | 'closed' | 'hidden';
+export type ResourcePublicStatus =
+  | 'active'
+  | 'saturated'
+  | 'paused'
+  | 'closed'
+  | 'hidden'
+  | 'preparing'
+  | 'assisted';
 
 export interface MapPoint {
   id: string;

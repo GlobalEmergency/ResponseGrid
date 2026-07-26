@@ -55,12 +55,11 @@ export class GetEmergencyMetrics {
       needCounts[NeedStatus.Pending] + needCounts[NeedStatus.Validated];
     const needClosed = needCounts[NeedStatus.Fulfilled];
 
-    const resourceTotal =
-      resourceCounts[PublicStatus.Hidden] +
-      resourceCounts[PublicStatus.Active] +
-      resourceCounts[PublicStatus.Saturated] +
-      resourceCounts[PublicStatus.Paused] +
-      resourceCounts[PublicStatus.Closed];
+    // Sum across every public status (robust to new statuses being added).
+    const resourceTotal = Object.values(resourceCounts).reduce(
+      (sum, n) => sum + (n ?? 0),
+      0,
+    );
 
     return {
       needs: {

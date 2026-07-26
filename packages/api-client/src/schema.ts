@@ -3370,7 +3370,7 @@ export interface components {
              * @example saturated
              * @enum {string}
              */
-            status: "active" | "saturated" | "paused" | "closed";
+            status: "active" | "saturated" | "paused" | "closed" | "preparing" | "assisted";
         };
         MyManagedResourceDto: {
             /**
@@ -3426,7 +3426,7 @@ export interface components {
              * @example active
              * @enum {string}
              */
-            publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed";
+            publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed" | "preparing" | "assisted";
             /** Format: uuid */
             ownerOrganizationId: string | null;
             /**
@@ -3624,7 +3624,7 @@ export interface components {
              * @example active
              * @enum {string}
              */
-            publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed";
+            publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed" | "preparing" | "assisted";
             /** Format: uuid */
             ownerOrganizationId: string | null;
             /**
@@ -3758,7 +3758,7 @@ export interface components {
              * @example active
              * @enum {string}
              */
-            publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed";
+            publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed" | "preparing" | "assisted";
             /** Format: uuid */
             ownerOrganizationId: string | null;
             /**
@@ -3883,7 +3883,7 @@ export interface components {
              * @example active
              * @enum {string}
              */
-            publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed";
+            publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed" | "preparing" | "assisted";
             /** Format: uuid */
             ownerOrganizationId: string | null;
             /**
@@ -4009,7 +4009,7 @@ export interface components {
              * @example active
              * @enum {string}
              */
-            publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed";
+            publicStatus: "hidden" | "active" | "saturated" | "paused" | "closed" | "preparing" | "assisted";
             /** Format: uuid */
             ownerOrganizationId: string | null;
             /**
@@ -8139,7 +8139,7 @@ export interface operations {
                 /** @description Filter by resource type */
                 type?: "collection_point" | "delivery_point" | "collection_and_delivery" | "warehouse" | "transport" | "supplier" | "venue";
                 /** @description Filter by operational status (includes hidden/closed — admin only) */
-                status?: "hidden" | "active" | "saturated" | "paused" | "closed";
+                status?: "hidden" | "active" | "saturated" | "paused" | "closed" | "preparing" | "assisted";
                 /** @description Filter by verification level */
                 verification?: "unverified" | "verified" | "official" | "rejected";
                 /** @description Full-text search matched against name, address and city (case-insensitive, max 100 chars) */

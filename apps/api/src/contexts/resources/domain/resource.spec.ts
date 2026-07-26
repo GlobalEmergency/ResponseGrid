@@ -193,6 +193,20 @@ describe('Resource', () => {
       expect(r.publicStatus).toBe(PublicStatus.Paused);
     });
 
+    it('transitions Active → Preparing and stays publicly visible', () => {
+      const r = makePublished();
+      r.changePublicStatus(PublicStatus.Preparing);
+      expect(r.publicStatus).toBe(PublicStatus.Preparing);
+      expect(r.isPubliclyVisible()).toBe(true);
+    });
+
+    it('transitions Active → Assisted and stays publicly visible', () => {
+      const r = makePublished();
+      r.changePublicStatus(PublicStatus.Assisted);
+      expect(r.publicStatus).toBe(PublicStatus.Assisted);
+      expect(r.isPubliclyVisible()).toBe(true);
+    });
+
     it('throws ResourceNotPublishedError when source is Hidden', () => {
       const r = make();
       expect(() => r.changePublicStatus(PublicStatus.Active)).toThrow(

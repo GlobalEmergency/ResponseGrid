@@ -22,4 +22,8 @@ export enum PublicStatus {
   Saturated = 'saturated',
   Paused = 'paused',
   Closed = 'closed',
+  /** En preparación: aún no operativo, pero públicamente visible. */
+  Preparing = 'preparing',
+  /** Alojamiento asistido / colectivo específico; públicamente visible. */
+  Assisted = 'assisted',
 }
