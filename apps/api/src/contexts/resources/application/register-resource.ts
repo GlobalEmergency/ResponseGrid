@@ -27,6 +27,10 @@ export interface RegisterResourceCommand {
   accepts?: string[];
   country?: string | null;
   city?: string | null;
+  capacity?: number | null;
+  occupancy?: number | null;
+  sourceOrganisation?: string | null;
+  sourceUrl?: string | null;
   provenance?: Provenance | null;
   // destinatario final (#60)
   isFinalRecipient?: boolean;
@@ -77,6 +81,10 @@ export class RegisterResource {
       accepts: cmd.accepts ?? [],
       country: cmd.country ?? null,
       city: cmd.city ?? null,
+      capacity: cmd.capacity ?? null,
+      occupancy: cmd.occupancy ?? null,
+      sourceOrganisation: cmd.sourceOrganisation ?? null,
+      sourceUrl: cmd.sourceUrl ?? null,
       provenance: cmd.provenance ?? null,
       isFinalRecipient: cmd.isFinalRecipient ?? false,
       recipientType: cmd.recipientType ?? null,

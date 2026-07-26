@@ -141,6 +141,38 @@ export class ResourceViewDto {
   @ApiProperty({ example: 'Caracas', nullable: true, type: String })
   city!: string | null;
 
+  @ApiProperty({
+    example: 200,
+    nullable: true,
+    type: Number,
+    description: 'Total capacity of the place (e.g. shelter beds)',
+  })
+  capacity!: number | null;
+
+  @ApiProperty({
+    example: 120,
+    nullable: true,
+    type: Number,
+    description: 'Current occupancy of the place',
+  })
+  occupancy!: number | null;
+
+  @ApiProperty({
+    example: 'Protección Civil',
+    nullable: true,
+    type: String,
+    description: 'Organisation that is the source of this record',
+  })
+  sourceOrganisation!: string | null;
+
+  @ApiProperty({
+    example: 'https://example.org/refugios/123',
+    nullable: true,
+    type: String,
+    description: 'URL of the source record',
+  })
+  sourceUrl!: string | null;
+
   // ── destinatario final (#60) ──────────────────────────────────────────────
 
   @ApiProperty({

@@ -128,6 +128,41 @@ export class RegisterResourceDto {
   city?: string;
 
   @ApiPropertyOptional({
+    example: 200,
+    description: 'Total capacity of the place (e.g. shelter beds)',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  capacity?: number;
+
+  @ApiPropertyOptional({
+    example: 120,
+    description: 'Current occupancy of the place',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  occupancy?: number;
+
+  @ApiPropertyOptional({
+    example: 'Protección Civil',
+    description: 'Organisation that is the source of this record',
+  })
+  @IsOptional()
+  @IsString()
+  sourceOrganisation?: string;
+
+  @ApiPropertyOptional({
+    example: 'https://example.org/refugios/123',
+    description: 'URL of the source record',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  sourceUrl?: string;
+
+  @ApiPropertyOptional({
     example: true,
     description: 'Mark this resource as a final recipient of aid',
   })
@@ -555,6 +590,45 @@ export class EditResourceDto {
   @IsOptional()
   @IsString()
   schedule?: string;
+
+  @ApiPropertyOptional({
+    description: 'Nueva capacidad total. Omitir para no cambiarla.',
+    example: 200,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  capacity?: number;
+
+  @ApiPropertyOptional({
+    description: 'Nueva ocupación actual. Omitir para no cambiarla.',
+    example: 120,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  occupancy?: number;
+
+  @ApiPropertyOptional({
+    description:
+      'Nueva organización de origen. Cadena vacía la borra. Omitir para no cambiarla.',
+    nullable: true,
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  sourceOrganisation?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Nueva URL de origen. Cadena vacía la borra. Omitir para no cambiarla.',
+    nullable: true,
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  sourceUrl?: string;
 
   @ApiPropertyOptional({
     description:

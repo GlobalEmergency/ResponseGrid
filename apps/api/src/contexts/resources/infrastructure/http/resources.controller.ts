@@ -172,6 +172,10 @@ export class ResourcesController {
       accepts: dto.accepts ?? [],
       country: dto.country ?? null,
       city: dto.city ?? null,
+      capacity: dto.capacity ?? null,
+      occupancy: dto.occupancy ?? null,
+      sourceOrganisation: dto.sourceOrganisation ?? null,
+      sourceUrl: dto.sourceUrl ?? null,
       isFinalRecipient: dto.isFinalRecipient ?? false,
       recipientType: dto.recipientType ?? null,
       items: (dto.items ?? []).map(toSupplyLineProps),
@@ -353,6 +357,11 @@ export class ResourcesController {
     if (dto.description !== undefined) cmd.description = dto.description;
     if (dto.contact !== undefined) cmd.contact = dto.contact;
     if (dto.schedule !== undefined) cmd.schedule = dto.schedule;
+    if (dto.capacity !== undefined) cmd.capacity = dto.capacity;
+    if (dto.occupancy !== undefined) cmd.occupancy = dto.occupancy;
+    if (dto.sourceOrganisation !== undefined)
+      cmd.sourceOrganisation = dto.sourceOrganisation;
+    if (dto.sourceUrl !== undefined) cmd.sourceUrl = dto.sourceUrl;
     if (dto.location !== undefined) cmd.location = dto.location;
 
     const result = await this.editResource.execute(cmd);

@@ -10257,6 +10257,26 @@
             "example": "Caracas",
             "description": "City name"
           },
+          "capacity": {
+            "type": "number",
+            "example": 200,
+            "description": "Total capacity of the place (e.g. shelter beds)"
+          },
+          "occupancy": {
+            "type": "number",
+            "example": 120,
+            "description": "Current occupancy of the place"
+          },
+          "sourceOrganisation": {
+            "type": "string",
+            "example": "Protección Civil",
+            "description": "Organisation that is the source of this record"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "example": "https://example.org/refugios/123",
+            "description": "URL of the source record"
+          },
           "isFinalRecipient": {
             "type": "boolean",
             "example": true,
@@ -10412,6 +10432,26 @@
           "schedule": {
             "type": "string",
             "description": "Nuevo horario. Cadena vacía lo borra. Omitir para no cambiarlo.",
+            "nullable": true
+          },
+          "capacity": {
+            "type": "number",
+            "description": "Nueva capacidad total. Omitir para no cambiarla.",
+            "example": 200
+          },
+          "occupancy": {
+            "type": "number",
+            "description": "Nueva ocupación actual. Omitir para no cambiarla.",
+            "example": 120
+          },
+          "sourceOrganisation": {
+            "type": "string",
+            "description": "Nueva organización de origen. Cadena vacía la borra. Omitir para no cambiarla.",
+            "nullable": true
+          },
+          "sourceUrl": {
+            "type": "string",
+            "description": "Nueva URL de origen. Cadena vacía la borra. Omitir para no cambiarla.",
             "nullable": true
           },
           "location": {
@@ -10639,6 +10679,30 @@
             "example": "Caracas",
             "nullable": true
           },
+          "capacity": {
+            "type": "number",
+            "example": 200,
+            "nullable": true,
+            "description": "Total capacity of the place (e.g. shelter beds)"
+          },
+          "occupancy": {
+            "type": "number",
+            "example": 120,
+            "nullable": true,
+            "description": "Current occupancy of the place"
+          },
+          "sourceOrganisation": {
+            "type": "string",
+            "example": "Protección Civil",
+            "nullable": true,
+            "description": "Organisation that is the source of this record"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "example": "https://example.org/refugios/123",
+            "nullable": true,
+            "description": "URL of the source record"
+          },
           "isFinalRecipient": {
             "type": "boolean",
             "example": false,
@@ -10680,6 +10744,10 @@
           "externalUpdatedAt",
           "country",
           "city",
+          "capacity",
+          "occupancy",
+          "sourceOrganisation",
+          "sourceUrl",
           "isFinalRecipient",
           "recipientType",
           "disputed",
@@ -11015,6 +11083,30 @@
             "example": "Caracas",
             "nullable": true
           },
+          "capacity": {
+            "type": "number",
+            "example": 200,
+            "nullable": true,
+            "description": "Total capacity of the place (e.g. shelter beds)"
+          },
+          "occupancy": {
+            "type": "number",
+            "example": 120,
+            "nullable": true,
+            "description": "Current occupancy of the place"
+          },
+          "sourceOrganisation": {
+            "type": "string",
+            "example": "Protección Civil",
+            "nullable": true,
+            "description": "Organisation that is the source of this record"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "example": "https://example.org/refugios/123",
+            "nullable": true,
+            "description": "URL of the source record"
+          },
           "isFinalRecipient": {
             "type": "boolean",
             "example": false,
@@ -11061,6 +11153,10 @@
           "externalUpdatedAt",
           "country",
           "city",
+          "capacity",
+          "occupancy",
+          "sourceOrganisation",
+          "sourceUrl",
           "isFinalRecipient",
           "recipientType",
           "disputed",
@@ -11237,6 +11333,30 @@
             "example": "Caracas",
             "nullable": true
           },
+          "capacity": {
+            "type": "number",
+            "example": 200,
+            "nullable": true,
+            "description": "Total capacity of the place (e.g. shelter beds)"
+          },
+          "occupancy": {
+            "type": "number",
+            "example": 120,
+            "nullable": true,
+            "description": "Current occupancy of the place"
+          },
+          "sourceOrganisation": {
+            "type": "string",
+            "example": "Protección Civil",
+            "nullable": true,
+            "description": "Organisation that is the source of this record"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "example": "https://example.org/refugios/123",
+            "nullable": true,
+            "description": "URL of the source record"
+          },
           "isFinalRecipient": {
             "type": "boolean",
             "example": false,
@@ -11289,6 +11409,10 @@
           "externalUpdatedAt",
           "country",
           "city",
+          "capacity",
+          "occupancy",
+          "sourceOrganisation",
+          "sourceUrl",
           "isFinalRecipient",
           "recipientType",
           "disputed",
@@ -11444,6 +11568,30 @@
             "example": "Caracas",
             "nullable": true
           },
+          "capacity": {
+            "type": "number",
+            "example": 200,
+            "nullable": true,
+            "description": "Total capacity of the place (e.g. shelter beds)"
+          },
+          "occupancy": {
+            "type": "number",
+            "example": 120,
+            "nullable": true,
+            "description": "Current occupancy of the place"
+          },
+          "sourceOrganisation": {
+            "type": "string",
+            "example": "Protección Civil",
+            "nullable": true,
+            "description": "Organisation that is the source of this record"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "example": "https://example.org/refugios/123",
+            "nullable": true,
+            "description": "URL of the source record"
+          },
           "isFinalRecipient": {
             "type": "boolean",
             "example": false,
@@ -11507,6 +11655,10 @@
           "externalUpdatedAt",
           "country",
           "city",
+          "capacity",
+          "occupancy",
+          "sourceOrganisation",
+          "sourceUrl",
           "isFinalRecipient",
           "recipientType",
           "disputed",
@@ -11656,6 +11808,30 @@
             "example": "Caracas",
             "nullable": true
           },
+          "capacity": {
+            "type": "number",
+            "example": 200,
+            "nullable": true,
+            "description": "Total capacity of the place (e.g. shelter beds)"
+          },
+          "occupancy": {
+            "type": "number",
+            "example": 120,
+            "nullable": true,
+            "description": "Current occupancy of the place"
+          },
+          "sourceOrganisation": {
+            "type": "string",
+            "example": "Protección Civil",
+            "nullable": true,
+            "description": "Organisation that is the source of this record"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "example": "https://example.org/refugios/123",
+            "nullable": true,
+            "description": "URL of the source record"
+          },
           "isFinalRecipient": {
             "type": "boolean",
             "example": false,
@@ -11737,6 +11913,10 @@
           "externalUpdatedAt",
           "country",
           "city",
+          "capacity",
+          "occupancy",
+          "sourceOrganisation",
+          "sourceUrl",
           "isFinalRecipient",
           "recipientType",
           "disputed",

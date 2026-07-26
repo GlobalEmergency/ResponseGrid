@@ -67,6 +67,42 @@ describe('EditResource', () => {
     expect(result.changes).toHaveLength(2);
   });
 
+  it('edits capacity, occupancy, source organisation and source url', async () => {
+    const id = await seed();
+
+    const result = await editResource.execute({
+      resourceId: id,
+      capacity: 200,
+      occupancy: 120,
+      sourceOrganisation: 'Protección Civil',
+      sourceUrl: 'https://example.org/refugios/123',
+    });
+
+    const resource = await repo.findById(ResourceId.fromString(id));
+    expect(resource!.capacity).toBe(200);
+    expect(resource!.occupancy).toBe(120);
+    expect(resource!.sourceOrganisation).toBe('Protección Civil');
+    expect(resource!.sourceUrl).toBe('https://example.org/refugios/123');
+
+    expect(result.changes).toEqual(
+      expect.arrayContaining([
+        { field: 'capacity', before: null, after: 200 },
+        { field: 'occupancy', before: null, after: 120 },
+        {
+          field: 'sourceOrganisation',
+          before: null,
+          after: 'Protección Civil',
+        },
+        {
+          field: 'sourceUrl',
+          before: null,
+          after: 'https://example.org/refugios/123',
+        },
+      ]),
+    );
+    expect(result.changes).toHaveLength(4);
+  });
+
   it('clears the contact when an empty string is given', async () => {
     const id = await seed();
     await editResource.execute({ resourceId: id, contact: '+58 212 555' });
