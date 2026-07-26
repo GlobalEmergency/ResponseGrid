@@ -17,6 +17,7 @@ import {
   ApiOperation,
   ApiOkResponse,
   ApiCreatedResponse,
+  ApiAcceptedResponse,
   ApiBadRequestResponse,
   ApiUnauthorizedResponse,
   ApiConflictResponse,
@@ -27,6 +28,8 @@ import type { Request as ExpressRequest } from 'express';
 import { Login } from '../../application/login';
 import { RegisterUser } from '../../application/register-user';
 import { CompleteRegistration } from '../../application/complete-registration';
+import { SetPassword } from '../../application/set-password';
+import { RequestPasswordSetup } from '../../application/request-password-setup';
 import {
   UpdateProfile,
   UpdateProfileResult,
@@ -40,6 +43,9 @@ import {
   UpdateProfileDto,
   OnboardingDto,
   OnboardingResponseDto,
+  SetPasswordDto,
+  SetPasswordResponseDto,
+  RequestPasswordSetupDto,
 } from './dto';
 import { IdentityExceptionFilter } from './identity-exception.filter';
 import { JwtAuthGuard, AuthenticatedUser } from './jwt-auth.guard';
@@ -70,6 +76,8 @@ export class AuthController {
     private readonly registerUser: RegisterUser,
     private readonly updateProfile: UpdateProfile,
     private readonly completeRegistration: CompleteRegistration,
+    private readonly setPassword: SetPassword,
+    private readonly requestPasswordSetup: RequestPasswordSetup,
     @Inject(CONSENT_REPOSITORY)
     private readonly consentRepo: ConsentRepository,
   ) {}
@@ -116,6 +124,53 @@ export class AuthController {
       acceptedPrivacy: dto.acceptedPrivacy,
       ...consentContext(req),
     });
+  }
+
+  @Post('set-password')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
+  @ApiOperation({
+    summary:
+      'Establecer la contraseña de un perfil sin contraseña con un token de ' +
+      'un solo uso (auto-login: devuelve un JWT)',
+  })
+  @ApiOkResponse({
+    description: 'Contraseña establecida',
+    type: SetPasswordResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Token inválido, caducado o ya usado',
+  })
+  @ApiTooManyRequestsResponse({
+    description: 'Rate limit exceeded — try again later',
+  })
+  async setPasswordRoute(
+    @Body() dto: SetPasswordDto,
+  ): Promise<SetPasswordResponseDto> {
+    return this.setPassword.execute({
+      token: dto.token,
+      newPassword: dto.password,
+    });
+  }
+
+  @Post('set-password/request')
+  @HttpCode(HttpStatus.ACCEPTED)
+  @Throttle({ default: { ttl: 60_000, limit: 3 } })
+  @ApiOperation({
+    summary:
+      'Reenviar el email de «crea tu contraseña» a un perfil sin contraseña. ' +
+      'Responde 202 siempre (no revela si el email existe).',
+  })
+  @ApiAcceptedResponse({
+    description: 'Solicitud aceptada (se envía el email si procede)',
+  })
+  @ApiTooManyRequestsResponse({
+    description: 'Rate limit exceeded — try again later',
+  })
+  async requestPasswordSetupRoute(
+    @Body() dto: RequestPasswordSetupDto,
+  ): Promise<void> {
+    await this.requestPasswordSetup.execute({ email: dto.email });
   }
 
   @Post('onboarding')

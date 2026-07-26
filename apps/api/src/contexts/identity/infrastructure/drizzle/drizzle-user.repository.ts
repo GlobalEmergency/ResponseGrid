@@ -68,6 +68,13 @@ export class DrizzleUserRepository implements UserRepository {
     return rows.map((r) => User.fromSnapshot(rowToSnapshot(r)));
   }
 
+  async setPassword(id: UserId, passwordHash: string): Promise<void> {
+    await this.db
+      .update(usersTable)
+      .set({ passwordHash })
+      .where(eq(usersTable.id, id.value));
+  }
+
   async recordLogin(id: UserId, at: Date): Promise<void> {
     await this.db
       .update(usersTable)
