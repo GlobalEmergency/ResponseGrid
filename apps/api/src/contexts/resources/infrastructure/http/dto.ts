@@ -246,13 +246,14 @@ export class UpdateInventoryDto {
 
 export class UpdateResourcePublicStatusDto {
   @ApiProperty({
-    enum: ['active', 'saturated', 'paused', 'closed'],
+    enum: ['active', 'saturated', 'paused', 'closed', 'preparing', 'assisted'],
     example: 'saturated',
     description:
       'Target operational status. Hidden is not allowed; use close() to deactivate.',
   })
-  @IsEnum(['active', 'saturated', 'paused', 'closed'])
-  status!: 'active' | 'saturated' | 'paused' | 'closed';
+  @IsEnum(['active', 'saturated', 'paused', 'closed', 'preparing', 'assisted'])
+  status!:
+    'active' | 'saturated' | 'paused' | 'closed' | 'preparing' | 'assisted';
 }
 
 export class NearbyResourcesQueryDto {

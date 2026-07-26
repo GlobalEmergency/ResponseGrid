@@ -16,6 +16,8 @@ const COLOR_MAP: Record<PublicStatus, string> = {
   paused: 'bg-accent',
   closed: 'bg-danger',
   hidden: 'bg-muted',
+  preparing: 'bg-accent',
+  assisted: 'bg-muted',
 };
 
 const LABEL_KEY: Record<PublicStatus, keyof Messages['status_light']> = {
@@ -24,6 +26,8 @@ const LABEL_KEY: Record<PublicStatus, keyof Messages['status_light']> = {
   paused: 'paused',
   closed: 'closed',
   hidden: 'hidden',
+  preparing: 'preparing',
+  assisted: 'assisted',
 };
 
 // `t` is optional — falls back to Spanish when omitted (used in coordinator pages).

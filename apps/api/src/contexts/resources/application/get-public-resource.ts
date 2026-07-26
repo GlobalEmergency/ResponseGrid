@@ -7,6 +7,8 @@ const VISIBLE = [
   PublicStatus.Active,
   PublicStatus.Saturated,
   PublicStatus.Paused,
+  PublicStatus.Preparing,
+  PublicStatus.Assisted,
 ];
 
 const PUBLICLY_VISIBLE_VERIFICATION = [

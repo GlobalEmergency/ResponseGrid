@@ -125,6 +125,8 @@ export class InMemoryResourceRepository implements ResourceRepository {
       [PublicStatus.Saturated]: 0,
       [PublicStatus.Paused]: 0,
       [PublicStatus.Closed]: 0,
+      [PublicStatus.Preparing]: 0,
+      [PublicStatus.Assisted]: 0,
     };
     for (const snap of this.store.values()) {
       if (snap.emergencyId === emergencyId.value) {

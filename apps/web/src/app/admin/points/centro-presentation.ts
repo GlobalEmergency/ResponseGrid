@@ -35,9 +35,19 @@ const STATUS_KEYS: Record<string, keyof AdminMessages> = {
   closed: 'centros_status_closed',
 };
 
+/**
+ * Operational states not (yet) present in the admin i18n bundle. Rendered with
+ * direct labels so the admin console shows them correctly meanwhile.
+ */
+const STATUS_LITERALS: Record<string, string> = {
+  preparing: 'En preparación',
+  assisted: 'Asistido',
+};
+
 export function statusLabel(status: string, ta: AdminMessages): string {
   const key = STATUS_KEYS[status];
-  return key ? ta[key] : status;
+  if (key) return ta[key];
+  return STATUS_LITERALS[status] ?? status;
 }
 
 export const PUBLIC_STATUSES: ReadonlyArray<string> = [

@@ -34,6 +34,8 @@ const PUBLICLY_VISIBLE_STATUSES = [
   PublicStatus.Active,
   PublicStatus.Saturated,
   PublicStatus.Paused,
+  PublicStatus.Preparing,
+  PublicStatus.Assisted,
 ];
 
 /**
@@ -823,6 +825,8 @@ export class DrizzleResourceRepository implements ResourceRepository {
       [PublicStatus.Saturated]: 0,
       [PublicStatus.Paused]: 0,
       [PublicStatus.Closed]: 0,
+      [PublicStatus.Preparing]: 0,
+      [PublicStatus.Assisted]: 0,
     };
     for (const row of rows) {
       const status = row.publicStatus as PublicStatus;

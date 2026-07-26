@@ -445,7 +445,9 @@ export class Resource {
     return (
       this._publicStatus === PublicStatus.Active ||
       this._publicStatus === PublicStatus.Saturated ||
-      this._publicStatus === PublicStatus.Paused
+      this._publicStatus === PublicStatus.Paused ||
+      this._publicStatus === PublicStatus.Preparing ||
+      this._publicStatus === PublicStatus.Assisted
     );
   }
 

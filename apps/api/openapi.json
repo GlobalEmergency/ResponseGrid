@@ -2299,7 +2299,9 @@
                 "active",
                 "saturated",
                 "paused",
-                "closed"
+                "closed",
+                "preparing",
+                "assisted"
               ]
             }
           },
@@ -10491,7 +10493,9 @@
               "active",
               "saturated",
               "paused",
-              "closed"
+              "closed",
+              "preparing",
+              "assisted"
             ],
             "example": "saturated",
             "description": "Target operational status. Hidden is not allowed; use close() to deactivate."
@@ -10617,7 +10621,9 @@
               "active",
               "saturated",
               "paused",
-              "closed"
+              "closed",
+              "preparing",
+              "assisted"
             ],
             "example": "active"
           },
@@ -11021,7 +11027,9 @@
               "active",
               "saturated",
               "paused",
-              "closed"
+              "closed",
+              "preparing",
+              "assisted"
             ],
             "example": "active"
           },
@@ -11271,7 +11279,9 @@
               "active",
               "saturated",
               "paused",
-              "closed"
+              "closed",
+              "preparing",
+              "assisted"
             ],
             "example": "active"
           },
@@ -11506,7 +11516,9 @@
               "active",
               "saturated",
               "paused",
-              "closed"
+              "closed",
+              "preparing",
+              "assisted"
             ],
             "example": "active"
           },
@@ -11746,7 +11758,9 @@
               "active",
               "saturated",
               "paused",
-              "closed"
+              "closed",
+              "preparing",
+              "assisted"
             ],
             "example": "active"
           },

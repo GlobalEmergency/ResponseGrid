@@ -565,6 +565,8 @@ export const en = {
     paused: 'Paused',
     closed: 'Closed',
     hidden: 'Hidden',
+    preparing: 'Preparing',
+    assisted: 'Assisted',
     aria_prefix: 'Operational status:',
   },
 

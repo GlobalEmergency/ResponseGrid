@@ -438,6 +438,8 @@ export class ResourcesController {
       saturated: PublicStatus.Saturated,
       paused: PublicStatus.Paused,
       closed: PublicStatus.Closed,
+      preparing: PublicStatus.Preparing,
+      assisted: PublicStatus.Assisted,
     };
     await this.updateStatus.execute({
       resourceId,

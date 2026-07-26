@@ -60,6 +60,8 @@ export function ResourceDetail({
     saturated: tc.public_status_saturated,
     paused: tc.public_status_paused,
     closed: tc.public_status_closed,
+    preparing: 'En preparación',
+    assisted: 'Asistido',
   };
 
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(
