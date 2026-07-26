@@ -52,6 +52,10 @@ export interface RegisterResourceProps {
   accepts?: string[];
   country?: string | null;
   city?: string | null;
+  capacity?: number | null;
+  occupancy?: number | null;
+  sourceOrganisation?: string | null;
+  sourceUrl?: string | null;
   provenance?: Provenance | null;
   // destinatario final (#60)
   isFinalRecipient?: boolean;
@@ -68,6 +72,10 @@ export interface EditResourceProps {
   description?: string | null;
   contact?: string | null;
   schedule?: string | null;
+  capacity?: number | null;
+  occupancy?: number | null;
+  sourceOrganisation?: string | null;
+  sourceUrl?: string | null;
   /** Correct the point's geolocation (address + coordinates) in place (#—). */
   location?: Location;
 }
@@ -92,6 +100,10 @@ export interface ResourceSnapshot {
   accepts: string[];
   country: string | null;
   city: string | null;
+  capacity: number | null;
+  occupancy: number | null;
+  sourceOrganisation: string | null;
+  sourceUrl: string | null;
   provenance: Provenance | null;
   isFinalRecipient: boolean;
   recipientType: string | null;
@@ -131,6 +143,10 @@ export class Resource {
     public readonly accepts: string[],
     public readonly country: string | null,
     public readonly city: string | null,
+    private _capacity: number | null,
+    private _occupancy: number | null,
+    private _sourceOrganisation: string | null,
+    private _sourceUrl: string | null,
     public readonly provenance: Provenance | null,
     public readonly isFinalRecipient: boolean,
     public readonly recipientType: string | null,
@@ -160,6 +176,10 @@ export class Resource {
       props.accepts ?? [],
       props.country ?? null,
       props.city ?? null,
+      props.capacity ?? null,
+      props.occupancy ?? null,
+      props.sourceOrganisation ?? null,
+      props.sourceUrl ?? null,
       props.provenance ?? null,
       props.isFinalRecipient ?? false,
       props.recipientType ?? null,
@@ -198,6 +218,10 @@ export class Resource {
       s.accepts ?? [],
       s.country ?? null,
       s.city ?? null,
+      s.capacity ?? null,
+      s.occupancy ?? null,
+      s.sourceOrganisation ?? null,
+      s.sourceUrl ?? null,
       s.provenance ?? null,
       s.isFinalRecipient ?? false,
       s.recipientType ?? null,
@@ -223,6 +247,18 @@ export class Resource {
   }
   get schedule(): string | null {
     return this._schedule;
+  }
+  get capacity(): number | null {
+    return this._capacity;
+  }
+  get occupancy(): number | null {
+    return this._occupancy;
+  }
+  get sourceOrganisation(): string | null {
+    return this._sourceOrganisation;
+  }
+  get sourceUrl(): string | null {
+    return this._sourceUrl;
   }
   get verificationLevel(): VerificationLevel {
     return this._verificationLevel;
@@ -320,6 +356,22 @@ export class Resource {
     if (props.schedule !== undefined) {
       this._schedule =
         props.schedule === null ? null : props.schedule.trim() || null;
+    }
+    if (props.capacity !== undefined) {
+      this._capacity = props.capacity;
+    }
+    if (props.occupancy !== undefined) {
+      this._occupancy = props.occupancy;
+    }
+    if (props.sourceOrganisation !== undefined) {
+      this._sourceOrganisation =
+        props.sourceOrganisation === null
+          ? null
+          : props.sourceOrganisation.trim() || null;
+    }
+    if (props.sourceUrl !== undefined) {
+      this._sourceUrl =
+        props.sourceUrl === null ? null : props.sourceUrl.trim() || null;
     }
     if (props.location !== undefined) {
       this._location = props.location;
@@ -469,6 +521,10 @@ export class Resource {
       accepts: this.accepts,
       country: this.country,
       city: this.city,
+      capacity: this.capacity,
+      occupancy: this.occupancy,
+      sourceOrganisation: this.sourceOrganisation,
+      sourceUrl: this.sourceUrl,
       provenance: this.provenance,
       isFinalRecipient: this.isFinalRecipient,
       recipientType: this.recipientType,
