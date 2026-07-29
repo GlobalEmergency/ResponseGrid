@@ -35,3 +35,4 @@ apps/api/uploads/
 
 # Local git worktrees for parallel agent work — never commit
 .worktrees/
+.claude/worktrees/

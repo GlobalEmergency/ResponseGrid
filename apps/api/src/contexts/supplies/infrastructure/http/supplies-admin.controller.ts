@@ -13,13 +13,17 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNoContentResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CreateSupply } from '../../application/create-supply';
 import { EditSupply } from '../../application/edit-supply';
@@ -66,6 +70,7 @@ import {
  */
 @ApiTags('supplies-admin')
 @ApiBearerAuth()
+@ApiUnauthorizedResponse({ description: 'Token ausente o inválido' })
 @ApiForbiddenResponse({ description: 'Falta el permiso catalogue:manage' })
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @UseFilters(SuppliesDomainExceptionFilter)
@@ -90,6 +95,13 @@ export class SuppliesAdminController {
   @HttpCode(201)
   @ApiOperation({ summary: 'Crear un insumo (asigna código INS-NNNN)' })
   @ApiCreatedResponse({ type: CreateSupplyResponseDto })
+  @ApiBadRequestResponse({
+    description:
+      'Payload inválido (código de insumo, atributos sin casar el esquema efectivo de la categoría, etc.)',
+  })
+  @ApiNotFoundResponse({
+    description: 'categorySlug o variantOfId no existen',
+  })
   async create(@Body() dto: CreateSupplyDto): Promise<CreateSupplyResponseDto> {
     const result = await this.createSupply.execute({
       name: dto.name,
@@ -145,6 +157,7 @@ export class SuppliesAdminController {
   @Get(':id')
   @ApiOperation({ summary: 'Detalle de gestión de un insumo' })
   @ApiOkResponse({ type: AdminSupplyDto })
+  @ApiNotFoundResponse({ description: 'Insumo no encontrado' })
   async get(@Param('id', ParseUUIDPipe) id: string): Promise<AdminSupplyView> {
     return this.getSupplyAdmin.execute(id);
   }
@@ -153,6 +166,12 @@ export class SuppliesAdminController {
   @HttpCode(204)
   @ApiOperation({ summary: 'Editar un insumo (code no editable)' })
   @ApiNoContentResponse()
+  @ApiBadRequestResponse({
+    description: 'Payload inválido o atributos que no casan el esquema',
+  })
+  @ApiNotFoundResponse({
+    description: 'Insumo, categorySlug o variantOfId no encontrados',
+  })
   async edit(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: EditSupplyDto,
@@ -165,6 +184,7 @@ export class SuppliesAdminController {
   @HttpCode(204)
   @ApiOperation({ summary: 'Archivar un insumo' })
   @ApiNoContentResponse()
+  @ApiNotFoundResponse({ description: 'Insumo no encontrado' })
   async archive(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.archiveSupply.execute(id);
     this.cache.invalidate();
@@ -174,6 +194,7 @@ export class SuppliesAdminController {
   @HttpCode(204)
   @ApiOperation({ summary: 'Reactivar un insumo archivado' })
   @ApiNoContentResponse()
+  @ApiNotFoundResponse({ description: 'Insumo no encontrado' })
   async restore(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.restoreSupply.execute(id);
     this.cache.invalidate();
@@ -183,6 +204,10 @@ export class SuppliesAdminController {
   @HttpCode(204)
   @ApiOperation({ summary: 'Añadir un alias/sinónimo a un insumo' })
   @ApiNoContentResponse()
+  @ApiNotFoundResponse({ description: 'Insumo no encontrado' })
+  @ApiConflictResponse({
+    description: 'El alias ya apunta a otro insumo del mismo scope',
+  })
   async addAlias(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AddSupplyAliasDto,
@@ -207,6 +232,10 @@ export class SuppliesAdminController {
   @HttpCode(204)
   @ApiOperation({ summary: 'Fusionar un insumo duplicado en el canónico' })
   @ApiNoContentResponse()
+  @ApiBadRequestResponse({
+    description: 'sourceId y targetId son el mismo insumo',
+  })
+  @ApiNotFoundResponse({ description: 'sourceId o targetId no encontrados' })
   async merge(@Body() dto: MergeSuppliesDto): Promise<void> {
     await this.mergeSupplies.execute({
       sourceId: dto.sourceId,

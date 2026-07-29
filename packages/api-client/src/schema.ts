@@ -11820,6 +11820,13 @@ export interface operations {
                     "application/json": components["schemas"]["SupplyDto"];
                 };
             };
+            /** @description Supply not found (or archived) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     SuppliesAdminController_list: {
@@ -11844,6 +11851,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AdminSupplyDto"][];
                 };
+            };
+            /** @description Token ausente o inválido */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Falta el permiso catalogue:manage */
             403: {
@@ -11875,8 +11889,29 @@ export interface operations {
                     "application/json": components["schemas"]["CreateSupplyResponseDto"];
                 };
             };
+            /** @description Payload inválido (código de insumo, atributos sin casar el esquema efectivo de la categoría, etc.) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Token ausente o inválido */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Falta el permiso catalogue:manage */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description categorySlug o variantOfId no existen */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -11900,6 +11935,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["SupplyLinkReportDto"];
                 };
+            };
+            /** @description Token ausente o inválido */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Falta el permiso catalogue:manage */
             403: {
@@ -11926,6 +11968,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["SupplyLinkBackfillResultDto"];
                 };
+            };
+            /** @description Token ausente o inválido */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Falta el permiso catalogue:manage */
             403: {
@@ -11955,8 +12004,22 @@ export interface operations {
                     "application/json": components["schemas"]["AdminSupplyDto"];
                 };
             };
+            /** @description Token ausente o inválido */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Falta el permiso catalogue:manage */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insumo no encontrado */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -11985,8 +12048,29 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Payload inválido o atributos que no casan el esquema */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Token ausente o inválido */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Falta el permiso catalogue:manage */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insumo, categorySlug o variantOfId no encontrados */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12011,8 +12095,22 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Token ausente o inválido */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Falta el permiso catalogue:manage */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insumo no encontrado */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12037,8 +12135,22 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Token ausente o inválido */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Falta el permiso catalogue:manage */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insumo no encontrado */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12067,8 +12179,29 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Token ausente o inválido */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Falta el permiso catalogue:manage */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insumo no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description El alias ya apunta a otro insumo del mismo scope */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12089,6 +12222,13 @@ export interface operations {
         requestBody?: never;
         responses: {
             204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Token ausente o inválido */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12122,8 +12262,29 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description sourceId y targetId son el mismo insumo */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Token ausente o inválido */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Falta el permiso catalogue:manage */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description sourceId o targetId no encontrados */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
