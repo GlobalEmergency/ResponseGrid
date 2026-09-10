@@ -117,7 +117,8 @@ Flujo de trabajo:
 
 ## 🚀 Despliegue
 
-- [`docs/deploy/aws-free-tier.md`](docs/deploy/aws-free-tier.md) — guía paso a paso: **web en Vercel + API/Postgres/Redis en una EC2 + S3** (la guía usa t3.micro free-tier; producción corre en **t3.small** por el agente de observabilidad). Artefactos en [`deploy/`](deploy) (Dockerfile, `docker-compose.prod.yml`, migraciones, Caddy).
+- [`docs/deploy/srv07.md`](docs/deploy/srv07.md) — **despliegue actual de producción**: web en Vercel + API/Postgres/Redis en srv07 (Plesk + Docker), detrás de nginx. Artefactos en [`deploy/`](deploy) (`docker-compose.srv07.yml`, unit de systemd, migraciones).
+- [`docs/deploy/aws-free-tier.md`](docs/deploy/aws-free-tier.md) — alternativa en AWS, guía paso a paso: **web en Vercel + API/Postgres/Redis en una EC2 + S3** (la guía usa t3.micro free-tier; producción corre en **t3.small** por el agente de observabilidad). Artefactos en [`deploy/`](deploy) (Dockerfile, `docker-compose.prod.yml`, migraciones, Caddy).
 - [`deploy/datadog.md`](deploy/datadog.md) — observabilidad: agente **Datadog** (host, contenedores, Postgres+DBM, Redis, logs y **APM/trazas**), sitio EU.
 
 ## 📚 Documentación
