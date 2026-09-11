@@ -1,11 +1,15 @@
 # Producción actual: srv07 (Plesk + Docker)
 
-La API corre en **srv07** (`srv07.ingenierosweb.co`), no en AWS. La guía de
+La API se está migrando a **srv07** (`srv07.ingenierosweb.co`). **Hasta el corte
+de DNS, `api.responsegrid.app` y la web siguen usando la EC2**: no hagas cambios de
+datos contra srv07 esperando verlos en la web. La guía de
 [`aws-free-tier.md`](aws-free-tier.md) sigue siendo válida como alternativa
-autocontenida, pero no describe el despliegue vivo.
+autocontenida.
+
+Tras el corte:
 
 ```
-responsegrid.app (Vercel)  ──►  responsegrid-api.globalemergency.online
+responsegrid.app (Vercel)  ──►  api.responsegrid.app / responsegrid-api.globalemergency.online
                                         │  nginx de Plesk (TLS wildcard)
                                         ▼
                                 127.0.0.1:3100  →  contenedor api

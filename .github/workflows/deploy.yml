@@ -25,6 +25,9 @@ concurrency:
   group: deploy-api-srv07
   cancel-in-progress: false
 
+# El job solo usa secretos: sin permisos para GITHUB_TOKEN.
+permissions: {}
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
