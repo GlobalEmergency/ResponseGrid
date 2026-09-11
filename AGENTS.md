@@ -4,7 +4,7 @@ Canonical instructions for any AI agent or contributor working in this repo. Rea
 
 ## What ResponseGrid is
 
-Multi-emergency **material aid coordination + logistics** platform (org: **Global Emergency**). Live: web `https://responsegrid.app` (Vercel), API `https://api.responsegrid.app` (srv07, Plesk + Docker). Activated per emergency; data isolated by `emergency_id`/slug. Connects citizens, organizations and coordinators during a disaster.
+Multi-emergency **material aid coordination + logistics** platform (org: **Global Emergency**). Live: web `https://responsegrid.app` (Vercel), API on srv07 (Plesk + Docker) at `https://responsegrid-api.globalemergency.online` — `https://api.responsegrid.app` still points to the old EC2 until the DNS cutover. Activated per emergency; data isolated by `emergency_id`/slug. Connects citizens, organizations and coordinators during a disaster.
 
 **In scope:** collection/logistic points (puntos de acopio) **with declared material inventory per place**, validated needs (with 48h freshness), material offers + matching to needs, **a single shared catalogue of supplies + categories** (insumos), **transport capacity + shipments** (logistics), volunteers + tasks, field reports (incident/stock/status), real-time Leaflet map, **authorization** (roles/grants/groups/API keys), public read-only API + developer `/docs`.
 
