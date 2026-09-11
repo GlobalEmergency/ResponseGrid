@@ -1,15 +1,17 @@
 # Producción actual: srv07 (Plesk + Docker)
 
-La API se está migrando a **srv07** (`srv07.ingenierosweb.co`). **Hasta el corte
-de DNS, `api.responsegrid.app` y la web siguen usando la EC2**: no hagas cambios de
-datos contra srv07 esperando verlos en la web. La guía de
+La API corre en **srv07** (`srv07.ingenierosweb.co`), no en AWS. La guía de
 [`aws-free-tier.md`](aws-free-tier.md) sigue siendo válida como alternativa
-autocontenida.
+autocontenida, pero no describe el despliegue vivo.
 
-Tras el corte:
+La web (`API_URL` y `NEXT_PUBLIC_API_URL` en Vercel) apunta directamente al
+subsitio. El dominio antiguo `api.responsegrid.app` es solo una *Redirect Rule*
+308 de Cloudflare hacia él (conserva ruta y query), para consumidores externos y
+para el callback de Google OAuth (`OAUTH_CALLBACK_BASE`), que sigue registrado con
+ese dominio.
 
 ```
-responsegrid.app (Vercel)  ──►  api.responsegrid.app / responsegrid-api.globalemergency.online
+responsegrid.app (Vercel)  ──►  responsegrid-api.globalemergency.online
                                         │  nginx de Plesk (TLS wildcard)
                                         ▼
                                 127.0.0.1:3100  →  contenedor api
