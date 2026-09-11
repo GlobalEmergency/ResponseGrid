@@ -1,0 +1,98 @@
+# ResponseGrid — stack de producción para srv07 (Plesk + Docker compartido).
+#
+# Diferencias con docker-compose.prod.yml (EC2):
+#   - Sin Caddy: Plesk/nginx ya ocupa 80/443 y termina TLS para
+#     responsegrid-api.globalemergency.online, y hace proxy_pass a 127.0.0.1:3100.
+#   - La API publica un puerto SOLO en loopback (127.0.0.1:3100 -> 3000).
+#   - Sin agente Datadog propio: srv07 ya tiene uno. Las trazas APM se envían
+#     al agente del host por la gateway de la red bridge (DD_AGENT_HOST).
+#   - Sin rol de instancia IAM: las credenciales de S3 son de un usuario IAM
+#     dedicado y viven en deploy/.env.
+#
+# Uso (en srv07, como root):
+#   cd /opt/responsegrid
+#   docker compose -p responsegrid -f deploy/docker-compose.srv07.yml up -d --build
+
+name: responsegrid
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    env_file: .env
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - track_activity_query_size=4096
+      - -c
+      - pg_stat_statements.track=all
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # Autodiscovery del agente Datadog del host (lee las labels vía docker.sock).
+    labels:
+      com.datadoghq.ad.checks: |
+        {"postgres":{"init_config":{},"instances":[{"host":"%%host%%","port":5432,"username":"datadog","password":"%%env_DD_POSTGRES_PASSWORD%%","dbname":"%%env_POSTGRES_DB%%","dbm":true}]}}
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    command: ['redis-server', '--save', '60', '1']
+    volumes:
+      - redisdata:/data
+    labels:
+      com.datadoghq.ad.checks: |
+        {"redisdb":{"init_config":{},"instances":[{"host":"%%host%%","port":6379}]}}
+
+  migrate:
+    image: postgres:16
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ../apps/api/drizzle:/migrations:ro
+      - ./migrate.sh:/migrate.sh:ro
+    entrypoint: ['sh', '/migrate.sh']
+    restart: 'no'
+
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: true
+      - path: .env.version
+        required: false
+    environment:
+      - DD_TRACE_ENABLED=${DD_TRACE_ENABLED:-false}
+      # Agente Datadog del host. 172.17.0.1 es la gateway de la bridge por
+      # defecto; verificar con:  ip -4 addr show docker0
+      # El agente debe tener DD_APM_NON_LOCAL_TRAFFIC=true y escuchar en 0.0.0.0:8126.
+      - DD_AGENT_HOST=${DD_AGENT_HOST:-172.17.0.1}
+      - DD_TRACE_AGENT_PORT=8126
+      - DD_ENV=prod
+      - DD_SERVICE=responsegrid-api
+      - DD_LOGS_INJECTION=true
+      # El X-Forwarded-For lo pone nginx de Plesk.
+      - DD_TRACE_CLIENT_IP_ENABLED=true
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+    # SOLO loopback: nginx de Plesk es quien expone el servicio al exterior.
+    ports:
+      - '127.0.0.1:3100:3000'
+
+volumes:
+  pgdata:
+  redisdata:

@@ -4,7 +4,7 @@ Canonical instructions for any AI agent or contributor working in this repo. Rea
 
 ## What ResponseGrid is
 
-Multi-emergency **material aid coordination + logistics** platform (org: **Global Emergency**). Live: web `https://responsegrid.app` (Vercel), API `https://api.responsegrid.app` (EC2). Activated per emergency; data isolated by `emergency_id`/slug. Connects citizens, organizations and coordinators during a disaster.
+Multi-emergency **material aid coordination + logistics** platform (org: **Global Emergency**). Live: web `https://responsegrid.app` (Vercel), API `https://responsegrid-api.globalemergency.online` (srv07, Plesk + Docker; the legacy `https://api.responsegrid.app` is a Cloudflare 308 redirect to it). Activated per emergency; data isolated by `emergency_id`/slug. Connects citizens, organizations and coordinators during a disaster.
 
 **In scope:** collection/logistic points (puntos de acopio) **with declared material inventory per place**, validated needs (with 48h freshness), material offers + matching to needs, **a single shared catalogue of supplies + categories** (insumos), **transport capacity + shipments** (logistics), volunteers + tasks, field reports (incident/stock/status), real-time Leaflet map, **authorization** (roles/grants/groups/API keys), public read-only API + developer `/docs`.
 
@@ -92,7 +92,7 @@ Verify `dynamic(ssr:false)` components (the Leaflet map) only in a **production*
 
 ## Deploy
 
-A merged PR → push to `main` triggers: **GitHub Action** deploys the API to EC2 via SSM (builds the Docker image, applies migrations with `migrate.sh`) **and** Vercel auto-deploys the web. The CI gate having passed is what keeps prod healthy.
+A merged PR → push to `main` triggers: **GitHub Action** deploys the API to srv07 over SSH (builds the Docker image, applies migrations with `migrate.sh`; see `docs/deploy/srv07.md`) **and** Vercel auto-deploys the web. The CI gate having passed is what keeps prod healthy.
 
 ## Public emergency for testing
 
