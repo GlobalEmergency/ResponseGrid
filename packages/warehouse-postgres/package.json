@@ -39,16 +39,16 @@
     "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\""
   },
   "peerDependencies": {
-    "drizzle-orm": "^0.45.2"
+    "drizzle-orm": "^0.45.3"
   },
   "dependencies": {
     "@globalemergency/warehouse-core": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
-    "@types/pg": "^8.11.10",
-    "drizzle-orm": "^0.45.2",
-    "pg": "^8.13.1",
+    "@types/pg": "^8.23.1",
+    "drizzle-orm": "^0.45.3",
+    "pg": "^8.23.0",
     "typescript": "^5.7.3"
   }
 }
