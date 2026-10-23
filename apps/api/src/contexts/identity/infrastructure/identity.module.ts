@@ -31,11 +31,20 @@ import { ListUsersAdmin } from '../application/list-users-admin';
 import { GetUserAdminDetail } from '../application/get-user-admin-detail';
 import { EnsureDonorAccount } from '../application/ensure-donor-account';
 import { UpdateProfile } from '../application/update-profile';
+import { SetPassword } from '../application/set-password';
+import { RequestPasswordSetup } from '../application/request-password-setup';
 import {
   SET_PASSWORD_INVITER,
   SetPasswordInviter,
 } from '../domain/ports/set-password-inviter';
-import { NoopSetPasswordInviter } from './noop-set-password-inviter';
+import {
+  PASSWORD_SETUP_TOKEN_REPOSITORY,
+  PasswordSetupTokenRepository,
+} from '../domain/ports/password-setup-token.repository';
+import { EMAIL_SENDER, EmailSender } from '../domain/ports/email-sender';
+import { EmailSetPasswordInviter } from './email-set-password-inviter';
+import { LoggingEmailSender } from './logging-email-sender';
+import { DrizzlePasswordSetupTokenRepository } from './drizzle/drizzle-password-setup-token.repository';
 import {
   USER_REPOSITORY,
   UserRepository,
@@ -465,9 +474,53 @@ const authenticateWithProviderProvider = {
   ) => new AuthenticateWithProvider(userRepo, identityRepo, tokenService),
 };
 
+const passwordSetupTokenRepositoryProvider = {
+  provide: PASSWORD_SETUP_TOKEN_REPOSITORY,
+  inject: [DB],
+  useFactory: (db: Db): PasswordSetupTokenRepository =>
+    new DrizzlePasswordSetupTokenRepository(db),
+};
+
+const emailSenderProvider = {
+  provide: EMAIL_SENDER,
+  useClass: LoggingEmailSender,
+};
+
 const setPasswordInviterProvider = {
   provide: SET_PASSWORD_INVITER,
-  useClass: NoopSetPasswordInviter,
+  inject: [PASSWORD_SETUP_TOKEN_REPOSITORY, EMAIL_SENDER],
+  useFactory: (
+    tokens: PasswordSetupTokenRepository,
+    email: EmailSender,
+  ): SetPasswordInviter =>
+    new EmailSetPasswordInviter(tokens, email, {
+      ttlHours: Number(process.env.PASSWORD_SETUP_TTL_HOURS ?? '48'),
+      frontendUrl: process.env.FRONTEND_URL ?? 'http://localhost:3001',
+      setPasswordPath: '/crear-contrasena',
+    }),
+};
+
+const setPasswordProvider = {
+  provide: SetPassword,
+  inject: [
+    PASSWORD_SETUP_TOKEN_REPOSITORY,
+    USER_REPOSITORY,
+    PASSWORD_HASHER,
+    TOKEN_SERVICE,
+  ],
+  useFactory: (
+    tokens: PasswordSetupTokenRepository,
+    users: UserRepository,
+    hasher: BcryptPasswordHasher,
+    tokenService: JwtTokenService,
+  ) => new SetPassword(tokens, users, hasher, tokenService),
+};
+
+const requestPasswordSetupProvider = {
+  provide: RequestPasswordSetup,
+  inject: [USER_REPOSITORY, SET_PASSWORD_INVITER],
+  useFactory: (users: UserRepository, inviter: SetPasswordInviter) =>
+    new RequestPasswordSetup(users, inviter),
 };
 
 const ensureDonorAccountProvider = {
@@ -526,7 +579,11 @@ const updateProfileProvider = {
     registerByPhoneProvider,
     completeRegistrationProvider,
     authenticateWithProviderProvider,
+    passwordSetupTokenRepositoryProvider,
+    emailSenderProvider,
     setPasswordInviterProvider,
+    setPasswordProvider,
+    requestPasswordSetupProvider,
     ensureDonorAccountProvider,
     updateProfileProvider,
     grantRoleProvider,

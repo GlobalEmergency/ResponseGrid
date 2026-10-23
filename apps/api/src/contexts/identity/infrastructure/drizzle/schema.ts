@@ -59,6 +59,30 @@ export const userConsentsTable = pgTable(
   (t) => [index('user_consents_user_idx').on(t.userId)],
 );
 
+/**
+ * Single-use, expiring tokens that let a passwordless profile set its password
+ * (#204). Only the SHA-256 hash of the secret is stored — a DB read never yields
+ * a usable token. A token is spent by stamping `used_at`; validity is
+ * `used_at IS NULL AND expires_at > now()` (migration 0059).
+ */
+export const passwordSetupTokensTable = pgTable(
+  'password_setup_tokens',
+  {
+    id: uuid('id').primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => usersTable.id, { onDelete: 'cascade' }),
+    /** SHA-256 hex of the raw token; unique so a lookup is an indexed equality. */
+    tokenHash: text('token_hash').notNull().unique(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    usedAt: timestamp('used_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index('password_setup_tokens_user_idx').on(t.userId)],
+);
+
 export const membershipsTable = pgTable(
   'memberships',
   {
