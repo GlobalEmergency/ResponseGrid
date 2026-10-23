@@ -63,20 +63,34 @@ function normalizeDateOnly(value?: string | null): string | null {
   if (trimmed === '') return null;
   const errorMessage = 'SupplyLine expiresAt must be a valid YYYY-MM-DD date';
   if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
-    throw new SupplyLineValidationError(errorMessage);
+    throw new SupplyLineValidationError(errorMessage, 'supply_expiry_invalid');
   }
   const parsed = new Date(`${trimmed}T00:00:00.000Z`);
   if (
     Number.isNaN(parsed.getTime()) ||
     parsed.toISOString().slice(0, 10) !== trimmed
   ) {
-    throw new SupplyLineValidationError(errorMessage);
+    throw new SupplyLineValidationError(errorMessage, 'supply_expiry_invalid');
   }
   return trimmed;
 }
 
+/**
+ * Stable, machine-readable identifier for each SupplyLine validation failure
+ * (#348). Consumers (e.g. the web's `localizeBackendError`) should key
+ * localized copy off `code`, not off `.message` prose, so a wording change
+ * here can't silently degrade the client to a generic error.
+ */
+export type SupplyLineErrorCode =
+  | 'supply_name_required'
+  | 'supply_quantity_invalid'
+  | 'supply_expiry_invalid';
+
 export class SupplyLineValidationError extends Error {
-  constructor(msg: string) {
+  constructor(
+    msg: string,
+    public readonly code: SupplyLineErrorCode,
+  ) {
     super(msg);
     this.name = 'SupplyLineValidationError';
   }
@@ -103,11 +117,15 @@ export class SupplyLine {
 
   static create(props: SupplyLineProps): SupplyLine {
     if (!props.name || props.name.trim().length === 0) {
-      throw new SupplyLineValidationError('SupplyLine name must not be empty');
+      throw new SupplyLineValidationError(
+        'SupplyLine name must not be empty',
+        'supply_name_required',
+      );
     }
     if (!Number.isInteger(props.quantity) || props.quantity < 1) {
       throw new SupplyLineValidationError(
         'SupplyLine quantity must be a positive integer',
+        'supply_quantity_invalid',
       );
     }
     // Valida el *formato* del slug (trim + lowercase + snake_case) y lo

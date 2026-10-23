@@ -37,6 +37,7 @@ import {
   CategoryValidationError,
 } from '../../application/category-admin.errors';
 import { AttributeDefinitionNotFoundError } from '../../application/attribute-definition-admin.errors';
+import { domainErrorResponseBody } from '../../../../shared/http/domain-error-response';
 
 type DomainError =
   | ContainerNotFoundError
@@ -106,7 +107,7 @@ export class SuppliesDomainExceptionFilter implements ExceptionFilter {
     const statusCode = this.statusFor(exception);
     response
       .status(statusCode)
-      .json({ statusCode, message: exception.message });
+      .json(domainErrorResponseBody(statusCode, exception));
   }
 
   private statusFor(exception: DomainError): HttpStatus {

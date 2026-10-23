@@ -1,20 +1,25 @@
 import type { Messages } from '../i18n/messages/es.ts';
 
 type BackendErrorMessages = Messages['backendErrors'];
+type BackendErrorCode = Exclude<keyof BackendErrorMessages, 'generic'>;
 
 /**
- * Known backend domain-error messages (#296). The NestJS exception filters
- * (`apps/api/src/contexts/*\/infrastructure/http/*-exception.filter.ts`) return
- * `{ statusCode, message: exception.message }` with no stable error-code
- * field — just the `Error`'s English text, sometimes with an id interpolated
- * in the middle. So we match on a stable substring/prefix of each known
- * message rather than the id-bearing parts.
+ * Known backend domain-error messages (#296, hardened by #348). The NestJS
+ * exception filters (`apps/api/src/contexts/*\/infrastructure/http/*-exception.filter.ts`)
+ * return `{ statusCode, message, code? }`. `code` (added in #348) is a
+ * stable, machine-readable identifier set on the domain error classes
+ * themselves — prefer it. This regex table matching a substring/prefix of the
+ * English `.message` is now only a **fallback** for the deploy-lag window (web
+ * and API roll out separately) and for any error not yet migrated to expose a
+ * `code`; keeping it means an untyped, hand-maintained coupling to backend
+ * prose that can drift silently, so new backend errors should get a `code`
+ * instead of relying on this table.
  *
  * Order matters: the first matching pattern wins.
  */
 const KNOWN_BACKEND_ERRORS: readonly {
   pattern: RegExp;
-  key: keyof BackendErrorMessages;
+  key: BackendErrorCode;
 }[] = [
   // needs / resources / offers — SupplyLineValidationError
   { pattern: /^SupplyLine name must not be empty/, key: 'supply_name_required' },
@@ -50,19 +55,42 @@ const KNOWN_BACKEND_ERRORS: readonly {
   { pattern: /must not be after/, key: 'capacity_window_order_invalid' },
 ];
 
+const KNOWN_BACKEND_ERROR_CODES: ReadonlySet<string> = new Set(
+  KNOWN_BACKEND_ERRORS.map((entry) => entry.key),
+);
+
+function isKnownBackendErrorCode(code: string): code is BackendErrorCode {
+  return KNOWN_BACKEND_ERROR_CODES.has(code);
+}
+
+function readStringProp(value: unknown, key: string): string | undefined {
+  if (typeof value !== 'object' || value === null) return undefined;
+  const prop = (value as Record<string, unknown>)[key];
+  return typeof prop === 'string' ? prop : undefined;
+}
+
 /**
- * Map a raw backend error message to localized copy, so a form never shows
- * English text (and stray UUIDs) straight from the API (#296). Returns
- * `fallback` — the caller's existing generic "couldn't submit" message —
- * for anything unmapped (including a missing/non-string message), so this
- * is always safe to call with whatever `error.message` the typed client gives.
+ * Map a backend error to localized copy, so a form never shows English text
+ * (and stray UUIDs) straight from the API (#296). `error` is whatever the
+ * typed client gives back for a failed request — safe to call with an
+ * `unknown` value, a plain string (treated as the message), or `undefined`.
+ *
+ * Resolution order (#348): a recognized `.code` wins first (the stable
+ * contract); a message-prose match is the fallback. Returns `fallback` — the
+ * caller's existing generic "couldn't submit" message — when neither matches.
  */
 export function localizeBackendError(
   t: BackendErrorMessages,
-  message: unknown,
+  error: unknown,
   fallback: string,
 ): string {
-  if (typeof message !== 'string' || message.trim() === '') return fallback;
+  const code = readStringProp(error, 'code');
+  if (code !== undefined && isKnownBackendErrorCode(code)) {
+    return t[code];
+  }
+
+  const message = typeof error === 'string' ? error : readStringProp(error, 'message');
+  if (message === undefined || message.trim() === '') return fallback;
   const match = KNOWN_BACKEND_ERRORS.find((entry) => entry.pattern.test(message));
   return match ? t[match.key] : fallback;
 }

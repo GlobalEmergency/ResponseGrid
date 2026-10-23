@@ -131,12 +131,28 @@ describe('SubmitOffer', () => {
     ).rejects.toThrow(TargetNeedNotFoundError);
   });
 
+  it('exposes a stable code on TargetNeedNotFoundError for web localization (#348)', async () => {
+    const lookupNotFound = new FakeNeedLookup(null);
+    const uc = new SubmitOffer(repo, bus, activeReader, lookupNotFound);
+    await expect(
+      uc.execute(makeCmd({ targetNeedId: NEED_ID })),
+    ).rejects.toMatchObject({ code: 'target_need_not_found' });
+  });
+
   it('throws TargetNeedWrongEmergencyError when need belongs to different emergency', async () => {
     const lookupOtherEm = new FakeNeedLookup(OTHER_EM);
     const uc = new SubmitOffer(repo, bus, activeReader, lookupOtherEm);
     await expect(
       uc.execute(makeCmd({ targetNeedId: NEED_ID })),
     ).rejects.toThrow(TargetNeedWrongEmergencyError);
+  });
+
+  it('exposes a stable code on TargetNeedWrongEmergencyError for web localization (#348)', async () => {
+    const lookupOtherEm = new FakeNeedLookup(OTHER_EM);
+    const uc = new SubmitOffer(repo, bus, activeReader, lookupOtherEm);
+    await expect(
+      uc.execute(makeCmd({ targetNeedId: NEED_ID })),
+    ).rejects.toMatchObject({ code: 'target_need_wrong_emergency' });
   });
 
   describe('kill-switch', () => {

@@ -122,15 +122,11 @@ export async function registerVolunteer(
   }
 
   if (error !== undefined || data === undefined) {
-    const rawMessage =
-      typeof error === 'object' && error !== null && 'message' in error
-        ? (error as { message: unknown }).message
-        : undefined;
     return {
       status: 'error',
       message: localizeBackendError(
         t.backendErrors,
-        rawMessage,
+        error,
         t.voluntario.err_register_failed,
       ),
     };

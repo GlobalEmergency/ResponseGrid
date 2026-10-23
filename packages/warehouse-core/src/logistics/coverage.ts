@@ -99,7 +99,10 @@ export class Coverage {
 
   static area(area: string): Coverage {
     if (!area || area.trim().length === 0) {
-      throw new InvalidCoverageError('Area coverage must not be empty');
+      throw new InvalidCoverageError(
+        'Area coverage must not be empty',
+        'coverage_area_required',
+      );
     }
     return new Coverage({ kind: 'area', area: area.trim() });
   }

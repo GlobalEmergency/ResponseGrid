@@ -12,6 +12,7 @@ function parseIso(value: string, field: string): Date {
   if (Number.isNaN(date.getTime())) {
     throw new InvalidCapacityWindowError(
       `Capacity window ${field} must be a valid ISO date, got '${value}'`,
+      'capacity_window_invalid_date',
     );
   }
   return date;
@@ -41,6 +42,7 @@ export class CapacityWindow {
     if (fromDate !== null && toDate !== null && fromDate > toDate) {
       throw new InvalidCapacityWindowError(
         `Capacity window 'from' (${from}) must not be after 'to' (${to})`,
+        'capacity_window_order_invalid',
       );
     }
 

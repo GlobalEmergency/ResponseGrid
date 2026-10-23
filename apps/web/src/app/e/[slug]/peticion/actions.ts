@@ -136,13 +136,9 @@ export async function submitPeticion(
   }
 
   if (error !== undefined || data === undefined) {
-    const rawMessage =
-      typeof error === 'object' && error !== null && 'message' in error
-        ? (error as { message: unknown }).message
-        : undefined;
     return {
       status: 'error',
-      message: localizeBackendError(t.backendErrors, rawMessage, t.peticion.err_submit_failed),
+      message: localizeBackendError(t.backendErrors, error, t.peticion.err_submit_failed),
     };
   }
 

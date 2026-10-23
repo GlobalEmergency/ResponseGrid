@@ -36,6 +36,13 @@ test('maps known SupplyLine validation messages', () => {
   );
 });
 
+test('maps the "offer must have at least one supply line" domain error (#348)', () => {
+  assert.equal(
+    localizeBackendError(t, 'An offer must have at least one supply line', FALLBACK),
+    t.offer_items_required,
+  );
+});
+
 test('maps offer target-need domain errors', () => {
   assert.equal(
     localizeBackendError(
@@ -87,6 +94,52 @@ test('maps logistics capacity domain errors', () => {
       FALLBACK,
     ),
     t.capacity_window_order_invalid,
+  );
+});
+
+test('maps by stable `code` first, ignoring stale message prose (#348)', () => {
+  assert.equal(
+    localizeBackendError(
+      t,
+      { code: 'resource_not_in_emergency', message: 'some divergent English text' },
+      FALLBACK,
+    ),
+    t.resource_not_in_emergency,
+  );
+});
+
+test('maps every known code directly, one per KNOWN_BACKEND_ERRORS entry (#348)', () => {
+  const knownCodes: (keyof typeof t)[] = [
+    'supply_name_required',
+    'supply_quantity_invalid',
+    'supply_expiry_invalid',
+    'resource_not_in_emergency',
+    'target_need_not_found',
+    'target_need_wrong_emergency',
+    'offer_items_required',
+    'capacity_weight_or_volume_required',
+    'capacity_amount_invalid',
+    'coverage_area_required',
+    'capacity_window_invalid_date',
+    'capacity_window_order_invalid',
+  ];
+  for (const code of knownCodes) {
+    assert.equal(localizeBackendError(t, { code }, FALLBACK), t[code]);
+  }
+});
+
+test('falls back to message-prose matching when `code` is missing or unrecognized', () => {
+  assert.equal(
+    localizeBackendError(
+      t,
+      { code: 'some_future_code_not_localized_yet', message: 'Target need not found: x' },
+      FALLBACK,
+    ),
+    t.target_need_not_found,
+  );
+  assert.equal(
+    localizeBackendError(t, { message: 'Area coverage must not be empty' }, FALLBACK),
+    t.coverage_area_required,
   );
 });
 
