@@ -48,6 +48,7 @@ export default async function ManageOverviewPage({ params }: Props) {
     offersPending,
     shipmentsActive,
     disputesPending,
+    autoHideOnDispute,
   ] = await Promise.all([
     access.canVerifyResources
       ? api
@@ -104,6 +105,20 @@ export default async function ManageOverviewPage({ params }: Props) {
           .then(async (r) => {
             await onUnauthorized(r.response.status);
             return r.data?.length ?? 0;
+          })
+      : Promise.resolve(null),
+    // #171: the auto-hide-on-dispute policy is only exposed on the
+    // authenticated "mine" view — find this emergency's entry there so the
+    // coordinator panel can show/save its current value.
+    access.canCoordinate
+      ? api
+          .GET('/emergencies/mine', { headers })
+          .then(async (r) => {
+            await onUnauthorized(r.response.status);
+            return (
+              r.data?.find((e) => e.id === emergencyId)?.autoHideOnDispute ??
+              null
+            );
           })
       : Promise.resolve(null),
   ]);
@@ -206,6 +221,7 @@ export default async function ManageOverviewPage({ params }: Props) {
                 ? emergency.announcement
                 : null
             }
+            autoHideOnDispute={autoHideOnDispute ?? undefined}
           />
         </>
       )}

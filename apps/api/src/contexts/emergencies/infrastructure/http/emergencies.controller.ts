@@ -36,6 +36,7 @@ import { ResumeEmergency } from '../../application/resume-emergency';
 import { PublishAnnouncement } from '../../application/publish-announcement';
 import { CreateEmergencyFromTemplate } from '../../application/create-emergency-from-template';
 import { SetEmergencyDisputeThreshold } from '../../application/set-emergency-dispute-threshold';
+import { SetEmergencyAutoHideOnDispute } from '../../application/set-emergency-auto-hide-on-dispute';
 import {
   CreateEmergencyDto,
   CreateEmergencyFromTemplateDto,
@@ -44,6 +45,7 @@ import {
   MyEmergencyViewDto,
   PublishAnnouncementDto,
   SetDisputeThresholdDto,
+  SetAutoHideOnDisputeDto,
 } from './dto';
 import { EmergencyExceptionFilter } from './emergency-exception.filter';
 import {
@@ -67,6 +69,7 @@ export class EmergenciesController {
     private readonly publishAnnouncement: PublishAnnouncement,
     private readonly createFromTemplate: CreateEmergencyFromTemplate,
     private readonly setDisputeThreshold: SetEmergencyDisputeThreshold,
+    private readonly setAutoHideOnDispute: SetEmergencyAutoHideOnDispute,
   ) {}
 
   @Post()
@@ -272,6 +275,37 @@ export class EmergenciesController {
     await this.setDisputeThreshold.execute({
       emergencyId,
       threshold: dto.threshold,
+    });
+  }
+
+  @Put(':emergencyId/auto-hide-on-dispute')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('emergency:configure')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Activar o desactivar la política de auto-ocultado por disputa (#171)',
+  })
+  @ApiParam({
+    name: 'emergencyId',
+    description: 'Emergency UUID',
+    format: 'uuid',
+  })
+  @ApiNoContentResponse({ description: 'Política actualizada' })
+  @ApiNotFoundResponse({ description: 'Emergency not found' })
+  @ApiBadRequestResponse({ description: 'Invalid body' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
+  @ApiForbiddenResponse({
+    description: 'emergency:configure permission required',
+  })
+  async setEmergencyAutoHideOnDispute(
+    @Param('emergencyId', ParseUUIDPipe) emergencyId: string,
+    @Body() dto: SetAutoHideOnDisputeDto,
+  ): Promise<void> {
+    await this.setAutoHideOnDispute.execute({
+      emergencyId,
+      enabled: dto.enabled,
     });
   }
 }

@@ -5,6 +5,7 @@ import {
   pauseEmergency,
   resumeEmergency,
   publishAnnouncement,
+  setAutoHideOnDispute,
 } from '@/app/emergencies/[slug]/manage/actions';
 import type { ActionResult } from '@/app/emergencies/[slug]/manage/actions';
 import { Button } from '@/components/atoms/button';
@@ -18,6 +19,8 @@ interface EmergencyControlsProps {
   slug: string;
   status: 'active' | 'paused' | 'closed';
   currentAnnouncement: string | null;
+  /** Opt-in auto-hide-on-dispute policy (#171); undefined when unknown to the caller. */
+  autoHideOnDispute?: boolean;
 }
 
 const IDLE: ActionResult = { status: 'idle' };
@@ -27,6 +30,7 @@ export function EmergencyControls({
   slug,
   status,
   currentAnnouncement,
+  autoHideOnDispute,
 }: EmergencyControlsProps) {
   const tc = getMessages(useLocale()).coord;
 
@@ -60,6 +64,18 @@ export function EmergencyControls({
       },
       IDLE,
     );
+
+  // --- Auto-hide-on-dispute policy state (#171) -----------------------------
+  const [autoHideState, autoHideAction, autoHidePending] = useActionState<
+    ActionResult,
+    FormData
+  >(
+    async (_prev, formData) => {
+      const enabled = formData.get('enabled') === 'true';
+      return setAutoHideOnDispute(emergencyId, slug, enabled);
+    },
+    IDLE,
+  );
 
   const isClosed = status === 'closed';
 
@@ -160,6 +176,62 @@ export function EmergencyControls({
           </Button>
         </form>
       </div>
+
+      {/* ── Auto-hide-on-dispute policy (#171) ──────────────────────────── */}
+      {autoHideOnDispute !== undefined && (
+        <div className="flex flex-col gap-3">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-muted">
+            {tc.controls_auto_hide_heading}
+          </h3>
+
+          {autoHideState.status === 'error' && (
+            <ErrorMessage message={autoHideState.message} />
+          )}
+          {autoHideState.status === 'success' && (
+            <p
+              role="status"
+              className="rounded-md border border-success bg-success-soft px-4 py-3 text-sm font-medium text-success"
+            >
+              {tc.controls_auto_hide_saved}
+            </p>
+          )}
+
+          <form
+            action={autoHideAction}
+            className="flex flex-col gap-3"
+          >
+            <div className="flex items-start gap-3">
+              <input
+                id="auto-hide-on-dispute"
+                name="enabled"
+                type="checkbox"
+                value="true"
+                defaultChecked={autoHideOnDispute}
+                className="mt-1 h-4 w-4 flex-shrink-0 cursor-pointer rounded border-2 border-navy accent-navy"
+              />
+              <label
+                htmlFor="auto-hide-on-dispute"
+                className="flex flex-col gap-1 text-sm text-ink-soft leading-snug cursor-pointer"
+              >
+                <span className="font-medium text-ink">
+                  {tc.controls_auto_hide_label}
+                </span>
+                <span>{tc.controls_auto_hide_description}</span>
+              </label>
+            </div>
+            <Button
+              type="submit"
+              variant="secondary"
+              disabled={autoHidePending}
+              fullWidth
+            >
+              {autoHidePending
+                ? tc.controls_auto_hide_saving
+                : tc.controls_auto_hide_save}
+            </Button>
+          </form>
+        </div>
+      )}
     </section>
   );
 }

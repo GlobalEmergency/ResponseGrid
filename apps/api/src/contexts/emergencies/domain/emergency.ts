@@ -25,6 +25,8 @@ export interface EmergencySnapshot {
   announcement: string | null;
   dontBringList: string[];
   resourceDisputeThreshold: number | null;
+  /** Opt-in policy (#171): auto-resolve a disputed resource on threshold, default off. */
+  autoHideOnDispute: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -39,6 +41,7 @@ export class Emergency {
     private _announcement: string | null,
     private _dontBringList: string[],
     private _resourceDisputeThreshold: number | null,
+    private _autoHideOnDispute: boolean,
     public readonly createdAt: Date,
     private _updatedAt: Date,
   ) {}
@@ -54,6 +57,7 @@ export class Emergency {
       props.announcement ?? null,
       props.dontBringList ?? [],
       null,
+      false,
       now,
       now,
     );
@@ -69,6 +73,7 @@ export class Emergency {
       snap.announcement,
       snap.dontBringList,
       snap.resourceDisputeThreshold,
+      snap.autoHideOnDispute,
       snap.createdAt,
       snap.updatedAt,
     );
@@ -88,6 +93,10 @@ export class Emergency {
 
   get resourceDisputeThreshold(): number | null {
     return this._resourceDisputeThreshold;
+  }
+
+  get autoHideOnDispute(): boolean {
+    return this._autoHideOnDispute;
   }
 
   get updatedAt(): Date {
@@ -133,6 +142,18 @@ export class Emergency {
     this._updatedAt = new Date();
   }
 
+  /**
+   * Opt-in per-emergency policy (#171): when enabled, a disputed resource that
+   * reaches the dispute threshold is closed automatically (same transition a
+   * coordinator's "confirm cierre" performs) instead of just staying visible
+   * with a badge. Off by default — must not change behavior for any emergency
+   * unless a coordinator explicitly turns it on.
+   */
+  setAutoHideOnDispute(enabled: boolean): void {
+    this._autoHideOnDispute = enabled;
+    this._updatedAt = new Date();
+  }
+
   toSnapshot(): EmergencySnapshot {
     return {
       id: this.id.value,
@@ -143,6 +164,7 @@ export class Emergency {
       announcement: this._announcement,
       dontBringList: this._dontBringList,
       resourceDisputeThreshold: this._resourceDisputeThreshold,
+      autoHideOnDispute: this._autoHideOnDispute,
       createdAt: this.createdAt,
       updatedAt: this._updatedAt,
     };
