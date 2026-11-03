@@ -92,7 +92,7 @@ Verify `dynamic(ssr:false)` components (the Leaflet map) only in a **production*
 
 ## Deploy
 
-A merged PR → push to `main` triggers: **GitHub Action** deploys the API to srv07 over SSH (builds the Docker image, applies migrations with `migrate.sh`; see `docs/deploy/srv07.md`) **and** Vercel auto-deploys the web. The CI gate having passed is what keeps prod healthy.
+A merged PR → push to `main` → **CI**. Only when the whole `CI` workflow finishes **green** — every job, not just the 4 required checks (so a red `Security` audit or `Semgrep` also holds the deploy) — does `deploy.yml` run (`workflow_run`) and deploy the API to srv07 over SSH (builds the Docker image, applies migrations with `migrate.sh`; see `docs/deploy/srv07.md`), provided the tested sha is still the tip of `main` (otherwise the newer commit's CI deploys). Manual escape hatch: run `Deploy API (srv07)` via `workflow_dispatch` on `main` (deploys the tip without looking at CI). The web is deployed by **Vercel's own Git integration** (project `response-grid`, production branch `main`).
 
 ## Public emergency for testing
 

@@ -1,6 +1,9 @@
 name: Deploy API (srv07)
 
-# Autodeploy de la API en srv07 al hacer push a main.
+# Autodeploy de la API en srv07 encadenado a la CI: solo arranca cuando el
+# workflow `CI` termina en verde (todos sus jobs, no solo los requeridos) para un
+# push a main. Nada se publica sin pasar el gate. (La web la despliega la
+# integración Git de Vercel, aparte.)
 #
 # La clave `SRV07_DEPLOY_KEY` entra como root pero está atada a un *forced
 # command* en /root/.ssh/authorized_keys: sshd ejecuta siempre
@@ -8,31 +11,61 @@ name: Deploy API (srv07)
 # esta clave no puede hacer nada más que desplegar, y el script de deploy vive en
 # el servidor (con git reset --hard, build, migraciones y health check).
 # El `script:` de abajo existe solo porque la action lo exige.
+#
+# Como el servidor despliega la punta de main y no un sha concreto, solo se
+# despliega si el sha que pasó la CI sigue siendo la punta de main. Si main ya
+# avanzó, esta ejecución se salta y despliega la CI del commit más reciente, que
+# incluye este. Por eso no se filtra por rutas: cada CI verde de la punta
+# despliega, y ningún cambio de la API queda atrás por un commit posterior que
+# no la toque.
+#
+# `workflow_dispatch` es la válvula manual (p. ej. si Security se pone rojo por un
+# advisory ajeno al cambio): despliega la punta de main sin mirar la CI.
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
-    paths:
-      - 'apps/api/**'
-      - 'packages/**'
-      - 'deploy/**'
-      - 'package.json'
-      - 'pnpm-workspace.yaml'
-      - 'pnpm-lock.yaml'
-      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
-concurrency:
-  group: deploy-api-srv07
-  cancel-in-progress: false
-
-# El job solo usa secretos: sin permisos para GITHUB_TOKEN.
-permissions: {}
+# Solo lee el repo (gh api); el deploy solo usa secretos.
+permissions:
+  contents: read
 
 jobs:
   deploy:
+    name: Deploy
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Solo pushes a main de este mismo repo con la CI en verde: una PR desde un
+    # fork con una rama llamada «main» también dispara workflow_run.
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    # Dentro del grupo, la comprobación de abajo corre justo antes del SSH: un
+    # deploy que esperó en cola a otro vuelve a mirar la punta de main.
+    concurrency:
+      group: deploy-api-srv07
+      cancel-in-progress: false
     steps:
+      - name: Comprobar que la CI probó la punta de main
+        id: tip
+        if: github.event_name == 'workflow_run'
+        env:
+          TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tip=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)
+          if [ "$tip" = "$TESTED_SHA" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::main ya está en ${tip:0:8} (la CI probó ${TESTED_SHA:0:8}); despliega la CI del commit más reciente."
+          fi
+
       - name: SSH deploy to srv07
+        if: github.event_name == 'workflow_dispatch' || steps.tip.outputs.current == 'true'
         uses: appleboy/ssh-action@7eaf76671a0d7eec5d98ee897acda4f968735a17 # v1.2.0
         with:
           host: ${{ secrets.SRV07_HOST }}

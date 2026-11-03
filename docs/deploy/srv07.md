@@ -32,8 +32,14 @@ colisionar con los demás stacks del servidor.
 
 ## Despliegue
 
-Push a `main` → [`deploy.yml`](../../.github/workflows/deploy.yml) entra por SSH
-a srv07. La clave `SRV07_DEPLOY_KEY` está atada a un *forced command* en
+Push a `main` → CI → **solo si el workflow `CI` termina en verde** (todos sus
+jobs, no solo los requeridos), [`deploy.yml`](../../.github/workflows/deploy.yml)
+(disparado por `workflow_run`) entra por SSH a srv07, siempre que el sha probado
+siga siendo la punta de `main`; si no, despliega la CI del commit más reciente.
+Para redesplegar a mano (p. ej. con Security en rojo por un advisory ajeno):
+`workflow_dispatch` sobre `main`, que despliega la punta sin mirar la CI.
+
+La clave `SRV07_DEPLOY_KEY` está atada a un *forced command* en
 `/root/.ssh/authorized_keys`, así que solo puede ejecutar
 `/usr/local/sbin/responsegrid-deploy`, que hace:
 
