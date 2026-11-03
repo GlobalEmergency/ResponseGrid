@@ -64,7 +64,7 @@ jobs:
             echo "::notice::main ya está en ${tip:0:8} (la CI probó ${TESTED_SHA:0:8}); despliega la CI del commit más reciente."
           fi
 
-      - name: SSH deploy to srv07
+      - name: Desplegar en srv07 por SSH
         if: github.event_name == 'workflow_dispatch' || steps.tip.outputs.current == 'true'
         uses: appleboy/ssh-action@7eaf76671a0d7eec5d98ee897acda4f968735a17 # v1.2.0
         with:
