@@ -32,11 +32,12 @@ colisionar con los demás stacks del servidor.
 
 ## Despliegue
 
-Push a `main` → CI → **solo si el workflow `CI` termina en verde**,
-[`deploy.yml`](../../.github/workflows/deploy.yml) (disparado por `workflow_run`)
-entra por SSH a srv07, siempre que el commit toque `apps/api/`, `packages/`,
-`deploy/` o la raíz del workspace y que el sha probado siga siendo la punta de
-`main`. Para redesplegar a mano: `workflow_dispatch`.
+Push a `main` → CI → **solo si el workflow `CI` termina en verde** (todos sus
+jobs, no solo los requeridos), [`deploy.yml`](../../.github/workflows/deploy.yml)
+(disparado por `workflow_run`) entra por SSH a srv07, siempre que el sha probado
+siga siendo la punta de `main`; si no, despliega la CI del commit más reciente.
+Para redesplegar a mano (p. ej. con Security en rojo por un advisory ajeno):
+`workflow_dispatch` sobre `main`, que despliega la punta sin mirar la CI.
 
 La clave `SRV07_DEPLOY_KEY` está atada a un *forced command* en
 `/root/.ssh/authorized_keys`, así que solo puede ejecutar
