@@ -36,7 +36,7 @@ Push a `main` → CI → **solo si el workflow `CI` termina en verde**,
 [`deploy.yml`](../../.github/workflows/deploy.yml) (disparado por `workflow_run`)
 entra por SSH a srv07, siempre que el commit toque `apps/api/`, `packages/`,
 `deploy/` o la raíz del workspace y que el sha probado siga siendo la punta de
-`main`. Para redesplegar a mano: `workflow_dispatch` con `target: api`.
+`main`. Para redesplegar a mano: `workflow_dispatch`.
 
 La clave `SRV07_DEPLOY_KEY` está atada a un *forced command* en
 `/root/.ssh/authorized_keys`, así que solo puede ejecutar
@@ -50,10 +50,7 @@ La clave `SRV07_DEPLOY_KEY` está atada a un *forced command* en
 5. health check contra `http://127.0.0.1:3100/emergencies`; si no responde 200
    en 2 minutos, falla el deploy y vuelca los logs de la API
 
-Secretos del repo: `SRV07_HOST`, `SRV07_USER`, `SRV07_DEPLOY_KEY` (API) y
-`VERCEL_DEPLOY_HOOK_WEB` (web: Deploy Hook de la rama `main` del proyecto Vercel
-`response-grid`, cuyo auto-deploy de Git para `main` está apagado en
-`apps/web/vercel.json`).
+Secretos del repo: `SRV07_HOST`, `SRV07_USER`, `SRV07_DEPLOY_KEY`.
 
 ## Operación manual
 

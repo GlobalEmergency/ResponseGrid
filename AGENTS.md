@@ -92,7 +92,7 @@ Verify `dynamic(ssr:false)` components (the Leaflet map) only in a **production*
 
 ## Deploy
 
-A merged PR → push to `main` → **CI**. Only when the whole `CI` workflow finishes **green** does `deploy.yml` run (`workflow_run`): it deploys the API to srv07 over SSH (builds the Docker image, applies migrations with `migrate.sh`; see `docs/deploy/srv07.md`) and the web to Vercel through a Deploy Hook (secret `VERCEL_DEPLOY_HOOK_WEB`). Vercel's Git auto-deploy of `main` is **off** (`apps/web/vercel.json`), so a red CI — including the `Security` audit — never reaches prod; PR previews still build. Each target only deploys if its paths changed, and only if the tested sha is still the tip of `main`. Manual redeploy: run `Deploy` with `workflow_dispatch` (`all`/`api`/`web`).
+A merged PR → push to `main` → **CI**. Only when the whole `CI` workflow finishes **green** does `deploy.yml` run (`workflow_run`) and deploy the API to srv07 over SSH (builds the Docker image, applies migrations with `migrate.sh`; see `docs/deploy/srv07.md`) — and only if the commit touches the API's paths and the tested sha is still the tip of `main`. Manual redeploy: run `Deploy API (srv07)` via `workflow_dispatch`. The web is deployed by **Vercel's own Git integration** (project `response-grid`, production branch `main`).
 
 ## Public emergency for testing
 

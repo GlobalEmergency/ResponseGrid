@@ -1,34 +1,27 @@
-name: Deploy
+name: Deploy API (srv07)
 
-# Despliegue a producción encadenado a la CI: solo arranca cuando el workflow
-# `CI` termina en verde para un push a main. Nada se publica sin pasar el gate.
+# Autodeploy de la API en srv07 encadenado a la CI: solo arranca cuando el
+# workflow `CI` termina en verde para un push a main. Nada se publica sin pasar
+# el gate. (La web la despliega la integración Git de Vercel, aparte.)
 #
-# - API → srv07 por SSH. La clave `SRV07_DEPLOY_KEY` entra como root pero está
-#   atada a un *forced command* en /root/.ssh/authorized_keys: sshd ejecuta
-#   siempre /usr/local/sbin/responsegrid-deploy e ignora lo que mande el cliente
-#   (el `script:` de abajo existe solo porque la action lo exige). El script vive
-#   en el servidor: git reset --hard origin/main, build, migraciones y health check.
-# - Web → Vercel por Deploy Hook (`VERCEL_DEPLOY_HOOK_WEB`, rama main). El
-#   auto-deploy de Git para main está apagado en apps/web/vercel.json, así que
-#   este hook es la única vía a producción; las previews de las PR siguen igual.
+# La clave `SRV07_DEPLOY_KEY` entra como root pero está atada a un *forced
+# command* en /root/.ssh/authorized_keys: sshd ejecuta siempre
+# /usr/local/sbin/responsegrid-deploy e ignora lo que mande el cliente. Es decir,
+# esta clave no puede hacer nada más que desplegar, y el script de deploy vive en
+# el servidor (con git reset --hard, build, migraciones y health check).
+# El `script:` de abajo existe solo porque la action lo exige.
 #
-# Ambos destinos despliegan la punta de main, no un sha concreto. Por eso el job
-# `gate` exige que el sha que pasó la CI siga siendo la punta de main: si main ya
-# avanzó, se salta y despliega la ejecución de la CI del commit más reciente.
+# Como el servidor despliega la punta de main y no un sha concreto, el job `gate`
+# exige que el sha que pasó la CI siga siendo la punta de main: si main ya avanzó,
+# se salta y despliega la ejecución de la CI del commit más reciente.
 on:
   workflow_run:
     workflows: [CI]
     types: [completed]
     branches: [main]
   workflow_dispatch:
-    inputs:
-      target:
-        description: Qué desplegar
-        type: choice
-        options: [all, api, web]
-        default: all
 
-# Los jobs solo usan secretos y git sobre el repo público: sin escritura.
+# El gate solo lee el repo; el deploy solo usa secretos.
 permissions:
   contents: read
 
@@ -44,8 +37,7 @@ jobs:
        github.event.workflow_run.event == 'push' &&
        github.event.workflow_run.head_repository.full_name == github.repository)
     outputs:
-      api: ${{ steps.scope.outputs.api }}
-      web: ${{ steps.scope.outputs.web }}
+      deploy: ${{ steps.scope.outputs.deploy }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -53,20 +45,15 @@ jobs:
           fetch-depth: 2
           persist-credentials: false
 
-      - name: Decidir qué se despliega
+      - name: Decidir si se despliega
         id: scope
         env:
           EVENT: ${{ github.event_name }}
-          TARGET: ${{ inputs.target }}
           TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
           GH_TOKEN: ${{ github.token }}
         run: |
           if [ "$EVENT" = "workflow_dispatch" ]; then
-            case "$TARGET" in
-              all) printf 'api=true\nweb=true\n' >> "$GITHUB_OUTPUT" ;;
-              api) echo "api=true" >> "$GITHUB_OUTPUT" ;;
-              web) echo "web=true" >> "$GITHUB_OUTPUT" ;;
-            esac
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -79,18 +66,16 @@ jobs:
           # main es squash-only y sin push directo: cada push es un único commit.
           changed=$(git diff --name-only HEAD^ HEAD)
           echo "$changed"
-          shared='^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|\.github/workflows/deploy\.yml)$'
-          if echo "$changed" | grep -qE "^(apps/api/|packages/|deploy/)|$shared"; then
-            echo "api=true" >> "$GITHUB_OUTPUT"
-          fi
-          if echo "$changed" | grep -qE "^(apps/web/|packages/api-client/)|$shared"; then
-            echo "web=true" >> "$GITHUB_OUTPUT"
+          if echo "$changed" | grep -qE '^(apps/api/|packages/|deploy/|package\.json$|pnpm-workspace\.yaml$|pnpm-lock\.yaml$|\.github/workflows/deploy\.yml$)'; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::El commit no toca la API: no hay nada que desplegar."
           fi
 
-  api:
-    name: API (srv07)
+  deploy:
+    name: Deploy
     needs: gate
-    if: needs.gate.outputs.api == 'true'
+    if: needs.gate.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     concurrency:
       group: deploy-api-srv07
@@ -105,22 +90,3 @@ jobs:
           command_timeout: 20m
           script: |
             true
-
-  web:
-    name: Web (Vercel)
-    needs: gate
-    if: needs.gate.outputs.web == 'true'
-    runs-on: ubuntu-latest
-    concurrency:
-      group: deploy-web-vercel
-      cancel-in-progress: false
-    steps:
-      - name: Disparar el Deploy Hook de producción
-        env:
-          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK_WEB }}
-        run: |
-          if [ -z "$HOOK" ]; then
-            echo "::error::Falta el secreto VERCEL_DEPLOY_HOOK_WEB"
-            exit 1
-          fi
-          curl -fsS --retry 3 -X POST "$HOOK"
