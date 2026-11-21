@@ -103,12 +103,14 @@ www.{$SITE_DOMAIN} {
 
 	# Mapa de riesgos: reportes ciudadanos con vencimiento (repo mayait/sosgalapagos-plataforma).
 	# Corre en un Compose aparte («sosgalapagos-plataforma»), unido a esta red. Todo lo suyo
-	# vive bajo /mapa/ (páginas, API, administración, estáticos y fotos). Ojo: /mapa/ no es
-	# /mapas/, que sigue siendo el visor de capas de arriba.
-	redir /mapa /mapa/ permanent
-	handle /mapa/* {
+	# vive bajo /riesgos/ (páginas, API, administración, estáticos y fotos).
+	redir /riesgos /riesgos/ permanent
+	handle /riesgos/* {
 		reverse_proxy plataforma:8000
 	}
+	# La dirección anterior, /mapa/, estuvo activa unas horas el 21-nov: lleva a la nueva.
+	redir /mapa /riesgos/ permanent
+	redir /mapa/* /riesgos/ permanent
 
 	# Informes y mapas descargables de la portada: PDF y sus miniaturas, fuera del
 	# repo, en /srv/sosgalapagos-descargas (los publica sosgalapagos-datos:
