@@ -17,9 +17,9 @@ export const PORTADA = {
    * emergencia. Para quitarlo, poner `aviso: null`.
    */
   aviso: {
-    titulo: 'Único refugio autorizado: Colegio Miguel Ángel Cazares',
+    titulo: 'Hoy, sábado 21 de noviembre: se reportan inundaciones en Puerto Ayora y la parte alta',
     texto:
-      'Si necesitas refugio, acude al Colegio Miguel Ángel Cazares, en Puerto Ayora. Los otros sitios de la lista del 31 de octubre ya no son refugios autorizados. No lleves ropa usada: hoy hace falta repelente, agua, artículos de higiene y pañales.',
+      'Desde las 05:00 hay reportes de vecinos de inundación en La Cascada (pasajes 4 y 5 y viviendas junto al cauce), la calle 8, Divino Niño, Curva Brava y el Parque El Bosque, y de vías colapsadas en la toma de agua y en la salida a Miramar. Llovió fuerte toda la noche en Bellavista, Cascajo y Santa Rosa. Si vives junto a un cauce o una encañada, sal ya hacia un lugar alto y no cruces calles por donde corre el agua. Emergencias: ECU 911. Son reportes ciudadanos de las 05:00 a las 06:30, no un comunicado oficial: sigue las indicaciones del COE y del ECU 911.',
   } as { titulo: string; texto: string } | null,
 
   formularioCOE:
