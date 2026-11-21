@@ -107,7 +107,7 @@ export default async function HomePage() {
             <a href="/riesgos/" title="Reportes de la comunidad y estimaciones propias, no oficiales" className="inline-flex items-center justify-center gap-1.5 rounded-lg border-[1.5px] border-white/60 px-4 py-2.5 text-sm font-bold text-white hover:border-white">
               <span aria-hidden="true">🗺️</span> Mapa de riesgos
             </a>
-            <a href="/riesgos/informe/" title="Reportes de la comunidad y lluvia medida, hora por hora" className="inline-flex items-center justify-center gap-1.5 rounded-lg border-[1.5px] border-white/60 px-4 py-2.5 text-sm font-bold text-white hover:border-white">
+            <a href="/riesgos/informe/" title="Todos los reportes de la comunidad, en orden" className="inline-flex items-center justify-center gap-1.5 rounded-lg border-[1.5px] border-white/60 px-4 py-2.5 text-sm font-bold text-white hover:border-white">
               <span aria-hidden="true">🕒</span> Línea del tiempo
             </a>
             <a href="/clima/" className="inline-flex items-center justify-center gap-1.5 rounded-lg border-[1.5px] border-white/60 px-4 py-2.5 text-sm font-bold text-white hover:border-white">
