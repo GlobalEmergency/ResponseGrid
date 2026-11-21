@@ -159,11 +159,11 @@ export const PORTADA = {
       titulo: 'Línea del tiempo',
       ruta: '/riesgos/informe/',
       resumen:
-        'Qué se reportó y cuánto llovió, hora por hora, desde el inicio de la emergencia. Reportes de la comunidad y mediciones preliminares, no oficiales.',
+        'Todo lo que se ha reportado, en orden, desde el inicio de la emergencia. Son reportes de la comunidad, no información oficial.',
       contenido: [
-        'La lluvia de cada hora junto a los reportes de ese momento',
-        'Salta a cualquier día: hoy, el más lluvioso o el inicio',
-        'Filtros por isla, zona, fechas y estación de lluvia',
+        'Cada reporte con su hora, su lugar y sus fotos',
+        'Salta a cualquier día: hoy, el último reporte o el inicio',
+        'Filtros por isla, zona y fechas',
       ],
     },
     {
