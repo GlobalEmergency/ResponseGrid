@@ -4,7 +4,7 @@
  * Con `PLATAFORMA_ACTIVA=false` el sitio publica solo la portada (/), las
  * páginas legales y los archivos estáticos. El resto de rutas de la app (mapa
  * de la emergencia, formularios, inicio de sesión, paneles) redirige a la
- * portada. /mapas/ y /clima/ no pasan por la app: los sirve Caddy.
+ * portada. /riesgos/, /mapas/ y /clima/ no pasan por la app: los sirve Caddy.
  *
  * Se lee en tiempo de ejecución (variable del contenedor web), así que
  * volver a activar la plataforma no exige reconstruir la imagen.

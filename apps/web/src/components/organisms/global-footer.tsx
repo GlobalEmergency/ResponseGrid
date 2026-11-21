@@ -37,7 +37,7 @@ export function GlobalFooter({ tf, tb }: GlobalFooterProps) {
       ]
     : [
         { href: '/', label: tf.nav_home },
-        { href: '/mapas/', label: 'Mapas de riesgo' },
+        { href: '/riesgos/', label: 'Mapa de riesgos' },
         { href: '/clima/', label: 'Clima en vivo' },
       ];
   const resources = !activa ? [] : [
@@ -76,8 +76,8 @@ export function GlobalFooter({ tf, tb }: GlobalFooterProps) {
           <nav aria-label={tf.nav_heading} className="flex flex-col gap-2.5">
             <h2 className={colHeading}>{tf.nav_heading}</h2>
             {nav.map((l) =>
-              // /mapas/ y /clima/ los sirve Caddy fuera de la app: <a>, no <Link>.
-              /^\/(mapas|clima)\//.test(l.href) ? (
+              // /riesgos/ y /clima/ los sirve Caddy fuera de la app: <a>, no <Link>.
+              /^\/(riesgos|clima)\//.test(l.href) ? (
                 <a key={l.href} href={l.href} className={linkClass}>
                   {l.label}
                 </a>

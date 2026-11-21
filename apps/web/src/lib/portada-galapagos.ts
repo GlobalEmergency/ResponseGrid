@@ -151,6 +151,7 @@ export const PORTADA = {
       contenido: [
         'Reportar un peligro con foto, sin cuenta',
         'Reportes ciudadanos con fotos y vista en 3D',
+        'Capas de riesgo, quebradas y vías, con buscador de calles y barrios',
         'Informe: línea del tiempo de los reportes y de la lluvia',
       ],
     },
@@ -163,17 +164,6 @@ export const PORTADA = {
         'Shapefile y GeoJSON, en WGS 84 (EPSG:4326)',
         'Riesgo de inundación, quebradas, vías y población',
         'Cada archivo trae su fuente y su licencia',
-      ],
-    },
-    {
-      titulo: 'Mapas y capas',
-      ruta: '/mapas/',
-      resumen:
-        'Visor de las capas geográficas de la emergencia en Santa Cruz, San Cristóbal e Isabela, sin recortes e incluido el Parque Nacional.',
-      contenido: [
-        'Quebradas, zonas inundables, cuencas y costa baja',
-        'Vías, población expuesta por isla y puntos clave',
-        'Descarga en Shapefile o GeoJSON para QGIS o ArcGIS',
       ],
     },
     {
