@@ -90,6 +90,9 @@ services:
       # solo la portada, lo legal, /mapas/ y /clima/. Para volver a activarla:
       # PLATAFORMA_ACTIVA=true en .env y `docker compose up -d web` (sin build).
       - PLATAFORMA_ACTIVA=${PLATAFORMA_ACTIVA:-false}
+    volumes:
+      # Índice de los informes descargables de la portada (ver lib/informes.ts).
+      - /srv/sosgalapagos-descargas:/srv/descargas:ro
     depends_on:
       - api
     expose:
@@ -122,6 +125,7 @@ services:
       - /srv/sosgalapagos-mapas:/srv/mapas:ro
       - /srv/sosgalapagos-clima:/srv/clima:ro
       - /srv/sosgalapagos-estudios:/srv/estudios:ro
+      - /srv/sosgalapagos-descargas:/srv/descargas:ro
       - caddydata:/data
       - caddyconfig:/config
       # Sitios privados con contraseña (configuración y archivos solo en el servidor).
