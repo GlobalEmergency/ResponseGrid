@@ -108,7 +108,8 @@ www.{$SITE_DOMAIN} {
 	redir /mapa /mapa/ permanent
 	handle /mapa/* {
 		reverse_proxy plataforma:8000
-||||||| Stash base
+	}
+
 	# Informes y mapas descargables de la portada: PDF y sus miniaturas, fuera del
 	# repo, en /srv/sosgalapagos-descargas (los publica sosgalapagos-datos:
 	# servidores/publicar.sh descargas). Solo se sirven .pdf, .jpg y .png de la
