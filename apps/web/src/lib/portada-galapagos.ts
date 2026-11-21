@@ -95,6 +95,23 @@ export const PORTADA = {
   ] as { nombre: string; instagram?: string; whatsapp?: string; enlaces?: { etiqueta: string; url: string }[]; donar?: string }[],
 
   /**
+   * Publicaciones científicas de referencia sobre las cuencas y el riesgo en
+   * Galápagos. Salen en la sección «Informes y mapas para descargar».
+   */
+  referencias: [
+    {
+      autores: 'Rosado, V., Bravo, G., Vaca, V., Menoscal, M., Garces, D., Larreta, E. y Mulas, M.',
+      anio: 2025,
+      titulo:
+        'Morphometric watershed prioritization for sustainable agriculture and water management on Santa Cruz Island, Galápagos',
+      revista: 'Environmental and Sustainability Indicators',
+      detalle: '27, 100843',
+      doi: '10.1016/j.indic.2025.100843',
+      nota: 'Delimita y prioriza las 24 subcuencas de Santa Cruz a partir de su morfometría.',
+    },
+  ] as { autores: string; anio: number; titulo: string; revista: string; detalle: string; doi: string; nota?: string }[],
+
+  /**
    * Páginas de consulta del mismo dominio que sirve Caddy fuera de la app
    * (por eso van con <a>, no con <Link>). Ver deploy/sosgalapagos/Caddyfile.
    */
