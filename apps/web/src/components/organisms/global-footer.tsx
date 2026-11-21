@@ -38,6 +38,7 @@ export function GlobalFooter({ tf, tb }: GlobalFooterProps) {
     : [
         { href: '/', label: tf.nav_home },
         { href: '/riesgos/', label: 'Mapa de riesgos' },
+        { href: '/riesgos/informe/', label: 'Línea del tiempo' },
         { href: '/clima/', label: 'Clima en vivo' },
       ];
   const resources = !activa ? [] : [

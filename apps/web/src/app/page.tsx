@@ -107,6 +107,9 @@ export default async function HomePage() {
             <a href="/riesgos/" title="Reportes de la comunidad y estimaciones propias, no oficiales" className="inline-flex items-center justify-center gap-1.5 rounded-lg border-[1.5px] border-white/60 px-4 py-2.5 text-sm font-bold text-white hover:border-white">
               <span aria-hidden="true">🗺️</span> Mapa de riesgos
             </a>
+            <a href="/riesgos/informe/" title="Reportes de la comunidad y lluvia medida, hora por hora" className="inline-flex items-center justify-center gap-1.5 rounded-lg border-[1.5px] border-white/60 px-4 py-2.5 text-sm font-bold text-white hover:border-white">
+              <span aria-hidden="true">🕒</span> Línea del tiempo
+            </a>
             <a href="/clima/" className="inline-flex items-center justify-center gap-1.5 rounded-lg border-[1.5px] border-white/60 px-4 py-2.5 text-sm font-bold text-white hover:border-white">
               <span aria-hidden="true">🌧️</span> Clima en vivo
             </a>
@@ -266,7 +269,7 @@ export default async function HomePage() {
             Información abierta para entender qué pasó y dónde está el riesgo. Sirve a vecinos, voluntarios, técnicos y
             autoridades.
           </p>
-          <ul className="mt-4 grid gap-3 md:grid-cols-3" role="list">
+          <ul className="mt-4 grid gap-3 md:grid-cols-2" role="list">
             {PORTADA.consulta.map((c) => (
               <li key={c.ruta}>
                 <a
