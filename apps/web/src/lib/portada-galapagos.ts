@@ -117,6 +117,28 @@ export const PORTADA = {
    */
   consulta: [
     {
+      titulo: 'Mapa de riesgos',
+      ruta: '/riesgos/',
+      resumen:
+        'Lugares de peligro, buenas noticias y dónde ayudar, según la comunidad, sobre las capas de riesgo. Cada aviso se retira solo con el tiempo.',
+      contenido: [
+        'Reportar un peligro con foto, sin cuenta',
+        'Reportes ciudadanos con fotos y vista en 3D',
+        'Informe: línea del tiempo de los reportes y de la lluvia',
+      ],
+    },
+    {
+      titulo: 'Descargar las capas',
+      ruta: '/riesgos/descargas/',
+      resumen:
+        'Todas las capas geográficas de la emergencia, una por una o en un solo archivo. Los modelos son estimaciones propias, no datos oficiales.',
+      contenido: [
+        'Shapefile y GeoJSON, en WGS 84 (EPSG:4326)',
+        'Riesgo de inundación, quebradas, vías y población',
+        'Cada archivo trae su fuente y su licencia',
+      ],
+    },
+    {
       titulo: 'Mapas y capas',
       ruta: '/mapas/',
       resumen:
