@@ -7,6 +7,7 @@ import { ApoyoViolencia } from '@/components/molecules/apoyo-violencia';
 import { AvisoDestacado } from '@/components/molecules/aviso-destacado';
 import { getEmergencyBySlug } from '@/lib/emergencies';
 import { PORTADA } from '@/lib/portada-galapagos';
+import { plataformaActiva } from '@/lib/plataforma';
 
 // Portada de la instancia USFQ Galápagos. Sustituye la portada genérica de
 // ResponseGrid (directorio de emergencias): esta instancia atiende una sola
@@ -43,6 +44,10 @@ const botonBorde =
   'inline-flex items-center justify-center rounded-lg border-[1.5px] border-black bg-white px-4 py-2.5 text-sm font-bold text-black transition-colors hover:bg-surface-alt focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2';
 
 export default async function HomePage() {
+  // Con la plataforma apagada (PLATAFORMA_ACTIVA=false) la portada no enlaza a
+  // ninguna ruta de ResponseGrid ni muestra su barra: quedan el contenido fijo,
+  // /mapas/ y /clima/.
+  const activa = plataformaActiva();
   const slug = PORTADA.emergenciaSlug;
   const emergencia = await getEmergencyBySlug(slug);
   const base = `/e/${slug}`;
@@ -58,7 +63,7 @@ export default async function HomePage() {
 
   return (
     <main className="flex-1 bg-surface">
-      {emergencia ? (
+      {!activa ? null : emergencia ? (
         <AppBar variant="emergency" slug={slug} emergency={{ name: emergencia.name, status: emergencia.status }} />
       ) : (
         <AppBar variant="home" />
@@ -82,6 +87,7 @@ export default async function HomePage() {
             Un solo lugar para coordinar la ayuda por las inundaciones en Santa Cruz. Trabajamos junto a organizaciones
             de la sociedad civil y en coordinación con el COE.
           </p>
+          {activa ? (
           <div className="mt-6 flex flex-wrap gap-2.5">
             <Link href={`${base}/peticion`} className={botonRojo}>
               Necesito ayuda
@@ -93,8 +99,9 @@ export default async function HomePage() {
               Ver el mapa y los puntos
             </Link>
           </div>
+          ) : null}
           {/* /mapas y /clima los sirve Caddy fuera de la app: van con <a>, no con <Link>. */}
-          <div className="mt-2.5 flex flex-wrap gap-2.5">
+          <div className={`${activa ? 'mt-2.5' : 'mt-6'} flex flex-wrap gap-2.5`}>
             <a href="/mapas/" title="Estimaciones propias, no oficiales" className="inline-flex items-center justify-center gap-1.5 rounded-lg border-[1.5px] border-white/60 px-4 py-2.5 text-sm font-bold text-white hover:border-white">
               <span aria-hidden="true">🗺️</span> Mapas de riesgo
             </a>
@@ -134,13 +141,15 @@ export default async function HomePage() {
           <section aria-labelledby="necesitas-heading" className={`${tarjeta} border-t-4 border-t-accent`}>
             <h2 id="necesitas-heading" className={h2}>Si necesitas ayuda</h2>
             <p className="mt-3 text-[14.5px] leading-relaxed text-ink-soft">
-              Registra tu necesidad en esta plataforma y regístrate como damnificado en el GAD Municipal de Santa Cruz. En
-              una emergencia, llama al ECU 911.
+              {activa ? 'Registra tu necesidad en esta plataforma y regístrate' : 'Regístrate'} como damnificado en el GAD
+              Municipal de Santa Cruz. En una emergencia, llama al ECU 911.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Link href={`${base}/peticion`} className={botonNegro}>
-                Registrar mi necesidad
-              </Link>
+              {activa ? (
+                <Link href={`${base}/peticion`} className={botonNegro}>
+                  Registrar mi necesidad
+                </Link>
+              ) : null}
               <a href={PORTADA.registroGAD} target="_blank" rel="noopener noreferrer" className={botonBorde}>
                 Registro de damnificados (GAD) ↗
               </a>
@@ -155,12 +164,14 @@ export default async function HomePage() {
             <p className="mt-3 text-[14.5px] leading-relaxed text-ink-soft">
               <b>No envíes donaciones físicas desde el continente.</b> Ponen en riesgo la bioseguridad de las islas y
               saturan una logística que hoy necesitamos para medicinas y agua. Dona dinero a organizaciones con
-              trazabilidad y registra aquí tu oferta de voluntariado.
+              trazabilidad{activa ? ' y registra aquí tu oferta de voluntariado' : ''}.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Link href={`${base}/voluntario`} className={botonNegro}>
-                Apuntarme como voluntario
-              </Link>
+              {activa ? (
+                <Link href={`${base}/voluntario`} className={botonNegro}>
+                  Apuntarme como voluntario
+                </Link>
+              ) : null}
               <a href="#organizaciones" className={botonRojo}>
                 Donar ↓
               </a>
@@ -172,12 +183,15 @@ export default async function HomePage() {
         </div>
 
         {/* ── Lo que se necesita hoy (en vivo) ──────────────────────── */}
+        {activa || hoy.length > 0 ? (
         <section aria-labelledby="hoy-heading" className={tarjeta}>
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 id="hoy-heading" className={h2}>Lo que se necesita hoy</h2>
-            <Link href={`${base}#explore-heading`} className="text-sm font-bold text-black underline underline-offset-2 hover:text-accent">
-              Ver todas las necesidades →
-            </Link>
+            {activa ? (
+              <Link href={`${base}#explore-heading`} className="text-sm font-bold text-black underline underline-offset-2 hover:text-accent">
+                Ver todas las necesidades →
+              </Link>
+            ) : null}
           </div>
           <p className="mt-2 text-[14px] text-ink-soft">
             Repelente, mosquiteros, artículos de higiene y agua. Lo que se pueda, cómpralo en Santa Cruz.
@@ -200,6 +214,7 @@ export default async function HomePage() {
             <p className="mt-4 text-sm text-muted">Aún no hay necesidades validadas.</p>
           )}
         </section>
+        ) : null}
 
         {/* ── Para entender la emergencia: /mapas y /clima ── */}
         <section aria-labelledby="consulta-heading" className={tarjeta}>

@@ -9,6 +9,7 @@ import { GLOBAL_EMERGENCY } from '@/lib/global-emergency';
 import { LEGAL } from '@/lib/legal';
 import { GITHUB_REPO_URL } from '@/lib/bots';
 import { MARCA } from '@/lib/marca';
+import { plataformaActiva } from '@/lib/plataforma';
 import type { Messages } from '@/i18n/messages/es';
 
 interface GlobalFooterProps {
@@ -25,13 +26,21 @@ const linkClass =
 export function GlobalFooter({ tf, tb }: GlobalFooterProps) {
   const year = new Date().getFullYear();
 
-  const nav = [
-    { href: '/', label: tf.nav_home },
-    { href: '/#emergencias', label: tf.nav_emergencies },
-    { href: '/panel/organizaciones', label: tf.nav_orgs },
-    { href: '/login', label: tf.nav_coordination },
-  ];
-  const resources = [
+  // Con la plataforma apagada solo quedan los enlaces que siguen publicados.
+  const activa = plataformaActiva();
+  const nav = activa
+    ? [
+        { href: '/', label: tf.nav_home },
+        { href: '/#emergencias', label: tf.nav_emergencies },
+        { href: '/panel/organizaciones', label: tf.nav_orgs },
+        { href: '/login', label: tf.nav_coordination },
+      ]
+    : [
+        { href: '/', label: tf.nav_home },
+        { href: '/mapas/', label: 'Mapas de riesgo' },
+        { href: '/clima/', label: 'Clima en vivo' },
+      ];
+  const resources = !activa ? [] : [
     { href: '/funcionalidades', label: tf.resources_features },
     { href: '/sobre', label: tf.resources_about },
     { href: '/como-funciona', label: tf.resources_how },
@@ -66,14 +75,21 @@ export function GlobalFooter({ tf, tb }: GlobalFooterProps) {
 
           <nav aria-label={tf.nav_heading} className="flex flex-col gap-2.5">
             <h2 className={colHeading}>{tf.nav_heading}</h2>
-            {nav.map((l) => (
-              <Link key={l.href} href={l.href} className={linkClass}>
-                {l.label}
-              </Link>
-            ))}
+            {nav.map((l) =>
+              // /mapas/ y /clima/ los sirve Caddy fuera de la app: <a>, no <Link>.
+              /^\/(mapas|clima)\//.test(l.href) ? (
+                <a key={l.href} href={l.href} className={linkClass}>
+                  {l.label}
+                </a>
+              ) : (
+                <Link key={l.href} href={l.href} className={linkClass}>
+                  {l.label}
+                </Link>
+              ),
+            )}
           </nav>
 
-          <nav aria-label={tf.resources_heading} className="flex flex-col gap-2.5">
+          <nav aria-label={tf.resources_heading} className={resources.length > 0 ? 'flex flex-col gap-2.5' : 'hidden'}>
             <h2 className={colHeading}>{tf.resources_heading}</h2>
             {resources.map((l) => (
               <Link key={l.href} href={l.href} className={linkClass}>

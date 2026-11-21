@@ -86,6 +86,10 @@ services:
       - API_URL=http://api:3000
       - COOKIE_SECURE=true
       - DEMO_MODE=false
+      # Plataforma de coordinación (ResponseGrid). Con «false» el sitio publica
+      # solo la portada, lo legal, /mapas/ y /clima/. Para volver a activarla:
+      # PLATAFORMA_ACTIVA=true en .env y `docker compose up -d web` (sin build).
+      - PLATAFORMA_ACTIVA=${PLATAFORMA_ACTIVA:-false}
     depends_on:
       - api
     expose:

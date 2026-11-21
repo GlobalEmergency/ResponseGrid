@@ -1,6 +1,7 @@
 import { MARCA } from '@/lib/marca';
 import type { MetadataRoute } from 'next';
 import { api } from '@/lib/api';
+import { plataformaActiva } from '@/lib/plataforma';
 
 // Emergencies come and go; keep the sitemap in sync with live backend state.
 export const dynamic = 'force-dynamic';
@@ -13,6 +14,14 @@ const BASE = MARCA.sitio;
  * per-emergency landing pages.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Plataforma apagada: solo lo que sigue publicado.
+  if (!plataformaActiva()) {
+    return [
+      { url: `${BASE}/`, changeFrequency: 'hourly', priority: 1 },
+      { url: `${BASE}/privacidad`, changeFrequency: 'yearly', priority: 0.3 },
+      { url: `${BASE}/eliminar-datos`, changeFrequency: 'yearly', priority: 0.3 },
+    ];
+  }
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${BASE}/`, changeFrequency: 'hourly', priority: 1 },
     { url: `${BASE}/funcionalidades`, changeFrequency: 'monthly', priority: 0.7 },
