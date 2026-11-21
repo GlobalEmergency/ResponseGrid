@@ -151,8 +151,19 @@ export const PORTADA = {
       contenido: [
         'Reportar un peligro con foto, sin cuenta',
         'Reportes ciudadanos con fotos y vista en 3D',
-        'Capas de riesgo, quebradas y vías, con buscador de calles y barrios',
-        'Informe: línea del tiempo de los reportes y de la lluvia',
+        'Capas de riesgo, quebradas y vías',
+        'Buscador de calles y barrios, y tus puntos guardados',
+      ],
+    },
+    {
+      titulo: 'Línea del tiempo',
+      ruta: '/riesgos/informe/',
+      resumen:
+        'Qué se reportó y cuánto llovió, hora por hora, desde el inicio de la emergencia. Reportes de la comunidad y mediciones preliminares, no oficiales.',
+      contenido: [
+        'La lluvia de cada hora junto a los reportes de ese momento',
+        'Salta a cualquier día: hoy, el más lluvioso o el inicio',
+        'Filtros por isla, zona, fechas y estación de lluvia',
       ],
     },
     {
