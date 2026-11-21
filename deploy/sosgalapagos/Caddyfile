@@ -36,11 +36,17 @@ www.{$SITE_DOMAIN} {
 	@estaticos path /capas/* /marca/* /videos/*
 	header @estaticos >Cache-Control "public, max-age=3600, stale-while-revalidate=86400"
 
-	# Mapas y capas descargables: archivos estáticos fuera del repo, en
-	# /srv/sosgalapagos-mapas (los publica geodatos/scripts/publicar_mapas.sh).
-	redir /mapas /mapas/ permanent
+	# Capas y descargas: archivos estáticos fuera del repo, en /srv/sosgalapagos-mapas
+	# (los publica sosgalapagos-datos: servidores/publicar.sh mapas).
+	# Desde el 21-nov-2026 el mapa único es /riesgos/: quien entra a /mapas/ va allí.
+	# Solo se redirige la página; el manifiesto, las capas, las descargas y las teselas
+	# de /mapas/… se siguen sirviendo, porque /riesgos/ las lee de aquí. La redirección
+	# es temporal (302) para poder volver atrás, y el navegador conserva lo que va tras «#».
+	redir /mapas /riesgos/ 302
 	handle_path /mapas/* {
 		root * /srv/mapas
+		@visor path / /index.html
+		redir @visor /riesgos/ 302
 		# La página y sus índices se revalidan siempre (ETag): un cambio se ve al instante.
 		@indices path / /index.html *.json
 		header @indices Cache-Control "no-cache"

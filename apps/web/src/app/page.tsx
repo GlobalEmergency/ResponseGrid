@@ -102,10 +102,10 @@ export default async function HomePage() {
             </Link>
           </div>
           ) : null}
-          {/* /mapas y /clima los sirve Caddy fuera de la app: van con <a>, no con <Link>. */}
+          {/* /riesgos y /clima los sirve Caddy fuera de la app: van con <a>, no con <Link>. */}
           <div className={`${activa ? 'mt-2.5' : 'mt-6'} flex flex-wrap gap-2.5`}>
-            <a href="/mapas/" title="Estimaciones propias, no oficiales" className="inline-flex items-center justify-center gap-1.5 rounded-lg border-[1.5px] border-white/60 px-4 py-2.5 text-sm font-bold text-white hover:border-white">
-              <span aria-hidden="true">🗺️</span> Mapas de riesgo
+            <a href="/riesgos/" title="Reportes de la comunidad y estimaciones propias, no oficiales" className="inline-flex items-center justify-center gap-1.5 rounded-lg border-[1.5px] border-white/60 px-4 py-2.5 text-sm font-bold text-white hover:border-white">
+              <span aria-hidden="true">🗺️</span> Mapa de riesgos
             </a>
             <a href="/clima/" className="inline-flex items-center justify-center gap-1.5 rounded-lg border-[1.5px] border-white/60 px-4 py-2.5 text-sm font-bold text-white hover:border-white">
               <span aria-hidden="true">🌧️</span> Clima en vivo
@@ -259,14 +259,14 @@ export default async function HomePage() {
         </section>
         ) : null}
 
-        {/* ── Para entender la emergencia: /mapas y /clima ── */}
+        {/* ── Para entender la emergencia: /riesgos y /clima ── */}
         <section aria-labelledby="consulta-heading" className={tarjeta}>
           <h2 id="consulta-heading" className={h2}>Mapas y clima</h2>
           <p className="mt-2 max-w-3xl text-[14px] leading-relaxed text-ink-soft">
             Información abierta para entender qué pasó y dónde está el riesgo. Sirve a vecinos, voluntarios, técnicos y
             autoridades.
           </p>
-          <ul className="mt-4 grid gap-3 md:grid-cols-2" role="list">
+          <ul className="mt-4 grid gap-3 md:grid-cols-3" role="list">
             {PORTADA.consulta.map((c) => (
               <li key={c.ruta}>
                 <a
