@@ -101,6 +101,15 @@ www.{$SITE_DOMAIN} {
 		}
 	}
 
+	# Mapa de riesgos: reportes ciudadanos con vencimiento (repo mayait/sosgalapagos-plataforma).
+	# Corre en un Compose aparte («sosgalapagos-plataforma»), unido a esta red. Todo lo suyo
+	# vive bajo /mapa/ (páginas, API, administración, estáticos y fotos). Ojo: /mapa/ no es
+	# /mapas/, que sigue siendo el visor de capas de arriba.
+	redir /mapa /mapa/ permanent
+	handle /mapa/* {
+		reverse_proxy plataforma:8000
+	}
+
 	# Sitios privados con contraseña que no viven en este repositorio. Cada archivo
 	# /srv/sosgalapagos-privado/caddy/*.caddy del servidor define su ruta, su usuario
 	# y el hash de su contraseña, y sirve archivos de /srv/sosgalapagos-privado/sitios.
