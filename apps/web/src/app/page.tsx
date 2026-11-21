@@ -124,6 +124,47 @@ export default async function HomePage() {
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-5 py-8 lg:gap-10 lg:px-8 lg:py-10">
         <AvisoDestacado />
 
+        {/* ── Advertencia oficial vigente (se oculta sola al vencer) ──────── */}
+        {PORTADA.advertencia && Date.now() < Date.parse(PORTADA.advertencia.hasta) ? (
+          <section aria-labelledby="advertencia-heading" className={`${tarjeta} border-t-4 border-t-accent`}>
+            <p className="text-[12px] font-extrabold uppercase tracking-wide text-accent">
+              Advertencia oficial · {PORTADA.advertencia.emisor}
+            </p>
+            <h2 id="advertencia-heading" className={`${h2} mt-1`}>{PORTADA.advertencia.titulo}</h2>
+            <div className="mt-4 grid gap-5 md:grid-cols-[minmax(0,320px)_1fr] md:items-start">
+              <a href={PORTADA.advertencia.imagen} target="_blank" rel="noopener" title="Abrir la imagen en grande">
+                {/* eslint-disable-next-line @next/next/no-img-element -- imagen fija de public/avisos, sin optimizador */}
+                <img
+                  src={PORTADA.advertencia.imagen}
+                  alt={PORTADA.advertencia.alt}
+                  width={863}
+                  height={1148}
+                  className="w-full rounded-lg border border-line bg-white"
+                />
+              </a>
+              <div>
+                <p className="text-[15px] font-bold leading-snug text-ink">{PORTADA.advertencia.vigencia}</p>
+                <p className="mt-2 text-[14px] leading-relaxed text-ink-soft">{PORTADA.advertencia.texto}</p>
+                {PORTADA.advertencia.nota ? (
+                  <p className="mt-2 text-[13px] leading-relaxed text-muted">{PORTADA.advertencia.nota}</p>
+                ) : null}
+                <p className="mt-3 text-[13px] leading-relaxed text-muted">
+                  Es un comunicado del {PORTADA.advertencia.emisor}, no de SOS Galápagos. Sigue las indicaciones del COE y, en una
+                  emergencia, llama al ECU 911.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2.5">
+                  <a href="/clima/" className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2.5 text-sm font-bold text-white hover:bg-black/85">
+                    Ver la lluvia en vivo
+                  </a>
+                  <a href="/riesgos/" className="inline-flex items-center justify-center rounded-lg border-[1.5px] border-black px-4 py-2.5 text-sm font-bold text-black hover:bg-surface">
+                    Ver el mapa de riesgos
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+        ) : null}
+
         {/* ── Situación hoy ─────────────────────────────────────────── */}
         <section aria-labelledby="situacion-heading" className={tarjeta}>
           <h2 id="situacion-heading" className={h2}>Situación hoy</h2>

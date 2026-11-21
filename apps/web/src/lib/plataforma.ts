@@ -18,7 +18,7 @@ export function plataformaActiva(): boolean {
 const PAGINAS_ABIERTAS = new Set(['/', '/privacidad', '/eliminar-datos', '/offline', '/apple-icon']);
 
 /** Carpetas de recursos estáticos (build de Next y `public/`). */
-const PREFIJOS_ESTATICOS = ['/_next/', '/capas/', '/marca/', '/videos/', '/icons/'];
+const PREFIJOS_ESTATICOS = ['/_next/', '/capas/', '/marca/', '/videos/', '/icons/', '/avisos/'];
 
 /** Archivos sueltos en la raíz: robots.txt, sitemap.xml, sw.js, icon.svg… */
 const ARCHIVO_RAIZ = /^\/[^/]+\.[a-z0-9]+$/i;

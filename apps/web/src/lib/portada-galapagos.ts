@@ -22,6 +22,33 @@ export const PORTADA = {
       'Desde las 05:00 hay reportes de vecinos de inundación en La Cascada (pasajes 4 y 5 y viviendas junto al cauce), la calle 8, Divino Niño, Curva Brava y el Parque El Bosque, y de vías colapsadas en la toma de agua y en la salida a Miramar. Llovió fuerte toda la noche en Bellavista, Cascajo y Santa Rosa. Si vives junto a un cauce o una encañada, sal ya hacia un lugar alto y no cruces calles por donde corre el agua. Emergencias: ECU 911. Son reportes ciudadanos de las 05:00 a las 06:30, no un comunicado oficial: sigue las indicaciones del COE y del ECU 911.',
   } as { titulo: string; texto: string } | null,
 
+  /**
+   * Advertencia oficial vigente (INAMHI u otra autoridad), con su imagen original.
+   * Se muestra bajo el aviso destacado y se oculta sola al pasar `hasta`.
+   * Para quitarla antes, poner `advertencia: null`. La imagen va en public/avisos/.
+   * Las horas del INAMHI son de Ecuador continental (UTC−5).
+   */
+  advertencia: {
+    emisor: 'INAMHI',
+    titulo: 'Advertencia meteorológica n.º 89: alerta por lluvias y tormentas',
+    vigencia: 'Desde las 17h00 del 21 de noviembre hasta las 10h00 del 24 de noviembre de 2026',
+    texto:
+      'El INAMHI pone a Galápagos en nivel rojo: lluvia fuerte, que varía en duración y puede prolongarse. Mantendrá el monitoreo y, si las lluvias intensas persisten, evaluará emitir una nueva advertencia.',
+    nota: 'Las horas son las del INAMHI (hora de Ecuador continental; en Galápagos es una hora menos).',
+    imagen: '/avisos/inamhi-advertencia-89.jpg',
+    alt: 'Advertencia meteorológica n.º 89 del INAMHI: mapa de Ecuador por niveles de lluvia, con Galápagos en rojo (lluvia fuerte).',
+    hasta: '2026-11-24T10:00:00-05:00',
+  } as {
+    emisor: string;
+    titulo: string;
+    vigencia: string;
+    texto: string;
+    nota?: string;
+    imagen: string;
+    alt: string;
+    hasta: string;
+  } | null,
+
   formularioCOE:
     'https://docs.google.com/forms/d/e/1FAIpQLSe-wb4SGX8Z0IxRUCjMUBgY3XFLGGc-wwmfPux6aTaGxxOCzQ/viewform',
 

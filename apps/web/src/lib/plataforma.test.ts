@@ -26,6 +26,7 @@ test('con la plataforma apagada siguen la portada, lo legal y los estáticos', (
     '/_next/image',
     '/capas/galapagos-2026/puntos.geojson',
     '/marca/logo.svg',
+    '/avisos/inamhi-advertencia-89.jpg',
     '/icons/icon-192.png',
     '/robots.txt',
     '/sitemap.xml',
