@@ -294,67 +294,6 @@ export default async function HomePage() {
           </ul>
         </section>
 
-        {/* ── Informes y mapas descargables (PDF en /descargas/, fuera de la app: van con <a>) ── */}
-        {informes.length > 0 || PORTADA.referencias.length > 0 ? (
-          <section id="informes" aria-labelledby="informes-heading" className={`${tarjeta} scroll-mt-20`}>
-            <h2 id="informes-heading" className={h2}>Informes y mapas para descargar</h2>
-            <p className="mt-2 max-w-3xl text-[14px] leading-relaxed text-ink-soft">
-              Mapas e informes en PDF listos para imprimir o compartir. Son <b>estimaciones propias de SOS Galápagos, no
-              datos oficiales</b>: sirven para priorizar y deben verificarse en campo.
-            </p>
-            {informes.length > 0 ? (
-            <ul className="mt-4 grid gap-3 md:grid-cols-2" role="list">
-              {informes.map((i) => (
-                <li key={i.archivo} className="flex flex-col overflow-hidden rounded-lg border border-line bg-surface">
-                  {i.portada ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- la miniatura la sirve Caddy desde /descargas/, fuera de la app
-                    <img
-                      src={`/descargas/${i.portada}`}
-                      alt=""
-                      loading="lazy"
-                      width={728}
-                      height={515}
-                      className="aspect-[1.414] w-full border-b border-line bg-white object-cover object-left-top"
-                    />
-                  ) : null}
-                  <div className="flex flex-1 flex-col p-4">
-                    <span className="font-display text-base font-black uppercase leading-tight text-black">{i.titulo}</span>
-                    <span className="mt-1 text-[12px] font-semibold text-muted">
-                      {[fechaLarga(i.fecha), i.formato, i.paginas ? `${i.paginas} páginas` : null, i.tamano].filter(Boolean).join(' · ')}
-                    </span>
-                    {i.resumen ? <p className="mt-2 text-[13.5px] leading-relaxed text-ink-soft">{i.resumen}</p> : null}
-                    <a href={`/descargas/${i.archivo}`} download className={`${botonNegro} mt-auto self-start`} style={{ marginTop: '0.9rem' }}>
-                      Descargar PDF ↓
-                    </a>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            ) : null}
-            {PORTADA.referencias.length > 0 ? (
-              <div className="mt-5 border-t border-line pt-4">
-                <h3 className="text-[12px] font-extrabold uppercase tracking-wide text-accent">Publicaciones científicas de referencia</h3>
-                <ul className="mt-2 flex flex-col gap-3" role="list">
-                  {PORTADA.referencias.map((r) => (
-                    <li key={r.doi} className="text-[13.5px] leading-relaxed text-ink">
-                      {r.autores} ({r.anio}). {r.titulo}. <i>{r.revista}</i>, {r.detalle}.{' '}
-                      <a
-                        href={`https://doi.org/${r.doi}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="break-all font-semibold text-accent underline-offset-2 hover:underline"
-                      >
-                        https://doi.org/{r.doi} ↗
-                      </a>
-                      {r.nota ? <span className="mt-0.5 block text-[12.5px] text-muted">{r.nota}</span> : null}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-          </section>
-        ) : null}
-
         <ApoyoViolencia headingId="apoyo-violencia-portada" />
 
         <GruposWhatsapp headingId="grupos-whatsapp-portada" />
@@ -466,6 +405,67 @@ export default async function HomePage() {
             Datos de donación compartidos por la coordinación de SOS Galápagos y por las propias fundaciones.
           </p>
         </section>
+
+        {/* ── Informes y mapas descargables: lo último de la portada (PDF en /descargas/, fuera de la app: van con <a>) ── */}
+        {informes.length > 0 || PORTADA.referencias.length > 0 ? (
+          <section id="informes" aria-labelledby="informes-heading" className={`${tarjeta} scroll-mt-20`}>
+            <h2 id="informes-heading" className={h2}>Informes y mapas para descargar</h2>
+            <p className="mt-2 max-w-3xl text-[14px] leading-relaxed text-ink-soft">
+              Mapas e informes en PDF listos para imprimir o compartir. Son <b>estimaciones propias de SOS Galápagos, no
+              datos oficiales</b>: sirven para priorizar y deben verificarse en campo.
+            </p>
+            {informes.length > 0 ? (
+            <ul className="mt-4 grid gap-3 md:grid-cols-2" role="list">
+              {informes.map((i) => (
+                <li key={i.archivo} className="flex flex-col overflow-hidden rounded-lg border border-line bg-surface">
+                  {i.portada ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- la miniatura la sirve Caddy desde /descargas/, fuera de la app
+                    <img
+                      src={`/descargas/${i.portada}`}
+                      alt=""
+                      loading="lazy"
+                      width={728}
+                      height={515}
+                      className="aspect-[1.414] w-full border-b border-line bg-white object-cover object-left-top"
+                    />
+                  ) : null}
+                  <div className="flex flex-1 flex-col p-4">
+                    <span className="font-display text-base font-black uppercase leading-tight text-black">{i.titulo}</span>
+                    <span className="mt-1 text-[12px] font-semibold text-muted">
+                      {[fechaLarga(i.fecha), i.formato, i.paginas ? `${i.paginas} páginas` : null, i.tamano].filter(Boolean).join(' · ')}
+                    </span>
+                    {i.resumen ? <p className="mt-2 text-[13.5px] leading-relaxed text-ink-soft">{i.resumen}</p> : null}
+                    <a href={`/descargas/${i.archivo}`} download className={`${botonNegro} mt-auto self-start`} style={{ marginTop: '0.9rem' }}>
+                      Descargar PDF ↓
+                    </a>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            ) : null}
+            {PORTADA.referencias.length > 0 ? (
+              <div className="mt-5 border-t border-line pt-4">
+                <h3 className="text-[12px] font-extrabold uppercase tracking-wide text-accent">Publicaciones científicas de referencia</h3>
+                <ul className="mt-2 flex flex-col gap-3" role="list">
+                  {PORTADA.referencias.map((r) => (
+                    <li key={r.doi} className="text-[13.5px] leading-relaxed text-ink">
+                      {r.autores} ({r.anio}). {r.titulo}. <i>{r.revista}</i>, {r.detalle}.{' '}
+                      <a
+                        href={`https://doi.org/${r.doi}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="break-all font-semibold text-accent underline-offset-2 hover:underline"
+                      >
+                        https://doi.org/{r.doi} ↗
+                      </a>
+                      {r.nota ? <span className="mt-0.5 block text-[12.5px] text-muted">{r.nota}</span> : null}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </section>
+        ) : null}
 
         <p className="text-[12.5px] text-muted">
           Información actualizada al {PORTADA.actualizado}. Fuentes: COE Provincial y cantonal, GAD Santa Cruz y
