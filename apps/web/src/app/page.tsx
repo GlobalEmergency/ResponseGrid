@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Script from 'next/script';
 import { api } from '@/lib/api';
 import { AppBar } from '@/components/organisms/app-bar';
 import { GruposWhatsapp } from '@/components/molecules/grupos-whatsapp';
@@ -114,6 +115,10 @@ export default async function HomePage() {
               <span aria-hidden="true">🌧️</span> Clima en vivo
             </a>
           </div>
+          {/* Instalar la app y recibir avisos: el componente lo sirve el mapa de riesgos (/riesgos/app.js)
+              y es el mismo en la portada, en /riesgos/ y en /clima/. */}
+          <div data-sos-app="oscuro" className="mt-2.5" aria-label="La app en tu teléfono" />
+          <Script src="/riesgos/app.js" strategy="afterInteractive" />
           <p className="mt-5 text-sm text-white/70">
             En una emergencia, llama al{' '}
             <a href="tel:911" className="font-bold text-white underline underline-offset-2">
