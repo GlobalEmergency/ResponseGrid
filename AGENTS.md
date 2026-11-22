@@ -7,15 +7,15 @@
 **Estás en:** `sosgalapagos`, la plataforma. Antes de tocar `deploy/sosgalapagos/` o la API, lee las dependencias de abajo: otros repositorios publican a través de este.
 
 <!-- arbol-repos:inicio -->
-> **Este bloque es idéntico en los seis repositorios** (en su `AGENTS.md`). Si cambias algo, cámbialo en los seis. Última revisión: 2026-11-21 (el mapa único es `/riesgos/`; el visor de `/mapas` se retiró).
+> **Este bloque es idéntico en los seis repositorios** (en su `AGENTS.md`). Si cambias algo, cámbialo en los seis. Última revisión: 2026-11-22 (el mapa único es `/riesgos/`; el visor de `/mapas` se retiró; todo el clima corre en `sosgalapagos-plataforma`; licencia nueva en `sosgalapagos-datos` y `sosgalapagos-plataforma`).
 
 SOS Galápagos no es un solo repositorio, son seis. No hay organización de GitHub: todos están en la cuenta `mayait`. En la Mac de Julián cada uno se clona en `~/dev/<nombre>`.
 
 | Repositorio | Visibilidad | Qué contiene | Qué publica |
 |---|---|---|---|
 | [`sosgalapagos`](https://github.com/mayait/sosgalapagos) | público | La plataforma de coordinación: web y API. Es un fork de `GlobalEmergency/ResponseGrid`. También guarda el Caddy y el Docker Compose de **todo** el servidor (`deploy/sosgalapagos/`). | `sosgalapagos.org/` y `/backend` |
-| [`sosgalapagos-datos`](https://github.com/mayait/sosgalapagos-datos) | público | Geodatos, clima, estudios de riesgo y modelos. Su carpeta `servidores/` es el índice de qué corre dónde. | Los datos de `/mapas/…` (capas y descargas, sin visor) y `/clima/` |
-| [`sosgalapagos-plataforma`](https://github.com/mayait/sosgalapagos-plataforma) | público | El mapa de riesgos: reportes ciudadanos con vencimiento sobre las capas de riesgo, buscador, descargas e informe. Django + PostGIS, Apache 2.0. Es el único mapa del sitio desde el 21-nov-2026. | `/riesgos/` |
+| [`sosgalapagos-datos`](https://github.com/mayait/sosgalapagos-datos) | público | Geodatos, estudios de riesgo, modelos y el panel de `/clima/`. Su carpeta `servidores/` es el índice de qué corre dónde. Código con derechos reservados: uso con permiso. | Los datos de `/mapas/…` (capas y descargas, sin visor) y la página de `/clima/` |
+| [`sosgalapagos-plataforma`](https://github.com/mayait/sosgalapagos-plataforma) | público | El mapa de riesgos: reportes ciudadanos con vencimiento sobre las capas de riesgo, buscador, descargas e informe. Django + PostGIS. También corre todo el clima (un solo stack, desde el 22-nov-2026). Código con derechos reservados: uso con permiso. Es el único mapa del sitio desde el 21-nov-2026. | `/riesgos/` |
 | [`sosgalapagos-bot`](https://github.com/mayait/sosgalapagos-bot) | **privado** | Asistente de WhatsApp: lee grupos, clasifica mensajes y crea pedidos en la plataforma. | Nada en la web; es un servicio systemd aparte (ver su `LEEME.md`) |
 | [`RESPONSEGRID_GALAPAGOS`](https://github.com/mayait/RESPONSEGRID_GALAPAGOS) | público | Carpeta de trabajo local: arranque en la Mac y datos semilla. Clona `sosgalapagos` dentro de `app/`, que git ignora. Conserva la historia de geodatos hasta el 2-nov-2026. | Nada |
 | [`estudiantes-riesgo-nino`](https://github.com/mayait/estudiantes-riesgo-nino) | **privado** | Viviendas de estudiantes de USFQ Galápagos cruzadas con el riesgo de inundación. Tiene datos personales. | `/usfq/`, con contraseña |
@@ -56,7 +56,8 @@ SOS Galápagos no es un solo repositorio, son seis. No hay organización de GitH
 | Una ruta, un contenedor o el Caddy del servidor | `sosgalapagos` → `deploy/sosgalapagos/` |
 | El mapa de riesgos: reportes, buscador, panel de capas, informe, página de descargas | `sosgalapagos-plataforma` |
 | Una capa, un estudio, un modelo, el orden y los colores de las capas | `sosgalapagos-datos` → `geodatos/` |
-| El panel de `/clima/`, el recolector, el pronóstico | `sosgalapagos-datos` → `clima/` |
+| La página del panel de `/clima/` | `sosgalapagos-datos` → `clima/web/` |
+| Las fuentes de clima, el nivel de lluvia, el pronóstico, las mareas, el satélite | `sosgalapagos-plataforma` → `clima/` |
 | Qué servicio corre dónde y cómo se publica | `sosgalapagos-datos` → `servidores/README.md` |
 | Cómo lee, responde o modera el asistente de WhatsApp | `sosgalapagos-bot` |
 | El arranque local o los datos semilla | `RESPONSEGRID_GALAPAGOS` → `galapagos/` |
@@ -64,8 +65,9 @@ SOS Galápagos no es un solo repositorio, son seis. No hay organización de GitH
 
 ### Reglas que cruzan repositorios
 
-- **No se copia código de `sosgalapagos` (AGPL-3.0) a `sosgalapagos-plataforma` (Apache 2.0).**
+- **No se copia código de `sosgalapagos` (AGPL-3.0) a `sosgalapagos-plataforma`** (todos los derechos reservados desde el 22-nov-2026; antes, Apache 2.0).
 - **Nada de un repositorio privado pasa a uno público.** Ni los datos personales de `estudiantes-riesgo-nino` ni la lógica de detección de estafas del bot (`src/analista.ts`).
+- **Licencias.** `sosgalapagos` es AGPL-3.0 (fork de ResponseGrid) y no cambia. `sosgalapagos-datos` y `sosgalapagos-plataforma` tienen, desde el 22-nov-2026, el código con todos los derechos reservados (usarlo requiere permiso escrito de Julián Maya) y lo propio que no es código bajo CC BY-NC-ND 4.0; cada archivo de código lleva su aviso de autoría. Los datos de terceros conservan la licencia de su fuente.
 - **Cada repositorio tiene sus propias reglas de commit y de ramas.** Léelas en su `AGENTS.md` o `LEEME.md` antes de hacer commit. Dos que cambian: en `sosgalapagos` los commits van como «IA Humana» y sin `Co-Authored-By`; en `sosgalapagos-datos` y en `sosgalapagos-plataforma` se trabaja en una rama con pull request, también sin `Co-Authored-By`.
 - **Desplegar es un paso aparte y manual.** Subir a `main` no publica nada en `sosgalapagos.org`. No despliegues si no te lo piden.
 <!-- arbol-repos:fin -->
