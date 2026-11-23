@@ -247,12 +247,12 @@
    "capas": [
     {
      "id": "areas_afectadas",
-     "titulo": "Áreas afectadas (COE)",
+     "titulo": "Áreas afectadas el 21-nov (reportes, por validar)",
      "archivo": "areas_afectadas.geojson",
      "tipo": "poligono",
      "visible": false,
-     "fuente": "COE, ECU 911 y equipos en terreno",
-     "descripcion": "Capa operativa: se actualiza reemplazando areas_afectadas.geojson. Línea discontinua = por validar.",
+     "fuente": "Reportes ciudadanos por WhatsApp y avisos del COE reenviados. Trazo aproximado de SOS Galápagos; no es un dato oficial.",
+     "descripcion": "Zonas inundadas, corredores por donde bajó el agua y zona de evacuación del 21 de noviembre, dibujadas a partir de reportes de vecinos sin verificar. Todo está por validar (línea discontinua).",
      "estilo": {
       "weight": 2.5,
       "fillOpacity": 0.22
@@ -280,6 +280,12 @@
         "etiqueta": "Riesgo inminente",
         "color": "#b91c1c",
         "fillColor": "#dc2626"
+       },
+       "evacuacion": {
+        "etiqueta": "Zona de evacuación (COE)",
+        "color": "#c2410c",
+        "fillColor": "#f97316",
+        "fillOpacity": 0.06
        }
       }
      },
@@ -302,7 +308,7 @@
        "fuente": "Fuente"
       }
      },
-     "elementos": 2
+     "elementos": 21
     }
    ]
   },
@@ -448,7 +454,7 @@
       }
      },
      "visible_movil": false,
-     "elementos": 2558
+     "elementos": 2679
     },
     {
      "id": "oficiales",
@@ -549,7 +555,7 @@
        "fuente": "Fuente"
       }
      },
-     "elementos": 184
+     "elementos": 181
     },
     {
      "id": "tsunami",
@@ -682,7 +688,7 @@
       }
      },
      "visible_movil": false,
-     "elementos": 1324
+     "elementos": 1345
     },
     {
      "id": "franja",
@@ -748,7 +754,7 @@
        "descripcion": "Qué es"
       }
      },
-     "elementos": 82
+     "elementos": 86
     }
    ]
   },
@@ -928,7 +934,8 @@
       "permanente": true
      },
      "fuente": "OpenStreetMap, 31-oct-2026",
-     "descripcion": "Rótulos propios de calles; útiles sobre el mapa satelital o topográfico."
+     "descripcion": "Rótulos propios de calles; útiles sobre el mapa satelital o topográfico.",
+     "elementos": null
     },
     {
      "id": "rutas",
@@ -1015,7 +1022,7 @@
       "sufijo_titulo": " m",
       "campos": {}
      },
-     "elementos": 967
+     "elementos": 918
     },
     {
      "id": "pendientes",
@@ -1067,5 +1074,5 @@
    "maxZoom": 17
   }
  ],
- "generado": "2026-11-01"
+ "generado": "2026-11-22"
 }
